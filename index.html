@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="GymTrack"/>
+<meta name="theme-color" content="#0a0a0a"/>
+<title>GymTrack</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #0f0f0f;
+  --bg2: #181818;
+  --bg3: #222;
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --text: #f0f0f0;
+  --text2: #888;
+  --text3: #555;
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --green-dim2: rgba(34,197,94,0.2);
+  --red: #ef4444;
+  --blue: #3b82f6;
+  --amber: #f59e0b;
+  --pink: #ec4899;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bot: env(safe-area-inset-bottom, 0px);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.5; overscroll-behavior: none; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input { font-family: inherit; }
+
+/* ── APP SHELL ── */
+#app { display: flex; flex-direction: column; height: 100vh; max-width: 480px; margin: 0 auto; position: relative; overflow: hidden; }
+#screen { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: calc(68px + var(--safe-bot)); }
+#screen::-webkit-scrollbar { display: none; }
+
+/* ── BOTTOM NAV ── */
+.botbar { position: absolute; bottom: 0; left: 0; right: 0; height: calc(60px + var(--safe-bot)); padding-bottom: var(--safe-bot); display: flex; background: rgba(15,15,15,0.92); backdrop-filter: blur(20px); border-top: 1px solid var(--border); z-index: 100; }
+.bb { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text3); font-size: 10px; font-weight: 500; letter-spacing: .3px; text-transform: uppercase; transition: color .2s; }
+.bb.on { color: var(--green); }
+.bb svg { width: 22px; height: 22px; }
+.bb .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); display: none; margin-top: -2px; }
+.bb.on .dot { display: block; }
+
+/* ── TOPBAR ── */
+.topbar { padding: calc(var(--safe-top) + 18px) 20px 14px; border-bottom: 1px solid var(--border); }
+.topbar-row { display: flex; align-items: center; justify-content: space-between; }
+.topbar h1 { font-size: 20px; font-weight: 600; letter-spacing: -.3px; }
+.topbar .sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
+
+/* ── CARDS ── */
+.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 0 14px 10px; }
+.card-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+
+/* ── METRICS ── */
+.mrow { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 0 14px 10px; }
+.met { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 10px; text-align: center; }
+.mval { font-size: 22px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.mlbl { font-size: 10px; color: var(--text2); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
+
+/* ── PROGRESS BAR ── */
+.pbar { background: var(--bg3); border-radius: 20px; height: 4px; overflow: hidden; }
+.pinner { height: 4px; background: var(--green); border-radius: 20px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+
+/* ── WEEK DOTS ── */
+.wgrid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-top: 10px; }
+.dd { height: 34px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; gap: 2px; text-transform: uppercase; letter-spacing: .3px; }
+.dd.done { background: var(--green-dim2); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
+.dd.plan { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
+.dd.rest { color: var(--text3); }
+.dd.today { border: 1px solid var(--green); color: var(--green); background: var(--bg3); }
+
+/* ── EXERCISE CARDS ── */
+.excard { border: 1px solid var(--border); border-radius: var(--radius); margin: 0 14px 8px; overflow: hidden; transition: border-color .2s; }
+.excard.open { border-color: var(--border2); }
+.exh { padding: 13px 14px; display: flex; align-items: center; gap: 11px; cursor: pointer; user-select: none; }
+.exic { width: 38px; height: 38px; border-radius: 10px; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.exin { flex: 1; min-width: 0; }
+.exn { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.exm { font-size: 12px; color: var(--text2); margin-top: 1px; }
+.exarrow { font-size: 14px; color: var(--text3); transition: transform .2s; }
+.excard.open .exarrow { transform: rotate(180deg); }
+.exdone { font-size: 18px; }
+.exb { padding: 12px 14px 14px; border-top: 1px solid var(--border); background: #141414; }
+
+/* ── TIP BOX ── */
+.tip { font-size: 12px; color: var(--text2); line-height: 1.6; padding: 10px 12px; background: rgba(34,197,94,.06); border-radius: var(--radius-sm); border-left: 2px solid var(--green); margin-bottom: 12px; }
+
+/* ── SET BUTTONS ── */
+.srow { display: flex; gap: 8px; margin-bottom: 12px; }
+.sb { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border2); background: var(--bg3); font-size: 13px; font-weight: 600; color: var(--text2); transition: all .15s; }
+.sb.on { background: var(--green); color: #fff; border-color: var(--green); }
+
+/* ── INPUTS ── */
+.irow { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+.irow label { font-size: 12px; color: var(--text2); width: 40px; flex-shrink: 0; }
+.irow input, .inp { flex: 1; padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--bg3); color: var(--text); font-size: 14px; font-family: 'DM Mono', monospace; outline: none; transition: border-color .2s; }
+.irow input:focus, .inp:focus { border-color: var(--green); }
+
+/* ── SUGGESTION BOX ── */
+.sug { padding: 10px 12px; border-radius: var(--radius-sm); font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
+.sug.up { background: rgba(34,197,94,.1); color: #86efac; border: 1px solid rgba(34,197,94,.2); }
+.sug.ok { background: rgba(59,130,246,.1); color: #93c5fd; border: 1px solid rgba(59,130,246,.2); }
+.sug.dn { background: rgba(245,158,11,.1); color: #fcd34d; border: 1px solid rgba(245,158,11,.2); }
+
+/* ── BUTTONS ── */
+.btn { display: block; width: 100%; padding: 14px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; transition: all .15s; letter-spacing: -.1px; }
+.bp { background: var(--green); color: #0a0a0a; }
+.bp:active { background: #16a34a; transform: scale(.98); }
+.bs { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); }
+.bs:active { background: var(--bg2); }
+.pill { display: inline-flex; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
+.pa { background: rgba(59,130,246,.15); color: #93c5fd; }
+.pb { background: rgba(236,72,153,.15); color: #f9a8d4; }
+.pc { background: rgba(34,197,94,.15); color: #86efac; }
+
+/* ── SPARKLINE ── */
+.carea { height: 100px; margin-top: 8px; }
+.carea svg { width: 100%; height: 100%; }
+
+/* ── TABS ── */
+.tabs { display: flex; background: var(--bg3); border-radius: var(--radius-sm); margin: 12px 14px; padding: 3px; gap: 3px; }
+.tab { flex: 1; padding: 9px 4px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text2); transition: all .15s; }
+.tab.on { background: var(--bg2); color: var(--text); border: 1px solid var(--border2); }
+
+/* ── ONBOARDING ── */
+#onboarding { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; flex-direction: column; overflow-y: auto; padding: calc(var(--safe-top) + 40px) 24px calc(var(--safe-bot) + 40px); max-width: 480px; margin: 0 auto; }
+.ob-step { display: none; flex-direction: column; gap: 24px; animation: fadeUp .3s ease; }
+.ob-step.active { display: flex; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.ob-logo { font-size: 42px; margin-bottom: 4px; }
+.ob-title { font-size: 28px; font-weight: 600; letter-spacing: -.5px; line-height: 1.2; }
+.ob-sub { font-size: 15px; color: var(--text2); line-height: 1.6; }
+.ob-label { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 8px; }
+.ob-input { width: 100%; padding: 16px; border: 1px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); font-size: 18px; font-family: 'DM Mono', monospace; font-weight: 500; outline: none; text-align: center; transition: border-color .2s; }
+.ob-input:focus { border-color: var(--green); }
+.ob-input.big { font-size: 36px; font-weight: 600; letter-spacing: -1px; }
+.ob-days { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.ob-day { padding: 14px 8px; border: 1px solid var(--border2); border-radius: var(--radius); background: var(--bg2); font-size: 13px; font-weight: 600; color: var(--text2); text-align: center; transition: all .2s; }
+.ob-day.sel { border-color: var(--green); background: var(--green-dim2); color: var(--green); }
+.ob-day .day-icon { font-size: 22px; margin-bottom: 4px; }
+.ob-day .day-name { font-size: 13px; font-weight: 600; }
+.ob-day .day-focus { font-size: 10px; color: var(--text2); margin-top: 2px; font-weight: 400; }
+.ob-day.sel .day-focus { color: rgba(34,197,94,.7); }
+.ob-note { font-size: 12px; color: var(--text3); line-height: 1.5; }
+
+/* ── MODAL ── */
+.mover { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: flex-end; z-index: 200; backdrop-filter: blur(4px); }
+.modal { background: var(--bg2); border-radius: var(--radius) var(--radius) 0 0; padding: 20px 20px calc(20px + var(--safe-bot)); width: 100%; border-top: 1px solid var(--border); }
+.modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 14px; }
+
+/* ── EMPTY STATE ── */
+.empty { text-align: center; padding: 32px 20px; }
+.empty .eic { font-size: 40px; margin-bottom: 12px; }
+.empty p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+/* ── SECTION HEADING ── */
+.sh { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin: 16px 14px 8px; }
+</style>
+</head>
+<body>
+
+<!-- ONBOARDING -->
+<div id="onboarding">
+
+  <!-- Step 1: Welcome -->
+  <div class="ob-step active" id="ob1">
+    <div>
+      <div class="ob-logo">💪</div>
+      <div class="ob-title">Bienvenido a GymTrack</div>
+    </div>
+    <div class="ob-sub">Tu app de entrenamiento personal. Simple, sin distracciones, diseñada para que vayas al gym 3 veces por semana y veas resultados reales.</div>
+    <div>
+      <div class="ob-label">¿Cuánto pesas hoy? (kg)</div>
+      <input class="ob-input big" id="ob-weight" type="number" placeholder="105" step="0.1" inputmode="decimal"/>
+    </div>
+    <button class="btn bp" onclick="obNext1()">Continuar →</button>
+  </div>
+
+  <!-- Step 2: Choose starting day -->
+  <div class="ob-step" id="ob2">
+    <div>
+      <div class="ob-title">¿Con qué día empezamos hoy?</div>
+      <div class="ob-sub" style="margin-top:8px">Elige el entrenamiento que harás en tu primera sesión.</div>
+    </div>
+    <div class="ob-days">
+      <div class="ob-day sel" id="sel-A" onclick="selDay('A')">
+        <div class="day-icon">🦵</div>
+        <div class="day-name">Día A</div>
+        <div class="day-focus">Piernas + abdomen</div>
+      </div>
+      <div class="ob-day" id="sel-B" onclick="selDay('B')">
+        <div class="day-icon">🏋️</div>
+        <div class="day-name">Día B</div>
+        <div class="day-focus">Pecho + hombros</div>
+      </div>
+      <div class="ob-day" id="sel-C" onclick="selDay('C')">
+        <div class="day-icon">🚣</div>
+        <div class="day-name">Día C</div>
+        <div class="day-focus">Espalda + bíceps</div>
+      </div>
+    </div>
+    <div class="ob-note">El orden A → B → C se rotará automáticamente cada semana. Puedes empezar con cualquiera.</div>
+    <button class="btn bp" onclick="obFinish()">Empezar a entrenar →</button>
+  </div>
+
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <div id="screen"></div>
+  <nav class="botbar">
+    <button class="bb on" id="nb-dash" onclick="go('dash')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Inicio
+      <div class="dot"></div>
+    </button>
+    <button class="bb" id="nb-workout" onclick="go('workout')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4v16M18 4v16M3 8h4M17 8h4M3 16h4M17 16h4"/></svg>
+      Entreno
+      <div class="dot"></div>
+    </button>
+    <button class="bb" id="nb-prog" onclick="go('prog')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+      Progreso
+      <div class="dot"></div>
+    </button>
+  </nav>
+</div>
+
+<script>
+// ── TRAINING PLAN ──
+const PLAN = {
+  A:{label:'Día A',focus:'Piernas + abdomen',pill:'pa',ex:[
+    {id:'a1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'4–5 km/h sin inclinación. El objetivo es entrar en calor, no cansarse. Respira tranquilo.',cardio:true},
+    {id:'a2',n:'Sentadilla en Smith',ic:'🏋️',eq:'Smith machine + banco',s:3,r:12,tip:'Pies al ancho de hombros. Barra en la parte alta de la espalda. Baja hasta que los muslos queden paralelos al piso. Empuja desde los talones. Deja 2 reps en reserva.'},
+    {id:'a3',n:'Extensión de cuádriceps',ic:'🦵',eq:'Máquina de extensión',s:3,r:12,tip:'Ajusta el asiento para que la rodilla quede alineada con el pivote. Sube en 2s, baja en 3s. No bloquees la rodilla arriba.'},
+    {id:'a4',n:'Curl de femoral',ic:'🦿',eq:'Máquina de curl femoral',s:3,r:12,tip:'Dobla hasta que los talones casi toquen los glúteos. Sostén 1s arriba. Controla el regreso — no dejes que caiga solo.'},
+    {id:'a5',n:'Crunch en cable',ic:'⚡',eq:'Cable dual',s:3,r:15,tip:'Cuerda en polea alta, arrodíllado de cara al cable. Jala los codos hacia las rodillas curvando la columna — no las caderas. Siente el abdomen contraerse.'},
+    {id:'a6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Respiración constante. Este es tu tiempo de quema de grasa — mantenlo manejable.',cardio:true},
+  ]},
+  B:{label:'Día B',focus:'Empuje — pecho, hombros, tríceps',pill:'pb',ex:[
+    {id:'b1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'4–5 km/h. Mueve los brazos. Aumenta el ritmo gradualmente después de 3 minutos.',cardio:true},
+    {id:'b2',n:'Press inclinado en Smith',ic:'🏋️',eq:'Smith machine + banco',s:3,r:10,tip:'Banco a 30–45°. Barra al pecho superior. Empuja hacia arriba. Pies planos en el piso. Aprieta el pecho arriba. Deja 2 reps en reserva.'},
+    {id:'b3',n:'Aperturas en máquina',ic:'🤸',eq:'Máquina de aperturas',s:3,r:12,tip:'Siente el estiramiento al abrir — no vayas rápido. Cierra hasta que los mangos casi se toquen. No necesitas mucho peso aquí.'},
+    {id:'b4',n:'Elevación lateral en cable',ic:'⚡',eq:'Cable dual',s:3,r:12,tip:'Un brazo a la vez, cable abajo. Levanta el brazo hacia afuera hasta el nivel del hombro solamente. Codo ligeramente doblado. Muy poco peso.'},
+    {id:'b5',n:'Jalón de tríceps en cable',ic:'⬇️',eq:'Cable dual',s:3,r:12,tip:'Cuerda o barra recta. Los codos se quedan pegados a los costados. Empuja hasta que los brazos queden rectos. Aprieta abajo. Controla el regreso.'},
+    {id:'b6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Ritmo de enfriamiento activo. Lo hiciste bien.',cardio:true},
+  ]},
+  C:{label:'Día C',focus:'Jale — espalda y bíceps',pill:'pc',ex:[
+    {id:'c1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'Camina suave. Haz círculos con los hombros — hoy es día de jalar.',cardio:true},
+    {id:'c2',n:'Jalón al pecho',ic:'🏋️',eq:'Jalón / remo sentado',s:3,r:12,tip:'Agarre un poco más ancho que los hombros. Jala la barra al pecho superior. Inclínate un poco hacia atrás. No balancees. La espalda hace el trabajo, no los brazos.'},
+    {id:'c3',n:'Remo sentado en máquina',ic:'🚣',eq:'Jalón / remo sentado',s:3,r:12,tip:'Siéntate erguido. Jala el agarre hacia el ombligo. Aprieta los omóplatos al final del movimiento. Regreso lento — 3 segundos.'},
+    {id:'c4',n:'Remo con mancuerna',ic:'💪',eq:'Mancuernas',s:3,r:10,tip:'Apóyate en el banco con una mano y una rodilla. Jala la mancuerna hacia la cadera — no hacia el hombro. El codo va directo hacia atrás.'},
+    {id:'c5',n:'Curl de bíceps en cable',ic:'⚡',eq:'Cable dual',s:3,r:12,tip:'Barra EZ o cuerda. De pie cerca del cable. Codos fijos a los costados. Sube completamente. Aprieta arriba. Controla el regreso. Poco peso, rango completo.'},
+    {id:'c6',n:'Aperturas inversas en máquina',ic:'🔄',eq:'Máquina de aperturas/inversas',s:3,r:15,tip:'Usa la máquina de aperturas al revés o la pec-deck invertida. Aprieta los deltoides posteriores. Muy poco peso — busca la sensación, no el número.'},
+    {id:'c7',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Caminata con inclinación. Si te sientes con energía, prueba 1 minuto de trote suave, luego vuelve a caminar.',cardio:true},
+  ]}
+};
+
+const DAY_ORDER = ['A','B','C'];
+
+// ── STATE (persisted to localStorage) ──
+function loadState() {
+  try {
+    const raw = localStorage.getItem('gymtrack_v3');
+    if (raw) return JSON.parse(raw);
+  } catch(e) {}
+  return null;
+}
+function saveState() {
+  localStorage.setItem('gymtrack_v3', JSON.stringify(S));
+}
+
+const defaults = {
+  tab: 'dash',
+  day: 'A',           // current workout tab
+  nextDay: 'A',       // next session day
+  open: null,
+  logs: {},           // {exId: {w, r}}
+  sets: {},           // {exId: {0:bool,1:bool,...}}
+  weights: [],        // [{d: 'DD MMM', v: number, ts: timestamp}]
+  sessions: [],       // [{day, date, ts}]
+  strength: {},       // {exId: [{d, v, ts}]}
+  wmodal: false,
+  wnew: '',
+  onboarded: false,
+  startDay: 'A'
+};
+
+let S = Object.assign({}, defaults, loadState() || {});
+
+// ── ONBOARDING ──
+let obSelectedDay = 'A';
+let obWeight = '';
+
+function selDay(d) {
+  obSelectedDay = d;
+  ['A','B','C'].forEach(k => document.getElementById('sel-'+k).classList.toggle('sel', k===d));
+}
+
+function obNext1() {
+  const v = parseFloat(document.getElementById('ob-weight').value);
+  if (!v || v < 30 || v > 300) {
+    document.getElementById('ob-weight').focus();
+    document.getElementById('ob-weight').style.borderColor = '#ef4444';
+    setTimeout(() => document.getElementById('ob-weight').style.borderColor = '', 1500);
+    return;
+  }
+  obWeight = v;
+  document.getElementById('ob1').classList.remove('active');
+  document.getElementById('ob2').classList.add('active');
+}
+
+function obFinish() {
+  const today = fmtDate(new Date());
+  S.weights.push({ d: today, v: obWeight, ts: Date.now() });
+  S.startDay = obSelectedDay;
+  S.nextDay = obSelectedDay;
+  S.day = obSelectedDay;
+  S.onboarded = true;
+  saveState();
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  render();
+}
+
+function fmtDate(date) {
+  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+  return date.getDate() + ' ' + months[date.getMonth()];
+}
+
+// ── NAVIGATION ──
+function go(tab) {
+  S.tab = tab;
+  ['dash','workout','prog'].forEach(t => document.getElementById('nb-'+t).classList.toggle('on', t===tab));
+  render();
+  saveState();
+}
+
+// ── SPARKLINE ──
+function spark(data, color) {
+  if (!data || data.length < 2) return `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:12px">Necesitas al menos 2 registros para ver la gráfica</div>`;
+  const vs = data.map(d => d.v);
+  const mn = Math.min(...vs) - 0.5, mx = Math.max(...vs) + 0.5;
+  const W = 300, H = 90;
+  const px = (i) => (i / (data.length-1)) * (W-30) + 15;
+  const py = (v) => H - 14 - ((v-mn)/(mx-mn)) * (H-30);
+  const pts = data.map((d,i) => px(i)+','+py(d.v)).join(' ');
+  const pathD = data.map((d,i) => (i===0?'M':'L')+px(i).toFixed(1)+','+py(d.v).toFixed(1)).join(' ');
+  const areaD = pathD + ` L${px(data.length-1)},${H} L${px(0)},${H} Z`;
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+    <defs><linearGradient id="g${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity=".25"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${areaD}" fill="url(#g${color.replace('#','')})" />
+    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${data.map((d,i) => {
+      const x = px(i), y = py(d.v);
+      return `<circle cx="${x}" cy="${y}" r="3.5" fill="${color}" stroke="var(--bg2)" stroke-width="1.5"/>
+      <text x="${x}" y="${y-8}" text-anchor="middle" font-size="9" fill="${color}" font-family="DM Mono,monospace">${d.v}</text>`;
+    }).join('')}
+    ${data.map((d,i) => {
+      const x = px(i);
+      return `<text x="${x}" y="${H-2}" text-anchor="middle" font-size="8" fill="var(--text3)" font-family="DM Sans,sans-serif">${d.d}</text>`;
+    }).join('')}
+  </svg>`;
+}
+
+// ── PROGRESSION LOGIC ──
+function getSug(id, sets, reps) {
+  const c = S.sets[id] || {}, done = Object.values(c).filter(Boolean).length;
+  if (done < sets) return null;
+  const l = S.logs[id] || {}, w = parseFloat(l.w) || 0, r = parseInt(l.r) || 0, rt = parseInt(reps) || 12;
+  if (!w) return null;
+  if (r >= rt) return { t:'up', m:`¡Todo completado! Próxima sesión prueba con ${(w+2.5).toFixed(1)} kg (+2.5 kg). 🎯` };
+  if (r > 0 && r < rt - 2) return { t:'dn', m:`Sin problema — mantén ${w} kg la próxima sesión hasta que las reps salgan limpias. ✊` };
+  return { t:'ok', m:`Buen trabajo con ${w} kg. Mantén este peso la próxima sesión. 👍` };
+}
+
+// ── SET / LOG ACTIONS ──
+function toggleSet(id, i) {
+  if (!S.sets[id]) S.sets[id] = {};
+  S.sets[id][i] = !S.sets[id][i];
+  saveState(); render();
+}
+function updLog(id, f, v) {
+  if (!S.logs[id]) S.logs[id] = {};
+  S.logs[id][f] = v;
+  saveState();
+}
+
+// ── NEXT DAY ROTATION ──
+function getNextDay(current) {
+  const idx = DAY_ORDER.indexOf(current);
+  return DAY_ORDER[(idx+1) % 3];
+}
+
+// ── WEEK GRID ──
+function renderWeekGrid() {
+  const labels = ['L','M','X','J','V','S','D'];
+  const today = new Date();
+  const dow = today.getDay(); // 0=sun
+  const mondayOffset = dow === 0 ? -6 : 1 - dow;
+  const monday = new Date(today); monday.setDate(today.getDate() + mondayOffset);
+  return labels.map((lbl, i) => {
+    const d = new Date(monday); d.setDate(monday.getDate() + i);
+    const ds = fmtDate(d);
+    const isToday = d.toDateString() === today.toDateString();
+    const done = S.sessions.some(s => s.date === ds);
+    const cls = done ? 'done' : isToday ? 'today' : (i > 4 ? 'rest' : 'plan');
+    return `<div class="dd ${cls}">${lbl}${done ? '<span style="font-size:8px">✓</span>' : ''}</div>`;
+  }).join('');
+}
+
+// ── SCREENS ──
+function renderDash() {
+  const lw = S.weights.length ? S.weights[S.weights.length-1] : null;
+  const pw = S.weights.length > 1 ? S.weights[S.weights.length-2] : null;
+  const diff = lw && pw ? (lw.v - pw.v).toFixed(1) : '—';
+  const sign = parseFloat(diff) > 0 ? '+' : '';
+  const total = S.sessions.length;
+  const thisWeek = (() => {
+    const today = new Date(), dow = today.getDay();
+    const mondayOffset = dow === 0 ? -6 : 1 - dow;
+    const monday = new Date(today); monday.setDate(today.getDate() + mondayOffset);
+    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+    return S.sessions.filter(s => {
+      if (!s.ts) return false;
+      const d = new Date(s.ts);
+      return d >= monday && d <= sunday;
+    }).length;
+  })();
+
+  return `
+  <div class="topbar">
+    <div class="topbar-row">
+      <div>
+        <h1>¡Hola, campeón! 💪</h1>
+        <div class="sub">${total === 0 ? 'Primera sesión — ¡vamos a ello!' : `${total} sesión${total>1?'es':''} completada${total>1?'s':''}`}</div>
+      </div>
+      <button onclick="S.wmodal=true;render()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;font-weight:600;color:var(--text2)">+ Peso</button>
+    </div>
+  </div>
+
+  <div style="padding:10px 14px 0"><div class="card-label">Esta semana</div></div>
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+      <span style="font-size:14px;font-weight:500">${thisWeek} de 3 sesiones</span>
+      <span style="font-size:12px;color:${thisWeek>=3?'var(--green)':'var(--text2)';}">${thisWeek>=3?'¡Semana completa! 🎉':thisWeek>0?'En camino 🔥':'Empieza hoy 👊'}</span>
+    </div>
+    <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(thisWeek/3*100))}%"></div></div>
+    <div class="wgrid">${renderWeekGrid()}</div>
+    <div style="display:flex;gap:12px;margin-top:8px;font-size:10px;color:var(--text3)">
+      <span style="color:var(--green)">■ Completado</span>
+      <span style="color:var(--green);border:1px solid var(--green);padding:0 2px">■</span><span> Hoy</span>
+      <span>■ Planificado</span>
+    </div>
+  </div>
+
+  <div class="mrow">
+    <div class="met"><div class="mval">${total}</div><div class="mlbl">Sesiones</div></div>
+    <div class="met"><div class="mval" style="color:var(--green)">${lw ? lw.v : '—'}</div><div class="mlbl">kg hoy</div></div>
+    <div class="met"><div class="mval" style="color:${parseFloat(diff)<=0?'var(--green)':'var(--red)'}">${diff !== '—' ? sign+diff : '—'}</div><div class="mlbl">kg cambio</div></div>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Peso corporal</div>
+    ${S.weights.length >= 2
+      ? `<div class="carea">${spark(S.weights, '#22c55e')}</div>`
+      : `<div class="empty"><div class="eic">📊</div><p>Registra tu peso cada día de entrenamiento para ver tu progreso aquí.</p></div>`
+    }
+    <button class="btn bs" style="margin-top:10px" onclick="S.wmodal=true;render()">Registrar peso de hoy</button>
+  </div>
+
+  <div class="card">
+    <div class="card-label">Próxima sesión</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+      <span class="pill p${S.nextDay.toLowerCase()}">${PLAN[S.nextDay].label}</span>
+      <span style="font-size:14px;color:var(--text2)">${PLAN[S.nextDay].focus}</span>
+    </div>
+    <button class="btn bp" onclick="S.day=S.nextDay;go('workout')">Empezar ${PLAN[S.nextDay].label} →</button>
+  </div>
+
+  ${S.wmodal ? `
+  <div class="mover" onclick="if(event.target===this){S.wmodal=false;render()}">
+    <div class="modal">
+      <h3>Registrar peso corporal</h3>
+      <input class="ob-input big" type="number" placeholder="${lw ? lw.v : '105'}" value="${S.wnew}" oninput="S.wnew=this.value" step="0.1" inputmode="decimal" autofocus/>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn bp" style="flex:1" onclick="logW()">Guardar</button>
+        <button class="btn bs" style="width:80px" onclick="S.wmodal=false;render()">Cancelar</button>
+      </div>
+    </div>
+  </div>` : ''}`;
+}
+
+function logW() {
+  const v = parseFloat(S.wnew);
+  if (!v || v < 30 || v > 300) return;
+  S.weights.push({ d: fmtDate(new Date()), v, ts: Date.now() });
+  S.wmodal = false; S.wnew = '';
+  saveState(); render();
+}
+
+function renderWorkout() {
+  const tabs = ['A','B','C'].map(k =>
+    `<button class="tab ${S.day===k?'on':''}" onclick="S.day='${k}';render()">${PLAN[k].label}</button>`
+  ).join('');
+  const day = PLAN[S.day];
+  const strEx = day.ex.filter(e => !e.cardio);
+  const doneEx = strEx.filter(e => Object.values(S.sets[e.id]||{}).filter(Boolean).length >= e.s).length;
+  const pct = strEx.length ? Math.round(doneEx/strEx.length*100) : 0;
+
+  const exHtml = day.ex.map(ex => {
+    const isOpen = S.open === ex.id;
+    const c = S.sets[ex.id] || {};
+    const allDone = ex.cardio ? c[0]===true : Object.values(c).filter(Boolean).length >= ex.s;
+    const l = S.logs[ex.id] || {};
+    const sug = !ex.cardio ? getSug(ex.id, ex.s, ex.r) : null;
+    const sbHtml = !ex.cardio ? Array.from({length:ex.s},(_,i)=>
+      `<button class="sb ${c[i]?'on':''}" onclick="toggleSet('${ex.id}',${i})">${c[i]?'✓':i+1}</button>`
+    ).join('') : '';
+
+    return `<div class="excard${isOpen?' open':''}">
+      <div class="exh" onclick="S.open=S.open==='${ex.id}'?null:'${ex.id}';render()">
+        <div class="exic">${ex.ic}</div>
+        <div class="exin">
+          <div class="exn">${ex.n}</div>
+          <div class="exm">${ex.eq} · ${ex.cardio ? ex.r : ex.s+'×'+ex.r+' reps'}</div>
+        </div>
+        ${allDone ? '<div class="exdone">✅</div>' : `<div class="exarrow">▼</div>`}
+      </div>
+      ${isOpen ? `<div class="exb">
+        <div class="tip">${ex.tip}</div>
+        ${!ex.cardio ? `
+          <div style="font-size:11px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Series completadas</div>
+          <div class="srow">${sbHtml}</div>
+          <div class="irow"><label>Peso</label><input class="inp" type="number" placeholder="kg" value="${l.w||''}" oninput="updLog('${ex.id}','w',this.value)" step="2.5" inputmode="decimal"/></div>
+          <div class="irow"><label>Reps</label><input class="inp" type="number" placeholder="${ex.r}" value="${l.r||''}" oninput="updLog('${ex.id}','r',this.value)" inputmode="numeric"/></div>
+          ${sug ? `<div class="sug ${sug.t}">${sug.m}</div>` : ''}
+        ` : `
+          <button class="btn ${c[0]?'bs':'bp'}" onclick="toggleSet('${ex.id}',0);render()">
+            ${c[0] ? '✅ Marcado como hecho' : 'Marcar como hecho'}
+          </button>
+        `}
+      </div>` : ''}
+    </div>`;
+  }).join('');
+
+  const allStrDone = doneEx === strEx.length && strEx.length > 0;
+
+  return `
+  <div class="topbar">
+    <h1>${day.label} — ${day.focus}</h1>
+    <div class="sub">${doneEx} / ${strEx.length} ejercicios de fuerza</div>
+  </div>
+  <div class="pbar" style="margin:8px 14px 0"><div class="pinner" style="width:${pct}%"></div></div>
+  <div class="tabs">${tabs}</div>
+  ${exHtml}
+  <div style="padding:4px 14px 14px">
+    <button class="btn ${allStrDone?'bp':'bs'}" onclick="finishSession()">
+      ${allStrDone ? '✅ Finalizar y guardar entrenamiento' : 'Guardar entrenamiento (parcial)'}
+    </button>
+  </div>`;
+}
+
+function finishSession() {
+  if (!confirm('¿Confirmar que terminaste el entrenamiento?')) return;
+  const today = fmtDate(new Date());
+  S.sessions.push({ day: S.day, date: today, ts: Date.now() });
+
+  // Save strength data for key exercises
+  const day = PLAN[S.day];
+  day.ex.filter(e => !e.cardio).forEach(ex => {
+    const l = S.logs[ex.id] || {};
+    const w = parseFloat(l.w);
+    if (w) {
+      if (!S.strength[ex.id]) S.strength[ex.id] = [];
+      S.strength[ex.id].push({ d: today, v: w, ts: Date.now() });
+    }
+  });
+
+  // Advance next day
+  S.nextDay = getNextDay(S.day);
+
+  // Reset sets/logs for this day's exercises
+  day.ex.forEach(ex => { S.sets[ex.id] = {}; S.logs[ex.id] = {}; });
+  S.open = null;
+
+  saveState();
+  alert(`¡Entrenamiento guardado! Próxima sesión: ${PLAN[S.nextDay].label} 💪`);
+  go('dash');
+}
+
+function renderProg() {
+  const cols = { A:'#3b82f6', B:'#ec4899', C:'#22c55e' };
+  const exNames = {};
+  Object.values(PLAN).forEach(d => d.ex.forEach(e => { if (!e.cardio) exNames[e.id] = e.n; }));
+
+  const hasStrength = Object.keys(S.strength).some(k => S.strength[k] && S.strength[k].length >= 1);
+
+  const charts = Object.entries(S.strength).filter(([id,data])=>data&&data.length>0).map(([id,data]) => {
+    const color = cols[id[0].toUpperCase()] || '#888';
+    const name = exNames[id] || id;
+    const last = data[data.length-1].v;
+    const gain = data.length > 1 ? (last - data[0].v).toFixed(1) : null;
+    return `<div class="card" style="margin-bottom:10px">
+      <div class="card-label">${name}</div>
+      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
+        <span style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums">${last} kg</span>
+        ${gain && parseFloat(gain) > 0 ? `<span style="font-size:13px;color:var(--green)">+${gain} kg ganados</span>` : gain && parseFloat(gain) < 0 ? `<span style="font-size:13px;color:var(--amber)">${gain} kg</span>` : `<span style="font-size:13px;color:var(--text2)">primer registro</span>`}
+      </div>
+      ${data.length >= 2 ? `<div class="carea">${spark(data,color)}</div>` : `<div style="font-size:12px;color:var(--text3);padding:8px 0">Necesitas al menos 2 sesiones para ver la gráfica.</div>`}
+    </div>`;
+  }).join('');
+
+  const sessArr = ['A','B','C'];
+  const cnt = { A: S.sessions.filter(s=>s.day==='A').length, B: S.sessions.filter(s=>s.day==='B').length, C: S.sessions.filter(s=>s.day==='C').length };
+
+  return `
+  <div class="topbar">
+    <h1>Tu progreso</h1>
+    <div class="sub">${S.sessions.length} sesión${S.sessions.length!==1?'es':''} registrada${S.sessions.length!==1?'s':''} en total</div>
+  </div>
+
+  <div class="sh">Constancia</div>
+  <div class="card">
+    <div style="display:flex;gap:12px">
+      ${sessArr.map(d => `<div style="flex:1;text-align:center">
+        <div style="font-size:26px;font-weight:600;color:${cols[d]};font-variant-numeric:tabular-nums">${cnt[d]}</div>
+        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Día ${d}</div>
+        <div class="pbar" style="margin-top:6px"><div class="pinner" style="width:${Math.min(100,Math.round(cnt[d]/8*100))}%;background:${cols[d]}"></div></div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <div class="sh">Peso corporal</div>
+  <div class="card">
+    ${S.weights.length >= 2 ? `
+      <div class="carea">${spark(S.weights,'#22c55e')}</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:8px;display:flex;gap:12px">
+        <span>Inicio: <strong style="color:var(--text)">${S.weights[0].v} kg</strong></span>
+        <span>Actual: <strong style="color:var(--text)">${S.weights[S.weights.length-1].v} kg</strong></span>
+        <span>Cambio: <strong style="color:${(S.weights[S.weights.length-1].v-S.weights[0].v)<=0?'var(--green)':'var(--red)'}">${((S.weights[S.weights.length-1].v-S.weights[0].v)>0?'+':'') + (S.weights[S.weights.length-1].v-S.weights[0].v).toFixed(1)} kg</strong></span>
+      </div>` :
+      `<div class="empty"><div class="eic">⚖️</div><p>Registra tu peso en cada sesión para ver la evolución aquí.</p></div>`
+    }
+  </div>
+
+  <div class="sh">Fuerza por ejercicio</div>
+  ${hasStrength ? charts : `<div class="card"><div class="empty"><div class="eic">🏋️</div><p>Completa entrenamientos y registra los pesos usados para ver tu evolución de fuerza aquí.</p></div></div>`}
+
+  <div class="sh">Guía de progresión</div>
+  <div class="card">
+    <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.6">
+      <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--green);font-size:16px">✓</span><div><strong>¿Completaste todas las series y reps?</strong><br><span style="color:var(--text2)">Sube 2.5 kg la próxima sesión.</span></div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--amber);font-size:16px">~</span><div><strong>¿Te costó pero completaste casi todo?</strong><br><span style="color:var(--text2)">Mantén el mismo peso — la limpieza importa más.</span></div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--red);font-size:16px">↓</span><div><strong>¿No llegaste a las reps objetivo?</strong><br><span style="color:var(--text2)">Reduce 2.5 kg o mantén. No pasa nada.</span></div></div>
+      <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--blue);font-size:16px">→</span><div><strong>La constancia lo es todo.</strong><br><span style="color:var(--text2)">3 días por semana durante meses gana siempre.</span></div></div>
+    </div>
+  </div>`;
+}
+
+function render() {
+  const s = document.getElementById('screen');
+  if (S.tab === 'dash') s.innerHTML = renderDash();
+  else if (S.tab === 'workout') s.innerHTML = renderWorkout();
+  else s.innerHTML = renderProg();
+}
+
+// ── INIT ──
+if (S.onboarded) {
+  document.getElementById('onboarding').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  render();
+}
+</script>
+</body>
+</html>
