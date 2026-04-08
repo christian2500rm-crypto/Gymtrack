@@ -453,7 +453,7 @@ function renderDash() {
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
       <span style="font-size:14px;font-weight:500">${thisWeek} de 3 sesiones</span>
-      <span style="font-size:12px;color:${thisWeek>=3?'var(--green)':'var(--text2)';}">${thisWeek>=3?'¡Semana completa! 🎉':thisWeek>0?'En camino 🔥':'Empieza hoy 👊'}</span>
+      <span style="font-size:12px;color:${thisWeek>=3?'var(--green)':'var(--text2)'}">${thisWeek>=3?'¡Semana completa! 🎉':thisWeek>0?'En camino 🔥':'Empieza hoy 👊'}</span>
     </div>
     <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(thisWeek/3*100))}%"></div></div>
     <div class="wgrid">${renderWeekGrid()}</div>
