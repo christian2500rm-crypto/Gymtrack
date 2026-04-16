@@ -6,1137 +6,592 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="GymTrack"/>
-<meta name="theme-color" content="#0a0a0a"/>
+<meta name="theme-color" content="#0f0f0f"/>
 <title>GymTrack</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
-:root {
-  --bg: #0f0f0f;
-  --bg2: #181818;
-  --bg3: #222;
-  --border: rgba(255,255,255,0.08);
-  --border2: rgba(255,255,255,0.14);
-  --text: #f0f0f0;
-  --text2: #888;
-  --text3: #555;
-  --green: #22c55e;
-  --green-dim: rgba(34,197,94,0.12);
-  --green-dim2: rgba(34,197,94,0.2);
-  --red: #ef4444;
-  --blue: #3b82f6;
-  --amber: #f59e0b;
-  --pink: #ec4899;
-  --radius: 14px;
-  --radius-sm: 8px;
-  --safe-top: env(safe-area-inset-top, 0px);
-  --safe-bot: env(safe-area-inset-bottom, 0px);
+:root{
+  --bg:#0f0f0f;--bg2:#181818;--bg3:#222;--bg4:#2a2a2a;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0f0f0;--text2:#888;--text3:#555;--text4:#333;
+  --green:#22c55e;--green-bg:rgba(34,197,94,0.1);--green-bg2:rgba(34,197,94,0.18);--green-b:rgba(34,197,94,0.3);
+  --red:#ef4444;--blue:#3b82f6;--amber:#f59e0b;--pink:#ec4899;
+  --r:14px;--rsm:9px;--rxs:6px;
+  --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
 }
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.5; overscroll-behavior: none; }
-button { font-family: inherit; cursor: pointer; border: none; background: none; color: inherit; }
-input { font-family: inherit; }
-
-/* ── APP SHELL ── */
-#app { display: flex; flex-direction: column; height: 100vh; max-width: 480px; margin: 0 auto; position: relative; overflow: hidden; }
-#screen { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; padding-bottom: calc(68px + var(--safe-bot)); }
-#screen::-webkit-scrollbar { display: none; }
-
-/* ── BOTTOM NAV ── */
-.botbar { position: absolute; bottom: 0; left: 0; right: 0; height: calc(60px + var(--safe-bot)); padding-bottom: var(--safe-bot); display: flex; background: rgba(15,15,15,0.92); backdrop-filter: blur(20px); border-top: 1px solid var(--border); z-index: 100; }
-.bb { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; color: var(--text3); font-size: 10px; font-weight: 500; letter-spacing: .3px; text-transform: uppercase; transition: color .2s; }
-.bb.on { color: var(--green); }
-.bb svg { width: 22px; height: 22px; }
-.bb .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--green); display: none; margin-top: -2px; }
-.bb.on .dot { display: block; }
-
-/* ── TOPBAR ── */
-.topbar { padding: calc(var(--safe-top) + 18px) 20px 14px; border-bottom: 1px solid var(--border); }
-.topbar-row { display: flex; align-items: center; justify-content: space-between; }
-.topbar h1 { font-size: 20px; font-weight: 600; letter-spacing: -.3px; }
-.topbar .sub { font-size: 13px; color: var(--text2); margin-top: 3px; }
-
-/* ── CARDS ── */
-.card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin: 0 14px 10px; }
-.card-label { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-
-/* ── METRICS ── */
-.mrow { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 0 14px 10px; }
-.met { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 10px; text-align: center; }
-.mval { font-size: 22px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
-.mlbl { font-size: 10px; color: var(--text2); margin-top: 4px; text-transform: uppercase; letter-spacing: .5px; }
-
-/* ── PROGRESS BAR ── */
-.pbar { background: var(--bg3); border-radius: 20px; height: 4px; overflow: hidden; }
-.pinner { height: 4px; background: var(--green); border-radius: 20px; transition: width .5s cubic-bezier(.4,0,.2,1); }
-
-/* ── WEEK DOTS ── */
-.wgrid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; margin-top: 10px; }
-.dd { height: 34px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 10px; font-weight: 600; gap: 2px; text-transform: uppercase; letter-spacing: .3px; }
-.dd.done { background: var(--green-dim2); color: var(--green); border: 1px solid rgba(34,197,94,.3); }
-.dd.plan { background: var(--bg3); color: var(--text2); border: 1px solid var(--border); }
-.dd.rest { color: var(--text3); }
-.dd.today { border: 1px solid var(--green); color: var(--green); background: var(--bg3); }
-
-/* ── EXERCISE CARDS ── */
-.excard { border: 1px solid var(--border); border-radius: var(--radius); margin: 0 14px 8px; overflow: hidden; transition: border-color .2s; }
-.excard.open { border-color: var(--border2); }
-.exh { padding: 13px 14px; display: flex; align-items: center; gap: 11px; cursor: pointer; user-select: none; }
-.exic { width: 38px; height: 38px; border-radius: 10px; background: var(--bg3); display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
-.exin { flex: 1; min-width: 0; }
-.exn { font-size: 14px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.exm { font-size: 12px; color: var(--text2); margin-top: 1px; }
-.exarrow { font-size: 14px; color: var(--text3); transition: transform .2s; }
-.excard.open .exarrow { transform: rotate(180deg); }
-.exdone { font-size: 18px; }
-.exb { padding: 12px 14px 14px; border-top: 1px solid var(--border); background: #141414; }
-
-/* ── TIP BOX ── */
-.tip { font-size: 12px; color: var(--text2); line-height: 1.6; padding: 10px 12px; background: rgba(34,197,94,.06); border-radius: var(--radius-sm); border-left: 2px solid var(--green); margin-bottom: 12px; }
-
-/* ── SET BUTTONS ── */
-.srow { display: flex; gap: 8px; margin-bottom: 12px; }
-.sb { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--border2); background: var(--bg3); font-size: 13px; font-weight: 600; color: var(--text2); transition: all .15s; }
-.sb.on { background: var(--green); color: #fff; border-color: var(--green); }
-
-/* ── INPUTS ── */
-.irow { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
-.irow label { font-size: 12px; color: var(--text2); width: 40px; flex-shrink: 0; }
-.irow input, .inp { flex: 1; padding: 9px 12px; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--bg3); color: var(--text); font-size: 14px; font-family: 'DM Mono', monospace; outline: none; transition: border-color .2s; }
-.irow input:focus, .inp:focus { border-color: var(--green); }
-
-/* ── SUGGESTION BOX ── */
-.sug { padding: 10px 12px; border-radius: var(--radius-sm); font-size: 13px; line-height: 1.5; margin-bottom: 8px; }
-.sug.up { background: rgba(34,197,94,.1); color: #86efac; border: 1px solid rgba(34,197,94,.2); }
-.sug.ok { background: rgba(59,130,246,.1); color: #93c5fd; border: 1px solid rgba(59,130,246,.2); }
-.sug.dn { background: rgba(245,158,11,.1); color: #fcd34d; border: 1px solid rgba(245,158,11,.2); }
-
-/* ── BUTTONS ── */
-.btn { display: block; width: 100%; padding: 14px; border-radius: var(--radius-sm); font-size: 15px; font-weight: 600; transition: all .15s; letter-spacing: -.1px; }
-.bp { background: var(--green); color: #0a0a0a; }
-.bp:active { background: #16a34a; transform: scale(.98); }
-.bs { background: var(--bg3); color: var(--text); border: 1px solid var(--border2); }
-.bs:active { background: var(--bg2); }
-.pill { display: inline-flex; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: .3px; text-transform: uppercase; }
-.pa { background: rgba(59,130,246,.15); color: #93c5fd; }
-.pb { background: rgba(236,72,153,.15); color: #f9a8d4; }
-.pc { background: rgba(34,197,94,.15); color: #86efac; }
-
-/* ── SPARKLINE ── */
-.carea { height: 100px; margin-top: 8px; }
-.carea svg { width: 100%; height: 100%; }
-
-/* ── TABS ── */
-.tabs { display: flex; background: var(--bg3); border-radius: var(--radius-sm); margin: 12px 14px; padding: 3px; gap: 3px; }
-.tab { flex: 1; padding: 9px 4px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--text2); transition: all .15s; }
-.tab.on { background: var(--bg2); color: var(--text); border: 1px solid var(--border2); }
-
-/* ── ONBOARDING ── */
-#onboarding { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; flex-direction: column; overflow-y: auto; padding: calc(var(--safe-top) + 40px) 24px calc(var(--safe-bot) + 40px); max-width: 480px; margin: 0 auto; }
-.ob-step { display: none; flex-direction: column; gap: 24px; animation: fadeUp .3s ease; }
-.ob-step.active { display: flex; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-.ob-logo { font-size: 42px; margin-bottom: 4px; }
-.ob-title { font-size: 28px; font-weight: 600; letter-spacing: -.5px; line-height: 1.2; }
-.ob-sub { font-size: 15px; color: var(--text2); line-height: 1.6; }
-.ob-label { font-size: 13px; font-weight: 500; color: var(--text2); margin-bottom: 8px; }
-.ob-input { width: 100%; padding: 16px; border: 1px solid var(--border2); border-radius: var(--radius); background: var(--bg2); color: var(--text); font-size: 18px; font-family: 'DM Mono', monospace; font-weight: 500; outline: none; text-align: center; transition: border-color .2s; }
-.ob-input:focus { border-color: var(--green); }
-.ob-input.big { font-size: 36px; font-weight: 600; letter-spacing: -1px; }
-.ob-days { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
-.ob-day { padding: 14px 8px; border: 1px solid var(--border2); border-radius: var(--radius); background: var(--bg2); font-size: 13px; font-weight: 600; color: var(--text2); text-align: center; transition: all .2s; }
-.ob-day.sel { border-color: var(--green); background: var(--green-dim2); color: var(--green); }
-.ob-day .day-icon { font-size: 22px; margin-bottom: 4px; }
-.ob-day .day-name { font-size: 13px; font-weight: 600; }
-.ob-day .day-focus { font-size: 10px; color: var(--text2); margin-top: 2px; font-weight: 400; }
-.ob-day.sel .day-focus { color: rgba(34,197,94,.7); }
-.ob-note { font-size: 12px; color: var(--text3); line-height: 1.5; }
-
-/* ── MODAL ── */
-.mover { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: flex; align-items: flex-end; z-index: 200; backdrop-filter: blur(4px); }
-.modal { background: var(--bg2); border-radius: var(--radius) var(--radius) 0 0; padding: 20px 20px calc(20px + var(--safe-bot)); width: 100%; border-top: 1px solid var(--border); }
-.modal h3 { font-size: 17px; font-weight: 600; margin-bottom: 14px; }
-
-/* ── EMPTY STATE ── */
-.empty { text-align: center; padding: 32px 20px; }
-.empty .eic { font-size: 40px; margin-bottom: 12px; }
-.empty p { font-size: 14px; color: var(--text2); line-height: 1.6; }
-
-/* ── EXERCISE ANIMATION ── */
-.ex-anim { width: 100%; height: 130px; display: flex; align-items: center; justify-content: center; background: rgba(34,197,94,0.04); border-radius: var(--radius-sm); border: 1px solid rgba(34,197,94,0.1); margin-bottom: 12px; overflow: hidden; }
-.ex-anim svg { width: 130px; height: 120px; }
-
-/* ── SECTION HEADING ── */
-.sh { font-size: 10px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 1px; margin: 16px 14px 8px; }
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.5;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input{font-family:inherit}
+#app{display:flex;flex-direction:column;height:100dvh;max-width:480px;margin:0 auto;position:relative;overflow:hidden}
+#screen{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(64px + var(--sb))}
+#screen::-webkit-scrollbar{display:none}
+.botbar{position:absolute;bottom:0;left:0;right:0;height:calc(58px + var(--sb));padding-bottom:var(--sb);display:flex;background:rgba(12,12,12,0.95);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100}
+.bb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--text3);font-size:10px;font-weight:500;letter-spacing:.4px;text-transform:uppercase;transition:color .2s}
+.bb.on{color:var(--green)}
+.bb svg{width:21px;height:21px;stroke-width:1.8}
+.bb-dot{width:4px;height:4px;border-radius:50%;background:var(--green);opacity:0;margin-top:-1px;transition:opacity .2s}
+.bb.on .bb-dot{opacity:1}
+.topbar{padding:calc(var(--st) + 20px) 18px 14px;border-bottom:1px solid var(--border)}
+.topbar-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.topbar h1{font-size:21px;font-weight:600;letter-spacing:-.4px;line-height:1.2}
+.sub{font-size:13px;color:var(--text2);margin-top:3px}
+.sh{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin:16px 18px 8px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin:0 14px 10px}
+.clbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px}
+.mrow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 14px 10px}
+.met{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:12px 8px;text-align:center}
+.mval{font-size:23px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;font-family:'DM Mono',monospace}
+.mlbl{font-size:10px;color:var(--text2);margin-top:4px;text-transform:uppercase;letter-spacing:.5px}
+.pbar{background:var(--bg3);border-radius:20px;height:4px;overflow:hidden}
+.pinner{height:4px;background:var(--green);border-radius:20px;transition:width .5s cubic-bezier(.4,0,.2,1)}
+.wgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+.dd{height:34px;border-radius:7px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:600;gap:1px;text-transform:uppercase}
+.dd.done{background:var(--green-bg2);color:var(--green);border:1px solid var(--green-b)}
+.dd.plan{background:var(--bg3);color:var(--text3);border:1px solid var(--border)}
+.dd.rest{color:var(--text4)}
+.dd.today{border:1px solid var(--green);color:var(--green);background:var(--bg3)}
+.excard{border:1px solid var(--border);border-radius:var(--r);margin:0 14px 8px;overflow:hidden;transition:border-color .2s}
+.excard.open{border-color:var(--border2)}
+.excard.complete{border-color:var(--green-b)}
+.exh{padding:13px 14px;display:flex;align-items:center;gap:11px;cursor:pointer;user-select:none}
+.exh:active{background:var(--bg3)}
+.exic{width:38px;height:38px;border-radius:10px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.exin{flex:1;min-width:0}
+.exn{font-size:14px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.exm{font-size:12px;color:var(--text2);margin-top:1px}
+.exarrow{font-size:13px;color:var(--text3);transition:transform .2s;flex-shrink:0}
+.excard.open .exarrow{transform:rotate(180deg)}
+.exb{padding:12px 14px 14px;border-top:1px solid var(--border);background:#141414}
+.tip{font-size:12px;color:var(--text2);line-height:1.65;padding:10px 12px;background:rgba(34,197,94,.05);border-radius:var(--rsm);border-left:2px solid var(--green);margin-bottom:12px}
+.srow{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.sb{width:40px;height:40px;border-radius:50%;border:1px solid var(--border2);background:var(--bg3);font-size:13px;font-weight:600;color:var(--text2);transition:all .15s;font-family:'DM Mono',monospace}
+.sb:active{transform:scale(.92)}
+.sb.on{background:var(--green);color:#000;border-color:var(--green)}
+.irow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.irow label{font-size:12px;color:var(--text2);width:42px;flex-shrink:0}
+.inp{flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);color:var(--text);font-size:15px;font-family:'DM Mono',monospace;font-weight:500;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.inp:focus{border-color:var(--green)}
+.inp::placeholder{color:var(--text3)}
+.sug{padding:10px 12px;border-radius:var(--rsm);font-size:13px;line-height:1.5;margin-bottom:8px}
+.sug.up{background:rgba(34,197,94,.1);color:#86efac;border:1px solid rgba(34,197,94,.25)}
+.sug.ok{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.25)}
+.sug.dn{background:rgba(245,158,11,.1);color:#fcd34d;border:1px solid rgba(245,158,11,.25)}
+.btn{display:block;width:100%;padding:14px;border-radius:var(--rsm);font-size:15px;font-weight:600;transition:all .15s;letter-spacing:-.1px;text-align:center}
+.btn:active{transform:scale(.98)}
+.bp{background:var(--green);color:#0a0a0a}
+.bp:active{background:#16a34a}
+.bs{background:var(--bg3);color:var(--text);border:1px solid var(--border2)}
+.icon-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:8px 12px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:5px}
+.pill{display:inline-flex;padding:4px 11px;border-radius:20px;font-size:12px;font-weight:600;letter-spacing:.2px}
+.pa{background:rgba(59,130,246,.15);color:#93c5fd}
+.pb{background:rgba(236,72,153,.15);color:#f9a8d4}
+.pc{background:rgba(34,197,94,.15);color:#86efac}
+.carea{height:100px;margin-top:8px}
+.carea svg{width:100%;height:100%}
+.tabs{display:flex;background:var(--bg3);border-radius:var(--rsm);margin:10px 14px;padding:3px;gap:3px}
+.tab{flex:1;padding:9px 4px;border-radius:var(--rxs);font-size:13px;font-weight:600;color:var(--text2);transition:all .15s}
+.tab.on{background:var(--bg2);color:var(--text);border:1px solid var(--border2)}
+.empty{text-align:center;padding:28px 16px}
+.empty .eic{font-size:36px;margin-bottom:10px}
+.empty p{font-size:13px;color:var(--text2);line-height:1.6}
+.fbanner{background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--rsm);padding:12px 14px;margin:0 14px 8px;font-size:13px;color:#86efac;line-height:1.5}
+/* ONBOARDING */
+#onboarding{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;overflow-y:auto;padding:calc(var(--st) + 44px) 24px calc(var(--sb) + 40px);max-width:480px;margin:0 auto}
+.ob-step{display:none;flex-direction:column;gap:22px}
+.ob-step.active{display:flex;animation:fu .35s ease}
+@keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.ob-title{font-size:30px;font-weight:600;letter-spacing:-.6px;line-height:1.15}
+.ob-sub{font-size:15px;color:var(--text2);line-height:1.65}
+.ob-lbl{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:8px}
+.ob-inp{width:100%;padding:16px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font-size:36px;font-family:'DM Mono',monospace;font-weight:600;outline:none;text-align:center;transition:border-color .2s;-webkit-appearance:none;letter-spacing:-1px}
+.ob-inp:focus{border-color:var(--green)}
+.ob-days{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.ob-day{padding:16px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);cursor:pointer;text-align:center;transition:all .2s}
+.ob-day:active{transform:scale(.97)}
+.ob-day.sel{border-color:var(--green);background:var(--green-bg2)}
+.ob-day .di{font-size:24px;margin-bottom:6px}
+.ob-day .dn{font-size:14px;font-weight:600;color:var(--text2)}
+.ob-day .df{font-size:11px;margin-top:3px;font-weight:400;color:var(--text3);line-height:1.3}
+.ob-day.sel .dn{color:var(--green)}
+.ob-day.sel .df{color:rgba(34,197,94,.6)}
+.ob-dots{display:flex;gap:6px;margin-bottom:4px}
+.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--bg3)}
+.ob-dot.on{background:var(--green);width:18px;border-radius:3px}
+/* MODAL */
+.mover{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;z-index:200;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.modal{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));width:100%;border-top:1px solid var(--border2)}
+.modal-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
+.modal h3{font-size:17px;font-weight:600;margin-bottom:14px;letter-spacing:-.2px}
+/* TIMER */
+#rest-timer{position:fixed;bottom:calc(58px + var(--sb) + 8px);left:50%;transform:translateX(-50%) translateY(80px);width:calc(100% - 28px);max-width:452px;background:#1a1a1a;border:1px solid var(--border2);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;z-index:150;box-shadow:0 -4px 32px rgba(0,0,0,.5);transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s ease;opacity:0;pointer-events:none}
+#rest-timer.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:all}
+.rt-ring{position:relative;width:48px;height:48px;flex-shrink:0}
+.rt-ring svg{width:48px;height:48px;transform:rotate(-90deg)}
+.rt-ring-bg{fill:none;stroke:var(--bg3);stroke-width:3}
+.rt-ring-fg{fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s}
+.rt-ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--text)}
+.rt-info{flex:1;min-width:0}
+.rt-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.rt-msg{font-size:13px;font-weight:500;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0;cursor:pointer;transition:all .15s}
+.rt-btn:active{transform:scale(.95)}
+.rt-btn.skip{color:var(--text3);font-size:11px}
+#rest-timer.done .rt-ring-fg{stroke:var(--amber)}
+#rest-timer.done .rt-ring-num{color:var(--amber)}
 </style>
 </head>
 <body>
 
-<!-- ONBOARDING -->
 <div id="onboarding">
-
-  <!-- Step 1: Welcome -->
   <div class="ob-step active" id="ob1">
+    <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div></div>
     <div>
-      <div class="ob-logo">💪</div>
+      <div style="font-size:44px;margin-bottom:8px">💪</div>
       <div class="ob-title">Bienvenido a GymTrack</div>
     </div>
-    <div class="ob-sub">Tu app de entrenamiento personal. Simple, sin distracciones, diseñada para que vayas al gym 3 veces por semana y veas resultados reales.</div>
+    <div class="ob-sub">Tu app de entrenamiento personal. Simple, sin distracciones, diseñada para ir al gym 3 veces por semana y ver resultados reales.</div>
     <div>
-      <div class="ob-label">¿Cuánto pesas hoy? (kg)</div>
-      <input class="ob-input big" id="ob-weight" type="number" placeholder="105" step="0.1" inputmode="decimal"/>
+      <div class="ob-lbl">¿Cuánto pesas hoy? (kg)</div>
+      <input class="ob-inp" id="ob-weight" type="number" placeholder="105" step="0.1" inputmode="decimal"/>
     </div>
-    <button class="btn bp" onclick="obNext1()">Continuar →</button>
-  </div>
-
-  <!-- Step 2: Choose starting day -->
-  <div class="ob-step" id="ob2">
     <div>
-      <div class="ob-title">¿Con qué día empezamos hoy?</div>
-      <div class="ob-sub" style="margin-top:8px">Elige el entrenamiento que harás en tu primera sesión.</div>
+      <button class="btn bp" onclick="obNext()">Continuar →</button>
+      <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:10px">Este será tu punto de partida real.</p>
+    </div>
+  </div>
+  <div class="ob-step" id="ob2">
+    <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot on"></div></div>
+    <div>
+      <div class="ob-title">¿Con qué día empezamos?</div>
+      <div class="ob-sub" style="margin-top:8px">Elige el entrenamiento de tu primera sesión. El orden A → B → C rotará solo.</div>
     </div>
     <div class="ob-days">
-      <div class="ob-day sel" id="sel-A" onclick="selDay('A')">
-        <div class="day-icon">🦵</div>
-        <div class="day-name">Día A</div>
-        <div class="day-focus">Piernas + abdomen</div>
-      </div>
-      <div class="ob-day" id="sel-B" onclick="selDay('B')">
-        <div class="day-icon">🏋️</div>
-        <div class="day-name">Día B</div>
-        <div class="day-focus">Pecho + hombros</div>
-      </div>
-      <div class="ob-day" id="sel-C" onclick="selDay('C')">
-        <div class="day-icon">🚣</div>
-        <div class="day-name">Día C</div>
-        <div class="day-focus">Espalda + bíceps</div>
-      </div>
+      <div class="ob-day sel" id="sel-A" onclick="selDay('A')"><div class="di">🦵</div><div class="dn">Día A</div><div class="df">Piernas y abdomen</div></div>
+      <div class="ob-day" id="sel-B" onclick="selDay('B')"><div class="di">🏋️</div><div class="dn">Día B</div><div class="df">Pecho, hombros, tríceps</div></div>
+      <div class="ob-day" id="sel-C" onclick="selDay('C')"><div class="di">🚣</div><div class="dn">Día C</div><div class="df">Espalda y bíceps</div></div>
     </div>
-    <div class="ob-note">El orden A → B → C se rotará automáticamente cada semana. Puedes empezar con cualquiera.</div>
-    <button class="btn bp" onclick="obFinish()">Empezar a entrenar →</button>
+    <p style="font-size:12px;color:var(--text3);line-height:1.55">💡 Si es tu primer día, empieza con el Día A. Si ya tienes historial, elige el que corresponda.</p>
+    <div>
+      <button class="btn bp" onclick="obFinish()">Empezar a entrenar →</button>
+      <button class="btn bs" style="margin-top:8px" onclick="obBack()">← Volver</button>
+    </div>
   </div>
-
 </div>
 
-<!-- MAIN APP -->
 <div id="app" style="display:none">
   <div id="screen"></div>
   <nav class="botbar">
     <button class="bb on" id="nb-dash" onclick="go('dash')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      Inicio
-      <div class="dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Inicio<div class="bb-dot"></div>
     </button>
     <button class="bb" id="nb-workout" onclick="go('workout')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4v16M18 4v16M3 8h4M17 8h4M3 16h4M17 16h4"/></svg>
-      Entreno
-      <div class="dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 4v16M18 4v16M3 8h4M17 8h4M3 16h4M17 16h4"/></svg>
+      Entreno<div class="bb-dot"></div>
     </button>
     <button class="bb" id="nb-prog" onclick="go('prog')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
-      Progreso
-      <div class="dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+      Progreso<div class="bb-dot"></div>
     </button>
   </nav>
+<div id="rest-timer">
+  <div class="rt-ring">
+    <svg viewBox="0 0 48 48"><circle class="rt-ring-bg" cx="24" cy="24" r="20"/><circle class="rt-ring-fg" id="rt-arc" cx="24" cy="24" r="20"/></svg>
+    <div class="rt-ring-num" id="rt-num">90</div>
+  </div>
+  <div class="rt-info">
+    <div class="rt-label">Descanso</div>
+    <div class="rt-msg" id="rt-msg">Recuperando...</div>
+  </div>
+  <button class="rt-btn skip" onclick="RT.skip()">Saltar</button>
+</div>
+
 </div>
 
 <script>
-// ── TRAINING PLAN ──
-const PLAN = {
+const PLAN={
   A:{label:'Día A',focus:'Piernas + abdomen',pill:'pa',ex:[
     {id:'a1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'4–5 km/h sin inclinación. El objetivo es entrar en calor, no cansarse. Respira tranquilo.',cardio:true},
-    {id:'a2',n:'Sentadilla en Smith',ic:'🏋️',eq:'Smith machine + banco',s:3,r:12,tip:'Pies al ancho de hombros. Barra en la parte alta de la espalda. Baja hasta que los muslos queden paralelos al piso. Empuja desde los talones. Deja 2 reps en reserva.'},
-    {id:'a3',n:'Extensión de cuádriceps',ic:'🦵',eq:'Máquina de extensión',s:3,r:12,tip:'Ajusta el asiento para que la rodilla quede alineada con el pivote. Sube en 2s, baja en 3s. No bloquees la rodilla arriba.'},
-    {id:'a4',n:'Curl de femoral',ic:'🦿',eq:'Máquina de curl femoral',s:3,r:12,tip:'Dobla hasta que los talones casi toquen los glúteos. Sostén 1s arriba. Controla el regreso — no dejes que caiga solo.'},
-    {id:'a5',n:'Crunch en cable',ic:'⚡',eq:'Cable dual',s:3,r:15,tip:'Cuerda en polea alta, arrodíllado de cara al cable. Jala los codos hacia las rodillas curvando la columna — no las caderas. Siente el abdomen contraerse.'},
-    {id:'a6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Respiración constante. Este es tu tiempo de quema de grasa — mantenlo manejable.',cardio:true},
+    {id:'a2',n:'Sentadilla en Smith',ic:'🏋️',eq:'Smith machine + banco',s:3,r:12,tip:'Pies al ancho de hombros. Barra en la parte alta de la espalda. Baja hasta muslos paralelos. Empuja desde los talones. Deja 2 reps en reserva.'},
+    {id:'a3',n:'Extensión de cuádriceps',ic:'🦵',eq:'Máquina de extensión',s:3,r:12,tip:'Rodilla alineada con el pivote. Sube 2s, baja 3s. No bloquees la rodilla arriba.'},
+    {id:'a4',n:'Curl femoral',ic:'🦿',eq:'Máquina de curl femoral',s:3,r:12,tip:'Dobla hasta casi tocar los glúteos. Sostén 1s arriba. Controla el regreso lento.'},
+    {id:'a5',n:'Crunch en cable',ic:'⚡',eq:'Cable dual (cuerda alta)',s:3,r:15,tip:'Arrodíllado de frente. Jala codos hacia rodillas curvando la columna. Siente el abdomen contraerse.'},
+    {id:'a6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Respiración constante. Tiempo de quema de grasa.',cardio:true},
   ]},
   B:{label:'Día B',focus:'Empuje — pecho, hombros, tríceps',pill:'pb',ex:[
-    {id:'b1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'4–5 km/h. Mueve los brazos. Aumenta el ritmo gradualmente después de 3 minutos.',cardio:true},
-    {id:'b2',n:'Press inclinado en Smith',ic:'🏋️',eq:'Smith machine + banco',s:3,r:10,tip:'Banco a 30–45°. Barra al pecho superior. Empuja hacia arriba. Pies planos en el piso. Aprieta el pecho arriba. Deja 2 reps en reserva.'},
-    {id:'b3',n:'Aperturas en máquina',ic:'🤸',eq:'Máquina de aperturas',s:3,r:12,tip:'Siente el estiramiento al abrir — no vayas rápido. Cierra hasta que los mangos casi se toquen. No necesitas mucho peso aquí.'},
-    {id:'b4',n:'Elevación lateral en cable',ic:'⚡',eq:'Cable dual',s:3,r:12,tip:'Un brazo a la vez, cable abajo. Levanta el brazo hacia afuera hasta el nivel del hombro solamente. Codo ligeramente doblado. Muy poco peso.'},
-    {id:'b5',n:'Jalón de tríceps en cable',ic:'⬇️',eq:'Cable dual',s:3,r:12,tip:'Cuerda o barra recta. Los codos se quedan pegados a los costados. Empuja hasta que los brazos queden rectos. Aprieta abajo. Controla el regreso.'},
-    {id:'b6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Ritmo de enfriamiento activo. Lo hiciste bien.',cardio:true},
+    {id:'b1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'4–5 km/h. Mueve los brazos. Aumenta el ritmo gradualmente.',cardio:true},
+    {id:'b2',n:'Press inclinado en Smith',ic:'🏋️',eq:'Smith machine + banco',s:3,r:10,tip:'Banco a 30–45°. Barra al pecho superior. Pies planos en el piso. Aprieta el pecho arriba. Deja 2 reps en reserva.'},
+    {id:'b3',n:'Aperturas en máquina',ic:'🤸',eq:'Máquina de aperturas',s:3,r:12,tip:'Siente el estiramiento al abrir. Cierra hasta que los mangos casi se toquen. Poco peso.'},
+    {id:'b4',n:'Elevación lateral en cable',ic:'⚡',eq:'Cable dual (polea baja)',s:3,r:12,tip:'Un brazo a la vez. Levanta solo hasta el nivel del hombro. Muy poco peso.'},
+    {id:'b5',n:'Jalón de tríceps en cable',ic:'⬇️',eq:'Cable dual (cuerda)',s:3,r:12,tip:'Codos pegados a los costados. Empuja hasta brazos rectos. Aprieta abajo. Controla el regreso.'},
+    {id:'b6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Enfriamiento activo.',cardio:true},
   ]},
   C:{label:'Día C',focus:'Jale — espalda y bíceps',pill:'pc',ex:[
-    {id:'c1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'Camina suave. Haz círculos con los hombros — hoy es día de jalar.',cardio:true},
-    {id:'c2',n:'Jalón al pecho',ic:'🏋️',eq:'Jalón / remo sentado',s:3,r:12,tip:'Agarre un poco más ancho que los hombros. Jala la barra al pecho superior. Inclínate un poco hacia atrás. No balancees. La espalda hace el trabajo, no los brazos.'},
-    {id:'c3',n:'Remo sentado en máquina',ic:'🚣',eq:'Jalón / remo sentado',s:3,r:12,tip:'Siéntate erguido. Jala el agarre hacia el ombligo. Aprieta los omóplatos al final del movimiento. Regreso lento — 3 segundos.'},
-    {id:'c4',n:'Remo con mancuerna',ic:'💪',eq:'Mancuernas',s:3,r:10,tip:'Apóyate en el banco con una mano y una rodilla. Jala la mancuerna hacia la cadera — no hacia el hombro. El codo va directo hacia atrás.'},
-    {id:'c5',n:'Curl de bíceps en cable',ic:'⚡',eq:'Cable dual',s:3,r:12,tip:'Barra EZ o cuerda. De pie cerca del cable. Codos fijos a los costados. Sube completamente. Aprieta arriba. Controla el regreso. Poco peso, rango completo.'},
-    {id:'c6',n:'Aperturas inversas en máquina',ic:'🔄',eq:'Máquina de aperturas/inversas',s:3,r:15,tip:'Usa la máquina de aperturas al revés o la pec-deck invertida. Aprieta los deltoides posteriores. Muy poco peso — busca la sensación, no el número.'},
-    {id:'c7',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Caminata con inclinación. Si te sientes con energía, prueba 1 minuto de trote suave, luego vuelve a caminar.',cardio:true},
+    {id:'c1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'Camina suave. Círculos con los hombros. Hoy es día de jalar.',cardio:true},
+    {id:'c2',n:'Jalón al pecho',ic:'🏋️',eq:'Jalón / remo (máquina)',s:3,r:12,tip:'Agarre ancho. Jala al pecho superior. No balancees. La espalda hace el trabajo.'},
+    {id:'c3',n:'Remo sentado en máquina',ic:'🚣',eq:'Jalón / remo (máquina)',s:3,r:12,tip:'Siéntate erguido. Jala hacia el ombligo. Aprieta omóplatos al final. Regreso 3s.'},
+    {id:'c4',n:'Remo con mancuerna',ic:'💪',eq:'Mancuernas + banco',s:3,r:10,tip:'Apóyate en el banco. Jala hacia la cadera. Codo directo hacia atrás.'},
+    {id:'c5',n:'Curl de bíceps en cable',ic:'⚡',eq:'Cable dual (barra EZ)',s:3,r:12,tip:'Codos fijos a los costados. Sube completo. Aprieta arriba. Controla el regreso 3s.'},
+    {id:'c6',n:'Aperturas inversas en máquina',ic:'🔄',eq:'Máquina de aperturas (invertida)',s:3,r:15,tip:'Máquina al revés. Aprieta deltoides posteriores. Poco peso — busca la sensación.'},
+    {id:'c7',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%. Si tienes energía, 1 min de trote suave, luego camina.',cardio:true},
   ]}
 };
 
-const DAY_ORDER = ['A','B','C'];
+const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+const DAY_ORDER=['A','B','C'];
 
-// ── STATE (persisted to localStorage) ──
-function loadState() {
-  try {
-    const raw = localStorage.getItem('gymtrack_v3');
-    if (raw) return JSON.parse(raw);
-  } catch(e) {}
-  return null;
+function loadState(){try{const r=localStorage.getItem('gymtrack_v3');if(r)return JSON.parse(r);}catch(e){}return null;}
+function saveState(){try{localStorage.setItem('gymtrack_v3',JSON.stringify(S));}catch(e){}}
+
+let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A'},loadState()||{});
+
+let obSelDay='A';
+function selDay(d){obSelDay=d;['A','B','C'].forEach(k=>document.getElementById('sel-'+k).classList.toggle('sel',k===d));}
+function obBack(){document.getElementById('ob2').classList.remove('active');document.getElementById('ob1').classList.add('active');}
+function obNext(){
+  const inp=document.getElementById('ob-weight'),v=parseFloat(inp.value);
+  if(!v||v<30||v>300){inp.style.borderColor='var(--red)';inp.focus();setTimeout(()=>inp.style.borderColor='',2000);return;}
+  document.getElementById('ob1').classList.remove('active');document.getElementById('ob2').classList.add('active');
 }
-function saveState() {
-  localStorage.setItem('gymtrack_v3', JSON.stringify(S));
-}
-
-const defaults = {
-  tab: 'dash',
-  day: 'A',           // current workout tab
-  nextDay: 'A',       // next session day
-  open: null,
-  logs: {},           // {exId: {w, r}}
-  sets: {},           // {exId: {0:bool,1:bool,...}}
-  weights: [],        // [{d: 'DD MMM', v: number, ts: timestamp}]
-  sessions: [],       // [{day, date, ts}]
-  strength: {},       // {exId: [{d, v, ts}]}
-  wmodal: false,
-  wnew: '',
-  onboarded: false,
-  startDay: 'A'
-};
-
-let S = Object.assign({}, defaults, loadState() || {});
-
-// ── ONBOARDING ──
-let obSelectedDay = 'A';
-let obWeight = '';
-
-function selDay(d) {
-  obSelectedDay = d;
-  ['A','B','C'].forEach(k => document.getElementById('sel-'+k).classList.toggle('sel', k===d));
+function obFinish(){
+  const v=parseFloat(document.getElementById('ob-weight').value);if(!v)return;
+  S.weights.push({d:fmtDate(new Date()),v,ts:Date.now()});
+  S.startDay=obSelDay;S.nextDay=obSelDay;S.day=obSelDay;S.onboarded=true;
+  saveState();document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();
 }
 
-function obNext1() {
-  const v = parseFloat(document.getElementById('ob-weight').value);
-  if (!v || v < 30 || v > 300) {
-    document.getElementById('ob-weight').focus();
-    document.getElementById('ob-weight').style.borderColor = '#ef4444';
-    setTimeout(() => document.getElementById('ob-weight').style.borderColor = '', 1500);
-    return;
-  }
-  obWeight = v;
-  document.getElementById('ob1').classList.remove('active');
-  document.getElementById('ob2').classList.add('active');
+function fmtDate(d){return d.getDate()+' '+MONTHS[d.getMonth()];}
+function getNextDay(c){return DAY_ORDER[(DAY_ORDER.indexOf(c)+1)%3];}
+function getWeekSessions(){
+  const t=new Date(),dow=t.getDay(),off=dow===0?-6:1-dow;
+  const mon=new Date(t);mon.setDate(t.getDate()+off);mon.setHours(0,0,0,0);
+  const sun=new Date(mon);sun.setDate(mon.getDate()+6);sun.setHours(23,59,59,999);
+  return S.sessions.filter(s=>s.ts&&new Date(s.ts)>=mon&&new Date(s.ts)<=sun).length;
 }
 
-function obFinish() {
-  const today = fmtDate(new Date());
-  S.weights.push({ d: today, v: obWeight, ts: Date.now() });
-  S.startDay = obSelectedDay;
-  S.nextDay = obSelectedDay;
-  S.day = obSelectedDay;
-  S.onboarded = true;
-  saveState();
-  document.getElementById('onboarding').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  render();
-}
-
-function fmtDate(date) {
-  const months = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-  return date.getDate() + ' ' + months[date.getMonth()];
-}
-
-// ── NAVIGATION ──
-function go(tab) {
-  S.tab = tab;
-  ['dash','workout','prog'].forEach(t => document.getElementById('nb-'+t).classList.toggle('on', t===tab));
-  render();
-  saveState();
-}
-
-// ── SPARKLINE ──
-function spark(data, color) {
-  if (!data || data.length < 2) return `<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:12px">Necesitas al menos 2 registros para ver la gráfica</div>`;
-  const vs = data.map(d => d.v);
-  const mn = Math.min(...vs) - 0.5, mx = Math.max(...vs) + 0.5;
-  const W = 300, H = 90;
-  const px = (i) => (i / (data.length-1)) * (W-30) + 15;
-  const py = (v) => H - 14 - ((v-mn)/(mx-mn)) * (H-30);
-  const pts = data.map((d,i) => px(i)+','+py(d.v)).join(' ');
-  const pathD = data.map((d,i) => (i===0?'M':'L')+px(i).toFixed(1)+','+py(d.v).toFixed(1)).join(' ');
-  const areaD = pathD + ` L${px(data.length-1)},${H} L${px(0)},${H} Z`;
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
-    <defs><linearGradient id="g${color.replace('#','')}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity=".25"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
-    <path d="${areaD}" fill="url(#g${color.replace('#','')})" />
-    <polyline points="${pts}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
-    ${data.map((d,i) => {
-      const x = px(i), y = py(d.v);
-      return `<circle cx="${x}" cy="${y}" r="3.5" fill="${color}" stroke="var(--bg2)" stroke-width="1.5"/>
-      <text x="${x}" y="${y-8}" text-anchor="middle" font-size="9" fill="${color}" font-family="DM Mono,monospace">${d.v}</text>`;
-    }).join('')}
-    ${data.map((d,i) => {
-      const x = px(i);
-      return `<text x="${x}" y="${H-2}" text-anchor="middle" font-size="8" fill="var(--text3)" font-family="DM Sans,sans-serif">${d.d}</text>`;
-    }).join('')}
-  </svg>`;
-}
-
-// ── PROGRESSION LOGIC ──
-function getSug(id, sets, reps) {
-  const c = S.sets[id] || {}, done = Object.values(c).filter(Boolean).length;
-  if (done < sets) return null;
-  const l = S.logs[id] || {}, w = parseFloat(l.w) || 0, r = parseInt(l.r) || 0, rt = parseInt(reps) || 12;
-  if (!w) return null;
-  if (r >= rt) return { t:'up', m:`¡Todo completado! Próxima sesión prueba con ${(w+2.5).toFixed(1)} kg (+2.5 kg). 🎯` };
-  if (r > 0 && r < rt - 2) return { t:'dn', m:`Sin problema — mantén ${w} kg la próxima sesión hasta que las reps salgan limpias. ✊` };
-  return { t:'ok', m:`Buen trabajo con ${w} kg. Mantén este peso la próxima sesión. 👍` };
-}
-
-// ── SET / LOG ACTIONS ──
-function toggleSet(id, i) {
-  if (!S.sets[id]) S.sets[id] = {};
-  S.sets[id][i] = !S.sets[id][i];
-  saveState(); render();
-}
-function updLog(id, f, v) {
-  if (!S.logs[id]) S.logs[id] = {};
-  S.logs[id][f] = v;
-  saveState();
-}
-
-// ── NEXT DAY ROTATION ──
-function getNextDay(current) {
-  const idx = DAY_ORDER.indexOf(current);
-  return DAY_ORDER[(idx+1) % 3];
-}
-
-// ── WEEK GRID ──
-function renderWeekGrid() {
-  const labels = ['L','M','X','J','V','S','D'];
-  const today = new Date();
-  const dow = today.getDay(); // 0=sun
-  const mondayOffset = dow === 0 ? -6 : 1 - dow;
-  const monday = new Date(today); monday.setDate(today.getDate() + mondayOffset);
-  return labels.map((lbl, i) => {
-    const d = new Date(monday); d.setDate(monday.getDate() + i);
-    const ds = fmtDate(d);
-    const isToday = d.toDateString() === today.toDateString();
-    const done = S.sessions.some(s => s.date === ds);
-    const cls = done ? 'done' : isToday ? 'today' : (i > 4 ? 'rest' : 'plan');
-    return `<div class="dd ${cls}">${lbl}${done ? '<span style="font-size:8px">✓</span>' : ''}</div>`;
+function weekGrid(){
+  const lbl=['L','M','X','J','V','S','D'],t=new Date(),dow=t.getDay(),off=dow===0?-6:1-dow;
+  const mon=new Date(t);mon.setDate(t.getDate()+off);
+  return lbl.map((l,i)=>{
+    const d=new Date(mon);d.setDate(mon.getDate()+i);
+    const ds=fmtDate(d),isT=d.toDateString()===t.toDateString(),done=S.sessions.some(s=>s.date===ds),we=i>=5;
+    const cls=done?'done':isT?'today':we?'rest':'plan';
+    return`<div class="dd ${cls}">${l}${done?'<span style="font-size:7px">✓</span>':''}</div>`;
   }).join('');
 }
 
-// ── SCREENS ──
-function renderDash() {
-  const lw = S.weights.length ? S.weights[S.weights.length-1] : null;
-  const pw = S.weights.length > 1 ? S.weights[S.weights.length-2] : null;
-  const diff = lw && pw ? (lw.v - pw.v).toFixed(1) : '—';
-  const sign = parseFloat(diff) > 0 ? '+' : '';
-  const total = S.sessions.length;
-  const thisWeek = (() => {
-    const today = new Date(), dow = today.getDay();
-    const mondayOffset = dow === 0 ? -6 : 1 - dow;
-    const monday = new Date(today); monday.setDate(today.getDate() + mondayOffset);
-    const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
-    return S.sessions.filter(s => {
-      if (!s.ts) return false;
-      const d = new Date(s.ts);
-      return d >= monday && d <= sunday;
-    }).length;
-  })();
+function spark(data,color){
+  if(!data||data.length<2)return`<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:12px">Necesitas al menos 2 registros</div>`;
+  const vs=data.map(d=>d.v),mn=Math.min(...vs)-.5,mx=Math.max(...vs)+.5;
+  const W=320,H=90,P=14;
+  const px=i=>(i/(data.length-1))*(W-P*2)+P;
+  const py=v=>H-P-((v-mn)/(mx-mn))*(H-P*2.5);
+  const path=data.map((d,i)=>(i===0?'M':'L')+px(i).toFixed(1)+','+py(d.v).toFixed(1)).join(' ');
+  const area=path+` L${px(data.length-1).toFixed(1)},${H} L${px(0).toFixed(1)},${H} Z`;
+  const gid='g'+Math.abs(color.split('').reduce((a,c)=>a+c.charCodeAt(0),0));
+  return`<svg viewBox="0 0 ${W} ${H}" style="overflow:visible">
+    <defs><linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="${color}" stop-opacity=".2"/><stop offset="100%" stop-color="${color}" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#${gid})"/>
+    <path d="${path}" fill="none" stroke="${color}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${data.map((d,i)=>`<circle cx="${px(i)}" cy="${py(d.v)}" r="3.5" fill="${color}" stroke="#181818" stroke-width="2"/>
+    <text x="${px(i)}" y="${py(d.v)-8}" text-anchor="middle" font-size="9.5" fill="${color}" font-family="DM Mono,monospace" font-weight="500">${d.v}</text>`).join('')}
+    ${data.map((d,i)=>`<text x="${px(i)}" y="${H-1}" text-anchor="middle" font-size="8.5" fill="var(--text3)" font-family="DM Sans,sans-serif">${d.d}</text>`).join('')}
+  </svg>`;
+}
 
-  return `
-  <div class="topbar">
-    <div class="topbar-row">
-      <div>
-        <h1>¡Hola, campeón! 💪</h1>
-        <div class="sub">${total === 0 ? 'Primera sesión — ¡vamos a ello!' : `${total} sesión${total>1?'es':''} completada${total>1?'s':''}`}</div>
-      </div>
-      <button onclick="S.wmodal=true;render()" style="background:var(--bg3);border:1px solid var(--border2);border-radius:var(--radius-sm);padding:8px 12px;font-size:12px;font-weight:600;color:var(--text2)">+ Peso</button>
-    </div>
-  </div>
+function getSug(id,sets,reps){
+  const c=S.sets[id]||{},done=Object.values(c).filter(Boolean).length;if(done<sets)return null;
+  const l=S.logs[id]||{},w=parseFloat(l.w)||0,r=parseInt(l.r)||0,rt=parseInt(reps)||12;if(!w)return null;
+  if(r>=rt)return{t:'up',m:`¡Series completas! Próxima sesión prueba con ${(w+2.5).toFixed(1)} kg (+2.5 kg) 🎯`};
+  if(r<rt-2)return{t:'dn',m:`Sin problema — mantén ${w} kg hasta que las reps salgan limpias. ✊`};
+  return{t:'ok',m:`Buen trabajo con ${w} kg. Mantén este peso la próxima sesión. 👍`};
+}
 
-  <div style="padding:10px 14px 0"><div class="card-label">Esta semana</div></div>
-  <div class="card">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-      <span style="font-size:14px;font-weight:500">${thisWeek} de 3 sesiones</span>
-      <span style="font-size:12px;color:${thisWeek>=3?'var(--green)':'var(--text2)'}">${thisWeek>=3?'¡Semana completa! 🎉':thisWeek>0?'En camino 🔥':'Empieza hoy 👊'}</span>
-    </div>
-    <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(thisWeek/3*100))}%"></div></div>
-    <div class="wgrid">${renderWeekGrid()}</div>
-    <div style="display:flex;gap:12px;margin-top:8px;font-size:10px;color:var(--text3)">
-      <span style="color:var(--green)">■ Completado</span>
-      <span style="color:var(--green);border:1px solid var(--green);padding:0 2px">■</span><span> Hoy</span>
-      <span>■ Planificado</span>
-    </div>
-  </div>
+// REST TIMER
+const CIRCUMFERENCE = 2 * Math.PI * 20; // r=20
+const RT = {
+  _tid: null,
+  _remaining: 0,
+  _total: 0,
+  _hideTimeout: null,
 
-  <div class="mrow">
-    <div class="met"><div class="mval">${total}</div><div class="mlbl">Sesiones</div></div>
-    <div class="met"><div class="mval" style="color:var(--green)">${lw ? lw.v : '—'}</div><div class="mlbl">kg hoy</div></div>
-    <div class="met"><div class="mval" style="color:${parseFloat(diff)<=0?'var(--green)':'var(--red)'}">${diff !== '—' ? sign+diff : '—'}</div><div class="mlbl">kg cambio</div></div>
-  </div>
+  start(seconds, exName) {
+    clearInterval(this._tid);
+    clearTimeout(this._hideTimeout);
+    this._total = seconds;
+    this._remaining = seconds;
+    const el = document.getElementById('rest-timer');
+    el.classList.remove('done');
+    el.classList.add('show');
+    document.getElementById('rt-msg').textContent = exName || 'Recuperando...';
+    this._update();
+    this._tid = setInterval(() => {
+      this._remaining--;
+      if (this._remaining <= 0) {
+        this._remaining = 0;
+        this._update();
+        clearInterval(this._tid);
+        this._finish();
+      } else {
+        this._update();
+      }
+    }, 1000);
+  },
 
-  <div class="card">
-    <div class="card-label">Peso corporal</div>
-    ${S.weights.length >= 2
-      ? `<div class="carea">${spark(S.weights, '#22c55e')}</div>`
-      : `<div class="empty"><div class="eic">📊</div><p>Registra tu peso cada día de entrenamiento para ver tu progreso aquí.</p></div>`
+  _update() {
+    const arc = document.getElementById('rt-arc');
+    const num = document.getElementById('rt-num');
+    if (!arc || !num) return;
+    const progress = this._remaining / this._total;
+    const offset = CIRCUMFERENCE * (1 - progress);
+    arc.style.strokeDasharray = CIRCUMFERENCE;
+    arc.style.strokeDashoffset = offset;
+    num.textContent = this._remaining;
+    // Color shift: green→amber as time runs out
+    if (this._remaining <= 10) arc.style.stroke = 'var(--amber)';
+    else arc.style.stroke = 'var(--green)';
+  },
+
+  _finish() {
+    const el = document.getElementById('rest-timer');
+    if (el) {
+      el.classList.add('done');
+      document.getElementById('rt-msg').textContent = '¡Listo! A la siguiente serie 💪';
+      document.getElementById('rt-num').textContent = '✓';
     }
-    <button class="btn bs" style="margin-top:10px" onclick="S.wmodal=true;render()">Registrar peso de hoy</button>
-  </div>
+    // Vibrate if supported
+    if ('vibrate' in navigator) {
+      try { navigator.vibrate([200, 100, 200]); } catch(e) {}
+    }
+    this._hideTimeout = setTimeout(() => this.hide(), 4000);
+  },
 
+  skip() {
+    clearInterval(this._tid);
+    clearTimeout(this._hideTimeout);
+    this.hide();
+  },
+
+  hide() {
+    const el = document.getElementById('rest-timer');
+    if (el) el.classList.remove('show');
+    clearInterval(this._tid);
+  }
+};
+
+// Map exercise rest times (matches the plan)
+function getRestTime(id) {
+  // 90s: compound movements (squats, press, rows, pulldowns)
+  const long90 = ['a2','b2','c2','c3','c4'];
+  // 60s: isolation / cardio markers
+  return long90.includes(id) ? 90 : 60;
+}
+
+function toggleSet(id, i) {
+  if (!S.sets[id]) S.sets[id] = {};
+  const wasOff = !S.sets[id][i];
+  S.sets[id][i] = !S.sets[id][i];
+  saveState();
+  render();
+  // Only start timer when MARKING a set as done (not when un-marking)
+  if (wasOff && S.tab === 'workout') {
+    // Find exercise name
+    const day = PLAN[S.day];
+    const ex = day.ex.find(e => e.id === id);
+    if (ex && !ex.cardio) {
+      const secs = getRestTime(id);
+      RT.start(secs, ex.n);
+    }
+  }
+}
+function updLog(id,f,v){if(!S.logs[id])S.logs[id]={};S.logs[id][f]=v;saveState();}
+function logW(){
+  const v=parseFloat(S.wnew);if(!v||v<30||v>300)return;
+  S.weights.push({d:fmtDate(new Date()),v,ts:Date.now()});S.wmodal=false;S.wnew='';saveState();render();
+}
+function finishSession(){
+  const day=PLAN[S.day],strEx=day.ex.filter(e=>!e.cardio);
+  const doneEx=strEx.filter(e=>Object.values(S.sets[e.id]||{}).filter(Boolean).length>=e.s).length;
+  const msg=doneEx===strEx.length?'¿Confirmar que terminaste el entrenamiento?':`Solo ${doneEx}/${strEx.length} ejercicios. ¿Guardar de todas formas?`;
+  if(!confirm(msg))return;
+  const today=fmtDate(new Date());
+  S.sessions.push({day:S.day,date:today,ts:Date.now()});
+  strEx.forEach(ex=>{const l=S.logs[ex.id]||{},w=parseFloat(l.w);if(w){if(!S.strength[ex.id])S.strength[ex.id]=[];S.strength[ex.id].push({d:today,v:w,ts:Date.now()});}});
+  S.nextDay=getNextDay(S.day);
+  day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});S.open=null;
+  saveState();alert(`¡Sesión guardada! 💪\nPróxima: ${PLAN[S.nextDay].label} — ${PLAN[S.nextDay].focus}`);go('dash');
+}
+
+function go(tab){
+  S.tab=tab;['dash','workout','prog'].forEach(t=>document.getElementById('nb-'+t).classList.toggle('on',t===tab));
+  document.getElementById('screen').scrollTop=0;render();saveState();
+}
+
+function renderDash(){
+  const lw=S.weights.length?S.weights[S.weights.length-1]:null;
+  const pw=S.weights.length>1?S.weights[S.weights.length-2]:null;
+  const diff=lw&&pw?(lw.v-pw.v):null;
+  const diffStr=diff!==null?(diff>0?'+':'')+diff.toFixed(1):'—';
+  const wk=getWeekSessions(),tot=S.sessions.length;
+  const greet=['¡Hola, campeón!','¡Vamos, que puedes!','¡Día de sudar!','¡Sigues en pie!','¡A por ello!'][tot%5];
+  return`
+  <div class="topbar"><div class="topbar-row"><div><h1>${greet} 💪</h1><div class="sub">${tot===0?'Primera sesión — el inicio es hoy':`${tot} sesión${tot!==1?'es':''} completada${tot!==1?'s':''}`}</div></div>
+  <button class="icon-btn" onclick="S.wmodal=true;render()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Peso</button></div></div>
+  <div class="sh">Esta semana</div>
   <div class="card">
-    <div class="card-label">Próxima sesión</div>
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:15px;font-weight:600">${wk} de 3 sesiones</span>
+      <span style="font-size:12px;font-weight:500;color:${wk>=3?'var(--green)':wk>0?'var(--amber)':'var(--text2)'}">${wk>=3?'¡Semana completa! 🎉':wk===2?'Una más 🔥':wk===1?'Buen inicio 👊':'Sin sesiones aún'}</span>
+    </div>
+    <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(wk/3*100))}%"></div></div>
+    <div class="wgrid">${weekGrid()}</div>
+    <div style="display:flex;gap:12px;margin-top:9px;font-size:10px;color:var(--text3)"><span style="color:var(--green)">■ Completado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span><span>■ Planificado</span></div>
+  </div>
+  <div class="mrow">
+    <div class="met"><div class="mval">${tot}</div><div class="mlbl">Sesiones</div></div>
+    <div class="met"><div class="mval" style="color:var(--green)">${lw?lw.v:'—'}</div><div class="mlbl">kg hoy</div></div>
+    <div class="met"><div class="mval" style="color:${diff===null?'var(--text2)':diff<=0?'var(--green)':'var(--red)'}">${diffStr}</div><div class="mlbl">kg cambio</div></div>
+  </div>
+  <div class="sh">Peso corporal</div>
+  <div class="card">
+    ${S.weights.length>=2?`<div class="carea">${spark(S.weights,'#22c55e')}</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">
+      <span>Inicio: <strong style="color:var(--text);font-family:'DM Mono',monospace">${S.weights[0].v} kg</strong></span>
+      <span>Actual: <strong style="color:var(--text);font-family:'DM Mono',monospace">${S.weights[S.weights.length-1].v} kg</strong></span>
+      <span>Cambio: <strong style="font-family:'DM Mono',monospace;color:${(S.weights[S.weights.length-1].v-S.weights[0].v)<=0?'var(--green)':'var(--red)'}">${((S.weights[S.weights.length-1].v-S.weights[0].v)>0?'+':'')+(S.weights[S.weights.length-1].v-S.weights[0].v).toFixed(1)} kg</strong></span>
+    </div>`:`<div class="empty"><div class="eic">⚖️</div><p>Registra tu peso en cada sesión para ver la evolución aquí.</p></div>`}
+    <button class="btn bs" style="margin-top:12px" onclick="S.wmodal=true;render()">Registrar peso de hoy</button>
+  </div>
+  <div class="sh">Próxima sesión</div>
+  <div class="card">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <span class="pill p${S.nextDay.toLowerCase()}">${PLAN[S.nextDay].label}</span>
       <span style="font-size:14px;color:var(--text2)">${PLAN[S.nextDay].focus}</span>
     </div>
     <button class="btn bp" onclick="S.day=S.nextDay;go('workout')">Empezar ${PLAN[S.nextDay].label} →</button>
   </div>
-
-  ${S.wmodal ? `
-  <div class="mover" onclick="if(event.target===this){S.wmodal=false;render()}">
-    <div class="modal">
-      <h3>Registrar peso corporal</h3>
-      <input class="ob-input big" type="number" placeholder="${lw ? lw.v : '105'}" value="${S.wnew}" oninput="S.wnew=this.value" step="0.1" inputmode="decimal" autofocus/>
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <button class="btn bp" style="flex:1" onclick="logW()">Guardar</button>
-        <button class="btn bs" style="width:80px" onclick="S.wmodal=false;render()">Cancelar</button>
-      </div>
-    </div>
-  </div>` : ''}`;
+  ${S.sessions.length>0?`<div class="sh">Últimas sesiones</div><div class="card">${S.sessions.slice(-4).reverse().map(s=>`
+  <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+    <span class="pill p${s.day.toLowerCase()}" style="font-size:11px;padding:3px 9px">${PLAN[s.day].label}</span>
+    <span style="font-size:13px;color:var(--text2);flex:1">${PLAN[s.day].focus}</span>
+    <span style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">${s.date}</span>
+  </div>`).join('')}</div>`:''}
+  ${S.wmodal?`<div class="mover" onclick="if(event.target===this){S.wmodal=false;render()}"><div class="modal">
+    <div class="modal-hdl"></div>
+    <h3>Registrar peso corporal</h3>
+    <input class="ob-inp" type="number" placeholder="${lw?lw.v:'105'}" value="${S.wnew}" oninput="S.wnew=this.value" step="0.1" inputmode="decimal" autofocus onkeydown="if(event.key==='Enter')logW()"/>
+    <p style="font-size:12px;color:var(--text3);text-align:center;margin:8px 0 14px">Pésate siempre en las mismas condiciones (mañana, en ayunas)</p>
+    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="logW()">Guardar</button><button class="btn bs" style="width:90px" onclick="S.wmodal=false;render()">Cancelar</button></div>
+  </div></div>`:''}`;
 }
 
-function logW() {
-  const v = parseFloat(S.wnew);
-  if (!v || v < 30 || v > 300) return;
-  S.weights.push({ d: fmtDate(new Date()), v, ts: Date.now() });
-  S.wmodal = false; S.wnew = '';
-  saveState(); render();
-}
-
-// ── EXERCISE ANIMATIONS ──
-function getExerciseAnim(id) {
-  const c = '#22c55e', s = '#f0f0f0', j = '#888';
-  const anims = {
-
-    // a1 / b1 / c1 — Caminadora (warmup walk)
-    'a1': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .wa-body { animation: wa-torso 0.6s ease-in-out infinite alternate; transform-origin: 65px 52px; }
-        .wa-larm { animation: wa-larm 0.6s ease-in-out infinite alternate; transform-origin: 65px 52px; }
-        .wa-rarm { animation: wa-rarm 0.6s ease-in-out infinite alternate; transform-origin: 65px 52px; }
-        .wa-lleg { animation: wa-lleg 0.6s ease-in-out infinite alternate; transform-origin: 65px 75px; }
-        .wa-rleg { animation: wa-rleg 0.6s ease-in-out infinite alternate; transform-origin: 65px 75px; }
-        @keyframes wa-torso { from { transform: rotate(-2deg); } to { transform: rotate(2deg); } }
-        @keyframes wa-larm  { from { transform: rotate(-25deg); } to { transform: rotate(25deg); } }
-        @keyframes wa-rarm  { from { transform: rotate(25deg); } to { transform: rotate(-25deg); } }
-        @keyframes wa-lleg  { from { transform: rotate(-22deg); } to { transform: rotate(22deg); } }
-        @keyframes wa-rleg  { from { transform: rotate(22deg); } to { transform: rotate(-22deg); } }
-      </style>
-      <!-- treadmill base -->
-      <rect x="20" y="100" width="90" height="6" rx="3" fill="${j}" opacity=".4"/>
-      <rect x="25" y="98" width="80" height="4" rx="2" fill="${j}" opacity=".25"/>
-      <!-- head -->
-      <circle cx="65" cy="30" r="11" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso+arms as one rotating group -->
-      <g class="wa-body">
-        <line x1="65" y1="41" x2="65" y2="74" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-        <g class="wa-larm"><line x1="65" y1="50" x2="50" y2="66" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/></g>
-        <g class="wa-rarm"><line x1="65" y1="50" x2="80" y2="66" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/></g>
-      </g>
-      <!-- legs -->
-      <g class="wa-lleg"><line x1="65" y1="74" x2="54" y2="98" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/></g>
-      <g class="wa-rleg"><line x1="65" y1="74" x2="76" y2="98" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/></g>
-    </svg>`,
-
-    // a2 — Sentadilla Smith
-    'a2': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .sq-all { animation: sq-down 1.2s ease-in-out infinite alternate; transform-origin: 65px 60px; }
-        @keyframes sq-down {
-          0%   { transform: translateY(0px) scaleY(1); }
-          100% { transform: translateY(14px) scaleY(0.82); }
-        }
-      </style>
-      <!-- Smith bar rails -->
-      <line x1="30" y1="20" x2="30" y2="105" stroke="${j}" stroke-width="1.5" opacity=".4"/>
-      <line x1="100" y1="20" x2="100" y2="105" stroke="${j}" stroke-width="1.5" opacity=".4"/>
-      <g class="sq-all">
-        <!-- bar -->
-        <rect x="28" y="42" width="74" height="5" rx="2.5" fill="${c}" opacity=".9"/>
-        <!-- head -->
-        <circle cx="65" cy="29" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-        <!-- torso -->
-        <line x1="65" y1="39" x2="65" y2="68" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- arms holding bar -->
-        <line x1="65" y1="50" x2="40" y2="45" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-        <line x1="65" y1="50" x2="90" y2="45" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-        <!-- legs -->
-        <line x1="65" y1="68" x2="50" y2="92" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="65" y1="68" x2="80" y2="92" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- feet -->
-        <line x1="50" y1="92" x2="43" y2="98" stroke="${s}" stroke-width="2" stroke-linecap="round"/>
-        <line x1="80" y1="92" x2="87" y2="98" stroke="${s}" stroke-width="2" stroke-linecap="round"/>
-      </g>
-      <!-- floor -->
-      <line x1="20" y1="105" x2="110" y2="105" stroke="${j}" stroke-width="1.5" opacity=".4"/>
-    </svg>`,
-
-    // a3 — Extensión cuádriceps (leg extension machine)
-    'a3': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .le-lower { animation: le-kick 1.2s ease-in-out infinite alternate; transform-origin: 72px 82px; }
-        @keyframes le-kick { from { transform: rotate(60deg); } to { transform: rotate(0deg); } }
-      </style>
-      <!-- seat -->
-      <rect x="30" y="70" width="50" height="8" rx="3" fill="${j}" opacity=".4"/>
-      <rect x="75" y="70" width="6" width="6" height="35" rx="2" fill="${j}" opacity=".3"/>
-      <!-- head -->
-      <circle cx="55" cy="32" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso -->
-      <line x1="55" y1="42" x2="55" y2="70" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- upper arms resting -->
-      <line x1="55" y1="52" x2="38" y2="63" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-      <line x1="55" y1="52" x2="72" y2="63" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-      <!-- upper leg (fixed) -->
-      <line x1="55" y1="70" x2="72" y2="82" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- lower leg (animates) -->
-      <g class="le-lower">
-        <line x1="72" y1="82" x2="72" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- pad -->
-        <rect x="63" y="103" width="18" height="5" rx="2.5" fill="${c}" opacity=".8"/>
-      </g>
-      <!-- static left leg -->
-      <line x1="55" y1="70" x2="42" y2="82" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="42" y1="82" x2="42" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>`,
-
-    // a4 — Curl femoral (lying leg curl)
-    'a4': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .lc-lower { animation: lc-curl 1.2s ease-in-out infinite alternate; transform-origin: 85px 68px; }
-        @keyframes lc-curl { from { transform: rotate(0deg); } to { transform: rotate(-70deg); } }
-      </style>
-      <!-- bench -->
-      <rect x="18" y="60" width="94" height="10" rx="4" fill="${j}" opacity=".4"/>
-      <line x1="25" y1="70" x2="25" y2="90" stroke="${j}" stroke-width="2" opacity=".3"/>
-      <line x1="105" y1="70" x2="105" y2="90" stroke="${j}" stroke-width="2" opacity=".3"/>
-      <!-- head (lying face down) -->
-      <circle cx="25" cy="52" r="9" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso lying -->
-      <line x1="34" y1="52" x2="86" y2="58" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- arms hanging -->
-      <line x1="40" y1="54" x2="40" y2="68" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-      <line x1="50" y1="55" x2="50" y2="68" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-      <!-- upper legs (static) -->
-      <line x1="86" y1="58" x2="86" y2="68" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="94" y1="59" x2="94" y2="68" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- lower legs (curl) -->
-      <g class="lc-lower">
-        <line x1="85" y1="68" x2="85" y2="95" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- pad -->
-        <rect x="78" y="92" width="14" height="5" rx="2.5" fill="${c}" opacity=".8"/>
-      </g>
-    </svg>`,
-
-    // a5 — Crunch en cable
-    'a5': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .cc-body { animation: cc-crunch 1.2s ease-in-out infinite alternate; transform-origin: 65px 75px; }
-        @keyframes cc-crunch { from { transform: rotate(-18deg); } to { transform: rotate(5deg); } }
-      </style>
-      <!-- cable machine -->
-      <rect x="100" y="15" width="10" height="80" rx="3" fill="${j}" opacity=".35"/>
-      <circle cx="105" cy="22" r="5" fill="none" stroke="${j}" stroke-width="1.5" opacity=".5"/>
-      <!-- cable line -->
-      <line x1="105" y1="27" x2="75" y2="52" stroke="${c}" stroke-width="1.5" stroke-dasharray="3,2" opacity=".7"/>
-      <!-- kneeling figure -->
-      <!-- knees on floor -->
-      <ellipse cx="57" cy="102" rx="8" ry="4" fill="${j}" opacity=".3"/>
-      <ellipse cx="73" cy="102" rx="8" ry="4" fill="${j}" opacity=".3"/>
-      <g class="cc-body">
-        <!-- head -->
-        <circle cx="65" cy="45" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-        <!-- torso -->
-        <line x1="65" y1="55" x2="65" y2="78" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- arms holding rope -->
-        <line x1="65" y1="60" x2="76" y2="52" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-        <line x1="65" y1="60" x2="74" y2="54" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-        <!-- upper legs -->
-        <line x1="65" y1="78" x2="57" y2="98" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="65" y1="78" x2="73" y2="98" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      </g>
-    </svg>`,
-
-    // a6 / b6 / c7 — Cardio caminadora final
-    'a6': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .wf-larm { animation: wf-larm 0.5s ease-in-out infinite alternate; transform-origin: 65px 52px; }
-        .wf-rarm { animation: wf-rarm 0.5s ease-in-out infinite alternate; transform-origin: 65px 52px; }
-        .wf-lleg { animation: wf-lleg 0.5s ease-in-out infinite alternate; transform-origin: 65px 75px; }
-        .wf-rleg { animation: wf-rleg 0.5s ease-in-out infinite alternate; transform-origin: 65px 75px; }
-        @keyframes wf-larm { from { transform: rotate(-30deg); } to { transform: rotate(30deg); } }
-        @keyframes wf-rarm { from { transform: rotate(30deg); } to { transform: rotate(-30deg); } }
-        @keyframes wf-lleg { from { transform: rotate(-28deg); } to { transform: rotate(28deg); } }
-        @keyframes wf-rleg { from { transform: rotate(28deg); } to { transform: rotate(-28deg); } }
-      </style>
-      <!-- incline indicator -->
-      <text x="22" y="30" font-size="9" fill="${c}" opacity=".7" font-family="DM Mono,monospace">3-5%↗</text>
-      <!-- treadmill base -->
-      <rect x="20" y="100" width="90" height="6" rx="3" fill="${j}" opacity=".4"/>
-      <!-- head -->
-      <circle cx="65" cy="30" r="11" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso -->
-      <line x1="65" y1="41" x2="65" y2="74" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- arms -->
-      <g class="wf-larm"><line x1="65" y1="50" x2="49" y2="65" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/></g>
-      <g class="wf-rarm"><line x1="65" y1="50" x2="81" y2="65" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/></g>
-      <!-- legs -->
-      <g class="wf-lleg"><line x1="65" y1="74" x2="53" y2="98" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/></g>
-      <g class="wf-rleg"><line x1="65" y1="74" x2="77" y2="98" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/></g>
-    </svg>`,
-
-    // b2 — Press inclinado Smith
-    'b2': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .ip-arms { animation: ip-press 1.2s ease-in-out infinite alternate; transform-origin: 65px 58px; }
-        @keyframes ip-press { from { transform: translateY(0px); } to { transform: translateY(-14px); } }
-      </style>
-      <!-- incline bench -->
-      <rect x="20" y="75" width="90" height="8" rx="3" fill="${j}" opacity=".4"/>
-      <line x1="30" y1="83" x2="24" y2="105" stroke="${j}" stroke-width="2" opacity=".3"/>
-      <line x1="100" y1="83" x2="106" y2="105" stroke="${j}" stroke-width="2" opacity=".3"/>
-      <!-- incline back -->
-      <rect x="20" y="50" width="12" height="30" rx="3" transform="rotate(-30 20 80)" fill="${j}" opacity=".3"/>
-      <!-- head (reclined) -->
-      <circle cx="30" cy="52" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso (inclined) -->
-      <line x1="38" y1="56" x2="90" y2="72" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- legs -->
-      <line x1="90" y1="72" x2="95" y2="95" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="90" y1="72" x2="82" y2="95" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- bar + arms -->
-      <g class="ip-arms">
-        <rect x="35" y="55" width="60" height="5" rx="2.5" fill="${c}" opacity=".9"/>
-        <line x1="55" y1="60" x2="52" y2="73" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-        <line x1="70" y1="60" x2="73" y2="73" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-      </g>
-    </svg>`,
-
-    // b3 — Aperturas en máquina (pec deck)
-    'b3': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .pd-larm { animation: pd-close 1.2s ease-in-out infinite alternate; transform-origin: 65px 55px; }
-        .pd-rarm { animation: pd-close 1.2s ease-in-out infinite alternate; transform-origin: 65px 55px; }
-        @keyframes pd-close { from { transform: scaleX(1); } to { transform: scaleX(0.45); } }
-      </style>
-      <!-- machine frame -->
-      <rect x="15" y="30" width="8" height="75" rx="3" fill="${j}" opacity=".35"/>
-      <rect x="107" y="30" width="8" height="75" rx="3" fill="${j}" opacity=".35"/>
-      <!-- seat -->
-      <rect x="42" y="75" width="46" height="8" rx="3" fill="${j}" opacity=".4"/>
-      <!-- head -->
-      <circle cx="65" cy="35" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso -->
-      <line x1="65" y1="45" x2="65" y2="75" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- arms (animate closing) -->
-      <g class="pd-larm">
-        <line x1="65" y1="55" x2="28" y2="55" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="28" cy="55" r="4" fill="${c}" opacity=".7"/>
-      </g>
-      <g class="pd-rarm">
-        <line x1="65" y1="55" x2="102" y2="55" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="102" cy="55" r="4" fill="${c}" opacity=".7"/>
-      </g>
-      <!-- legs -->
-      <line x1="58" y1="75" x2="52" y2="100" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="72" y1="75" x2="78" y2="100" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>`,
-
-    // b4 — Elevación lateral cable
-    'b4': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .el-arm { animation: el-raise 1.2s ease-in-out infinite alternate; transform-origin: 70px 55px; }
-        @keyframes el-raise { from { transform: rotate(0deg); } to { transform: rotate(-55deg); } }
-      </style>
-      <!-- cable tower -->
-      <rect x="15" y="20" width="8" height="90" rx="3" fill="${j}" opacity=".35"/>
-      <circle cx="19" cy="27" r="4" fill="none" stroke="${j}" stroke-width="1.5" opacity=".5"/>
-      <!-- cable -->
-      <line x1="19" y1="31" x2="62" y2="58" stroke="${c}" stroke-width="1.5" stroke-dasharray="3,2" opacity=".7"/>
-      <!-- head -->
-      <circle cx="75" cy="32" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso -->
-      <line x1="75" y1="42" x2="75" y2="75" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- static arm (right, relaxed) -->
-      <line x1="75" y1="53" x2="90" y2="65" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-      <!-- raising arm -->
-      <g class="el-arm">
-        <line x1="70" y1="53" x2="55" y2="65" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="55" cy="65" r="3.5" fill="${c}" opacity=".8"/>
-      </g>
-      <!-- legs -->
-      <line x1="75" y1="75" x2="65" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="75" y1="75" x2="85" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>`,
-
-    // b5 — Jalón tríceps cable
-    'b5': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .tc-forearm { animation: tc-push 1.2s ease-in-out infinite alternate; transform-origin: 65px 58px; }
-        @keyframes tc-push { from { transform: rotate(-45deg); } to { transform: rotate(0deg); } }
-      </style>
-      <!-- cable machine top -->
-      <rect x="52" y="12" width="26" height="8" rx="3" fill="${j}" opacity=".4"/>
-      <rect x="62" y="20" width="6" height="20" rx="2" fill="${j}" opacity=".3"/>
-      <!-- rope -->
-      <line x1="59" y1="40" x2="55" y2="52" stroke="${c}" stroke-width="1.5" stroke-dasharray="3,2" opacity=".8"/>
-      <line x1="71" y1="40" x2="75" y2="52" stroke="${c}" stroke-width="1.5" stroke-dasharray="3,2" opacity=".8"/>
-      <!-- head -->
-      <circle cx="65" cy="28" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso -->
-      <line x1="65" y1="38" x2="65" y2="72" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- upper arms (fixed at sides) -->
-      <line x1="65" y1="48" x2="55" y2="60" stroke="${s}" stroke-width="2" opacity=".6" stroke-linecap="round"/>
-      <line x1="65" y1="48" x2="75" y2="60" stroke="${s}" stroke-width="2" opacity=".6" stroke-linecap="round"/>
-      <!-- forearms (animate) -->
-      <g class="tc-forearm">
-        <line x1="55" y1="58" x2="48" y2="80" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="75" y1="58" x2="82" y2="80" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-      </g>
-      <!-- legs -->
-      <line x1="65" y1="72" x2="57" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="65" y1="72" x2="73" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>`,
-
-    // c2 — Jalón al pecho (lat pulldown)
-    'c2': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .lp-arms { animation: lp-pull 1.2s ease-in-out infinite alternate; transform-origin: 65px 52px; }
-        .lp-bar  { animation: lp-bar  1.2s ease-in-out infinite alternate; }
-        @keyframes lp-pull { from { transform: rotate(0deg); } to { transform: rotate(20deg) translateY(8px); } }
-        @keyframes lp-bar  { from { transform: translateY(0px); } to { transform: translateY(12px); } }
-      </style>
-      <!-- machine -->
-      <rect x="52" y="10" width="26" height="6" rx="3" fill="${j}" opacity=".4"/>
-      <line x1="65" y1="16" x2="65" y2="30" stroke="${j}" stroke-width="2" opacity=".35"/>
-      <!-- seat -->
-      <rect x="40" y="80" width="50" height="8" rx="3" fill="${j}" opacity=".4"/>
-      <!-- bar (animate down) -->
-      <g class="lp-bar">
-        <rect x="28" y="28" width="74" height="5" rx="2.5" fill="${c}" opacity=".9"/>
-      </g>
-      <!-- head -->
-      <circle cx="65" cy="40" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso (slight lean back) -->
-      <line x1="65" y1="50" x2="68" y2="80" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- arms -->
-      <g class="lp-arms">
-        <line x1="65" y1="52" x2="35" y2="33" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="65" y1="52" x2="95" y2="33" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-      </g>
-      <!-- legs (under pad) -->
-      <line x1="62" y1="80" x2="50" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="72" y1="80" x2="84" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>`,
-
-    // c3 — Remo sentado en máquina
-    'c3': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .rs-torso { animation: rs-row 1.2s ease-in-out infinite alternate; transform-origin: 55px 65px; }
-        @keyframes rs-row { from { transform: rotate(-10deg); } to { transform: rotate(8deg); } }
-      </style>
-      <!-- machine -->
-      <rect x="95" y="35" width="15" height="60" rx="4" fill="${j}" opacity=".35"/>
-      <rect x="88" y="55" width="10" height="6" rx="2" fill="${c}" opacity=".5"/>
-      <!-- cable -->
-      <line x1="95" y1="58" x2="78" y2="62" stroke="${c}" stroke-width="1.5" stroke-dasharray="3,2" opacity=".8"/>
-      <!-- seat -->
-      <rect x="25" y="72" width="55" height="8" rx="3" fill="${j}" opacity=".4"/>
-      <!-- figure -->
-      <g class="rs-torso">
-        <!-- head -->
-        <circle cx="55" cy="43" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-        <!-- torso -->
-        <line x1="55" y1="53" x2="55" y2="72" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- arms pulling -->
-        <line x1="55" y1="60" x2="78" y2="62" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-      </g>
-      <!-- legs (static, on footrest) -->
-      <line x1="55" y1="72" x2="44" y2="95" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="55" y1="72" x2="66" y2="95" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="44" y1="95" x2="38" y2="105" stroke="${s}" stroke-width="2" stroke-linecap="round"/>
-      <line x1="66" y1="95" x2="72" y2="105" stroke="${s}" stroke-width="2" stroke-linecap="round"/>
-    </svg>`,
-
-    // c4 — Remo con mancuerna
-    'c4': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .db-arm { animation: db-row 1.2s ease-in-out infinite alternate; transform-origin: 72px 58px; }
-        @keyframes db-row { from { transform: translateY(14px); } to { transform: translateY(0px); } }
-      </style>
-      <!-- bench -->
-      <rect x="20" y="70" width="55" height="9" rx="3" fill="${j}" opacity=".4"/>
-      <line x1="28" y1="79" x2="25" y2="105" stroke="${j}" stroke-width="2" opacity=".3"/>
-      <line x1="67" y1="79" x2="70" y2="105" stroke="${j}" stroke-width="2" opacity=".3"/>
-      <!-- head (facing down) -->
-      <circle cx="28" cy="52" r="9" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso (horizontal) -->
-      <line x1="36" y1="55" x2="75" y2="58" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- supporting arm on bench -->
-      <line x1="45" y1="57" x2="38" y2="70" stroke="${c}" stroke-width="2.2" stroke-linecap="round"/>
-      <!-- rowing arm -->
-      <g class="db-arm">
-        <line x1="72" y1="58" x2="72" y2="82" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-        <!-- dumbbell -->
-        <rect x="65" y="80" width="14" height="5" rx="2.5" fill="${c}" opacity=".9"/>
-        <rect x="63" y="79" width="4" height="7" rx="2" fill="${c}" opacity=".7"/>
-        <rect x="77" y="79" width="4" height="7" rx="2" fill="${c}" opacity=".7"/>
-      </g>
-      <!-- standing leg -->
-      <line x1="75" y1="58" x2="90" y2="80" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="90" y1="80" x2="90" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- kneeling leg -->
-      <line x1="75" y1="58" x2="75" y2="72" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>`,
-
-    // c5 — Curl bíceps cable
-    'c5': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .bc-forearms { animation: bc-curl 1.2s ease-in-out infinite alternate; transform-origin: 65px 62px; }
-        @keyframes bc-curl { from { transform: rotate(40deg); } to { transform: rotate(-5deg); } }
-      </style>
-      <!-- cable machine bottom -->
-      <rect x="52" y="100" width="26" height="10" rx="3" fill="${j}" opacity=".4"/>
-      <circle cx="65" cy="100" r="4" fill="none" stroke="${j}" stroke-width="1.5" opacity=".5"/>
-      <!-- cable -->
-      <line x1="65" y1="96" x2="65" y2="78" stroke="${c}" stroke-width="1.5" stroke-dasharray="3,2" opacity=".8"/>
-      <!-- head -->
-      <circle cx="65" cy="28" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso -->
-      <line x1="65" y1="38" x2="65" y2="72" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- upper arms (fixed) -->
-      <line x1="65" y1="50" x2="52" y2="62" stroke="${s}" stroke-width="2" opacity=".5" stroke-linecap="round"/>
-      <line x1="65" y1="50" x2="78" y2="62" stroke="${s}" stroke-width="2" opacity=".5" stroke-linecap="round"/>
-      <!-- forearms curl up -->
-      <g class="bc-forearms">
-        <line x1="52" y1="62" x2="42" y2="80" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-        <line x1="78" y1="62" x2="88" y2="80" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-      </g>
-      <!-- legs -->
-      <line x1="65" y1="72" x2="56" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="65" y1="72" x2="74" y2="105" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>`,
-
-    // c6 — Aperturas inversas (rear delt)
-    'c6': `<svg viewBox="0 0 130 120" xmlns="http://www.w3.org/2000/svg">
-      <style>
-        .rd-arms { animation: rd-open 1.2s ease-in-out infinite alternate; transform-origin: 65px 54px; }
-        @keyframes rd-open { from { transform: scaleX(0.4); } to { transform: scaleX(1); } }
-      </style>
-      <!-- machine frame (reversed pec deck) -->
-      <rect x="15" y="25" width="8" height="80" rx="3" fill="${j}" opacity=".35"/>
-      <rect x="107" y="25" width="8" height="80" rx="3" fill="${j}" opacity=".35"/>
-      <!-- seat -->
-      <rect x="42" y="76" width="46" height="8" rx="3" fill="${j}" opacity=".4"/>
-      <!-- head (leaning forward into pad) -->
-      <circle cx="65" cy="34" r="10" fill="none" stroke="${s}" stroke-width="2.5"/>
-      <!-- torso (slight lean fwd) -->
-      <line x1="65" y1="44" x2="65" y2="76" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <!-- arms opening backward -->
-      <g class="rd-arms">
-        <line x1="65" y1="54" x2="28" y2="54" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="28" cy="54" r="4" fill="${c}" opacity=".7"/>
-        <line x1="65" y1="54" x2="102" y2="54" stroke="${c}" stroke-width="2.5" stroke-linecap="round"/>
-        <circle cx="102" cy="54" r="4" fill="${c}" opacity=".7"/>
-      </g>
-      <!-- legs -->
-      <line x1="58" y1="76" x2="52" y2="102" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-      <line x1="72" y1="76" x2="78" y2="102" stroke="${s}" stroke-width="2.5" stroke-linecap="round"/>
-    </svg>`,
-  };
-
-  // Reuse same animation for shared exercises
-  anims['b1'] = anims['a1'];
-  anims['c1'] = anims['a1'];
-  anims['b6'] = anims['a6'];
-  anims['c7'] = anims['a6'];
-
-  return anims[id] || null;
-}
-
-function renderWorkout() {
-  const tabs = ['A','B','C'].map(k =>
-    `<button class="tab ${S.day===k?'on':''}" onclick="S.day='${k}';render()">${PLAN[k].label}</button>`
-  ).join('');
-  const day = PLAN[S.day];
-  const strEx = day.ex.filter(e => !e.cardio);
-  const doneEx = strEx.filter(e => Object.values(S.sets[e.id]||{}).filter(Boolean).length >= e.s).length;
-  const pct = strEx.length ? Math.round(doneEx/strEx.length*100) : 0;
-
-  const exHtml = day.ex.map(ex => {
-    const isOpen = S.open === ex.id;
-    const c = S.sets[ex.id] || {};
-    const allDone = ex.cardio ? c[0]===true : Object.values(c).filter(Boolean).length >= ex.s;
-    const l = S.logs[ex.id] || {};
-    const sug = !ex.cardio ? getSug(ex.id, ex.s, ex.r) : null;
-    const sbHtml = !ex.cardio ? Array.from({length:ex.s},(_,i)=>
-      `<button class="sb ${c[i]?'on':''}" onclick="toggleSet('${ex.id}',${i})">${c[i]?'✓':i+1}</button>`
-    ).join('') : '';
-
-    return `<div class="excard${isOpen?' open':''}">
+function renderWorkout(){
+  const tabs=['A','B','C'].map(k=>`<button class="tab ${S.day===k?'on':''}" onclick="S.day='${k}';S.open=null;render()">${PLAN[k].label}</button>`).join('');
+  const day=PLAN[S.day],strEx=day.ex.filter(e=>!e.cardio);
+  const doneEx=strEx.filter(e=>Object.values(S.sets[e.id]||{}).filter(Boolean).length>=e.s).length;
+  const pct=strEx.length?Math.round(doneEx/strEx.length*100):0,allDone=doneEx===strEx.length&&strEx.length>0;
+  const exHtml=day.ex.map(ex=>{
+    const isOpen=S.open===ex.id,c=S.sets[ex.id]||{};
+    const exDone=ex.cardio?c[0]===true:Object.values(c).filter(Boolean).length>=ex.s;
+    const l=S.logs[ex.id]||{},sug=!ex.cardio?getSug(ex.id,ex.s,ex.r):null;
+    const sbHtml=!ex.cardio?Array.from({length:ex.s},(_,i)=>`<button class="sb ${c[i]?'on':''}" onclick="toggleSet('${ex.id}',${i})">${c[i]?'✓':i+1}</button>`).join(''):'';
+    return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}">
       <div class="exh" onclick="S.open=S.open==='${ex.id}'?null:'${ex.id}';render()">
-        <div class="exic">${ex.ic}</div>
-        <div class="exin">
-          <div class="exn">${ex.n}</div>
-          <div class="exm">${ex.eq} · ${ex.cardio ? ex.r : ex.s+'×'+ex.r+' reps'}</div>
-        </div>
-        ${allDone ? '<div class="exdone">✅</div>' : `<div class="exarrow">▼</div>`}
+        <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${ex.ic}</div>
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${ex.n}</div><div class="exm">${ex.eq} · ${ex.cardio?ex.r:ex.s+'×'+ex.r+' reps'}</div></div>
+        ${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
-      ${isOpen ? `<div class="exb">
-        ${(() => { const anim = getExerciseAnim(ex.id); return anim ? `<div class="ex-anim">${anim}</div>` : ''; })()}
-        <div class="tip">${ex.tip}</div>
-        ${!ex.cardio ? `
-          <div style="font-size:11px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.5px;font-weight:600">Series completadas</div>
+      ${isOpen?`<div class="exb"><div class="tip">${ex.tip}</div>
+        ${!ex.cardio?`<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:8px">Series completadas</div>
           <div class="srow">${sbHtml}</div>
           <div class="irow"><label>Peso</label><input class="inp" type="number" placeholder="kg" value="${l.w||''}" oninput="updLog('${ex.id}','w',this.value)" step="2.5" inputmode="decimal"/></div>
           <div class="irow"><label>Reps</label><input class="inp" type="number" placeholder="${ex.r}" value="${l.r||''}" oninput="updLog('${ex.id}','r',this.value)" inputmode="numeric"/></div>
-          ${sug ? `<div class="sug ${sug.t}">${sug.m}</div>` : ''}
-        ` : `
-          <button class="btn ${c[0]?'bs':'bp'}" onclick="toggleSet('${ex.id}',0);render()">
-            ${c[0] ? '✅ Marcado como hecho' : 'Marcar como hecho'}
-          </button>
-        `}
-      </div>` : ''}
+          ${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}`
+        :`<button class="btn ${c[0]?'bs':'bp'}" onclick="toggleSet('${ex.id}',0);render()">${c[0]?'✅ Marcado como hecho':'✓ Marcar como hecho'}</button>`}
+      </div>`:''}
     </div>`;
   }).join('');
-
-  const allStrDone = doneEx === strEx.length && strEx.length > 0;
-
-  return `
-  <div class="topbar">
-    <h1>${day.label} — ${day.focus}</h1>
-    <div class="sub">${doneEx} / ${strEx.length} ejercicios de fuerza</div>
-  </div>
-  <div class="pbar" style="margin:8px 14px 0"><div class="pinner" style="width:${pct}%"></div></div>
+  return`
+  <div class="topbar"><div class="topbar-row"><div><h1>${day.label}</h1><div class="sub">${day.focus}</div></div><span class="pill p${S.day.toLowerCase()}">${doneEx}/${strEx.length}</span></div></div>
+  <div class="pbar" style="border-radius:0;height:3px"><div class="pinner" style="width:${pct}%;border-radius:0"></div></div>
   <div class="tabs">${tabs}</div>
+  ${allDone?`<div class="fbanner">🎉 ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
   ${exHtml}
-  <div style="padding:4px 14px 14px">
-    <button class="btn ${allStrDone?'bp':'bs'}" onclick="finishSession()">
-      ${allStrDone ? '✅ Finalizar y guardar entrenamiento' : 'Guardar entrenamiento (parcial)'}
-    </button>
-  </div>`;
+  <div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?'✅ Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`;
 }
 
-function finishSession() {
-  if (!confirm('¿Confirmar que terminaste el entrenamiento?')) return;
-  const today = fmtDate(new Date());
-  S.sessions.push({ day: S.day, date: today, ts: Date.now() });
-
-  // Save strength data for key exercises
-  const day = PLAN[S.day];
-  day.ex.filter(e => !e.cardio).forEach(ex => {
-    const l = S.logs[ex.id] || {};
-    const w = parseFloat(l.w);
-    if (w) {
-      if (!S.strength[ex.id]) S.strength[ex.id] = [];
-      S.strength[ex.id].push({ d: today, v: w, ts: Date.now() });
-    }
-  });
-
-  // Advance next day
-  S.nextDay = getNextDay(S.day);
-
-  // Reset sets/logs for this day's exercises
-  day.ex.forEach(ex => { S.sets[ex.id] = {}; S.logs[ex.id] = {}; });
-  S.open = null;
-
-  saveState();
-  alert(`¡Entrenamiento guardado! Próxima sesión: ${PLAN[S.nextDay].label} 💪`);
-  go('dash');
-}
-
-function renderProg() {
-  const cols = { A:'#3b82f6', B:'#ec4899', C:'#22c55e' };
-  const exNames = {};
-  Object.values(PLAN).forEach(d => d.ex.forEach(e => { if (!e.cardio) exNames[e.id] = e.n; }));
-
-  const hasStrength = Object.keys(S.strength).some(k => S.strength[k] && S.strength[k].length >= 1);
-
-  const charts = Object.entries(S.strength).filter(([id,data])=>data&&data.length>0).map(([id,data]) => {
-    const color = cols[id[0].toUpperCase()] || '#888';
-    const name = exNames[id] || id;
-    const last = data[data.length-1].v;
-    const gain = data.length > 1 ? (last - data[0].v).toFixed(1) : null;
-    return `<div class="card" style="margin-bottom:10px">
-      <div class="card-label">${name}</div>
-      <div style="display:flex;align-items:baseline;gap:8px;margin-bottom:4px">
-        <span style="font-size:22px;font-weight:600;font-variant-numeric:tabular-nums">${last} kg</span>
-        ${gain && parseFloat(gain) > 0 ? `<span style="font-size:13px;color:var(--green)">+${gain} kg ganados</span>` : gain && parseFloat(gain) < 0 ? `<span style="font-size:13px;color:var(--amber)">${gain} kg</span>` : `<span style="font-size:13px;color:var(--text2)">primer registro</span>`}
+function renderProg(){
+  const cols={A:'#3b82f6',B:'#ec4899',C:'#22c55e'};
+  const exNames={};Object.values(PLAN).forEach(d=>d.ex.forEach(e=>{if(!e.cardio)exNames[e.id]=e.n;}));
+  const hasAny=Object.values(S.strength).some(d=>d&&d.length>0);
+  const wk=getWeekSessions(),tot=S.sessions.length;
+  const cnt={A:0,B:0,C:0};S.sessions.forEach(s=>{if(cnt[s.day]!==undefined)cnt[s.day]++;});
+  const cards=Object.entries(S.strength).filter(([,d])=>d&&d.length>0).map(([id,data])=>{
+    const color=cols[id[0].toUpperCase()]||'#888',name=exNames[id]||id;
+    const last=data[data.length-1].v,gain=(last-data[0].v).toFixed(1);
+    return`<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
+        <div><div class="clbl">${name}</div>
+          <div style="display:flex;align-items:baseline;gap:8px">
+            <span style="font-size:24px;font-weight:600;font-family:'DM Mono',monospace;color:${color}">${last} kg</span>
+            ${parseFloat(gain)>0?`<span style="font-size:12px;color:var(--green);font-weight:500">+${gain} kg</span>`:parseFloat(gain)<0?`<span style="font-size:12px;color:var(--amber)">${gain} kg</span>`:`<span style="font-size:12px;color:var(--text3)">primer registro</span>`}
+          </div>
+        </div>
+        <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${data.length} sesión${data.length!==1?'es':''}</span>
       </div>
-      ${data.length >= 2 ? `<div class="carea">${spark(data,color)}</div>` : `<div style="font-size:12px;color:var(--text3);padding:8px 0">Necesitas al menos 2 sesiones para ver la gráfica.</div>`}
+      ${data.length>=2?`<div class="carea">${spark(data,color)}</div>`:`<div style="font-size:12px;color:var(--text3);padding:4px 0">Necesitas al menos 2 sesiones para ver la gráfica.</div>`}
     </div>`;
   }).join('');
-
-  const sessArr = ['A','B','C'];
-  const cnt = { A: S.sessions.filter(s=>s.day==='A').length, B: S.sessions.filter(s=>s.day==='B').length, C: S.sessions.filter(s=>s.day==='C').length };
-
-  return `
-  <div class="topbar">
-    <h1>Tu progreso</h1>
-    <div class="sub">${S.sessions.length} sesión${S.sessions.length!==1?'es':''} registrada${S.sessions.length!==1?'s':''} en total</div>
-  </div>
-
-  <div class="sh">Constancia</div>
+  return`
+  <div class="topbar"><h1>Tu progreso</h1><div class="sub">${tot} sesión${tot!==1?'es':''} completada${tot!==1?'s':''}</div></div>
+  <div class="sh">Constancia por día</div>
   <div class="card">
-    <div style="display:flex;gap:12px">
-      ${sessArr.map(d => `<div style="flex:1;text-align:center">
-        <div style="font-size:26px;font-weight:600;color:${cols[d]};font-variant-numeric:tabular-nums">${cnt[d]}</div>
-        <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px">Día ${d}</div>
-        <div class="pbar" style="margin-top:6px"><div class="pinner" style="width:${Math.min(100,Math.round(cnt[d]/8*100))}%;background:${cols[d]}"></div></div>
-      </div>`).join('')}
+    <div style="display:flex;gap:10px">${['A','B','C'].map(d=>`<div style="flex:1;text-align:center">
+      <div style="font-size:28px;font-weight:700;color:${cols[d]};font-family:'DM Mono',monospace;line-height:1">${cnt[d]}</div>
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">${PLAN[d].label}</div>
+      <div class="pbar" style="margin-top:6px"><div class="pinner" style="width:${Math.min(100,Math.round(cnt[d]/10*100))}%;background:${cols[d]}"></div></div>
+    </div>`).join('')}</div>
+    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);display:flex;justify-content:space-between">
+      <span>Esta semana: <strong style="color:var(--text)">${wk}/3</strong></span>
+      <span>Total: <strong style="color:var(--text)">${tot} sesiones</strong></span>
     </div>
   </div>
-
-  <div class="sh">Peso corporal</div>
+  <div class="sh">Evolución del peso</div>
   <div class="card">
-    ${S.weights.length >= 2 ? `
-      <div class="carea">${spark(S.weights,'#22c55e')}</div>
-      <div style="font-size:13px;color:var(--text2);margin-top:8px;display:flex;gap:12px">
-        <span>Inicio: <strong style="color:var(--text)">${S.weights[0].v} kg</strong></span>
-        <span>Actual: <strong style="color:var(--text)">${S.weights[S.weights.length-1].v} kg</strong></span>
-        <span>Cambio: <strong style="color:${(S.weights[S.weights.length-1].v-S.weights[0].v)<=0?'var(--green)':'var(--red)'}">${((S.weights[S.weights.length-1].v-S.weights[0].v)>0?'+':'') + (S.weights[S.weights.length-1].v-S.weights[0].v).toFixed(1)} kg</strong></span>
-      </div>` :
-      `<div class="empty"><div class="eic">⚖️</div><p>Registra tu peso en cada sesión para ver la evolución aquí.</p></div>`
-    }
+    ${S.weights.length>=2?`<div class="carea">${spark(S.weights,'#22c55e')}</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:10px;display:flex;gap:14px;flex-wrap:wrap">
+      <span>Inicio: <strong style="color:var(--text);font-family:'DM Mono',monospace">${S.weights[0].v} kg</strong></span>
+      <span>Actual: <strong style="color:var(--text);font-family:'DM Mono',monospace">${S.weights[S.weights.length-1].v} kg</strong></span>
+      <span>Cambio: <strong style="font-family:'DM Mono',monospace;color:${(S.weights[S.weights.length-1].v-S.weights[0].v)<=0?'var(--green)':'var(--red)'}">${((S.weights[S.weights.length-1].v-S.weights[0].v)>0?'+':'')+(S.weights[S.weights.length-1].v-S.weights[0].v).toFixed(1)} kg</strong></span>
+    </div>`:`<div class="empty"><div class="eic">⚖️</div><p>Registra tu peso regularmente para ver la evolución.</p></div>`}
   </div>
-
   <div class="sh">Fuerza por ejercicio</div>
-  ${hasStrength ? charts : `<div class="card"><div class="empty"><div class="eic">🏋️</div><p>Completa entrenamientos y registra los pesos usados para ver tu evolución de fuerza aquí.</p></div></div>`}
-
+  ${hasAny?cards:`<div class="card"><div class="empty"><div class="eic">🏋️</div><p>Completa entrenamientos y registra pesos para ver tu progreso de fuerza.</p></div></div>`}
   <div class="sh">Guía de progresión</div>
   <div class="card">
-    <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;line-height:1.6">
-      <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--green);font-size:16px">✓</span><div><strong>¿Completaste todas las series y reps?</strong><br><span style="color:var(--text2)">Sube 2.5 kg la próxima sesión.</span></div></div>
-      <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--amber);font-size:16px">~</span><div><strong>¿Te costó pero completaste casi todo?</strong><br><span style="color:var(--text2)">Mantén el mismo peso — la limpieza importa más.</span></div></div>
-      <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--red);font-size:16px">↓</span><div><strong>¿No llegaste a las reps objetivo?</strong><br><span style="color:var(--text2)">Reduce 2.5 kg o mantén. No pasa nada.</span></div></div>
-      <div style="display:flex;gap:10px;align-items:flex-start"><span style="color:var(--blue);font-size:16px">→</span><div><strong>La constancia lo es todo.</strong><br><span style="color:var(--text2)">3 días por semana durante meses gana siempre.</span></div></div>
+    <div style="display:flex;flex-direction:column;gap:12px">
+      ${[['var(--green)','✓','¿Completaste todas las series y reps?','Sube 2.5 kg la próxima sesión.'],
+         ['var(--amber)','~','¿Te costó pero casi lo completaste?','Mantén el peso hasta que las reps salgan limpias.'],
+         ['var(--red)','↓','¿No llegaste a las reps?','Reduce 2.5 kg o mantén. No pasa nada.'],
+         ['var(--blue)','→','La regla de oro','3 días/semana durante meses = resultados reales. La constancia lo es todo.'],
+      ].map(([c,i,t,d])=>`<div style="display:flex;gap:12px;align-items:flex-start">
+        <span style="color:${c};font-size:18px;font-weight:700;line-height:1.3;flex-shrink:0;width:20px;text-align:center">${i}</span>
+        <div><div style="font-size:13px;font-weight:500;margin-bottom:2px">${t}</div><div style="font-size:12px;color:var(--text2);line-height:1.55">${d}</div></div>
+      </div>`).join('')}
     </div>
   </div>`;
 }
 
-function render() {
-  const s = document.getElementById('screen');
-  if (S.tab === 'dash') s.innerHTML = renderDash();
-  else if (S.tab === 'workout') s.innerHTML = renderWorkout();
-  else s.innerHTML = renderProg();
+function render(){
+  const s=document.getElementById('screen');
+  if(S.tab==='dash')s.innerHTML=renderDash();
+  else if(S.tab==='workout')s.innerHTML=renderWorkout();
+  else s.innerHTML=renderProg();
 }
 
-// ── INIT ──
-if (S.onboarded) {
-  document.getElementById('onboarding').style.display = 'none';
-  document.getElementById('app').style.display = 'flex';
-  render();
-}
+if(S.onboarded){document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();}
 </script>
 </body>
 </html>
