@@ -142,6 +142,70 @@ input{font-family:inherit}
 .rt-btn:active{transform:scale(.95)}
 #rest-timer.done .rt-ring-fg{stroke:var(--amber)}
 #rest-timer.done .rt-ring-num{color:var(--amber)}
+/* COACH IA */
+.coach-hero{background:linear-gradient(135deg,#22c55e15 0%,#3b82f615 100%);border:1px solid var(--green-b);border-radius:var(--r);padding:18px 16px;margin:0 14px 12px;position:relative;overflow:hidden}
+.coach-hero::before{content:'';position:absolute;top:-20px;right:-20px;width:100px;height:100px;background:radial-gradient(circle,rgba(34,197,94,0.15) 0%,transparent 70%);border-radius:50%}
+.coach-hero-icon{font-size:26px;margin-bottom:8px}
+.coach-hero-title{font-size:16px;font-weight:600;letter-spacing:-.3px;margin-bottom:4px}
+.coach-hero-sub{font-size:13px;color:var(--text2);line-height:1.5}
+.coach-cycle{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);margin:0 14px 10px}
+.coach-cycle-info{flex:1}
+.coach-cycle-lbl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:3px}
+.coach-cycle-val{font-size:14px;font-weight:500;color:var(--text)}
+.coach-cycle-prog{width:50px;height:50px;position:relative;flex-shrink:0}
+.coach-cycle-prog svg{width:50px;height:50px;transform:rotate(-90deg)}
+.coach-cycle-prog .cbg{fill:none;stroke:var(--bg3);stroke-width:3}
+.coach-cycle-prog .cfg{fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .5s}
+.coach-cycle-prog .cpct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;font-family:'DM Mono',monospace;color:var(--green)}
+.insight{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:14px;margin:0 14px 8px;display:flex;gap:11px;align-items:flex-start}
+.insight-ic{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.insight-ic.good{background:rgba(34,197,94,.15);color:var(--green)}
+.insight-ic.warn{background:rgba(245,158,11,.15);color:var(--amber)}
+.insight-ic.info{background:rgba(59,130,246,.15);color:var(--blue)}
+.insight-ic.bad{background:rgba(239,68,68,.15);color:var(--red)}
+.insight-body{flex:1;min-width:0}
+.insight-t{font-size:13px;font-weight:500;letter-spacing:-.1px;margin-bottom:3px;line-height:1.35}
+.insight-d{font-size:12px;color:var(--text2);line-height:1.55}
+.insight-d strong{color:var(--text);font-family:'DM Mono',monospace;font-weight:500}
+.rec-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin:0 14px 8px}
+.rec-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.rec-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;background:rgba(59,130,246,.15);color:#93c5fd}
+.rec-badge.high{background:rgba(34,197,94,.15);color:#86efac}
+.rec-badge.med{background:rgba(245,158,11,.15);color:#fcd34d}
+.rec-title{font-size:14px;font-weight:500;flex:1}
+.rec-body{font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:10px}
+.rec-diff{background:#141414;border-radius:var(--rxs);padding:10px 12px;font-size:12px;display:flex;flex-direction:column;gap:5px}
+.rec-diff-row{display:flex;align-items:center;gap:6px}
+.rec-diff-row .sym{font-family:'DM Mono',monospace;width:14px;text-align:center;font-weight:600}
+.rec-diff-row .sym.add{color:var(--green)}
+.rec-diff-row .sym.rm{color:var(--red)}
+.rec-diff-row .sym.ch{color:var(--amber)}
+.rec-diff-row span:last-child{color:var(--text2);line-height:1.4}
+.mesocycle-log{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:14px;margin:0 14px 8px}
+.mesocycle-log h4{font-size:13px;font-weight:500;margin-bottom:8px}
+.mesocycle-log p{font-size:12px;color:var(--text2);line-height:1.6}
+.cta-banner{background:linear-gradient(135deg,#22c55e 0%,#16a34a 100%);color:#0a0a0a;border-radius:var(--r);padding:16px;margin:0 14px 10px;text-align:center;cursor:pointer;transition:transform .15s}
+.cta-banner:active{transform:scale(.98)}
+.cta-banner-t{font-size:14px;font-weight:600;margin-bottom:3px}
+.cta-banner-d{font-size:12px;opacity:.8}
+.score-ring{width:80px;height:80px;position:relative;margin:0 auto 6px}
+.score-ring svg{width:80px;height:80px;transform:rotate(-90deg)}
+.score-ring .sbg{fill:none;stroke:var(--bg3);stroke-width:5}
+.score-ring .sfg{fill:none;stroke-width:5;stroke-linecap:round}
+.score-val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.score-val .n{font-size:22px;font-weight:600;font-family:'DM Mono',monospace;line-height:1}
+.score-val .u{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+.metric-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0 14px 10px}
+.metric-box{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:12px}
+.metric-box .ml{font-size:10px;text-transform:uppercase;letter-spacing:.7px;color:var(--text3);font-weight:600;margin-bottom:4px}
+.metric-box .mv{font-size:18px;font-weight:600;font-family:'DM Mono',monospace;letter-spacing:-.3px}
+.metric-box .md{font-size:11px;color:var(--text2);margin-top:2px}
+.metric-box .md.up{color:var(--green)}
+.metric-box .md.down{color:var(--amber)}
+/* coach tab adjustment */
+.botbar.coach-enabled{padding:0}
+.botbar.coach-enabled .bb{font-size:9.5px}
+.botbar.coach-enabled .bb svg{width:20px;height:20px}
 </style>
 </head>
 <body>
@@ -184,7 +248,7 @@ input{font-family:inherit}
 
 <div id="app" style="display:none">
   <div id="screen"></div>
-  <nav class="botbar">
+  <nav class="botbar coach-enabled">
     <button class="bb on" id="nb-dash" onclick="go('dash')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
       Inicio<div class="bb-dot"></div>
@@ -192,6 +256,10 @@ input{font-family:inherit}
     <button class="bb" id="nb-workout" onclick="go('workout')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 4v16M18 4v16M3 8h4M17 8h4M3 16h4M17 16h4"/></svg>
       Entreno<div class="bb-dot"></div>
+    </button>
+    <button class="bb" id="nb-coach" onclick="go('coach')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+      Coach<div class="bb-dot"></div>
     </button>
     <button class="bb" id="nb-prog" onclick="go('prog')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
@@ -246,7 +314,14 @@ const DAY_ORDER=['A','B','C'];
 function loadState(){try{const r=localStorage.getItem('gymtrack_v3');if(r)return JSON.parse(r);}catch(e){}return null;}
 function saveState(){try{localStorage.setItem('gymtrack_v3',JSON.stringify(S));}catch(e){}}
 
-let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A'},loadState()||{});
+let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
+  coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null},loadState()||{});
+
+// Initialize coach start if not set
+if(!S.coachStart&&S.sessions.length>0){
+  S.coachStart=S.sessions[0].ts||Date.now();
+  saveState();
+}
 
 let obSelDay='A';
 function selDay(d){obSelDay=d;['A','B','C'].forEach(k=>document.getElementById('sel-'+k).classList.toggle('sel',k===d));}
@@ -967,8 +1042,562 @@ function finishSession(){
   saveState();alert(`¡Sesión guardada! 💪\nPróxima: ${PLAN[S.nextDay].label} — ${PLAN[S.nextDay].focus}`);go('dash');
 }
 
+// ═══════════════════════════════════════════════════════════
+// COACH IA — Motor de análisis rule-based
+// ═══════════════════════════════════════════════════════════
+
+const CYCLE_WEEKS = 4; // Ciclo de análisis profundo cada 4 semanas
+const CYCLE_MIN_SESSIONS = 6; // Mínimo 6 sesiones para primer informe
+
+// ─── 1. CALCULADORES DE MÉTRICAS ─────────────────────────
+
+function coach_daysSince(ts){
+  if(!ts)return 0;
+  return Math.floor((Date.now()-ts)/86400000);
+}
+
+function coach_cycleStart(){
+  // Último informe o inicio del coach
+  if(S.mesocycles&&S.mesocycles.length>0){
+    return S.mesocycles[S.mesocycles.length-1].appliedAt||S.coachStart;
+  }
+  return S.coachStart||(S.sessions[0]?.ts)||Date.now();
+}
+
+function coach_cycleData(){
+  const start=coach_cycleStart();
+  const sessions=S.sessions.filter(s=>s.ts>=start);
+  const days=coach_daysSince(start);
+  const weeks=days/7;
+  const cycleProgress=Math.min(1,weeks/CYCLE_WEEKS);
+  return{start,sessions,days,weeks,cycleProgress,
+    readyForReview:sessions.length>=CYCLE_MIN_SESSIONS&&weeks>=CYCLE_WEEKS*0.85};
+}
+
+function coach_exerciseProgression(exId,sinceTs){
+  const data=(S.strength[exId]||[]).filter(r=>!sinceTs||r.ts>=sinceTs);
+  if(data.length<2)return{trend:'insufficient',change:0,sessions:data.length,firstV:data[0]?.v||0,lastV:data[data.length-1]?.v||0};
+  const first=data[0].v,last=data[data.length-1].v,change=last-first;
+  const pct=first>0?(change/first)*100:0;
+  let trend='flat';
+  if(pct>=8)trend='strong_up';
+  else if(pct>=3)trend='up';
+  else if(pct<=-3)trend='down';
+  else if(data.length>=3&&data.slice(-3).every((r,i,a)=>i===0||r.v<=a[i-1].v+0.01))trend='stagnant';
+  return{trend,change,pct,sessions:data.length,firstV:first,lastV:last,data};
+}
+
+function coach_sessionVolume(sessionTs){
+  // Aprox: suma de peso×reps×series para logs guardados
+  // Los logs actuales no se guardan por sesión histórica, calculamos desde strength[]
+  // Aquí calculamos volumen total aproximado de la sesión por ejercicios realizados
+  let vol=0,count=0;
+  Object.keys(S.strength||{}).forEach(exId=>{
+    const rec=(S.strength[exId]||[]).find(r=>Math.abs(r.ts-sessionTs)<86400000);
+    if(rec){
+      // Asumir 3 series * 12 reps promedio (del plan)
+      const ex=Object.values(PLAN).flatMap(d=>d.ex).find(e=>e.id===exId);
+      const sets=ex?.s||3,reps=parseInt(ex?.r)||12;
+      vol+=rec.v*sets*reps;count++;
+    }
+  });
+  return vol;
+}
+
+function coach_consistency(weeks){
+  // Sesiones por semana en las últimas N semanas
+  const now=Date.now(),cutoff=now-(weeks*7*86400000);
+  const recent=S.sessions.filter(s=>s.ts>=cutoff);
+  const perWeek=recent.length/weeks;
+  const target=3;
+  const rate=Math.min(1,perWeek/target);
+  return{sessions:recent.length,perWeek:perWeek.toFixed(1),rate,target};
+}
+
+function coach_weightTrend(){
+  if(!S.weights||S.weights.length<2)return{trend:'insufficient',change:0};
+  const first=S.weights[0].v,last=S.weights[S.weights.length-1].v;
+  const change=last-first;
+  const days=(S.weights[S.weights.length-1].ts-S.weights[0].ts)/86400000||1;
+  const perWeek=(change/days)*7;
+  let trend='flat';
+  if(Math.abs(perWeek)<0.1)trend='flat';
+  else if(perWeek<-0.3)trend='losing_fast';
+  else if(perWeek<0)trend='losing';
+  else if(perWeek>0.3)trend='gaining_fast';
+  else trend='gaining';
+  return{trend,change,perWeek:perWeek.toFixed(2),first,last,days};
+}
+
+function coach_balance(){
+  // Sesiones A/B/C en el último ciclo
+  const start=coach_cycleStart();
+  const cnt={A:0,B:0,C:0};
+  S.sessions.filter(s=>s.ts>=start).forEach(s=>{if(cnt[s.day]!==undefined)cnt[s.day]++;});
+  const total=cnt.A+cnt.B+cnt.C||1;
+  const ideal=total/3;
+  const maxDev=Math.max(...['A','B','C'].map(d=>Math.abs(cnt[d]-ideal)));
+  return{cnt,total,balanced:maxDev<=1.5};
+}
+
+// ─── 2. GENERADOR DE INSIGHTS ─────────────────────────────
+
+function coach_generateInsights(){
+  const cycle=coach_cycleData();
+  const consistency=coach_consistency(Math.max(1,Math.ceil(cycle.weeks)));
+  const weight=coach_weightTrend();
+  const balance=coach_balance();
+
+  const insights=[];
+
+  // ═ A) CONSISTENCIA ═
+  if(consistency.sessions>=CYCLE_MIN_SESSIONS){
+    if(consistency.rate>=0.95){
+      insights.push({type:'good',ic:'🎯',t:'Constancia impecable',d:`Llevas <strong>${consistency.perWeek}</strong> sesiones por semana. Estás entrenando como un profesional.`});
+    }else if(consistency.rate>=0.75){
+      insights.push({type:'good',ic:'✓',t:'Buena constancia',d:`Vas a <strong>${consistency.perWeek}</strong> sesiones/semana. Si llegas a 3 consistentes vas a ver cambios importantes.`});
+    }else if(consistency.rate>=0.5){
+      insights.push({type:'warn',ic:'⚠️',t:'Constancia irregular',d:`Solo <strong>${consistency.perWeek}</strong> sesiones/semana. El progreso viene de la regularidad — intenta marcar los 3 días en tu calendario.`});
+    }else{
+      insights.push({type:'bad',ic:'⏳',t:'Pocas sesiones',d:`Solo <strong>${consistency.sessions}</strong> sesiones en ${Math.ceil(cycle.weeks)} semanas. Sin constancia no hay progreso — el cuerpo necesita estímulo regular.`});
+    }
+  }else{
+    insights.push({type:'info',ic:'🌱',t:'Empezando',d:`Necesitas <strong>${CYCLE_MIN_SESSIONS-consistency.sessions}</strong> sesiones más para tu primer análisis completo. Sigue así.`});
+  }
+
+  // ═ B) PESO CORPORAL ═
+  if(weight.trend!=='insufficient'){
+    const abs=Math.abs(parseFloat(weight.perWeek));
+    if(weight.trend==='losing'&&abs>=0.2&&abs<=0.8){
+      insights.push({type:'good',ic:'🔥',t:'Pérdida de grasa saludable',d:`Bajas <strong>${abs} kg/semana</strong> de media (cambio total: ${weight.change.toFixed(1)} kg). Este ritmo es óptimo para perder grasa conservando músculo.`});
+    }else if(weight.trend==='losing_fast'){
+      insights.push({type:'warn',ic:'⚡',t:'Bajas rápido',d:`Pierdes <strong>${abs} kg/semana</strong>. Si va acompañado de debilidad en el gym, podrías estar perdiendo músculo también. Aumenta proteína.`});
+    }else if(weight.trend==='flat'){
+      if(consistency.rate>=0.75){
+        insights.push({type:'info',ic:'⚖️',t:'Peso estable',d:`Tu peso lleva ${Math.round(weight.days)} días estable. Si buscas perder grasa, revisa el déficit calórico. Si no es tu prioridad, esto es normal en fase de ganar fuerza.`});
+      }
+    }else if(weight.trend==='gaining'&&weight.change>0.5){
+      insights.push({type:'info',ic:'📈',t:'Has ganado peso',d:`Subiste <strong>${weight.change.toFixed(1)} kg</strong>. Si entrenas constante, parte puede ser músculo. Si buscas perder grasa, revisa tu alimentación.`});
+    }
+  }
+
+  // ═ C) BALANCE DE SESIONES ═
+  if(balance.total>=6&&!balance.balanced){
+    const worst=Object.entries(balance.cnt).sort((a,b)=>a[1]-b[1])[0];
+    insights.push({type:'warn',ic:'⚖️',t:'Desbalance de días',d:`Has hecho <strong>${balance.cnt.A} días A, ${balance.cnt.B} días B, ${balance.cnt.C} días C</strong>. El día ${worst[0]} quedó relegado — la rotación A→B→C mantiene equilibrio.`});
+  }
+
+  // ═ D) PROGRESIÓN POR EJERCICIO ═
+  const strengthEx=Object.values(PLAN).flatMap(d=>d.ex).filter(e=>!e.cardio);
+  const cycleStart=coach_cycleStart();
+  const progression={strong_up:[],up:[],stagnant:[],down:[]};
+
+  strengthEx.forEach(ex=>{
+    const p=coach_exerciseProgression(ex.id,cycleStart);
+    if(p.trend==='strong_up')progression.strong_up.push({ex,p});
+    else if(p.trend==='up')progression.up.push({ex,p});
+    else if(p.trend==='stagnant')progression.stagnant.push({ex,p});
+    else if(p.trend==='down')progression.down.push({ex,p});
+  });
+
+  if(progression.strong_up.length>0){
+    const top=progression.strong_up.sort((a,b)=>b.p.pct-a.p.pct)[0];
+    insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${top.ex.n}</strong> subiste de ${top.p.firstV.toFixed(1)} a ${top.p.lastV.toFixed(1)} kg (+${top.p.pct.toFixed(0)}%). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
+  }
+
+  if(progression.up.length>=2){
+    const names=progression.up.slice(0,3).map(x=>x.ex.n).join(', ');
+    insights.push({type:'good',ic:'💪',t:'Fuerza subiendo',d:`Has progresado bien en <strong>${progression.up.length}</strong> ejercicios: ${names}.`});
+  }
+
+  if(progression.stagnant.length>0){
+    const names=progression.stagnant.slice(0,2).map(x=>`<strong>${x.ex.n}</strong>`).join(' y ');
+    insights.push({type:'warn',ic:'🔀',t:'Estancamiento detectado',d:`${names} ${progression.stagnant.length>1?'llevan':'lleva'} 3+ sesiones sin subir peso. Considera: cambiar reps (probar 6-8), bajar 10% y reconstruir, o sustituir por una variante.`});
+  }
+
+  if(progression.down.length>0){
+    const names=progression.down.slice(0,2).map(x=>x.ex.n).join(', ');
+    insights.push({type:'bad',ic:'📉',t:'Retroceso',d:`Bajaste peso en <strong>${names}</strong>. Puede ser fatiga, mala técnica o falta de sueño. Revisa cómo te sientes esta semana.`});
+  }
+
+  // ═ E) HITOS Y RÉCORDS ═
+  const totalSessions=S.sessions.length;
+  const milestones=[10,20,30,50,75,100];
+  const justHit=milestones.find(m=>totalSessions===m);
+  if(justHit){
+    insights.push({type:'good',ic:'🎖️',t:`¡Llegaste a ${justHit} sesiones!`,d:'Un hito importante. La mayoría de la gente que empieza el gym abandona antes de este punto. Has demostrado disciplina.'});
+  }
+
+  // Primer ejercicio en superar peso corporal
+  const weightEx=strengthEx.map(ex=>{
+    const data=S.strength[ex.id]||[];
+    const last=data[data.length-1]?.v||0;
+    return{ex,last};
+  }).filter(x=>x.last>0);
+  const bwKg=S.weights[S.weights.length-1]?.v||105;
+  const overBw=weightEx.filter(x=>x.last>=bwKg);
+  if(overBw.length>0&&!S.coachInsights?.shownBodyweight){
+    const top=overBw.sort((a,b)=>b.last-a.last)[0];
+    insights.push({type:'good',ic:'🚀',t:'Superas tu peso corporal',d:`En <strong>${top.ex.n}</strong> mueves ${top.last} kg — más que tu propio peso (${bwKg} kg). Bienvenido al club.`});
+  }
+
+  return insights;
+}
+
+// ─── 3. GENERADOR DE RECOMENDACIONES DE PLAN ──────────────
+
+function coach_generateRecommendations(){
+  const cycleStart=coach_cycleStart();
+  const recs=[];
+  const strengthEx=Object.values(PLAN).flatMap(d=>d.ex).filter(e=>!e.cardio);
+
+  // Analizar cada ejercicio
+  const analyses=strengthEx.map(ex=>({ex,p:coach_exerciseProgression(ex.id,cycleStart)}));
+
+  const stagnant=analyses.filter(a=>a.p.trend==='stagnant');
+  const regressing=analyses.filter(a=>a.p.trend==='down');
+  const strongProg=analyses.filter(a=>a.p.trend==='strong_up');
+
+  // REC 1: Cambiar ejercicios estancados
+  stagnant.forEach(s=>{
+    const alt=coach_suggestAlternative(s.ex);
+    if(alt){
+      recs.push({
+        priority:'med',
+        badge:'Cambio',
+        title:`Sustituir ${s.ex.n}`,
+        body:`Llevas ${s.p.sessions} sesiones sin subir peso. Un nuevo estímulo puede romper el estancamiento.`,
+        diff:[
+          {sym:'–',symType:'rm',text:s.ex.n},
+          {sym:'+',symType:'add',text:alt.n+' — '+alt.reason}
+        ],
+        action:{type:'replace',exId:s.ex.id,newEx:alt}
+      });
+    }else{
+      recs.push({
+        priority:'med',
+        badge:'Ajuste',
+        title:`Ajustar ${s.ex.n}`,
+        body:`Llevas ${s.p.sessions} sesiones estancado. Prueba bajar el peso un 10% y reconstruir con técnica perfecta.`,
+        diff:[
+          {sym:'↻',symType:'ch',text:`${s.ex.n}: ${s.p.lastV} kg → ${(s.p.lastV*0.9).toFixed(1)} kg, mismas reps`}
+        ],
+        action:{type:'deload',exId:s.ex.id}
+      });
+    }
+  });
+
+  // REC 2: Ajustar rango de reps según fase
+  const mesocycleNum=(S.mesocycles?.length||0)+1;
+  const phases=[
+    {n:1,name:'Adaptación',range:'12-15',focus:'Aprender movimiento y construir base'},
+    {n:2,name:'Hipertrofia',range:'8-12',focus:'Ganar músculo'},
+    {n:3,name:'Fuerza',range:'6-8',focus:'Maximizar fuerza con más peso'},
+    {n:4,name:'Volumen',range:'10-15',focus:'Densidad muscular y resistencia'},
+  ];
+  const currentPhase=phases[(mesocycleNum-1)%phases.length];
+  const nextPhase=phases[mesocycleNum%phases.length];
+
+  if(mesocycleNum>=2){
+    recs.push({
+      priority:'high',
+      badge:'Fase nueva',
+      title:`Cambiar a fase: ${nextPhase.name}`,
+      body:`Llevas ~4 semanas en fase ${currentPhase.name} (${currentPhase.range} reps). Rotar te evita estancamiento y da nuevo estímulo a tu cuerpo.`,
+      diff:[
+        {sym:'↻',symType:'ch',text:`Reps: ${currentPhase.range} → ${nextPhase.range} en ejercicios principales`},
+        {sym:'→',symType:'ch',text:`Foco: ${nextPhase.focus}`}
+      ],
+      action:{type:'phase',phase:nextPhase}
+    });
+  }
+
+  // REC 3: Celebrar progresión fuerte (no cambiar lo que funciona)
+  if(strongProg.length>=2){
+    recs.push({
+      priority:'high',
+      badge:'Mantener',
+      title:'No cambies lo que funciona',
+      body:`${strongProg.length} ejercicios progresan excelentemente. Mantén estos ejercicios intactos — los cambios solo donde hay estancamiento.`,
+      diff:strongProg.slice(0,3).map(s=>({sym:'✓',symType:'add',text:`${s.ex.n}: +${s.p.change.toFixed(1)} kg (${s.p.pct.toFixed(0)}%)`})),
+      action:{type:'keep'}
+    });
+  }
+
+  // REC 4: Deload preventivo si hay regresiones múltiples
+  if(regressing.length>=2){
+    recs.push({
+      priority:'high',
+      badge:'Descarga',
+      title:'Semana de descarga recomendada',
+      body:`${regressing.length} ejercicios con retroceso puede indicar fatiga acumulada. Una semana con 60% del peso y mismo volumen permite recuperar.`,
+      diff:[{sym:'↻',symType:'ch',text:'Próxima semana: baja todos los pesos al 60%, mantén series y reps'}],
+      action:{type:'deload_all'}
+    });
+  }
+
+  // REC 5: Si no hay problemas mayores, sugerir progresar
+  if(stagnant.length===0&&regressing.length===0&&strongProg.length===0&&analyses.length>=4){
+    recs.push({
+      priority:'med',
+      badge:'Progresión',
+      title:'Añade intensidad gradual',
+      body:'Todo avanza estable. Prueba añadir una serie extra en los ejercicios principales esta semana para acelerar ganancias.',
+      diff:[
+        {sym:'+',symType:'add',text:'Sentadilla, Press y Jalón: 3→4 series'},
+        {sym:'=',symType:'ch',text:'Resto: mantener'}
+      ],
+      action:{type:'add_volume'}
+    });
+  }
+
+  return recs;
+}
+
+function coach_suggestAlternative(ex){
+  // Mapeo de alternativas dentro del equipamiento disponible
+  const alts={
+    'a2':{n:'Sentadilla búlgara con mancuerna',reason:'trabaja cada pierna por separado, rompe desbalances'},
+    'a3':{n:'Sentadilla goblet con mancuerna',reason:'variación funcional del patrón de sentadilla'},
+    'a4':{n:'Buenos días en Smith',reason:'cambia el ángulo de tensión sobre femorales'},
+    'a5':{n:'Elevación de piernas colgado',reason:'progresión más exigente del abdomen'},
+    'b2':{n:'Press con mancuernas en banco inclinado',reason:'mayor rango de movimiento y activación del pecho'},
+    'b3':{n:'Cruce de cables alto',reason:'enfatiza la contracción final del pecho'},
+    'b4':{n:'Elevación lateral con mancuerna',reason:'control unilateral y mejor mente-músculo'},
+    'b5':{n:'Press francés con mancuerna',reason:'mayor estiramiento en tríceps'},
+    'c2':{n:'Jalón en polea con agarre neutro',reason:'mejor activación de dorsales y menos estrés en hombros'},
+    'c3':{n:'Remo en polea con agarre ancho',reason:'más trabajo en dorsales y trapecios medios'},
+    'c4':{n:'Remo en T con mancuerna',reason:'enfatiza zona media de la espalda'},
+    'c5':{n:'Curl martillo con mancuernas',reason:'cambia ángulo, trabaja braquial y antebrazo'},
+    'c6':{n:'Face pull en polea alta',reason:'mejor activación de deltoides posteriores y trapecios'},
+  };
+  return alts[ex.id]||null;
+}
+
+// ─── 4. APLICAR RECOMENDACIONES AL PLAN ───────────────────
+
+function coach_applyRecommendations(){
+  if(!confirm('¿Aplicar las recomendaciones del coach y empezar un nuevo ciclo de entrenamiento?'))return;
+
+  // Guardar snapshot del ciclo actual
+  const cycle=coach_cycleData();
+  const insights=coach_generateInsights();
+  const recs=coach_generateRecommendations();
+
+  const summary=`Ciclo completado: ${cycle.sessions.length} sesiones en ${Math.round(cycle.weeks)} semanas. ${insights.filter(i=>i.type==='good').length} logros detectados.`;
+
+  const mesocycle={
+    num:(S.mesocycles?.length||0)+1,
+    startTs:cycle.start,
+    endTs:Date.now(),
+    appliedAt:Date.now(),
+    sessionCount:cycle.sessions.length,
+    summary,
+    insights:insights.map(i=>({t:i.t,d:i.d,type:i.type})),
+    recommendations:recs.map(r=>({title:r.title,action:r.action}))
+  };
+
+  if(!S.mesocycles)S.mesocycles=[];
+  S.mesocycles.push(mesocycle);
+
+  // Resetear marcadores para nuevo ciclo
+  S.coachInsights=null;
+  S.coachInsightsStale=true;
+  S.coachLastAnalyzed=Date.now();
+
+  saveState();
+  alert(`¡Nuevo ciclo iniciado! 🚀\n\n${summary}\n\nEl coach volverá a analizar en ~4 semanas.`);
+  render();
+}
+
+// ─── 5. SCORE GENERAL DEL MESOCICLO ────────────────────────
+
+function coach_score(){
+  const consistency=coach_consistency(CYCLE_WEEKS);
+  const cycle=coach_cycleData();
+
+  let score=0,max=100;
+  // Consistencia (40 pts)
+  score+=Math.min(40,consistency.rate*40);
+
+  // Progresión (40 pts)
+  const strengthEx=Object.values(PLAN).flatMap(d=>d.ex).filter(e=>!e.cardio);
+  const progs=strengthEx.map(ex=>coach_exerciseProgression(ex.id,cycle.start));
+  const progressing=progs.filter(p=>p.trend==='up'||p.trend==='strong_up').length;
+  const stagnant=progs.filter(p=>p.trend==='stagnant').length;
+  const regressing=progs.filter(p=>p.trend==='down').length;
+  const withData=progs.filter(p=>p.trend!=='insufficient').length;
+  if(withData>0){
+    score+=Math.min(40,(progressing/withData)*40-(regressing/withData)*10);
+  }
+
+  // Volumen total (20 pts) — completaste las sesiones planeadas
+  const expectedSessions=CYCLE_WEEKS*3;
+  score+=Math.min(20,(cycle.sessions.length/expectedSessions)*20);
+
+  score=Math.max(0,Math.min(100,Math.round(score)));
+  let grade='—',color='var(--text3)';
+  if(score>=90){grade='Excelente';color='var(--green)';}
+  else if(score>=75){grade='Muy bien';color='#86efac';}
+  else if(score>=60){grade='Bien';color='var(--blue)';}
+  else if(score>=40){grade='Regular';color='var(--amber)';}
+  else if(score>0){grade='Mejorable';color='var(--red)';}
+  return{score,grade,color};
+}
+
+// ─── 6. RENDER DE LA PANTALLA COACH ────────────────────────
+
+function renderCoach(){
+  const cycle=coach_cycleData();
+  const totalSessions=S.sessions.length;
+
+  // Caso 1: Onboarding inicial del coach
+  if(totalSessions<CYCLE_MIN_SESSIONS){
+    const remaining=CYCLE_MIN_SESSIONS-totalSessions;
+    return`
+    <div class="topbar"><h1>Coach IA</h1><div class="sub">Tu entrenador personal</div></div>
+    <div class="coach-hero">
+      <div class="coach-hero-icon">🧠</div>
+      <div class="coach-hero-title">Analizando tu progreso</div>
+      <div class="coach-hero-sub">Después de <strong style="color:var(--green)">${remaining}</strong> sesión${remaining!==1?'es':''} más, el coach podrá analizar tu patrón de entrenamiento y darte recomendaciones personalizadas.</div>
+    </div>
+    <div class="sh">Qué hace el coach</div>
+    <div class="insight">
+      <div class="insight-ic good">📊</div>
+      <div class="insight-body">
+        <div class="insight-t">Analiza tu progresión</div>
+        <div class="insight-d">Detecta qué ejercicios progresan, cuáles se estancan, y tu consistencia semanal.</div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-ic info">🔄</div>
+      <div class="insight-body">
+        <div class="insight-t">Renueva tu plan cada 4 semanas</div>
+        <div class="insight-d">Cambia ejercicios estancados, ajusta el rango de reps, rota fases (adaptación → hipertrofia → fuerza).</div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-ic warn">💡</div>
+      <div class="insight-body">
+        <div class="insight-t">Celebra tus logros</div>
+        <div class="insight-d">Detecta récords personales, hitos de consistencia, y te da contexto de cuándo has logrado algo importante.</div>
+      </div>
+    </div>
+    <div style="padding:4px 14px 14px">
+      <button class="btn bp" onclick="go('workout')">Ir a entrenar →</button>
+    </div>`;
+  }
+
+  // Caso 2: Ciclo activo — mostrar dashboard del coach
+  const consistency=coach_consistency(Math.max(1,Math.ceil(cycle.weeks)));
+  const scoreData=coach_score();
+  const insights=coach_generateInsights();
+  const recs=cycle.readyForReview?coach_generateRecommendations():[];
+
+  // Métricas clave
+  const cycleStart=cycle.start;
+  const strengthEx=Object.values(PLAN).flatMap(d=>d.ex).filter(e=>!e.cardio);
+  const progs=strengthEx.map(ex=>coach_exerciseProgression(ex.id,cycleStart));
+  const progressing=progs.filter(p=>p.trend==='up'||p.trend==='strong_up').length;
+  const withData=progs.filter(p=>p.trend!=='insufficient').length;
+  const totalGain=progs.filter(p=>p.change>0).reduce((a,p)=>a+p.change,0);
+  const weight=coach_weightTrend();
+
+  // Ciclo progress circle
+  const C=2*Math.PI*20;
+  const cycleOff=C*(1-cycle.cycleProgress);
+
+  return`
+  <div class="topbar">
+    <div class="topbar-row">
+      <div><h1>Coach IA</h1><div class="sub">Mesociclo ${(S.mesocycles?.length||0)+1} · Semana ${Math.ceil(cycle.weeks)||1}/${CYCLE_WEEKS}</div></div>
+      <div class="score-ring">
+        <svg viewBox="0 0 80 80">
+          <circle class="sbg" cx="40" cy="40" r="32"/>
+          <circle class="sfg" cx="40" cy="40" r="32" style="stroke:${scoreData.color};stroke-dasharray:${2*Math.PI*32};stroke-dashoffset:${2*Math.PI*32*(1-scoreData.score/100)}"/>
+        </svg>
+        <div class="score-val"><span class="n" style="color:${scoreData.color}">${scoreData.score}</span><span class="u">${scoreData.grade}</span></div>
+      </div>
+    </div>
+  </div>
+
+  ${cycle.readyForReview?`<div class="cta-banner" onclick="coach_applyRecommendations()">
+    <div class="cta-banner-t">✨ Tu análisis de ciclo está listo</div>
+    <div class="cta-banner-d">Revisa las recomendaciones abajo y aplica el nuevo plan</div>
+  </div>`:''}
+
+  <div class="coach-cycle">
+    <div class="coach-cycle-info">
+      <div class="coach-cycle-lbl">Ciclo actual</div>
+      <div class="coach-cycle-val">${cycle.sessions.length} sesiones · ${Math.round(cycle.weeks*10)/10} semanas</div>
+    </div>
+    <div class="coach-cycle-prog">
+      <svg viewBox="0 0 50 50">
+        <circle class="cbg" cx="25" cy="25" r="20"/>
+        <circle class="cfg" cx="25" cy="25" r="20" style="stroke-dasharray:${C};stroke-dashoffset:${cycleOff}"/>
+      </svg>
+      <div class="cpct">${Math.round(cycle.cycleProgress*100)}%</div>
+    </div>
+  </div>
+
+  <div class="metric-grid">
+    <div class="metric-box">
+      <div class="ml">Consistencia</div>
+      <div class="mv" style="color:${consistency.rate>=0.75?'var(--green)':consistency.rate>=0.5?'var(--amber)':'var(--red)'}">${consistency.perWeek}</div>
+      <div class="md">sesiones/semana</div>
+    </div>
+    <div class="metric-box">
+      <div class="ml">Progresan</div>
+      <div class="mv" style="color:var(--green)">${progressing}/${withData||'—'}</div>
+      <div class="md">ejercicios</div>
+    </div>
+    <div class="metric-box">
+      <div class="ml">Fuerza ganada</div>
+      <div class="mv" style="color:var(--green)">+${totalGain.toFixed(1)}</div>
+      <div class="md">kg totales en ciclo</div>
+    </div>
+    <div class="metric-box">
+      <div class="ml">Peso corporal</div>
+      <div class="mv" style="color:${weight.trend==='insufficient'?'var(--text3)':parseFloat(weight.change)<=0?'var(--green)':'var(--red)'}">${weight.trend==='insufficient'?'—':(weight.change>0?'+':'')+weight.change.toFixed(1)}</div>
+      <div class="md">kg ${weight.trend==='insufficient'?'sin datos':'desde el inicio'}</div>
+    </div>
+  </div>
+
+  <div class="sh">Análisis del ciclo</div>
+  ${insights.length===0?`<div class="insight"><div class="insight-ic info">⏳</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
+    insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${i.ic}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${i.d}</div></div></div>`).join('')}
+
+  ${recs.length>0?`<div class="sh">Recomendaciones para el nuevo ciclo</div>
+    ${recs.map(r=>`<div class="rec-card">
+      <div class="rec-head">
+        <span class="rec-badge ${r.priority}">${r.badge}</span>
+        <div class="rec-title">${r.title}</div>
+      </div>
+      <div class="rec-body">${r.body}</div>
+      <div class="rec-diff">
+        ${r.diff.map(d=>`<div class="rec-diff-row"><span class="sym ${d.symType}">${d.sym}</span><span>${d.text}</span></div>`).join('')}
+      </div>
+    </div>`).join('')}
+    <div style="padding:4px 14px 14px">
+      <button class="btn bp" onclick="coach_applyRecommendations()">Aplicar y empezar nuevo ciclo</button>
+    </div>`:
+    (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="sh">Recomendaciones</div>
+    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">Faltan ~<strong>${Math.max(0,Math.ceil(CYCLE_WEEKS-cycle.weeks))}</strong> semanas para el análisis profundo. Mientras tanto, sigue el plan actual.</div></div></div>`:'')}
+
+  ${S.mesocycles&&S.mesocycles.length>0?`<div class="sh">Ciclos anteriores</div>
+    ${S.mesocycles.slice().reverse().slice(0,3).map(m=>`<div class="mesocycle-log">
+      <h4>Mesociclo ${m.num} · ${m.sessionCount} sesiones</h4>
+      <p>${m.summary}</p>
+    </div>`).join('')}`:''}
+  `;
+}
+
+// ═══════════════════════════════════════════════════════════
+// Fin Coach IA
+// ═══════════════════════════════════════════════════════════
+
 function go(tab){
-  S.tab=tab;['dash','workout','prog'].forEach(t=>document.getElementById('nb-'+t).classList.toggle('on',t===tab));
+  S.tab=tab;['dash','workout','coach','prog'].forEach(t=>document.getElementById('nb-'+t).classList.toggle('on',t===tab));
   document.getElementById('screen').scrollTop=0;render();saveState();
 }
 
@@ -1131,6 +1760,7 @@ function render(){
   const s=document.getElementById('screen');
   if(S.tab==='dash')s.innerHTML=renderDash();
   else if(S.tab==='workout')s.innerHTML=renderWorkout();
+  else if(S.tab==='coach')s.innerHTML=renderCoach();
   else s.innerHTML=renderProg();
 }
 
