@@ -124,8 +124,11 @@ input{font-family:inherit}
 .modal{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));width:100%;border-top:1px solid var(--border2)}
 .modal-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
 .modal h3{font-size:17px;font-weight:600;margin-bottom:14px;letter-spacing:-.2px}
-/* TIMER */
-#rest-timer{position:fixed;bottom:calc(58px + var(--sb) + 8px);left:50%;transform:translateX(-50%) translateY(80px);width:calc(100% - 28px);max-width:452px;background:#1a1a1a;border:1px solid var(--border2);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;z-index:150;box-shadow:0 -4px 32px rgba(0,0,0,.5);transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s ease;opacity:0;pointer-events:none}
+/* EXERCISE ANIMATION */
+.ex-anim{width:100%;height:130px;border-radius:var(--rsm);background:#111;margin-bottom:12px;overflow:hidden;display:block}
+.ex-anim svg{width:100%;height:130px;display:block}
+/* REST TIMER */
+#rest-timer{position:fixed;bottom:calc(58px + var(--sb) + 8px);left:50%;transform:translateX(-50%) translateY(80px);width:calc(100% - 28px);max-width:452px;background:#1a1a1a;border:1px solid var(--border2);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;z-index:150;box-shadow:0 -4px 32px rgba(0,0,0,.6);transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none}
 #rest-timer.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:all}
 .rt-ring{position:relative;width:48px;height:48px;flex-shrink:0}
 .rt-ring svg{width:48px;height:48px;transform:rotate(-90deg)}
@@ -137,7 +140,6 @@ input{font-family:inherit}
 .rt-msg{font-size:13px;font-weight:500;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rt-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0;cursor:pointer;transition:all .15s}
 .rt-btn:active{transform:scale(.95)}
-.rt-btn.skip{color:var(--text3);font-size:11px}
 #rest-timer.done .rt-ring-fg{stroke:var(--amber)}
 #rest-timer.done .rt-ring-num{color:var(--amber)}
 </style>
@@ -196,18 +198,17 @@ input{font-family:inherit}
       Progreso<div class="bb-dot"></div>
     </button>
   </nav>
-<div id="rest-timer">
-  <div class="rt-ring">
-    <svg viewBox="0 0 48 48"><circle class="rt-ring-bg" cx="24" cy="24" r="20"/><circle class="rt-ring-fg" id="rt-arc" cx="24" cy="24" r="20"/></svg>
-    <div class="rt-ring-num" id="rt-num">90</div>
+  <div id="rest-timer">
+    <div class="rt-ring">
+      <svg viewBox="0 0 48 48"><circle class="rt-ring-bg" cx="24" cy="24" r="20"/><circle class="rt-ring-fg" id="rt-arc" cx="24" cy="24" r="20"/></svg>
+      <div class="rt-ring-num" id="rt-num">90</div>
+    </div>
+    <div class="rt-info">
+      <div class="rt-label">Descanso</div>
+      <div class="rt-msg" id="rt-msg">Recuperando...</div>
+    </div>
+    <button class="rt-btn" onclick="RT.skip()">Saltar</button>
   </div>
-  <div class="rt-info">
-    <div class="rt-label">Descanso</div>
-    <div class="rt-msg" id="rt-msg">Recuperando...</div>
-  </div>
-  <button class="rt-btn skip" onclick="RT.skip()">Saltar</button>
-</div>
-
 </div>
 
 <script>
@@ -309,101 +310,643 @@ function getSug(id,sets,reps){
   return{t:'ok',m:`Buen trabajo con ${w} kg. Mantén este peso la próxima sesión. 👍`};
 }
 
-// REST TIMER
-const CIRCUMFERENCE = 2 * Math.PI * 20; // r=20
-const RT = {
-  _tid: null,
-  _remaining: 0,
-  _total: 0,
-  _hideTimeout: null,
+// ─── SVG EXERCISE ANIMATIONS ───────────────────────────────────────────────
+// Colors: skin #e8b88a, hair #3d2b1f, shirt #22c55e, pants #1e3a5f, shoes #111
+// Machine/equipment: frame #1c2b3a, pad #2d4a6a, bar #8899aa, plate #556677
+function exSVG(id){
+const BG='#111', SK='#e8b88a', HA='#3d2b1f', SH='#22c55e', PA='#1e3a5f', SO='#111827';
+const FR='#1c2b3a', PD='#2d4a6a', BR='#8899aa', PL='#556677', FL='#94a3b8';
+const T='2s', E='ease-in-out', N='infinite';
 
-  start(seconds, exName) {
-    clearInterval(this._tid);
-    clearTimeout(this._hideTimeout);
-    this._total = seconds;
-    this._remaining = seconds;
-    const el = document.getElementById('rest-timer');
-    el.classList.remove('done');
-    el.classList.add('show');
-    document.getElementById('rt-msg').textContent = exName || 'Recuperando...';
-    this._update();
-    this._tid = setInterval(() => {
-      this._remaining--;
-      if (this._remaining <= 0) {
-        this._remaining = 0;
-        this._update();
-        clearInterval(this._tid);
-        this._finish();
-      } else {
-        this._update();
-      }
-    }, 1000);
-  },
+// ── Shared human body builder ──
+// head(cx,cy,r), neck, torso(x,y,w,h), limb segments as polylines
+// animations embedded inline with CSS animation on groups
 
-  _update() {
-    const arc = document.getElementById('rt-arc');
-    const num = document.getElementById('rt-num');
-    if (!arc || !num) return;
-    const progress = this._remaining / this._total;
-    const offset = CIRCUMFERENCE * (1 - progress);
-    arc.style.strokeDasharray = CIRCUMFERENCE;
-    arc.style.strokeDashoffset = offset;
-    num.textContent = this._remaining;
-    // Color shift: green→amber as time runs out
-    if (this._remaining <= 10) arc.style.stroke = 'var(--amber)';
-    else arc.style.stroke = 'var(--green)';
-  },
+const anims = {
 
-  _finish() {
-    const el = document.getElementById('rest-timer');
-    if (el) {
-      el.classList.add('done');
-      document.getElementById('rt-msg').textContent = '¡Listo! A la siguiente serie 💪';
-      document.getElementById('rt-num').textContent = '✓';
-    }
-    // Vibrate if supported
-    if ('vibrate' in navigator) {
-      try { navigator.vibrate([200, 100, 200]); } catch(e) {}
-    }
-    this._hideTimeout = setTimeout(() => this.hide(), 4000);
-  },
+// CAMINADORA (a1, a6, b1, b6, c1, c7)
+cardio:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Machine frame -->
+<rect x="20" y="68" width="240" height="8" rx="3" fill="${FR}"/>
+<rect x="20" y="68" width="240" height="8" rx="3" fill="none" stroke="#334155" stroke-width="0.5"
+  stroke-dasharray="12 8" style="animation:belt 0.5s linear infinite"/>
+<line x1="22" y1="67" x2="22" y2="48" stroke="${FR}" stroke-width="4" stroke-linecap="round"/>
+<line x1="258" y1="67" x2="258" y2="48" stroke="${FR}" stroke-width="4" stroke-linecap="round"/>
+<line x1="22" y1="48" x2="258" y2="48" stroke="${PD}" stroke-width="3" stroke-linecap="round"/>
+<!-- Speed display -->
+<rect x="110" y="36" width="60" height="14" rx="3" fill="#0a1628"/>
+<text x="140" y="47" text-anchor="middle" font-family="monospace" font-size="9" fill="#22c55e">5.0 km/h</text>
+<!-- Person walking — body bobs gently -->
+<g style="animation:bob ${T} ${E} ${N};transform-origin:140px 66px">
+  <!-- back leg -->
+  <g style="animation:legB ${T} ${E} ${N};transform-origin:140px 54px">
+    <line x1="140" y1="54" x2="126" y2="67" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
+    <line x1="126" y1="67" x2="122" y2="76" stroke="${PA}" stroke-width="6" stroke-linecap="round"/>
+    <rect x="115" y="73" width="14" height="5" rx="2" fill="${SO}"/>
+  </g>
+  <!-- front leg -->
+  <g style="animation:legF ${T} ${E} ${N};transform-origin:140px 54px">
+    <line x1="140" y1="54" x2="154" y2="67" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
+    <line x1="154" y1="67" x2="158" y2="76" stroke="${PA}" stroke-width="6" stroke-linecap="round"/>
+    <rect x="151" y="73" width="14" height="5" rx="2" fill="${SO}"/>
+  </g>
+  <!-- torso -->
+  <rect x="133" y="32" width="14" height="24" rx="5" fill="${SH}"/>
+  <!-- back arm -->
+  <g style="animation:armB ${T} ${E} ${N};transform-origin:140px 37px">
+    <line x1="140" y1="37" x2="152" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <!-- front arm -->
+  <g style="animation:armF ${T} ${E} ${N};transform-origin:140px 37px">
+    <line x1="140" y1="37" x2="128" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <!-- neck + head -->
+  <rect x="137" y="27" width="6" height="7" rx="2" fill="${SK}"/>
+  <circle cx="140" cy="21" r="10" fill="${SK}"/>
+  <ellipse cx="140" cy="14" rx="10" ry="9" fill="${HA}"/>
+  <circle cx="136" cy="21" r="1.8" fill="#4a3728"/>
+  <circle cx="144" cy="21" r="1.8" fill="#4a3728"/>
+</g>
+<style>
+@keyframes belt{to{stroke-dashoffset:-20}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes legF{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(20deg)}}
+@keyframes legB{0%,100%{transform:rotate(20deg)}50%{transform:rotate(-20deg)}}
+@keyframes armF{0%,100%{transform:rotate(25deg)}50%{transform:rotate(-25deg)}}
+@keyframes armB{0%,100%{transform:rotate(-25deg)}50%{transform:rotate(25deg)}}
+</style></svg>`,
 
-  skip() {
-    clearInterval(this._tid);
-    clearTimeout(this._hideTimeout);
-    this.hide();
-  },
+// SENTADILLA SMITH (a2)
+squat:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Smith rails -->
+<rect x="60" y="4" width="6" height="122" rx="2" fill="${FR}"/>
+<rect x="214" y="4" width="6" height="122" rx="2" fill="${FR}"/>
+<rect x="50" y="4" width="180" height="8" rx="3" fill="${FR}"/>
+<!-- Rail notches -->
+<rect x="55" y="35" width="16" height="4" rx="1" fill="${PD}"/>
+<rect x="209" y="35" width="16" height="4" rx="1" fill="${PD}"/>
+<!-- Animated group: whole body squats -->
+<g style="animation:sqDown 2s ease-in-out infinite;transform-origin:140px 90px">
+  <!-- feet -->
+  <rect x="116" y="118" width="18" height="6" rx="2" fill="${SO}"/>
+  <rect x="146" y="118" width="18" height="6" rx="2" fill="${SO}"/>
+  <!-- lower legs -->
+  <g style="animation:sqKnee 2s ease-in-out infinite;transform-origin:120px 100px">
+    <line x1="120" y1="100" x2="120" y2="118" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <g style="animation:sqKnee 2s ease-in-out infinite;transform-origin:160px 100px">
+    <line x1="160" y1="100" x2="160" y2="118" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+  </g>
+  <!-- upper legs -->
+  <line x1="140" y1="82" x2="120" y2="100" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+  <line x1="140" y1="82" x2="160" y2="100" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+  <!-- torso -->
+  <rect x="129" y="52" width="22" height="32" rx="7" fill="${SH}"/>
+  <!-- bar on traps -->
+  <rect x="64" y="46" width="152" height="7" rx="3" fill="${BR}"/>
+  <rect x="63" y="43" width="12" height="13" rx="3" fill="${PL}"/>
+  <rect x="205" y="43" width="12" height="13" rx="3" fill="${PL}"/>
+  <!-- arms gripping bar -->
+  <line x1="131" y1="58" x2="96" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="149" y1="58" x2="184" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- neck + head -->
+  <rect x="136" y="46" width="8" height="8" rx="2" fill="${SK}"/>
+  <circle cx="140" cy="37" r="11" fill="${SK}"/>
+  <ellipse cx="140" cy="29" rx="11" ry="10" fill="${HA}"/>
+  <circle cx="135" cy="37" r="2" fill="#4a3728"/>
+  <circle cx="145" cy="37" r="2" fill="#4a3728"/>
+</g>
+<style>
+@keyframes sqDown{0%,100%{transform:translateY(0)}50%{transform:translateY(16px)}}
+@keyframes sqKnee{0%,100%{transform:rotate(0deg)}50%{transform:rotate(22deg)}}
+</style></svg>`,
 
-  hide() {
-    const el = document.getElementById('rest-timer');
-    if (el) el.classList.remove('show');
-    clearInterval(this._tid);
-  }
+// EXTENSIÓN CUÁDRICEPS (a3)
+legext:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Machine seat + back -->
+<rect x="60" y="62" width="80" height="12" rx="4" fill="${PD}"/>
+<rect x="60" y="62" width="28" height="65" rx="4" fill="${FR}"/>
+<rect x="130" y="62" width="10" height="65" rx="3" fill="${FR}"/>
+<!-- Pivot + arm -->
+<circle cx="145" cy="76" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Weight stack -->
+<rect x="220" y="30" width="22" height="95" rx="3" fill="${FR}"/>
+<rect x="223" y="35" width="16" height="6" rx="1" fill="${PD}"/>
+<rect x="223" y="45" width="16" height="6" rx="1" fill="${PD}"/>
+<rect x="223" y="55" width="16" height="6" rx="1" fill="${PD}"/>
+<rect x="223" y="65" width="16" height="8" rx="1" fill="#22c55e" opacity="0.7"/>
+<!-- Cable -->
+<line x1="220" y1="69" x2="185" y2="80" stroke="${FL}" stroke-width="1.5" stroke-dasharray="3 3"/>
+<!-- Person seated -->
+<!-- torso upright -->
+<rect x="82" y="28" width="20" height="36" rx="7" fill="${SH}"/>
+<!-- head -->
+<rect x="86" y="22" width="8" height="8" rx="2" fill="${SK}"/>
+<circle cx="92" cy="14" r="11" fill="${SK}"/>
+<ellipse cx="92" cy="6" rx="11" ry="9" fill="${HA}"/>
+<circle cx="87" cy="14" r="2" fill="#4a3728"/>
+<circle cx="97" cy="14" r="2" fill="#4a3728"/>
+<!-- hands on side handles -->
+<line x1="84" y1="38" width="4" height="0" x2="72" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<line x1="100" y1="38" x2="112" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- upper leg on seat -->
+<line x1="92" y1="64" x2="140" y2="66" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<line x1="88" y1="64" x2="136" y2="66" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<!-- lower leg animating — extends out -->
+<g style="animation:legExt 2s ease-in-out infinite;transform-origin:140px 66px">
+  <line x1="140" y1="66" x2="188" y2="98" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+  <!-- shin pad -->
+  <rect x="180" y="92" width="20" height="10" rx="4" fill="${PD}"/>
+  <!-- shoe -->
+  <rect x="182" y="100" width="20" height="6" rx="2" fill="${SO}"/>
+</g>
+<style>
+@keyframes legExt{0%,100%{transform:rotate(20deg)}50%{transform:rotate(-22deg)}}
+</style></svg>`,
+
+// CURL FEMORAL (a4)
+legcurl:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Machine bench -->
+<rect x="30" y="52" width="160" height="14" rx="5" fill="${PD}"/>
+<rect x="30" y="65" width="24" height="62" rx="4" fill="${FR}"/>
+<rect x="166" y="65" width="24" height="62" rx="4" fill="${FR}"/>
+<!-- Pivot + roller -->
+<circle cx="178" cy="66" r="8" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Weight stack on right -->
+<rect x="220" y="30" width="22" height="95" rx="3" fill="${FR}"/>
+<rect x="223" y="35" width="16" height="6" rx="1" fill="${PD}"/>
+<rect x="223" y="45" width="16" height="6" rx="1" fill="${PD}"/>
+<rect x="223" y="55" width="16" height="8" rx="1" fill="#22c55e" opacity="0.7"/>
+<!-- Person lying face down -->
+<!-- head to left -->
+<circle cx="42" cy="44" r="11" fill="${SK}"/>
+<ellipse cx="42" cy="36" rx="11" ry="9" fill="${HA}"/>
+<!-- torso -->
+<rect x="50" y="42" width="80" height="14" rx="5" fill="${SH}"/>
+<!-- arm hangs down -->
+<line x1="58" y1="52" x2="52" y2="66" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- upper legs -->
+<line x1="128" y1="50" x2="170" y2="55" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<line x1="128" y1="58" x2="170" y2="63" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<!-- lower leg curling up -->
+<g style="animation:curl 2s ease-in-out infinite;transform-origin:174px 59px">
+  <line x1="174" y1="59" x2="174" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+  <!-- roller pad -->
+  <rect x="164" y="84" width="22" height="10" rx="4" fill="${PD}"/>
+  <!-- shoe -->
+  <rect x="162" y="92" width="22" height="6" rx="2" fill="${SO}"/>
+</g>
+<style>@keyframes curl{0%,100%{transform:rotate(5deg)}50%{transform:rotate(75deg)}}</style></svg>`,
+
+// CRUNCH EN CABLE (a5)
+cruncha:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Cable machine -->
+<rect x="210" y="4" width="22" height="120" rx="4" fill="${FR}"/>
+<circle cx="221" cy="32" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Floor -->
+<rect x="0" y="112" width="280" height="18" fill="#0d1520" rx="2"/>
+<!-- Knees on floor -->
+<rect x="98" y="105" width="16" height="10" rx="4" fill="${PD}"/>
+<rect x="122" y="105" width="16" height="10" rx="4" fill="${PD}"/>
+<!-- Shins -->
+<line x1="106" y1="115" x2="100" y2="130" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
+<line x1="130" y1="115" x2="136" y2="130" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
+<!-- Thighs -->
+<line x1="106" y1="105" x2="118" y2="88" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="130" y1="105" x2="118" y2="88" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<!-- Body crunching -->
+<g style="animation:crunch 2s ease-in-out infinite;transform-origin:118px 88px">
+  <!-- torso -->
+  <rect x="109" y="60" width="18" height="30" rx="7" fill="${SH}"/>
+  <!-- arms holding rope behind head -->
+  <line x1="111" y1="68" x2="96" y2="62" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="127" y1="68" x2="162" y2="58" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- rope -->
+  <path d="M96 62 Q80 55 75 50" stroke="${FL}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M162 58 Q185 44 208 32" stroke="${FL}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- head -->
+  <rect x="113" y="53" width="10" height="9" rx="2" fill="${SK}"/>
+  <circle cx="118" cy="44" r="11" fill="${SK}"/>
+  <ellipse cx="118" cy="36" rx="11" ry="9" fill="${HA}"/>
+</g>
+<style>@keyframes crunch{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-22deg)}}</style></svg>`,
+
+// PRESS INCLINADO SMITH (b2)
+incpress:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Smith rails -->
+<rect x="56" y="4" width="6" height="122" rx="2" fill="${FR}"/>
+<rect x="218" y="4" width="6" height="122" rx="2" fill="${FR}"/>
+<rect x="46" y="4" width="188" height="8" rx="3" fill="${FR}"/>
+<!-- Incline bench -->
+<rect x="82" y="72" width="120" height="12" rx="4" fill="${PD}"/>
+<rect x="82" y="82" width="26" height="45" rx="4" fill="${FR}"/>
+<rect x="176" y="82" width="26" height="45" rx="4" fill="${FR}"/>
+<!-- incline pad -->
+<rect x="82" y="52" width="70" height="22" rx="5" fill="${PD}" transform="rotate(-28 117 63)"/>
+<!-- Person lying on incline — head upper-left -->
+<!-- head -->
+<circle cx="68" cy="50" r="11" fill="${SK}"/>
+<ellipse cx="68" cy="42" rx="11" ry="9" fill="${HA}"/>
+<circle cx="63" cy="50" r="2" fill="#4a3728"/>
+<circle cx="73" cy="50" r="2" fill="#4a3728"/>
+<!-- neck -->
+<rect x="64" y="58" width="8" height="8" rx="2" fill="${SK}"/>
+<!-- torso inclined -->
+<rect x="68" y="54" width="74" height="18" rx="7" fill="${SH}" transform="rotate(20 105 63)"/>
+<!-- legs going down-right -->
+<line x1="155" y1="74" x2="168" y2="92" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<line x1="164" y1="72" x2="177" y2="90" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<rect x="162" y="89" width="18" height="6" rx="2" fill="${SO}"/>
+<rect x="170" y="87" width="18" height="6" rx="2" fill="${SO}"/>
+<!-- ANIMATED press -->
+<g style="animation:press 2s ease-in-out infinite;transform-origin:112px 56px">
+  <!-- arms -->
+  <line x1="80" y1="56" x2="62" y2="44" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="98" y1="53" x2="150" y2="42" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- bar with plates -->
+  <rect x="50" y="37" width="166" height="7" rx="3" fill="${BR}"/>
+  <rect x="48" y="34" width="14" height="13" rx="3" fill="${PL}"/>
+  <rect x="204" y="34" width="14" height="13" rx="3" fill="${PL}"/>
+  <rect x="50" y="35" width="6" height="9" rx="1" fill="#6b7a8d"/>
+  <rect x="210" y="35" width="6" height="9" rx="1" fill="#6b7a8d"/>
+</g>
+<style>@keyframes press{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}</style></svg>`,
+
+// APERTURAS MÁQUINA (b3)
+pecfly:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Machine frame -->
+<rect x="10" y="18" width="12" height="90" rx="3" fill="${FR}"/>
+<rect x="258" y="18" width="12" height="90" rx="3" fill="${FR}"/>
+<rect x="10" y="18" width="260" height="10" rx="3" fill="${FR}"/>
+<!-- Pivots -->
+<circle cx="22" cy="62" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="258" cy="62" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Seat + post -->
+<rect x="116" y="70" width="48" height="12" rx="4" fill="${PD}"/>
+<rect x="124" y="82" width="32" height="45" rx="4" fill="${FR}"/>
+<!-- Person seated -->
+<!-- legs -->
+<line x1="124" y1="80" x2="104" y2="100" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="156" y1="80" x2="176" y2="100" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<rect x="94" y="97" width="18" height="6" rx="2" fill="${SO}"/>
+<rect x="168" y="97" width="18" height="6" rx="2" fill="${SO}"/>
+<!-- torso -->
+<rect x="126" y="38" width="28" height="34" rx="8" fill="${SH}"/>
+<!-- head -->
+<rect x="132" y="30" width="10" height="10" rx="2" fill="${SK}"/>
+<circle cx="140" cy="21" r="11" fill="${SK}"/>
+<ellipse cx="140" cy="13" rx="11" ry="9" fill="${HA}"/>
+<circle cx="135" cy="21" r="2" fill="#4a3728"/>
+<circle cx="145" cy="21" r="2" fill="#4a3728"/>
+<!-- ANIMATED fly arms -->
+<g style="animation:flyL 2s ease-in-out infinite;transform-origin:22px 62px">
+  <line x1="22" y1="62" x2="120" y2="58" stroke="${FR}" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="120" cy="58" r="5" fill="${PD}"/>
+  <line x1="120" y1="58" x2="128" y2="55" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+</g>
+<g style="animation:flyR 2s ease-in-out infinite;transform-origin:258px 62px">
+  <line x1="258" y1="62" x2="160" y2="58" stroke="${FR}" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="160" cy="58" r="5" fill="${PD}"/>
+  <line x1="160" y1="58" x2="152" y2="55" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+</g>
+<style>
+@keyframes flyL{0%,100%{transform:rotate(-48deg)}50%{transform:rotate(-12deg)}}
+@keyframes flyR{0%,100%{transform:rotate(48deg)}50%{transform:rotate(12deg)}}
+</style></svg>`,
+
+// ELEVACIÓN LATERAL CABLE (b4)
+latsideq:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Cable machine right side -->
+<rect x="228" y="4" width="22" height="122" rx="4" fill="${FR}"/>
+<circle cx="239" cy="108" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Floor -->
+<rect x="0" y="118" width="280" height="12" fill="#0d1520" rx="2"/>
+<!-- Person standing -->
+<!-- feet + legs -->
+<rect x="102" y="112" width="18" height="7" rx="2" fill="${SO}"/>
+<rect x="130" y="112" width="18" height="7" rx="2" fill="${SO}"/>
+<line x1="110" y1="112" x2="106" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="140" y1="112" x2="144" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<!-- torso -->
+<rect x="108" y="52" width="24" height="40" rx="8" fill="${SH}"/>
+<!-- head -->
+<rect x="114" y="44" width="10" height="10" rx="2" fill="${SK}"/>
+<circle cx="120" cy="35" r="11" fill="${SK}"/>
+<ellipse cx="120" cy="27" rx="11" ry="9" fill="${HA}"/>
+<circle cx="115" cy="35" r="2" fill="#4a3728"/>
+<circle cx="125" cy="35" r="2" fill="#4a3728"/>
+<!-- resting arm (left) -->
+<line x1="110" y1="60" x2="100" y2="78" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- ANIMATED raising arm (right) with cable -->
+<g style="animation:raise 2s ease-in-out infinite;transform-origin:128px 62px">
+  <line x1="128" y1="62" x2="180" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="180" cy="52" r="5" fill="${PD}"/>
+</g>
+<!-- Cable from machine to handle -->
+<path style="animation:cableRaise 2s ease-in-out infinite" d="M232 108 Q210 100 180 52" stroke="${FL}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<style>
+@keyframes raise{0%,100%{transform:rotate(-28deg)}50%{transform:rotate(12deg)}}
+@keyframes cableRaise{
+  0%,100%{d:path("M232 108 Q210 100 180 52")}
+  50%{d:path("M232 108 Q210 90 162 35")}
+}
+</style></svg>`,
+
+// JALÓN TRÍCEPS CABLE (b5)
+tripdwn:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Cable machine top -->
+<rect x="110" y="4" width="60" height="18" rx="4" fill="${FR}"/>
+<circle cx="140" cy="22" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Cable down -->
+<line x1="140" y1="22" x2="140" y2="52" stroke="${FL}" stroke-width="1.5"/>
+<!-- Floor -->
+<rect x="0" y="118" width="280" height="12" fill="#0d1520" rx="2"/>
+<!-- Person standing -->
+<rect x="102" y="112" width="16" height="7" rx="2" fill="${SO}"/>
+<rect x="132" y="112" width="16" height="7" rx="2" fill="${SO}"/>
+<line x1="110" y1="112" x2="108" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="140" y1="112" x2="142" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<!-- torso slightly forward -->
+<rect x="111" y="52" width="22" height="40" rx="7" fill="${SH}" transform="rotate(5 122 72)"/>
+<!-- head -->
+<rect x="116" y="43" width="10" height="10" rx="2" fill="${SK}"/>
+<circle cx="121" cy="34" r="11" fill="${SK}"/>
+<ellipse cx="121" cy="26" rx="11" ry="9" fill="${HA}"/>
+<!-- ANIMATED tricep pushdown -->
+<g style="animation:triPush 2s ease-in-out infinite;transform-origin:122px 60px">
+  <!-- upper arms fixed at sides -->
+  <line x1="113" y1="57" x2="111" y2="68" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="131" y1="57" x2="133" y2="68" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- forearms push down -->
+  <line x1="111" y1="68" x2="108" y2="86" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="133" y1="68" x2="136" y2="86" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- rope handle -->
+  <path d="M108 86 Q122 93 136 86" stroke="${FL}" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <circle cx="108" cy="86" r="4" fill="${PD}"/>
+  <circle cx="136" cy="86" r="4" fill="${PD}"/>
+</g>
+<style>@keyframes triPush{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}</style></svg>`,
+
+// JALÓN AL PECHO (c2)
+latpull:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Machine overhead -->
+<rect x="70" y="4" width="140" height="12" rx="4" fill="${FR}"/>
+<line x1="140" y1="16" x2="140" y2="30" stroke="${FR}" stroke-width="4"/>
+<circle cx="140" cy="30" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Seat + leg brace -->
+<rect x="102" y="76" width="76" height="12" rx="4" fill="${PD}"/>
+<rect x="102" y="86" width="76" height="8" rx="3" fill="${FR}"/>
+<rect x="108" y="94" width="64" height="32" rx="4" fill="${FR}"/>
+<!-- Weight stack -->
+<rect x="238" y="20" width="22" height="96" rx="3" fill="${FR}"/>
+<rect x="241" y="25" width="16" height="6" rx="1" fill="${PD}"/>
+<rect x="241" y="35" width="16" height="6" rx="1" fill="${PD}"/>
+<rect x="241" y="45" width="16" height="8" rx="1" fill="#22c55e" opacity="0.7"/>
+<!-- Person seated -->
+<!-- legs under brace -->
+<line x1="118" y1="84" x2="96" y2="108" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="162" y1="84" x2="184" y2="108" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<rect x="84" y="105" width="18" height="7" rx="2" fill="${SO}"/>
+<rect x="178" y="105" width="18" height="7" rx="2" fill="${SO}"/>
+<!-- torso -->
+<rect x="128" y="44" width="24" height="34" rx="8" fill="${SH}"/>
+<!-- head -->
+<rect x="134" y="36" width="10" height="10" rx="2" fill="${SK}"/>
+<circle cx="140" cy="27" r="11" fill="${SK}"/>
+<ellipse cx="140" cy="19" rx="11" ry="9" fill="${HA}"/>
+<circle cx="135" cy="27" r="2" fill="#4a3728"/>
+<circle cx="145" cy="27" r="2" fill="#4a3728"/>
+<!-- ANIMATED lat pulldown -->
+<g style="animation:latDown 2s ease-in-out infinite;transform-origin:140px 46px">
+  <!-- arms reaching wide -->
+  <g style="animation:latArms 2s ease-in-out infinite;transform-origin:132px 48px">
+    <line x1="132" y1="48" x2="88" y2="28" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <g style="animation:latArmsR 2s ease-in-out infinite;transform-origin:148px 48px">
+    <line x1="148" y1="48" x2="192" y2="28" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  </g>
+  <!-- wide-grip bar -->
+  <rect x="74" y="22" width="132" height="7" rx="3" fill="${BR}"/>
+  <rect x="72" y="20" width="16" height="11" rx="3" fill="${PL}"/>
+  <rect x="192" y="20" width="16" height="11" rx="3" fill="${PL}"/>
+</g>
+<style>
+@keyframes latDown{0%,100%{transform:translateY(0)}50%{transform:translateY(18px)}}
+@keyframes latArms{0%,100%{transform:rotate(-52deg)}50%{transform:rotate(-18deg)}}
+@keyframes latArmsR{0%,100%{transform:rotate(52deg)}50%{transform:rotate(18deg)}}
+</style></svg>`,
+
+// REMO SENTADO (c3)
+seatedrow:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Cable machine left -->
+<rect x="10" y="8" width="22" height="118" rx="4" fill="${FR}"/>
+<circle cx="21" cy="72" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Foot platform -->
+<rect x="32" y="88" width="62" height="10" rx="3" fill="${PD}"/>
+<!-- Seat + post -->
+<rect x="102" y="74" width="70" height="12" rx="4" fill="${PD}"/>
+<rect x="118" y="86" width="26" height="42" rx="4" fill="${FR}"/>
+<!-- Weight stack right -->
+<rect x="238" y="20" width="22" height="96" rx="3" fill="${FR}"/>
+<rect x="241" y="25" width="16" height="6" rx="1" fill="${PD}"/>
+<rect x="241" y="45" width="16" height="8" rx="1" fill="#22c55e" opacity="0.7"/>
+<!-- Person seated, legs extended -->
+<!-- legs horizontal -->
+<line x1="104" y1="80" x2="50" y2="86" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="104" y1="86" x2="50" y2="92" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<rect x="32" y="83" width="20" height="8" rx="2" fill="${SO}"/>
+<!-- torso upright -->
+<rect x="116" y="42" width="24" height="34" rx="8" fill="${SH}"/>
+<!-- head -->
+<rect x="122" y="33" width="10" height="11" rx="2" fill="${SK}"/>
+<circle cx="128" cy="24" r="11" fill="${SK}"/>
+<ellipse cx="128" cy="16" rx="11" ry="9" fill="${HA}"/>
+<circle cx="123" cy="24" r="2" fill="#4a3728"/>
+<circle cx="133" cy="24" r="2" fill="#4a3728"/>
+<!-- ANIMATED rowing arms -->
+<g style="animation:rowPull 2s ease-in-out infinite;transform-origin:118px 58px">
+  <line x1="118" y1="58" x2="72" y2="72" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="118" y1="63" x2="72" y2="77" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- V-bar handle -->
+  <path d="M64 72 L72 72 L72 77 L64 77" stroke="${BR}" stroke-width="3" fill="${PD}" stroke-linecap="round"/>
+  <!-- cable to machine -->
+  <line x1="64" y1="74" x2="28" y2="72" stroke="${FL}" stroke-width="1.5"/>
+</g>
+<style>@keyframes rowPull{0%,100%{transform:translateX(0)}50%{transform:translateX(16px)}}</style></svg>`,
+
+// REMO MANCUERNA (c4)
+dbrow:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Bench -->
+<rect x="56" y="60" width="110" height="14" rx="5" fill="${PD}"/>
+<rect x="56" y="73" width="22" height="54" rx="4" fill="${FR}"/>
+<rect x="144" y="73" width="22" height="54" rx="4" fill="${FR}"/>
+<!-- Person in bent-over row position -->
+<!-- support leg (left, straight) -->
+<line x1="98" y1="72" x2="88" y2="108" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<rect x="80" y="105" width="18" height="7" rx="2" fill="${SO}"/>
+<!-- back leg (right, extended) -->
+<line x1="98" y1="72" x2="152" y2="80" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="152" y1="80" x2="162" y2="108" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
+<rect x="154" y="105" width="18" height="7" rx="2" fill="${SO}"/>
+<!-- torso horizontal -->
+<rect x="76" y="50" width="62" height="18" rx="7" fill="${SH}" transform="rotate(8 107 59)"/>
+<!-- support arm on bench -->
+<line x1="84" y1="58" x2="78" y2="68" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- head -->
+<circle cx="70" cy="44" r="10" fill="${SK}"/>
+<ellipse cx="70" cy="37" rx="10" ry="8" fill="${HA}"/>
+<!-- ANIMATED dumbbell row -->
+<g style="animation:dbRow 2s ease-in-out infinite;transform-origin:138px 56px">
+  <line x1="138" y1="56" x2="152" y2="82" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- dumbbell -->
+  <rect x="146" y="79" width="28" height="8" rx="3" fill="${PD}"/>
+  <rect x="143" y="76" width="8" height="14" rx="3" fill="${FR}"/>
+  <rect x="169" y="76" width="8" height="14" rx="3" fill="${FR}"/>
+</g>
+<style>@keyframes dbRow{0%,100%{transform:rotate(12deg)}50%{transform:rotate(-22deg)}}</style></svg>`,
+
+// CURL DE BÍCEPS CABLE (c5)
+cabcurl:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Cable machine right -->
+<rect x="228" y="4" width="22" height="122" rx="4" fill="${FR}"/>
+<circle cx="239" cy="108" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Floor -->
+<rect x="0" y="118" width="280" height="12" fill="#0d1520" rx="2"/>
+<!-- Person standing, facing machine -->
+<rect x="102" y="112" width="18" height="7" rx="2" fill="${SO}"/>
+<rect x="132" y="112" width="18" height="7" rx="2" fill="${SO}"/>
+<line x1="110" y1="112" x2="108" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="140" y1="112" x2="142" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<!-- torso -->
+<rect x="110" y="52" width="22" height="40" rx="7" fill="${SH}"/>
+<!-- head -->
+<rect x="115" y="43" width="10" height="11" rx="2" fill="${SK}"/>
+<circle cx="120" cy="34" r="11" fill="${SK}"/>
+<ellipse cx="120" cy="26" rx="11" ry="9" fill="${HA}"/>
+<!-- resting arm -->
+<line x1="112" y1="60" x2="102" y2="76" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- ANIMATED curling arm -->
+<g style="animation:bcurl 2s ease-in-out infinite;transform-origin:128px 64px">
+  <line x1="128" y1="64" x2="162" y2="85" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="162" cy="85" r="5" fill="${PD}"/>
+</g>
+<!-- cable from machine to handle -->
+<path style="animation:curlCable 2s ease-in-out infinite" d="M232 108 Q200 96 162 85" stroke="${FL}" stroke-width="1.5" fill="none"/>
+<style>
+@keyframes bcurl{0%{transform:rotate(0deg)}50%{transform:rotate(-58deg)}100%{transform:rotate(0deg)}}
+@keyframes curlCable{
+  0%,100%{d:path("M232 108 Q200 96 162 85")}
+  50%{d:path("M232 108 Q200 80 130 38")}
+}
+</style></svg>`,
+
+// APERTURAS INVERSAS (c6)
+revfly:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Machine frame (pec deck reverse) -->
+<rect x="10" y="18" width="12" height="90" rx="3" fill="${FR}"/>
+<rect x="258" y="18" width="12" height="90" rx="3" fill="${FR}"/>
+<rect x="10" y="18" width="260" height="10" rx="3" fill="${FR}"/>
+<circle cx="22" cy="58" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="258" cy="58" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Seat -->
+<rect x="116" y="70" width="48" height="12" rx="4" fill="${PD}"/>
+<rect x="124" y="82" width="32" height="45" rx="4" fill="${FR}"/>
+<!-- Person seated FACING machine (seen from back — hair visible) -->
+<!-- legs -->
+<line x1="126" y1="80" x2="106" y2="102" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="154" y1="80" x2="174" y2="102" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<rect x="96" y="99" width="18" height="6" rx="2" fill="${SO}"/>
+<rect x="166" y="99" width="18" height="6" rx="2" fill="${SO}"/>
+<!-- torso (back of shirt) -->
+<rect x="126" y="36" width="28" height="36" rx="8" fill="${SH}"/>
+<!-- head from back = show hair -->
+<rect x="132" y="28" width="10" height="10" rx="2" fill="${HA}"/>
+<circle cx="140" cy="20" r="11" fill="${HA}"/>
+<!-- ANIMATED reverse fly arms going BACK/outward -->
+<g style="animation:rvFlyL 2s ease-in-out infinite;transform-origin:22px 58px">
+  <line x1="22" y1="58" x2="118" y2="52" stroke="${FR}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="118" cy="52" r="5" fill="${PD}"/>
+  <line x1="118" y1="52" x2="128" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+</g>
+<g style="animation:rvFlyR 2s ease-in-out infinite;transform-origin:258px 58px">
+  <line x1="258" y1="58" x2="162" y2="52" stroke="${FR}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="162" cy="52" r="5" fill="${PD}"/>
+  <line x1="162" y1="52" x2="152" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+</g>
+<style>
+@keyframes rvFlyL{0%,100%{transform:rotate(44deg)}50%{transform:rotate(10deg)}}
+@keyframes rvFlyR{0%,100%{transform:rotate(-44deg)}50%{transform:rotate(-10deg)}}
+</style></svg>`,
 };
 
-// Map exercise rest times (matches the plan)
-function getRestTime(id) {
-  // 90s: compound movements (squats, press, rows, pulldowns)
-  const long90 = ['a2','b2','c2','c3','c4'];
-  // 60s: isolation / cardio markers
-  return long90.includes(id) ? 90 : 60;
+const map={a1:'cardio',a2:'squat',a3:'legext',a4:'legcurl',a5:'cruncha',a6:'cardio',
+           b1:'cardio',b2:'incpress',b3:'pecfly',b4:'latsideq',b5:'tripdwn',b6:'cardio',
+           c1:'cardio',c2:'latpull',c3:'seatedrow',c4:'dbrow',c5:'cabcurl',c6:'revfly',c7:'cardio'};
+return anims[map[id]]||'';
 }
 
-function toggleSet(id, i) {
-  if (!S.sets[id]) S.sets[id] = {};
-  const wasOff = !S.sets[id][i];
-  S.sets[id][i] = !S.sets[id][i];
-  saveState();
-  render();
-  // Only start timer when MARKING a set as done (not when un-marking)
-  if (wasOff && S.tab === 'workout') {
-    // Find exercise name
-    const day = PLAN[S.day];
-    const ex = day.ex.find(e => e.id === id);
-    if (ex && !ex.cardio) {
-      const secs = getRestTime(id);
-      RT.start(secs, ex.n);
-    }
+// REST TIMER
+const CIRC=2*Math.PI*20;
+const RT={
+  _tid:null,_remaining:0,_total:0,_hideT:null,
+  start(secs,name){
+    clearInterval(this._tid);clearTimeout(this._hideT);
+    this._total=secs;this._remaining=secs;
+    const el=document.getElementById('rest-timer');
+    if(!el)return;
+    el.classList.remove('done');el.classList.add('show');
+    document.getElementById('rt-msg').textContent=name||'Recuperando...';
+    this._draw();
+    this._tid=setInterval(()=>{
+      this._remaining--;
+      if(this._remaining<=0){this._remaining=0;this._draw();clearInterval(this._tid);this._done();}
+      else{this._draw();}
+    },1000);
+  },
+  _draw(){
+    const arc=document.getElementById('rt-arc'),num=document.getElementById('rt-num');
+    if(!arc||!num)return;
+    const pct=this._remaining/this._total;
+    arc.style.strokeDasharray=CIRC;arc.style.strokeDashoffset=CIRC*(1-pct);
+    num.textContent=this._remaining;
+    arc.style.stroke=this._remaining<=10?'var(--amber)':'var(--green)';
+  },
+  _done(){
+    const el=document.getElementById('rest-timer');
+    if(el)el.classList.add('done');
+    const num=document.getElementById('rt-num'),msg=document.getElementById('rt-msg');
+    if(num)num.textContent='✓';
+    if(msg)msg.textContent='¡Listo! A la siguiente serie 💪';
+    try{if('vibrate'in navigator)navigator.vibrate([200,100,200]);}catch(e){}
+    this._hideT=setTimeout(()=>this.hide(),4000);
+  },
+  skip(){clearInterval(this._tid);clearTimeout(this._hideT);this.hide();},
+  hide(){const el=document.getElementById('rest-timer');if(el)el.classList.remove('show');clearInterval(this._tid);}
+};
+function getRestSecs(id){return['a2','b2','c2','c3','c4'].includes(id)?90:60;}
+
+function toggleSet(id,i){
+  if(!S.sets[id])S.sets[id]={};
+  const wasOff=!S.sets[id][i];
+  S.sets[id][i]=!S.sets[id][i];
+  saveState();render();
+  if(wasOff&&S.tab==='workout'){
+    const ex=PLAN[S.day].ex.find(e=>e.id===id);
+    if(ex&&!ex.cardio)RT.start(getRestSecs(id),ex.n);
   }
 }
 function updLog(id,f,v){if(!S.logs[id])S.logs[id]={};S.logs[id][f]=v;saveState();}
@@ -503,7 +1046,7 @@ function renderWorkout(){
         <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${ex.n}</div><div class="exm">${ex.eq} · ${ex.cardio?ex.r:ex.s+'×'+ex.r+' reps'}</div></div>
         ${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
-      ${isOpen?`<div class="exb"><div class="tip">${ex.tip}</div>
+      ${isOpen?`<div class="exb">${exSVG(ex.id)?`<div class="ex-anim">${exSVG(ex.id)}</div>`:''}<div class="tip">${ex.tip}</div>
         ${!ex.cardio?`<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:8px">Series completadas</div>
           <div class="srow">${sbHtml}</div>
           <div class="irow"><label>Peso</label><input class="inp" type="number" placeholder="kg" value="${l.w||''}" oninput="updLog('${ex.id}','w',this.value)" step="2.5" inputmode="decimal"/></div>
