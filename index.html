@@ -206,6 +206,45 @@ input{font-family:inherit}
 .botbar.coach-enabled{padding:0}
 .botbar.coach-enabled .bb{font-size:9.5px}
 .botbar.coach-enabled .bb svg{width:20px;height:20px}
+/* EXERCISE HISTORY MODAL */
+.hist-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:7px 12px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:5px;margin-top:4px}
+.hist-btn:active{transform:scale(.95)}
+.hist-btn svg{width:12px;height:12px}
+.hist-modal{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;display:flex;align-items:flex-end;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.hist-panel{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;margin:0 auto;max-height:88vh;display:flex;flex-direction:column;border-top:1px solid var(--border2);animation:slideUp .3s cubic-bezier(.3,1.3,.5,1);position:relative}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.hist-head{padding:18px 18px 14px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:2;border-radius:var(--r) var(--r) 0 0}
+.hist-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 14px}
+.hist-title{font-size:16px;font-weight:600;letter-spacing:-.2px;margin-bottom:3px;padding-right:34px}
+.hist-sub{font-size:12px;color:var(--text2);padding-right:34px}
+.hist-body{flex:1;overflow-y:auto;padding:14px 18px calc(22px + var(--sb))}
+.hist-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px}
+.hist-stat{background:#141414;border:1px solid var(--border);border-radius:var(--rsm);padding:10px 8px;text-align:center}
+.hist-stat-v{font-size:17px;font-weight:600;font-family:'DM Mono',monospace;line-height:1}
+.hist-stat-l{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.5px;margin-top:3px;font-weight:600}
+.hist-chart{height:110px;margin-bottom:16px;background:#141414;border-radius:var(--rsm);padding:8px;border:1px solid var(--border)}
+.hist-sectitle{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1.2px;margin:10px 0 8px}
+.hist-entry{display:flex;align-items:center;gap:10px;padding:11px 12px;background:#141414;border:1px solid var(--border);border-radius:var(--rsm);margin-bottom:6px}
+.hist-entry.pr{border-color:var(--green-b);background:rgba(34,197,94,.05)}
+.hist-entry-date{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;min-width:50px;flex-shrink:0}
+.hist-entry-main{flex:1;min-width:0}
+.hist-entry-w{font-size:15px;font-weight:600;font-family:'DM Mono',monospace}
+.hist-entry-extra{font-size:11px;color:var(--text2);margin-top:1px}
+.hist-entry-diff{font-size:11px;font-weight:500;font-family:'DM Mono',monospace;flex-shrink:0}
+.hist-entry-diff.up{color:var(--green)}
+.hist-entry-diff.down{color:var(--amber)}
+.hist-entry-pr{font-size:10px;background:var(--green);color:#000;padding:2px 6px;border-radius:10px;font-weight:700;letter-spacing:.3px}
+.hist-close{position:absolute;top:16px;right:16px;background:var(--bg3);border:1px solid var(--border2);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--text2);font-size:14px;z-index:3}
+.hist-close:active{transform:scale(.9)}
+/* SUGGESTED WEIGHT AUTOFILL */
+.inp-wrap{position:relative;flex:1;display:flex}
+.inp-wrap .inp{padding-right:64px}
+.inp-sug{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:10px;background:rgba(34,197,94,.15);color:#86efac;padding:4px 8px;border-radius:5px;font-weight:600;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid rgba(34,197,94,.3);line-height:1;letter-spacing:.2px}
+.inp-sug:active{transform:translateY(-50%) scale(.95)}
+.inp-sug.info{background:rgba(59,130,246,.15);color:#93c5fd;border-color:rgba(59,130,246,.3)}
+.last-sess{font-size:11px;color:var(--text3);margin:0 0 6px 50px;font-family:'DM Mono',monospace;line-height:1.4}
+.last-sess strong{color:var(--text2);font-weight:500}
 </style>
 </head>
 <body>
@@ -315,7 +354,7 @@ function loadState(){try{const r=localStorage.getItem('gymtrack_v3');if(r)return
 function saveState(){try{localStorage.setItem('gymtrack_v3',JSON.stringify(S));}catch(e){}}
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
-  coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null},loadState()||{});
+  coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,histOpen:null},loadState()||{});
 
 // Initialize coach start if not set
 if(!S.coachStart&&S.sessions.length>0){
@@ -1659,6 +1698,147 @@ function renderDash(){
   </div></div>`:''}`;
 }
 
+// ─── EXERCISE HISTORY & WEIGHT SUGGESTIONS ─────────────────
+
+function getLastSession(exId){
+  // Returns the most recent strength record for this exercise
+  const data=S.strength[exId];
+  if(!data||data.length===0)return null;
+  return data[data.length-1];
+}
+
+function getSuggestedWeight(exId,targetReps){
+  // Decide suggested weight for next session based on last performance
+  const last=getLastSession(exId);
+  if(!last)return null;
+
+  const lastW=last.v;
+  const ex=Object.values(PLAN).flatMap(d=>d.ex).find(e=>e.id===exId);
+  if(!ex||ex.cardio)return null;
+
+  // Look at the last 2 sessions to decide
+  const data=S.strength[exId]||[];
+  if(data.length===0)return null;
+
+  // If we have the "logs" in state for this exercise that are fresh (current session),
+  // we mean "what peso to START with today". Base on history.
+  const tRep=parseInt(targetReps)||12;
+
+  // Heuristic: if last session was a new PR or improved, suggest +2.5kg
+  // If stagnant (2+ equal sessions), suggest same
+  // If regressed, suggest same as last
+  if(data.length===1)return{w:lastW,reason:'última',type:'ok'};
+
+  const prev=data[data.length-2].v;
+  if(lastW>prev)return{w:lastW+2.5,reason:'+2.5 kg',type:'up'};
+  if(lastW===prev)return{w:lastW,reason:'mantén',type:'ok'};
+  return{w:lastW,reason:'última',type:'ok'};
+}
+
+function applySuggestion(exId,targetReps){
+  const sug=getSuggestedWeight(exId,targetReps);
+  if(!sug)return;
+  if(!S.logs[exId])S.logs[exId]={};
+  S.logs[exId].w=sug.w.toString();
+  saveState();render();
+}
+
+// ─── HISTORY MODAL ─────────────────────────────────────────
+
+function openHistory(exId){
+  S.histOpen=exId;
+  render();
+}
+
+function closeHistory(){
+  S.histOpen=null;
+  render();
+}
+
+function renderHistoryModal(){
+  if(!S.histOpen)return'';
+  const exId=S.histOpen;
+  const ex=Object.values(PLAN).flatMap(d=>d.ex).find(e=>e.id===exId);
+  if(!ex)return'';
+
+  const data=(S.strength[exId]||[]).slice().reverse(); // newest first
+
+  if(data.length===0){
+    return`<div class="hist-modal" onclick="if(event.target===this)closeHistory()">
+      <div class="hist-panel">
+        <div class="hist-head">
+          <div class="hist-hdl"></div>
+          <div class="hist-title">${ex.n}</div>
+          <div class="hist-sub">${ex.eq} · ${ex.s}×${ex.r} reps</div>
+          <button class="hist-close" onclick="closeHistory()">×</button>
+        </div>
+        <div class="hist-body">
+          <div class="empty" style="padding:40px 20px">
+            <div class="eic">📊</div>
+            <p>Sin registros todavía. Completa una sesión para empezar a ver tu historial.</p>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  // Calculate stats
+  const allW=data.map(d=>d.v);
+  const maxW=Math.max(...allW);
+  const firstW=data[data.length-1].v;
+  const lastW=data[0].v;
+  const gain=lastW-firstW;
+  const totalSessions=data.length;
+
+  // Determine PRs (each entry that was max at time of recording)
+  const prs=new Set();
+  let runMax=0;
+  data.slice().reverse().forEach(d=>{
+    if(d.v>runMax){prs.add(d.ts);runMax=d.v;}
+  });
+
+  // Spark data
+  const chartData=data.slice().reverse();
+
+  // Entries with delta calculation
+  const entries=data.map((d,i)=>{
+    const next=data[i+1]; // previous in chronological terms = next in reversed array
+    const delta=next?d.v-next.v:0;
+    const isPr=prs.has(d.ts);
+    return{d,delta,isPr};
+  });
+
+  return`<div class="hist-modal" onclick="if(event.target===this)closeHistory()">
+    <div class="hist-panel">
+      <div class="hist-head">
+        <div class="hist-hdl"></div>
+        <div class="hist-title">${ex.n}</div>
+        <div class="hist-sub">${ex.eq} · ${ex.s}×${ex.r} reps objetivo</div>
+        <button class="hist-close" onclick="closeHistory()">×</button>
+      </div>
+      <div class="hist-body">
+        <div class="hist-stats">
+          <div class="hist-stat"><div class="hist-stat-v" style="color:var(--green)">${maxW}</div><div class="hist-stat-l">PR (kg)</div></div>
+          <div class="hist-stat"><div class="hist-stat-v" style="color:${gain>0?'var(--green)':gain<0?'var(--amber)':'var(--text)'}">${gain>0?'+':''}${gain.toFixed(1)}</div><div class="hist-stat-l">Total (kg)</div></div>
+          <div class="hist-stat"><div class="hist-stat-v">${totalSessions}</div><div class="hist-stat-l">Sesiones</div></div>
+        </div>
+        ${chartData.length>=2?`<div class="hist-chart">${spark(chartData,'#22c55e')}</div>`:''}
+        <div class="hist-sectitle">Historial completo</div>
+        ${entries.map(e=>`<div class="hist-entry${e.isPr?' pr':''}">
+          <div class="hist-entry-date">${e.d.d}</div>
+          <div class="hist-entry-main">
+            <div class="hist-entry-w">${e.d.v} kg</div>
+            <div class="hist-entry-extra">${ex.s}×${ex.r} reps</div>
+          </div>
+          ${e.isPr?'<span class="hist-entry-pr">PR</span>':
+            e.delta!==0?`<span class="hist-entry-diff ${e.delta>0?'up':'down'}">${e.delta>0?'+':''}${e.delta.toFixed(1)} kg</span>`:
+            '<span class="hist-entry-diff" style="color:var(--text3)">=</span>'}
+        </div>`).join('')}
+      </div>
+    </div>
+  </div>`;
+}
+
 function renderWorkout(){
   const tabs=['A','B','C'].map(k=>`<button class="tab ${S.day===k?'on':''}" onclick="S.day='${k}';S.open=null;render()">${PLAN[k].label}</button>`).join('');
   const day=PLAN[S.day],strEx=day.ex.filter(e=>!e.cardio);
@@ -1676,9 +1856,31 @@ function renderWorkout(){
         ${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${exSVG(ex.id)?`<div class="ex-anim">${exSVG(ex.id)}</div>`:''}<div class="tip">${ex.tip}</div>
-        ${!ex.cardio?`<div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:8px">Series completadas</div>
+        ${!ex.cardio?`
+          ${(()=>{
+            const last=getLastSession(ex.id);
+            const sug=getSuggestedWeight(ex.id,ex.r);
+            return last?`<div class="last-sess">Última sesión: <strong>${last.v} kg</strong> · ${last.d}</div>`:'';
+          })()}
+          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between">
+            <span>Series completadas</span>
+            <button class="hist-btn" onclick="openHistory('${ex.id}')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+              Ver historial
+            </button>
+          </div>
           <div class="srow">${sbHtml}</div>
-          <div class="irow"><label>Peso</label><input class="inp" type="number" placeholder="kg" value="${l.w||''}" oninput="updLog('${ex.id}','w',this.value)" step="2.5" inputmode="decimal"/></div>
+          <div class="irow">
+            <label>Peso</label>
+            <div class="inp-wrap">
+              <input class="inp" type="number" placeholder="${(()=>{const s=getSuggestedWeight(ex.id,ex.r);return s?s.w+' kg sugerido':'kg';})()}" value="${l.w||''}" oninput="updLog('${ex.id}','w',this.value)" step="2.5" inputmode="decimal"/>
+              ${(()=>{
+                const s=getSuggestedWeight(ex.id,ex.r);
+                if(!s)return'';
+                return`<span class="inp-sug ${s.type==='up'?'':'info'}" onclick="applySuggestion('${ex.id}','${ex.r}')">${s.w} kg</span>`;
+              })()}
+            </div>
+          </div>
           <div class="irow"><label>Reps</label><input class="inp" type="number" placeholder="${ex.r}" value="${l.r||''}" oninput="updLog('${ex.id}','r',this.value)" inputmode="numeric"/></div>
           ${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}`
         :`<button class="btn ${c[0]?'bs':'bp'}" onclick="toggleSet('${ex.id}',0);render()">${c[0]?'✅ Marcado como hecho':'✓ Marcar como hecho'}</button>`}
@@ -1691,7 +1893,9 @@ function renderWorkout(){
   <div class="tabs">${tabs}</div>
   ${allDone?`<div class="fbanner">🎉 ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
   ${exHtml}
-  <div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?'✅ Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`;
+  <div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?'✅ Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>
+  ${S.histOpen?renderHistoryModal():''}`;
+
 }
 
 function renderProg(){
