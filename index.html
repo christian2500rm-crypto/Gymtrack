@@ -19,6 +19,8 @@
   --red:#ef4444;--blue:#3b82f6;--amber:#f59e0b;--pink:#ec4899;
   --r:14px;--rsm:9px;--rxs:6px;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
+  --kb:0px; /* virtual keyboard height — se actualiza vía JS con visualViewport */
+  --vh:100vh; /* altura real viewport — se actualiza vía JS */
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px;line-height:1.5;overscroll-behavior:none;-webkit-font-smoothing:antialiased}
@@ -120,8 +122,8 @@ input{font-family:inherit}
 .ob-dot{width:6px;height:6px;border-radius:50%;background:var(--bg3)}
 .ob-dot.on{background:var(--green);width:18px;border-radius:3px}
 /* MODAL */
-.mover{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;z-index:200;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.modal{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));width:100%;border-top:1px solid var(--border2)}
+.mover{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;z-index:200;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overscroll-behavior:contain;padding-bottom:var(--kb)}
+.modal{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));width:100%;max-height:calc(85vh - var(--kb));max-height:calc(85dvh - var(--kb));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-top:1px solid var(--border2)}
 .modal-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
 .modal h3{font-size:17px;font-weight:600;margin-bottom:14px;letter-spacing:-.2px}
 /* EXERCISE ANIMATION */
@@ -209,8 +211,8 @@ input{font-family:inherit}
 /* HISTORIAL + SUGERENCIA PESO */
 .hist-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:6px 10px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
 .hist-btn:active{transform:scale(.95)}
-.hist-over{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
-.hist-sheet{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;max-height:80vh;max-height:80dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-top:1px solid var(--border2);padding-bottom:env(safe-area-inset-bottom,0px)}
+.hist-over{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:300;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overscroll-behavior:contain;padding-bottom:var(--kb)}
+.hist-sheet{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:480px;max-height:calc(85vh - var(--kb));max-height:calc(85dvh - var(--kb));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-top:1px solid var(--border2);padding-bottom:env(safe-area-inset-bottom,0px)}
 .hist-sheet-head{padding:16px 16px 12px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg2);z-index:1}
 .hist-sheet-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 12px}
 .hist-sheet-title{font-size:15px;font-weight:600;letter-spacing:-.2px}
@@ -239,9 +241,9 @@ input{font-family:inherit}
 #toast{position:fixed;top:calc(var(--st) + 14px);left:50%;transform:translateX(-50%) translateY(-120%);background:rgba(26,26,26,0.96);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:calc(100% - 28px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 /* ── CONFIRM MODAL ── */
-.cmov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .2s ease}
+.cmov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .2s ease;overscroll-behavior:contain;padding-bottom:var(--kb)}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.cmod{background:var(--bg2);width:100%;max-width:480px;border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));border-top:1px solid var(--border2);animation:slideUp .3s cubic-bezier(.34,1.2,.64,1)}
+.cmod{background:var(--bg2);width:100%;max-width:480px;max-height:calc(85vh - var(--kb));max-height:calc(85dvh - var(--kb));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));border-top:1px solid var(--border2);animation:slideUp .3s cubic-bezier(.34,1.2,.64,1)}
 @keyframes slideUp{from{transform:translateY(20px);opacity:.5}to{transform:translateY(0);opacity:1}}
 .cmod-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
 .cmod-t{font-size:17px;font-weight:600;letter-spacing:-.2px;margin-bottom:8px}
@@ -347,6 +349,8 @@ input[type=number]{-moz-appearance:textfield}
 <div id="toast"></div>
 <div id="cmodal-root"></div>
 <div id="settings-root"></div>
+<div id="wmodal-root"></div>
+<div id="hist-root"></div>
 
 <script>
 const PLAN={
@@ -1828,7 +1832,7 @@ function renderDash(){
   return`
   <div class="topbar"><div class="topbar-row"><div><h1>${greet} 💪</h1><div class="sub">${tot===0?'Primera sesión — el inicio es hoy':`${tot} sesión${tot!==1?'es':''} completada${tot!==1?'s':''}`}</div></div>
   <div style="display:flex;gap:8px;align-items:center">
-    <button class="icon-btn" onclick="S.wmodal=true;render()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Peso</button>
+    <button class="icon-btn" onclick="S.wmodal=true;renderWmodal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Peso</button>
     <button class="settings-btn" aria-label="Ajustes" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
   </div></div>
@@ -1855,7 +1859,7 @@ function renderDash(){
       <span>Actual: <strong style="color:var(--text);font-family:'DM Mono',monospace">${S.weights[S.weights.length-1].v} kg</strong></span>
       <span>Cambio: <strong style="font-family:'DM Mono',monospace;color:${(S.weights[S.weights.length-1].v-S.weights[0].v)<=0?'var(--green)':'var(--red)'}">${((S.weights[S.weights.length-1].v-S.weights[0].v)>0?'+':'')+(S.weights[S.weights.length-1].v-S.weights[0].v).toFixed(1)} kg</strong></span>
     </div>`:`<div class="empty"><div class="eic">⚖️</div><p>Registra tu peso en cada sesión para ver la evolución aquí.</p></div>`}
-    <button class="btn bs" style="margin-top:12px" onclick="S.wmodal=true;render()">Registrar peso de hoy</button>
+    <button class="btn bs" style="margin-top:12px" onclick="S.wmodal=true;renderWmodal()">Registrar peso de hoy</button>
   </div>
   <div class="sh">Próxima sesión</div>
   <div class="card">
@@ -1880,13 +1884,23 @@ function renderDash(){
     <span style="font-size:13px;color:var(--text2);flex:1">${PLAN[s.day].focus}</span>
     <span style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">${s.date}</span>
   </div>`).join('')}</div>`:''}
-  ${S.wmodal?`<div class="mover" onclick="if(event.target===this){S.wmodal=false;render()}"><div class="modal">
+  `;
+}
+
+function renderWmodal(){
+  const root=document.getElementById('wmodal-root');
+  if(!root)return;
+  if(!S.wmodal){root.innerHTML='';return;}
+  const lw=S.weights.length?S.weights[S.weights.length-1]:null;
+  root.innerHTML=`<div class="mover" onclick="if(event.target===this){S.wmodal=false;S.wnew='';renderWmodal()}"><div class="modal">
     <div class="modal-hdl"></div>
     <h3>Registrar peso corporal</h3>
-    <input class="ob-inp" type="number" placeholder="${lw?lw.v:'105'}" value="${S.wnew}" oninput="S.wnew=this.value" step="0.1" inputmode="decimal" autofocus onkeydown="if(event.key==='Enter')logW()"/>
+    <input class="ob-inp" id="wmodal-input" type="number" placeholder="${lw?lw.v:'105'}" value="${S.wnew||''}" oninput="S.wnew=this.value" step="0.1" inputmode="decimal" onkeydown="if(event.key==='Enter')logW()"/>
     <p style="font-size:12px;color:var(--text3);text-align:center;margin:8px 0 14px">Pésate siempre en las mismas condiciones (mañana, en ayunas)</p>
-    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="logW()">Guardar</button><button class="btn bs" style="width:90px" onclick="S.wmodal=false;render()">Cancelar</button></div>
-  </div></div>`:''}`;
+    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="logW()">Guardar</button><button class="btn bs" style="width:90px" onclick="S.wmodal=false;S.wnew='';renderWmodal()">Cancelar</button></div>
+  </div></div>`;
+  // Focus diferido: iOS a veces ignora autofocus en elementos insertados dinámicamente
+  setTimeout(()=>{const i=document.getElementById('wmodal-input');if(i){i.focus();i.select&&i.select();}},60);
 }
 
 // ─── HISTORIAL Y SUGERENCIA DE PESO ─────────────────────────
@@ -1930,19 +1944,24 @@ function useSug(exId){
   saveState();render();
 }
 
-function openHist(exId){S._hist=exId;render();}
-function closeHist(){S._hist=null;render();}
+function openHist(exId){S._hist=exId;renderHist();}
+function closeHist(){S._hist=null;renderHist();}
 
-function histHTML(){
-  if(!S._hist)return'';
+function renderHist(){
+  const root=document.getElementById('hist-root');
+  if(!root)return;
+  if(!S._hist){root.innerHTML='';return;}
   const exId=S._hist;
   const ex=Object.values(PLAN).flatMap(d=>d.ex).find(e=>e.id===exId);
-  if(!ex)return'';
+  if(!ex){root.innerHTML='';return;}
   const data=(S.strength[exId]||[]).slice();
-  if(data.length===0)return`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet">
-    <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${ex.n}</div><div class="hist-sheet-sub">${ex.eq} · ${ex.s}×${ex.r} reps</div><button class="hist-sheet-close" onclick="closeHist()">✕</button></div>
-    <div class="hist-sheet-body"><div class="empty"><div class="eic">📊</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
-  </div></div>`;
+  if(data.length===0){
+    root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet">
+      <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${ex.n}</div><div class="hist-sheet-sub">${ex.eq} · ${ex.s}×${ex.r} reps</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
+      <div class="hist-sheet-body"><div class="empty"><div class="eic">📊</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
+    </div></div>`;
+    return;
+  }
 
   const ws=data.map(d=>d.v);
   const mx=Math.max(...ws), first=data[0].v, last=data[data.length-1].v;
@@ -1965,12 +1984,12 @@ function histHTML(){
     </div>`;
   }).join('');
 
-  return`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet">
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet">
     <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
       <div class="hist-sheet-title">${ex.n}</div>
       <div class="hist-sheet-sub">${ex.eq} · ${ex.s}×${ex.r} reps objetivo</div>
-      <button class="hist-sheet-close" onclick="closeHist()">✕</button>
+      <button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
       <div class="hist-row">
@@ -2019,7 +2038,7 @@ function renderWorkout(){
   ${allDone?`<div class="fbanner">🎉 ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
   ${exHtml}
   <div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?'✅ Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>
-  ${histHTML()}`;
+  `;
 }
 
 function renderProg(){
@@ -2091,6 +2110,8 @@ function render(){
   else if(S.tab==='coach')s.innerHTML=renderCoach();
   else s.innerHTML=renderProg();
   renderSettings();
+  renderWmodal();
+  renderHist();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2381,6 +2402,31 @@ function resetAllData(){
     }
   });
 }
+
+// ── iOS viewport + teclado virtual: actualizar --kb cuando aparece el teclado ─
+(function setupViewport(){
+  const root=document.documentElement;
+  function update(){
+    try{
+      if(window.visualViewport){
+        const vv=window.visualViewport;
+        // Diferencia entre altura del layout viewport y el visual viewport = teclado
+        const kb=Math.max(0,window.innerHeight-vv.height-vv.offsetTop);
+        root.style.setProperty('--kb',kb+'px');
+        root.style.setProperty('--vh',vv.height+'px');
+      }else{
+        root.style.setProperty('--vh',window.innerHeight+'px');
+      }
+    }catch(e){}
+  }
+  update();
+  if(window.visualViewport){
+    window.visualViewport.addEventListener('resize',update);
+    window.visualViewport.addEventListener('scroll',update);
+  }
+  window.addEventListener('resize',update);
+  window.addEventListener('orientationchange',()=>setTimeout(update,120));
+})();
 
 if(S.onboarded){document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();}
 </script>
