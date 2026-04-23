@@ -235,6 +235,42 @@ input{font-family:inherit}
 .sug-tag.keep{background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.25)}
 .last-info{font-size:11px;color:var(--text3);margin:0 0 6px;padding-left:50px;font-family:'DM Mono',monospace}
 .last-info b{color:var(--text2);font-weight:500}
+/* ── TOAST ── */
+#toast{position:fixed;top:calc(var(--st) + 14px);left:50%;transform:translateX(-50%) translateY(-120%);background:rgba(26,26,26,0.96);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:calc(100% - 28px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* ── CONFIRM MODAL ── */
+.cmov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.cmod{background:var(--bg2);width:100%;max-width:480px;border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));border-top:1px solid var(--border2);animation:slideUp .3s cubic-bezier(.34,1.2,.64,1)}
+@keyframes slideUp{from{transform:translateY(20px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.cmod-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
+.cmod-t{font-size:17px;font-weight:600;letter-spacing:-.2px;margin-bottom:8px}
+.cmod-b{font-size:14px;color:var(--text2);line-height:1.55;margin-bottom:18px}
+.cmod-btns{display:flex;gap:10px}
+.cmod-btns .btn{flex:1}
+/* ── SHAKE ── */
+.shake{animation:shake .5s}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-5px)}40%,60%{transform:translateX(5px)}}
+/* ── SETTINGS BUTTON ── */
+.settings-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text2);flex-shrink:0;cursor:pointer;transition:transform .15s}
+.settings-btn:active{transform:scale(.92)}
+.settings-btn svg{width:16px;height:16px;stroke-width:2}
+/* ── SETTINGS SHEET ── */
+.set-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin:0 14px 10px;overflow:hidden}
+.set-row{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.set-row:last-child{border-bottom:none}
+.set-row:active{background:var(--bg3)}
+.set-row-info{flex:1;min-width:0}
+.set-row-t{font-size:14px;font-weight:500;margin-bottom:2px}
+.set-row-d{font-size:12px;color:var(--text2);line-height:1.4}
+.set-row-v{font-size:13px;color:var(--text3);font-family:'DM Mono',monospace;flex-shrink:0}
+.set-row.danger .set-row-t{color:var(--red)}
+.set-row-arrow{color:var(--text3);font-size:14px;flex-shrink:0}
+/* ── iOS-specific tweaks ── */
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+/* evitar zoom en inputs (iOS hace zoom si font-size < 16px) */
+@supports(-webkit-touch-callout:none){.inp,.ob-inp{font-size:16px}}
 </style>
 </head>
 <body>
@@ -308,6 +344,10 @@ input{font-family:inherit}
   </div>
 </div>
 
+<div id="toast"></div>
+<div id="cmodal-root"></div>
+<div id="settings-root"></div>
+
 <script>
 const PLAN={
   A:{label:'Día A',focus:'Piernas + abdomen',pill:'pa',ex:[
@@ -339,17 +379,86 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
+const SCHEMA_VERSION=4;
 
 function loadState(){try{const r=localStorage.getItem('gymtrack_v3');if(r)return JSON.parse(r);}catch(e){}return null;}
 function saveState(){try{localStorage.setItem('gymtrack_v3',JSON.stringify(S));}catch(e){}}
 
+// Migración de datos: aseguramos campos añadidos en versiones nuevas
+function migrateState(data){
+  if(!data)return data;
+  const v=data.schema_version||1;
+  if(v<4){
+    // v2: coachStart; v3: coachInsights; v4: registros con r/setsDone
+    data.coachStart=data.coachStart||null;
+    data.mesocycles=data.mesocycles||[];
+    data.coachInsights=data.coachInsights||null;
+    data.coachInsightsStale=data.coachInsightsStale!==false;
+    // Los strength[].r y setsDone pueden faltar en registros antiguos; los dejamos como null y las funciones son defensivas
+  }
+  data.schema_version=SCHEMA_VERSION;
+  return data;
+}
+
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
-  coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null},loadState()||{});
+  coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false},migrateState(loadState())||{});
 
 // Initialize coach start if not set
 if(!S.coachStart&&S.sessions.length>0){
   S.coachStart=S.sessions[0].ts||Date.now();
   saveState();
+}
+
+// ── UI HELPERS ────────────────────────────────────────────────
+let _toastT=null;
+function toast(msg,ms){
+  const el=document.getElementById('toast');
+  if(!el)return;
+  el.textContent=msg;
+  el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT=setTimeout(()=>el.classList.remove('show'),ms||2600);
+}
+
+// Modal de confirmación (reemplaza confirm nativo)
+let _cmodalState=null;
+function confirmModal({title,body,okText,cancelText,onOk,onCancel,danger}){
+  _cmodalState={title,body,okText:okText||'Aceptar',cancelText:cancelText||'Cancelar',onOk,onCancel,danger:!!danger};
+  renderCmodal();
+}
+function closeCmodal(runCancel){
+  const st=_cmodalState;_cmodalState=null;renderCmodal();
+  if(runCancel&&st&&typeof st.onCancel==='function')st.onCancel();
+}
+function cmodalOk(){
+  const st=_cmodalState;_cmodalState=null;renderCmodal();
+  if(st&&typeof st.onOk==='function')st.onOk();
+}
+function renderCmodal(){
+  const root=document.getElementById('cmodal-root');
+  if(!root)return;
+  if(!_cmodalState){root.innerHTML='';return;}
+  const s=_cmodalState;
+  // Escape básico para evitar inyección HTML en título/body si viniera de datos del usuario
+  const esc=str=>String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  root.innerHTML=`<div class="cmov" onclick="if(event.target===this)closeCmodal(true)"><div class="cmod">
+    <div class="cmod-hdl"></div>
+    <div class="cmod-t">${esc(s.title)}</div>
+    <div class="cmod-b">${esc(s.body)}</div>
+    <div class="cmod-btns">
+      <button class="btn bs" onclick="closeCmodal(true)">${esc(s.cancelText)}</button>
+      <button class="btn ${s.danger?'bp':'bp'}" style="${s.danger?'background:var(--red);color:#fff':''}" onclick="cmodalOk()">${esc(s.okText)}</button>
+    </div>
+  </div></div>`;
+}
+
+// Haptic feedback — iOS Safari no implementa navigator.vibrate, pero no rompe si no existe
+function haptic(pattern){
+  try{
+    if(typeof navigator!=='undefined'&&typeof navigator.vibrate==='function'){
+      navigator.vibrate(pattern);
+    }
+  }catch(e){}
 }
 
 let obSelDay='A';
@@ -362,13 +471,21 @@ function obNext(){
 }
 function obFinish(){
   const v=parseFloat(document.getElementById('ob-weight').value);if(!v)return;
-  S.weights.push({d:fmtDate(new Date()),v,ts:Date.now()});
+  const now=Date.now();
+  S.weights.push({d:fmtDate(new Date()),v,ts:now});
   S.startDay=obSelDay;S.nextDay=obSelDay;S.day=obSelDay;S.onboarded=true;
+  S.coachStart=now;
   saveState();document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();
 }
 
 function fmtDate(d){return d.getDate()+' '+MONTHS[d.getMonth()];}
 function getNextDay(c){return DAY_ORDER[(DAY_ORDER.indexOf(c)+1)%3];}
+// Cuenta series completadas de forma defensiva (sólo índices 0..maxSets-1)
+function countSetsDone(exId,maxSets){
+  const c=S.sets[exId]||{};let n=0;
+  for(let i=0;i<maxSets;i++){if(c[i])n++;}
+  return n;
+}
 function getWeekSessions(){
   const t=new Date(),dow=t.getDay(),off=dow===0?-6:1-dow;
   const mon=new Date(t);mon.setDate(t.getDate()+off);mon.setHours(0,0,0,0);
@@ -407,7 +524,10 @@ function spark(data,color){
 }
 
 function getSug(id,sets,reps){
-  const c=S.sets[id]||{},done=Object.values(c).filter(Boolean).length;if(done<sets)return null;
+  const c=S.sets[id]||{};
+  // Contar solo series dentro del rango válido del ejercicio
+  let done=0;for(let i=0;i<sets;i++){if(c[i])done++;}
+  if(done<sets)return null;
   const l=S.logs[id]||{},w=parseFloat(l.w)||0,r=parseInt(l.r)||0,rt=parseInt(reps)||12;if(!w)return null;
   if(r>=rt)return{t:'up',m:`¡Series completas! Próxima sesión prueba con ${(w+2.5).toFixed(1)} kg (+2.5 kg) 🎯`};
   if(r<rt-2)return{t:'dn',m:`Sin problema — mantén ${w} kg hasta que las reps salgan limpias. ✊`};
@@ -554,7 +674,7 @@ legext:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <circle cx="87" cy="14" r="2" fill="#4a3728"/>
 <circle cx="97" cy="14" r="2" fill="#4a3728"/>
 <!-- hands on side handles -->
-<line x1="84" y1="38" width="4" height="0" x2="72" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<line x1="84" y1="38" x2="72" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
 <line x1="100" y1="38" x2="112" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
 <!-- upper leg on seat -->
 <line x1="92" y1="64" x2="140" y2="66" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
@@ -1035,7 +1155,7 @@ const RT={
     const num=document.getElementById('rt-num'),msg=document.getElementById('rt-msg');
     if(num)num.textContent='✓';
     if(msg)msg.textContent='¡Listo! A la siguiente serie 💪';
-    try{if('vibrate'in navigator)navigator.vibrate([200,100,200]);}catch(e){}
+    try{haptic([200,100,200]);}catch(e){}
     this._hideT=setTimeout(()=>this.hide(),4000);
   },
   skip(){clearInterval(this._tid);clearTimeout(this._hideT);this.hide();},
@@ -1051,24 +1171,74 @@ function toggleSet(id,i){
   if(wasOff&&S.tab==='workout'){
     const ex=PLAN[S.day].ex.find(e=>e.id===id);
     if(ex&&!ex.cardio)RT.start(getRestSecs(id),ex.n);
+  }else if(!wasOff){
+    // Se desmarcó: si el timer estaba contando, lo escondemos
+    RT.hide();
   }
 }
 function updLog(id,f,v){if(!S.logs[id])S.logs[id]={};S.logs[id][f]=v;saveState();}
 function logW(){
-  const v=parseFloat(S.wnew);if(!v||v<30||v>300)return;
-  S.weights.push({d:fmtDate(new Date()),v,ts:Date.now()});S.wmodal=false;S.wnew='';saveState();render();
+  const v=parseFloat(S.wnew);
+  if(!v||v<30||v>300){
+    // Shake del input + mensaje
+    const inp=document.querySelector('.mover .ob-inp');
+    if(inp){
+      inp.style.borderColor='var(--red)';
+      inp.classList.add('shake');
+      setTimeout(()=>{inp.style.borderColor='';inp.classList.remove('shake');},600);
+    }
+    toast('Introduce un peso entre 30 y 300 kg');
+    return;
+  }
+  const now=Date.now();
+  S.weights.push({d:fmtDate(new Date()),v,ts:now});
+  S.wmodal=false;S.wnew='';saveState();render();
+  toast(`Peso guardado: ${v} kg`);
 }
 function finishSession(){
   const day=PLAN[S.day],strEx=day.ex.filter(e=>!e.cardio);
-  const doneEx=strEx.filter(e=>Object.values(S.sets[e.id]||{}).filter(Boolean).length>=e.s).length;
-  const msg=doneEx===strEx.length?'¿Confirmar que terminaste el entrenamiento?':`Solo ${doneEx}/${strEx.length} ejercicios. ¿Guardar de todas formas?`;
-  if(!confirm(msg))return;
+  const doneEx=strEx.filter(e=>countSetsDone(e.id,e.s)>=e.s).length;
   const today=fmtDate(new Date());
-  S.sessions.push({day:S.day,date:today,ts:Date.now()});
-  strEx.forEach(ex=>{const l=S.logs[ex.id]||{},w=parseFloat(l.w);if(w){if(!S.strength[ex.id])S.strength[ex.id]=[];S.strength[ex.id].push({d:today,v:w,ts:Date.now()});}});
+  // Bug fix: evitar doble sesión el mismo día
+  const existingToday=S.sessions.find(s=>s.date===today);
+  if(existingToday){
+    confirmModal({
+      title:'Ya hay una sesión hoy',
+      body:`Ya registraste el ${PLAN[existingToday.day].label} el ${today}. ¿Guardar esta como una sesión adicional?`,
+      okText:'Guardar igual',
+      cancelText:'Cancelar',
+      onOk:()=>finishSessionConfirmed(doneEx,strEx.length)
+    });
+    return;
+  }
+  const msg=doneEx===strEx.length?'¿Confirmar que terminaste el entrenamiento?':`Solo ${doneEx}/${strEx.length} ejercicios. ¿Guardar de todas formas?`;
+  confirmModal({
+    title:doneEx===strEx.length?'¡Terminado!':'Sesión incompleta',
+    body:msg,
+    okText:'Guardar',
+    cancelText:'Cancelar',
+    onOk:()=>finishSessionConfirmed(doneEx,strEx.length)
+  });
+}
+function finishSessionConfirmed(doneEx,totalEx){
+  const day=PLAN[S.day],strEx=day.ex.filter(e=>!e.cardio);
+  const today=fmtDate(new Date()),now=Date.now();
+  S.sessions.push({day:S.day,date:today,ts:now});
+  // Guardar también reps y series completadas, no solo peso — necesario para sugerencias inteligentes
+  strEx.forEach(ex=>{
+    const l=S.logs[ex.id]||{},w=parseFloat(l.w);
+    if(w){
+      if(!S.strength[ex.id])S.strength[ex.id]=[];
+      const setsDone=countSetsDone(ex.id,ex.s);
+      const reps=parseInt(l.r)||null;
+      S.strength[ex.id].push({d:today,v:w,r:reps,setsDone,ts:now});
+    }
+  });
   S.nextDay=getNextDay(S.day);
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});S.open=null;
-  saveState();alert(`¡Sesión guardada! 💪\nPróxima: ${PLAN[S.nextDay].label} — ${PLAN[S.nextDay].focus}`);go('dash');
+  saveState();
+  toast(`✅ Sesión guardada · Próxima: ${PLAN[S.nextDay].label}`);
+  go('dash');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -1112,7 +1282,14 @@ function coach_exerciseProgression(exId,sinceTs){
   if(pct>=8)trend='strong_up';
   else if(pct>=3)trend='up';
   else if(pct<=-3)trend='down';
-  else if(data.length>=3&&data.slice(-3).every((r,i,a)=>i===0||r.v<=a[i-1].v+0.01))trend='stagnant';
+  else if(data.length>=3){
+    // Estancamiento: últimas 3 sesiones con peso prácticamente idéntico (±1% o ±0.5kg)
+    const last3=data.slice(-3).map(r=>r.v);
+    const max3=Math.max(...last3),min3=Math.min(...last3);
+    const dev=max3-min3;
+    const tol=Math.max(0.5,last*0.01);
+    if(dev<=tol)trend='stagnant';
+  }
   return{trend,change,pct,sessions:data.length,firstV:first,lastV:last,data};
 }
 
@@ -1268,6 +1445,10 @@ function coach_generateInsights(){
   if(overBw.length>0&&!S.coachInsights?.shownBodyweight){
     const top=overBw.sort((a,b)=>b.last-a.last)[0];
     insights.push({type:'good',ic:'🚀',t:'Superas tu peso corporal',d:`En <strong>${top.ex.n}</strong> mueves ${top.last} kg — más que tu propio peso (${bwKg} kg). Bienvenido al club.`});
+    // Marcar como mostrado para no repetir en cada render
+    if(!S.coachInsights)S.coachInsights={};
+    S.coachInsights.shownBodyweight=true;
+    saveState();
   }
 
   return insights;
@@ -1406,8 +1587,15 @@ function coach_suggestAlternative(ex){
 // ─── 4. APLICAR RECOMENDACIONES AL PLAN ───────────────────
 
 function coach_applyRecommendations(){
-  if(!confirm('¿Aplicar las recomendaciones del coach y empezar un nuevo ciclo de entrenamiento?'))return;
-
+  confirmModal({
+    title:'Cerrar ciclo actual',
+    body:'Se archivará el ciclo con su resumen y empezará un nuevo período de análisis de ~4 semanas. Las recomendaciones son sugerencias para que tú las apliques manualmente en tu entrenamiento.',
+    okText:'Cerrar ciclo',
+    cancelText:'Cancelar',
+    onOk:coach_applyRecommendationsConfirmed
+  });
+}
+function coach_applyRecommendationsConfirmed(){
   // Guardar snapshot del ciclo actual
   const cycle=coach_cycleData();
   const insights=coach_generateInsights();
@@ -1435,7 +1623,7 @@ function coach_applyRecommendations(){
   S.coachLastAnalyzed=Date.now();
 
   saveState();
-  alert(`¡Nuevo ciclo iniciado! 🚀\n\n${summary}\n\nEl coach volverá a analizar en ~4 semanas.`);
+  toast(`🚀 Nuevo ciclo iniciado · ${cycle.sessions.length} sesiones completadas`,3500);
   render();
 }
 
@@ -1457,7 +1645,7 @@ function coach_score(){
   const regressing=progs.filter(p=>p.trend==='down').length;
   const withData=progs.filter(p=>p.trend!=='insufficient').length;
   if(withData>0){
-    score+=Math.min(40,(progressing/withData)*40-(regressing/withData)*10);
+    score+=Math.max(0,Math.min(40,(progressing/withData)*40-(regressing/withData)*10));
   }
 
   // Volumen total (20 pts) — completaste las sesiones planeadas
@@ -1552,7 +1740,7 @@ function renderCoach(){
 
   ${cycle.readyForReview?`<div class="cta-banner" onclick="coach_applyRecommendations()">
     <div class="cta-banner-t">✨ Tu análisis de ciclo está listo</div>
-    <div class="cta-banner-d">Revisa las recomendaciones abajo y aplica el nuevo plan</div>
+    <div class="cta-banner-d">Revisa las sugerencias abajo e inicia un nuevo período de análisis</div>
   </div>`:''}
 
   <div class="coach-cycle">
@@ -1608,7 +1796,7 @@ function renderCoach(){
       </div>
     </div>`).join('')}
     <div style="padding:4px 14px 14px">
-      <button class="btn bp" onclick="coach_applyRecommendations()">Aplicar y empezar nuevo ciclo</button>
+      <button class="btn bp" onclick="coach_applyRecommendations()">Cerrar ciclo e iniciar uno nuevo</button>
     </div>`:
     (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="sh">Recomendaciones</div>
     <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">Faltan ~<strong>${Math.max(0,Math.ceil(CYCLE_WEEKS-cycle.weeks))}</strong> semanas para el análisis profundo. Mientras tanto, sigue el plan actual.</div></div></div>`:'')}
@@ -1639,7 +1827,11 @@ function renderDash(){
   const greet=['¡Hola, campeón!','¡Vamos, que puedes!','¡Día de sudar!','¡Sigues en pie!','¡A por ello!'][tot%5];
   return`
   <div class="topbar"><div class="topbar-row"><div><h1>${greet} 💪</h1><div class="sub">${tot===0?'Primera sesión — el inicio es hoy':`${tot} sesión${tot!==1?'es':''} completada${tot!==1?'s':''}`}</div></div>
-  <button class="icon-btn" onclick="S.wmodal=true;render()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Peso</button></div></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <button class="icon-btn" onclick="S.wmodal=true;render()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Peso</button>
+    <button class="settings-btn" aria-label="Ajustes" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+  </div>
+  </div></div>
   <div class="sh">Esta semana</div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
@@ -1667,6 +1859,15 @@ function renderDash(){
   </div>
   <div class="sh">Próxima sesión</div>
   <div class="card">
+    ${(()=>{const today=fmtDate(new Date());const didToday=S.sessions.find(s=>s.date===today);
+      if(didToday){
+        return`<div style="background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--rsm);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#86efac;display:flex;align-items:center;gap:8px">
+          <span style="font-size:16px">✅</span>
+          <span>Ya entrenaste hoy (${PLAN[didToday.day].label}). ¡Disfruta el descanso!</span>
+        </div>`;
+      }
+      return'';
+    })()}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
       <span class="pill p${S.nextDay.toLowerCase()}">${PLAN[S.nextDay].label}</span>
       <span style="font-size:14px;color:var(--text2)">${PLAN[S.nextDay].focus}</span>
@@ -1698,10 +1899,26 @@ function getLastW(exId){
 function sugW(exId){
   const d=S.strength[exId];
   if(!d||d.length===0)return null;
-  const last=d[d.length-1].v;
-  if(d.length===1)return{v:last,label:last+' kg',cls:'keep'};
+  const lastRec=d[d.length-1];
+  const last=lastRec.v;
+  // Buscar reps objetivo del ejercicio
+  const ex=Object.values(PLAN).flatMap(day=>day.ex).find(e=>e.id===exId);
+  const targetReps=ex?parseInt(ex.r)||12:12;
+  const targetSets=ex?ex.s:3;
+  // Si tenemos datos históricos de reps, usar esa info para decidir
+  const didCompleteReps=lastRec.r!=null?lastRec.r>=targetReps:true; // compat con registros antiguos sin reps
+  const didCompleteSets=lastRec.setsDone!=null?lastRec.setsDone>=targetSets:true;
+  const fullyCompleted=didCompleteReps&&didCompleteSets;
+  if(d.length===1){
+    // Primera sesión: si completó todo, sugerir subir; si no, mantener
+    if(fullyCompleted&&lastRec.r!=null)return{v:+(last+2.5).toFixed(1),label:'+2.5 → '+(last+2.5).toFixed(1)+' kg',cls:''};
+    return{v:last,label:last+' kg',cls:'keep'};
+  }
   const prev=d[d.length-2].v;
-  if(last>prev)return{v:+(last+2.5).toFixed(1),label:'+'+(2.5)+' → '+(last+2.5).toFixed(1),cls:''};
+  // Solo sugerir subir si: subió respecto a anterior Y completó las reps objetivo
+  if(last>prev&&fullyCompleted)return{v:+(last+2.5).toFixed(1),label:'+2.5 → '+(last+2.5).toFixed(1)+' kg',cls:''};
+  // Si completó todo y se mantiene, ofrecer subir
+  if(fullyCompleted&&lastRec.r!=null)return{v:+(last+2.5).toFixed(1),label:'+2.5 → '+(last+2.5).toFixed(1)+' kg',cls:''};
   return{v:last,label:last+' kg',cls:'keep'};
 }
 
@@ -1771,13 +1988,13 @@ function histHTML(){
 function renderWorkout(){
   const tabs=['A','B','C'].map(k=>`<button class="tab ${S.day===k?'on':''}" onclick="S.day='${k}';S.open=null;render()">${PLAN[k].label}</button>`).join('');
   const day=PLAN[S.day],strEx=day.ex.filter(e=>!e.cardio);
-  const doneEx=strEx.filter(e=>Object.values(S.sets[e.id]||{}).filter(Boolean).length>=e.s).length;
+  const doneEx=strEx.filter(e=>countSetsDone(e.id,e.s)>=e.s).length;
   const pct=strEx.length?Math.round(doneEx/strEx.length*100):0,allDone=doneEx===strEx.length&&strEx.length>0;
   const exHtml=day.ex.map(ex=>{
     const isOpen=S.open===ex.id,c=S.sets[ex.id]||{};
-    const exDone=ex.cardio?c[0]===true:Object.values(c).filter(Boolean).length>=ex.s;
+    const exDone=ex.cardio?c[0]===true:countSetsDone(ex.id,ex.s)>=ex.s;
     const l=S.logs[ex.id]||{},sug=!ex.cardio?getSug(ex.id,ex.s,ex.r):null;
-    const sbHtml=!ex.cardio?Array.from({length:ex.s},(_,i)=>`<button class="sb ${c[i]?'on':''}" onclick="toggleSet('${ex.id}',${i})">${c[i]?'✓':i+1}</button>`).join(''):'';
+    const sbHtml=!ex.cardio?Array.from({length:ex.s},(_,i)=>`<button class="sb ${c[i]?'on':''}" aria-label="Serie ${i+1}${c[i]?' (completada)':''}" onclick="toggleSet('${ex.id}',${i})">${c[i]?'✓':i+1}</button>`).join(''):'';
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}">
       <div class="exh" onclick="S.open=S.open==='${ex.id}'?null:'${ex.id}';render()">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${ex.ic}</div>
@@ -1873,6 +2090,296 @@ function render(){
   else if(S.tab==='workout')s.innerHTML=renderWorkout();
   else if(S.tab==='coach')s.innerHTML=renderCoach();
   else s.innerHTML=renderProg();
+  renderSettings();
+}
+
+// ══════════════════════════════════════════════════════════
+// AJUSTES · Export/Import · Editar peso · Reset · Onboarding
+// ══════════════════════════════════════════════════════════
+function openSettings(){S.settingsOpen=true;renderSettings();}
+function closeSettings(){S.settingsOpen=false;renderSettings();}
+function renderSettings(){
+  const root=document.getElementById('settings-root');
+  if(!root)return;
+  if(!S.settingsOpen){root.innerHTML='';return;}
+  const lw=S.weights.length?S.weights[S.weights.length-1]:null;
+  const firstW=S.weights.length?S.weights[0]:null;
+  const totalSessions=S.sessions.length;
+  const dataSize=new Blob([JSON.stringify(S)]).size;
+  const dataSizeKb=(dataSize/1024).toFixed(1);
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeSettings()"><div class="hist-sheet" style="max-height:90vh;max-height:90dvh">
+    <div class="hist-sheet-head">
+      <div class="hist-sheet-hdl"></div>
+      <div class="hist-sheet-title">Ajustes</div>
+      <div class="hist-sheet-sub">Datos y preferencias</div>
+      <button class="hist-sheet-close" onclick="closeSettings()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="hist-sheet-body">
+      <div class="sh" style="margin:2px 0 8px">Datos personales</div>
+      <div class="set-section">
+        <div class="set-row" onclick="openEditWeight('first')">
+          <div class="set-row-info">
+            <div class="set-row-t">Peso corporal inicial</div>
+            <div class="set-row-d">Punto de partida para calcular progreso</div>
+          </div>
+          <span class="set-row-v">${firstW?firstW.v+' kg':'—'}</span>
+          <span class="set-row-arrow">›</span>
+        </div>
+        <div class="set-row" onclick="openEditWeight('last')">
+          <div class="set-row-info">
+            <div class="set-row-t">Peso corporal actual</div>
+            <div class="set-row-d">Último registro guardado</div>
+          </div>
+          <span class="set-row-v">${lw?lw.v+' kg':'—'}</span>
+          <span class="set-row-arrow">›</span>
+        </div>
+        <div class="set-row" onclick="settingsChangeStartDay()">
+          <div class="set-row-info">
+            <div class="set-row-t">Próxima sesión</div>
+            <div class="set-row-d">Cambiar si te has saltado un día</div>
+          </div>
+          <span class="set-row-v">${PLAN[S.nextDay].label}</span>
+          <span class="set-row-arrow">›</span>
+        </div>
+      </div>
+      <div class="sh">Tus datos</div>
+      <div class="set-section">
+        <div class="set-row" onclick="exportData()">
+          <div class="set-row-info">
+            <div class="set-row-t">Exportar backup</div>
+            <div class="set-row-d">Descarga un archivo JSON con todo tu historial</div>
+          </div>
+          <span class="set-row-v">${dataSizeKb} KB</span>
+          <span class="set-row-arrow">›</span>
+        </div>
+        <div class="set-row" onclick="importData()">
+          <div class="set-row-info">
+            <div class="set-row-t">Importar backup</div>
+            <div class="set-row-d">Restaura desde un archivo JSON exportado</div>
+          </div>
+          <span class="set-row-arrow">›</span>
+        </div>
+        <div class="set-row" onclick="copyDataToClipboard()">
+          <div class="set-row-info">
+            <div class="set-row-t">Copiar datos (JSON)</div>
+            <div class="set-row-d">Útil para trasladar entre dispositivos</div>
+          </div>
+          <span class="set-row-arrow">›</span>
+        </div>
+      </div>
+      <div class="sh">Estadísticas</div>
+      <div class="set-section">
+        <div class="set-row" style="cursor:default">
+          <div class="set-row-info">
+            <div class="set-row-t">Sesiones totales</div>
+          </div>
+          <span class="set-row-v">${totalSessions}</span>
+        </div>
+        <div class="set-row" style="cursor:default">
+          <div class="set-row-info">
+            <div class="set-row-t">Registros de peso</div>
+          </div>
+          <span class="set-row-v">${S.weights.length}</span>
+        </div>
+        <div class="set-row" style="cursor:default">
+          <div class="set-row-info">
+            <div class="set-row-t">Mesociclos completados</div>
+          </div>
+          <span class="set-row-v">${S.mesocycles?.length||0}</span>
+        </div>
+      </div>
+      <div class="sh">Zona de peligro</div>
+      <div class="set-section">
+        <div class="set-row danger" onclick="resetOnboarding()">
+          <div class="set-row-info">
+            <div class="set-row-t">Rehacer onboarding</div>
+            <div class="set-row-d">Vuelve a la pantalla inicial (conserva datos)</div>
+          </div>
+          <span class="set-row-arrow">›</span>
+        </div>
+        <div class="set-row danger" onclick="resetAllData()">
+          <div class="set-row-info">
+            <div class="set-row-t">Borrar todos los datos</div>
+            <div class="set-row-d">Elimina historial, pesos, sesiones — irreversible</div>
+          </div>
+          <span class="set-row-arrow">›</span>
+        </div>
+      </div>
+      <div style="text-align:center;padding:12px 14px 24px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">
+        GymTrack v4 · Schema ${SCHEMA_VERSION}
+      </div>
+    </div>
+  </div></div>`;
+}
+
+function openEditWeight(which){
+  const rec=which==='first'?S.weights[0]:S.weights[S.weights.length-1];
+  const current=rec?rec.v:'';
+  const label=which==='first'?'Peso inicial (kg)':'Peso actual (kg)';
+  _editWeightTarget=which;
+  // Usamos un prompt estilizado mediante confirmModal custom — creamos un modal con input
+  const root=document.getElementById('cmodal-root');
+  root.innerHTML=`<div class="cmov" onclick="if(event.target===this){document.getElementById('cmodal-root').innerHTML=''}"><div class="cmod">
+    <div class="cmod-hdl"></div>
+    <div class="cmod-t">${label}</div>
+    <div style="margin-bottom:16px">
+      <input class="ob-inp" id="edit-w-inp" type="number" value="${current}" step="0.1" inputmode="decimal" autofocus/>
+    </div>
+    <div class="cmod-btns">
+      <button class="btn bs" onclick="document.getElementById('cmodal-root').innerHTML=''">Cancelar</button>
+      <button class="btn bp" onclick="saveEditWeight()">Guardar</button>
+    </div>
+  </div></div>`;
+  setTimeout(()=>{const i=document.getElementById('edit-w-inp');if(i)i.focus();},100);
+}
+let _editWeightTarget=null;
+function saveEditWeight(){
+  const inp=document.getElementById('edit-w-inp');
+  if(!inp)return;
+  const v=parseFloat(inp.value);
+  if(!v||v<30||v>300){
+    inp.classList.add('shake');
+    inp.style.borderColor='var(--red)';
+    setTimeout(()=>{inp.classList.remove('shake');inp.style.borderColor='';},600);
+    toast('Peso fuera de rango (30-300 kg)');
+    return;
+  }
+  if(_editWeightTarget==='first'&&S.weights.length>0){
+    S.weights[0].v=v;
+  }else if(_editWeightTarget==='last'&&S.weights.length>0){
+    S.weights[S.weights.length-1].v=v;
+  }else{
+    // No había registros, añadir uno
+    S.weights.push({d:fmtDate(new Date()),v,ts:Date.now()});
+  }
+  saveState();
+  document.getElementById('cmodal-root').innerHTML='';
+  toast('Peso actualizado');
+  renderSettings();render();
+}
+
+function settingsChangeStartDay(){
+  const root=document.getElementById('cmodal-root');
+  root.innerHTML=`<div class="cmov" onclick="if(event.target===this){document.getElementById('cmodal-root').innerHTML=''}"><div class="cmod">
+    <div class="cmod-hdl"></div>
+    <div class="cmod-t">Próxima sesión</div>
+    <div class="cmod-b">Elige el día con el que quieres entrenar la próxima vez.</div>
+    <div class="ob-days" style="margin-bottom:14px">
+      ${['A','B','C'].map(d=>`<div class="ob-day ${S.nextDay===d?'sel':''}" onclick="pickNextDay('${d}')">
+        <div class="di">${d==='A'?'🦵':d==='B'?'🏋️':'🚣'}</div>
+        <div class="dn">Día ${d}</div>
+        <div class="df">${PLAN[d].focus.split('—')[0].trim()}</div>
+      </div>`).join('')}
+    </div>
+    <div class="cmod-btns">
+      <button class="btn bs" onclick="document.getElementById('cmodal-root').innerHTML=''">Cerrar</button>
+    </div>
+  </div></div>`;
+}
+function pickNextDay(d){
+  S.nextDay=d;saveState();
+  document.getElementById('cmodal-root').innerHTML='';
+  toast(`Próxima sesión: ${PLAN[d].label}`);
+  renderSettings();render();
+}
+
+function exportData(){
+  try{
+    const payload={...S,_exported:new Date().toISOString(),_version:SCHEMA_VERSION};
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`gymtrack-backup-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+    toast('Backup descargado');
+  }catch(e){toast('Error al exportar');}
+}
+
+function copyDataToClipboard(){
+  try{
+    const txt=JSON.stringify(S,null,2);
+    if(navigator.clipboard&&navigator.clipboard.writeText){
+      navigator.clipboard.writeText(txt).then(()=>toast('JSON copiado al portapapeles'),()=>toast('No se pudo copiar'));
+    }else{
+      // Fallback
+      const ta=document.createElement('textarea');
+      ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+      document.body.appendChild(ta);ta.select();
+      try{document.execCommand('copy');toast('JSON copiado');}catch(e){toast('No se pudo copiar');}
+      document.body.removeChild(ta);
+    }
+  }catch(e){toast('Error al copiar');}
+}
+
+function importData(){
+  const inp=document.createElement('input');
+  inp.type='file';inp.accept='application/json,.json';
+  inp.onchange=(e)=>{
+    const f=e.target.files[0];if(!f)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      try{
+        const data=JSON.parse(ev.target.result);
+        if(!data||typeof data!=='object'||!('sessions'in data||'weights'in data)){
+          toast('Archivo no válido');return;
+        }
+        confirmModal({
+          title:'Importar backup',
+          body:`Se reemplazarán los datos actuales por los del archivo (${(data.sessions||[]).length} sesiones, ${(data.weights||[]).length} pesos). Esta acción no se puede deshacer.`,
+          okText:'Importar',
+          cancelText:'Cancelar',
+          danger:true,
+          onOk:()=>{
+            // Aplicar migración por si viene de versión antigua
+            const migrated=migrateState(data);
+            Object.keys(S).forEach(k=>{if(!(k in migrated))migrated[k]=S[k];});
+            S=Object.assign(S,migrated);
+            S.settingsOpen=true;
+            saveState();render();
+            toast('✓ Datos importados correctamente',3500);
+          }
+        });
+      }catch(err){toast('Error al leer el archivo');}
+    };
+    reader.readAsText(f);
+  };
+  inp.click();
+}
+
+function resetOnboarding(){
+  confirmModal({
+    title:'Rehacer onboarding',
+    body:'Volverás a la pantalla inicial para confirmar peso y día de inicio. Tus datos de entrenamiento no se borran.',
+    okText:'Rehacer',
+    cancelText:'Cancelar',
+    onOk:()=>{
+      S.onboarded=false;S.settingsOpen=false;
+      saveState();
+      document.getElementById('app').style.display='none';
+      document.getElementById('onboarding').style.display='flex';
+      document.getElementById('ob1').classList.add('active');
+      document.getElementById('ob2').classList.remove('active');
+      // Resetear input
+      const w=document.getElementById('ob-weight');
+      if(w)w.value=S.weights.length?S.weights[S.weights.length-1].v:'';
+    }
+  });
+}
+
+function resetAllData(){
+  confirmModal({
+    title:'¿Borrar TODOS los datos?',
+    body:'Esta acción elimina sesiones, pesos, historial y ciclos de forma permanente. No se puede deshacer. ¿Estás seguro?',
+    okText:'Borrar todo',
+    cancelText:'Cancelar',
+    danger:true,
+    onOk:()=>{
+      try{localStorage.removeItem('gymtrack_v3');}catch(e){}
+      location.reload();
+    }
+  });
 }
 
 if(S.onboarded){document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();}
