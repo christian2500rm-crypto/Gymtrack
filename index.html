@@ -235,8 +235,50 @@ input{font-family:inherit}
 .sug-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;background:rgba(34,197,94,.15);color:#86efac;padding:3px 7px;border-radius:4px;font-weight:600;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid rgba(34,197,94,.3);margin-left:6px;vertical-align:middle}
 .sug-tag:active{opacity:.7}
 .sug-tag.keep{background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.25)}
-.last-info{font-size:11px;color:var(--text3);margin:0 0 6px;padding-left:50px;font-family:'DM Mono',monospace}
-.last-info b{color:var(--text2);font-weight:500}
+/* ── EDITOR DE RUTINA ── */
+.edit-day-tab{display:flex;gap:6px;padding:0 14px 12px}
+.edit-day-btn{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:9px 6px;font-size:13px;font-weight:500;color:var(--text2);text-align:center;cursor:pointer;transition:all .15s}
+.edit-day-btn.on{background:var(--green-bg);border-color:var(--green-b);color:var(--green)}
+.edit-ex-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:11px 12px;margin:0 14px 8px;display:flex;align-items:center;gap:10px}
+.edit-ex-item.dragging{opacity:.4}
+.drag-handle{color:var(--text3);font-size:18px;cursor:grab;padding:2px 4px;flex-shrink:0;user-select:none;-webkit-user-select:none}
+.edit-ex-info{flex:1;min-width:0}
+.edit-ex-name{font-size:13px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.edit-ex-meta{font-size:11px;color:var(--text3);margin-top:2px}
+.edit-ex-actions{display:flex;gap:6px;flex-shrink:0}
+.edit-ex-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rxs);width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;color:var(--text2);flex-shrink:0}
+.edit-ex-btn:active{transform:scale(.9)}
+.edit-ex-btn.danger{color:var(--red);border-color:rgba(239,68,68,.3)}
+.edit-add-btn{margin:4px 14px 12px;background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--rsm);padding:11px;font-size:13px;color:var(--text2);width:calc(100% - 28px);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.edit-add-btn:active{background:var(--bg3)}
+/* Ajuste series/reps inline */
+.sr-editor{display:flex;align-items:center;gap:4px;margin-top:5px}
+.sr-label{font-size:10px;color:var(--text3);min-width:22px}
+.sr-val{font-size:12px;font-weight:600;color:var(--text2);min-width:18px;text-align:center}
+.sr-btn{background:var(--bg3);border:1px solid var(--border);border-radius:50%;width:20px;height:20px;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;line-height:1}
+.sr-btn:active{transform:scale(.9)}
+/* Biblioteca picker */
+.lib-search{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:10px 12px;font-size:14px;color:var(--text);margin-bottom:10px}
+.lib-search::placeholder{color:var(--text3)}
+.lib-group-h{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;padding:8px 0 4px}
+.lib-item{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;border-radius:var(--rxs)}
+.lib-item:active{background:var(--bg3)}
+.lib-item-n{font-size:13px;font-weight:500;color:var(--text)}
+.lib-item-d{font-size:11px;color:var(--text3);margin-top:2px}
+.lib-item-badge{display:inline-block;font-size:9px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--text3);margin-right:4px;vertical-align:middle}
+/* Propuestas del coach */
+.proposal-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);margin:0 14px 10px;overflow:hidden}
+.proposal-head{padding:12px 14px 10px;display:flex;gap:10px;align-items:flex-start}
+.proposal-ic{font-size:20px;flex-shrink:0}
+.proposal-t{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.proposal-d{font-size:12px;color:var(--text2);line-height:1.5}
+.proposal-actions{display:flex;gap:8px;padding:0 14px 12px}
+.proposal-apply{flex:1;background:var(--green);color:#000;border:none;border-radius:var(--rsm);padding:10px;font-size:13px;font-weight:700;cursor:pointer}
+.proposal-apply:active{transform:scale(.98)}
+.proposal-ignore{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 14px;font-size:13px;color:var(--text2);cursor:pointer}
+.proposal-ignore:active{transform:scale(.98)}
+.proposal-tag{display:inline-block;font-size:10px;background:rgba(34,197,94,.12);color:#86efac;border-radius:4px;padding:2px 7px;margin-bottom:4px}
+
 /* ── TOAST ── */
 #toast{position:fixed;top:calc(var(--st) + 14px);left:50%;transform:translateX(-50%) translateY(-120%);background:rgba(26,26,26,0.96);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:calc(100% - 28px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
@@ -351,6 +393,7 @@ input[type=number]{-moz-appearance:textfield}
 <div id="settings-root"></div>
 <div id="wmodal-root"></div>
 <div id="hist-root"></div>
+<div id="proposals-root"></div>
 
 <script>
 const PLAN={
@@ -383,34 +426,127 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=4;
+const SCHEMA_VERSION=5;
 
 function loadState(){try{const r=localStorage.getItem('gymtrack_v3');if(r)return JSON.parse(r);}catch(e){}return null;}
 function saveState(){try{localStorage.setItem('gymtrack_v3',JSON.stringify(S));}catch(e){}}
 
-// Migración de datos: aseguramos campos añadidos en versiones nuevas
 function migrateState(data){
   if(!data)return data;
   const v=data.schema_version||1;
   if(v<4){
-    // v2: coachStart; v3: coachInsights; v4: registros con r/setsDone
     data.coachStart=data.coachStart||null;
     data.mesocycles=data.mesocycles||[];
     data.coachInsights=data.coachInsights||null;
     data.coachInsightsStale=data.coachInsightsStale!==false;
-    // Los strength[].r y setsDone pueden faltar en registros antiguos; los dejamos como null y las funciones son defensivas
+  }
+  if(v<5){
+    // v5: plan mutable — si no existe, se inicializa desde PLAN en el arranque
+    data.currentPlan=data.currentPlan||null;
+    data.pendingCoachProposals=data.pendingCoachProposals||[];
+    data.appliedProposals=data.appliedProposals||[];
   }
   data.schema_version=SCHEMA_VERSION;
   return data;
 }
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
-  coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false},migrateState(loadState())||{});
+  coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
+  pendingCoachProposals:[],appliedProposals:[]},migrateState(loadState())||{});
+
+// Inicializar currentPlan mutable desde PLAN si no existe aún
+if(!S.currentPlan){
+  S.currentPlan=JSON.parse(JSON.stringify(PLAN));
+  saveState();
+}
+
+// Helper: plan activo (mutable) — SIEMPRE usar getPlan() en vez de PLAN directamente
+function getPlan(){return S.currentPlan||PLAN;}
 
 // Initialize coach start if not set
 if(!S.coachStart&&S.sessions.length>0){
   S.coachStart=S.sessions[0].ts||Date.now();
   saveState();
+}
+
+// ══════════════════════════════════════════════════════════
+// BIBLIOTECA DE EJERCICIOS  (~45 ejercicios, máquinas + pesas libres)
+// Campos: id, n (nombre), ic (icono), eq (equipamiento), muscle (grupo),
+//         s (series defecto), r (reps defecto), tip, cardio?, compound?
+// ══════════════════════════════════════════════════════════
+const EXERCISE_DB=[
+  // ── PIERNAS ───────────────────────────────────────────
+  {id:'lib_squat_smith',n:'Sentadilla en Smith',ic:'🏋️',eq:'Smith machine + banco',muscle:'piernas',s:3,r:12,tip:'Pies al ancho de hombros. Baja hasta muslos paralelos. Empuja desde talones.',compound:true},
+  {id:'lib_leg_press',n:'Prensa de piernas',ic:'🦵',eq:'Máquina prensa',muscle:'piernas',s:3,r:12,tip:'Pies al ancho de caderas. Baja hasta 90° de rodilla. No bloquees arriba.',compound:true},
+  {id:'lib_leg_ext',n:'Extensión de cuádriceps',ic:'🦵',eq:'Máquina de extensión',muscle:'piernas',s:3,r:12,tip:'Sube 2s, baja 3s. No bloquees la rodilla arriba.',compound:false},
+  {id:'lib_leg_curl',n:'Curl femoral tumbado',ic:'🦿',eq:'Máquina de curl femoral',muscle:'piernas',s:3,r:12,tip:'Dobla hasta casi tocar los glúteos. Controla el regreso lento.',compound:false},
+  {id:'lib_leg_curl_seated',n:'Curl femoral sentado',ic:'🦿',eq:'Máquina de curl femoral sentado',muscle:'piernas',s:3,r:12,tip:'Variante sentado. Igual de efectiva. Alterna con el tumbado.',compound:false},
+  {id:'lib_hip_abductor',n:'Abductor de cadera',ic:'🦵',eq:'Máquina abductora',muscle:'piernas',s:3,r:15,tip:'Abre controlando la velocidad. No rebotes. Siente el glúteo medio.',compound:false},
+  {id:'lib_hip_adductor',n:'Aductor de cadera',ic:'🦵',eq:'Máquina aductora',muscle:'piernas',s:3,r:15,tip:'Cierra lento. Mantén la espalda apoyada.',compound:false},
+  {id:'lib_rdl_db',n:'Peso muerto rumano (mancuernas)',ic:'🏋️',eq:'Mancuernas',muscle:'piernas',s:3,r:10,tip:'Baja las mancuernas por las piernas. Siente el estiramiento en isquios. Espalda recta.',compound:true},
+  {id:'lib_calf_machine',n:'Elevación de talones (máquina)',ic:'⬆️',eq:'Máquina de gemelos',muscle:'piernas',s:3,r:15,tip:'Sube completo. Aguanta 1s arriba. Baja lento hasta estiramiento total.',compound:false},
+  {id:'lib_goblet_squat',n:'Sentadilla goblet (mancuerna)',ic:'🏋️',eq:'Mancuernas',muscle:'piernas',s:3,r:12,tip:'Mancuerna en el pecho. Pies separados. Buena opción para aprender la sentadilla.',compound:true},
+  // ── PECHO ─────────────────────────────────────────────
+  {id:'lib_press_incline_smith',n:'Press inclinado en Smith',ic:'🏋️',eq:'Smith machine + banco',muscle:'pecho',s:3,r:10,tip:'Banco a 30-45°. Barra al pecho superior. Pies planos. Deja 2 reps en reserva.',compound:true},
+  {id:'lib_press_flat_db',n:'Press plano con mancuernas',ic:'🏋️',eq:'Mancuernas + banco',muscle:'pecho',s:3,r:10,tip:'Baja hasta codos a 90°. Empuja y junta ligeramente al subir.',compound:true},
+  {id:'lib_press_incline_db',n:'Press inclinado con mancuernas',ic:'🏋️',eq:'Mancuernas + banco inclinado',muscle:'pecho',s:3,r:10,tip:'45°. Más énfasis en pecho superior que el press plano.',compound:true},
+  {id:'lib_fly_machine',n:'Aperturas en máquina',ic:'🤸',eq:'Máquina de aperturas',muscle:'pecho',s:3,r:12,tip:'Siente el estiramiento al abrir. Cierra sin trabar los codos.',compound:false},
+  {id:'lib_cable_fly_low',n:'Apertura en cable bajo',ic:'⚡',eq:'Cable dual (polea baja)',muscle:'pecho',s:3,r:12,tip:'Lleva los cables hacia arriba y al centro. Énfasis en pecho superior.',compound:false},
+  {id:'lib_cable_fly_high',n:'Apertura en cable alto',ic:'⚡',eq:'Cable dual (polea alta)',muscle:'pecho',s:3,r:12,tip:'Lleva los cables hacia abajo. Énfasis en pecho inferior.',compound:false},
+  {id:'lib_pushup',n:'Flexiones (push-up)',ic:'💪',eq:'Peso corporal',muscle:'pecho',s:3,r:12,tip:'Cuerpo recto. Baja pecho al suelo. Buena opción de calentamiento o finisher.',compound:true},
+  // ── ESPALDA ───────────────────────────────────────────
+  {id:'lib_lat_pulldown',n:'Jalón al pecho',ic:'🏋️',eq:'Jalón / remo (máquina)',muscle:'espalda',s:3,r:12,tip:'Agarre ancho. Jala al pecho superior. No balancees.',compound:true},
+  {id:'lib_row_machine',n:'Remo sentado en máquina',ic:'🚣',eq:'Jalón / remo (máquina)',muscle:'espalda',s:3,r:12,tip:'Jala hacia el ombligo. Aprieta omóplatos al final. Regreso 3s.',compound:true},
+  {id:'lib_row_db',n:'Remo con mancuerna',ic:'💪',eq:'Mancuernas + banco',muscle:'espalda',s:3,r:10,tip:'Apóyate en el banco. Jala hacia la cadera. Codo directo hacia atrás.',compound:true},
+  {id:'lib_row_cable',n:'Remo en cable sentado',ic:'⚡',eq:'Cable dual (barra)',muscle:'espalda',s:3,r:12,tip:'Agarre neutro o prono. Jala al pecho bajo. Contrae la espalda.',compound:true},
+  {id:'lib_pullover_db',n:'Pullover con mancuerna',ic:'🏋️',eq:'Mancuernas + banco',muscle:'espalda',s:3,r:12,tip:'Baja la mancuerna por detrás de la cabeza. Siente el dorsal al subir.',compound:false},
+  {id:'lib_face_pull',n:'Face pull en cable',ic:'⚡',eq:'Cable dual (cuerda alta)',muscle:'espalda',s:3,r:15,tip:'Jala hacia la cara. Codos altos. Excelente para salud del hombro.',compound:false},
+  {id:'lib_rev_fly_machine',n:'Aperturas inversas en máquina',ic:'🔄',eq:'Máquina de aperturas (invertida)',muscle:'espalda',s:3,r:15,tip:'Máquina al revés. Aprieta deltoides posteriores. Poco peso.',compound:false},
+  // ── HOMBROS ───────────────────────────────────────────
+  {id:'lib_lat_raise_cable',n:'Elevación lateral en cable',ic:'⚡',eq:'Cable dual (polea baja)',muscle:'hombros',s:3,r:12,tip:'Un brazo a la vez. Solo hasta el hombro. Muy poco peso.',compound:false},
+  {id:'lib_lat_raise_db',n:'Elevación lateral con mancuernas',ic:'💪',eq:'Mancuernas',muscle:'hombros',s:3,r:12,tip:'Ligera inclinación del torso. No balancees. Pulgares abajo al subir.',compound:false},
+  {id:'lib_shoulder_press_db',n:'Press de hombros con mancuernas',ic:'🏋️',eq:'Mancuernas',muscle:'hombros',s:3,r:10,tip:'Codos a 90° abajo. Sube sin trabar. Controla el regreso.',compound:true},
+  {id:'lib_shoulder_press_machine',n:'Press de hombros en máquina',ic:'🏋️',eq:'Máquina press hombros',muscle:'hombros',s:3,r:10,tip:'Más seguro que con pesas libres para principiantes.',compound:true},
+  {id:'lib_front_raise_db',n:'Elevación frontal con mancuernas',ic:'💪',eq:'Mancuernas',muscle:'hombros',s:3,r:12,tip:'Sube hasta la altura del hombro. No balancees. Alterna brazos.',compound:false},
+  // ── BÍCEPS ────────────────────────────────────────────
+  {id:'lib_curl_cable',n:'Curl de bíceps en cable',ic:'⚡',eq:'Cable dual (barra EZ)',muscle:'biceps',s:3,r:12,tip:'Codos fijos a los costados. Aprieta arriba. Controla 3s al bajar.',compound:false},
+  {id:'lib_curl_db',n:'Curl con mancuernas',ic:'💪',eq:'Mancuernas',muscle:'biceps',s:3,r:12,tip:'Alterna brazos o simultáneo. Supina la muñeca al subir.',compound:false},
+  {id:'lib_curl_db_concentrated',n:'Curl concentrado (mancuerna)',ic:'💪',eq:'Mancuernas',muscle:'biceps',s:3,r:12,tip:'Codo en el muslo interior. Máximo recorrido. Gran aislamiento.',compound:false},
+  {id:'lib_curl_machine',n:'Curl en máquina',ic:'🏋️',eq:'Máquina de curl',muscle:'biceps',s:3,r:12,tip:'Apoyo del brazo elimina el balanceo. Buena opción para aislar.',compound:false},
+  {id:'lib_hammer_curl',n:'Curl martillo (mancuernas)',ic:'💪',eq:'Mancuernas',muscle:'biceps',s:3,r:12,tip:'Agarre neutro (pulgar arriba). Trabaja braquial además del bíceps.',compound:false},
+  // ── TRÍCEPS ───────────────────────────────────────────
+  {id:'lib_tricep_pushdown',n:'Jalón de tríceps en cable',ic:'⬇️',eq:'Cable dual (cuerda)',muscle:'triceps',s:3,r:12,tip:'Codos pegados a costados. Empuja hasta brazos rectos. Aprieta abajo.',compound:false},
+  {id:'lib_tricep_overhead_cable',n:'Extensión tríceps sobre cabeza (cable)',ic:'⚡',eq:'Cable dual (cuerda alta)',muscle:'triceps',s:3,r:12,tip:'De espaldas al cable. Codos cerca de la cabeza. Gran estiramiento.',compound:false},
+  {id:'lib_tricep_machine',n:'Extensión tríceps en máquina',ic:'🏋️',eq:'Máquina de tríceps',muscle:'triceps',s:3,r:12,tip:'Apoya los codos. Extiende completo. Controla el regreso.',compound:false},
+  {id:'lib_skull_crusher_db',n:'Skull crusher (mancuernas)',ic:'🏋️',eq:'Mancuernas + banco',muscle:'triceps',s:3,r:12,tip:'Codos apuntando al techo. Baja hacia la frente. Extiende completo.',compound:false},
+  // ── ABDOMEN ───────────────────────────────────────────
+  {id:'lib_crunch_cable',n:'Crunch en cable',ic:'⚡',eq:'Cable dual (cuerda alta)',muscle:'core',s:3,r:15,tip:'Arrodíllado. Jala codos hacia rodillas curvando la columna.',compound:false},
+  {id:'lib_crunch_machine',n:'Crunch en máquina',ic:'🏋️',eq:'Máquina de crunch',muscle:'core',s:3,r:15,tip:'Contrae fuerte. Pausa 1s arriba. Controla el regreso.',compound:false},
+  {id:'lib_plank',n:'Plancha',ic:'💪',eq:'Peso corporal',muscle:'core',s:3,r:'30s',tip:'Cuerpo recto como una tabla. No hundas las caderas.',compound:false},
+  {id:'lib_leg_raise',n:'Elevación de piernas (colgado)',ic:'💪',eq:'Barra fija / máquina',muscle:'core',s:3,r:12,tip:'Sube las piernas rectas o dobladas. Controla el descenso.',compound:false},
+  // ── CARDIO ────────────────────────────────────────────
+  {id:'lib_cardio_walk',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',muscle:'cardio',s:1,r:'8 min',tip:'4-5 km/h sin inclinación. Entra en calor, no te canses.',cardio:true},
+  {id:'lib_cardio_run',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',muscle:'cardio',s:1,r:'15 min',tip:'Inclinación 3-5%, 5 km/h. Zona de quema de grasa.',cardio:true},
+  {id:'lib_cardio_bike',n:'Cardio — bicicleta estática',ic:'🚴',eq:'Bicicleta estática',muscle:'cardio',s:1,r:'15 min',tip:'Resistencia moderada. RPM 70-90. Bajo impacto articular.',cardio:true},
+  {id:'lib_cardio_elliptical',n:'Cardio — elíptica',ic:'🏃',eq:'Elíptica',muscle:'cardio',s:1,r:'15 min',tip:'Movimiento completo. Usa los agarres. Sin impacto.',cardio:true},
+];
+
+// Grupos musculares en orden y sus etiquetas
+const MUSCLE_GROUPS=[
+  {id:'piernas',label:'Piernas'},
+  {id:'pecho',label:'Pecho'},
+  {id:'espalda',label:'Espalda'},
+  {id:'hombros',label:'Hombros'},
+  {id:'biceps',label:'Bíceps'},
+  {id:'triceps',label:'Tríceps'},
+  {id:'core',label:'Core / Abdomen'},
+  {id:'cardio',label:'Cardio'},
+];
+
+// Crear copia de ejercicio de la biblioteca con nuevo ID único
+function libExToEx(libEx){
+  const uid='ex_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+  return{...libEx,id:uid};
 }
 
 // ── UI HELPERS ────────────────────────────────────────────────
@@ -552,579 +688,1136 @@ const T='2s', E='ease-in-out', N='infinite';
 
 const anims = {
 
-// CAMINADORA (a1, a6, b1, b6, c1, c7)
+// CAMINADORA (a1, a6, b1, b6, c1, c7) — con display animado, manillar, y figura proporcional
 cardio:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Machine frame -->
-<rect x="20" y="68" width="240" height="8" rx="3" fill="${FR}"/>
-<rect x="20" y="68" width="240" height="8" rx="3" fill="none" stroke="#334155" stroke-width="0.5"
-  stroke-dasharray="12 8" style="animation:belt 0.5s linear infinite"/>
-<line x1="22" y1="67" x2="22" y2="48" stroke="${FR}" stroke-width="4" stroke-linecap="round"/>
-<line x1="258" y1="67" x2="258" y2="48" stroke="${FR}" stroke-width="4" stroke-linecap="round"/>
-<line x1="22" y1="48" x2="258" y2="48" stroke="${PD}" stroke-width="3" stroke-linecap="round"/>
-<!-- Speed display -->
-<rect x="110" y="36" width="60" height="14" rx="3" fill="#0a1628"/>
-<text x="140" y="47" text-anchor="middle" font-family="monospace" font-size="9" fill="#22c55e">5.0 km/h</text>
-<!-- Person walking — body bobs gently -->
-<g style="animation:bob ${T} ${E} ${N};transform-origin:140px 66px">
-  <!-- back leg -->
-  <g style="animation:legB ${T} ${E} ${N};transform-origin:140px 54px">
-    <line x1="140" y1="54" x2="126" y2="67" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
-    <line x1="126" y1="67" x2="122" y2="76" stroke="${PA}" stroke-width="6" stroke-linecap="round"/>
-    <rect x="115" y="73" width="14" height="5" rx="2" fill="${SO}"/>
+<!-- Background detail: gym floor line -->
+<line x1="0" y1="82" x2="280" y2="82" stroke="#1a1f26" stroke-width="1"/>
+<!-- Machine base -->
+<rect x="18" y="76" width="244" height="6" rx="2" fill="#0a0e14"/>
+<!-- Treadmill belt surface -->
+<rect x="20" y="66" width="240" height="10" rx="2" fill="${FR}"/>
+<!-- Belt motion (dashed, animated) -->
+<rect x="20" y="66" width="240" height="10" rx="2" fill="none" stroke="#334155" stroke-width="0.7"
+  stroke-dasharray="10 8" style="animation:belt 0.4s linear infinite"/>
+<!-- Belt rollers (front and back) -->
+<circle cx="24" cy="71" r="4" fill="#2a3441" stroke="#475569" stroke-width="0.5"/>
+<circle cx="256" cy="71" r="4" fill="#2a3441" stroke="#475569" stroke-width="0.5"/>
+<circle cx="24" cy="71" r="1.5" fill="#475569"/>
+<circle cx="256" cy="71" r="1.5" fill="#475569"/>
+<!-- Side rails/supports -->
+<line x1="22" y1="66" x2="22" y2="38" stroke="${FR}" stroke-width="5" stroke-linecap="round"/>
+<line x1="258" y1="66" x2="258" y2="38" stroke="${FR}" stroke-width="5" stroke-linecap="round"/>
+<!-- Handlebar (with grip ends) -->
+<line x1="22" y1="38" x2="258" y2="38" stroke="${PD}" stroke-width="4" stroke-linecap="round"/>
+<rect x="18" y="34" width="10" height="10" rx="2" fill="#0f172a"/>
+<rect x="252" y="34" width="10" height="10" rx="2" fill="#0f172a"/>
+<!-- Display panel -->
+<rect x="96" y="16" width="88" height="22" rx="3" fill="#0a1628" stroke="#1e293b" stroke-width="0.5"/>
+<rect x="99" y="19" width="82" height="16" rx="2" fill="#020617"/>
+<!-- Stats on screen -->
+<text x="116" y="29" text-anchor="middle" font-family="monospace" font-size="7" fill="#64748b">VELOC</text>
+<text x="116" y="34" text-anchor="middle" font-family="monospace" font-size="8" fill="#22c55e" font-weight="bold">5.0</text>
+<line x1="140" y1="20" x2="140" y2="34" stroke="#1e293b" stroke-width="0.5"/>
+<text x="163" y="29" text-anchor="middle" font-family="monospace" font-size="7" fill="#64748b">INCL</text>
+<text x="163" y="34" text-anchor="middle" font-family="monospace" font-size="8" fill="#fbbf24" font-weight="bold">3%</text>
+<!-- Blinking dot (heart rate indicator) -->
+<circle cx="180" cy="22" r="1.5" fill="#ef4444">
+  <animate attributeName="opacity" values="1;0.2;1" dur="0.8s" repeatCount="indefinite"/>
+</circle>
+<!-- ── Person walking ── -->
+<g style="animation:bob ${T} ${E} ${N};transform-origin:140px 60px">
+  <!-- Back leg -->
+  <g style="animation:legB ${T} ${E} ${N};transform-origin:140px 52px">
+    <line x1="140" y1="52" x2="128" y2="64" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
+    <line x1="128" y1="64" x2="125" y2="74" stroke="${PA}" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="121" cy="75" rx="8" ry="2.5" fill="${SO}"/>
   </g>
-  <!-- front leg -->
-  <g style="animation:legF ${T} ${E} ${N};transform-origin:140px 54px">
-    <line x1="140" y1="54" x2="154" y2="67" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
-    <line x1="154" y1="67" x2="158" y2="76" stroke="${PA}" stroke-width="6" stroke-linecap="round"/>
-    <rect x="151" y="73" width="14" height="5" rx="2" fill="${SO}"/>
+  <!-- Front leg -->
+  <g style="animation:legF ${T} ${E} ${N};transform-origin:140px 52px">
+    <line x1="140" y1="52" x2="152" y2="64" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
+    <line x1="152" y1="64" x2="155" y2="74" stroke="${PA}" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="159" cy="75" rx="8" ry="2.5" fill="${SO}"/>
   </g>
-  <!-- torso -->
-  <rect x="133" y="32" width="14" height="24" rx="5" fill="${SH}"/>
-  <!-- back arm -->
-  <g style="animation:armB ${T} ${E} ${N};transform-origin:140px 37px">
-    <line x1="140" y1="37" x2="152" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Torso (tapered) -->
+  <path d="M 132 30 L 148 30 L 145 54 L 135 54 Z" fill="${SH}"/>
+  <!-- Shoulder line -->
+  <ellipse cx="140" cy="30" rx="10" ry="2.5" fill="${SH}"/>
+  <!-- Back arm -->
+  <g style="animation:armB ${T} ${E} ${N};transform-origin:140px 33px">
+    <line x1="140" y1="33" x2="150" y2="45" stroke="${SK}" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="150" y1="45" x2="155" y2="54" stroke="${SK}" stroke-width="4" stroke-linecap="round"/>
   </g>
-  <!-- front arm -->
-  <g style="animation:armF ${T} ${E} ${N};transform-origin:140px 37px">
-    <line x1="140" y1="37" x2="128" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Front arm -->
+  <g style="animation:armF ${T} ${E} ${N};transform-origin:140px 33px">
+    <line x1="140" y1="33" x2="130" y2="45" stroke="${SK}" stroke-width="4.5" stroke-linecap="round"/>
+    <line x1="130" y1="45" x2="125" y2="54" stroke="${SK}" stroke-width="4" stroke-linecap="round"/>
   </g>
-  <!-- neck + head -->
-  <rect x="137" y="27" width="6" height="7" rx="2" fill="${SK}"/>
-  <circle cx="140" cy="21" r="10" fill="${SK}"/>
-  <ellipse cx="140" cy="14" rx="10" ry="9" fill="${HA}"/>
-  <circle cx="136" cy="21" r="1.8" fill="#4a3728"/>
-  <circle cx="144" cy="21" r="1.8" fill="#4a3728"/>
+  <!-- Neck -->
+  <rect x="137" y="24" width="6" height="7" rx="2" fill="${SK}"/>
+  <!-- Head -->
+  <circle cx="140" cy="18" r="9" fill="${SK}"/>
+  <!-- Hair -->
+  <path d="M 131 17 Q 140 8 149 17 L 149 12 Q 140 8 131 12 Z" fill="${HA}"/>
+  <!-- Face details -->
+  <circle cx="136" cy="19" r="1.2" fill="#3a2817"/>
+  <circle cx="144" cy="19" r="1.2" fill="#3a2817"/>
+  <line x1="138" y1="23" x2="142" y2="23" stroke="#3a2817" stroke-width="0.8" stroke-linecap="round"/>
 </g>
 <style>
-@keyframes belt{to{stroke-dashoffset:-20}}
+@keyframes belt{to{stroke-dashoffset:-18}}
 @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-@keyframes legF{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(20deg)}}
-@keyframes legB{0%,100%{transform:rotate(20deg)}50%{transform:rotate(-20deg)}}
-@keyframes armF{0%,100%{transform:rotate(25deg)}50%{transform:rotate(-25deg)}}
-@keyframes armB{0%,100%{transform:rotate(-25deg)}50%{transform:rotate(25deg)}}
+@keyframes legF{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(22deg)}}
+@keyframes legB{0%,100%{transform:rotate(22deg)}50%{transform:rotate(-22deg)}}
+@keyframes armF{0%,100%{transform:rotate(28deg)}50%{transform:rotate(-28deg)}}
+@keyframes armB{0%,100%{transform:rotate(-28deg)}50%{transform:rotate(28deg)}}
 </style></svg>`,
 
-// SENTADILLA SMITH (a2)
+// SENTADILLA SMITH (a2) — figura con articulaciones que doblan correctamente
 squat:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Smith rails -->
-<rect x="60" y="4" width="6" height="122" rx="2" fill="${FR}"/>
-<rect x="214" y="4" width="6" height="122" rx="2" fill="${FR}"/>
-<rect x="50" y="4" width="180" height="8" rx="3" fill="${FR}"/>
+<!-- Floor shadow -->
+<ellipse cx="140" cy="126" rx="50" ry="2" fill="#000" opacity="0.5"/>
+<!-- Smith rails (with more detail) -->
+<rect x="58" y="4" width="8" height="122" rx="2" fill="${FR}"/>
+<rect x="214" y="4" width="8" height="122" rx="2" fill="${FR}"/>
+<rect x="58" y="4" width="8" height="122" rx="2" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<rect x="214" y="4" width="8" height="122" rx="2" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<rect x="48" y="4" width="184" height="8" rx="3" fill="${FR}"/>
 <!-- Rail notches -->
-<rect x="55" y="35" width="16" height="4" rx="1" fill="${PD}"/>
-<rect x="209" y="35" width="16" height="4" rx="1" fill="${PD}"/>
-<!-- Animated group: whole body squats -->
-<g style="animation:sqDown 2s ease-in-out infinite;transform-origin:140px 90px">
-  <!-- feet -->
-  <rect x="116" y="118" width="18" height="6" rx="2" fill="${SO}"/>
-  <rect x="146" y="118" width="18" height="6" rx="2" fill="${SO}"/>
-  <!-- lower legs -->
-  <g style="animation:sqKnee 2s ease-in-out infinite;transform-origin:120px 100px">
-    <line x1="120" y1="100" x2="120" y2="118" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<g fill="${PD}">
+  <rect x="53" y="28" width="18" height="3" rx="1"/>
+  <rect x="53" y="50" width="18" height="3" rx="1"/>
+  <rect x="53" y="72" width="18" height="3" rx="1"/>
+  <rect x="53" y="94" width="18" height="3" rx="1"/>
+  <rect x="209" y="28" width="18" height="3" rx="1"/>
+  <rect x="209" y="50" width="18" height="3" rx="1"/>
+  <rect x="209" y="72" width="18" height="3" rx="1"/>
+  <rect x="209" y="94" width="18" height="3" rx="1"/>
+</g>
+<!-- Animation: whole body descends, knees bend more -->
+<g style="animation:sqDown 2.2s ease-in-out infinite;transform-origin:140px 90px">
+  <!-- Feet with detail -->
+  <ellipse cx="124" cy="120" rx="10" ry="3" fill="${SO}"/>
+  <ellipse cx="156" cy="120" rx="10" ry="3" fill="${SO}"/>
+  <!-- Lower legs (rotate at knee) -->
+  <g style="animation:sqKnee 2.2s ease-in-out infinite;transform-origin:124px 96px">
+    <line x1="124" y1="96" x2="124" y2="118" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="124" cy="96" r="4" fill="${PA}"/>
   </g>
-  <g style="animation:sqKnee 2s ease-in-out infinite;transform-origin:160px 100px">
-    <line x1="160" y1="100" x2="160" y2="118" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+  <g style="animation:sqKnee 2.2s ease-in-out infinite;transform-origin:156px 96px">
+    <line x1="156" y1="96" x2="156" y2="118" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+    <circle cx="156" cy="96" r="4" fill="${PA}"/>
   </g>
-  <!-- upper legs -->
-  <line x1="140" y1="82" x2="120" y2="100" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
-  <line x1="140" y1="82" x2="160" y2="100" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
-  <!-- torso -->
-  <rect x="129" y="52" width="22" height="32" rx="7" fill="${SH}"/>
-  <!-- bar on traps -->
-  <rect x="64" y="46" width="152" height="7" rx="3" fill="${BR}"/>
-  <rect x="63" y="43" width="12" height="13" rx="3" fill="${PL}"/>
-  <rect x="205" y="43" width="12" height="13" rx="3" fill="${PL}"/>
-  <!-- arms gripping bar -->
-  <line x1="131" y1="58" x2="96" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <line x1="149" y1="58" x2="184" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <!-- neck + head -->
-  <rect x="136" y="46" width="8" height="8" rx="2" fill="${SK}"/>
-  <circle cx="140" cy="37" r="11" fill="${SK}"/>
-  <ellipse cx="140" cy="29" rx="11" ry="10" fill="${HA}"/>
-  <circle cx="135" cy="37" r="2" fill="#4a3728"/>
-  <circle cx="145" cy="37" r="2" fill="#4a3728"/>
+  <!-- Upper legs (quads) -->
+  <line x1="138" y1="80" x2="124" y2="96" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+  <line x1="142" y1="80" x2="156" y2="96" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+  <!-- Hip joint -->
+  <ellipse cx="140" cy="80" rx="13" ry="4" fill="${PA}" opacity="0.9"/>
+  <!-- Torso — trapezoid with shoulders wider -->
+  <path d="M 128 52 L 152 52 L 148 80 L 132 80 Z" fill="${SH}"/>
+  <!-- Chest highlight -->
+  <line x1="140" y1="58" x2="140" y2="76" stroke="#16a34a" stroke-width="1" opacity="0.5"/>
+  <!-- Shoulders/traps -->
+  <ellipse cx="140" cy="52" rx="18" ry="5" fill="${SH}"/>
+  <!-- Bar on traps with realistic plates -->
+  <rect x="62" y="45" width="156" height="8" rx="3" fill="${BR}"/>
+  <rect x="62" y="45" width="156" height="8" rx="3" fill="none" stroke="#556677" stroke-width="0.5"/>
+  <!-- Plates (stacked) -->
+  <g>
+    <circle cx="72" cy="49" r="14" fill="#1a1a1a" stroke="#ef4444" stroke-width="2"/>
+    <circle cx="72" cy="49" r="3" fill="${BR}"/>
+    <circle cx="208" cy="49" r="14" fill="#1a1a1a" stroke="#ef4444" stroke-width="2"/>
+    <circle cx="208" cy="49" r="3" fill="${BR}"/>
+  </g>
+  <!-- Arms gripping bar (forearm + upper arm) -->
+  <line x1="130" y1="56" x2="100" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="150" y1="56" x2="180" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Hands on bar -->
+  <circle cx="100" cy="52" r="4" fill="${SK}"/>
+  <circle cx="180" cy="52" r="4" fill="${SK}"/>
+  <!-- Neck -->
+  <rect x="136" y="44" width="8" height="10" rx="2" fill="${SK}"/>
+  <!-- Head -->
+  <circle cx="140" cy="36" r="10" fill="${SK}"/>
+  <!-- Hair -->
+  <path d="M 130 35 Q 140 22 150 35 L 150 28 Q 140 24 130 28 Z" fill="${HA}"/>
+  <!-- Eyes (concentration) -->
+  <circle cx="136" cy="37" r="1.3" fill="#3a2817"/>
+  <circle cx="144" cy="37" r="1.3" fill="#3a2817"/>
+  <!-- Breath indicator -->
+  <line x1="140" y1="40" x2="140" y2="43" stroke="#3a2817" stroke-width="1" stroke-linecap="round"/>
 </g>
 <style>
-@keyframes sqDown{0%,100%{transform:translateY(0)}50%{transform:translateY(16px)}}
-@keyframes sqKnee{0%,100%{transform:rotate(0deg)}50%{transform:rotate(22deg)}}
+@keyframes sqDown{0%,100%{transform:translateY(0)}50%{transform:translateY(18px)}}
+@keyframes sqKnee{0%,100%{transform:rotate(0deg)}50%{transform:rotate(25deg)}}
 </style></svg>`,
 
-// EXTENSIÓN CUÁDRICEPS (a3)
+// EXTENSIÓN CUÁDRICEPS (a3) — máquina con almohadilla detallada, cable animado
 legext:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Machine seat + back -->
-<rect x="60" y="62" width="80" height="12" rx="4" fill="${PD}"/>
-<rect x="60" y="62" width="28" height="65" rx="4" fill="${FR}"/>
-<rect x="130" y="62" width="10" height="65" rx="3" fill="${FR}"/>
-<!-- Pivot + arm -->
-<circle cx="145" cy="76" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
-<!-- Weight stack -->
-<rect x="220" y="30" width="22" height="95" rx="3" fill="${FR}"/>
-<rect x="223" y="35" width="16" height="6" rx="1" fill="${PD}"/>
-<rect x="223" y="45" width="16" height="6" rx="1" fill="${PD}"/>
-<rect x="223" y="55" width="16" height="6" rx="1" fill="${PD}"/>
-<rect x="223" y="65" width="16" height="8" rx="1" fill="#22c55e" opacity="0.7"/>
+<!-- Floor -->
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<!-- Machine base -->
+<rect x="58" y="125" width="90" height="4" rx="1" fill="#0a0e14"/>
+<!-- Backrest (tall) -->
+<rect x="60" y="22" width="28" height="70" rx="3" fill="${FR}"/>
+<rect x="62" y="24" width="24" height="66" rx="2" fill="#0f172a"/>
+<!-- Seat cushion -->
+<rect x="60" y="62" width="80" height="12" rx="3" fill="${PD}"/>
+<rect x="60" y="62" width="80" height="4" rx="2" fill="#4a6384" opacity="0.5"/>
+<!-- Seat support -->
+<rect x="85" y="74" width="6" height="51" fill="${FR}"/>
+<!-- Side handles on seat -->
+<line x1="58" y1="68" x2="52" y2="50" stroke="${FR}" stroke-width="3" stroke-linecap="round"/>
+<line x1="140" y1="68" x2="146" y2="50" stroke="${FR}" stroke-width="3" stroke-linecap="round"/>
+<!-- Pivot + arm mechanism -->
+<rect x="138" y="64" width="6" height="30" fill="${FR}"/>
+<circle cx="141" cy="66" r="8" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="141" cy="66" r="2" fill="${BR}"/>
+<!-- Weight stack (right side) -->
+<rect x="220" y="20" width="26" height="105" rx="2" fill="#0a0e14"/>
+<rect x="222" y="22" width="22" height="100" rx="2" fill="none" stroke="#334155" stroke-width="0.5"/>
+<!-- Weight plates (individual) -->
+<g>
+  <rect x="223" y="28" width="20" height="5" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <rect x="223" y="35" width="20" height="5" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <rect x="223" y="42" width="20" height="5" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <rect x="223" y="49" width="20" height="5" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <!-- Active plate (animated up/down) -->
+  <rect x="222" y="58" width="22" height="7" rx="1" fill="#22c55e" opacity="0.85" style="animation:stack 2s ease-in-out infinite;transform-origin:233px 60px"/>
+</g>
+<!-- Guide rod -->
+<line x1="233" y1="22" x2="233" y2="125" stroke="#334155" stroke-width="1"/>
 <!-- Cable -->
-<line x1="220" y1="69" x2="185" y2="80" stroke="${FL}" stroke-width="1.5" stroke-dasharray="3 3"/>
-<!-- Person seated -->
-<!-- torso upright -->
-<rect x="82" y="28" width="20" height="36" rx="7" fill="${SH}"/>
-<!-- head -->
-<rect x="86" y="22" width="8" height="8" rx="2" fill="${SK}"/>
-<circle cx="92" cy="14" r="11" fill="${SK}"/>
-<ellipse cx="92" cy="6" rx="11" ry="9" fill="${HA}"/>
-<circle cx="87" cy="14" r="2" fill="#4a3728"/>
-<circle cx="97" cy="14" r="2" fill="#4a3728"/>
-<!-- hands on side handles -->
-<line x1="84" y1="38" x2="72" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-<line x1="100" y1="38" x2="112" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-<!-- upper leg on seat -->
-<line x1="92" y1="64" x2="140" y2="66" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
-<line x1="88" y1="64" x2="136" y2="66" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
-<!-- lower leg animating — extends out -->
-<g style="animation:legExt 2s ease-in-out infinite;transform-origin:140px 66px">
-  <line x1="140" y1="66" x2="188" y2="98" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-  <!-- shin pad -->
-  <rect x="180" y="92" width="20" height="10" rx="4" fill="${PD}"/>
-  <!-- shoe -->
-  <rect x="182" y="100" width="20" height="6" rx="2" fill="${SO}"/>
+<path d="M 141 66 Q 180 30 233 30" stroke="${FL}" stroke-width="1.5" fill="none" stroke-dasharray="3 2" opacity="0.7"/>
+<!-- ── Person seated ── -->
+<!-- Back against backrest, torso upright -->
+<!-- Hips on seat -->
+<ellipse cx="92" cy="66" rx="12" ry="5" fill="${PA}"/>
+<!-- Torso -->
+<path d="M 82 30 L 102 30 L 104 60 L 80 60 Z" fill="${SH}"/>
+<line x1="92" y1="35" x2="92" y2="56" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+<!-- Shoulders -->
+<ellipse cx="92" cy="30" rx="13" ry="3.5" fill="${SH}"/>
+<!-- Neck -->
+<rect x="88" y="22" width="8" height="8" rx="2" fill="${SK}"/>
+<!-- Head -->
+<circle cx="92" cy="15" r="10" fill="${SK}"/>
+<!-- Hair -->
+<path d="M 82 13 Q 92 3 102 13 L 102 8 Q 92 4 82 8 Z" fill="${HA}"/>
+<!-- Face -->
+<circle cx="87" cy="15" r="1.3" fill="#3a2817"/>
+<circle cx="97" cy="15" r="1.3" fill="#3a2817"/>
+<path d="M 89 20 Q 92 21 95 20" stroke="#3a2817" stroke-width="0.8" fill="none" stroke-linecap="round"/>
+<!-- Arms gripping side handles -->
+<line x1="82" y1="38" x2="58" y2="60" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<line x1="102" y1="38" x2="138" y2="60" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<circle cx="58" cy="60" r="3.5" fill="${SK}"/>
+<circle cx="138" cy="60" r="3.5" fill="${SK}"/>
+<!-- Upper legs (resting on seat) -->
+<line x1="92" y1="66" x2="136" y2="68" stroke="${PA}" stroke-width="11" stroke-linecap="round"/>
+<!-- Knee joint -->
+<circle cx="138" cy="68" r="5" fill="${PA}"/>
+<!-- Lower leg with pad — pivots at knee -->
+<g style="animation:legExt 2s ease-in-out infinite;transform-origin:141px 68px">
+  <line x1="141" y1="68" x2="188" y2="98" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+  <!-- Ankle -->
+  <circle cx="188" cy="98" r="4" fill="${PA}"/>
+  <!-- Shin pad (foam) -->
+  <rect x="178" y="92" width="22" height="12" rx="5" fill="${PD}"/>
+  <rect x="178" y="92" width="22" height="4" rx="2" fill="#4a6384" opacity="0.5"/>
+  <!-- Foot -->
+  <ellipse cx="192" cy="108" rx="10" ry="3" fill="${SO}"/>
 </g>
 <style>
-@keyframes legExt{0%,100%{transform:rotate(20deg)}50%{transform:rotate(-22deg)}}
+@keyframes legExt{0%,100%{transform:rotate(25deg)}50%{transform:rotate(-25deg)}}
+@keyframes stack{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
 </style></svg>`,
 
-// CURL FEMORAL (a4)
+// CURL FEMORAL (a4) — tumbado boca abajo, más detalle
 legcurl:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Machine bench -->
-<rect x="30" y="52" width="160" height="14" rx="5" fill="${PD}"/>
-<rect x="30" y="65" width="24" height="62" rx="4" fill="${FR}"/>
-<rect x="166" y="65" width="24" height="62" rx="4" fill="${FR}"/>
-<!-- Pivot + roller -->
+<!-- Floor -->
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<!-- Machine base -->
+<rect x="28" y="125" width="170" height="4" rx="1" fill="#0a0e14"/>
+<!-- Bench surface -->
+<rect x="30" y="52" width="160" height="14" rx="4" fill="${PD}"/>
+<rect x="30" y="52" width="160" height="5" rx="3" fill="#4a6384" opacity="0.4"/>
+<!-- Legs of bench -->
+<rect x="32" y="66" width="6" height="59" fill="${FR}"/>
+<rect x="184" y="66" width="6" height="59" fill="${FR}"/>
+<rect x="100" y="66" width="6" height="59" fill="${FR}"/>
+<!-- Pivot for roller -->
+<rect x="174" y="64" width="8" height="4" fill="${FR}"/>
 <circle cx="178" cy="66" r="8" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
-<!-- Weight stack on right -->
-<rect x="220" y="30" width="22" height="95" rx="3" fill="${FR}"/>
-<rect x="223" y="35" width="16" height="6" rx="1" fill="${PD}"/>
-<rect x="223" y="45" width="16" height="6" rx="1" fill="${PD}"/>
-<rect x="223" y="55" width="16" height="8" rx="1" fill="#22c55e" opacity="0.7"/>
-<!-- Person lying face down -->
-<!-- head to left -->
-<circle cx="42" cy="44" r="11" fill="${SK}"/>
-<ellipse cx="42" cy="36" rx="11" ry="9" fill="${HA}"/>
-<!-- torso -->
-<rect x="50" y="42" width="80" height="14" rx="5" fill="${SH}"/>
-<!-- arm hangs down -->
-<line x1="58" y1="52" x2="52" y2="66" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-<!-- upper legs -->
-<line x1="128" y1="50" x2="170" y2="55" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
-<line x1="128" y1="58" x2="170" y2="63" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
-<!-- lower leg curling up -->
-<g style="animation:curl 2s ease-in-out infinite;transform-origin:174px 59px">
-  <line x1="174" y1="59" x2="174" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-  <!-- roller pad -->
-  <rect x="164" y="84" width="22" height="10" rx="4" fill="${PD}"/>
-  <!-- shoe -->
-  <rect x="162" y="92" width="22" height="6" rx="2" fill="${SO}"/>
+<circle cx="178" cy="66" r="2" fill="${BR}"/>
+<!-- Mechanism arm -->
+<rect x="176" y="50" width="4" height="18" fill="${FR}" style="animation:curlArm 2s ease-in-out infinite;transform-origin:178px 66px"/>
+<!-- Weight stack -->
+<rect x="220" y="20" width="26" height="105" rx="2" fill="#0a0e14"/>
+<g>
+  <rect x="223" y="28" width="20" height="5" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <rect x="223" y="35" width="20" height="5" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <rect x="223" y="42" width="20" height="5" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <rect x="222" y="52" width="22" height="7" rx="1" fill="#22c55e" opacity="0.85" style="animation:stack 2s ease-in-out infinite;transform-origin:233px 55px"/>
 </g>
-<style>@keyframes curl{0%,100%{transform:rotate(5deg)}50%{transform:rotate(75deg)}}</style></svg>`,
+<line x1="233" y1="22" x2="233" y2="125" stroke="#334155" stroke-width="1"/>
+<!-- Cable from pivot to stack -->
+<path d="M 178 66 Q 205 40 233 30" stroke="${FL}" stroke-width="1.5" fill="none" stroke-dasharray="3 2" opacity="0.7"/>
+<!-- ── Person lying face down ── -->
+<!-- Head (left, profile view) -->
+<circle cx="42" cy="46" r="10" fill="${SK}"/>
+<!-- Hair -->
+<path d="M 33 42 Q 42 32 52 42 L 52 38 Q 42 34 33 38 Z" fill="${HA}"/>
+<!-- Face (profile) -->
+<circle cx="36" cy="48" r="1.2" fill="#3a2817"/>
+<!-- Neck -->
+<rect x="48" y="47" width="8" height="6" rx="2" fill="${SK}"/>
+<!-- Torso (flat on bench) -->
+<path d="M 54 42 L 130 42 L 132 56 L 52 56 Z" fill="${SH}"/>
+<line x1="70" y1="45" x2="125" y2="45" stroke="#16a34a" stroke-width="0.7" opacity="0.5"/>
+<!-- Arm hanging down from bench -->
+<line x1="58" y1="55" x2="50" y2="66" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<line x1="50" y1="66" x2="48" y2="78" stroke="${SK}" stroke-width="4.5" stroke-linecap="round"/>
+<circle cx="48" cy="79" r="3" fill="${SK}"/>
+<!-- Upper legs (on bench) -->
+<line x1="128" y1="50" x2="172" y2="58" stroke="${PA}" stroke-width="11" stroke-linecap="round"/>
+<!-- Hip/glute hint -->
+<ellipse cx="130" cy="50" rx="8" ry="5" fill="${PA}"/>
+<!-- Knee joint -->
+<circle cx="174" cy="58" r="4" fill="${PA}"/>
+<!-- Lower leg curling up -->
+<g style="animation:curl 2s ease-in-out infinite;transform-origin:174px 58px">
+  <line x1="174" y1="58" x2="174" y2="92" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+  <!-- Ankle -->
+  <circle cx="174" cy="92" r="4" fill="${PA}"/>
+  <!-- Roller pad -->
+  <rect x="164" y="86" width="22" height="12" rx="5" fill="${PD}"/>
+  <rect x="164" y="86" width="22" height="4" rx="2" fill="#4a6384" opacity="0.5"/>
+  <!-- Shoe -->
+  <ellipse cx="174" cy="102" rx="10" ry="3" fill="${SO}"/>
+</g>
+<style>
+@keyframes curl{0%,100%{transform:rotate(0deg)}50%{transform:rotate(85deg)}}
+@keyframes curlArm{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-75deg)}}
+@keyframes stack{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
+</style></svg>`,
 
-// CRUNCH EN CABLE (a5)
+// CRUNCH EN CABLE (a5) — cuerda con puntas, torso curva realmente
 cruncha:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Cable machine -->
-<rect x="210" y="4" width="22" height="120" rx="4" fill="${FR}"/>
-<circle cx="221" cy="32" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
-<!-- Floor -->
-<rect x="0" y="112" width="280" height="18" fill="#0d1520" rx="2"/>
-<!-- Knees on floor -->
-<rect x="98" y="105" width="16" height="10" rx="4" fill="${PD}"/>
-<rect x="122" y="105" width="16" height="10" rx="4" fill="${PD}"/>
-<!-- Shins -->
-<line x1="106" y1="115" x2="100" y2="130" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
-<line x1="130" y1="115" x2="136" y2="130" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
-<!-- Thighs -->
-<line x1="106" y1="105" x2="118" y2="88" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<line x1="130" y1="105" x2="118" y2="88" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<!-- Body crunching -->
-<g style="animation:crunch 2s ease-in-out infinite;transform-origin:118px 88px">
-  <!-- torso -->
-  <rect x="109" y="60" width="18" height="30" rx="7" fill="${SH}"/>
-  <!-- arms holding rope behind head -->
-  <line x1="111" y1="68" x2="96" y2="62" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <line x1="127" y1="68" x2="162" y2="58" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <!-- rope -->
-  <path d="M96 62 Q80 55 75 50" stroke="${FL}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <path d="M162 58 Q185 44 208 32" stroke="${FL}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
-  <!-- head -->
-  <rect x="113" y="53" width="10" height="9" rx="2" fill="${SK}"/>
-  <circle cx="118" cy="44" r="11" fill="${SK}"/>
-  <ellipse cx="118" cy="36" rx="11" ry="9" fill="${HA}"/>
+<!-- Cable machine structure -->
+<rect x="210" y="4" width="24" height="124" rx="3" fill="${FR}"/>
+<rect x="210" y="4" width="24" height="124" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<!-- Top pulley -->
+<circle cx="222" cy="28" r="9" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="222" cy="28" r="4" fill="${BR}"/>
+<circle cx="222" cy="28" r="1.5" fill="${PD}"/>
+<!-- Machine logo -->
+<rect x="214" y="52" width="16" height="40" rx="1" fill="#0f172a"/>
+<text x="222" y="66" text-anchor="middle" font-family="monospace" font-size="6" fill="#22c55e">GYM</text>
+<text x="222" y="78" text-anchor="middle" font-family="monospace" font-size="5" fill="#64748b">20kg</text>
+<!-- Weight stack inside -->
+<g>
+  <rect x="215" y="95" width="14" height="4" rx="1" fill="${PD}"/>
+  <rect x="215" y="100" width="14" height="4" rx="1" fill="${PD}"/>
+  <rect x="215" y="105" width="14" height="5" rx="1" fill="#22c55e" opacity="0.8"/>
 </g>
-<style>@keyframes crunch{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-22deg)}}</style></svg>`,
+<!-- Floor -->
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<rect x="0" y="118" width="280" height="12" fill="#0d1520"/>
+<!-- Knee pad (soft mat) -->
+<rect x="92" y="108" width="54" height="10" rx="2" fill="#1a1f26"/>
+<rect x="92" y="108" width="54" height="3" rx="1" fill="#2a3441"/>
+<!-- Knees on pad -->
+<ellipse cx="106" cy="112" rx="7" ry="4" fill="${PA}"/>
+<ellipse cx="130" cy="112" rx="7" ry="4" fill="${PA}"/>
+<!-- Shins folded under -->
+<line x1="106" y1="115" x2="100" y2="125" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
+<line x1="130" y1="115" x2="136" y2="125" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
+<ellipse cx="100" cy="126" rx="7" ry="2" fill="${SO}"/>
+<ellipse cx="136" cy="126" rx="7" ry="2" fill="${SO}"/>
+<!-- Thighs -->
+<line x1="106" y1="108" x2="118" y2="90" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<line x1="130" y1="108" x2="118" y2="90" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<!-- Hip -->
+<ellipse cx="118" cy="90" rx="10" ry="4" fill="${PA}"/>
+<!-- Torso + arms + head CRUNCH group -->
+<g style="animation:crunch 2s ease-in-out infinite;transform-origin:118px 90px">
+  <!-- Torso -->
+  <path d="M 110 60 L 126 60 L 128 88 L 108 88 Z" fill="${SH}"/>
+  <line x1="118" y1="66" x2="118" y2="84" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+  <!-- Shoulders -->
+  <ellipse cx="118" cy="60" rx="10" ry="3" fill="${SH}"/>
+  <!-- Arms holding rope behind head -->
+  <line x1="111" y1="64" x2="102" y2="48" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="102" y1="48" x2="108" y2="38" stroke="${SK}" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="125" y1="64" x2="140" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="140" y1="52" x2="148" y2="40" stroke="${SK}" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Rope from hands up to pulley -->
+  <path d="M 108 38 Q 160 25 222 28" stroke="${FL}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M 148 40 Q 180 30 222 28" stroke="${FL}" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <!-- Rope end knobs -->
+  <circle cx="108" cy="38" r="3.5" fill="${PD}"/>
+  <circle cx="148" cy="40" r="3.5" fill="${PD}"/>
+  <!-- Neck -->
+  <rect x="114" y="54" width="8" height="8" rx="2" fill="${SK}"/>
+  <!-- Head -->
+  <circle cx="118" cy="46" r="10" fill="${SK}"/>
+  <path d="M 108 44 Q 118 34 128 44 L 128 40 Q 118 36 108 40 Z" fill="${HA}"/>
+  <circle cx="114" cy="46" r="1.3" fill="#3a2817"/>
+  <circle cx="122" cy="46" r="1.3" fill="#3a2817"/>
+</g>
+<style>@keyframes crunch{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-28deg)}}</style></svg>`,
 
-// PRESS INCLINADO SMITH (b2)
+// PRESS INCLINADO SMITH (b2) — banco inclinado, figura en posición, discos visibles
 incpress:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Smith rails -->
-<rect x="56" y="4" width="6" height="122" rx="2" fill="${FR}"/>
-<rect x="218" y="4" width="6" height="122" rx="2" fill="${FR}"/>
-<rect x="46" y="4" width="188" height="8" rx="3" fill="${FR}"/>
-<!-- Incline bench -->
-<rect x="82" y="72" width="120" height="12" rx="4" fill="${PD}"/>
-<rect x="82" y="82" width="26" height="45" rx="4" fill="${FR}"/>
-<rect x="176" y="82" width="26" height="45" rx="4" fill="${FR}"/>
-<!-- incline pad -->
-<rect x="82" y="52" width="70" height="22" rx="5" fill="${PD}" transform="rotate(-28 117 63)"/>
-<!-- Person lying on incline — head upper-left -->
-<!-- head -->
-<circle cx="68" cy="50" r="11" fill="${SK}"/>
-<ellipse cx="68" cy="42" rx="11" ry="9" fill="${HA}"/>
-<circle cx="63" cy="50" r="2" fill="#4a3728"/>
-<circle cx="73" cy="50" r="2" fill="#4a3728"/>
-<!-- neck -->
-<rect x="64" y="58" width="8" height="8" rx="2" fill="${SK}"/>
-<!-- torso inclined -->
-<rect x="68" y="54" width="74" height="18" rx="7" fill="${SH}" transform="rotate(20 105 63)"/>
-<!-- legs going down-right -->
-<line x1="155" y1="74" x2="168" y2="92" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
-<line x1="164" y1="72" x2="177" y2="90" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
-<rect x="162" y="89" width="18" height="6" rx="2" fill="${SO}"/>
-<rect x="170" y="87" width="18" height="6" rx="2" fill="${SO}"/>
-<!-- ANIMATED press -->
-<g style="animation:press 2s ease-in-out infinite;transform-origin:112px 56px">
-  <!-- arms -->
-  <line x1="80" y1="56" x2="62" y2="44" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <line x1="98" y1="53" x2="150" y2="42" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <!-- bar with plates -->
-  <rect x="50" y="37" width="166" height="7" rx="3" fill="${BR}"/>
-  <rect x="48" y="34" width="14" height="13" rx="3" fill="${PL}"/>
-  <rect x="204" y="34" width="14" height="13" rx="3" fill="${PL}"/>
-  <rect x="50" y="35" width="6" height="9" rx="1" fill="#6b7a8d"/>
-  <rect x="210" y="35" width="6" height="9" rx="1" fill="#6b7a8d"/>
+<!-- Floor -->
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<!-- Smith rails with notches -->
+<rect x="54" y="4" width="8" height="124" rx="2" fill="${FR}"/>
+<rect x="218" y="4" width="8" height="124" rx="2" fill="${FR}"/>
+<rect x="44" y="4" width="192" height="8" rx="3" fill="${FR}"/>
+<g fill="${PD}">
+  <rect x="48" y="26" width="20" height="3" rx="1"/>
+  <rect x="48" y="44" width="20" height="3" rx="1"/>
+  <rect x="48" y="62" width="20" height="3" rx="1"/>
+  <rect x="212" y="26" width="20" height="3" rx="1"/>
+  <rect x="212" y="44" width="20" height="3" rx="1"/>
+  <rect x="212" y="62" width="20" height="3" rx="1"/>
 </g>
-<style>@keyframes press{0%,100%{transform:translateY(0)}50%{transform:translateY(-16px)}}</style></svg>`,
+<!-- Bench base (legs) -->
+<rect x="82" y="82" width="8" height="45" fill="${FR}"/>
+<rect x="194" y="82" width="8" height="45" fill="${FR}"/>
+<rect x="80" y="80" width="124" height="6" rx="2" fill="${PD}"/>
+<!-- Inclined pad (the visible part) -->
+<g transform="rotate(-28 130 70)">
+  <rect x="78" y="62" width="104" height="18" rx="5" fill="${PD}"/>
+  <rect x="78" y="62" width="104" height="5" rx="3" fill="#4a6384" opacity="0.4"/>
+</g>
+<!-- ── Person on bench ── -->
+<!-- Head upper-left -->
+<circle cx="66" cy="52" r="10" fill="${SK}"/>
+<path d="M 56 50 Q 66 40 76 50 L 76 46 Q 66 42 56 46 Z" fill="${HA}"/>
+<circle cx="62" cy="53" r="1.3" fill="#3a2817"/>
+<circle cx="70" cy="53" r="1.3" fill="#3a2817"/>
+<!-- Neck -->
+<rect x="64" y="60" width="8" height="7" rx="2" fill="${SK}" transform="rotate(-28 68 62)"/>
+<!-- Torso (inclined) -->
+<g transform="rotate(-28 115 66)">
+  <path d="M 75 56 L 150 56 L 155 72 L 72 72 Z" fill="${SH}"/>
+  <line x1="112" y1="60" x2="112" y2="70" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+</g>
+<!-- Legs going down-right (bent at hip) -->
+<line x1="152" y1="82" x2="172" y2="102" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<line x1="146" y1="88" x2="166" y2="108" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<circle cx="172" cy="102" r="4" fill="${PA}"/>
+<circle cx="166" cy="108" r="4" fill="${PA}"/>
+<!-- Lower legs -->
+<line x1="172" y1="102" x2="178" y2="122" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="166" y1="108" x2="172" y2="124" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<!-- Feet planted -->
+<ellipse cx="178" cy="124" rx="10" ry="2.5" fill="${SO}"/>
+<ellipse cx="172" cy="126" rx="10" ry="2.5" fill="${SO}"/>
+<!-- ── ANIMATED: arms + bar press up ── -->
+<g style="animation:press ${T} ${E} ${N};transform-origin:112px 56px">
+  <!-- Forearms from torso up to bar -->
+  <line x1="88" y1="54" x2="76" y2="40" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="76" y1="40" x2="66" y2="32" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="138" y1="54" x2="156" y2="40" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <line x1="156" y1="40" x2="166" y2="32" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Hands -->
+  <circle cx="66" cy="32" r="4" fill="${SK}"/>
+  <circle cx="166" cy="32" r="4" fill="${SK}"/>
+  <!-- Bar -->
+  <rect x="48" y="28" width="184" height="7" rx="3" fill="${BR}"/>
+  <!-- Plates each side -->
+  <circle cx="58" cy="31" r="13" fill="#1a1a1a" stroke="#ef4444" stroke-width="2"/>
+  <circle cx="58" cy="31" r="3" fill="${BR}"/>
+  <circle cx="222" cy="31" r="13" fill="#1a1a1a" stroke="#ef4444" stroke-width="2"/>
+  <circle cx="222" cy="31" r="3" fill="${BR}"/>
+</g>
+<style>@keyframes press{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}</style></svg>`,
 
-// APERTURAS MÁQUINA (b3)
+// APERTURAS MÁQUINA (b3) — con almohadillas de brazos y pivotes realistas
 pecfly:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Machine frame -->
-<rect x="10" y="18" width="12" height="90" rx="3" fill="${FR}"/>
-<rect x="258" y="18" width="12" height="90" rx="3" fill="${FR}"/>
-<rect x="10" y="18" width="260" height="10" rx="3" fill="${FR}"/>
-<!-- Pivots -->
-<circle cx="22" cy="62" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
-<circle cx="258" cy="62" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
-<!-- Seat + post -->
-<rect x="116" y="70" width="48" height="12" rx="4" fill="${PD}"/>
-<rect x="124" y="82" width="32" height="45" rx="4" fill="${FR}"/>
-<!-- Person seated -->
-<!-- legs -->
-<line x1="124" y1="80" x2="104" y2="100" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<line x1="156" y1="80" x2="176" y2="100" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<rect x="94" y="97" width="18" height="6" rx="2" fill="${SO}"/>
-<rect x="168" y="97" width="18" height="6" rx="2" fill="${SO}"/>
-<!-- torso -->
-<rect x="126" y="38" width="28" height="34" rx="8" fill="${SH}"/>
-<!-- head -->
-<rect x="132" y="30" width="10" height="10" rx="2" fill="${SK}"/>
-<circle cx="140" cy="21" r="11" fill="${SK}"/>
-<ellipse cx="140" cy="13" rx="11" ry="9" fill="${HA}"/>
-<circle cx="135" cy="21" r="2" fill="#4a3728"/>
-<circle cx="145" cy="21" r="2" fill="#4a3728"/>
-<!-- ANIMATED fly arms -->
-<g style="animation:flyL 2s ease-in-out infinite;transform-origin:22px 62px">
-  <line x1="22" y1="62" x2="120" y2="58" stroke="${FR}" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="120" cy="58" r="5" fill="${PD}"/>
-  <line x1="120" y1="58" x2="128" y2="55" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- Floor -->
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<!-- Machine vertical frames -->
+<rect x="8" y="14" width="14" height="98" rx="3" fill="${FR}"/>
+<rect x="258" y="14" width="14" height="98" rx="3" fill="${FR}"/>
+<rect x="8" y="14" width="14" height="98" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<rect x="258" y="14" width="14" height="98" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<!-- Top crossbar -->
+<rect x="8" y="14" width="264" height="10" rx="3" fill="${FR}"/>
+<!-- Pivots (larger, detailed) -->
+<circle cx="15" cy="60" r="9" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="15" cy="60" r="3" fill="${BR}"/>
+<circle cx="265" cy="60" r="9" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="265" cy="60" r="3" fill="${BR}"/>
+<!-- Seat cushion -->
+<rect x="108" y="78" width="64" height="12" rx="4" fill="${PD}"/>
+<rect x="108" y="78" width="64" height="4" rx="2" fill="#4a6384" opacity="0.5"/>
+<!-- Seat support -->
+<rect x="134" y="90" width="12" height="38" fill="${FR}"/>
+<!-- Back support -->
+<rect x="130" y="34" width="20" height="48" rx="3" fill="${FR}"/>
+<rect x="132" y="36" width="16" height="44" rx="2" fill="#0f172a"/>
+<!-- ── Person seated on machine ── -->
+<!-- Legs forward -->
+<line x1="124" y1="88" x2="100" y2="110" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<line x1="156" y1="88" x2="180" y2="110" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<circle cx="100" cy="110" r="4" fill="${PA}"/>
+<circle cx="180" cy="110" r="4" fill="${PA}"/>
+<!-- Lower legs -->
+<line x1="100" y1="110" x2="95" y2="122" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="180" y1="110" x2="185" y2="122" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<ellipse cx="94" cy="124" rx="9" ry="2.5" fill="${SO}"/>
+<ellipse cx="186" cy="124" rx="9" ry="2.5" fill="${SO}"/>
+<!-- Torso (seen from front, broad) -->
+<path d="M 128 42 L 152 42 L 155 78 L 125 78 Z" fill="${SH}"/>
+<!-- Chest center line -->
+<line x1="140" y1="48" x2="140" y2="72" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+<!-- Shoulders (wider) -->
+<ellipse cx="140" cy="42" rx="15" ry="4" fill="${SH}"/>
+<!-- Neck -->
+<rect x="136" y="34" width="8" height="8" rx="2" fill="${SK}"/>
+<!-- Head -->
+<circle cx="140" cy="26" r="10" fill="${SK}"/>
+<path d="M 130 24 Q 140 14 150 24 L 150 20 Q 140 16 130 20 Z" fill="${HA}"/>
+<circle cx="136" cy="27" r="1.3" fill="#3a2817"/>
+<circle cx="144" cy="27" r="1.3" fill="#3a2817"/>
+<line x1="138" y1="31" x2="142" y2="31" stroke="#3a2817" stroke-width="0.8" stroke-linecap="round"/>
+<!-- ANIMATED fly arms (LEFT) -->
+<g style="animation:flyL 2s ease-in-out infinite;transform-origin:15px 60px">
+  <line x1="15" y1="60" x2="115" y2="56" stroke="${FR}" stroke-width="7" stroke-linecap="round"/>
+  <!-- Arm pad -->
+  <rect x="108" y="52" width="18" height="22" rx="4" fill="${PD}"/>
+  <rect x="108" y="52" width="18" height="6" rx="2" fill="#4a6384" opacity="0.4"/>
 </g>
-<g style="animation:flyR 2s ease-in-out infinite;transform-origin:258px 62px">
-  <line x1="258" y1="62" x2="160" y2="58" stroke="${FR}" stroke-width="6" stroke-linecap="round"/>
-  <circle cx="160" cy="58" r="5" fill="${PD}"/>
-  <line x1="160" y1="58" x2="152" y2="55" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- RIGHT fly arm -->
+<g style="animation:flyR 2s ease-in-out infinite;transform-origin:265px 60px">
+  <line x1="265" y1="60" x2="165" y2="56" stroke="${FR}" stroke-width="7" stroke-linecap="round"/>
+  <rect x="154" y="52" width="18" height="22" rx="4" fill="${PD}"/>
+  <rect x="154" y="52" width="18" height="6" rx="2" fill="#4a6384" opacity="0.4"/>
+</g>
+<!-- Forearms pressing against pads (always touching) -->
+<g style="animation:flyForeL 2s ease-in-out infinite;transform-origin:128px 55px">
+  <line x1="128" y1="55" x2="118" y2="63" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+</g>
+<g style="animation:flyForeR 2s ease-in-out infinite;transform-origin:152px 55px">
+  <line x1="152" y1="55" x2="162" y2="63" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
 </g>
 <style>
-@keyframes flyL{0%,100%{transform:rotate(-48deg)}50%{transform:rotate(-12deg)}}
-@keyframes flyR{0%,100%{transform:rotate(48deg)}50%{transform:rotate(12deg)}}
+@keyframes flyL{0%,100%{transform:rotate(-50deg)}50%{transform:rotate(-10deg)}}
+@keyframes flyR{0%,100%{transform:rotate(50deg)}50%{transform:rotate(10deg)}}
+@keyframes flyForeL{0%,100%{transform:rotate(-30deg)}50%{transform:rotate(0deg)}}
+@keyframes flyForeR{0%,100%{transform:rotate(30deg)}50%{transform:rotate(0deg)}}
 </style></svg>`,
 
-// ELEVACIÓN LATERAL CABLE (b4)
+// ELEVACIÓN LATERAL CABLE (b4) — persona de cuerpo completo, cable animado
 latsideq:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Cable machine right side -->
-<rect x="228" y="4" width="22" height="122" rx="4" fill="${FR}"/>
-<circle cx="239" cy="108" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
 <!-- Floor -->
-<rect x="0" y="118" width="280" height="12" fill="#0d1520" rx="2"/>
-<!-- Person standing -->
-<!-- feet + legs -->
-<rect x="102" y="112" width="18" height="7" rx="2" fill="${SO}"/>
-<rect x="130" y="112" width="18" height="7" rx="2" fill="${SO}"/>
-<line x1="110" y1="112" x2="106" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<line x1="140" y1="112" x2="144" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<!-- torso -->
-<rect x="108" y="52" width="24" height="40" rx="8" fill="${SH}"/>
-<!-- head -->
-<rect x="114" y="44" width="10" height="10" rx="2" fill="${SK}"/>
-<circle cx="120" cy="35" r="11" fill="${SK}"/>
-<ellipse cx="120" cy="27" rx="11" ry="9" fill="${HA}"/>
-<circle cx="115" cy="35" r="2" fill="#4a3728"/>
-<circle cx="125" cy="35" r="2" fill="#4a3728"/>
-<!-- resting arm (left) -->
-<line x1="110" y1="60" x2="100" y2="78" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-<!-- ANIMATED raising arm (right) with cable -->
-<g style="animation:raise 2s ease-in-out infinite;transform-origin:128px 62px">
-  <line x1="128" y1="62" x2="180" y2="52" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="180" cy="52" r="5" fill="${PD}"/>
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<rect x="0" y="120" width="280" height="10" fill="#0d1520"/>
+<!-- Cable machine (full column) -->
+<rect x="226" y="4" width="26" height="124" rx="3" fill="${FR}"/>
+<rect x="226" y="4" width="26" height="124" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<!-- Bottom pulley (low cable) -->
+<circle cx="239" cy="108" r="9" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="239" cy="108" r="3" fill="${BR}"/>
+<!-- Weight stack inside column -->
+<rect x="230" y="38" width="18" height="4" rx="1" fill="${PD}"/>
+<rect x="230" y="44" width="18" height="4" rx="1" fill="${PD}"/>
+<rect x="230" y="50" width="18" height="4" rx="1" fill="${PD}"/>
+<rect x="230" y="58" width="18" height="5" rx="1" fill="#22c55e" opacity="0.85" style="animation:stack 2s ease-in-out infinite;transform-origin:239px 60px"/>
+<line x1="239" y1="12" x2="239" y2="100" stroke="#334155" stroke-width="1"/>
+<!-- ── Person standing (facing left, right side to machine) ── -->
+<!-- Feet -->
+<ellipse cx="108" cy="122" rx="10" ry="3" fill="${SO}"/>
+<ellipse cx="140" cy="122" rx="10" ry="3" fill="${SO}"/>
+<!-- Lower legs -->
+<line x1="108" y1="122" x2="108" y2="96" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="140" y1="122" x2="140" y2="96" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<!-- Knees -->
+<circle cx="108" cy="96" r="4" fill="${PA}"/>
+<circle cx="140" cy="96" r="4" fill="${PA}"/>
+<!-- Upper legs -->
+<line x1="108" y1="96" x2="114" y2="76" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<line x1="140" y1="96" x2="134" y2="76" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<!-- Hips -->
+<ellipse cx="124" cy="76" rx="13" ry="4" fill="${PA}"/>
+<!-- Torso -->
+<path d="M 112 42 L 136 42 L 138 76 L 110 76 Z" fill="${SH}"/>
+<line x1="124" y1="48" x2="124" y2="72" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+<!-- Shoulders -->
+<ellipse cx="124" cy="42" rx="14" ry="4" fill="${SH}"/>
+<!-- Neck -->
+<rect x="120" y="34" width="8" height="8" rx="2" fill="${SK}"/>
+<!-- Head -->
+<circle cx="124" cy="26" r="10" fill="${SK}"/>
+<path d="M 114 24 Q 124 14 134 24 L 134 20 Q 124 16 114 20 Z" fill="${HA}"/>
+<circle cx="120" cy="27" r="1.3" fill="#3a2817"/>
+<circle cx="128" cy="27" r="1.3" fill="#3a2817"/>
+<!-- Resting arm (left side, holds bar or rests) -->
+<line x1="112" y1="48" x2="104" y2="74" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<line x1="104" y1="74" x2="102" y2="90" stroke="${SK}" stroke-width="4.5" stroke-linecap="round"/>
+<!-- ANIMATED lateral raise (right arm) -->
+<g style="animation:raise 2s ease-in-out infinite;transform-origin:136px 46px">
+  <!-- Upper arm -->
+  <line x1="136" y1="46" x2="186" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Forearm -->
+  <line x1="186" y1="50" x2="210" y2="54" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Hand grip -->
+  <circle cx="212" cy="54" r="4" fill="${SK}"/>
+  <!-- Handle (D-ring) -->
+  <ellipse cx="214" cy="54" rx="6" ry="4" fill="none" stroke="${PD}" stroke-width="3"/>
 </g>
-<!-- Cable from machine to handle -->
-<path style="animation:cableRaise 2s ease-in-out infinite" d="M232 108 Q210 100 180 52" stroke="${FL}" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<!-- Cable from bottom pulley to hand -->
+<path style="animation:cableRaise 2s ease-in-out infinite" d="M 239 108 Q 230 80 214 54" stroke="${FL}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
 <style>
-@keyframes raise{0%,100%{transform:rotate(-28deg)}50%{transform:rotate(12deg)}}
+@keyframes raise{0%,100%{transform:rotate(-20deg)}50%{transform:rotate(55deg)}}
 @keyframes cableRaise{
-  0%,100%{d:path("M232 108 Q210 100 180 52")}
-  50%{d:path("M232 108 Q210 90 162 35")}
+  0%,100%{d:path("M 239 108 Q 230 95 214 75")}
+  50%{d:path("M 239 108 Q 225 80 186 20")}
 }
+@keyframes stack{0%,100%{transform:translateY(0)}50%{transform:translateY(-22px)}}
 </style></svg>`,
 
-// JALÓN TRÍCEPS CABLE (b5)
+// JALÓN TRÍCEPS CABLE (b5) — cuerda animada, postura correcta codos pegados
 tripdwn:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Cable machine top -->
-<rect x="110" y="4" width="60" height="18" rx="4" fill="${FR}"/>
-<circle cx="140" cy="22" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
-<!-- Cable down -->
-<line x1="140" y1="22" x2="140" y2="52" stroke="${FL}" stroke-width="1.5"/>
 <!-- Floor -->
-<rect x="0" y="118" width="280" height="12" fill="#0d1520" rx="2"/>
-<!-- Person standing -->
-<rect x="102" y="112" width="16" height="7" rx="2" fill="${SO}"/>
-<rect x="132" y="112" width="16" height="7" rx="2" fill="${SO}"/>
-<line x1="110" y1="112" x2="108" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<line x1="140" y1="112" x2="142" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<!-- torso slightly forward -->
-<rect x="111" y="52" width="22" height="40" rx="7" fill="${SH}" transform="rotate(5 122 72)"/>
-<!-- head -->
-<rect x="116" y="43" width="10" height="10" rx="2" fill="${SK}"/>
-<circle cx="121" cy="34" r="11" fill="${SK}"/>
-<ellipse cx="121" cy="26" rx="11" ry="9" fill="${HA}"/>
-<!-- ANIMATED tricep pushdown -->
-<g style="animation:triPush 2s ease-in-out infinite;transform-origin:122px 60px">
-  <!-- upper arms fixed at sides -->
-  <line x1="113" y1="57" x2="111" y2="68" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <line x1="131" y1="57" x2="133" y2="68" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <!-- forearms push down -->
-  <line x1="111" y1="68" x2="108" y2="86" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <line x1="133" y1="68" x2="136" y2="86" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <!-- rope handle -->
-  <path d="M108 86 Q122 93 136 86" stroke="${FL}" stroke-width="3" fill="none" stroke-linecap="round"/>
-  <circle cx="108" cy="86" r="4" fill="${PD}"/>
-  <circle cx="136" cy="86" r="4" fill="${PD}"/>
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<rect x="0" y="120" width="280" height="10" fill="#0d1520"/>
+<!-- Machine top -->
+<rect x="100" y="4" width="80" height="16" rx="3" fill="${FR}"/>
+<rect x="100" y="4" width="80" height="16" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<!-- Top support posts -->
+<rect x="100" y="4" width="4" height="16" fill="#0a0e14"/>
+<rect x="176" y="4" width="4" height="16" fill="#0a0e14"/>
+<!-- Top pulley -->
+<circle cx="140" cy="20" r="8" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="140" cy="20" r="3" fill="${BR}"/>
+<!-- Side column with weight stack indicator -->
+<rect x="216" y="20" width="20" height="100" rx="2" fill="#0a0e14"/>
+<rect x="218" y="30" width="16" height="4" rx="1" fill="${PD}"/>
+<rect x="218" y="36" width="16" height="4" rx="1" fill="${PD}"/>
+<rect x="217" y="45" width="18" height="5" rx="1" fill="#22c55e" opacity="0.85" style="animation:stack 2s ease-in-out infinite;transform-origin:226px 47px"/>
+<!-- ── Person standing ── -->
+<!-- Feet -->
+<ellipse cx="112" cy="122" rx="9" ry="3" fill="${SO}"/>
+<ellipse cx="138" cy="122" rx="9" ry="3" fill="${SO}"/>
+<!-- Lower legs -->
+<line x1="112" y1="122" x2="112" y2="98" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="138" y1="122" x2="138" y2="98" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<circle cx="112" cy="98" r="4" fill="${PA}"/>
+<circle cx="138" cy="98" r="4" fill="${PA}"/>
+<!-- Upper legs -->
+<line x1="112" y1="98" x2="118" y2="80" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<line x1="138" y1="98" x2="132" y2="80" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<!-- Hips -->
+<ellipse cx="125" cy="80" rx="12" ry="4" fill="${PA}"/>
+<!-- Torso (slightly forward lean) -->
+<path d="M 114 48 L 136 48 L 138 78 L 112 78 Z" fill="${SH}"/>
+<line x1="125" y1="54" x2="125" y2="74" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+<!-- Shoulders -->
+<ellipse cx="125" cy="48" rx="13" ry="3.5" fill="${SH}"/>
+<!-- Neck -->
+<rect x="121" y="40" width="8" height="8" rx="2" fill="${SK}"/>
+<!-- Head (looking down at handles) -->
+<circle cx="125" cy="32" r="10" fill="${SK}"/>
+<path d="M 115 30 Q 125 20 135 30 L 135 26 Q 125 22 115 26 Z" fill="${HA}"/>
+<circle cx="121" cy="34" r="1.3" fill="#3a2817"/>
+<circle cx="129" cy="34" r="1.3" fill="#3a2817"/>
+<!-- Upper arms (pinned to sides, don't animate) -->
+<line x1="115" y1="54" x2="113" y2="68" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<line x1="135" y1="54" x2="137" y2="68" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- Elbow joint -->
+<circle cx="113" cy="68" r="3.5" fill="${SK}"/>
+<circle cx="137" cy="68" r="3.5" fill="${SK}"/>
+<!-- ANIMATED forearms + rope push down -->
+<g style="animation:triPushL 2s ease-in-out infinite;transform-origin:113px 68px">
+  <line x1="113" y1="68" x2="113" y2="95" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="113" cy="95" r="3.5" fill="${SK}"/>
 </g>
-<style>@keyframes triPush{0%,100%{transform:translateY(0)}50%{transform:translateY(14px)}}</style></svg>`,
+<g style="animation:triPushR 2s ease-in-out infinite;transform-origin:137px 68px">
+  <line x1="137" y1="68" x2="137" y2="95" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="137" cy="95" r="3.5" fill="${SK}"/>
+</g>
+<!-- Rope from pulley to hands — two paths -->
+<path style="animation:ropeL 2s ease-in-out infinite" d="M 140 20 Q 125 50 113 80" stroke="${FL}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<path style="animation:ropeR 2s ease-in-out infinite" d="M 140 20 Q 155 50 137 80" stroke="${FL}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<!-- Rope end knots -->
+<circle style="animation:knotL 2s ease-in-out infinite" cx="113" cy="80" r="3" fill="${PD}"/>
+<circle style="animation:knotR 2s ease-in-out infinite" cx="137" cy="80" r="3" fill="${PD}"/>
+<style>
+@keyframes triPushL{0%,100%{transform:rotate(-40deg)}50%{transform:rotate(0deg)}}
+@keyframes triPushR{0%,100%{transform:rotate(40deg)}50%{transform:rotate(0deg)}}
+@keyframes ropeL{
+  0%,100%{d:path("M 140 20 Q 120 40 100 68")}
+  50%{d:path("M 140 20 Q 125 50 113 95")}
+}
+@keyframes ropeR{
+  0%,100%{d:path("M 140 20 Q 160 40 178 68")}
+  50%{d:path("M 140 20 Q 155 50 137 95")}
+}
+@keyframes knotL{0%,100%{transform:translate(-13px,-12px)}50%{transform:translate(0,15px)}}
+@keyframes knotR{0%,100%{transform:translate(41px,-12px)}50%{transform:translate(0,15px)}}
+@keyframes stack{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
+</style></svg>`,
 
-// JALÓN AL PECHO (c2)
+// JALÓN AL PECHO (c2) — barra con agarre ancho, articulaciones en brazos, stack animado
 latpull:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Machine overhead -->
-<rect x="70" y="4" width="140" height="12" rx="4" fill="${FR}"/>
-<line x1="140" y1="16" x2="140" y2="30" stroke="${FR}" stroke-width="4"/>
-<circle cx="140" cy="30" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
-<!-- Seat + leg brace -->
-<rect x="102" y="76" width="76" height="12" rx="4" fill="${PD}"/>
-<rect x="102" y="86" width="76" height="8" rx="3" fill="${FR}"/>
-<rect x="108" y="94" width="64" height="32" rx="4" fill="${FR}"/>
-<!-- Weight stack -->
-<rect x="238" y="20" width="22" height="96" rx="3" fill="${FR}"/>
-<rect x="241" y="25" width="16" height="6" rx="1" fill="${PD}"/>
-<rect x="241" y="35" width="16" height="6" rx="1" fill="${PD}"/>
-<rect x="241" y="45" width="16" height="8" rx="1" fill="#22c55e" opacity="0.7"/>
-<!-- Person seated -->
-<!-- legs under brace -->
-<line x1="118" y1="84" x2="96" y2="108" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<line x1="162" y1="84" x2="184" y2="108" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<rect x="84" y="105" width="18" height="7" rx="2" fill="${SO}"/>
-<rect x="178" y="105" width="18" height="7" rx="2" fill="${SO}"/>
-<!-- torso -->
-<rect x="128" y="44" width="24" height="34" rx="8" fill="${SH}"/>
-<!-- head -->
-<rect x="134" y="36" width="10" height="10" rx="2" fill="${SK}"/>
-<circle cx="140" cy="27" r="11" fill="${SK}"/>
-<ellipse cx="140" cy="19" rx="11" ry="9" fill="${HA}"/>
-<circle cx="135" cy="27" r="2" fill="#4a3728"/>
-<circle cx="145" cy="27" r="2" fill="#4a3728"/>
-<!-- ANIMATED lat pulldown -->
-<g style="animation:latDown 2s ease-in-out infinite;transform-origin:140px 46px">
-  <!-- arms reaching wide -->
-  <g style="animation:latArms 2s ease-in-out infinite;transform-origin:132px 48px">
-    <line x1="132" y1="48" x2="88" y2="28" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- Floor -->
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<!-- Overhead beam -->
+<rect x="64" y="4" width="152" height="14" rx="3" fill="${FR}"/>
+<rect x="64" y="4" width="152" height="14" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<!-- Top pulley housing -->
+<rect x="130" y="18" width="20" height="14" rx="2" fill="${FR}"/>
+<circle cx="140" cy="32" r="9" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="140" cy="32" r="3" fill="${BR}"/>
+<!-- Cable down -->
+<line x1="140" y1="32" x2="140" y2="48" stroke="${FL}" stroke-width="1.8"/>
+<!-- Seat cushion -->
+<rect x="100" y="78" width="80" height="12" rx="4" fill="${PD}"/>
+<rect x="100" y="78" width="80" height="4" rx="2" fill="#4a6384" opacity="0.4"/>
+<!-- Seat post -->
+<rect x="134" y="90" width="12" height="38" fill="${FR}"/>
+<!-- Leg pads/brace (thigh pads that lock you in) -->
+<rect x="98" y="88" width="84" height="10" rx="3" fill="${FR}"/>
+<rect x="108" y="98" width="12" height="18" rx="3" fill="${PD}"/>
+<rect x="160" y="98" width="12" height="18" rx="3" fill="${PD}"/>
+<!-- Weight stack (right side) -->
+<rect x="234" y="20" width="26" height="100" rx="2" fill="#0a0e14"/>
+<g>
+  <rect x="237" y="28" width="20" height="4" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <rect x="237" y="34" width="20" height="4" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <rect x="237" y="40" width="20" height="4" rx="1" fill="${PD}" stroke="#64748b" stroke-width="0.3"/>
+  <rect x="236" y="50" width="22" height="6" rx="1" fill="#22c55e" opacity="0.85" style="animation:stack 2s ease-in-out infinite;transform-origin:247px 53px"/>
+</g>
+<line x1="247" y1="22" x2="247" y2="120" stroke="#334155" stroke-width="1"/>
+<!-- ── Person seated ── -->
+<!-- Lower legs under brace -->
+<line x1="120" y1="108" x2="108" y2="126" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="160" y1="108" x2="172" y2="126" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<ellipse cx="106" cy="127" rx="8" ry="2.5" fill="${SO}"/>
+<ellipse cx="174" cy="127" rx="8" ry="2.5" fill="${SO}"/>
+<!-- Upper legs (under pads) -->
+<line x1="140" y1="86" x2="120" y2="108" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<line x1="140" y1="86" x2="160" y2="108" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<!-- Hips -->
+<ellipse cx="140" cy="86" rx="12" ry="4" fill="${PA}"/>
+<!-- Torso -->
+<path d="M 128 50 L 152 50 L 154 84 L 126 84 Z" fill="${SH}"/>
+<line x1="140" y1="56" x2="140" y2="80" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+<!-- Shoulders -->
+<ellipse cx="140" cy="50" rx="14" ry="4" fill="${SH}"/>
+<!-- Neck -->
+<rect x="136" y="42" width="8" height="8" rx="2" fill="${SK}"/>
+<!-- Head -->
+<circle cx="140" cy="34" r="10" fill="${SK}"/>
+<path d="M 130 32 Q 140 22 150 32 L 150 28 Q 140 24 130 28 Z" fill="${HA}"/>
+<circle cx="136" cy="35" r="1.3" fill="#3a2817"/>
+<circle cx="144" cy="35" r="1.3" fill="#3a2817"/>
+<!-- ANIMATED lat pull: bar descends, arms rotate at shoulder AND elbow -->
+<g style="animation:latDown 2.2s ease-in-out infinite;transform-origin:140px 50px">
+  <!-- Left upper arm (shoulder → elbow) -->
+  <g style="animation:latArmsL 2.2s ease-in-out infinite;transform-origin:128px 52px">
+    <line x1="128" y1="52" x2="102" y2="32" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+    <!-- Left forearm (elbow → hand) -->
+    <g style="animation:latForeL 2.2s ease-in-out infinite;transform-origin:102px 32px">
+      <line x1="102" y1="32" x2="82" y2="20" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="82" cy="20" r="4" fill="${SK}"/>
+    </g>
   </g>
-  <g style="animation:latArmsR 2s ease-in-out infinite;transform-origin:148px 48px">
-    <line x1="148" y1="48" x2="192" y2="28" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Right upper arm (shoulder → elbow) -->
+  <g style="animation:latArmsR 2.2s ease-in-out infinite;transform-origin:152px 52px">
+    <line x1="152" y1="52" x2="178" y2="32" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+    <g style="animation:latForeR 2.2s ease-in-out infinite;transform-origin:178px 32px">
+      <line x1="178" y1="32" x2="198" y2="20" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="198" cy="20" r="4" fill="${SK}"/>
+    </g>
   </g>
-  <!-- wide-grip bar -->
-  <rect x="74" y="22" width="132" height="7" rx="3" fill="${BR}"/>
-  <rect x="72" y="20" width="16" height="11" rx="3" fill="${PL}"/>
-  <rect x="192" y="20" width="16" height="11" rx="3" fill="${PL}"/>
+  <!-- Wide-grip bar with slight curve at ends -->
+  <rect x="70" y="16" width="140" height="8" rx="3" fill="${BR}"/>
+  <rect x="70" y="16" width="140" height="8" rx="3" fill="none" stroke="#556677" stroke-width="0.5"/>
+  <!-- Bar end knobs -->
+  <circle cx="74" cy="20" r="5" fill="${PL}"/>
+  <circle cx="206" cy="20" r="5" fill="${PL}"/>
+  <!-- End caps (rubber) -->
+  <rect x="72" y="14" width="4" height="12" rx="1" fill="#1a1a1a"/>
+  <rect x="204" y="14" width="4" height="12" rx="1" fill="#1a1a1a"/>
 </g>
 <style>
-@keyframes latDown{0%,100%{transform:translateY(0)}50%{transform:translateY(18px)}}
-@keyframes latArms{0%,100%{transform:rotate(-52deg)}50%{transform:rotate(-18deg)}}
-@keyframes latArmsR{0%,100%{transform:rotate(52deg)}50%{transform:rotate(18deg)}}
+@keyframes latDown{0%,100%{transform:translateY(0)}50%{transform:translateY(22px)}}
+@keyframes latArmsL{0%,100%{transform:rotate(-18deg)}50%{transform:rotate(18deg)}}
+@keyframes latArmsR{0%,100%{transform:rotate(18deg)}50%{transform:rotate(-18deg)}}
+@keyframes latForeL{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-10deg)}}
+@keyframes latForeR{0%,100%{transform:rotate(0deg)}50%{transform:rotate(10deg)}}
+@keyframes stack{0%,100%{transform:translateY(0)}50%{transform:translateY(-26px)}}
 </style></svg>`,
 
-// REMO SENTADO (c3)
+// REMO SENTADO (c3) — máquina con columna, pies en plataforma, articulaciones en brazos
 seatedrow:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Cable machine left -->
-<rect x="10" y="8" width="22" height="118" rx="4" fill="${FR}"/>
-<circle cx="21" cy="72" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
-<!-- Foot platform -->
-<rect x="32" y="88" width="62" height="10" rx="3" fill="${PD}"/>
-<!-- Seat + post -->
-<rect x="102" y="74" width="70" height="12" rx="4" fill="${PD}"/>
-<rect x="118" y="86" width="26" height="42" rx="4" fill="${FR}"/>
-<!-- Weight stack right -->
-<rect x="238" y="20" width="22" height="96" rx="3" fill="${FR}"/>
-<rect x="241" y="25" width="16" height="6" rx="1" fill="${PD}"/>
-<rect x="241" y="45" width="16" height="8" rx="1" fill="#22c55e" opacity="0.7"/>
-<!-- Person seated, legs extended -->
-<!-- legs horizontal -->
-<line x1="104" y1="80" x2="50" y2="86" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<line x1="104" y1="86" x2="50" y2="92" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<rect x="32" y="83" width="20" height="8" rx="2" fill="${SO}"/>
-<!-- torso upright -->
-<rect x="116" y="42" width="24" height="34" rx="8" fill="${SH}"/>
-<!-- head -->
-<rect x="122" y="33" width="10" height="11" rx="2" fill="${SK}"/>
-<circle cx="128" cy="24" r="11" fill="${SK}"/>
-<ellipse cx="128" cy="16" rx="11" ry="9" fill="${HA}"/>
-<circle cx="123" cy="24" r="2" fill="#4a3728"/>
-<circle cx="133" cy="24" r="2" fill="#4a3728"/>
-<!-- ANIMATED rowing arms -->
-<g style="animation:rowPull 2s ease-in-out infinite;transform-origin:118px 58px">
-  <line x1="118" y1="58" x2="72" y2="72" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <line x1="118" y1="63" x2="72" y2="77" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <!-- V-bar handle -->
-  <path d="M64 72 L72 72 L72 77 L64 77" stroke="${BR}" stroke-width="3" fill="${PD}" stroke-linecap="round"/>
-  <!-- cable to machine -->
-  <line x1="64" y1="74" x2="28" y2="72" stroke="${FL}" stroke-width="1.5"/>
-</g>
-<style>@keyframes rowPull{0%,100%{transform:translateX(0)}50%{transform:translateX(16px)}}</style></svg>`,
-
-// REMO MANCUERNA (c4)
-dbrow:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
-<rect width="280" height="130" fill="${BG}"/>
-<!-- Bench -->
-<rect x="56" y="60" width="110" height="14" rx="5" fill="${PD}"/>
-<rect x="56" y="73" width="22" height="54" rx="4" fill="${FR}"/>
-<rect x="144" y="73" width="22" height="54" rx="4" fill="${FR}"/>
-<!-- Person in bent-over row position -->
-<!-- support leg (left, straight) -->
-<line x1="98" y1="72" x2="88" y2="108" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<rect x="80" y="105" width="18" height="7" rx="2" fill="${SO}"/>
-<!-- back leg (right, extended) -->
-<line x1="98" y1="72" x2="152" y2="80" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<line x1="152" y1="80" x2="162" y2="108" stroke="${PA}" stroke-width="7" stroke-linecap="round"/>
-<rect x="154" y="105" width="18" height="7" rx="2" fill="${SO}"/>
-<!-- torso horizontal -->
-<rect x="76" y="50" width="62" height="18" rx="7" fill="${SH}" transform="rotate(8 107 59)"/>
-<!-- support arm on bench -->
-<line x1="84" y1="58" x2="78" y2="68" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-<!-- head -->
-<circle cx="70" cy="44" r="10" fill="${SK}"/>
-<ellipse cx="70" cy="37" rx="10" ry="8" fill="${HA}"/>
-<!-- ANIMATED dumbbell row -->
-<g style="animation:dbRow 2s ease-in-out infinite;transform-origin:138px 56px">
-  <line x1="138" y1="56" x2="152" y2="82" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <!-- dumbbell -->
-  <rect x="146" y="79" width="28" height="8" rx="3" fill="${PD}"/>
-  <rect x="143" y="76" width="8" height="14" rx="3" fill="${FR}"/>
-  <rect x="169" y="76" width="8" height="14" rx="3" fill="${FR}"/>
-</g>
-<style>@keyframes dbRow{0%,100%{transform:rotate(12deg)}50%{transform:rotate(-22deg)}}</style></svg>`,
-
-// CURL DE BÍCEPS CABLE (c5)
-cabcurl:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
-<rect width="280" height="130" fill="${BG}"/>
-<!-- Cable machine right -->
-<rect x="228" y="4" width="22" height="122" rx="4" fill="${FR}"/>
-<circle cx="239" cy="108" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
 <!-- Floor -->
-<rect x="0" y="118" width="280" height="12" fill="#0d1520" rx="2"/>
-<!-- Person standing, facing machine -->
-<rect x="102" y="112" width="18" height="7" rx="2" fill="${SO}"/>
-<rect x="132" y="112" width="18" height="7" rx="2" fill="${SO}"/>
-<line x1="110" y1="112" x2="108" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<line x1="140" y1="112" x2="142" y2="90" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<!-- torso -->
-<rect x="110" y="52" width="22" height="40" rx="7" fill="${SH}"/>
-<!-- head -->
-<rect x="115" y="43" width="10" height="11" rx="2" fill="${SK}"/>
-<circle cx="120" cy="34" r="11" fill="${SK}"/>
-<ellipse cx="120" cy="26" rx="11" ry="9" fill="${HA}"/>
-<!-- resting arm -->
-<line x1="112" y1="60" x2="102" y2="76" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-<!-- ANIMATED curling arm -->
-<g style="animation:bcurl 2s ease-in-out infinite;transform-origin:128px 64px">
-  <line x1="128" y1="64" x2="162" y2="85" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="162" cy="85" r="5" fill="${PD}"/>
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<!-- Left cable column -->
+<rect x="8" y="8" width="26" height="120" rx="3" fill="${FR}"/>
+<rect x="8" y="8" width="26" height="120" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<!-- Low pulley on column -->
+<circle cx="21" cy="74" r="9" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="21" cy="74" r="3" fill="${BR}"/>
+<!-- Weight stack inside -->
+<g>
+  <rect x="12" y="30" width="18" height="4" rx="1" fill="${PD}"/>
+  <rect x="12" y="36" width="18" height="4" rx="1" fill="${PD}"/>
+  <rect x="12" y="42" width="18" height="4" rx="1" fill="${PD}"/>
+  <rect x="11" y="52" width="20" height="6" rx="1" fill="#22c55e" opacity="0.85" style="animation:stack 2s ease-in-out infinite;transform-origin:21px 55px"/>
 </g>
-<!-- cable from machine to handle -->
-<path style="animation:curlCable 2s ease-in-out infinite" d="M232 108 Q200 96 162 85" stroke="${FL}" stroke-width="1.5" fill="none"/>
+<line x1="21" y1="12" x2="21" y2="68" stroke="#334155" stroke-width="1"/>
+<!-- Foot platform -->
+<rect x="34" y="84" width="56" height="14" rx="3" fill="${PD}"/>
+<rect x="34" y="84" width="56" height="5" rx="2" fill="#4a6384" opacity="0.4"/>
+<!-- Platform supports -->
+<rect x="36" y="98" width="6" height="28" fill="${FR}"/>
+<rect x="82" y="98" width="6" height="28" fill="${FR}"/>
+<!-- Seat (far from column) -->
+<rect x="120" y="78" width="60" height="14" rx="4" fill="${PD}"/>
+<rect x="120" y="78" width="60" height="5" rx="2" fill="#4a6384" opacity="0.4"/>
+<rect x="146" y="92" width="8" height="36" fill="${FR}"/>
+<!-- ── Person seated with legs extended ── -->
+<!-- Feet on platform -->
+<ellipse cx="52" cy="86" rx="11" ry="3" fill="${SO}" transform="rotate(-90 52 86)"/>
+<ellipse cx="72" cy="86" rx="11" ry="3" fill="${SO}" transform="rotate(-90 72 86)"/>
+<!-- Lower legs (slight bend) -->
+<line x1="52" y1="86" x2="80" y2="84" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<line x1="72" y1="86" x2="90" y2="88" stroke="${PA}" stroke-width="9" stroke-linecap="round"/>
+<!-- Knees -->
+<circle cx="88" cy="86" r="4" fill="${PA}"/>
+<!-- Upper legs -->
+<line x1="88" y1="86" x2="130" y2="82" stroke="${PA}" stroke-width="11" stroke-linecap="round"/>
+<!-- Hip -->
+<ellipse cx="132" cy="82" rx="10" ry="5" fill="${PA}"/>
+<!-- Torso upright -->
+<path d="M 124 46 L 144 46 L 146 82 L 122 82 Z" fill="${SH}"/>
+<line x1="134" y1="52" x2="134" y2="78" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+<!-- Shoulders -->
+<ellipse cx="134" cy="46" rx="13" ry="4" fill="${SH}"/>
+<!-- Neck -->
+<rect x="130" y="38" width="8" height="8" rx="2" fill="${SK}"/>
+<!-- Head -->
+<circle cx="134" cy="30" r="10" fill="${SK}"/>
+<path d="M 124 28 Q 134 18 144 28 L 144 24 Q 134 20 124 24 Z" fill="${HA}"/>
+<circle cx="130" cy="31" r="1.3" fill="#3a2817"/>
+<circle cx="138" cy="31" r="1.3" fill="#3a2817"/>
+<!-- ANIMATED rowing arms -->
+<g style="animation:rowPull 2s ease-in-out infinite;transform-origin:120px 56px">
+  <!-- Upper arm -->
+  <line x1="122" y1="54" x2="102" y2="66" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Elbow -->
+  <circle cx="102" cy="66" r="3.5" fill="${SK}"/>
+  <!-- Forearm -->
+  <line x1="102" y1="66" x2="80" y2="72" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Hands gripping V-handle -->
+  <circle cx="80" cy="71" r="3.5" fill="${SK}"/>
+  <circle cx="80" cy="77" r="3.5" fill="${SK}"/>
+  <!-- V-bar handle -->
+  <path d="M 68 70 L 80 70 L 80 78 L 68 78" stroke="${BR}" stroke-width="3" fill="${PD}" stroke-linecap="round"/>
+  <!-- Cable to pulley -->
+  <path d="M 68 74 Q 48 75 30 74" stroke="${FL}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+</g>
 <style>
-@keyframes bcurl{0%{transform:rotate(0deg)}50%{transform:rotate(-58deg)}100%{transform:rotate(0deg)}}
-@keyframes curlCable{
-  0%,100%{d:path("M232 108 Q200 96 162 85")}
-  50%{d:path("M232 108 Q200 80 130 38")}
-}
+@keyframes rowPull{0%,100%{transform:translateX(0)}50%{transform:translateX(20px)}}
+@keyframes stack{0%,100%{transform:translateY(0)}50%{transform:translateY(-18px)}}
 </style></svg>`,
 
-// APERTURAS INVERSAS (c6)
+// REMO MANCUERNA (c4) — postura de remo inclinado con mano en banco
+dbrow:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Floor -->
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<!-- Bench (flat) -->
+<rect x="50" y="62" width="130" height="14" rx="4" fill="${PD}"/>
+<rect x="50" y="62" width="130" height="4" rx="2" fill="#4a6384" opacity="0.4"/>
+<!-- Bench legs -->
+<rect x="54" y="76" width="10" height="50" fill="${FR}"/>
+<rect x="166" y="76" width="10" height="50" fill="${FR}"/>
+<rect x="108" y="76" width="10" height="50" fill="${FR}"/>
+<!-- ── Person in bent-over row position ── -->
+<!-- Support leg (left, planted) -->
+<line x1="90" y1="72" x2="80" y2="108" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<circle cx="80" cy="108" r="4" fill="${PA}"/>
+<line x1="80" y1="108" x2="74" y2="124" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<ellipse cx="72" cy="126" rx="10" ry="3" fill="${SO}"/>
+<!-- Back knee on bench (right leg bent) -->
+<ellipse cx="108" cy="72" rx="10" ry="4" fill="${PA}"/>
+<line x1="112" y1="72" x2="150" y2="70" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<circle cx="152" cy="70" r="4" fill="${PA}"/>
+<!-- Lower leg of kneeling leg -->
+<line x1="152" y1="70" x2="170" y2="62" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<ellipse cx="170" cy="62" rx="8" ry="2.5" fill="${SO}" transform="rotate(-20 170 62)"/>
+<!-- Torso (horizontal, parallel to floor) -->
+<g transform="rotate(5 112 54)">
+  <path d="M 76 46 L 144 46 L 146 62 L 74 62 Z" fill="${SH}"/>
+  <line x1="110" y1="52" x2="110" y2="58" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+</g>
+<!-- Support arm (left) — straight down to bench -->
+<line x1="78" y1="54" x2="74" y2="68" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<line x1="74" y1="68" x2="76" y2="76" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<circle cx="77" cy="76" r="4" fill="${SK}"/>
+<!-- Neck + head (looking down) -->
+<rect x="66" y="40" width="8" height="8" rx="2" fill="${SK}" transform="rotate(-5 70 44)"/>
+<circle cx="60" cy="38" r="10" fill="${SK}"/>
+<path d="M 50 36 Q 60 26 70 36 L 70 32 Q 60 28 50 32 Z" fill="${HA}"/>
+<circle cx="56" cy="40" r="1.3" fill="#3a2817"/>
+<!-- ANIMATED dumbbell row (right arm pulls up) -->
+<g style="animation:dbRow 2s ease-in-out infinite;transform-origin:144px 50px">
+  <!-- Upper arm -->
+  <line x1="144" y1="50" x2="156" y2="70" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Elbow -->
+  <circle cx="156" cy="70" r="3.5" fill="${SK}"/>
+  <!-- Forearm -->
+  <line x1="156" y1="70" x2="162" y2="90" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <!-- Hand -->
+  <circle cx="162" cy="90" r="4" fill="${SK}"/>
+  <!-- Dumbbell (with weight plates) -->
+  <rect x="158" y="88" width="8" height="6" rx="2" fill="${BR}"/>
+  <!-- Plate 1 left -->
+  <circle cx="160" cy="91" r="9" fill="#1a1a1a" stroke="${PL}" stroke-width="1.5"/>
+  <circle cx="160" cy="91" r="2" fill="${BR}"/>
+  <!-- Plate 2 right -->
+  <circle cx="164" cy="91" r="9" fill="#1a1a1a" stroke="${PL}" stroke-width="1.5"/>
+  <circle cx="164" cy="91" r="2" fill="${BR}"/>
+</g>
+<style>@keyframes dbRow{0%,100%{transform:rotate(12deg)}50%{transform:rotate(-30deg)}}</style></svg>`,
+
+// CURL DE BÍCEPS CABLE (c5) — de pie con barra EZ, cable curvado
+cabcurl:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
+<rect width="280" height="130" fill="${BG}"/>
+<!-- Floor -->
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<rect x="0" y="120" width="280" height="10" fill="#0d1520"/>
+<!-- Cable machine (right) -->
+<rect x="226" y="4" width="26" height="124" rx="3" fill="${FR}"/>
+<rect x="226" y="4" width="26" height="124" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<!-- Low pulley -->
+<circle cx="239" cy="108" r="9" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="239" cy="108" r="3" fill="${BR}"/>
+<!-- Weight stack -->
+<g>
+  <rect x="230" y="28" width="18" height="4" rx="1" fill="${PD}"/>
+  <rect x="230" y="34" width="18" height="4" rx="1" fill="${PD}"/>
+  <rect x="230" y="40" width="18" height="4" rx="1" fill="${PD}"/>
+  <rect x="229" y="50" width="20" height="6" rx="1" fill="#22c55e" opacity="0.85" style="animation:stack 2s ease-in-out infinite;transform-origin:239px 53px"/>
+</g>
+<line x1="239" y1="12" x2="239" y2="100" stroke="#334155" stroke-width="1"/>
+<!-- ── Person standing facing machine ── -->
+<!-- Feet -->
+<ellipse cx="110" cy="122" rx="10" ry="3" fill="${SO}"/>
+<ellipse cx="142" cy="122" rx="10" ry="3" fill="${SO}"/>
+<!-- Lower legs -->
+<line x1="110" y1="122" x2="110" y2="98" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="142" y1="122" x2="142" y2="98" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<circle cx="110" cy="98" r="4" fill="${PA}"/>
+<circle cx="142" cy="98" r="4" fill="${PA}"/>
+<!-- Upper legs -->
+<line x1="110" y1="98" x2="118" y2="78" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<line x1="142" y1="98" x2="134" y2="78" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<!-- Hips -->
+<ellipse cx="126" cy="78" rx="12" ry="4" fill="${PA}"/>
+<!-- Torso -->
+<path d="M 114 44 L 138 44 L 140 78 L 112 78 Z" fill="${SH}"/>
+<line x1="126" y1="50" x2="126" y2="74" stroke="#16a34a" stroke-width="0.8" opacity="0.5"/>
+<!-- Shoulders -->
+<ellipse cx="126" cy="44" rx="14" ry="4" fill="${SH}"/>
+<!-- Neck -->
+<rect x="122" y="36" width="8" height="8" rx="2" fill="${SK}"/>
+<!-- Head -->
+<circle cx="126" cy="28" r="10" fill="${SK}"/>
+<path d="M 116 26 Q 126 16 136 26 L 136 22 Q 126 18 116 22 Z" fill="${HA}"/>
+<circle cx="122" cy="29" r="1.3" fill="#3a2817"/>
+<circle cx="130" cy="29" r="1.3" fill="#3a2817"/>
+<!-- Upper arms (elbows PINNED to sides — the key to good bicep form) -->
+<line x1="114" y1="50" x2="112" y2="70" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<line x1="138" y1="50" x2="140" y2="70" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<!-- Elbow joints -->
+<circle cx="112" cy="70" r="4" fill="${SK}"/>
+<circle cx="140" cy="70" r="4" fill="${SK}"/>
+<!-- ANIMATED forearms curl up — rotate at elbow -->
+<g style="animation:bcurlL 2s ease-in-out infinite;transform-origin:112px 70px">
+  <line x1="112" y1="70" x2="130" y2="98" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="131" cy="99" r="4" fill="${SK}"/>
+</g>
+<g style="animation:bcurlR 2s ease-in-out infinite;transform-origin:140px 70px">
+  <line x1="140" y1="70" x2="152" y2="98" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="153" cy="99" r="4" fill="${SK}"/>
+</g>
+<!-- EZ Bar handle (curved, both hands grip it) -->
+<g style="animation:barCurl 2s ease-in-out infinite;transform-origin:140px 98px">
+  <path d="M 128 100 Q 140 94 152 100" stroke="${BR}" stroke-width="6" fill="none" stroke-linecap="round"/>
+  <path d="M 128 100 Q 140 94 152 100" stroke="#556677" stroke-width="1" fill="none" opacity="0.8"/>
+</g>
+<!-- Cable from pulley to bar — curves with motion -->
+<path style="animation:curlCable 2s ease-in-out infinite" d="M 239 108 Q 195 106 155 102" stroke="${FL}" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+<style>
+@keyframes bcurlL{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-95deg)}}
+@keyframes bcurlR{0%,100%{transform:rotate(0deg)}50%{transform:rotate(95deg)}}
+@keyframes barCurl{0%,100%{transform:translateY(0)}50%{transform:translateY(-40px)}}
+@keyframes curlCable{
+  0%,100%{d:path("M 239 108 Q 195 106 155 102")}
+  50%{d:path("M 239 108 Q 200 80 155 62")}
+}
+@keyframes stack{0%,100%{transform:translateY(0)}50%{transform:translateY(-26px)}}
+</style></svg>`,
+
+// APERTURAS INVERSAS (c6) — pec deck invertido, vista de espalda
 revfly:`<svg viewBox="0 0 280 130" xmlns="http://www.w3.org/2000/svg">
 <rect width="280" height="130" fill="${BG}"/>
-<!-- Machine frame (pec deck reverse) -->
-<rect x="10" y="18" width="12" height="90" rx="3" fill="${FR}"/>
-<rect x="258" y="18" width="12" height="90" rx="3" fill="${FR}"/>
-<rect x="10" y="18" width="260" height="10" rx="3" fill="${FR}"/>
-<circle cx="22" cy="58" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
-<circle cx="258" cy="58" r="7" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<!-- Floor -->
+<line x1="0" y1="127" x2="280" y2="127" stroke="#1a1f26" stroke-width="1"/>
+<!-- Machine vertical frames -->
+<rect x="8" y="14" width="14" height="98" rx="3" fill="${FR}"/>
+<rect x="258" y="14" width="14" height="98" rx="3" fill="${FR}"/>
+<rect x="8" y="14" width="14" height="98" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<rect x="258" y="14" width="14" height="98" rx="3" fill="none" stroke="#2a3f55" stroke-width="0.5"/>
+<!-- Top crossbar -->
+<rect x="8" y="14" width="264" height="10" rx="3" fill="${FR}"/>
+<!-- Pivots -->
+<circle cx="15" cy="56" r="9" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="15" cy="56" r="3" fill="${BR}"/>
+<circle cx="265" cy="56" r="9" fill="${PD}" stroke="${BR}" stroke-width="1.5"/>
+<circle cx="265" cy="56" r="3" fill="${BR}"/>
+<!-- Chest pad (rear fly: person faces the machine, pad against chest) -->
+<rect x="122" y="52" width="36" height="22" rx="5" fill="${PD}"/>
+<rect x="122" y="52" width="36" height="6" rx="2" fill="#4a6384" opacity="0.5"/>
 <!-- Seat -->
-<rect x="116" y="70" width="48" height="12" rx="4" fill="${PD}"/>
-<rect x="124" y="82" width="32" height="45" rx="4" fill="${FR}"/>
-<!-- Person seated FACING machine (seen from back — hair visible) -->
-<!-- legs -->
-<line x1="126" y1="80" x2="106" y2="102" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<line x1="154" y1="80" x2="174" y2="102" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
-<rect x="96" y="99" width="18" height="6" rx="2" fill="${SO}"/>
-<rect x="166" y="99" width="18" height="6" rx="2" fill="${SO}"/>
-<!-- torso (back of shirt) -->
-<rect x="126" y="36" width="28" height="36" rx="8" fill="${SH}"/>
-<!-- head from back = show hair -->
-<rect x="132" y="28" width="10" height="10" rx="2" fill="${HA}"/>
-<circle cx="140" cy="20" r="11" fill="${HA}"/>
-<!-- ANIMATED reverse fly arms going BACK/outward -->
-<g style="animation:rvFlyL 2s ease-in-out infinite;transform-origin:22px 58px">
-  <line x1="22" y1="58" x2="118" y2="52" stroke="${FR}" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="118" cy="52" r="5" fill="${PD}"/>
-  <line x1="118" y1="52" x2="128" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<rect x="108" y="80" width="64" height="12" rx="4" fill="${PD}"/>
+<rect x="134" y="92" width="12" height="36" fill="${FR}"/>
+<!-- ── Person seated FACING machine (back to viewer) ── -->
+<!-- Legs -->
+<line x1="124" y1="88" x2="104" y2="112" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<line x1="156" y1="88" x2="176" y2="112" stroke="${PA}" stroke-width="10" stroke-linecap="round"/>
+<circle cx="104" cy="112" r="4" fill="${PA}"/>
+<circle cx="176" cy="112" r="4" fill="${PA}"/>
+<line x1="104" y1="112" x2="100" y2="124" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<line x1="176" y1="112" x2="180" y2="124" stroke="${PA}" stroke-width="8" stroke-linecap="round"/>
+<ellipse cx="98" cy="126" rx="9" ry="2.5" fill="${SO}"/>
+<ellipse cx="182" cy="126" rx="9" ry="2.5" fill="${SO}"/>
+<!-- Torso (BACK view, darker for back muscles) -->
+<path d="M 128 40 L 152 40 L 154 80 L 126 80 Z" fill="${SH}"/>
+<!-- Spine line down back -->
+<line x1="140" y1="44" x2="140" y2="76" stroke="#15803d" stroke-width="1" opacity="0.6"/>
+<!-- Back muscle shading (lats) -->
+<path d="M 128 45 Q 124 60 128 78" stroke="#15803d" stroke-width="0.8" fill="none" opacity="0.4"/>
+<path d="M 152 45 Q 156 60 152 78" stroke="#15803d" stroke-width="0.8" fill="none" opacity="0.4"/>
+<!-- Shoulders -->
+<ellipse cx="140" cy="40" rx="15" ry="4" fill="${SH}"/>
+<!-- Neck (back) -->
+<rect x="136" y="32" width="8" height="8" rx="2" fill="${SK}"/>
+<!-- Head from behind: mostly hair visible, small patch of neck -->
+<circle cx="140" cy="24" r="10" fill="${HA}"/>
+<!-- Ears sides -->
+<ellipse cx="130" cy="24" rx="1.5" ry="3" fill="${SK}"/>
+<ellipse cx="150" cy="24" rx="1.5" ry="3" fill="${SK}"/>
+<!-- ANIMATED reverse fly arms going outward (squeezing rear delts) -->
+<g style="animation:rvFlyL 2s ease-in-out infinite;transform-origin:15px 56px">
+  <!-- Machine arm -->
+  <line x1="15" y1="56" x2="112" y2="54" stroke="${FR}" stroke-width="7" stroke-linecap="round"/>
+  <!-- Grip handle -->
+  <rect x="108" y="48" width="10" height="14" rx="3" fill="${PD}"/>
 </g>
-<g style="animation:rvFlyR 2s ease-in-out infinite;transform-origin:258px 58px">
-  <line x1="258" y1="58" x2="162" y2="52" stroke="${FR}" stroke-width="5" stroke-linecap="round"/>
-  <circle cx="162" cy="52" r="5" fill="${PD}"/>
-  <line x1="162" y1="52" x2="152" y2="50" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+<g style="animation:rvFlyR 2s ease-in-out infinite;transform-origin:265px 56px">
+  <line x1="265" y1="56" x2="168" y2="54" stroke="${FR}" stroke-width="7" stroke-linecap="round"/>
+  <rect x="162" y="48" width="10" height="14" rx="3" fill="${PD}"/>
+</g>
+<!-- Forearms reaching out to grips — rotate with the movement -->
+<g style="animation:rvFyL 2s ease-in-out infinite;transform-origin:128px 50px">
+  <line x1="128" y1="50" x2="114" y2="54" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="114" cy="54" r="3.5" fill="${SK}"/>
+</g>
+<g style="animation:rvFyR 2s ease-in-out infinite;transform-origin:152px 50px">
+  <line x1="152" y1="50" x2="166" y2="54" stroke="${SK}" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="166" cy="54" r="3.5" fill="${SK}"/>
 </g>
 <style>
-@keyframes rvFlyL{0%,100%{transform:rotate(44deg)}50%{transform:rotate(10deg)}}
-@keyframes rvFlyR{0%,100%{transform:rotate(-44deg)}50%{transform:rotate(-10deg)}}
+@keyframes rvFlyL{0%,100%{transform:rotate(40deg)}50%{transform:rotate(5deg)}}
+@keyframes rvFlyR{0%,100%{transform:rotate(-40deg)}50%{transform:rotate(-5deg)}}
+@keyframes rvFyL{0%,100%{transform:rotate(35deg)}50%{transform:rotate(-5deg)}}
+@keyframes rvFyR{0%,100%{transform:rotate(-35deg)}50%{transform:rotate(5deg)}}
 </style></svg>`,
 };
 
 const map={a1:'cardio',a2:'squat',a3:'legext',a4:'legcurl',a5:'cruncha',a6:'cardio',
            b1:'cardio',b2:'incpress',b3:'pecfly',b4:'latsideq',b5:'tripdwn',b6:'cardio',
            c1:'cardio',c2:'latpull',c3:'seatedrow',c4:'dbrow',c5:'cabcurl',c6:'revfly',c7:'cardio'};
-return anims[map[id]]||'';
+
+// Si el ID original existe, usar el mapa. Si es un ejercicio nuevo de la biblioteca,
+// intentamos mapear por su libId (los IDs de biblioteca tienen un mapeo equivalente).
+const libToAnim={
+  lib_squat_smith:'squat',
+  lib_leg_press:'squat', // aproximación
+  lib_leg_ext:'legext',
+  lib_leg_curl:'legcurl',
+  lib_leg_curl_seated:'legcurl',
+  lib_press_incline_smith:'incpress',
+  lib_press_flat_db:'incpress',
+  lib_press_incline_db:'incpress',
+  lib_fly_machine:'pecfly',
+  lib_cable_fly_low:'pecfly',
+  lib_cable_fly_high:'pecfly',
+  lib_lat_pulldown:'latpull',
+  lib_row_machine:'seatedrow',
+  lib_row_db:'dbrow',
+  lib_row_cable:'seatedrow',
+  lib_rev_fly_machine:'revfly',
+  lib_lat_raise_cable:'latsideq',
+  lib_lat_raise_db:'latsideq',
+  lib_shoulder_press_db:'incpress',
+  lib_shoulder_press_machine:'incpress',
+  lib_tricep_pushdown:'tripdwn',
+  lib_tricep_overhead_cable:'tripdwn',
+  lib_tricep_machine:'tripdwn',
+  lib_curl_cable:'cabcurl',
+  lib_curl_db:'cabcurl',
+  lib_curl_db_concentrated:'cabcurl',
+  lib_curl_machine:'cabcurl',
+  lib_hammer_curl:'cabcurl',
+  lib_crunch_cable:'cruncha',
+  lib_crunch_machine:'cruncha',
+  lib_cardio_walk:'cardio',
+  lib_cardio_run:'cardio',
+  lib_cardio_bike:'cardio',
+  lib_cardio_elliptical:'cardio'
+};
+
+// Resolver: si ID está en map plano, usar; si no, buscar en plan actual el ejercicio
+// y mapear por su linkage a la biblioteca a través de propiedades guardadas.
+if(map[id])return anims[map[id]]||'';
+
+// ID nuevo: buscar el ejercicio en el plan actual para recuperar datos
+if(typeof S!=='undefined'&&S.currentPlan){
+  const ex=Object.values(S.currentPlan).flatMap(d=>d.ex).find(e=>e.id===id);
+  if(ex){
+    // Si es cardio, siempre animación cardio
+    if(ex.cardio)return anims.cardio||'';
+    // Buscar en biblioteca por nombre para mapear a animación
+    const libMatch=EXERCISE_DB.find(e=>e.n===ex.n);
+    if(libMatch&&libToAnim[libMatch.id])return anims[libToAnim[libMatch.id]]||'';
+    // Fallback por grupo muscular
+    const muscleFallback={piernas:'squat',pecho:'incpress',espalda:'latpull',hombros:'latsideq',biceps:'cabcurl',triceps:'tripdwn',core:'cruncha',cardio:'cardio'};
+    if(ex.muscle&&muscleFallback[ex.muscle])return anims[muscleFallback[ex.muscle]]||'';
+  }
+}
+return '';
 }
 
 // REST TIMER
@@ -1173,7 +1866,7 @@ function toggleSet(id,i){
   S.sets[id][i]=!S.sets[id][i];
   saveState();render();
   if(wasOff&&S.tab==='workout'){
-    const ex=PLAN[S.day].ex.find(e=>e.id===id);
+    const ex=getPlan()[S.day].ex.find(e=>e.id===id);
     if(ex&&!ex.cardio)RT.start(getRestSecs(id),ex.n);
   }else if(!wasOff){
     // Se desmarcó: si el timer estaba contando, lo escondemos
@@ -1200,7 +1893,7 @@ function logW(){
   toast(`Peso guardado: ${v} kg`);
 }
 function finishSession(){
-  const day=PLAN[S.day],strEx=day.ex.filter(e=>!e.cardio);
+  const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const doneEx=strEx.filter(e=>countSetsDone(e.id,e.s)>=e.s).length;
   const today=fmtDate(new Date());
   // Bug fix: evitar doble sesión el mismo día
@@ -1208,7 +1901,7 @@ function finishSession(){
   if(existingToday){
     confirmModal({
       title:'Ya hay una sesión hoy',
-      body:`Ya registraste el ${PLAN[existingToday.day].label} el ${today}. ¿Guardar esta como una sesión adicional?`,
+      body:`Ya registraste el ${getPlan()[existingToday.day].label} el ${today}. ¿Guardar esta como una sesión adicional?`,
       okText:'Guardar igual',
       cancelText:'Cancelar',
       onOk:()=>finishSessionConfirmed(doneEx,strEx.length)
@@ -1225,7 +1918,7 @@ function finishSession(){
   });
 }
 function finishSessionConfirmed(doneEx,totalEx){
-  const day=PLAN[S.day],strEx=day.ex.filter(e=>!e.cardio);
+  const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const today=fmtDate(new Date()),now=Date.now();
   S.sessions.push({day:S.day,date:today,ts:now});
   // Guardar también reps y series completadas, no solo peso — necesario para sugerencias inteligentes
@@ -1241,7 +1934,7 @@ function finishSessionConfirmed(doneEx,totalEx){
   S.nextDay=getNextDay(S.day);
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});S.open=null;
   saveState();
-  toast(`✅ Sesión guardada · Próxima: ${PLAN[S.nextDay].label}`);
+  toast(`✅ Sesión guardada · Próxima: ${getPlan()[S.nextDay].label}`);
   go('dash');
 }
 
@@ -1306,7 +1999,7 @@ function coach_sessionVolume(sessionTs){
     const rec=(S.strength[exId]||[]).find(r=>Math.abs(r.ts-sessionTs)<86400000);
     if(rec){
       // Asumir 3 series * 12 reps promedio (del plan)
-      const ex=Object.values(PLAN).flatMap(d=>d.ex).find(e=>e.id===exId);
+      const ex=Object.values(getPlan()).flatMap(d=>d.ex).find(e=>e.id===exId);
       const sets=ex?.s||3,reps=parseInt(ex?.r)||12;
       vol+=rec.v*sets*reps;count++;
     }
@@ -1398,7 +2091,7 @@ function coach_generateInsights(){
   }
 
   // ═ D) PROGRESIÓN POR EJERCICIO ═
-  const strengthEx=Object.values(PLAN).flatMap(d=>d.ex).filter(e=>!e.cardio);
+  const strengthEx=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
   const cycleStart=coach_cycleStart();
   const progression={strong_up:[],up:[],stagnant:[],down:[]};
 
@@ -1463,7 +2156,7 @@ function coach_generateInsights(){
 function coach_generateRecommendations(){
   const cycleStart=coach_cycleStart();
   const recs=[];
-  const strengthEx=Object.values(PLAN).flatMap(d=>d.ex).filter(e=>!e.cardio);
+  const strengthEx=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
 
   // Analizar cada ejercicio
   const analyses=strengthEx.map(ex=>({ex,p:coach_exerciseProgression(ex.id,cycleStart)}));
@@ -1600,35 +2293,34 @@ function coach_applyRecommendations(){
   });
 }
 function coach_applyRecommendationsConfirmed(){
-  // Guardar snapshot del ciclo actual
   const cycle=coach_cycleData();
   const insights=coach_generateInsights();
-  const recs=coach_generateRecommendations();
 
-  const summary=`Ciclo completado: ${cycle.sessions.length} sesiones en ${Math.round(cycle.weeks)} semanas. ${insights.filter(i=>i.type==='good').length} logros detectados.`;
+  // Generar propuestas reales que el usuario puede aprobar/ignorar
+  const proposals=coach_generateProposals(cycle);
+  // Serializar las propuestas (sin funciones) para guardar en estado
+  S.pendingCoachProposals=(proposals||[]).map(p=>({
+    id:p.id,type:p.type,ic:p.ic,tag:p.tag,title:p.title,description:p.description,
+    exId:p.exId||null,dayKey:p.dayKey||null,libExId:p.libExId||null
+  }));
 
+  const summary=`Ciclo completado: ${cycle.sessions.length} sesiones en ${Math.round(cycle.weeks)} semanas. ${proposals.length} propuesta${proposals.length!==1?'s':''} del coach.`;
   const mesocycle={
-    num:(S.mesocycles?.length||0)+1,
-    startTs:cycle.start,
-    endTs:Date.now(),
-    appliedAt:Date.now(),
-    sessionCount:cycle.sessions.length,
-    summary,
+    num:(S.mesocycles?.length||0)+1,startTs:cycle.start,endTs:Date.now(),appliedAt:Date.now(),
+    sessionCount:cycle.sessions.length,summary,
     insights:insights.map(i=>({t:i.t,d:i.d,type:i.type})),
-    recommendations:recs.map(r=>({title:r.title,action:r.action}))
   };
-
   if(!S.mesocycles)S.mesocycles=[];
   S.mesocycles.push(mesocycle);
-
-  // Resetear marcadores para nuevo ciclo
-  S.coachInsights=null;
-  S.coachInsightsStale=true;
-  S.coachLastAnalyzed=Date.now();
-
+  S.coachInsights=null;S.coachInsightsStale=true;S.coachLastAnalyzed=Date.now();
+  S.coachStart=Date.now(); // reiniciar ciclo
   saveState();
-  toast(`🚀 Nuevo ciclo iniciado · ${cycle.sessions.length} sesiones completadas`,3500);
-  render();
+
+  const msg=proposals.length>0
+    ?`🚀 Ciclo cerrado · ${proposals.length} propuesta${proposals.length!==1?'s':''} esperan tu aprobación`
+    :`🚀 Nuevo ciclo iniciado · ${cycle.sessions.length} sesiones completadas`;
+  toast(msg,3500);
+  go('coach');
 }
 
 // ─── 5. SCORE GENERAL DEL MESOCICLO ────────────────────────
@@ -1642,7 +2334,7 @@ function coach_score(){
   score+=Math.min(40,consistency.rate*40);
 
   // Progresión (40 pts)
-  const strengthEx=Object.values(PLAN).flatMap(d=>d.ex).filter(e=>!e.cardio);
+  const strengthEx=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
   const progs=strengthEx.map(ex=>coach_exerciseProgression(ex.id,cycle.start));
   const progressing=progs.filter(p=>p.trend==='up'||p.trend==='strong_up').length;
   const stagnant=progs.filter(p=>p.trend==='stagnant').length;
@@ -1717,7 +2409,7 @@ function renderCoach(){
 
   // Métricas clave
   const cycleStart=cycle.start;
-  const strengthEx=Object.values(PLAN).flatMap(d=>d.ex).filter(e=>!e.cardio);
+  const strengthEx=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
   const progs=strengthEx.map(ex=>coach_exerciseProgression(ex.id,cycleStart));
   const progressing=progs.filter(p=>p.trend==='up'||p.trend==='strong_up').length;
   const withData=progs.filter(p=>p.trend!=='insufficient').length;
@@ -1788,7 +2480,24 @@ function renderCoach(){
   ${insights.length===0?`<div class="insight"><div class="insight-ic info">⏳</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
     insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${i.ic}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${i.d}</div></div></div>`).join('')}
 
-  ${recs.length>0?`<div class="sh">Recomendaciones para el nuevo ciclo</div>
+  ${(S.pendingCoachProposals&&S.pendingCoachProposals.length>0)?`
+  <div class="sh">💡 El Coach propone — tú decides</div>
+  ${S.pendingCoachProposals.map((p,i)=>`<div class="proposal-card">
+    <div class="proposal-head">
+      <div class="proposal-ic">${p.ic}</div>
+      <div>
+        <div class="proposal-tag">${p.tag}</div>
+        <div class="proposal-t">${p.title}</div>
+        <div class="proposal-d">${p.description}</div>
+      </div>
+    </div>
+    <div class="proposal-actions">
+      <button class="proposal-apply" onclick="applyProposal(${i})">✓ Aplicar</button>
+      <button class="proposal-ignore" onclick="ignoreProposal(${i})">Ignorar</button>
+    </div>
+  </div>`).join('')}`:''}
+
+  ${recs.length>0?`<div class="sh">Análisis detallado</div>
     ${recs.map(r=>`<div class="rec-card">
       <div class="rec-head">
         <span class="rec-badge ${r.priority}">${r.badge}</span>
@@ -1867,21 +2576,21 @@ function renderDash(){
       if(didToday){
         return`<div style="background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--rsm);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#86efac;display:flex;align-items:center;gap:8px">
           <span style="font-size:16px">✅</span>
-          <span>Ya entrenaste hoy (${PLAN[didToday.day].label}). ¡Disfruta el descanso!</span>
+          <span>Ya entrenaste hoy (${getPlan()[didToday.day].label}). ¡Disfruta el descanso!</span>
         </div>`;
       }
       return'';
     })()}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <span class="pill p${S.nextDay.toLowerCase()}">${PLAN[S.nextDay].label}</span>
-      <span style="font-size:14px;color:var(--text2)">${PLAN[S.nextDay].focus}</span>
+      <span class="pill p${S.nextDay.toLowerCase()}">${getPlan()[S.nextDay].label}</span>
+      <span style="font-size:14px;color:var(--text2)">${getPlan()[S.nextDay].focus}</span>
     </div>
-    <button class="btn bp" onclick="S.day=S.nextDay;go('workout')">Empezar ${PLAN[S.nextDay].label} →</button>
+    <button class="btn bp" onclick="S.day=S.nextDay;go('workout')">Empezar ${getPlan()[S.nextDay].label} →</button>
   </div>
   ${S.sessions.length>0?`<div class="sh">Últimas sesiones</div><div class="card">${S.sessions.slice(-4).reverse().map(s=>`
   <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-    <span class="pill p${s.day.toLowerCase()}" style="font-size:11px;padding:3px 9px">${PLAN[s.day].label}</span>
-    <span style="font-size:13px;color:var(--text2);flex:1">${PLAN[s.day].focus}</span>
+    <span class="pill p${s.day.toLowerCase()}" style="font-size:11px;padding:3px 9px">${getPlan()[s.day].label}</span>
+    <span style="font-size:13px;color:var(--text2);flex:1">${getPlan()[s.day].focus}</span>
     <span style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">${s.date}</span>
   </div>`).join('')}</div>`:''}
   `;
@@ -1916,7 +2625,7 @@ function sugW(exId){
   const lastRec=d[d.length-1];
   const last=lastRec.v;
   // Buscar reps objetivo del ejercicio
-  const ex=Object.values(PLAN).flatMap(day=>day.ex).find(e=>e.id===exId);
+  const ex=Object.values(getPlan()).flatMap(day=>day.ex).find(e=>e.id===exId);
   const targetReps=ex?parseInt(ex.r)||12:12;
   const targetSets=ex?ex.s:3;
   // Si tenemos datos históricos de reps, usar esa info para decidir
@@ -1952,12 +2661,16 @@ function renderHist(){
   if(!root)return;
   if(!S._hist){root.innerHTML='';return;}
   const exId=S._hist;
-  const ex=Object.values(PLAN).flatMap(d=>d.ex).find(e=>e.id===exId);
-  if(!ex){root.innerHTML='';return;}
+  let ex=Object.values(getPlan()).flatMap(d=>d.ex).find(e=>e.id===exId);
+  // Si ya no está en el plan, intentar reconstruir desde el histórico guardado
+  if(!ex){
+    // Busca nombre en appliedProposals o intentar reconstruir con datos mínimos
+    ex={id:exId,n:'Ejercicio (ya no en plan)',eq:'—',s:'—',r:'—',ic:'📊',_orphan:true};
+  }
   const data=(S.strength[exId]||[]).slice();
   if(data.length===0){
     root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet">
-      <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${ex.n}</div><div class="hist-sheet-sub">${ex.eq} · ${ex.s}×${ex.r} reps</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
+      <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${ex.n}</div><div class="hist-sheet-sub">${ex.eq}${ex.s&&ex.r&&!ex._orphan?' · '+ex.s+'×'+ex.r+' reps':''}</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
       <div class="hist-sheet-body"><div class="empty"><div class="eic">📊</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
     </div></div>`;
     return;
@@ -1988,7 +2701,7 @@ function renderHist(){
     <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
       <div class="hist-sheet-title">${ex.n}</div>
-      <div class="hist-sheet-sub">${ex.eq} · ${ex.s}×${ex.r} reps objetivo</div>
+      <div class="hist-sheet-sub">${ex._orphan?'Ya no está en tu rutina · Solo lectura':ex.eq+' · '+ex.s+'×'+ex.r+' reps objetivo'}</div>
       <button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
@@ -2005,8 +2718,8 @@ function renderHist(){
 }
 
 function renderWorkout(){
-  const tabs=['A','B','C'].map(k=>`<button class="tab ${S.day===k?'on':''}" onclick="S.day='${k}';S.open=null;render()">${PLAN[k].label}</button>`).join('');
-  const day=PLAN[S.day],strEx=day.ex.filter(e=>!e.cardio);
+  const tabs=['A','B','C'].map(k=>`<button class="tab ${S.day===k?'on':''}" onclick="S.day='${k}';S.open=null;render()">${getPlan()[k].label}</button>`).join('');
+  const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const doneEx=strEx.filter(e=>countSetsDone(e.id,e.s)>=e.s).length;
   const pct=strEx.length?Math.round(doneEx/strEx.length*100):0,allDone=doneEx===strEx.length&&strEx.length>0;
   const exHtml=day.ex.map(ex=>{
@@ -2043,7 +2756,7 @@ function renderWorkout(){
 
 function renderProg(){
   const cols={A:'#3b82f6',B:'#ec4899',C:'#22c55e'};
-  const exNames={};Object.values(PLAN).forEach(d=>d.ex.forEach(e=>{if(!e.cardio)exNames[e.id]=e.n;}));
+  const exNames={};Object.values(getPlan()).forEach(d=>d.ex.forEach(e=>{if(!e.cardio)exNames[e.id]=e.n;}));
   const hasAny=Object.values(S.strength).some(d=>d&&d.length>0);
   const wk=getWeekSessions(),tot=S.sessions.length;
   const cnt={A:0,B:0,C:0};S.sessions.forEach(s=>{if(cnt[s.day]!==undefined)cnt[s.day]++;});
@@ -2069,7 +2782,7 @@ function renderProg(){
   <div class="card">
     <div style="display:flex;gap:10px">${['A','B','C'].map(d=>`<div style="flex:1;text-align:center">
       <div style="font-size:28px;font-weight:700;color:${cols[d]};font-family:'DM Mono',monospace;line-height:1">${cnt[d]}</div>
-      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">${PLAN[d].label}</div>
+      <div style="font-size:11px;color:var(--text2);text-transform:uppercase;letter-spacing:.5px;margin-top:4px">${getPlan()[d].label}</div>
       <div class="pbar" style="margin-top:6px"><div class="pinner" style="width:${Math.min(100,Math.round(cnt[d]/10*100))}%;background:${cols[d]}"></div></div>
     </div>`).join('')}</div>
     <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);display:flex;justify-content:space-between">
@@ -2103,6 +2816,532 @@ function renderProg(){
   </div>`;
 }
 
+// ══════════════════════════════════════════════════════════
+// EDITOR DE RUTINA — funciones completas
+// ══════════════════════════════════════════════════════════
+let _editDay='A'; // día activo en el editor
+
+function openRoutineEditor(){
+  _editDay=S.nextDay||'A';
+  S.settingsOpen=false;
+  document.getElementById('settings-root').innerHTML='';
+  renderRoutineEditor();
+}
+
+function closeRoutineEditor(){
+  document.getElementById('settings-root').innerHTML='';
+}
+
+function editExSeries(dayKey,idx,delta){
+  const ex=getPlan()[dayKey].ex[idx];
+  if(!ex)return;
+  const nv=Math.max(1,Math.min(6,(ex.s||3)+delta));
+  ex.s=nv;
+  saveState();
+  const el=document.getElementById('srv_'+idx);
+  if(el)el.textContent=nv;
+  // Actualizar el meta text
+  const meta=document.querySelector(`#edi_${idx} .edit-ex-meta`);
+  if(meta){
+    const isCardio=!!ex.cardio;
+    meta.textContent=`${ex.eq} · ${isCardio?ex.s+' × '+ex.r:ex.s+' series × '+ex.r+' reps'}`;
+  }
+}
+
+function editExReps(dayKey,idx,delta){
+  const ex=getPlan()[dayKey].ex[idx];
+  if(!ex||ex.cardio)return;
+  const cur=parseInt(ex.r)||12;
+  const nv=Math.max(1,Math.min(30,cur+delta));
+  ex.r=nv;
+  saveState();
+  const el=document.getElementById('rpv_'+idx);
+  if(el)el.textContent=nv;
+  const meta=document.querySelector(`#edi_${idx} .edit-ex-meta`);
+  if(meta)meta.textContent=`${ex.eq} · ${ex.s} series × ${ex.r} reps`;
+}
+
+function removeExercise(dayKey,idx){
+  const plan=getPlan();
+  const ex=plan[dayKey].ex[idx];
+  if(!ex)return;
+  confirmModal({
+    title:'Eliminar ejercicio',
+    body:`¿Eliminar "${ex.n}" del ${plan[dayKey].label}? Los datos históricos se conservan.`,
+    okText:'Eliminar',cancelText:'Cancelar',danger:true,
+    onOk:()=>{
+      plan[dayKey].ex.splice(idx,1);
+      saveState();
+      toast('Ejercicio eliminado');
+      renderRoutineEditor();
+      render();
+    }
+  });
+}
+
+function swapExerciseUI(dayKey,idx){
+  const ex=getPlan()[dayKey].ex[idx];
+  if(!ex)return;
+  showExercisePicker({
+    title:`Cambiar "${ex.n}"`,
+    muscle:ex.muscle||null,
+    onPick:(libEx)=>{
+      const newEx=libExToEx(libEx);
+      // Conservar series/reps personalizadas
+      if(ex.s)newEx.s=ex.s;
+      if(ex.r&&!newEx.cardio)newEx.r=ex.r;
+      // Si hay histórico, preguntar si migrar
+      const oldHist=S.strength[ex.id];
+      const doSwap=()=>{
+        getPlan()[dayKey].ex[idx]=newEx;
+        saveState();
+        toast(`Cambiado a ${newEx.n}`);
+        renderRoutineEditor();
+        render();
+      };
+      if(oldHist&&oldHist.length>0){
+        confirmModal({
+          title:'Trasladar historial',
+          body:`El ejercicio anterior tiene ${oldHist.length} registro${oldHist.length!==1?'s':''}. ¿Trasladar el historial al nuevo ejercicio? Elige "No" si es un ejercicio distinto (el histórico antiguo se conservará como solo lectura).`,
+          okText:'Trasladar',
+          cancelText:'No, es distinto',
+          onOk:()=>{
+            S.strength[newEx.id]=oldHist.slice();
+            delete S.strength[ex.id];
+            doSwap();
+          },
+          onCancel:doSwap
+        });
+      }else{
+        doSwap();
+      }
+    }
+  });
+}
+
+function addExerciseUI(dayKey){
+  showExercisePicker({
+    title:`Añadir al ${getPlan()[dayKey].label}`,
+    muscle:null,
+    onPick:(libEx)=>{
+      const newEx=libExToEx(libEx);
+      const plan=getPlan();
+      // Si el último es cardio, insertar antes del cardio final
+      const ex=plan[dayKey].ex;
+      if(ex.length>0&&ex[ex.length-1].cardio){
+        ex.splice(ex.length-1,0,newEx);
+      }else{
+        ex.push(newEx);
+      }
+      saveState();
+      toast(`${newEx.n} añadido`);
+      renderRoutineEditor();
+      render();
+    }
+  });
+}
+
+function resetPlanToDefault(){
+  confirmModal({
+    title:'Restaurar rutina original',
+    body:'Se volverá al plan inicial. Los cambios personalizados se perderán. Los datos de entrenamiento (historial, pesos) NO se tocan.',
+    okText:'Restaurar',cancelText:'Cancelar',danger:true,
+    onOk:()=>{
+      S.currentPlan=JSON.parse(JSON.stringify(PLAN));
+      saveState();
+      toast('Rutina restaurada al plan original');
+      renderRoutineEditor();
+      render();
+    }
+  });
+}
+
+// ── PICKER DE EJERCICIOS ──────────────────────────────────────
+let _pickerState=null;
+function showExercisePicker({title,muscle,onPick}){
+  _pickerState={title,muscle,onPick,search:'',filterMuscle:muscle||'all'};
+  renderExercisePicker();
+}
+
+function renderExercisePicker(){
+  const root=document.getElementById('cmodal-root');
+  if(!root||!_pickerState)return;
+  const {title,search,filterMuscle}=_pickerState;
+
+  const q=(search||'').toLowerCase().trim();
+  let items=EXERCISE_DB;
+  if(filterMuscle&&filterMuscle!=='all')items=items.filter(e=>e.muscle===filterMuscle);
+  if(q)items=items.filter(e=>e.n.toLowerCase().includes(q)||e.eq.toLowerCase().includes(q)||e.muscle.toLowerCase().includes(q));
+
+  const byMuscle={};
+  items.forEach(e=>{
+    if(!byMuscle[e.muscle])byMuscle[e.muscle]=[];
+    byMuscle[e.muscle].push(e);
+  });
+
+  const muscleFilter=`<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">
+    ${[{id:'all',label:'Todos'},...MUSCLE_GROUPS].map(m=>`<button style="background:${filterMuscle===m.id?'var(--green)':'var(--bg3)'};color:${filterMuscle===m.id?'#000':'var(--text2)'};border:1px solid ${filterMuscle===m.id?'var(--green)':'var(--border)'};border-radius:20px;padding:5px 11px;font-size:11px;cursor:pointer;font-weight:${filterMuscle===m.id?'600':'400'}" onclick="pickerSetMuscle('${m.id}')">${m.label}</button>`).join('')}
+  </div>`;
+
+  const listHTML=Object.entries(byMuscle).map(([muscle,exs])=>{
+    const mLabel=MUSCLE_GROUPS.find(m=>m.id===muscle)?.label||muscle;
+    return`<div class="lib-group-h">${mLabel}</div>`+
+      exs.map(e=>`<div class="lib-item" onclick="pickerPick('${e.id}')">
+        <div class="lib-item-n">${e.ic||'💪'} ${e.n}</div>
+        <div class="lib-item-d">
+          <span class="lib-item-badge">${e.eq}</span>
+          ${e.compound?'<span class="lib-item-badge">Compuesto</span>':''}
+          ${e.cardio?'<span class="lib-item-badge">Cardio</span>':''}
+        </div>
+      </div>`).join('');
+  }).join('');
+
+  const empty=items.length===0?`<div class="empty"><div class="eic">🔍</div><p>Sin resultados. Prueba otra búsqueda.</p></div>`:'';
+
+  // Escape del título por seguridad
+  const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeExercisePicker()" style="z-index:500"><div class="hist-sheet" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
+    <div class="hist-sheet-head">
+      <div class="hist-sheet-hdl"></div>
+      <div class="hist-sheet-title">${esc(title)}</div>
+      <div class="hist-sheet-sub">Elige de la biblioteca o busca</div>
+      <button class="hist-sheet-close" onclick="closeExercisePicker()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="hist-sheet-body">
+      <input class="lib-search" id="lib-search-inp" type="search" placeholder="Buscar ejercicio..." value="${esc(search||'')}" oninput="pickerSearch(this.value)" autocomplete="off"/>
+      ${muscleFilter}
+      ${listHTML}${empty}
+      <div style="height:24px"></div>
+    </div>
+  </div></div>`;
+}
+
+function pickerSearch(v){
+  if(!_pickerState)return;
+  _pickerState.search=v;
+  renderExercisePicker();
+  // Restaurar foco + cursor al final
+  const i=document.getElementById('lib-search-inp');
+  if(i){i.focus();const l=v.length;try{i.setSelectionRange(l,l);}catch(e){}}
+}
+function pickerSetMuscle(m){
+  if(_pickerState){_pickerState.filterMuscle=m;renderExercisePicker();}
+}
+function pickerPick(libId){
+  const libEx=EXERCISE_DB.find(e=>e.id===libId);
+  if(!libEx||!_pickerState)return;
+  const cb=_pickerState.onPick;
+  _pickerState=null;
+  document.getElementById('cmodal-root').innerHTML='';
+  if(cb)cb(libEx);
+}
+function closeExercisePicker(){
+  _pickerState=null;
+  document.getElementById('cmodal-root').innerHTML='';
+}
+
+// ── DRAG & DROP TÁCTIL PARA REORDENAR ─────────────────────────
+function initDragDrop(dayKey){
+  const items=document.querySelectorAll('#settings-root .edit-ex-item');
+  items.forEach(item=>{
+    const handle=item.querySelector('.drag-handle');
+    if(!handle||handle._dragBound)return;
+    handle._dragBound=true;
+    let startY=0,startIdx=0,curIdx=0,dragging=false;
+
+    const getIdx=el=>parseInt(el.dataset.idx)||0;
+
+    const onStart=e=>{
+      const touch=e.touches?e.touches[0]:e;
+      startY=touch.clientY;
+      startIdx=getIdx(item);
+      curIdx=startIdx;
+      dragging=true;
+      item.classList.add('dragging');
+      if(e.cancelable)e.preventDefault();
+    };
+    const onMove=e=>{
+      if(!dragging)return;
+      const touch=e.touches?e.touches[0]:e;
+      const dy=touch.clientY-startY;
+      const h=item.offsetHeight+8;
+      const maxIdx=getPlan()[dayKey].ex.length-1;
+      const newIdx=Math.max(0,Math.min(maxIdx,startIdx+Math.round(dy/h)));
+      if(newIdx!==curIdx){
+        const plan=getPlan();
+        const arr=plan[dayKey].ex;
+        const moved=arr.splice(startIdx,1)[0];
+        arr.splice(newIdx,0,moved);
+        curIdx=newIdx;
+        startIdx=newIdx;
+        startY=touch.clientY;
+        saveState();
+        renderRoutineEditor();
+      }
+      if(e.cancelable)e.preventDefault();
+    };
+    const onEnd=()=>{
+      dragging=false;
+      item.classList.remove('dragging');
+    };
+
+    handle.addEventListener('touchstart',onStart,{passive:false});
+    handle.addEventListener('touchmove',onMove,{passive:false});
+    handle.addEventListener('touchend',onEnd);
+    handle.addEventListener('touchcancel',onEnd);
+    // Soporte mouse para desarrollo en desktop (no afecta iOS)
+    handle.addEventListener('mousedown',e=>{
+      onStart(e);
+      const mm=ev=>onMove(ev);
+      const mu=()=>{onEnd();document.removeEventListener('mousemove',mm);document.removeEventListener('mouseup',mu);};
+      document.addEventListener('mousemove',mm);
+      document.addEventListener('mouseup',mu);
+    });
+  });
+}
+
+// ══════════════════════════════════════════════════════════
+// PROPUESTAS DEL COACH — generación y aplicación real
+// ══════════════════════════════════════════════════════════
+function coach_generateProposals(cycle){
+  const proposals=[];
+  const plan=getPlan();
+  const cycleStart=cycle.start;
+  const allEx=Object.values(plan).flatMap(d=>d.ex).filter(e=>!e.cardio);
+
+  allEx.forEach(ex=>{
+    const prog=coach_exerciseProgression(ex.id,cycleStart);
+    if(prog.trend==='insufficient')return; // sin datos suficientes
+
+    // Propuesta 1: añadir serie si progresa fuerte y tiene pocas series
+    if((prog.trend==='strong_up'||prog.trend==='up')&&ex.s<5){
+      proposals.push({
+        id:'add_set_'+ex.id,
+        type:'add_set',
+        ic:'💪',
+        tag:'Progresión',
+        title:`Añadir serie a ${ex.n}`,
+        description:`Progresas bien (+${prog.pct?.toFixed(0)||0}% en este ciclo). Pasar de ${ex.s}×${ex.r} a ${ex.s+1}×${ex.r} aumentará el volumen para seguir estimulando músculo.`,
+        dayKey:Object.keys(plan).find(d=>plan[d].ex.some(e=>e.id===ex.id)),
+        exId:ex.id,
+        apply:()=>{ const e=findExInPlan(ex.id); if(e)e.s=Math.min(6,e.s+1); }
+      });
+    }
+
+    // Propuesta 2: quitar serie si hay regresión constante (posible fatiga)
+    if(prog.trend==='down'&&ex.s>2){
+      proposals.push({
+        id:'rm_set_'+ex.id,
+        type:'rm_set',
+        ic:'⚠️',
+        tag:'Recuperación',
+        title:`Reducir volumen en ${ex.n}`,
+        description:`El peso ha bajado. Puede ser fatiga acumulada. Bajar de ${ex.s}×${ex.r} a ${ex.s-1}×${ex.r} una semana puede ayudar a recuperar.`,
+        dayKey:Object.keys(plan).find(d=>plan[d].ex.some(e=>e.id===ex.id)),
+        exId:ex.id,
+        apply:()=>{ const e=findExInPlan(ex.id); if(e)e.s=Math.max(1,e.s-1); }
+      });
+    }
+
+    // Propuesta 3: bajar reps y subir series para más fuerza si lleva muchas semanas
+    if(prog.trend==='stagnant'&&cycle.weeks>=3&&ex.r>=12&&!ex.cardio){
+      proposals.push({
+        id:'change_rep_scheme_'+ex.id,
+        type:'rep_scheme',
+        ic:'🔄',
+        tag:'Variación',
+        title:`Cambiar esquema en ${ex.n}`,
+        description:`Estancado en ${ex.s}×${ex.r}. Cambiar a ${ex.s+1}×8 con más peso puede romper la meseta — trabajas la misma musculatura con un estímulo diferente.`,
+        dayKey:Object.keys(plan).find(d=>plan[d].ex.some(e=>e.id===ex.id)),
+        exId:ex.id,
+        apply:()=>{ const e=findExInPlan(ex.id); if(e){e.s=Math.min(6,e.s+1);e.r=8;} }
+      });
+    }
+  });
+
+  // Propuesta 4: semana de descarga si llevan muchas sesiones seguidas
+  if(cycle.sessions.length>=10){
+    proposals.push({
+      id:'deload_week',
+      type:'deload',
+      ic:'🧘',
+      tag:'Descarga',
+      title:'Semana de descarga',
+      description:`Con ${cycle.sessions.length} sesiones en el ciclo llevas mucho trabajo acumulado. Reducir las series a la mitad (mantener el peso) durante una semana mejora la recuperación y suele producir un rebote de fuerza.`,
+      apply:()=>{
+        const p=getPlan();
+        Object.keys(p).forEach(dk=>{
+          p[dk].ex.forEach(e=>{ if(!e.cardio)e.s=Math.max(1,Math.round((e.s||3)/2)); });
+        });
+        // Programar restauración a ciclo siguiente guardando estado
+        S._deloadActive=true;
+      }
+    });
+  }
+
+  // Propuesta 5: añadir ejercicio si el día tiene pocos ejercicios de fuerza
+  Object.keys(plan).forEach(dk=>{
+    const strEx=plan[dk].ex.filter(e=>!e.cardio);
+    if(strEx.length<3&&cycle.sessions.length>=4){
+      // Sugerir ejercicio del grupo muscular principal
+      const mainMuscle=dk==='A'?'piernas':dk==='B'?'pecho':'espalda';
+      const candidates=EXERCISE_DB.filter(e=>e.muscle===mainMuscle&&!strEx.some(s=>s.n===e.n));
+      if(candidates.length>0){
+        const pick=candidates[0];
+        proposals.push({
+          id:'add_ex_'+dk+'_'+pick.id,
+          type:'add_ex',
+          ic:'➕',
+          tag:'Volumen',
+          title:`Añadir ejercicio al ${plan[dk].label}`,
+          description:`El ${plan[dk].label} tiene pocos ejercicios de fuerza (${strEx.length}). Añadir "${pick.n}" (${pick.eq}) aumentaría el volumen de ${mainMuscle} sin saturar la sesión.`,
+          apply:()=>{ getPlan()[dk].ex.splice(-1,0,libExToEx(pick)); } // antes del cardio final
+        });
+      }
+    }
+  });
+
+  // Limitar a 4 propuestas (principiante — no saturar)
+  return proposals.slice(0,4);
+}
+
+function findExInPlan(exId){
+  const plan=getPlan();
+  for(const dk of Object.keys(plan)){
+    const ex=plan[dk].ex.find(e=>e.id===exId);
+    if(ex)return ex;
+  }
+  return null;
+}
+
+// Renderizar propuestas pendientes en el Coach
+let _proposalsRoot=null;
+function renderPendingProposals(){
+  const root=document.getElementById('proposals-root');
+  if(!root)return;
+  const props=S.pendingCoachProposals||[];
+  if(props.length===0){root.innerHTML='';return;}
+
+  root.innerHTML=`<div style="padding:0 0 4px">
+    <div class="sh" style="padding:0 14px 8px">📋 El Coach propone — tú decides</div>
+    ${props.map((p,i)=>`<div class="proposal-card">
+      <div class="proposal-head">
+        <div class="proposal-ic">${p.ic}</div>
+        <div>
+          <div class="proposal-tag">${p.tag}</div>
+          <div class="proposal-t">${p.title}</div>
+          <div class="proposal-d">${p.description}</div>
+        </div>
+      </div>
+      <div class="proposal-actions">
+        <button class="proposal-apply" onclick="applyProposal(${i})">✓ Aplicar</button>
+        <button class="proposal-ignore" onclick="ignoreProposal(${i})">Ignorar</button>
+      </div>
+    </div>`).join('')}
+  </div>`;
+}
+
+function applyProposal(idx){
+  const props=S.pendingCoachProposals||[];
+  const p=props[idx];
+  if(!p)return;
+  // Reconstruir la función apply desde el tipo y exId guardados
+  _applyProposalByData(p);
+  const title=p.title;
+  props.splice(idx,1);
+  if(!S.appliedProposals)S.appliedProposals=[];
+  S.appliedProposals.push({...p,appliedAt:Date.now()});
+  saveState();
+  toast(`✓ Aplicado: ${title}`);
+  renderPendingProposals();
+  render();
+}
+
+function ignoreProposal(idx){
+  const props=S.pendingCoachProposals||[];
+  props.splice(idx,1);
+  saveState();
+  renderPendingProposals();
+}
+
+function _applyProposalByData(p){
+  const plan=getPlan();
+  if(p.type==='add_set'&&p.exId){
+    const ex=findExInPlan(p.exId);
+    if(ex)ex.s=Math.min(6,(ex.s||3)+1);
+  }else if(p.type==='rm_set'&&p.exId){
+    const ex=findExInPlan(p.exId);
+    if(ex)ex.s=Math.max(1,(ex.s||3)-1);
+  }else if(p.type==='rep_scheme'&&p.exId){
+    const ex=findExInPlan(p.exId);
+    if(ex){ex.s=Math.min(6,(ex.s||3)+1);ex.r=8;}
+  }else if(p.type==='deload'){
+    Object.keys(plan).forEach(dk=>{
+      plan[dk].ex.forEach(e=>{ if(!e.cardio)e.s=Math.max(1,Math.round((e.s||3)/2)); });
+    });
+  }else if(p.type==='add_ex'&&p.libExId&&p.dayKey){
+    const libEx=EXERCISE_DB.find(e=>e.id===p.libExId);
+    if(libEx)plan[p.dayKey].ex.splice(-1,0,libExToEx(libEx));
+  }
+  saveState();
+}
+
+function renderRoutineEditor(){
+  const root=document.getElementById('settings-root');
+  if(!root)return;
+  const plan=getPlan();
+  const day=plan[_editDay];
+  const exItems=day.ex.map((ex,i)=>{
+    const isCardio=!!ex.cardio;
+    const sLabel=isCardio?`${ex.s} × ${ex.r}`:`${ex.s} series × ${ex.r} reps`;
+    return`<div class="edit-ex-item" data-idx="${i}" id="edi_${i}">
+      <div class="drag-handle" aria-label="Arrastrar">⠿</div>
+      <div class="edit-ex-info">
+        <div class="edit-ex-name">${ex.ic||'💪'} ${ex.n}</div>
+        <div class="edit-ex-meta">${ex.eq} · ${sLabel}</div>
+        ${!isCardio?`<div class="sr-editor">
+          <span class="sr-label">Series</span>
+          <button class="sr-btn" onclick="editExSeries('${_editDay}',${i},-1)">−</button>
+          <span class="sr-val" id="srv_${i}">${ex.s}</span>
+          <button class="sr-btn" onclick="editExSeries('${_editDay}',${i},1)">+</button>
+          <span class="sr-label" style="margin-left:8px">Reps</span>
+          <button class="sr-btn" onclick="editExReps('${_editDay}',${i},-1)">−</button>
+          <span class="sr-val" id="rpv_${i}">${ex.r}</span>
+          <button class="sr-btn" onclick="editExReps('${_editDay}',${i},1)">+</button>
+        </div>`:''}
+      </div>
+      <div class="edit-ex-actions">
+        <button class="edit-ex-btn" onclick="swapExerciseUI('${_editDay}',${i})" title="Cambiar" aria-label="Cambiar ejercicio">⇄</button>
+        <button class="edit-ex-btn danger" onclick="removeExercise('${_editDay}',${i})" title="Eliminar" aria-label="Eliminar">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeRoutineEditor()"><div class="hist-sheet" style="max-height:92vh;max-height:92dvh">
+    <div class="hist-sheet-head">
+      <div class="hist-sheet-hdl"></div>
+      <div class="hist-sheet-title">Editar rutina</div>
+      <div class="hist-sheet-sub">⇄ cambiar · ✕ eliminar · ⠿ reordenar</div>
+      <button class="hist-sheet-close" onclick="closeRoutineEditor()" aria-label="Cerrar">✕</button>
+    </div>
+    <div class="hist-sheet-body" style="padding:12px 0 24px">
+      <div class="edit-day-tab">
+        ${['A','B','C'].map(d=>`<button class="edit-day-btn${_editDay===d?' on':''}" onclick="_editDay='${d}';renderRoutineEditor()">${plan[d].label}</button>`).join('')}
+      </div>
+      ${exItems}
+      <button class="edit-add-btn" onclick="addExerciseUI('${_editDay}')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Añadir ejercicio
+      </button>
+      <div style="padding:0 14px">
+        <button class="btn bs" style="width:100%;margin-top:4px" onclick="resetPlanToDefault()">Restaurar plan original</button>
+      </div>
+    </div>
+  </div></div>`;
+  initDragDrop(_editDay);
+}
+
 function render(){
   const s=document.getElementById('screen');
   if(S.tab==='dash')s.innerHTML=renderDash();
@@ -2112,6 +3351,7 @@ function render(){
   renderSettings();
   renderWmodal();
   renderHist();
+  renderPendingProposals();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -2136,8 +3376,17 @@ function renderSettings(){
       <button class="hist-sheet-close" onclick="closeSettings()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
-      <div class="sh" style="margin:2px 0 8px">Datos personales</div>
+      <div class="sh" style="margin:2px 0 8px">Rutina</div>
       <div class="set-section">
+        <div class="set-row" onclick="closeSettings();openRoutineEditor()">
+          <div class="set-row-info">
+            <div class="set-row-t">Editar rutina</div>
+            <div class="set-row-d">Cambia, añade o elimina ejercicios · Ajusta series y reps</div>
+          </div>
+          <span class="set-row-arrow">›</span>
+        </div>
+      </div>
+      <div class="sh" style="margin:2px 0 8px">Datos personales</div>      <div class="set-section">
         <div class="set-row" onclick="openEditWeight('first')">
           <div class="set-row-info">
             <div class="set-row-t">Peso corporal inicial</div>
@@ -2159,7 +3408,7 @@ function renderSettings(){
             <div class="set-row-t">Próxima sesión</div>
             <div class="set-row-d">Cambiar si te has saltado un día</div>
           </div>
-          <span class="set-row-v">${PLAN[S.nextDay].label}</span>
+          <span class="set-row-v">${getPlan()[S.nextDay].label}</span>
           <span class="set-row-arrow">›</span>
         </div>
       </div>
@@ -2289,7 +3538,7 @@ function settingsChangeStartDay(){
       ${['A','B','C'].map(d=>`<div class="ob-day ${S.nextDay===d?'sel':''}" onclick="pickNextDay('${d}')">
         <div class="di">${d==='A'?'🦵':d==='B'?'🏋️':'🚣'}</div>
         <div class="dn">Día ${d}</div>
-        <div class="df">${PLAN[d].focus.split('—')[0].trim()}</div>
+        <div class="df">${getPlan()[d].focus.split('—')[0].trim()}</div>
       </div>`).join('')}
     </div>
     <div class="cmod-btns">
@@ -2300,7 +3549,7 @@ function settingsChangeStartDay(){
 function pickNextDay(d){
   S.nextDay=d;saveState();
   document.getElementById('cmodal-root').innerHTML='';
-  toast(`Próxima sesión: ${PLAN[d].label}`);
+  toast(`Próxima sesión: ${getPlan()[d].label}`);
   renderSettings();render();
 }
 
