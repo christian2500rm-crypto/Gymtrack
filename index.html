@@ -2561,23 +2561,53 @@ function coach_weekStats(offsetWeeks){
 function coach_weeklyInsight(){
   const cur=coach_weekStats(0);
   const prev=coach_weekStats(1);
-  if(cur.sessions===0)return null;
 
   const sessionsDiff=cur.sessions-prev.sessions;
   const volumeDiff=cur.totalVolume-prev.totalVolume;
   const volumePct=prev.totalVolume>0?Math.round((volumeDiff/prev.totalVolume)*100):0;
 
-  // Generar mensaje contextual
   let title='Resumen de la semana',description='',tag='Esta semana';
   const stats=[
     {l:'Sesiones',v:cur.sessions,d:sessionsDiff,unit:''},
-    {l:'Volumen',v:cur.totalVolume,d:volumeDiff,unit:' kg'}
+    {l:'Volumen',v:cur.totalVolume,d:volumeDiff,unit:cur.totalVolume>0?' kg':''}
   ];
   if(cur.avgRpe){
     const rpeLabel=cur.avgRpe<=1.4?'Fácil':cur.avgRpe<=2.4?'Justo':'Al límite';
     stats.push({l:'Esfuerzo',v:rpeLabel,d:0,unit:''});
   }
 
+  // ── CASO ESPECIAL: 0 sesiones esta semana — mensaje motivacional contextual ──
+  if(cur.sessions===0){
+    title='Esta semana';
+    // ¿Qué día de la semana es? (1=lunes ... 7=domingo)
+    const today=new Date();
+    const dow=today.getDay()||7;
+    const totalSessions=S.sessions.length;
+
+    if(totalSessions===0){
+      description='Aún no has empezado. Tu primera sesión es el comienzo de todo — registra una hoy y construye el hábito.';
+    }else if(dow<=2){
+      // Lunes/martes — semana joven
+      if(prev.sessions>=2)description=`La semana pasada hiciste ${prev.sessions} sesiones — un buen ritmo. Empieza fuerte hoy y mantén la racha.`;
+      else if(prev.sessions===1)description=`Llevas una semana en buen camino. Esta semana puedes intentar 2 sesiones para subir el volumen.`;
+      else description='Semana nueva, empezamos de cero. Intenta hoy o mañana — la primera sesión siempre es la más difícil.';
+    }else if(dow<=4){
+      // Miércoles/jueves — mitad de semana
+      if(prev.sessions>=2)description=`La semana pasada hiciste ${prev.sessions} sesiones. Aún hay tiempo de hacer al menos una esta semana — no dejes que se vacíe.`;
+      else description='Estamos a mitad de semana. Una sesión hoy o mañana mantiene el hábito vivo.';
+    }else if(dow<=6){
+      // Viernes/sábado — última oportunidad
+      if(prev.sessions>=2)description=`La semana pasada entrenaste ${prev.sessions} veces. Aún puedes salvar la semana con una sesión rápida hoy o mañana.`;
+      else description='Quedan pocos días. Una sesión corta es mejor que ninguna — el hábito se construye mostrándose, no siendo perfecto.';
+    }else{
+      // Domingo
+      if(prev.sessions>=3)description=`Semana de descanso completo. La pasada hiciste ${prev.sessions} sesiones — ahora a recargar y volver fuerte el lunes.`;
+      else description=`Semana sin entrenar. No pasa nada — mañana es lunes, perfecta oportunidad para reiniciar con el ${getPlan()[S.nextDay].label}.`;
+    }
+    return{title,description,tag,stats};
+  }
+
+  // ── Casos normales (ya hay sesiones) ──
   if(prev.sessions===0){
     description=`Llevas ${cur.sessions} sesión${cur.sessions!==1?'es':''} esta semana. Sigue así para construir un baseline.`;
   }else if(sessionsDiff>0){
@@ -2960,7 +2990,7 @@ function renderDash(){
   </div>
   ${(()=>{
     const w=coach_weeklyInsight();
-    if(!w||w.stats[0].v===0)return''; // sin sesiones esta semana
+    if(!w)return''; // función nunca debería devolver null ahora, pero por seguridad
     return`<div class="week-card">
       <div class="week-card-h">
         <div class="week-card-t">📈 ${w.title}</div>
