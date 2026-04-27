@@ -279,6 +279,47 @@ input{font-family:inherit}
 .proposal-ignore:active{transform:scale(.98)}
 .proposal-tag{display:inline-block;font-size:10px;background:rgba(34,197,94,.12);color:#86efac;border-radius:4px;padding:2px 7px;margin-bottom:4px}
 
+/* ── RPE SELECTOR ── */
+.rpe-pop{position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rsm);padding:8px;display:flex;gap:6px;z-index:250;box-shadow:0 8px 24px rgba(0,0,0,.6);animation:rpeIn .15s ease}
+@keyframes rpeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.rpe-opt{display:flex;flex-direction:column;align-items:center;gap:2px;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rxs);padding:8px 10px;min-width:54px;cursor:pointer;transition:all .12s}
+.rpe-opt:active{transform:scale(.94)}
+.rpe-opt.r1{border-color:rgba(34,197,94,.35)}
+.rpe-opt.r2{border-color:rgba(245,158,11,.35)}
+.rpe-opt.r3{border-color:rgba(239,68,68,.35)}
+.rpe-opt-ic{font-size:18px;line-height:1}
+.rpe-opt-l{font-size:9px;color:var(--text2);font-weight:500;letter-spacing:.3px;text-transform:uppercase}
+.sb.r1{box-shadow:inset 0 0 0 2px #22c55e}
+.sb.r2{box-shadow:inset 0 0 0 2px #f59e0b}
+.sb.r3{box-shadow:inset 0 0 0 2px #ef4444}
+.rpe-skip{background:transparent;border:none;color:var(--text3);font-size:11px;text-decoration:underline;align-self:center;padding:4px 6px;cursor:pointer}
+
+/* ── WARMUP SECTION ── */
+.warmup-block{background:rgba(245,158,11,.06);border:1px dashed rgba(245,158,11,.25);border-radius:var(--rsm);padding:10px 12px;margin-bottom:10px}
+.warmup-h{font-size:11px;color:#fcd34d;font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.warmup-h-l{display:flex;align-items:center;gap:6px}
+.warmup-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px}
+.warmup-row:last-child{margin-bottom:0}
+.warmup-sb{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid rgba(245,158,11,.4);color:#fcd34d;font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Mono',monospace;transition:all .15s}
+.warmup-sb.on{background:rgba(245,158,11,.2);color:#fde68a}
+.warmup-sb:active{transform:scale(.92)}
+.warmup-info{font-size:11px;color:var(--text2);flex:1}
+.warmup-info b{color:var(--text);font-weight:500}
+.warmup-skip{background:transparent;border:none;color:var(--text3);font-size:10px;cursor:pointer;text-decoration:underline}
+
+/* ── WEEKLY MINI-INSIGHT ── */
+.week-card{background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(34,197,94,.05));border:1px solid rgba(59,130,246,.2);border-radius:var(--r);padding:14px 16px;margin:0 14px 10px}
+.week-card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.week-card-t{font-size:13px;font-weight:600;color:#93c5fd}
+.week-card-tag{font-size:10px;background:rgba(59,130,246,.15);color:#93c5fd;border-radius:4px;padding:2px 7px}
+.week-card-d{font-size:12px;color:var(--text2);line-height:1.55}
+.week-stats{display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.06);font-family:'DM Mono',monospace}
+.week-stat{flex:1}
+.week-stat-v{font-size:15px;font-weight:600;color:var(--text)}
+.week-stat-v.up{color:#86efac}
+.week-stat-v.dn{color:#fcd34d}
+.week-stat-l{font-size:10px;color:var(--text3);margin-top:1px;font-family:-apple-system,sans-serif}
+
 /* ── TOAST ── */
 #toast{position:fixed;top:calc(var(--st) + 14px);left:50%;transform:translateX(-50%) translateY(-120%);background:rgba(26,26,26,0.96);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:calc(100% - 28px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
@@ -426,7 +467,7 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=5;
+const SCHEMA_VERSION=6;
 
 function loadState(){try{const r=localStorage.getItem('gymtrack_v3');if(r)return JSON.parse(r);}catch(e){}return null;}
 function saveState(){try{localStorage.setItem('gymtrack_v3',JSON.stringify(S));}catch(e){}}
@@ -441,10 +482,16 @@ function migrateState(data){
     data.coachInsightsStale=data.coachInsightsStale!==false;
   }
   if(v<5){
-    // v5: plan mutable — si no existe, se inicializa desde PLAN en el arranque
     data.currentPlan=data.currentPlan||null;
     data.pendingCoachProposals=data.pendingCoachProposals||[];
     data.appliedProposals=data.appliedProposals||[];
+  }
+  if(v<6){
+    // v6: RPE por serie + calentamiento + análisis semanal
+    data.rpe=data.rpe||{}; // {exId: {setIdx: 1|2|3}} para sesión actual
+    data.warmups=data.warmups||{}; // {exId: {setIdx: true}} para sesión actual
+    data.weeklyAnalyses=data.weeklyAnalyses||[]; // [{weekStart, weekEnd, ...}]
+    data.lastWeekAnalysisTs=data.lastWeekAnalysisTs||null;
   }
   data.schema_version=SCHEMA_VERSION;
   return data;
@@ -452,7 +499,7 @@ function migrateState(data){
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[]},migrateState(loadState())||{});
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -1860,18 +1907,142 @@ const RT={
 };
 function getRestSecs(id){return['a2','b2','c2','c3','c4'].includes(id)?90:60;}
 
-function toggleSet(id,i){
+// ── CALENTAMIENTO ACTIVO ──
+// Devuelve series de calentamiento sugeridas, o null si el ejercicio no las necesita
+function getWarmupSets(ex){
+  if(!ex||ex.cardio)return null;
+  // Solo para ejercicios compuestos o con peso significativo
+  // Detectar compuesto: por ID original o por flag compound en biblioteca
+  const isCompound=['a2','b2','c2','c3','c4'].includes(ex.id) ||
+    (typeof EXERCISE_DB!=='undefined' && EXERCISE_DB.find(e=>e.n===ex.n)?.compound);
+  if(!isCompound)return null;
+  // Necesitamos saber el peso objetivo. Usamos sugerencia o último peso
+  const lw=getLastW(ex.id);
+  if(!lw||!lw.v||lw.v<20)return null; // peso muy bajo no necesita warmup
+  const target=lw.v;
+  return[
+    {pct:50,w:+(target*0.5/2.5).toFixed(0)*2.5,reps:8},
+    {pct:75,w:+(target*0.75/2.5).toFixed(0)*2.5,reps:5}
+  ];
+}
+
+function toggleWarmupSet(exId,wIdx){
+  if(!S.warmups[exId])S.warmups[exId]={};
+  const wasOff=!S.warmups[exId][wIdx];
+  S.warmups[exId][wIdx]=!S.warmups[exId][wIdx];
+  saveState();render();
+  // Tras calentar, descanso corto (45s)
+  if(wasOff){
+    const ex=getPlan()[S.day].ex.find(e=>e.id===exId);
+    if(ex)RT.start(45,ex.n+' (calentamiento)');
+  }
+}
+
+function skipWarmup(exId){
+  // Marcar todas como saltadas
+  if(!S.warmups[exId])S.warmups[exId]={};
+  S.warmups[exId]._skipped=true;
+  saveState();render();
+}
+
+function toggleSet(id,i,evt){
   if(!S.sets[id])S.sets[id]={};
   const wasOff=!S.sets[id][i];
   S.sets[id][i]=!S.sets[id][i];
+  // Si se desmarca, también limpiar RPE de esa serie
+  if(!wasOff){
+    if(S.rpe&&S.rpe[id])delete S.rpe[id][i];
+  }
   saveState();render();
   if(wasOff&&S.tab==='workout'){
     const ex=getPlan()[S.day].ex.find(e=>e.id===id);
-    if(ex&&!ex.cardio)RT.start(getRestSecs(id),ex.n);
+    if(ex&&!ex.cardio){
+      // Mostrar selector RPE en lugar de iniciar timer directamente
+      // El timer empezará cuando elija RPE (o lo salte)
+      showRpeSelector(id,i,ex);
+    }else if(ex&&ex.cardio){
+      // Cardio no usa RPE
+      // (no hay timer para cardio)
+    }
   }else if(!wasOff){
-    // Se desmarcó: si el timer estaba contando, lo escondemos
     RT.hide();
+    closeRpeSelector();
   }
+}
+
+// ── RPE SELECTOR ──
+let _rpeOpen=null;
+function showRpeSelector(exId,setIdx,ex){
+  closeRpeSelector();
+  _rpeOpen={exId,setIdx,ex};
+  const root=document.body;
+  // Encontrar el botón de la serie para posicionar cerca
+  const sbBtn=document.querySelector(`.sb[data-ex="${exId}"][data-set="${setIdx}"]`);
+  const pop=document.createElement('div');
+  pop.className='rpe-pop';
+  pop.id='rpe-pop';
+  pop.innerHTML=`
+    <div class="rpe-opt r1" onclick="setRpe(1)" aria-label="Fácil"><div class="rpe-opt-ic">😌</div><div class="rpe-opt-l">Fácil</div></div>
+    <div class="rpe-opt r2" onclick="setRpe(2)" aria-label="Justo"><div class="rpe-opt-ic">💪</div><div class="rpe-opt-l">Justo</div></div>
+    <div class="rpe-opt r3" onclick="setRpe(3)" aria-label="Al límite"><div class="rpe-opt-ic">🥵</div><div class="rpe-opt-l">Al límite</div></div>
+    <button class="rpe-skip" onclick="skipRpe()">Saltar</button>
+  `;
+  root.appendChild(pop);
+  // Posicionar relativo al botón
+  if(sbBtn){
+    const r=sbBtn.getBoundingClientRect();
+    const popH=pop.offsetHeight||60;
+    const popW=pop.offsetWidth||280;
+    let top=r.bottom+8;
+    // Si no cabe abajo, mostrar arriba
+    if(top+popH>window.innerHeight-20)top=r.top-popH-8;
+    let left=r.left+r.width/2-popW/2;
+    if(left<8)left=8;
+    if(left+popW>window.innerWidth-8)left=window.innerWidth-popW-8;
+    pop.style.top=top+'px';
+    pop.style.left=left+'px';
+  }else{
+    // Fallback: centrado
+    pop.style.bottom='100px';
+    pop.style.left='50%';
+    pop.style.transform='translateX(-50%)';
+  }
+  // Cerrar al tocar fuera
+  setTimeout(()=>{
+    document.addEventListener('click',_rpeOutsideClick,{once:true});
+  },50);
+}
+function _rpeOutsideClick(e){
+  if(!_rpeOpen)return;
+  const pop=document.getElementById('rpe-pop');
+  if(pop&&!pop.contains(e.target))skipRpe();
+}
+function setRpe(level){
+  if(!_rpeOpen)return;
+  const {exId,setIdx,ex}=_rpeOpen;
+  if(!S.rpe[exId])S.rpe[exId]={};
+  S.rpe[exId][setIdx]=level;
+  saveState();
+  closeRpeSelector();
+  // Iniciar timer ahora con duración ajustada por RPE (más descanso si RPE alto)
+  const baseRest=getRestSecs(exId);
+  const adjustedRest=level===3?Math.round(baseRest*1.15):level===1?Math.round(baseRest*0.85):baseRest;
+  RT.start(adjustedRest,ex.n);
+  render();
+}
+function skipRpe(){closeRpeSelector();
+  // Aún así iniciar timer (sin ajuste)
+  if(_rpeOpenLast){
+    RT.start(getRestSecs(_rpeOpenLast.exId),_rpeOpenLast.ex.n);
+    _rpeOpenLast=null;
+  }
+}
+let _rpeOpenLast=null;
+function closeRpeSelector(){
+  if(_rpeOpen)_rpeOpenLast=_rpeOpen;
+  _rpeOpen=null;
+  const pop=document.getElementById('rpe-pop');
+  if(pop)pop.remove();
 }
 function updLog(id,f,v){if(!S.logs[id])S.logs[id]={};S.logs[id][f]=v;saveState();}
 function logW(){
@@ -1921,18 +2092,27 @@ function finishSessionConfirmed(doneEx,totalEx){
   const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const today=fmtDate(new Date()),now=Date.now();
   S.sessions.push({day:S.day,date:today,ts:now});
-  // Guardar también reps y series completadas, no solo peso — necesario para sugerencias inteligentes
+  // Guardar reps, series completadas y RPE promedio
   strEx.forEach(ex=>{
     const l=S.logs[ex.id]||{},w=parseFloat(l.w);
     if(w){
       if(!S.strength[ex.id])S.strength[ex.id]=[];
       const setsDone=countSetsDone(ex.id,ex.s);
       const reps=parseInt(l.r)||null;
-      S.strength[ex.id].push({d:today,v:w,r:reps,setsDone,ts:now});
+      // Calcular RPE promedio de la sesión
+      const rpeMap=S.rpe[ex.id]||{};
+      const rpeValues=Object.values(rpeMap).filter(v=>v>0);
+      const avgRpe=rpeValues.length>0?+(rpeValues.reduce((a,b)=>a+b,0)/rpeValues.length).toFixed(2):null;
+      S.strength[ex.id].push({d:today,v:w,r:reps,setsDone,rpe:avgRpe,ts:now});
     }
   });
   S.nextDay=getNextDay(S.day);
-  day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});S.open=null;
+  day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
+  // Limpiar RPE y warmups de la sesión
+  S.rpe={};S.warmups={};
+  S.open=null;
+  // Disparar análisis semanal si toca
+  coach_maybeRunWeeklyAnalysis();
   saveState();
   toast(`✅ Sesión guardada · Próxima: ${getPlan()[S.nextDay].label}`);
   go('dash');
@@ -2148,6 +2328,17 @@ function coach_generateInsights(){
     saveState();
   }
 
+  // ── Vínculo peso corporal ↔ rendimiento ──
+  const bwInsight=coach_bodyweightPerformanceInsight();
+  if(bwInsight){
+    insights.push({
+      type:bwInsight.type,
+      ic:bwInsight.ic,
+      t:bwInsight.title,
+      d:bwInsight.description+(bwInsight.bw?` <span style="opacity:.6;font-family:'DM Mono',monospace;font-size:11px">[${bwInsight.bw}]</span>`:'')
+    });
+  }
+
   return insights;
 }
 
@@ -2321,6 +2512,203 @@ function coach_applyRecommendationsConfirmed(){
     :`🚀 Nuevo ciclo iniciado · ${cycle.sessions.length} sesiones completadas`;
   toast(msg,3500);
   go('coach');
+}
+
+// ─── ANÁLISIS SEMANAL (mini-insight cada 7 días) ─────────────
+
+function coach_weekRange(offsetWeeks){
+  // offsetWeeks: 0 = esta semana, 1 = la pasada, etc
+  // Lunes 00:00 como inicio de semana
+  const now=new Date();
+  const day=now.getDay()||7;
+  const monday=new Date(now);
+  monday.setHours(0,0,0,0);
+  monday.setDate(now.getDate()-(day-1)-7*offsetWeeks);
+  const sunday=new Date(monday);
+  sunday.setDate(monday.getDate()+6);
+  sunday.setHours(23,59,59,999);
+  return{start:monday.getTime(),end:sunday.getTime(),startStr:fmtDate(monday),endStr:fmtDate(sunday)};
+}
+
+function coach_weekStats(offsetWeeks){
+  const r=coach_weekRange(offsetWeeks);
+  const sessions=S.sessions.filter(s=>s.ts>=r.start&&s.ts<=r.end);
+  // Volumen total: suma de (peso × series completadas) en esa semana
+  let totalVolume=0,exerciseCount=0,avgRpe=0,rpeCount=0;
+  sessions.forEach(sess=>{
+    const dayPlan=getPlan()[sess.day];
+    if(!dayPlan)return;
+    const strEx=dayPlan.ex.filter(e=>!e.cardio);
+    strEx.forEach(ex=>{
+      const recs=(S.strength[ex.id]||[]).filter(r=>r.ts>=r.start&&r.ts<=r.end||(r.ts>=sess.ts-3600000&&r.ts<=sess.ts+3600000));
+      const sessRec=(S.strength[ex.id]||[]).find(r=>Math.abs(r.ts-sess.ts)<86400000);
+      if(sessRec){
+        totalVolume+=(sessRec.v||0)*(sessRec.setsDone||1);
+        exerciseCount++;
+        if(sessRec.rpe){avgRpe+=sessRec.rpe;rpeCount++;}
+      }
+    });
+  });
+  return{
+    sessions:sessions.length,
+    totalVolume:Math.round(totalVolume),
+    exerciseCount,
+    avgRpe:rpeCount>0?+(avgRpe/rpeCount).toFixed(2):null,
+    range:r
+  };
+}
+
+function coach_weeklyInsight(){
+  const cur=coach_weekStats(0);
+  const prev=coach_weekStats(1);
+  if(cur.sessions===0)return null;
+
+  const sessionsDiff=cur.sessions-prev.sessions;
+  const volumeDiff=cur.totalVolume-prev.totalVolume;
+  const volumePct=prev.totalVolume>0?Math.round((volumeDiff/prev.totalVolume)*100):0;
+
+  // Generar mensaje contextual
+  let title='Resumen de la semana',description='',tag='Esta semana';
+  const stats=[
+    {l:'Sesiones',v:cur.sessions,d:sessionsDiff,unit:''},
+    {l:'Volumen',v:cur.totalVolume,d:volumeDiff,unit:' kg'}
+  ];
+  if(cur.avgRpe){
+    const rpeLabel=cur.avgRpe<=1.4?'Fácil':cur.avgRpe<=2.4?'Justo':'Al límite';
+    stats.push({l:'Esfuerzo',v:rpeLabel,d:0,unit:''});
+  }
+
+  if(prev.sessions===0){
+    description=`Llevas ${cur.sessions} sesión${cur.sessions!==1?'es':''} esta semana. Sigue así para construir un baseline.`;
+  }else if(sessionsDiff>0){
+    description=`Has hecho ${sessionsDiff} sesión más que la semana pasada. ${volumePct>=10?`Volumen total: +${volumePct}%, gran progreso.`:'Buena consistencia.'}`;
+  }else if(sessionsDiff<0){
+    description=`${Math.abs(sessionsDiff)} sesión menos que la semana pasada. Si fue intencional perfecto, si no, intenta mantener la cadencia esta semana.`;
+  }else{
+    if(volumePct>=10)description=`Mismo número de sesiones pero +${volumePct}% de volumen. Estás progresando bien.`;
+    else if(volumePct<=-10)description=`El volumen bajó ${Math.abs(volumePct)}% respecto a la semana pasada. Puede ser fatiga o cambio de pesos.`;
+    else description=`Semana estable: ${cur.sessions} sesiones, volumen consistente. Buena base.`;
+  }
+
+  return{title,description,tag,stats};
+}
+
+// Marcar análisis semanal como visto + guardar histórico
+function coach_maybeRunWeeklyAnalysis(){
+  const now=Date.now();
+  const last=S.lastWeekAnalysisTs||0;
+  // Cada 7 días
+  if(now-last<7*86400000)return;
+  S.lastWeekAnalysisTs=now;
+  const insight=coach_weeklyInsight();
+  if(insight){
+    if(!S.weeklyAnalyses)S.weeklyAnalyses=[];
+    S.weeklyAnalyses.push({...insight,ts:now});
+    // Mantener solo las últimas 12 semanas
+    if(S.weeklyAnalyses.length>12)S.weeklyAnalyses=S.weeklyAnalyses.slice(-12);
+  }
+  saveState();
+}
+
+// ─── PESO CORPORAL ↔ RENDIMIENTO ─────────────────────────────
+
+function coach_bodyweightPerformanceInsight(){
+  // Necesitamos al menos 2 pesos corporales y datos en ejercicios compuestos
+  if(!S.weights||S.weights.length<2)return null;
+  const wRecent=S.weights.slice(-3);
+  const wOldest=wRecent[0],wLatest=wRecent[wRecent.length-1];
+  const bwDelta=wLatest.v-wOldest.v;
+  const bwDays=Math.max(1,Math.round((wLatest.ts-wOldest.ts)/86400000));
+  const bwPctPerWeek=(bwDelta/wOldest.v)*100*(7/bwDays);
+
+  // Ejercicios compuestos (los que más reflejan fuerza global)
+  const compoundIds=Object.values(getPlan()).flatMap(d=>d.ex)
+    .filter(e=>!e.cardio&&(['a2','b2','c2','c3','c4'].includes(e.id) ||
+      (typeof EXERCISE_DB!=='undefined' && EXERCISE_DB.find(x=>x.n===e.n)?.compound)))
+    .map(e=>e.id);
+
+  if(compoundIds.length===0)return null;
+
+  // Calcular delta de fuerza promedio en compuestos en el mismo periodo
+  const sinceTs=wOldest.ts;
+  let progressing=0,regressing=0,stable=0;
+  compoundIds.forEach(id=>{
+    const data=(S.strength[id]||[]).filter(r=>r.ts>=sinceTs);
+    if(data.length<2)return;
+    const change=data[data.length-1].v-data[0].v;
+    if(change>=2.5)progressing++;
+    else if(change<=-2.5)regressing++;
+    else stable++;
+  });
+
+  if(progressing+regressing+stable===0)return null;
+
+  // Generar insight basado en la combinación
+  const lostWeight=bwDelta<-0.3;
+  const gainedWeight=bwDelta>0.3;
+  const flatWeight=Math.abs(bwDelta)<=0.3;
+  const strongerOverall=progressing>regressing;
+  const weakerOverall=regressing>progressing;
+
+  const bwSign=bwDelta>0?'+':'';
+  const bwTxt=`${bwSign}${bwDelta.toFixed(1)} kg en ${bwDays}d`;
+
+  // Patrones — para perfil "ganar músculo + perder grasa"
+  if(lostWeight&&strongerOverall){
+    return{
+      type:'good',
+      ic:'🎯',
+      title:'Recomposición corporal',
+      description:`Has bajado ${Math.abs(bwDelta).toFixed(1)} kg de peso pero mantienes o subes fuerza en ejercicios compuestos. Esto es exactamente lo que buscas: estás perdiendo grasa conservando músculo. Sigue así.`,
+      bw:bwTxt
+    };
+  }
+  if(lostWeight&&weakerOverall){
+    return{
+      type:'warn',
+      ic:'⚠️',
+      title:'Déficit demasiado agresivo',
+      description:`Has bajado ${Math.abs(bwDelta).toFixed(1)} kg pero también estás perdiendo fuerza. Tu cuerpo está catabolizando músculo. Considera comer 200-300 kcal más al día o reducir cardio.`,
+      bw:bwTxt
+    };
+  }
+  if(gainedWeight&&strongerOverall){
+    return{
+      type:'info',
+      ic:'💪',
+      title:'Fase de volumen efectiva',
+      description:`Has ganado ${bwDelta.toFixed(1)} kg y la fuerza sube proporcionalmente. Buena ganancia. Si tu objetivo es definir, baja un poco las calorías; si es seguir creciendo, mantén.`,
+      bw:bwTxt
+    };
+  }
+  if(gainedWeight&&weakerOverall){
+    return{
+      type:'warn',
+      ic:'📊',
+      title:'Peso sube pero fuerza baja',
+      description:`Has ganado ${bwDelta.toFixed(1)} kg pero tu fuerza está bajando. Puede ser fatiga, mal descanso, o exceso de cardio. Revisa sueño y volumen de cardio.`,
+      bw:bwTxt
+    };
+  }
+  if(flatWeight&&strongerOverall){
+    return{
+      type:'good',
+      ic:'⚡',
+      title:'Recomposición lenta',
+      description:`Tu peso se mantiene pero la fuerza sube. Estás cambiando músculo por grasa silenciosamente. La báscula no es el mejor indicador en esta fase — fíate del espejo y la fuerza.`,
+      bw:bwTxt
+    };
+  }
+  if(flatWeight&&weakerOverall){
+    return{
+      type:'warn',
+      ic:'💤',
+      title:'Estancamiento general',
+      description:`Tu peso se mantiene y la fuerza baja. Puede ser falta de descanso, técnica o motivación. Una semana de descarga puede ayudar a resetear.`,
+      bw:bwTxt
+    };
+  }
+  return null;
 }
 
 // ─── 5. SCORE GENERAL DEL MESOCICLO ────────────────────────
@@ -2570,6 +2958,27 @@ function renderDash(){
     </div>`:`<div class="empty"><div class="eic">⚖️</div><p>Registra tu peso en cada sesión para ver la evolución aquí.</p></div>`}
     <button class="btn bs" style="margin-top:12px" onclick="S.wmodal=true;renderWmodal()">Registrar peso de hoy</button>
   </div>
+  ${(()=>{
+    const w=coach_weeklyInsight();
+    if(!w||w.stats[0].v===0)return''; // sin sesiones esta semana
+    return`<div class="week-card">
+      <div class="week-card-h">
+        <div class="week-card-t">📈 ${w.title}</div>
+        <span class="week-card-tag">${w.tag}</span>
+      </div>
+      <div class="week-card-d">${w.description}</div>
+      <div class="week-stats">
+        ${w.stats.map(s=>{
+          const cls=s.d>0?'up':s.d<0?'dn':'';
+          const arrow=s.d>0?'↑':s.d<0?'↓':'';
+          return`<div class="week-stat">
+            <div class="week-stat-v ${cls}">${s.v}${s.unit}</div>
+            <div class="week-stat-l">${s.l}${arrow?' '+arrow:''}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  })()}
   <div class="sh">Próxima sesión</div>
   <div class="card">
     ${(()=>{const today=fmtDate(new Date());const didToday=S.sessions.find(s=>s.date===today);
@@ -2726,7 +3135,13 @@ function renderWorkout(){
     const isOpen=S.open===ex.id,c=S.sets[ex.id]||{};
     const exDone=ex.cardio?c[0]===true:countSetsDone(ex.id,ex.s)>=ex.s;
     const l=S.logs[ex.id]||{},sug=!ex.cardio?getSug(ex.id,ex.s,ex.r):null;
-    const sbHtml=!ex.cardio?Array.from({length:ex.s},(_,i)=>`<button class="sb ${c[i]?'on':''}" aria-label="Serie ${i+1}${c[i]?' (completada)':''}" onclick="toggleSet('${ex.id}',${i})">${c[i]?'✓':i+1}</button>`).join(''):'';
+    const sbHtml=!ex.cardio?Array.from({length:ex.s},(_,i)=>{
+      const done=c[i];
+      const rpeLevel=(S.rpe&&S.rpe[ex.id]&&S.rpe[ex.id][i])||0;
+      const rpeClass=done&&rpeLevel?` r${rpeLevel}`:'';
+      const rpeAria=rpeLevel===1?' fácil':rpeLevel===2?' justo':rpeLevel===3?' al límite':'';
+      return`<button class="sb ${done?'on':''}${rpeClass}" data-ex="${ex.id}" data-set="${i}" aria-label="Serie ${i+1}${done?' (completada'+rpeAria+')':''}" onclick="toggleSet('${ex.id}',${i},event)">${done?'✓':i+1}</button>`;
+    }).join(''):'';
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}">
       <div class="exh" onclick="S.open=S.open==='${ex.id}'?null:'${ex.id}';render()">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${ex.ic}</div>
@@ -2735,6 +3150,25 @@ function renderWorkout(){
       </div>
       ${isOpen?`<div class="exb">${exSVG(ex.id)?`<div class="ex-anim">${exSVG(ex.id)}</div>`:''}<div class="tip">${ex.tip}</div>
         ${!ex.cardio?`${(()=>{const lw=getLastW(ex.id);return lw?`<div class="last-info">Última: <b>${lw.v} kg</b> · ${lw.d}</div>`:''})()}
+          ${(()=>{
+            const wu=getWarmupSets(ex);
+            if(!wu||S.warmups[ex.id]?._skipped)return'';
+            const w=S.warmups[ex.id]||{};
+            const allDone=wu.every((_,i)=>w[i]);
+            if(allDone)return`<div class="warmup-block" style="opacity:.6">
+              <div class="warmup-h"><span class="warmup-h-l">🔥 Calentamiento ✓</span></div>
+            </div>`;
+            return`<div class="warmup-block">
+              <div class="warmup-h">
+                <span class="warmup-h-l">🔥 Calentamiento sugerido</span>
+                <button class="warmup-skip" onclick="skipWarmup('${ex.id}')">Saltar</button>
+              </div>
+              ${wu.map((s,i)=>`<div class="warmup-row">
+                <button class="warmup-sb ${w[i]?'on':''}" onclick="toggleWarmupSet('${ex.id}',${i})" aria-label="Calentamiento ${i+1}">${w[i]?'✓':i+1}</button>
+                <div class="warmup-info"><b>${s.w} kg</b> × ${s.reps} reps <span style="color:var(--text3)">(${s.pct}%)</span></div>
+              </div>`).join('')}
+            </div>`;
+          })()}
           <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span>Series completadas</span><button class="hist-btn" onclick="event.stopPropagation();openHist('${ex.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Historial</button></div>
           <div class="srow">${sbHtml}</div>
           <div class="irow"><label>Peso</label><input class="inp" type="number" placeholder="${(()=>{const s=sugW(ex.id);return s?s.v+' kg':'kg'})()}" value="${l.w||''}" oninput="updLog('${ex.id}','w',this.value)" step="2.5" inputmode="decimal"/>${(()=>{const s=sugW(ex.id);return s?`<span class="sug-tag ${s.cls}" onclick="useSug('${ex.id}')">${s.label}</span>`:''})()}</div>
