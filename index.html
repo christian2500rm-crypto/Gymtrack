@@ -583,6 +583,12 @@ if(!S.coachStart&&S.sessions.length>0){
   saveState();
 }
 
+// Sanity check: si sessionStartTs lleva >24h sin guardarse, descartarlo
+if(S.sessionStartTs&&(Date.now()-S.sessionStartTs)>86400000){
+  S.sessionStartTs=null;
+  saveState();
+}
+
 // ══════════════════════════════════════════════════════════
 // BIBLIOTECA DE EJERCICIOS  (~45 ejercicios, máquinas + pesas libres)
 // Campos: id, n (nombre), ic (icono), eq (equipamiento), muscle (grupo),
@@ -1996,6 +2002,25 @@ function getRestSecs(id){
   return isCompoundEx(ex)?90:60;
 }
 
+// Cronómetro de cardio: reutiliza RT pero con label específico y auto-marca al terminar
+function startCardioTimer(exId,mins){
+  const ex=getPlan()[S.day].ex.find(e=>e.id===exId);
+  if(!ex)return;
+  // Marcar inicio de sesión si es la primera acción
+  if(!S.sessionStartTs)S.sessionStartTs=Date.now();
+  RT.start(mins*60,`${ex.n} — ${mins} min`);
+  // Sobrescribir el _done para auto-marcar el cardio como hecho al acabar
+  const origDone=RT._done.bind(RT);
+  RT._done=function(){
+    origDone();
+    // Auto-marcar el cardio como completado
+    if(!S.sets[exId])S.sets[exId]={};
+    S.sets[exId][0]=true;
+    saveState();render();
+  };
+  haptic([60]);
+}
+
 // ── CALENTAMIENTO ACTIVO ──
 // Devuelve series de calentamiento sugeridas, o null si el ejercicio no las necesita
 function getWarmupSets(ex){
@@ -2064,6 +2089,8 @@ function toggleSet(id,i,evt){
   // Snapshot para undo
   const prevSet=S.sets[id][i];
   const prevRpe=S.rpe&&S.rpe[id]?S.rpe[id][i]:undefined;
+  // Marcar inicio de sesión al primer set marcado (para calcular duración real)
+  if(wasOff&&!S.sessionStartTs)S.sessionStartTs=Date.now();
   S.sets[id][i]=!S.sets[id][i];
   // Si se desmarca, también limpiar RPE de esa serie
   if(!wasOff){
@@ -2250,15 +2277,8 @@ function finishSessionConfirmedWithNote(doneEx,totalEx){
 function finishSessionConfirmed(doneEx,totalEx,note){
   const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const today=fmtDate(new Date()),now=Date.now();
-  // Calcular duración aprox de la sesión: primer ts de strength más antiguo de hoy → ahora
-  let sessionStartTs=null;
-  Object.values(S.strength||{}).forEach(records=>{
-    (records||[]).forEach(r=>{
-      if(r.ts&&sameDayTs(r.ts,now)&&(sessionStartTs==null||r.ts<sessionStartTs))sessionStartTs=r.ts;
-    });
-  });
-  // Si no hay registros previos hoy, usar primera marca de sets actuales no es trackeable — usar ahora
-  const durationMin=sessionStartTs?Math.max(1,Math.round((now-sessionStartTs)/60000)):null;
+  // Duración real: desde el primer set marcado hasta ahora
+  const durationMin=S.sessionStartTs?Math.max(1,Math.round((now-S.sessionStartTs)/60000)):null;
   const session={day:S.day,date:today,ts:now,doneEx,totalEx,note:note||null,durationMin};
   S.sessions.push(session);
   // Guardar reps, series completadas y RPE promedio
@@ -2278,8 +2298,8 @@ function finishSessionConfirmed(doneEx,totalEx,note){
   });
   S.nextDay=getNextDay(S.day);
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
-  // Limpiar RPE y warmups de la sesión
-  S.rpe={};S.warmups={};
+  // Limpiar RPE, warmups y tracker de duración de la sesión
+  S.rpe={};S.warmups={};S.sessionStartTs=null;
   S.open=null;
   // Cancelar undo pendiente
   _lastSetAction=null;
@@ -2393,6 +2413,44 @@ function coach_balance(){
   const ideal=total/3;
   const maxDev=Math.max(...['A','B','C'].map(d=>Math.abs(cnt[d]-ideal)));
   return{cnt,total,balanced:maxDev<=1.5};
+}
+
+// RPE acumulado por zona muscular en las últimas N sesiones
+function coach_rpeByMuscle(lastN){
+  const sessions=(S.sessions||[]).slice(-Math.max(1,lastN||6));
+  if(sessions.length===0)return null;
+  const byMuscle={};
+  // Reunir RPE por grupo muscular usando los registros de strength
+  Object.values(S.strength||{}).forEach(records=>{
+    (records||[]).forEach(r=>{
+      if(!r.rpe||!r.muscle)return;
+      if(!sessions.some(s=>s.ts&&Math.abs(s.ts-r.ts)<7200000))return;
+      if(!byMuscle[r.muscle])byMuscle[r.muscle]={sum:0,n:0};
+      byMuscle[r.muscle].sum+=r.rpe;
+      byMuscle[r.muscle].n++;
+    });
+  });
+  const result=Object.entries(byMuscle).map(([m,d])=>({muscle:m,avg:+(d.sum/d.n).toFixed(2),samples:d.n}));
+  result.sort((a,b)=>b.avg-a.avg);
+  return result;
+}
+
+// Duración promedio de las últimas N sesiones (minutos)
+function coach_sessionDensity(lastN){
+  const sessions=(S.sessions||[]).slice(-Math.max(1,lastN||5)).filter(s=>s.durationMin);
+  if(sessions.length===0)return null;
+  const avg=sessions.reduce((a,s)=>a+s.durationMin,0)/sessions.length;
+  const max=Math.max(...sessions.map(s=>s.durationMin));
+  const min=Math.min(...sessions.map(s=>s.durationMin));
+  return{avg:Math.round(avg),max,min,samples:sessions.length};
+}
+
+// Días desde la última sesión
+function coach_daysSinceLastSession(){
+  if(!S.sessions||S.sessions.length===0)return null;
+  const last=S.sessions[S.sessions.length-1];
+  if(!last.ts)return null;
+  return Math.floor((Date.now()-last.ts)/86400000);
 }
 
 // ─── 2. GENERADOR DE INSIGHTS ─────────────────────────────
@@ -2509,6 +2567,43 @@ function coach_generateInsights(){
       t:bwInsight.title,
       d:bwInsight.description+(bwInsight.bw?` <span style="opacity:.6;font-family:'DM Mono',monospace;font-size:11px">[${bwInsight.bw}]</span>`:'')
     });
+  }
+
+  // ═ F) RPE ACUMULADO POR ZONA MUSCULAR ═
+  const rpeZones=coach_rpeByMuscle(6);
+  if(rpeZones&&rpeZones.length>0){
+    const hot=rpeZones.filter(z=>z.avg>=2.6&&z.samples>=3);
+    if(hot.length>0){
+      const muscleLbl=MUSCLE_GROUPS.find(m=>m.id===hot[0].muscle)?.label||hot[0].muscle;
+      insights.push({type:'warn',ic:'🔥',t:'Zona con RPE alto sostenido',d:`Tus últimas sesiones de <strong>${esc(muscleLbl)}</strong> promedian RPE ${hot[0].avg} ("al límite"). Considera bajar 5% el peso o añadir 1 día de descanso entre sesiones que la trabajen.`});
+    }
+    const cool=rpeZones.filter(z=>z.avg<=1.4&&z.samples>=3);
+    if(cool.length>0&&hot.length===0){
+      const muscleLbl=MUSCLE_GROUPS.find(m=>m.id===cool[0].muscle)?.label||cool[0].muscle;
+      insights.push({type:'info',ic:'📈',t:'Margen para progresar',d:`Tus sesiones de <strong>${esc(muscleLbl)}</strong> promedian RPE ${cool[0].avg} ("fácil"). Hay espacio para subir peso o reps con seguridad.`});
+    }
+  }
+
+  // ═ G) DENSIDAD DE SESIÓN ═
+  const dens=coach_sessionDensity(5);
+  if(dens){
+    if(dens.avg>90){
+      insights.push({type:'warn',ic:'⏱️',t:'Sesiones muy largas',d:`Tus últimas ${dens.samples} sesiones duran <strong>${dens.avg} min</strong> de media. Más de 90 min suele indicar descansos largos o distracciones — intenta cerrarlas en 60-75 min.`});
+    }else if(dens.avg>=45&&dens.avg<=75){
+      insights.push({type:'good',ic:'⏱️',t:'Densidad óptima',d:`Sesiones de <strong>${dens.avg} min</strong> de media. Es el rango ideal: suficiente para volumen, sin perder intensidad.`});
+    }else if(dens.avg<30&&dens.samples>=3){
+      insights.push({type:'info',ic:'⚡',t:'Sesiones cortas',d:`Promedias <strong>${dens.avg} min</strong>. Sesiones cortas funcionan si la intensidad es alta — revisa que estés llegando al RPE objetivo.`});
+    }
+  }
+
+  // ═ H) INACTIVIDAD ═
+  const daysSinceLast=coach_daysSinceLastSession();
+  if(daysSinceLast!=null){
+    if(daysSinceLast>=7&&daysSinceLast<=14){
+      insights.push({type:'warn',ic:'⏳',t:'Llevas días sin entrenar',d:`Última sesión hace <strong>${daysSinceLast} días</strong>. El cuerpo conserva fuerza ~1-2 semanas — empieza suave (75% del último peso) para reincorporarte sin lesionarte.`});
+    }else if(daysSinceLast>14){
+      insights.push({type:'bad',ic:'🔄',t:'Pausa larga',d:`Más de <strong>${daysSinceLast} días</strong> sin entrenar. Considera empezar con un microciclo de readaptación (2 semanas al 60% de pesos) antes de volver al ritmo normal.`});
+    }
   }
 
   return insights;
@@ -3362,7 +3457,17 @@ function renderWorkout(){
         ${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${exSVG(ex.id)?`<div class="ex-anim">${exSVG(ex.id)}</div>`:''}<div class="tip">${esc(ex.tip||'')}</div>
-        ${!ex.cardio?`${(()=>{const lw=getLastW(ex.id);return lw?`<div class="last-info">Última: <b>${lw.v} kg</b> · ${lw.d}</div>`:''})()}
+        ${!ex.cardio?`${(()=>{const lw=getLastW(ex.id);
+          if(!lw)return'';
+          const rpeLbl=lw.rpe?(lw.rpe<=1.4?' · 😌 Fácil':lw.rpe<=2.4?' · 💪 Justo':' · 🥵 Al límite'):'';
+          const setsLbl=lw.setsDone?`${lw.setsDone}×`:'';
+          const repsLbl=lw.r?`${lw.r}`:'';
+          return`<div class="last-info" style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:rgba(255,255,255,0.03);border-radius:var(--rxs);border-left:2px solid var(--green-b);margin-bottom:10px;font-size:12px;color:var(--text2);flex-wrap:wrap">
+            <span style="font-family:'DM Mono',monospace"><b style="color:var(--text);font-weight:600">${lw.v} kg</b></span>
+            ${setsLbl||repsLbl?`<span style="color:var(--text3);font-family:'DM Mono',monospace">${setsLbl}${repsLbl} reps</span>`:''}
+            <span style="color:var(--text3)">${esc(lw.d||'')}${rpeLbl}</span>
+          </div>`;
+        })()}
           ${(()=>{
             const wu=getWarmupSets(ex);
             if(!wu||S.warmups[ex.id]?._skipped)return'';
@@ -3387,12 +3492,31 @@ function renderWorkout(){
           <div class="irow"><label>Peso</label><input class="inp" type="number" placeholder="${(()=>{const s=sugW(ex.id);return s?s.v+' kg':'kg'})()}" value="${l.w||''}" oninput="updLog('${ex.id}','w',this.value)" step="2.5" inputmode="decimal"/>${(()=>{const s=sugW(ex.id);return s?`<span class="sug-tag ${s.cls}" onclick="useSug('${ex.id}')">${s.label}</span>`:''})()}</div>
           <div class="irow"><label>Reps</label><input class="inp" type="number" placeholder="${ex.r}" value="${l.r||''}" oninput="updLog('${ex.id}','r',this.value)" inputmode="numeric"/></div>
           ${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}`
-        :`<button class="btn ${c[0]?'bs':'bp'}" onclick="toggleSet('${ex.id}',0);render()">${c[0]?'✅ Marcado como hecho':'✓ Marcar como hecho'}</button>`}
+        :`${(()=>{
+          // Cronómetro de cardio: parsear duración de ex.r (ej: "8 min", "15 min")
+          const m=String(ex.r||'').match(/(\d+)\s*min/i);
+          const mins=m?parseInt(m[1]):0;
+          if(c[0]){
+            return`<button class="btn bs" onclick="toggleSet('${ex.id}',0);render()">✅ Marcado como hecho</button>`;
+          }
+          if(mins>0){
+            return`<div style="display:flex;gap:8px">
+              <button class="btn bp" style="flex:1" onclick="startCardioTimer('${ex.id}',${mins})">▶ Iniciar ${mins} min</button>
+              <button class="btn bs" style="width:130px" onclick="toggleSet('${ex.id}',0);render()">Marcar hecho</button>
+            </div>`;
+          }
+          return`<button class="btn bp" onclick="toggleSet('${ex.id}',0);render()">✓ Marcar como hecho</button>`;
+        })()}`}
       </div>`:''}
     </div>`;
   }).join('');
   return`
-  <div class="topbar"><div class="topbar-row"><div><h1>${esc(day.label)}</h1><div class="sub">${esc(day.focus)}</div></div><span class="pill p${S.day.toLowerCase()}">${doneEx}/${strEx.length}</span></div></div>
+  <div class="topbar"><div class="topbar-row"><div><h1>${esc(day.label)}</h1><div class="sub">${esc(day.focus)}${(()=>{
+    if(!S.sessionStartTs)return'';
+    const elapsedMin=Math.floor((Date.now()-S.sessionStartTs)/60000);
+    if(elapsedMin<1)return' · <span style="color:var(--green)">● en curso</span>';
+    return` · <span style="color:var(--green)" id="live-dur" data-start="${S.sessionStartTs}">● ${elapsedMin} min</span>`;
+  })()}</div></div><span class="pill p${S.day.toLowerCase()}">${doneEx}/${strEx.length}</span></div></div>
   <div class="pbar" style="border-radius:0;height:3px"><div class="pinner" style="width:${pct}%;border-radius:0"></div></div>
   <div class="tabs">${tabs}</div>
   ${allDone?`<div class="fbanner">🎉 ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
@@ -4386,6 +4510,15 @@ function resetAllData(){
     }
   });
 }
+
+// ── Actualizar contador de duración de sesión cada 30s ──────────
+setInterval(()=>{
+  const el=document.getElementById('live-dur');
+  if(el&&S.sessionStartTs){
+    const min=Math.floor((Date.now()-S.sessionStartTs)/60000);
+    el.textContent=`● ${min} min`;
+  }
+},30000);
 
 // ── PWA: registrar manifest dinámico (single-file friendly) ────────
 (function setupManifest(){
