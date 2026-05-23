@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-title" content="GymTrack"/>
 <meta name="theme-color" content="#0f0f0f"/>
 <title>GymTrack</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0f0f'/%3E%3Cpath d='M16 24h6v16h-6zm26 0h6v16h-6zM22 30h20v4H22z' fill='%2322c55e'/%3E%3C/svg%3E"/>
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230f0f0f'/%3E%3Cpath d='M44 68h17v44H44zm75 0h17v44h-17zM61 84h58v12H61z' fill='%2322c55e'/%3E%3C/svg%3E"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <style>
@@ -356,6 +358,11 @@ input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-
 input[type=number]{-moz-appearance:textfield}
 /* evitar zoom en inputs (iOS hace zoom si font-size < 16px) */
 @supports(-webkit-touch-callout:none){.inp,.ob-inp{font-size:16px}}
+/* respetar preferencia de movimiento reducido */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+  .ex-anim svg *{animation:none!important}
+}
 </style>
 </head>
 <body>
@@ -439,38 +446,78 @@ input[type=number]{-moz-appearance:textfield}
 <script>
 const PLAN={
   A:{label:'Día A',focus:'Piernas + abdomen',pill:'pa',ex:[
-    {id:'a1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'4–5 km/h sin inclinación. El objetivo es entrar en calor, no cansarse. Respira tranquilo.',cardio:true},
-    {id:'a2',n:'Sentadilla en Smith',ic:'🏋️',eq:'Smith machine + banco',s:3,r:12,tip:'Pies al ancho de hombros. Barra en la parte alta de la espalda. Baja hasta muslos paralelos. Empuja desde los talones. Deja 2 reps en reserva.'},
-    {id:'a3',n:'Extensión de cuádriceps',ic:'🦵',eq:'Máquina de extensión',s:3,r:12,tip:'Rodilla alineada con el pivote. Sube 2s, baja 3s. No bloquees la rodilla arriba.'},
-    {id:'a4',n:'Curl femoral',ic:'🦿',eq:'Máquina de curl femoral',s:3,r:12,tip:'Dobla hasta casi tocar los glúteos. Sostén 1s arriba. Controla el regreso lento.'},
-    {id:'a5',n:'Crunch en cable',ic:'⚡',eq:'Cable dual (cuerda alta)',s:3,r:15,tip:'Arrodíllado de frente. Jala codos hacia rodillas curvando la columna. Siente el abdomen contraerse.'},
-    {id:'a6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Respiración constante. Tiempo de quema de grasa.',cardio:true},
+    {id:'a1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',muscle:'cardio',s:1,r:'8 min',tip:'4–5 km/h sin inclinación. El objetivo es entrar en calor, no cansarse. Respira tranquilo.',cardio:true},
+    {id:'a2',n:'Sentadilla en Smith',ic:'🏋️',eq:'Smith machine + banco',muscle:'piernas',compound:true,s:3,r:12,tip:'Pies al ancho de hombros. Barra en la parte alta de la espalda. Baja hasta muslos paralelos. Empuja desde los talones. Deja 2 reps en reserva.'},
+    {id:'a3',n:'Extensión de cuádriceps',ic:'🦵',eq:'Máquina de extensión',muscle:'piernas',s:3,r:12,tip:'Rodilla alineada con el pivote. Sube 2s, baja 3s. No bloquees la rodilla arriba.'},
+    {id:'a4',n:'Curl femoral',ic:'🦿',eq:'Máquina de curl femoral',muscle:'piernas',s:3,r:12,tip:'Dobla hasta casi tocar los glúteos. Sostén 1s arriba. Controla el regreso lento.'},
+    {id:'a5',n:'Crunch en cable',ic:'⚡',eq:'Cable dual (cuerda alta)',muscle:'core',s:3,r:15,tip:'Arrodíllado de frente. Jala codos hacia rodillas curvando la columna. Siente el abdomen contraerse.'},
+    {id:'a6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',muscle:'cardio',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Respiración constante. Tiempo de quema de grasa.',cardio:true},
   ]},
   B:{label:'Día B',focus:'Empuje — pecho, hombros, tríceps',pill:'pb',ex:[
-    {id:'b1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'4–5 km/h. Mueve los brazos. Aumenta el ritmo gradualmente.',cardio:true},
-    {id:'b2',n:'Press inclinado en Smith',ic:'🏋️',eq:'Smith machine + banco',s:3,r:10,tip:'Banco a 30–45°. Barra al pecho superior. Pies planos en el piso. Aprieta el pecho arriba. Deja 2 reps en reserva.'},
-    {id:'b3',n:'Aperturas en máquina',ic:'🤸',eq:'Máquina de aperturas',s:3,r:12,tip:'Siente el estiramiento al abrir. Cierra hasta que los mangos casi se toquen. Poco peso.'},
-    {id:'b4',n:'Elevación lateral en cable',ic:'⚡',eq:'Cable dual (polea baja)',s:3,r:12,tip:'Un brazo a la vez. Levanta solo hasta el nivel del hombro. Muy poco peso.'},
-    {id:'b5',n:'Jalón de tríceps en cable',ic:'⬇️',eq:'Cable dual (cuerda)',s:3,r:12,tip:'Codos pegados a los costados. Empuja hasta brazos rectos. Aprieta abajo. Controla el regreso.'},
-    {id:'b6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Enfriamiento activo.',cardio:true},
+    {id:'b1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',muscle:'cardio',s:1,r:'8 min',tip:'4–5 km/h. Mueve los brazos. Aumenta el ritmo gradualmente.',cardio:true},
+    {id:'b2',n:'Press inclinado en Smith',ic:'🏋️',eq:'Smith machine + banco',muscle:'pecho',compound:true,s:3,r:10,tip:'Banco a 30–45°. Barra al pecho superior. Pies planos en el piso. Aprieta el pecho arriba. Deja 2 reps en reserva.'},
+    {id:'b3',n:'Aperturas en máquina',ic:'🤸',eq:'Máquina de aperturas',muscle:'pecho',s:3,r:12,tip:'Siente el estiramiento al abrir. Cierra hasta que los mangos casi se toquen. Poco peso.'},
+    {id:'b4',n:'Elevación lateral en cable',ic:'⚡',eq:'Cable dual (polea baja)',muscle:'hombros',s:3,r:12,tip:'Un brazo a la vez. Levanta solo hasta el nivel del hombro. Muy poco peso.'},
+    {id:'b5',n:'Jalón de tríceps en cable',ic:'⬇️',eq:'Cable dual (cuerda)',muscle:'triceps',s:3,r:12,tip:'Codos pegados a los costados. Empuja hasta brazos rectos. Aprieta abajo. Controla el regreso.'},
+    {id:'b6',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',muscle:'cardio',s:1,r:'15 min',tip:'Inclinación 3–5%, 5 km/h. Enfriamiento activo.',cardio:true},
   ]},
   C:{label:'Día C',focus:'Jale — espalda y bíceps',pill:'pc',ex:[
-    {id:'c1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',s:1,r:'8 min',tip:'Camina suave. Círculos con los hombros. Hoy es día de jalar.',cardio:true},
-    {id:'c2',n:'Jalón al pecho',ic:'🏋️',eq:'Jalón / remo (máquina)',s:3,r:12,tip:'Agarre ancho. Jala al pecho superior. No balancees. La espalda hace el trabajo.'},
-    {id:'c3',n:'Remo sentado en máquina',ic:'🚣',eq:'Jalón / remo (máquina)',s:3,r:12,tip:'Siéntate erguido. Jala hacia el ombligo. Aprieta omóplatos al final. Regreso 3s.'},
-    {id:'c4',n:'Remo con mancuerna',ic:'💪',eq:'Mancuernas + banco',s:3,r:10,tip:'Apóyate en el banco. Jala hacia la cadera. Codo directo hacia atrás.'},
-    {id:'c5',n:'Curl de bíceps en cable',ic:'⚡',eq:'Cable dual (barra EZ)',s:3,r:12,tip:'Codos fijos a los costados. Sube completo. Aprieta arriba. Controla el regreso 3s.'},
-    {id:'c6',n:'Aperturas inversas en máquina',ic:'🔄',eq:'Máquina de aperturas (invertida)',s:3,r:15,tip:'Máquina al revés. Aprieta deltoides posteriores. Poco peso — busca la sensación.'},
-    {id:'c7',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',s:1,r:'15 min',tip:'Inclinación 3–5%. Si tienes energía, 1 min de trote suave, luego camina.',cardio:true},
+    {id:'c1',n:'Calentamiento — caminadora',ic:'🚶',eq:'Caminadora',muscle:'cardio',s:1,r:'8 min',tip:'Camina suave. Círculos con los hombros. Hoy es día de jalar.',cardio:true},
+    {id:'c2',n:'Jalón al pecho',ic:'🏋️',eq:'Jalón / remo (máquina)',muscle:'espalda',compound:true,s:3,r:12,tip:'Agarre ancho. Jala al pecho superior. No balancees. La espalda hace el trabajo.'},
+    {id:'c3',n:'Remo sentado en máquina',ic:'🚣',eq:'Jalón / remo (máquina)',muscle:'espalda',compound:true,s:3,r:12,tip:'Siéntate erguido. Jala hacia el ombligo. Aprieta omóplatos al final. Regreso 3s.'},
+    {id:'c4',n:'Remo con mancuerna',ic:'💪',eq:'Mancuernas + banco',muscle:'espalda',compound:true,s:3,r:10,tip:'Apóyate en el banco. Jala hacia la cadera. Codo directo hacia atrás.'},
+    {id:'c5',n:'Curl de bíceps en cable',ic:'⚡',eq:'Cable dual (barra EZ)',muscle:'biceps',s:3,r:12,tip:'Codos fijos a los costados. Sube completo. Aprieta arriba. Controla el regreso 3s.'},
+    {id:'c6',n:'Aperturas inversas en máquina',ic:'🔄',eq:'Máquina de aperturas (invertida)',muscle:'espalda',s:3,r:15,tip:'Máquina al revés. Aprieta deltoides posteriores. Poco peso — busca la sensación.'},
+    {id:'c7',n:'Cardio — caminadora',ic:'🏃',eq:'Caminadora',muscle:'cardio',s:1,r:'15 min',tip:'Inclinación 3–5%. Si tienes energía, 1 min de trote suave, luego camina.',cardio:true},
   ]}
 };
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=6;
+const SCHEMA_VERSION=7;
 
+// Claves transitorias de UI que NO deben persistirse (modales abiertos, búsquedas, etc.)
+const TRANSIENT_KEYS=['wmodal','wnew','settingsOpen','_hist','open','_editWeightTarget','_deloadActive'];
+let _saveFailedNotified=false;
 function loadState(){try{const r=localStorage.getItem('gymtrack_v3');if(r)return JSON.parse(r);}catch(e){}return null;}
-function saveState(){try{localStorage.setItem('gymtrack_v3',JSON.stringify(S));}catch(e){}}
+function saveState(){
+  try{
+    const snap={};
+    for(const k in S){if(!TRANSIENT_KEYS.includes(k))snap[k]=S[k];}
+    localStorage.setItem('gymtrack_v3',JSON.stringify(snap));
+    return true;
+  }catch(e){
+    if(!_saveFailedNotified){
+      _saveFailedNotified=true;
+      try{toast('⚠️ No se pudo guardar — comprueba almacenamiento del navegador',5000);}catch(_){}
+    }
+    return false;
+  }
+}
+
+// Escapado HTML universal (defensa XSS para datos importables / nombres custom)
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// Detecta si un ejercicio es compuesto sin depender de IDs originales (resistente a swaps)
+function isCompoundEx(ex){
+  if(!ex||ex.cardio)return false;
+  if(ex.compound===true)return true;
+  // IDs originales del plan v1
+  if(['a2','b2','c2','c3','c4'].includes(ex.id))return true;
+  // Búsqueda por nombre en la biblioteca
+  if(typeof EXERCISE_DB!=='undefined'){
+    const lib=EXERCISE_DB.find(e=>e.n===ex.n);
+    if(lib&&lib.compound)return true;
+  }
+  return false;
+}
+
+// Compara dos timestamps por día calendario (mismo año/mes/día)
+function sameDayTs(ts1,ts2){
+  if(!ts1||!ts2)return false;
+  const a=new Date(ts1),b=new Date(ts2);
+  return a.getFullYear()===b.getFullYear()&&a.getMonth()===b.getMonth()&&a.getDate()===b.getDate();
+}
 
 function migrateState(data){
   if(!data)return data;
@@ -492,6 +539,26 @@ function migrateState(data){
     data.warmups=data.warmups||{}; // {exId: {setIdx: true}} para sesión actual
     data.weeklyAnalyses=data.weeklyAnalyses||[]; // [{weekStart, weekEnd, ...}]
     data.lastWeekAnalysisTs=data.lastWeekAnalysisTs||null;
+  }
+  if(v<7){
+    // v7: sembrar muscle/compound en ejercicios del currentPlan que vinieran de PLAN sin esos campos
+    if(data.currentPlan){
+      Object.keys(data.currentPlan).forEach(dk=>{
+        const day=data.currentPlan[dk];
+        const original=PLAN[dk];
+        if(day&&Array.isArray(day.ex)&&original){
+          day.ex.forEach(ex=>{
+            const orig=original.ex.find(o=>o.id===ex.id);
+            if(orig){
+              if(!ex.muscle&&orig.muscle)ex.muscle=orig.muscle;
+              if(ex.compound==null&&orig.compound)ex.compound=orig.compound;
+            }
+          });
+        }
+      });
+    }
+    // Limpiar campos transitorios persistidos de versiones anteriores
+    ['wmodal','wnew','settingsOpen','_hist','open','_editWeightTarget','_deloadActive'].forEach(k=>{if(k in data)delete data[k];});
   }
   data.schema_version=SCHEMA_VERSION;
   return data;
@@ -626,8 +693,6 @@ function renderCmodal(){
   if(!root)return;
   if(!_cmodalState){root.innerHTML='';return;}
   const s=_cmodalState;
-  // Escape básico para evitar inyección HTML en título/body si viniera de datos del usuario
-  const esc=str=>String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   root.innerHTML=`<div class="cmov" onclick="if(event.target===this)closeCmodal(true)"><div class="cmod">
     <div class="cmod-hdl"></div>
     <div class="cmod-t">${esc(s.title)}</div>
@@ -638,6 +703,20 @@ function renderCmodal(){
     </div>
   </div></div>`;
 }
+
+// Soporte global teclado en modales: Escape cierra, Enter confirma (solo en confirmModal sin input)
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(_cmodalState){closeCmodal(true);return;}
+    if(_pickerState){closeExercisePicker();return;}
+    if(S._hist){closeHist();return;}
+    if(S.wmodal){S.wmodal=false;S.wnew='';renderWmodal();return;}
+    if(S.settingsOpen){closeSettings();return;}
+    if(_rpeOpen){skipRpe();return;}
+  }else if(e.key==='Enter'&&_cmodalState&&!document.querySelector('#cmodal-root input,#cmodal-root textarea')){
+    e.preventDefault();cmodalOk();
+  }
+});
 
 // Haptic feedback — iOS Safari no implementa navigator.vibrate, pero no rompe si no existe
 function haptic(pattern){
@@ -657,11 +736,15 @@ function obNext(){
   document.getElementById('ob1').classList.remove('active');document.getElementById('ob2').classList.add('active');
 }
 function obFinish(){
-  const v=parseFloat(document.getElementById('ob-weight').value);if(!v)return;
+  const v=parseFloat(document.getElementById('ob-weight').value);
+  if(!v||v<30||v>300)return;
   const now=Date.now();
   S.weights.push({d:fmtDate(new Date()),v,ts:now});
   S.startDay=obSelDay;S.nextDay=obSelDay;S.day=obSelDay;S.onboarded=true;
-  S.coachStart=now;
+  // Preservar coachStart si ya hay historial — solo inicializar en primera vez
+  if(!S.coachStart){
+    S.coachStart=S.sessions.length>0?(S.sessions[0].ts||now):now;
+  }
   saveState();document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();
 }
 
@@ -682,10 +765,12 @@ function getWeekSessions(){
 
 function weekGrid(){
   const lbl=['L','M','X','J','V','S','D'],t=new Date(),dow=t.getDay(),off=dow===0?-6:1-dow;
-  const mon=new Date(t);mon.setDate(t.getDate()+off);
+  const mon=new Date(t);mon.setDate(t.getDate()+off);mon.setHours(0,0,0,0);
   return lbl.map((l,i)=>{
     const d=new Date(mon);d.setDate(mon.getDate()+i);
-    const ds=fmtDate(d),isT=d.toDateString()===t.toDateString(),done=S.sessions.some(s=>s.date===ds),we=i>=5;
+    const isT=d.toDateString()===t.toDateString(),we=i>=5;
+    // Comparar por timestamp del mismo día (resistente a colisión de año)
+    const done=S.sessions.some(s=>s.ts&&sameDayTs(s.ts,d.getTime()));
     const cls=done?'done':isT?'today':we?'rest':'plan';
     return`<div class="dd ${cls}">${l}${done?'<span style="font-size:7px">✓</span>':''}</div>`;
   }).join('');
@@ -1905,17 +1990,17 @@ const RT={
   skip(){clearInterval(this._tid);clearTimeout(this._hideT);this.hide();},
   hide(){const el=document.getElementById('rest-timer');if(el)el.classList.remove('show');clearInterval(this._tid);}
 };
-function getRestSecs(id){return['a2','b2','c2','c3','c4'].includes(id)?90:60;}
+function getRestSecs(id){
+  // Resolver al objeto ejercicio para detectar compuestos vía isCompoundEx (resistente a swaps)
+  const ex=Object.values(getPlan()).flatMap(d=>d.ex).find(e=>e.id===id);
+  return isCompoundEx(ex)?90:60;
+}
 
 // ── CALENTAMIENTO ACTIVO ──
 // Devuelve series de calentamiento sugeridas, o null si el ejercicio no las necesita
 function getWarmupSets(ex){
   if(!ex||ex.cardio)return null;
-  // Solo para ejercicios compuestos o con peso significativo
-  // Detectar compuesto: por ID original o por flag compound en biblioteca
-  const isCompound=['a2','b2','c2','c3','c4'].includes(ex.id) ||
-    (typeof EXERCISE_DB!=='undefined' && EXERCISE_DB.find(e=>e.n===ex.n)?.compound);
-  if(!isCompound)return null;
+  if(!isCompoundEx(ex))return null;
   // Necesitamos saber el peso objetivo. Usamos sugerencia o último peso
   const lw=getLastW(ex.id);
   if(!lw||!lw.v||lw.v<20)return null; // peso muy bajo no necesita warmup
@@ -1945,17 +2030,63 @@ function skipWarmup(exId){
   saveState();render();
 }
 
+// Buffer para undo del último toggleSet (5s window)
+let _lastSetAction=null;
+let _undoToastT=null;
+function showUndoToast(label,onUndo){
+  clearTimeout(_undoToastT);
+  const el=document.getElementById('toast');
+  if(!el)return;
+  el.innerHTML=`<span style="margin-right:14px">${esc(label)}</span><button id="undo-btn" style="background:transparent;border:1px solid var(--green);color:var(--green);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;pointer-events:auto">Deshacer</button>`;
+  el.classList.add('show');
+  el.style.pointerEvents='auto';
+  const btn=document.getElementById('undo-btn');
+  if(btn){
+    btn.addEventListener('click',e=>{
+      e.stopPropagation();
+      el.classList.remove('show');
+      el.style.pointerEvents='';
+      el.textContent='';
+      onUndo();
+    },{once:true});
+  }
+  _undoToastT=setTimeout(()=>{
+    el.classList.remove('show');
+    el.style.pointerEvents='';
+    el.textContent='';
+    _lastSetAction=null;
+  },5000);
+}
+
 function toggleSet(id,i,evt){
   if(!S.sets[id])S.sets[id]={};
   const wasOff=!S.sets[id][i];
+  // Snapshot para undo
+  const prevSet=S.sets[id][i];
+  const prevRpe=S.rpe&&S.rpe[id]?S.rpe[id][i]:undefined;
   S.sets[id][i]=!S.sets[id][i];
   // Si se desmarca, también limpiar RPE de esa serie
   if(!wasOff){
     if(S.rpe&&S.rpe[id])delete S.rpe[id][i];
   }
   saveState();render();
+  _lastSetAction={id,i,prevSet,prevRpe};
+  const ex=getPlan()[S.day].ex.find(e=>e.id===id);
+  const label=wasOff?`Serie ${i+1} marcada`:`Serie ${i+1} desmarcada`;
+  showUndoToast(label,()=>{
+    if(!_lastSetAction)return;
+    S.sets[id][i]=_lastSetAction.prevSet;
+    if(_lastSetAction.prevRpe!==undefined){
+      if(!S.rpe[id])S.rpe[id]={};
+      S.rpe[id][i]=_lastSetAction.prevRpe;
+    }else if(S.rpe&&S.rpe[id]){
+      delete S.rpe[id][i];
+    }
+    _lastSetAction=null;
+    RT.hide();closeRpeSelector();
+    saveState();render();
+  });
   if(wasOff&&S.tab==='workout'){
-    const ex=getPlan()[S.day].ex.find(e=>e.id===id);
     if(ex&&!ex.cardio){
       // Mostrar selector RPE en lugar de iniciar timer directamente
       // El timer empezará cuando elija RPE (o lo salte)
@@ -2044,7 +2175,15 @@ function closeRpeSelector(){
   const pop=document.getElementById('rpe-pop');
   if(pop)pop.remove();
 }
-function updLog(id,f,v){if(!S.logs[id])S.logs[id]={};S.logs[id][f]=v;saveState();}
+function updLog(id,f,v){
+  if(!S.logs[id])S.logs[id]={};
+  // Sanear: normalizar comas → puntos, limitar longitud, evitar NaN explícito
+  let val=String(v||'').replace(',','.').slice(0,8);
+  // Solo permitir números válidos (incluye '' para borrar)
+  if(val!==''&&!/^-?\d*\.?\d*$/.test(val))return;
+  S.logs[id][f]=val;
+  saveState();
+}
 function logW(){
   const v=parseFloat(S.wnew);
   if(!v||v<30||v>300){
@@ -2066,32 +2205,62 @@ function logW(){
 function finishSession(){
   const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const doneEx=strEx.filter(e=>countSetsDone(e.id,e.s)>=e.s).length;
-  const today=fmtDate(new Date());
-  // Bug fix: evitar doble sesión el mismo día
-  const existingToday=S.sessions.find(s=>s.date===today);
+  // Bug fix: evitar doble sesión el mismo día — comparar por timestamp (resistente a colisiones de año)
+  const nowTs=Date.now();
+  const existingToday=S.sessions.find(s=>s.ts&&sameDayTs(s.ts,nowTs));
   if(existingToday){
     confirmModal({
       title:'Ya hay una sesión hoy',
-      body:`Ya registraste el ${getPlan()[existingToday.day].label} el ${today}. ¿Guardar esta como una sesión adicional?`,
+      body:`Ya registraste el ${getPlan()[existingToday.day]?.label||existingToday.day} hoy. ¿Guardar esta como una sesión adicional?`,
       okText:'Guardar igual',
       cancelText:'Cancelar',
-      onOk:()=>finishSessionConfirmed(doneEx,strEx.length)
+      onOk:()=>openFinishModal(doneEx,strEx.length)
     });
     return;
   }
-  const msg=doneEx===strEx.length?'¿Confirmar que terminaste el entrenamiento?':`Solo ${doneEx}/${strEx.length} ejercicios. ¿Guardar de todas formas?`;
-  confirmModal({
-    title:doneEx===strEx.length?'¡Terminado!':'Sesión incompleta',
-    body:msg,
-    okText:'Guardar',
-    cancelText:'Cancelar',
-    onOk:()=>finishSessionConfirmed(doneEx,strEx.length)
-  });
+  openFinishModal(doneEx,strEx.length);
 }
-function finishSessionConfirmed(doneEx,totalEx){
+
+// Modal de finalización con nota opcional
+function openFinishModal(doneEx,totalEx){
+  const root=document.getElementById('cmodal-root');
+  if(!root)return;
+  const allDone=doneEx===totalEx;
+  const title=allDone?'¡Terminado!':'Sesión incompleta';
+  const body=allDone?'Buen trabajo. ¿Quieres añadir una nota sobre cómo te sentiste?':`Solo ${doneEx}/${totalEx} ejercicios completados. Puedes añadir una nota antes de guardar.`;
+  root.innerHTML=`<div class="cmov" onclick="if(event.target===this){document.getElementById('cmodal-root').innerHTML=''}"><div class="cmod">
+    <div class="cmod-hdl"></div>
+    <div class="cmod-t">${esc(title)}</div>
+    <div class="cmod-b">${esc(body)}</div>
+    <textarea id="finish-note-inp" class="inp" placeholder="Notas opcionales (ej: dolió el hombro, cardio sin pausa, sueño regular...)" rows="3" maxlength="500" style="width:100%;font-size:14px;font-family:inherit;font-weight:400;resize:vertical;min-height:60px;margin-bottom:14px"></textarea>
+    <div class="cmod-btns">
+      <button class="btn bs" onclick="document.getElementById('cmodal-root').innerHTML=''">Cancelar</button>
+      <button class="btn bp" onclick="finishSessionConfirmedWithNote(${doneEx},${totalEx})">Guardar</button>
+    </div>
+  </div></div>`;
+  setTimeout(()=>{const i=document.getElementById('finish-note-inp');if(i)i.focus();},80);
+}
+
+function finishSessionConfirmedWithNote(doneEx,totalEx){
+  const inp=document.getElementById('finish-note-inp');
+  const note=inp?String(inp.value||'').trim().slice(0,500):'';
+  document.getElementById('cmodal-root').innerHTML='';
+  finishSessionConfirmed(doneEx,totalEx,note);
+}
+function finishSessionConfirmed(doneEx,totalEx,note){
   const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const today=fmtDate(new Date()),now=Date.now();
-  S.sessions.push({day:S.day,date:today,ts:now});
+  // Calcular duración aprox de la sesión: primer ts de strength más antiguo de hoy → ahora
+  let sessionStartTs=null;
+  Object.values(S.strength||{}).forEach(records=>{
+    (records||[]).forEach(r=>{
+      if(r.ts&&sameDayTs(r.ts,now)&&(sessionStartTs==null||r.ts<sessionStartTs))sessionStartTs=r.ts;
+    });
+  });
+  // Si no hay registros previos hoy, usar primera marca de sets actuales no es trackeable — usar ahora
+  const durationMin=sessionStartTs?Math.max(1,Math.round((now-sessionStartTs)/60000)):null;
+  const session={day:S.day,date:today,ts:now,doneEx,totalEx,note:note||null,durationMin};
+  S.sessions.push(session);
   // Guardar reps, series completadas y RPE promedio
   strEx.forEach(ex=>{
     const l=S.logs[ex.id]||{},w=parseFloat(l.w);
@@ -2103,7 +2272,8 @@ function finishSessionConfirmed(doneEx,totalEx){
       const rpeMap=S.rpe[ex.id]||{};
       const rpeValues=Object.values(rpeMap).filter(v=>v>0);
       const avgRpe=rpeValues.length>0?+(rpeValues.reduce((a,b)=>a+b,0)/rpeValues.length).toFixed(2):null;
-      S.strength[ex.id].push({d:today,v:w,r:reps,setsDone,rpe:avgRpe,ts:now});
+      // Guardar también el muscle group para análisis RPE acumulado por zona
+      S.strength[ex.id].push({d:today,v:w,r:reps,setsDone,rpe:avgRpe,muscle:ex.muscle||null,ts:now});
     }
   });
   S.nextDay=getNextDay(S.day);
@@ -2111,6 +2281,8 @@ function finishSessionConfirmed(doneEx,totalEx){
   // Limpiar RPE y warmups de la sesión
   S.rpe={};S.warmups={};
   S.open=null;
+  // Cancelar undo pendiente
+  _lastSetAction=null;
   // Disparar análisis semanal si toca
   coach_maybeRunWeeklyAnalysis();
   saveState();
@@ -2284,22 +2456,22 @@ function coach_generateInsights(){
   });
 
   if(progression.strong_up.length>0){
-    const top=progression.strong_up.sort((a,b)=>b.p.pct-a.p.pct)[0];
-    insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${top.ex.n}</strong> subiste de ${top.p.firstV.toFixed(1)} a ${top.p.lastV.toFixed(1)} kg (+${top.p.pct.toFixed(0)}%). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
+    const top=progression.strong_up.slice().sort((a,b)=>b.p.pct-a.p.pct)[0];
+    insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> subiste de ${top.p.firstV.toFixed(1)} a ${top.p.lastV.toFixed(1)} kg (+${top.p.pct.toFixed(0)}%). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
   }
 
   if(progression.up.length>=2){
-    const names=progression.up.slice(0,3).map(x=>x.ex.n).join(', ');
+    const names=progression.up.slice(0,3).map(x=>esc(x.ex.n)).join(', ');
     insights.push({type:'good',ic:'💪',t:'Fuerza subiendo',d:`Has progresado bien en <strong>${progression.up.length}</strong> ejercicios: ${names}.`});
   }
 
   if(progression.stagnant.length>0){
-    const names=progression.stagnant.slice(0,2).map(x=>`<strong>${x.ex.n}</strong>`).join(' y ');
+    const names=progression.stagnant.slice(0,2).map(x=>`<strong>${esc(x.ex.n)}</strong>`).join(' y ');
     insights.push({type:'warn',ic:'🔀',t:'Estancamiento detectado',d:`${names} ${progression.stagnant.length>1?'llevan':'lleva'} 3+ sesiones sin subir peso. Considera: cambiar reps (probar 6-8), bajar 10% y reconstruir, o sustituir por una variante.`});
   }
 
   if(progression.down.length>0){
-    const names=progression.down.slice(0,2).map(x=>x.ex.n).join(', ');
+    const names=progression.down.slice(0,2).map(x=>esc(x.ex.n)).join(', ');
     insights.push({type:'bad',ic:'📉',t:'Retroceso',d:`Bajaste peso en <strong>${names}</strong>. Puede ser fatiga, mala técnica o falta de sueño. Revisa cómo te sientes esta semana.`});
   }
 
@@ -2321,11 +2493,11 @@ function coach_generateInsights(){
   const overBw=weightEx.filter(x=>x.last>=bwKg);
   if(overBw.length>0&&!S.coachInsights?.shownBodyweight){
     const top=overBw.sort((a,b)=>b.last-a.last)[0];
-    insights.push({type:'good',ic:'🚀',t:'Superas tu peso corporal',d:`En <strong>${top.ex.n}</strong> mueves ${top.last} kg — más que tu propio peso (${bwKg} kg). Bienvenido al club.`});
-    // Marcar como mostrado para no repetir en cada render
+    insights.push({type:'good',ic:'🚀',t:'Superas tu peso corporal',d:`En <strong>${esc(top.ex.n)}</strong> mueves ${top.last} kg — más que tu propio peso (${bwKg} kg). Bienvenido al club.`});
+    // Marcar como mostrado para no repetir — diferir la mutación fuera del render
     if(!S.coachInsights)S.coachInsights={};
     S.coachInsights.shownBodyweight=true;
-    saveState();
+    queueMicrotask(()=>saveState());
   }
 
   // ── Vínculo peso corporal ↔ rendimiento ──
@@ -2534,25 +2706,29 @@ function coach_weekStats(offsetWeeks){
   const r=coach_weekRange(offsetWeeks);
   const sessions=S.sessions.filter(s=>s.ts>=r.start&&s.ts<=r.end);
   // Volumen total: suma de (peso × series completadas) en esa semana
-  let totalVolume=0,exerciseCount=0,avgRpe=0,rpeCount=0;
+  // Match preciso: registro de fuerza cuyo ts cae dentro de ±2h de la sesión (evita colisiones del mismo día con otra rutina)
+  let totalVolume=0,avgRpe=0,rpeCount=0;
   sessions.forEach(sess=>{
     const dayPlan=getPlan()[sess.day];
     if(!dayPlan)return;
     const strEx=dayPlan.ex.filter(e=>!e.cardio);
     strEx.forEach(ex=>{
-      const recs=(S.strength[ex.id]||[]).filter(r=>r.ts>=r.start&&r.ts<=r.end||(r.ts>=sess.ts-3600000&&r.ts<=sess.ts+3600000));
-      const sessRec=(S.strength[ex.id]||[]).find(r=>Math.abs(r.ts-sess.ts)<86400000);
-      if(sessRec){
-        totalVolume+=(sessRec.v||0)*(sessRec.setsDone||1);
-        exerciseCount++;
-        if(sessRec.rpe){avgRpe+=sessRec.rpe;rpeCount++;}
+      const recs=(S.strength[ex.id]||[]);
+      // El registro vinculado a esta sesión: el más cercano dentro de ±2h
+      let best=null,bestDiff=Infinity;
+      for(const rec of recs){
+        const diff=Math.abs(rec.ts-sess.ts);
+        if(diff<7200000&&diff<bestDiff){best=rec;bestDiff=diff;}
+      }
+      if(best){
+        totalVolume+=(best.v||0)*(best.setsDone||1);
+        if(best.rpe){avgRpe+=best.rpe;rpeCount++;}
       }
     });
   });
   return{
     sessions:sessions.length,
     totalVolume:Math.round(totalVolume),
-    exerciseCount,
     avgRpe:rpeCount>0?+(avgRpe/rpeCount).toFixed(2):null,
     range:r
   };
@@ -2653,8 +2829,7 @@ function coach_bodyweightPerformanceInsight(){
 
   // Ejercicios compuestos (los que más reflejan fuerza global)
   const compoundIds=Object.values(getPlan()).flatMap(d=>d.ex)
-    .filter(e=>!e.cardio&&(['a2','b2','c2','c3','c4'].includes(e.id) ||
-      (typeof EXERCISE_DB!=='undefined' && EXERCISE_DB.find(x=>x.n===e.n)?.compound)))
+    .filter(e=>isCompoundEx(e))
     .map(e=>e.id);
 
   if(compoundIds.length===0)return null;
@@ -2902,11 +3077,11 @@ function renderCoach(){
   <div class="sh">💡 El Coach propone — tú decides</div>
   ${S.pendingCoachProposals.map((p,i)=>`<div class="proposal-card">
     <div class="proposal-head">
-      <div class="proposal-ic">${p.ic}</div>
+      <div class="proposal-ic">${esc(p.ic||'')}</div>
       <div>
-        <div class="proposal-tag">${p.tag}</div>
-        <div class="proposal-t">${p.title}</div>
-        <div class="proposal-d">${p.description}</div>
+        <div class="proposal-tag">${esc(p.tag||'')}</div>
+        <div class="proposal-t">${esc(p.title||'')}</div>
+        <div class="proposal-d">${esc(p.description||'')}</div>
       </div>
     </div>
     <div class="proposal-actions">
@@ -2935,7 +3110,7 @@ function renderCoach(){
   ${S.mesocycles&&S.mesocycles.length>0?`<div class="sh">Ciclos anteriores</div>
     ${S.mesocycles.slice().reverse().slice(0,3).map(m=>`<div class="mesocycle-log">
       <h4>Mesociclo ${m.num} · ${m.sessionCount} sesiones</h4>
-      <p>${m.summary}</p>
+      <p>${esc(m.summary||'')}</p>
     </div>`).join('')}`:''}
   `;
 }
@@ -3011,11 +3186,12 @@ function renderDash(){
   })()}
   <div class="sh">Próxima sesión</div>
   <div class="card">
-    ${(()=>{const today=fmtDate(new Date());const didToday=S.sessions.find(s=>s.date===today);
+    ${(()=>{const nowTs=Date.now();const didToday=S.sessions.find(s=>s.ts&&sameDayTs(s.ts,nowTs));
       if(didToday){
+        const lbl=getPlan()[didToday.day]?.label||didToday.day;
         return`<div style="background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--rsm);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#86efac;display:flex;align-items:center;gap:8px">
           <span style="font-size:16px">✅</span>
-          <span>Ya entrenaste hoy (${getPlan()[didToday.day].label}). ¡Disfruta el descanso!</span>
+          <span>Ya entrenaste hoy (${esc(lbl)}). ¡Disfruta el descanso!</span>
         </div>`;
       }
       return'';
@@ -3026,12 +3202,19 @@ function renderDash(){
     </div>
     <button class="btn bp" onclick="S.day=S.nextDay;go('workout')">Empezar ${getPlan()[S.nextDay].label} →</button>
   </div>
-  ${S.sessions.length>0?`<div class="sh">Últimas sesiones</div><div class="card">${S.sessions.slice(-4).reverse().map(s=>`
-  <div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
-    <span class="pill p${s.day.toLowerCase()}" style="font-size:11px;padding:3px 9px">${getPlan()[s.day].label}</span>
-    <span style="font-size:13px;color:var(--text2);flex:1">${getPlan()[s.day].focus}</span>
-    <span style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">${s.date}</span>
-  </div>`).join('')}</div>`:''}
+  ${S.sessions.length>0?`<div class="sh">Últimas sesiones</div><div class="card">${S.sessions.slice(-4).reverse().map(s=>{
+    const lbl=getPlan()[s.day]?.label||s.day;
+    const focus=getPlan()[s.day]?.focus||'';
+    const dur=s.durationMin?` · ${s.durationMin}min`:'';
+    return`<div style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <span class="pill p${s.day.toLowerCase()}" style="font-size:11px;padding:3px 9px">${esc(lbl)}</span>
+        <span style="font-size:13px;color:var(--text2);flex:1">${esc(focus)}</span>
+        <span style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">${esc(s.date||'')}${dur}</span>
+      </div>
+      ${s.note?`<div style="font-size:12px;color:var(--text2);margin-top:6px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:6px;border-left:2px solid var(--border2);line-height:1.5;font-style:italic">"${esc(s.note)}"</div>`:''}
+    </div>`;
+  }).join('')}</div>`:''}
   `;
 }
 
@@ -3109,7 +3292,7 @@ function renderHist(){
   const data=(S.strength[exId]||[]).slice();
   if(data.length===0){
     root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet">
-      <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${ex.n}</div><div class="hist-sheet-sub">${ex.eq}${ex.s&&ex.r&&!ex._orphan?' · '+ex.s+'×'+ex.r+' reps':''}</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
+      <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${esc(ex.n)}</div><div class="hist-sheet-sub">${esc(ex.eq)}${ex.s&&ex.r&&!ex._orphan?' · '+ex.s+'×'+esc(ex.r)+' reps':''}</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
       <div class="hist-sheet-body"><div class="empty"><div class="eic">📊</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
     </div></div>`;
     return;
@@ -3139,8 +3322,8 @@ function renderHist(){
   root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet">
     <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
-      <div class="hist-sheet-title">${ex.n}</div>
-      <div class="hist-sheet-sub">${ex._orphan?'Ya no está en tu rutina · Solo lectura':ex.eq+' · '+ex.s+'×'+ex.r+' reps objetivo'}</div>
+      <div class="hist-sheet-title">${esc(ex.n)}</div>
+      <div class="hist-sheet-sub">${ex._orphan?'Ya no está en tu rutina · Solo lectura':esc(ex.eq)+' · '+ex.s+'×'+esc(ex.r)+' reps objetivo'}</div>
       <button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
@@ -3174,11 +3357,11 @@ function renderWorkout(){
     }).join(''):'';
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}">
       <div class="exh" onclick="S.open=S.open==='${ex.id}'?null:'${ex.id}';render()">
-        <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${ex.ic}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${ex.n}</div><div class="exm">${ex.eq} · ${ex.cardio?ex.r:ex.s+'×'+ex.r+' reps'}</div></div>
+        <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${esc(ex.ic||'💪')}</div>
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+esc(ex.r)+' reps'}</div></div>
         ${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
-      ${isOpen?`<div class="exb">${exSVG(ex.id)?`<div class="ex-anim">${exSVG(ex.id)}</div>`:''}<div class="tip">${ex.tip}</div>
+      ${isOpen?`<div class="exb">${exSVG(ex.id)?`<div class="ex-anim">${exSVG(ex.id)}</div>`:''}<div class="tip">${esc(ex.tip||'')}</div>
         ${!ex.cardio?`${(()=>{const lw=getLastW(ex.id);return lw?`<div class="last-info">Última: <b>${lw.v} kg</b> · ${lw.d}</div>`:''})()}
           ${(()=>{
             const wu=getWarmupSets(ex);
@@ -3209,7 +3392,7 @@ function renderWorkout(){
     </div>`;
   }).join('');
   return`
-  <div class="topbar"><div class="topbar-row"><div><h1>${day.label}</h1><div class="sub">${day.focus}</div></div><span class="pill p${S.day.toLowerCase()}">${doneEx}/${strEx.length}</span></div></div>
+  <div class="topbar"><div class="topbar-row"><div><h1>${esc(day.label)}</h1><div class="sub">${esc(day.focus)}</div></div><span class="pill p${S.day.toLowerCase()}">${doneEx}/${strEx.length}</span></div></div>
   <div class="pbar" style="border-radius:0;height:3px"><div class="pinner" style="width:${pct}%;border-radius:0"></div></div>
   <div class="tabs">${tabs}</div>
   ${allDone?`<div class="fbanner">🎉 ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
@@ -3229,7 +3412,7 @@ function renderProg(){
     const last=data[data.length-1].v,gain=(last-data[0].v).toFixed(1);
     return`<div class="card" style="margin-bottom:10px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px">
-        <div><div class="clbl">${name}</div>
+        <div><div class="clbl">${esc(name)}</div>
           <div style="display:flex;align-items:baseline;gap:8px">
             <span style="font-size:24px;font-weight:600;font-family:'DM Mono',monospace;color:${color}">${last} kg</span>
             ${parseFloat(gain)>0?`<span style="font-size:12px;color:var(--green);font-weight:500">+${gain} kg</span>`:parseFloat(gain)<0?`<span style="font-size:12px;color:var(--amber)">${gain} kg</span>`:`<span style="font-size:12px;color:var(--text3)">primer registro</span>`}
@@ -3364,18 +3547,25 @@ function swapExerciseUI(dayKey,idx){
         render();
       };
       if(oldHist&&oldHist.length>0){
-        confirmModal({
-          title:'Trasladar historial',
-          body:`El ejercicio anterior tiene ${oldHist.length} registro${oldHist.length!==1?'s':''}. ¿Trasladar el historial al nuevo ejercicio? Elige "No" si es un ejercicio distinto (el histórico antiguo se conservará como solo lectura).`,
-          okText:'Trasladar',
-          cancelText:'No, es distinto',
-          onOk:()=>{
-            S.strength[newEx.id]=oldHist.slice();
-            delete S.strength[ex.id];
-            doSwap();
-          },
-          onCancel:doSwap
-        });
+        // Tres opciones reales: trasladar / no trasladar / cancelar todo
+        // Usamos un confirmModal personalizado de 3 botones inline
+        const root=document.getElementById('cmodal-root');
+        const cancelAll=()=>{root.innerHTML='';toast('Cambio cancelado');};
+        const keepHist=()=>{root.innerHTML='';S.strength[newEx.id]=oldHist.slice();delete S.strength[ex.id];doSwap();};
+        const dropHist=()=>{root.innerHTML='';doSwap();};
+        root.innerHTML=`<div class="cmov" onclick="if(event.target===this)window._swapCancel&&window._swapCancel()"><div class="cmod">
+          <div class="cmod-hdl"></div>
+          <div class="cmod-t">Trasladar historial</div>
+          <div class="cmod-b">El ejercicio anterior tiene ${oldHist.length} registro${oldHist.length!==1?'s':''}. ¿Qué quieres hacer?</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="btn bp" onclick="window._swapKeep()">Trasladar al nuevo ejercicio</button>
+            <button class="btn bs" onclick="window._swapDrop()">No, es distinto (conservar antiguo)</button>
+            <button class="btn bs" onclick="window._swapCancel()" style="color:var(--text3)">Cancelar cambio</button>
+          </div>
+        </div></div>`;
+        window._swapKeep=keepHist;
+        window._swapDrop=dropHist;
+        window._swapCancel=cancelAll;
       }else{
         doSwap();
       }
@@ -3506,55 +3696,68 @@ function closeExercisePicker(){
 }
 
 // ── DRAG & DROP TÁCTIL PARA REORDENAR ─────────────────────────
+// Reordena en memoria + intercambio visual durante el gesto.
+// Solo re-renderiza al soltar (evita perder el item arrastrado mid-touch).
 function initDragDrop(dayKey){
-  const items=document.querySelectorAll('#settings-root .edit-ex-item');
+  const container=document.querySelector('#settings-root .hist-sheet-body');
+  if(!container)return;
+  const items=container.querySelectorAll('.edit-ex-item');
   items.forEach(item=>{
     const handle=item.querySelector('.drag-handle');
     if(!handle||handle._dragBound)return;
     handle._dragBound=true;
-    let startY=0,startIdx=0,curIdx=0,dragging=false;
-
-    const getIdx=el=>parseInt(el.dataset.idx)||0;
+    let startY=0,startIdx=0,curIdx=0,dragging=false,itemH=0;
 
     const onStart=e=>{
       const touch=e.touches?e.touches[0]:e;
       startY=touch.clientY;
-      startIdx=getIdx(item);
+      startIdx=parseInt(item.dataset.idx)||0;
       curIdx=startIdx;
+      itemH=item.offsetHeight+8;
       dragging=true;
       item.classList.add('dragging');
+      item.style.zIndex='10';
+      item.style.position='relative';
       if(e.cancelable)e.preventDefault();
     };
     const onMove=e=>{
       if(!dragging)return;
       const touch=e.touches?e.touches[0]:e;
       const dy=touch.clientY-startY;
-      const h=item.offsetHeight+8;
       const maxIdx=getPlan()[dayKey].ex.length-1;
-      const newIdx=Math.max(0,Math.min(maxIdx,startIdx+Math.round(dy/h)));
-      if(newIdx!==curIdx){
-        const plan=getPlan();
-        const arr=plan[dayKey].ex;
-        const moved=arr.splice(startIdx,1)[0];
-        arr.splice(newIdx,0,moved);
-        curIdx=newIdx;
-        startIdx=newIdx;
-        startY=touch.clientY;
-        saveState();
-        renderRoutineEditor();
+      const targetIdx=Math.max(0,Math.min(maxIdx,startIdx+Math.round(dy/itemH)));
+      // Translate visual del item arrastrado
+      item.style.transform=`translateY(${dy}px)`;
+      // Mover otros items con CSS transform sin tocar el DOM
+      if(targetIdx!==curIdx){
+        curIdx=targetIdx;
       }
       if(e.cancelable)e.preventDefault();
     };
     const onEnd=()=>{
+      if(!dragging)return;
       dragging=false;
       item.classList.remove('dragging');
+      item.style.transform='';
+      item.style.zIndex='';
+      item.style.position='';
+      // Aplicar el reorden final al modelo
+      if(curIdx!==startIdx){
+        const plan=getPlan();
+        const arr=plan[dayKey].ex;
+        const moved=arr.splice(startIdx,1)[0];
+        arr.splice(curIdx,0,moved);
+        saveState();
+        renderRoutineEditor();
+        render();
+      }
     };
 
     handle.addEventListener('touchstart',onStart,{passive:false});
     handle.addEventListener('touchmove',onMove,{passive:false});
     handle.addEventListener('touchend',onEnd);
     handle.addEventListener('touchcancel',onEnd);
-    // Soporte mouse para desarrollo en desktop (no afecta iOS)
+    // Soporte mouse para desktop
     handle.addEventListener('mousedown',e=>{
       onStart(e);
       const mm=ev=>onMove(ev);
@@ -3638,8 +3841,6 @@ function coach_generateProposals(cycle){
         Object.keys(p).forEach(dk=>{
           p[dk].ex.forEach(e=>{ if(!e.cardio)e.s=Math.max(1,Math.round((e.s||3)/2)); });
         });
-        // Programar restauración a ciclo siguiente guardando estado
-        S._deloadActive=true;
       }
     });
   }
@@ -3660,6 +3861,8 @@ function coach_generateProposals(cycle){
           tag:'Volumen',
           title:`Añadir ejercicio al ${plan[dk].label}`,
           description:`El ${plan[dk].label} tiene pocos ejercicios de fuerza (${strEx.length}). Añadir "${pick.n}" (${pick.eq}) aumentaría el volumen de ${mainMuscle} sin saturar la sesión.`,
+          dayKey:dk,
+          libExId:pick.id,
           apply:()=>{ getPlan()[dk].ex.splice(-1,0,libExToEx(pick)); } // antes del cardio final
         });
       }
@@ -3691,11 +3894,11 @@ function renderPendingProposals(){
     <div class="sh" style="padding:0 14px 8px">📋 El Coach propone — tú decides</div>
     ${props.map((p,i)=>`<div class="proposal-card">
       <div class="proposal-head">
-        <div class="proposal-ic">${p.ic}</div>
+        <div class="proposal-ic">${esc(p.ic||'')}</div>
         <div>
-          <div class="proposal-tag">${p.tag}</div>
-          <div class="proposal-t">${p.title}</div>
-          <div class="proposal-d">${p.description}</div>
+          <div class="proposal-tag">${esc(p.tag||'')}</div>
+          <div class="proposal-t">${esc(p.title||'')}</div>
+          <div class="proposal-d">${esc(p.description||'')}</div>
         </div>
       </div>
       <div class="proposal-actions">
@@ -3762,8 +3965,8 @@ function renderRoutineEditor(){
     return`<div class="edit-ex-item" data-idx="${i}" id="edi_${i}">
       <div class="drag-handle" aria-label="Arrastrar">⠿</div>
       <div class="edit-ex-info">
-        <div class="edit-ex-name">${ex.ic||'💪'} ${ex.n}</div>
-        <div class="edit-ex-meta">${ex.eq} · ${sLabel}</div>
+        <div class="edit-ex-name">${esc(ex.ic||'💪')} ${esc(ex.n)}</div>
+        <div class="edit-ex-meta">${esc(ex.eq)} · ${esc(sLabel)}</div>
         ${!isCardio?`<div class="sr-editor">
           <span class="sr-label">Series</span>
           <button class="sr-btn" onclick="editExSeries('${_editDay}',${i},-1)">−</button>
@@ -3808,10 +4011,15 @@ function renderRoutineEditor(){
 
 function render(){
   const s=document.getElementById('screen');
+  if(!s)return;
+  // Preservar posición de scroll entre renders (evita el "salto al inicio" al marcar series)
+  const prevScroll=s.scrollTop;
   if(S.tab==='dash')s.innerHTML=renderDash();
   else if(S.tab==='workout')s.innerHTML=renderWorkout();
   else if(S.tab==='coach')s.innerHTML=renderCoach();
   else s.innerHTML=renderProg();
+  // Restaurar scroll en el siguiente frame para que el DOM ya esté listo
+  if(prevScroll>0)requestAnimationFrame(()=>{s.scrollTop=prevScroll;});
   renderSettings();
   renderWmodal();
   renderHist();
@@ -3893,6 +4101,13 @@ function renderSettings(){
           </div>
           <span class="set-row-arrow">›</span>
         </div>
+        <div class="set-row" onclick="exportCSV()">
+          <div class="set-row-info">
+            <div class="set-row-t">Exportar CSV (Excel)</div>
+            <div class="set-row-d">Hoja de cálculo con tu historial de fuerza y peso corporal</div>
+          </div>
+          <span class="set-row-arrow">›</span>
+        </div>
         <div class="set-row" onclick="copyDataToClipboard()">
           <div class="set-row-info">
             <div class="set-row-t">Copiar datos (JSON)</div>
@@ -3940,7 +4155,7 @@ function renderSettings(){
         </div>
       </div>
       <div style="text-align:center;padding:12px 14px 24px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">
-        GymTrack v4 · Schema ${SCHEMA_VERSION}
+        GymTrack · Schema ${SCHEMA_VERSION}
       </div>
     </div>
   </div></div>`;
@@ -3955,9 +4170,9 @@ function openEditWeight(which){
   const root=document.getElementById('cmodal-root');
   root.innerHTML=`<div class="cmov" onclick="if(event.target===this){document.getElementById('cmodal-root').innerHTML=''}"><div class="cmod">
     <div class="cmod-hdl"></div>
-    <div class="cmod-t">${label}</div>
+    <div class="cmod-t">${esc(label)}</div>
     <div style="margin-bottom:16px">
-      <input class="ob-inp" id="edit-w-inp" type="number" value="${current}" step="0.1" inputmode="decimal" autofocus/>
+      <input class="ob-inp" id="edit-w-inp" type="number" value="${current}" step="0.1" inputmode="decimal" autofocus onkeydown="if(event.key==='Enter')saveEditWeight()"/>
     </div>
     <div class="cmod-btns">
       <button class="btn bs" onclick="document.getElementById('cmodal-root').innerHTML=''">Cancelar</button>
@@ -4020,6 +4235,8 @@ function pickNextDay(d){
 function exportData(){
   try{
     const payload={...S,_exported:new Date().toISOString(),_version:SCHEMA_VERSION};
+    // Excluir claves transitorias del export
+    TRANSIENT_KEYS.forEach(k=>delete payload[k]);
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -4029,6 +4246,44 @@ function exportData(){
     setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
     toast('Backup descargado');
   }catch(e){toast('Error al exportar');}
+}
+
+function exportCSV(){
+  try{
+    // CSV: fecha, día, ejercicio, peso(kg), reps, series, rpe
+    const rows=[['fecha','dia','ejercicio','peso_kg','reps','series_completadas','rpe_promedio','ts']];
+    const plan=getPlan();
+    // Mapa id→nombre para reconstruir nombres
+    const nameById={};
+    Object.values(plan).forEach(d=>d.ex.forEach(e=>{nameById[e.id]=e.n;}));
+    // Cualquier ejercicio en S.strength aunque ya no esté en el plan
+    Object.entries(S.strength||{}).forEach(([exId,records])=>{
+      (records||[]).forEach(r=>{
+        const name=nameById[exId]||exId;
+        // Escapado CSV: si contiene coma/comilla/salto, envolver en comillas
+        const csvEsc=v=>{const s=String(v==null?'':v);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+        // Determinar día (A/B/C) por sesión más cercana
+        const sess=(S.sessions||[]).find(s=>s.ts&&Math.abs(s.ts-r.ts)<86400000);
+        rows.push([r.d||'',sess?.day||'',name,r.v??'',r.r??'',r.setsDone??'',r.rpe??'',r.ts||''].map(csvEsc));
+      });
+    });
+    // Añadir registros de peso corporal
+    rows.push([]);
+    rows.push(['# peso_corporal']);
+    rows.push(['fecha','peso_kg','ts']);
+    (S.weights||[]).forEach(w=>{
+      rows.push([w.d||'',w.v??'',w.ts||'']);
+    });
+    const csv=rows.map(r=>r.join(',')).join('\n');
+    const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'}); // BOM para Excel
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`gymtrack-${new Date().toISOString().slice(0,10)}.csv`;
+    document.body.appendChild(a);a.click();
+    setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
+    toast('CSV descargado');
+  }catch(e){toast('Error al exportar CSV');}
 }
 
 function copyDataToClipboard(){
@@ -4068,8 +4323,24 @@ function importData(){
           onOk:()=>{
             // Aplicar migración por si viene de versión antigua
             const migrated=migrateState(data);
+            // Sanear nombres y campos de texto del plan personalizado (defensa XSS)
+            if(migrated.currentPlan){
+              Object.values(migrated.currentPlan).forEach(day=>{
+                if(day&&day.label)day.label=String(day.label).slice(0,80);
+                if(day&&day.focus)day.focus=String(day.focus).slice(0,200);
+                if(day&&Array.isArray(day.ex)){
+                  day.ex.forEach(ex=>{
+                    ['n','eq','tip','ic','r'].forEach(k=>{
+                      if(ex[k]!=null)ex[k]=String(ex[k]).slice(0,300);
+                    });
+                  });
+                }
+              });
+            }
             Object.keys(S).forEach(k=>{if(!(k in migrated))migrated[k]=S[k];});
             S=Object.assign(S,migrated);
+            // Limpiar estado UI transitorio importado
+            TRANSIENT_KEYS.forEach(k=>{if(k in S)delete S[k];});
             S.settingsOpen=true;
             saveState();render();
             toast('✓ Datos importados correctamente',3500);
@@ -4115,6 +4386,34 @@ function resetAllData(){
     }
   });
 }
+
+// ── PWA: registrar manifest dinámico (single-file friendly) ────────
+(function setupManifest(){
+  try{
+    const iconSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0f0f0f"/><path d="M124 192h48v128h-48zm216 0h48v128h-48zM172 240h168v32H172z" fill="#22c55e"/></svg>`;
+    const iconUrl='data:image/svg+xml,'+encodeURIComponent(iconSvg);
+    const manifest={
+      name:'GymTrack',
+      short_name:'GymTrack',
+      description:'Tu app de entrenamiento personal',
+      start_url:'./',
+      display:'standalone',
+      orientation:'portrait',
+      background_color:'#0f0f0f',
+      theme_color:'#0f0f0f',
+      lang:'es',
+      icons:[
+        {src:iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'any maskable'},
+        {src:iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}
+      ]
+    };
+    const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
+    const link=document.createElement('link');
+    link.rel='manifest';
+    link.href=URL.createObjectURL(blob);
+    document.head.appendChild(link);
+  }catch(e){}
+})();
 
 // ── iOS viewport + teclado virtual: actualizar --kb cuando aparece el teclado ─
 (function setupViewport(){
