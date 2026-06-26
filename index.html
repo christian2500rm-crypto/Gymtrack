@@ -474,9 +474,11 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=8;
+const SCHEMA_VERSION=9;
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
+// Duración máxima plausible de una sesión (min); por encima se considera dato no fiable
+const MAX_SESSION_MIN=360;
 
 // Claves transitorias de UI que NO deben persistirse (modales abiertos, búsquedas, etc.)
 const TRANSIENT_KEYS=['wmodal','wnew','settingsOpen','_hist','open','_editWeightTarget','_deloadActive'];
@@ -529,6 +531,83 @@ function getWeeklyTarget(){
   return Math.min(WEEKLY_TARGET_MAX,Math.max(WEEKLY_TARGET_MIN,n));
 }
 
+// Cuenta series marcadas (fuerza) + cardio hecho de un día concreto del plan.
+function dayMarkCount(dayKey){
+  const plan=getPlan();
+  const day=plan&&plan[dayKey];
+  if(!day||!Array.isArray(day.ex))return {strDone:0,strTotal:0,marks:0};
+  let strDone=0,strTotal=0,marks=0;
+  day.ex.forEach(ex=>{
+    if(ex.cardio){
+      if(S.sets[ex.id]&&S.sets[ex.id][0])marks++;
+    }else{
+      strTotal++;
+      const c=countSetsDone(ex.id,ex.s);
+      if(c>0)marks++;
+      if(c>=ex.s)strDone++;
+    }
+  });
+  return {strDone,strTotal,marks};
+}
+
+// Día con un entreno en curso = el que más series marcadas tiene (0 marcas → null).
+// Se calcula desde las marcas REALES, no desde un puntero, para que nunca haya datos huérfanos invisibles.
+function currentInProgressDay(){
+  const plan=getPlan();
+  let best=null,bestMarks=0;
+  for(const dk of Object.keys(plan)){
+    const mc=dayMarkCount(dk);
+    if(mc.marks>bestMarks){bestMarks=mc.marks;best=dk;}
+  }
+  return best;
+}
+
+// Devuelve el entreno en curso (recuperable) o null — siempre refleja las marcas reales.
+function getActiveWorkout(){
+  const day=currentInProgressDay();
+  if(!day)return null;
+  const plan=getPlan();
+  if(!plan[day])return null;
+  const mc=dayMarkCount(day);
+  if(mc.marks<1)return null;
+  // startTs fiable solo si el puntero coincide con el día detectado
+  const startTs=(S.activeWorkout&&S.activeWorkout.day===day&&S.activeWorkout.startTs)?S.activeWorkout.startTs:(S.sessionStartTs||null);
+  return {day,startTs,strDone:mc.strDone,strTotal:mc.strTotal,label:plan[day].label,focus:plan[day].focus};
+}
+
+// Sincroniza S.activeWorkout con las marcas reales de CUALQUIER día (auto-sana).
+// Reapunta al día con marcas y lo limpia cuando no queda ninguna en ningún día.
+function syncActiveWorkout(){
+  const day=currentInProgressDay();
+  if(day){
+    if(!S.activeWorkout||S.activeWorkout.day!==day){
+      const ts=(S.activeWorkout&&S.activeWorkout.day===day&&S.activeWorkout.startTs)?S.activeWorkout.startTs:(S.sessionStartTs||Date.now());
+      S.activeWorkout={day,startTs:ts};
+      if(!S.sessionStartTs)S.sessionStartTs=ts;
+    }
+  }else{
+    S.activeWorkout=null;S.sessionStartTs=null;
+  }
+}
+
+// Infiere el día con un entreno a medias a partir de las series marcadas (para migración / recuperación).
+function inferActiveDay(data){
+  const plan=(data&&data.currentPlan)||PLAN;
+  const sets=(data&&data.sets)||{};
+  let best=null,bestCount=0;
+  for(const dk of Object.keys(plan)){
+    const day=plan[dk];
+    if(!day||!Array.isArray(day.ex))continue;
+    let count=0;
+    day.ex.forEach(ex=>{
+      const c=sets[ex.id];
+      if(c)for(const k in c){if(c[k])count++;}
+    });
+    if(count>bestCount){bestCount=count;best=dk;}
+  }
+  return best;
+}
+
 function migrateState(data){
   if(!data)return data;
   const v=data.schema_version||1;
@@ -575,13 +654,24 @@ function migrateState(data){
     // Por defecto 3, que reproduce EXACTAMENTE el comportamiento anterior de la app.
     if(data.weeklyTarget==null)data.weeklyTarget=WEEKLY_TARGET_DEFAULT;
   }
+  if(v<9){
+    // v9: reanudar entreno incompleto. ADITIVO — no borra series ni datos.
+    // Recupera el entreno a medias actual infiriendo el día desde las series ya marcadas.
+    if(data.activeWorkout==null){
+      data.activeWorkout=null;
+      const inferred=inferActiveDay(data);
+      if(inferred){
+        data.activeWorkout={day:inferred,startTs:data.sessionStartTs||null};
+      }
+    }
+  }
   data.schema_version=SCHEMA_VERSION;
   return data;
 }
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT},migrateState(loadState())||{});
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -1976,10 +2066,11 @@ return '';
 // REST TIMER
 const CIRC=2*Math.PI*20;
 const RT={
-  _tid:null,_remaining:0,_total:0,_hideT:null,
-  start(secs,name){
+  _tid:null,_remaining:0,_total:0,_hideT:null,_onComplete:null,
+  start(secs,name,onComplete){
     clearInterval(this._tid);clearTimeout(this._hideT);
     this._total=secs;this._remaining=secs;
+    this._onComplete=(typeof onComplete==='function')?onComplete:null; // callback por-timer (no monkey-patch)
     const el=document.getElementById('rest-timer');
     if(!el)return;
     el.classList.remove('done');el.classList.add('show');
@@ -2007,8 +2098,11 @@ const RT={
     if(msg)msg.textContent='¡Listo! A la siguiente serie 💪';
     try{haptic([200,100,200]);}catch(e){}
     this._hideT=setTimeout(()=>this.hide(),4000);
+    // Ejecutar callback de finalización UNA sola vez (p.ej. auto-marcar cardio)
+    const cb=this._onComplete;this._onComplete=null;
+    if(typeof cb==='function'){try{cb();}catch(e){}}
   },
-  skip(){clearInterval(this._tid);clearTimeout(this._hideT);this.hide();},
+  skip(){clearInterval(this._tid);clearTimeout(this._hideT);this._onComplete=null;this.hide();},
   hide(){const el=document.getElementById('rest-timer');if(el)el.classList.remove('show');clearInterval(this._tid);}
 };
 function getRestSecs(id){
@@ -2023,16 +2117,16 @@ function startCardioTimer(exId,mins){
   if(!ex)return;
   // Marcar inicio de sesión si es la primera acción
   if(!S.sessionStartTs)S.sessionStartTs=Date.now();
-  RT.start(mins*60,`${ex.n} — ${mins} min`);
-  // Sobrescribir el _done para auto-marcar el cardio como hecho al acabar
-  const origDone=RT._done.bind(RT);
-  RT._done=function(){
-    origDone();
-    // Auto-marcar el cardio como completado
+  syncActiveWorkout();
+  saveState();
+  // Callback por-timer: al terminar la cuenta atrás, auto-marcar ESTE cardio como hecho.
+  // (Sin parchear RT._done → no hay fuga ni re-marcado de cardios anteriores.)
+  RT.start(mins*60,`${ex.n} — ${mins} min`,()=>{
     if(!S.sets[exId])S.sets[exId]={};
     S.sets[exId][0]=true;
+    syncActiveWorkout();
     saveState();render();
-  };
+  });
   haptic([60]);
 }
 
@@ -2111,6 +2205,8 @@ function toggleSet(id,i,evt){
   if(!wasOff){
     if(S.rpe&&S.rpe[id])delete S.rpe[id][i];
   }
+  // Crear / cerrar el entreno activo según las marcas reales (permite reanudarlo si se interrumpe)
+  syncActiveWorkout();
   saveState();render();
   _lastSetAction={id,i,prevSet,prevRpe};
   const ex=getPlan()[S.day].ex.find(e=>e.id===id);
@@ -2125,6 +2221,7 @@ function toggleSet(id,i,evt){
       delete S.rpe[id][i];
     }
     _lastSetAction=null;
+    syncActiveWorkout();
     RT.hide();closeRpeSelector();
     saveState();render();
   });
@@ -2283,17 +2380,23 @@ function openFinishModal(doneEx,totalEx){
   setTimeout(()=>{const i=document.getElementById('finish-note-inp');if(i)i.focus();},80);
 }
 
+let _finishInFlight=false;
 function finishSessionConfirmedWithNote(doneEx,totalEx){
+  if(_finishInFlight)return; // anti doble-tap: evita guardar la sesión dos veces
+  _finishInFlight=true;
   const inp=document.getElementById('finish-note-inp');
   const note=inp?String(inp.value||'').trim().slice(0,500):'';
   document.getElementById('cmodal-root').innerHTML='';
   finishSessionConfirmed(doneEx,totalEx,note);
+  setTimeout(()=>{_finishInFlight=false;},800);
 }
 function finishSessionConfirmed(doneEx,totalEx,note){
   const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const today=fmtDate(new Date()),now=Date.now();
-  // Duración real: desde el primer set marcado hasta ahora
-  const durationMin=S.sessionStartTs?Math.max(1,Math.round((now-S.sessionStartTs)/60000)):null;
+  // Duración real: desde el primer set marcado hasta ahora.
+  // Si supera el máximo plausible (entreno reanudado horas/días después), se descarta (null).
+  let durationMin=S.sessionStartTs?Math.max(1,Math.round((now-S.sessionStartTs)/60000)):null;
+  if(durationMin!=null&&durationMin>MAX_SESSION_MIN)durationMin=null;
   const session={day:S.day,date:today,ts:now,doneEx,totalEx,note:note||null,durationMin};
   S.sessions.push(session);
   // Guardar reps, series completadas y RPE promedio
@@ -2315,6 +2418,9 @@ function finishSessionConfirmed(doneEx,totalEx,note){
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
   // Limpiar RPE, warmups y tracker de duración de la sesión
   S.rpe={};S.warmups={};S.sessionStartTs=null;
+  // Re-detectar entreno activo: null si no quedan marcas, o reapunta a otro día a medias
+  S.activeWorkout=null;
+  syncActiveWorkout();
   S.open=null;
   // Cancelar undo pendiente
   _lastSetAction=null;
@@ -2323,6 +2429,41 @@ function finishSessionConfirmed(doneEx,totalEx,note){
   saveState();
   toast(`✅ Sesión guardada · Próxima: ${getPlan()[S.nextDay].label}`);
   go('dash');
+}
+
+// ── REANUDAR / DESCARTAR ENTRENO EN CURSO ──
+function resumeWorkout(){
+  const aw=getActiveWorkout();
+  if(!aw){render();return;}
+  S.day=aw.day;
+  S.open=null;
+  go('workout');
+  toast(`Reanudando ${getPlan()[aw.day].label}`);
+}
+function discardWorkout(){
+  const aw=getActiveWorkout();
+  if(!aw)return;
+  confirmModal({
+    title:'Descartar entreno',
+    body:`Se borrarán las series marcadas del ${aw.label} sin guardar la sesión. Tu historial y tus pesos NO se tocan. ¿Seguro?`,
+    okText:'Descartar',cancelText:'Cancelar',danger:true,
+    onOk:()=>{
+      const plan=getPlan();
+      const day=plan[aw.day];
+      if(day&&Array.isArray(day.ex)){
+        day.ex.forEach(ex=>{
+          S.sets[ex.id]={};S.logs[ex.id]={};
+          if(S.rpe)delete S.rpe[ex.id];
+          if(S.warmups)delete S.warmups[ex.id];
+        });
+      }
+      S.activeWorkout=null;S.sessionStartTs=null;_lastSetAction=null;
+      // Re-detectar: si quedara otro día con marcas, su tarjeta vuelve a mostrarse (nada queda huérfano)
+      syncActiveWorkout();
+      saveState();render();
+      toast('Entreno descartado');
+    }
+  });
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3295,6 +3436,33 @@ function renderDash(){
       </div>
     </div>`;
   })()}
+  ${(()=>{
+    const aw=getActiveWorkout();
+    if(!aw)return'';
+    let ago='';
+    if(aw.startTs){
+      const mins=Math.floor((Date.now()-aw.startTs)/60000);
+      if(mins>=0&&mins<60)ago=` · empezado hace ${mins} min`;
+      else if(mins<1440)ago=` · hace ${Math.round(mins/60)} h`;
+      else ago=` · hace ${Math.round(mins/1440)} d`;
+    }
+    return`<div class="sh">Entreno sin terminar</div>
+    <div class="card" style="border-color:var(--amber);background:rgba(245,158,11,.06)">
+      <div style="display:flex;align-items:center;gap:11px;margin-bottom:8px">
+        <span style="font-size:22px">⏸️</span>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:15px;font-weight:600">${esc(aw.label)} a medias</div>
+          <div style="font-size:12px;color:var(--text2)">${esc(aw.focus)}</div>
+        </div>
+        <span class="pill p${aw.day.toLowerCase()}">${aw.strDone}/${aw.strTotal}</span>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5">Tus series marcadas están guardadas${ago}. Reanúdalo donde lo dejaste.</div>
+      <div style="display:flex;gap:8px">
+        <button class="btn bp" style="flex:1" onclick="resumeWorkout()">▶ Reanudar entreno</button>
+        <button class="btn bs" style="width:120px" onclick="discardWorkout()">Descartar</button>
+      </div>
+    </div>`;
+  })()}
   <div class="sh">Próxima sesión</div>
   <div class="card">
     ${(()=>{const nowTs=Date.now();const didToday=S.sessions.find(s=>s.ts&&sameDayTs(s.ts,nowTs));
@@ -3530,6 +3698,7 @@ function renderWorkout(){
   <div class="topbar"><div class="topbar-row"><div><h1>${esc(day.label)}</h1><div class="sub">${esc(day.focus)}${(()=>{
     if(!S.sessionStartTs)return'';
     const elapsedMin=Math.floor((Date.now()-S.sessionStartTs)/60000);
+    if(elapsedMin>MAX_SESSION_MIN)return''; // entreno reanudado mucho después: no mostrar contador absurdo
     if(elapsedMin<1)return' · <span style="color:var(--green)">● en curso</span>';
     return` · <span style="color:var(--green)" id="live-dur" data-start="${S.sessionStartTs}">● ${elapsedMin} min</span>`;
   })()}</div></div><span class="pill p${S.day.toLowerCase()}">${doneEx}/${strEx.length}</span></div></div>
@@ -4519,6 +4688,8 @@ function importData(){
             S=Object.assign(S,migrated);
             // Limpiar estado UI transitorio importado
             TRANSIENT_KEYS.forEach(k=>{if(k in S)delete S[k];});
+            // Re-sincronizar el puntero del entreno activo con las series realmente importadas
+            syncActiveWorkout();
             S.settingsOpen=true;
             saveState();render();
             toast('✓ Datos importados correctamente',3500);
@@ -4570,7 +4741,8 @@ setInterval(()=>{
   const el=document.getElementById('live-dur');
   if(el&&S.sessionStartTs){
     const min=Math.floor((Date.now()-S.sessionStartTs)/60000);
-    el.textContent=`● ${min} min`;
+    if(min>MAX_SESSION_MIN)el.textContent='';
+    else el.textContent=`● ${min} min`;
   }
 },30000);
 
