@@ -2414,6 +2414,13 @@ function finishSessionConfirmed(doneEx,totalEx,note){
       S.strength[ex.id].push({d:today,v:w,r:reps,setsDone,rpe:avgRpe,muscle:ex.muscle||null,ts:now});
     }
   });
+  // Snapshot del trabajo realizado (series, pesos, RPE) para poder reabrir la sesión SIN pérdida
+  session.snapshot={sets:{},logs:{},rpe:{}};
+  day.ex.forEach(ex=>{
+    if(S.sets[ex.id]&&Object.keys(S.sets[ex.id]).length)session.snapshot.sets[ex.id]={...S.sets[ex.id]};
+    if(S.logs[ex.id]&&Object.keys(S.logs[ex.id]).length)session.snapshot.logs[ex.id]={...S.logs[ex.id]};
+    if(S.rpe[ex.id]&&Object.keys(S.rpe[ex.id]).length)session.snapshot.rpe[ex.id]={...S.rpe[ex.id]};
+  });
   S.nextDay=getNextDay(S.day);
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
   // Limpiar RPE, warmups y tracker de duración de la sesión
@@ -2464,6 +2471,84 @@ function discardWorkout(){
       toast('Entreno descartado');
     }
   });
+}
+
+// ── REABRIR UNA SESIÓN YA FINALIZADA (rescatar) ──
+// Devuelve la sesión guardada por su ts, o null.
+function findSession(ts){return (S.sessions||[]).find(s=>s.ts===ts)||null;}
+
+function reopenSession(ts){
+  const sess=findSession(ts);
+  if(!sess){toast('No se encontró la sesión');return;}
+  const plan=getPlan();
+  const dayKey=sess.day;
+  if(!plan[dayKey]){toast('Esa rutina ya no existe — no se puede reabrir');return;}
+  confirmModal({
+    title:'Reabrir sesión',
+    body:`Se reabrirá el ${plan[dayKey].label} (${sess.date||''}) para que lo termines. Se quita del historial y del Coach hasta que lo vuelvas a guardar. Tus series y pesos se recuperan.`,
+    okText:'Reabrir',cancelText:'Cancelar',
+    onOk:()=>_reopenSessionConfirmed(sess)
+  });
+}
+
+function _reopenSessionConfirmed(sess){
+  const sessTs=sess.ts, dayKey=sess.day, plan=getPlan();
+  const dayObj=plan[dayKey];
+  if(!dayObj||!Array.isArray(dayObj.ex)){toast('Esa rutina ya no existe — no se puede reabrir');return;}
+  const validIds=new Set(dayObj.ex.map(e=>e.id));
+  // 1. CONSTRUIR la restauración (solo para ejercicios que SIGUEN en el plan) — aún sin aplicar
+  const restore={sets:{},logs:{},rpe:{}};
+  let droppedCount=0; // ejercicios del snapshot que ya no están en la rutina (se omiten)
+  if(sess.snapshot&&typeof sess.snapshot==='object'){
+    const snap=sess.snapshot;
+    Object.keys(snap.sets||{}).forEach(id=>{if(validIds.has(id))restore.sets[id]={...snap.sets[id]};else droppedCount++;});
+    Object.keys(snap.logs||{}).forEach(id=>{if(validIds.has(id))restore.logs[id]={...snap.logs[id]};});
+    Object.keys(snap.rpe||{}).forEach(id=>{if(validIds.has(id))restore.rpe[id]={...snap.rpe[id]};});
+  }else{
+    // Sesión antigua sin snapshot: reconstruir desde los registros de fuerza (peso, reps, nº series)
+    dayObj.ex.forEach(ex=>{
+      const rec=(S.strength[ex.id]||[]).find(r=>r.ts===sessTs);
+      if(rec){
+        restore.logs[ex.id]={w:rec.v!=null?String(rec.v):'',r:rec.r!=null?String(rec.r):''};
+        const n=rec.setsDone||0;
+        restore.sets[ex.id]={};
+        for(let i=0;i<n;i++)restore.sets[ex.id][i]=true;
+        if(rec.rpe){restore.rpe[ex.id]={};const lvl=Math.round(rec.rpe);for(let i=0;i<n;i++)restore.rpe[ex.id][i]=lvl;}
+      }
+    });
+  }
+  // 2. SALVAGUARDA: ¿quedará al menos una serie marcada visible en el plan actual?
+  // Si NO (p.ej. todos los ejercicios del día se cambiaron en el editor), abortar SIN destruir la sesión.
+  let willHaveMarks=false;
+  Object.keys(restore.sets).forEach(id=>{const c=restore.sets[id];if(c)for(const k in c){if(c[k]){willHaveMarks=true;break;}}});
+  if(!willHaveMarks){
+    toast('No se puede reabrir: los ejercicios de esa rutina han cambiado');
+    return; // historial y datos intactos
+  }
+  // 3. Aplicar la restauración (a partir de aquí es seguro)
+  Object.keys(restore.sets).forEach(id=>{S.sets[id]={...restore.sets[id]};});
+  Object.keys(restore.logs).forEach(id=>{S.logs[id]={...restore.logs[id]};});
+  if(Object.keys(restore.rpe).length){if(!S.rpe)S.rpe={};Object.keys(restore.rpe).forEach(id=>{S.rpe[id]={...restore.rpe[id]};});}
+  // 4. Quitar los registros de fuerza creados por esta sesión (se re-guardarán al finalizar de nuevo)
+  Object.keys(S.strength).forEach(id=>{
+    S.strength[id]=(S.strength[id]||[]).filter(r=>r.ts!==sessTs);
+    if(S.strength[id].length===0)delete S.strength[id];
+  });
+  // 5. Quitar la sesión del historial (deja de contar para el Coach hasta re-guardarla)
+  S.sessions=(S.sessions||[]).filter(s=>s.ts!==sessTs);
+  // 6. Revertir el puntero de rotación y abrir el día
+  S.nextDay=dayKey;
+  S.day=dayKey;
+  S.open=null;
+  // 7. Marcar como entreno activo (cronómetro nuevo desde ahora)
+  S.sessionStartTs=Date.now();
+  S.activeWorkout={day:dayKey,startTs:Date.now()};
+  syncActiveWorkout();
+  saveState();
+  go('workout');
+  toast(droppedCount>0
+    ? `Sesión reabierta · ${droppedCount} ejercicio${droppedCount!==1?'s':''} ya no en tu rutina, omitido${droppedCount!==1?'s':''}`
+    : 'Sesión reabierta — termínala y guárdala otra vez',droppedCount>0?4000:2600);
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -3481,10 +3566,14 @@ function renderDash(){
     </div>
     <button class="btn bp" onclick="S.day=S.nextDay;go('workout')">Empezar ${getPlan()[S.nextDay].label} →</button>
   </div>
-  ${S.sessions.length>0?`<div class="sh">Últimas sesiones</div><div class="card">${S.sessions.slice(-4).reverse().map(s=>{
+  ${S.sessions.length>0?(()=>{
+    const lastTs=S.sessions[S.sessions.length-1].ts;
+    const canReopen=!getActiveWorkout(); // no ofrecer reabrir si ya hay un entreno en curso
+    return`<div class="sh">Últimas sesiones</div><div class="card">${S.sessions.slice(-4).reverse().map(s=>{
     const lbl=getPlan()[s.day]?.label||s.day;
     const focus=getPlan()[s.day]?.focus||'';
     const dur=s.durationMin?` · ${s.durationMin}min`:'';
+    const isLast=s.ts===lastTs;
     return`<div style="padding:8px 0;border-bottom:1px solid var(--border)">
       <div style="display:flex;align-items:center;gap:10px">
         <span class="pill p${s.day.toLowerCase()}" style="font-size:11px;padding:3px 9px">${esc(lbl)}</span>
@@ -3492,8 +3581,10 @@ function renderDash(){
         <span style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace">${esc(s.date||'')}${dur}</span>
       </div>
       ${s.note?`<div style="font-size:12px;color:var(--text2);margin-top:6px;padding:6px 10px;background:rgba(255,255,255,0.03);border-radius:6px;border-left:2px solid var(--border2);line-height:1.5;font-style:italic">"${esc(s.note)}"</div>`:''}
+      ${isLast&&canReopen?`<button class="hist-btn" style="margin-top:8px" onclick="reopenSession(${s.ts})">↩ Reabrir para terminar</button>`:''}
     </div>`;
-  }).join('')}</div>`:''}
+  }).join('')}</div>`;
+  })():''}
   `;
 }
 
