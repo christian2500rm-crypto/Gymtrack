@@ -474,11 +474,13 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=9;
+const SCHEMA_VERSION=10;
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
 // Duración máxima plausible de una sesión (min); por encima se considera dato no fiable
 const MAX_SESSION_MIN=360;
+// Duración de una semana de descanso planificada (ms)
+const REST_WEEK_MS=7*86400000;
 
 // Claves transitorias de UI que NO deben persistirse (modales abiertos, búsquedas, etc.)
 const TRANSIENT_KEYS=['wmodal','wnew','settingsOpen','_hist','open','_editWeightTarget','_deloadActive'];
@@ -575,6 +577,42 @@ function getActiveWorkout(){
   return {day,startTs,strDone:mc.strDone,strTotal:mc.strTotal,label:plan[day].label,focus:plan[day].focus};
 }
 
+// ── SEMANA DE DESCANSO (deload planificado) ──────────────────
+// Periodo de descanso que cubre AHORA, o null.
+function getActiveRest(){
+  const now=Date.now();
+  if(!Array.isArray(S.restWeeks))return null;
+  return S.restWeeks.find(r=>r&&r.startTs!=null&&r.endTs!=null&&r.startTs<=now&&r.endTs>now)||null;
+}
+// Días completos que quedan de un periodo de descanso (mínimo 0).
+function restDaysLeft(r){
+  if(!r||r.endTs==null)return 0;
+  return Math.max(0,Math.ceil((r.endTs-Date.now())/86400000));
+}
+// Semanas de descanso (fraccionarias) dentro de la ventana [fromTs,toTs], para no penalizar la constancia.
+// Calcula la UNIÓN de días de descanso recortados a la ventana (evita doble-conteo de periodos
+// solapados o adyacentes) y la convierte a semanas, capada al tamaño de la ventana.
+function restWeeksInWindow(fromTs,toTs){
+  if(!Array.isArray(S.restWeeks)||!S.restWeeks.length||toTs<=fromTs)return 0;
+  const iv=[];
+  S.restWeeks.forEach(r=>{
+    if(!r||r.startTs==null||r.endTs==null)return;
+    const s=Math.max(fromTs,r.startTs),e=Math.min(toTs,r.endTs);
+    if(e>s)iv.push([s,e]);
+  });
+  if(!iv.length)return 0;
+  iv.sort((a,b)=>a[0]-b[0]);
+  let total=0,curS=iv[0][0],curE=iv[0][1];
+  for(let i=1;i<iv.length;i++){
+    if(iv[i][0]<=curE){curE=Math.max(curE,iv[i][1]);} // solapan/adyacentes → fusionar
+    else{total+=curE-curS;curS=iv[i][0];curE=iv[i][1];}
+  }
+  total+=curE-curS;
+  const weeks=total/REST_WEEK_MS;
+  const windowWeeks=(toTs-fromTs)/REST_WEEK_MS;
+  return Math.min(weeks,windowWeeks);
+}
+
 // Sincroniza S.activeWorkout con las marcas reales de CUALQUIER día (auto-sana).
 // Reapunta al día con marcas y lo limpia cuando no queda ninguna en ningún día.
 function syncActiveWorkout(){
@@ -665,13 +703,17 @@ function migrateState(data){
       }
     }
   }
+  if(v<10){
+    // v10: semana de descanso planificada. ADITIVO — solo añade la lista si falta.
+    if(!Array.isArray(data.restWeeks))data.restWeeks=[];
+  }
   data.schema_version=SCHEMA_VERSION;
   return data;
 }
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null},migrateState(loadState())||{});
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[]},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -2551,6 +2593,46 @@ function _reopenSessionConfirmed(sess){
     : 'Sesión reabierta — termínala y guárdala otra vez',droppedCount>0?4000:2600);
 }
 
+// ── SEMANA DE DESCANSO — activar / terminar ──
+function startRestWeek(){
+  if(getActiveRest()){toast('Ya estás en una semana de descanso');return;}
+  confirmModal({
+    title:'Semana de descanso',
+    body:'Se marcarán los próximos 7 días como descanso planificado. El Coach no penalizará tu constancia y te lo recordará en Inicio. Puedes terminarla antes cuando quieras.',
+    okText:'Empezar descanso',cancelText:'Cancelar',
+    onOk:()=>{
+      if(!Array.isArray(S.restWeeks))S.restWeeks=[];
+      const now=Date.now();
+      S.restWeeks.push({startTs:now,endTs:now+REST_WEEK_MS});
+      S.settingsOpen=false;
+      saveState();render();
+      toast('🌴 Semana de descanso activada');
+    }
+  });
+}
+function endRestWeek(){
+  if(!getActiveRest())return;
+  confirmModal({
+    title:'Terminar descanso',
+    body:'¿Terminar la semana de descanso ahora y volver a entrenar? Los días que ya descansaste no penalizan tu constancia.',
+    okText:'Terminar',cancelText:'Seguir descansando',
+    onOk:()=>{
+      const now=Date.now();
+      // Cierra TODOS los descansos activos (por si hubiera solapados): los recién creados (<1h)
+      // se eliminan sin registro; el resto se cierran en 'ahora'.
+      S.restWeeks=(S.restWeeks||[]).filter(r=>{
+        const active=r&&r.startTs!=null&&r.endTs!=null&&r.startTs<=now&&r.endTs>now;
+        if(!active)return true;
+        if(now-r.startTs<3600000)return false; // recién empezado → descartar
+        r.endTs=now; return true;              // cerrar en 'ahora'
+      });
+      S.settingsOpen=false;
+      saveState();render();
+      toast('Descanso terminado — ¡a darle! 💪');
+    }
+  });
+}
+
 // ═══════════════════════════════════════════════════════════
 // COACH IA — Motor de análisis rule-based
 // ═══════════════════════════════════════════════════════════
@@ -2624,11 +2706,14 @@ function coach_consistency(weeks){
   // Sesiones por semana en las últimas N semanas
   const now=Date.now(),cutoff=now-(weeks*7*86400000);
   const recent=S.sessions.filter(s=>s.ts>=cutoff);
-  const perWeek=recent.length/weeks;
+  // Descontar las semanas de descanso planificado del denominador (no penalizan la constancia)
+  const restCount=restWeeksInWindow(cutoff,now);
+  const effWeeks=Math.max(1,weeks-restCount);
+  const perWeek=recent.length/effWeeks;
   // Objetivo configurable por el usuario (clamp >=1, nunca divide entre 0)
   const target=getWeeklyTarget();
   const rate=Math.min(1,perWeek/target);
-  return{sessions:recent.length,perWeek:perWeek.toFixed(1),rate,target};
+  return{sessions:recent.length,perWeek:perWeek.toFixed(1),rate,target,restWeeks:restCount};
 }
 
 function coach_weightTrend(){
@@ -2838,13 +2923,20 @@ function coach_generateInsights(){
     }
   }
 
-  // ═ H) INACTIVIDAD ═
-  const daysSinceLast=coach_daysSinceLastSession();
-  if(daysSinceLast!=null){
-    if(daysSinceLast>=7&&daysSinceLast<=14){
-      insights.push({type:'warn',ic:'⏳',t:'Llevas días sin entrenar',d:`Última sesión hace <strong>${daysSinceLast} días</strong>. El cuerpo conserva fuerza ~1-2 semanas — empieza suave (75% del último peso) para reincorporarte sin lesionarte.`});
-    }else if(daysSinceLast>14){
-      insights.push({type:'bad',ic:'🔄',t:'Pausa larga',d:`Más de <strong>${daysSinceLast} días</strong> sin entrenar. Considera empezar con un microciclo de readaptación (2 semanas al 60% de pesos) antes de volver al ritmo normal.`});
+  // ═ H) DESCANSO / INACTIVIDAD ═
+  const activeRest=getActiveRest();
+  if(activeRest){
+    // Semana de descanso planificada: mensaje positivo, sin avisos de inactividad
+    const dleft=restDaysLeft(activeRest);
+    insights.push({type:'info',ic:'🌴',t:'Semana de descanso',d:`Estás en una semana de descanso planificada${dleft>0?` · quedan <strong>${dleft} día${dleft!==1?'s':''}</strong>`:''}. El descanso es donde el músculo crece y se previenen lesiones — tu constancia no se penaliza.`});
+  }else{
+    const daysSinceLast=coach_daysSinceLastSession();
+    if(daysSinceLast!=null){
+      if(daysSinceLast>=7&&daysSinceLast<=14){
+        insights.push({type:'warn',ic:'⏳',t:'Llevas días sin entrenar',d:`Última sesión hace <strong>${daysSinceLast} días</strong>. El cuerpo conserva fuerza ~1-2 semanas — empieza suave (75% del último peso) para reincorporarte sin lesionarte.`});
+      }else if(daysSinceLast>14){
+        insights.push({type:'bad',ic:'🔄',t:'Pausa larga',d:`Más de <strong>${daysSinceLast} días</strong> sin entrenar. Considera empezar con un microciclo de readaptación (2 semanas al 60% de pesos) antes de volver al ritmo normal.`});
+      }
     }
   }
 
@@ -3072,6 +3164,21 @@ function coach_weekStats(offsetWeeks){
 }
 
 function coach_weeklyInsight(){
+  // Si estamos en una semana de descanso planificada, mensaje específico (sin nag de "0 sesiones")
+  const activeRest=getActiveRest();
+  if(activeRest){
+    const curR=coach_weekStats(0);
+    const dleft=restDaysLeft(activeRest);
+    return{
+      title:'Semana de descanso',
+      tag:'Descanso 🌴',
+      description:`Semana de descanso planificada${dleft>0?` · quedan ${dleft} día${dleft!==1?'s':''}`:''}. Recupera, duerme y come bien — vuelves más fuerte. Tu constancia no se penaliza.`,
+      stats:[
+        {l:'Sesiones',v:curR.sessions,d:0,unit:''},
+        {l:'Estado',v:'Descanso',d:0,unit:''}
+      ]
+    };
+  }
   const cur=coach_weekStats(0);
   const prev=coach_weekStats(1);
 
@@ -3274,8 +3381,11 @@ function coach_score(){
     score+=Math.max(0,Math.min(40,(progressing/withData)*40-(regressing/withData)*10));
   }
 
-  // Volumen total (20 pts) — completaste las sesiones planeadas (según tu objetivo semanal)
-  const expectedSessions=CYCLE_WEEKS*getWeeklyTarget();
+  // Volumen total (20 pts) — completaste las sesiones planeadas (según tu objetivo semanal).
+  // Las semanas de descanso planificado no cuentan como semanas esperadas.
+  const restInCycle=restWeeksInWindow(cycle.start,Date.now());
+  const effCycleWeeks=Math.max(1,CYCLE_WEEKS-restInCycle);
+  const expectedSessions=effCycleWeeks*getWeeklyTarget();
   score+=Math.min(20,(cycle.sessions.length/expectedSessions)*20);
 
   score=Math.max(0,Math.min(100,Math.round(score)));
@@ -3476,7 +3586,23 @@ function renderDash(){
   </div>
   </div></div>
   <div class="sh">Esta semana</div>
-  <div class="card">
+  ${(()=>{
+    const ar=getActiveRest();
+    if(ar){
+      const dleft=restDaysLeft(ar);
+      return`<div class="card" style="border-color:var(--blue);background:rgba(59,130,246,.06)">
+        <div style="display:flex;align-items:center;gap:11px;margin-bottom:8px">
+          <span style="font-size:22px">🌴</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:15px;font-weight:600">Semana de descanso</div>
+            <div style="font-size:12px;color:var(--text2)">${dleft>0?`Quedan ${dleft} día${dleft!==1?'s':''}`:'Termina hoy'} · el Coach no penaliza tu constancia</div>
+          </div>
+        </div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5">El descanso es parte del progreso: recuperas fuerza y evitas lesiones.${wk>0?` Aun así llevas ${wk} sesión${wk!==1?'es':''} esta semana.`:''}</div>
+        <button class="btn bs" onclick="endRestWeek()">Terminar descanso y volver a entrenar</button>
+      </div>`;
+    }
+    return`<div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <span style="font-size:15px;font-weight:600">${Math.min(wk,target)} de ${target} sesion${target!==1?'es':''}${wk>target?` · +${wk-target} extra 🔥`:''}</span>
       <span style="font-size:12px;font-weight:500;color:${wk>=target?'var(--green)':wk>0?'var(--amber)':'var(--text2)'}">${wk>=target?'¡Semana completa! 🎉':wk>0?(target-wk===1?'Una más 🔥':`${target-wk} más 💪`):'Sin sesiones aún'}</span>
@@ -3484,7 +3610,8 @@ function renderDash(){
     <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(wk/target*100))}%"></div></div>
     <div class="wgrid">${weekGrid()}</div>
     <div style="display:flex;gap:12px;margin-top:9px;font-size:10px;color:var(--text3)"><span style="color:var(--green)">■ Completado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span><span>■ Planificado</span></div>
-  </div>
+  </div>`;
+  })()}
   <div class="mrow">
     <div class="met"><div class="mval">${tot}</div><div class="mlbl">Sesiones</div></div>
     <div class="met"><div class="mval" style="color:var(--green)">${lw?lw.v:'—'}</div><div class="mlbl">kg hoy</div></div>
@@ -3564,7 +3691,10 @@ function renderDash(){
       <span class="pill p${S.nextDay.toLowerCase()}">${getPlan()[S.nextDay].label}</span>
       <span style="font-size:14px;color:var(--text2)">${getPlan()[S.nextDay].focus}</span>
     </div>
-    <button class="btn bp" onclick="S.day=S.nextDay;go('workout')">Empezar ${getPlan()[S.nextDay].label} →</button>
+    ${getActiveRest()
+      ? `<div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.5">Estás en semana de descanso. Si te apetece entrenar suave, adelante — no es obligatorio.</div>
+         <button class="btn bs" onclick="S.day=S.nextDay;go('workout')">Entrenar suave de todas formas</button>`
+      : `<button class="btn bp" onclick="S.day=S.nextDay;go('workout')">Empezar ${getPlan()[S.nextDay].label} →</button>`}
   </div>
   ${S.sessions.length>0?(()=>{
     const lastTs=S.sessions[S.sessions.length-1].ts;
@@ -4465,6 +4595,14 @@ function renderSettings(){
           <span class="set-row-v">${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}</span>
           <span class="set-row-arrow">›</span>
         </div>
+        ${(()=>{const ar=getActiveRest();return`<div class="set-row" onclick="${ar?'endRestWeek()':'startRestWeek()'}">
+          <div class="set-row-info">
+            <div class="set-row-t">Semana de descanso</div>
+            <div class="set-row-d">${ar?'En descanso · el Coach no penaliza tu constancia':'Planifica 7 días de descanso sin penalización'}</div>
+          </div>
+          <span class="set-row-v">${ar?`${restDaysLeft(ar)} día${restDaysLeft(ar)!==1?'s':''}`:'—'}</span>
+          <span class="set-row-arrow">›</span>
+        </div>`;})()}
       </div>
       <div class="sh" style="margin:2px 0 8px">Datos personales</div>      <div class="set-section">
         <div class="set-row" onclick="openEditWeight('first')">
@@ -4775,6 +4913,8 @@ function importData(){
                 }
               });
             }
+            // Normalizar restWeeks siempre (defensa: un backup v10 editado a mano podría traerlo inválido)
+            if(!Array.isArray(migrated.restWeeks))migrated.restWeeks=[];
             Object.keys(S).forEach(k=>{if(!(k in migrated))migrated[k]=S[k];});
             S=Object.assign(S,migrated);
             // Limpiar estado UI transitorio importado
