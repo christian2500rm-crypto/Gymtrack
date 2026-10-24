@@ -172,8 +172,8 @@ input{font-family:inherit}
 .modal-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
 .modal h3{font-size:17px;font-weight:600;margin-bottom:14px;letter-spacing:-.2px}
 /* EXERCISE ANIMATION */
-.ex-anim{position:relative;width:100%;height:200px;border-radius:var(--rsm);background:#111;margin-bottom:12px;overflow:hidden;display:block}
-.ex-anim canvas{display:block;width:100%;height:100%}
+.ex-anim{position:relative;width:100%;height:200px;border-radius:var(--rsm);background:#111;margin-bottom:12px;overflow:hidden;display:block;touch-action:pan-y;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.ex-anim canvas{display:block;width:100%;height:100%;touch-action:pan-y}
 /* REST TIMER */
 #rest-timer{position:fixed;bottom:calc(58px + var(--sb) + 8px);left:50%;transform:translateX(-50%) translateY(80px);width:calc(100% - 28px);max-width:452px;background:#1a1a1a;border:1px solid var(--border2);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:14px;z-index:150;box-shadow:0 -4px 32px rgba(0,0,0,.6);transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none}
 #rest-timer.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:all}
@@ -1135,18 +1135,21 @@ function dragCam(inst){const b=inst.base,cm=makeCam(Object.assign({},inst.spec.c
 function lerpCam(a,b,e){return Object.assign({},b,{zoom:mix(a.zoom,b.zoom,e),ox:mix(a.ox,b.ox,e),oy:mix(a.oy,b.oy,e),traces:e>=1?b.traces:null});}
 function settle(inst){const to=(inst.dyaw||inst.dpitch)?fitCam(inst.spec,inst.W,inst.H,PAD,camOf(inst)):inst.base;
   if(inst.rm){inst.cm=to;drawStatic(inst);return;}inst.anim={k:'fit',from:inst.cm,to,t0:NOW(),d:260};inst.dirty=1;kick();}
-function resetView(inst){if(inst.paused)togglePause(inst);if(!inst.dyaw&&!inst.dpitch)return;
+function resetView(inst){if(!inst.dyaw&&!inst.dpitch)return;
   if(inst.rm){inst.dyaw=inst.dpitch=0;inst.cm=inst.base;drawStatic(inst);return;}
   inst.anim={k:'ret',dy:inst.dyaw,dp:inst.dpitch,t0:NOW(),d:420};kick();}
 function togglePause(inst){if(inst.rm)return;const n=NOW();if(inst.paused)inst.pauseAcc+=n-inst.pausedAt;else inst.pausedAt=n;inst.paused=!inst.paused;inst.dirty=1;kick();}
-function bindInput(inst){const el=inst.cv;el.style.touchAction='pan-y';el.style.cursor='grab';let st=null,lastTap=0;
+function bindInput(inst){const el=inst.cv,cs=el.style;cs.touchAction='pan-y';cs.cursor='grab';cs.userSelect=cs.webkitUserSelect='none';cs.webkitTouchCallout='none';cs.webkitTapHighlightColor='transparent';
+  let st=null,tapT=null,lastEnd=0;
+  el.addEventListener('touchend',e=>{const n=NOW();if(n-lastEnd<350&&e.cancelable)e.preventDefault();lastEnd=n;},{passive:false});
+  el.addEventListener('dblclick',e=>e.preventDefault());
   el.addEventListener('pointerdown',e=>{st={x:e.clientX,y:e.clientY,t:NOW(),dy:inst.dyaw,dp:inst.dpitch,id:e.pointerId,type:e.pointerType,drag:false};});
   el.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;
     if(!st.drag&&Math.abs(dx)>7&&Math.abs(dx)>Math.abs(dy)*1.2){st.drag=true;inst.drag=true;inst.touched=true;inst.anim=null;el.style.cursor='grabbing';try{el.setPointerCapture(e.pointerId);}catch(_){}}
     if(st.drag){inst.dyaw=st.dy+dx*.55;if(st.type==='mouse')inst.dpitch=clamp(st.dp+dy*.35,-30,60);inst.cm=dragCam(inst);inst.dirty=1;if(inst.rm)drawStatic(inst);else kick();if(e.cancelable)e.preventDefault();}});
   const end=e=>{if(!st||e.pointerId!==st.id)return;const s=st;st=null;inst.drag=false;el.style.cursor='grab';
     if(s.drag){settle(inst);return;}if(e.type==='pointercancel')return;
-    if(NOW()-s.t<350){inst.touched=true;const n=NOW();if(n-lastTap<320){lastTap=0;resetView(inst);}else{lastTap=n;togglePause(inst);}}};
+    if(NOW()-s.t<350){inst.touched=true;if(tapT){clearTimeout(tapT);tapT=null;resetView(inst);}else tapT=setTimeout(()=>{tapT=null;togglePause(inst);},280);}};
   el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);}
 function frame(inst,t){const{ctx,spec,cm,W,H,dpr}=inst;ctx.setTransform(dpr,0,0,dpr,0,0);
   const c=evalTL(spec._tl,spec,t);renderTo(ctx,spec,cm,c,W,H);drawUI(inst);}
