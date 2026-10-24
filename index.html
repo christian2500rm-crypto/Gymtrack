@@ -78,6 +78,22 @@ input{font-family:inherit}
 .inp{flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);color:var(--text);font-size:15px;font-family:'DM Mono',monospace;font-weight:500;outline:none;transition:border-color .2s;-webkit-appearance:none}
 .inp:focus{border-color:var(--green)}
 .inp::placeholder{color:var(--text3)}
+/* placeholder de sugerencia: se distingue de un valor escrito (cursiva, sans, más pequeño) */
+.inp.inp-hint::placeholder{font-family:'DM Sans',sans-serif;font-style:italic;font-weight:400;font-size:13px}
+/* peso pendiente: hay series marcadas pero no se ha escrito el peso */
+.inp.need{border-color:rgba(245,158,11,.75);box-shadow:0 0 0 3px rgba(245,158,11,.14)}
+.need-hint{font-size:11px;color:#fcd34d;margin:-2px 0 8px 50px;line-height:1.4}
+.fin-miss{background:rgba(245,158,11,.07);border:1px solid rgba(245,158,11,.3);border-radius:var(--rsm);padding:12px 12px 4px;margin-bottom:14px}
+.fin-miss-h{font-size:13px;font-weight:600;color:#fcd34d;margin-bottom:4px}
+.fin-miss-p{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:6px}
+.fin-miss-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--border)}
+.fin-miss-n{flex:1;min-width:0;font-size:13px;color:var(--text);font-weight:500;line-height:1.3;overflow-wrap:anywhere}
+.fin-miss-n small{display:block;font-size:11px;color:var(--text3);font-weight:400;margin-top:2px}
+.fin-miss-inp{flex:0 0 118px;width:118px;min-width:0;min-height:44px;padding:8px 10px}
+.fin-miss-u{font-size:12px;color:var(--text3);flex-shrink:0}
+.fin-miss-err{font-size:12px;color:#fca5a5;line-height:1.5;padding:6px 0 2px}
+.fin-miss-err[hidden],.fin-miss-skip[hidden],.need-hint[hidden]{display:none}
+.fin-miss-skip{display:block;background:none;border:none;color:var(--text2);font-size:12px;text-decoration:underline;min-height:44px;padding:0;cursor:pointer;font-family:inherit}
 .sug{padding:10px 12px;border-radius:var(--rsm);font-size:13px;line-height:1.5;margin-bottom:8px}
 .sug.up{background:rgba(34,197,94,.1);color:#86efac;border:1px solid rgba(34,197,94,.25)}
 .sug.ok{background:rgba(59,130,246,.1);color:#93c5fd;border:1px solid rgba(59,130,246,.25)}
@@ -3147,7 +3163,7 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=10;
+const SCHEMA_VERSION=11;
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
 // Duración máxima plausible de una sesión (min); por encima se considera dato no fiable
@@ -3189,6 +3205,32 @@ function isCompoundEx(ex){
     if(lib&&lib.compound)return true;
   }
   return false;
+}
+
+// Reps objetivo como número (12 o '12'), o null si el objetivo no es un nº de reps (ej: '30s' en la plancha, '8-12')
+function targetRepsNum(ex){
+  const r=String(ex&&ex.r!=null?ex.r:'').trim();
+  return /^\d{1,3}$/.test(r)&&+r>0?+r:null;
+}
+// Texto del objetivo: «12 reps» / «8-12 reps», o tal cual cuando no son reps («30s»)
+function fmtTargetReps(ex){
+  const n=targetRepsNum(ex),raw=String(ex&&ex.r!=null?ex.r:'').trim();
+  if(n!=null)return n+' reps';
+  return /^\d{1,3}\s*[-–]\s*\d{1,3}$/.test(raw)?raw+' reps':raw;
+}
+// Peso corporal o por tiempo (flexiones, plancha, elevaciones colgado): el peso es OPCIONAL,
+// así que nunca se avisa de «falta el peso» ni se bloquea el guardado por ellos.
+const BODYWEIGHT_LIB=['lib_pushup','lib_plank','lib_leg_raise'];
+function isBodyweightEx(ex){
+  if(!ex||ex.cardio)return false;
+  if(BODYWEIGHT_LIB.includes(ex.lib)||BODYWEIGHT_LIB.includes(ex.id))return true;
+  if(/peso corporal|bodyweight|barra fija/i.test(String(ex.eq||'')))return true;
+  if(typeof EXERCISE_DB!=='undefined'&&ex.n){
+    const lib=EXERCISE_DB.find(e=>e.n===ex.n);
+    if(lib&&BODYWEIGHT_LIB.includes(lib.id))return true;
+  }
+  // Objetivo por tiempo («30s», «45 seg», «1 min»)
+  return /^\d+(?:[.,]\d+)?\s*(?:s|seg|segs|segundos|min|mins|minutos)$/i.test(String(ex.r==null?'':ex.r).trim());
 }
 
 // Compara dos timestamps por día calendario (mismo año/mes/día)
@@ -3289,6 +3331,8 @@ function restWeeksInWindow(fromTs,toTs){
 // Sincroniza S.activeWorkout con las marcas reales de CUALQUIER día (auto-sana).
 // Reapunta al día con marcas y lo limpia cuando no queda ninguna en ningún día.
 function syncActiveWorkout(){
+  // Una sesión reabierta cuyo día ya no tiene series marcadas vuelve al historial tal como estaba
+  _reconcileReopened();
   const day=currentInProgressDay();
   if(day){
     if(!S.activeWorkout||S.activeWorkout.day!==day){
@@ -3380,13 +3424,17 @@ function migrateState(data){
     // v10: semana de descanso planificada. ADITIVO — solo añade la lista si falta.
     if(!Array.isArray(data.restWeeks))data.restWeeks=[];
   }
+  if(v<11){
+    // v11: sesión reabierta (conserva fecha, duración y nota al volver a guardarla). ADITIVO.
+    if(data.reopenedSession===undefined)data.reopenedSession=null;
+  }
   data.schema_version=SCHEMA_VERSION;
   return data;
 }
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m'},migrateState(loadState())||{});
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',reopenedSession:null},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -3407,6 +3455,12 @@ if(!S.coachStart&&S.sessions.length>0){
 if(S.sessionStartTs&&(Date.now()-S.sessionStartTs)>86400000){
   S.sessionStartTs=null;
   saveState();
+}
+// Sesión reabierta: descartar datos inválidos y devolverla al historial si ya no tiene series marcadas
+if(S.reopenedSession!=null){
+  const _rsBefore=S.reopenedSession;
+  _reconcileReopened();
+  if(S.reopenedSession!==_rsBefore)saveState();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -3878,18 +3932,49 @@ function startCardioTimer(exId,mins){
 }
 
 // ── CALENTAMIENTO ACTIVO ──
+// Peso objetivo de HOY para calcular el calentamiento:
+// el que ya hayas escrito para hoy → si no, la sugerencia si es mayor que el último peso → si no, el último.
+// Sin historial no hay calentamiento (null).
+function getWarmupTarget(ex){
+  if(!ex)return null;
+  const lw=getLastW(ex.id);
+  const last=lw?+lw.v:0;
+  if(!(last>0))return null;
+  const typed=parseFloat((S.logs[ex.id]||{}).w);
+  if(typed>0&&typed<1000)return typed;
+  const s=sugW(ex.id);
+  const sv=s?+s.v:0;
+  return sv>last?sv:last;
+}
 // Devuelve series de calentamiento sugeridas, o null si el ejercicio no las necesita
 function getWarmupSets(ex){
   if(!ex||ex.cardio)return null;
   if(!isCompoundEx(ex))return null;
-  // Necesitamos saber el peso objetivo. Usamos sugerencia o último peso
-  const lw=getLastW(ex.id);
-  if(!lw||!lw.v||lw.v<20)return null; // peso muy bajo no necesita warmup
-  const target=lw.v;
+  const target=getWarmupTarget(ex);
+  if(!target||target<20)return null; // peso muy bajo no necesita warmup
   return[
     {pct:50,w:+(target*0.5/2.5).toFixed(0)*2.5,reps:8},
     {pct:75,w:+(target*0.75/2.5).toFixed(0)*2.5,reps:5}
   ];
+}
+// Bloque de calentamiento de la tarjeta (va dentro de .wu-slot para poder refrescarlo al escribir el peso)
+function warmupBlockHtml(ex){
+  const wu=getWarmupSets(ex);
+  if(!wu||(S.warmups[ex.id]&&S.warmups[ex.id]._skipped))return'';
+  const w=S.warmups[ex.id]||{};
+  if(wu.every((_,i)=>w[i]))return`<div class="warmup-block" style="opacity:.6">
+    <div class="warmup-h"><span class="warmup-h-l">🔥 Calentamiento ✓</span></div>
+  </div>`;
+  return`<div class="warmup-block">
+    <div class="warmup-h">
+      <span class="warmup-h-l">🔥 Calentamiento sugerido <span style="font-family:'DM Mono',monospace;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8">· ${esc(getWarmupTarget(ex))} kg</span></span>
+      <button class="warmup-skip" onclick="skipWarmup('${ex.id}')">Saltar</button>
+    </div>
+    ${wu.map((s,i)=>`<div class="warmup-row">
+      <button class="warmup-sb ${w[i]?'on':''}" onclick="toggleWarmupSet('${ex.id}',${i})" aria-label="Calentamiento ${i+1}">${w[i]?'✓':i+1}</button>
+      <div class="warmup-info"><b>${s.w} kg</b> × ${s.reps} reps <span style="color:var(--text3)">(${s.pct}%)</span></div>
+    </div>`).join('')}
+  </div>`;
 }
 
 function toggleWarmupSet(exId,wIdx){
@@ -3953,11 +4038,14 @@ function toggleSet(id,i,evt){
     if(S.rpe&&S.rpe[id])delete S.rpe[id][i];
   }
   // Crear / cerrar el entreno activo según las marcas reales (permite reanudarlo si se interrumpe)
+  const rsBefore=getReopened();
   syncActiveWorkout();
+  // ¿Al desmarcar la última serie, la sesión reabierta ha vuelto al historial?
+  const restoredRs=(rsBefore&&!getReopened())?rsBefore:null;
   saveState();render();
   _lastSetAction={id,i,prevSet,prevRpe};
   const ex=getPlan()[S.day].ex.find(e=>e.id===id);
-  const label=wasOff?`Serie ${i+1} marcada`:`Serie ${i+1} desmarcada`;
+  const label=wasOff?`Serie ${i+1} marcada`:(restoredRs?`Serie ${i+1} desmarcada · sesión devuelta al historial`:`Serie ${i+1} desmarcada`);
   showUndoToast(label,()=>{
     if(!_lastSetAction)return;
     S.sets[id][i]=_lastSetAction.prevSet;
@@ -3966,6 +4054,16 @@ function toggleSet(id,i,evt){
       S.rpe[id][i]=_lastSetAction.prevRpe;
     }else if(S.rpe&&S.rpe[id]){
       delete S.rpe[id][i];
+    }
+    // Deshacer también la vuelta al historial: la sesión sigue reabierta como antes
+    if(restoredRs&&!getReopened()){
+      const sess=findSession(restoredRs.session.ts);
+      if(sess){
+        _detachSession(sess,restoredRs.prevNextDay,restoredRs.reopenTs);
+        S.nextDay=restoredRs.session.day;
+        S.sessionStartTs=_reopenStartTs(S.reopenedSession);
+        S.activeWorkout={day:restoredRs.session.day,startTs:restoredRs.reopenTs};
+      }
     }
     _lastSetAction=null;
     syncActiveWorkout();
@@ -4070,6 +4168,25 @@ function updLog(id,f,v){
   S.logs[id][f]=val;
   saveState();
 }
+// Input de peso del ejercicio: guarda y actualiza el aviso «falta el peso» y el calentamiento sin re-renderizar
+// (re-renderizar cerraría el teclado mientras escribes)
+let _wuRefreshT=null;
+function onWeightInput(inp,id){
+  updLog(id,'w',inp.value);
+  const ok=parseFloat(String(inp.value||'').replace(',','.'))>0;
+  const card=inp.closest('.excard');
+  const ex=(getPlan()[S.day]?.ex||[]).find(e=>e.id===id);
+  const need=!ok&&!!ex&&!isBodyweightEx(ex)&&countSetsDone(id,ex.s)>0;
+  inp.classList.toggle('need',need);
+  const h=card&&card.querySelector('.need-hint');
+  if(h)h.hidden=!need;
+  // Calentamiento: sigue al peso escrito (con un pequeño retardo para no parpadear con cada tecla)
+  clearTimeout(_wuRefreshT);
+  _wuRefreshT=setTimeout(()=>{
+    const slot=card&&card.isConnected?card.querySelector('.wu-slot'):null;
+    if(slot&&ex)slot.innerHTML=warmupBlockHtml(ex);
+  },350);
+}
 function logW(){
   const v=parseFloat(S.wnew);
   if(!v||v<30||v>300){
@@ -4092,12 +4209,14 @@ function finishSession(){
   const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const doneEx=strEx.filter(e=>countSetsDone(e.id,e.s)>=e.s).length;
   // Bug fix: evitar doble sesión el mismo día — comparar por timestamp (resistente a colisiones de año)
-  const nowTs=Date.now();
+  // Una sesión reabierta se guarda con su fecha original: se compara con ESE día.
+  const rs=reopenedFor(S.day);
+  const nowTs=rs?rs.session.ts:Date.now();
   const existingToday=S.sessions.find(s=>s.ts&&sameDayTs(s.ts,nowTs));
   if(existingToday){
     confirmModal({
-      title:'Ya hay una sesión hoy',
-      body:`Ya registraste el ${getPlan()[existingToday.day]?.label||existingToday.day} hoy. ¿Guardar esta como una sesión adicional?`,
+      title:rs?'Ya hay otra sesión ese día':'Ya hay una sesión hoy',
+      body:`Ya registraste el ${getPlan()[existingToday.day]?.label||existingToday.day} ${rs?'el '+(rs.session.date||'mismo día'):'hoy'}. ¿Guardar esta como una sesión adicional?`,
       okText:'Guardar igual',
       cancelText:'Cancelar',
       onOk:()=>openFinishModal(doneEx,strEx.length)
@@ -4107,45 +4226,174 @@ function finishSession(){
   openFinishModal(doneEx,strEx.length);
 }
 
-// Modal de finalización con nota opcional
+// Ejercicios de fuerza con series marcadas pero SIN peso escrito: al guardar se perderían del progreso.
+// Los de peso corporal / por tiempo no cuentan (su peso es opcional).
+// Devuelve [{ex, done (series hechas), sug (peso sugerido o null), last (último peso o null), repsLbl}]
+function getMissingWeights(dayKey){
+  const day=getPlan()[dayKey||S.day];
+  if(!day||!Array.isArray(day.ex))return[];
+  return day.ex.filter(ex=>!ex.cardio&&!isBodyweightEx(ex)&&countSetsDone(ex.id,ex.s)>0&&!(parseFloat((S.logs[ex.id]||{}).w)>0)).map(ex=>{
+    const s=sugW(ex.id),lw=getLastW(ex.id),typedR=parseInt((S.logs[ex.id]||{}).r);
+    return{ex,done:countSetsDone(ex.id,ex.s),sug:s&&+s.v>0?+s.v:null,last:lw&&+lw.v>0?+lw.v:null,
+      repsLbl:typedR>0?typedR+' reps':fmtTargetReps(ex)};
+  });
+}
+function _finSugLabel(n){return n>1?'Usar los sugeridos':'Usar el sugerido';}
+
+// Modal de finalización con nota opcional (+ aviso de pesos sin escribir)
 function openFinishModal(doneEx,totalEx){
   const root=document.getElementById('cmodal-root');
   if(!root)return;
   const allDone=doneEx===totalEx;
+  const miss=getMissingWeights(S.day);
+  const rs=reopenedFor(S.day);
   const title=allDone?'¡Terminado!':'Sesión incompleta';
-  const body=allDone?'Buen trabajo. ¿Quieres añadir una nota sobre cómo te sentiste?':`Solo ${doneEx}/${totalEx} ejercicios completados. Puedes añadir una nota antes de guardar.`;
+  let body=allDone?'Buen trabajo. ¿Quieres añadir una nota sobre cómo te sentiste?':`Solo ${doneEx}/${totalEx} ejercicios completados. Puedes añadir una nota antes de guardar.`;
+  if(rs)body+=` Se guardará con su fecha original (${rs.session.date||'sin fecha'}).`;
+  const note=rs&&rs.session.note?String(rs.session.note).slice(0,500):'';
+  const nSug=miss.filter(m=>m.sug!=null).length,anySug=nSug>0;
+  const missHtml=miss.length?`<div class="fin-miss" id="fin-miss">
+      <div class="fin-miss-h">⚠️ ${miss.length===1?'Falta el peso en 1 ejercicio':`Falta el peso en ${miss.length} ejercicios`}</div>
+      <div class="fin-miss-p">Marcaste series sin escribir el peso y no contarían en tu progreso. ${nSug>1?'Usa los sugeridos, escribe otros aquí o revísalos.':anySug?'Usa el sugerido, escribe otro aquí o revísalo.':miss.length>1?'Escríbelos aquí o revísalos.':'Escríbelo aquí o revísalo.'}</div>
+      ${miss.map(m=>`<div class="fin-miss-row">
+        <div class="fin-miss-n">${esc(m.ex.n)}<small>${m.done} serie${m.done!==1?'s':''}${m.repsLbl?` · ${esc(m.repsLbl)}`:''}${m.last!=null?` · última ${m.last} kg`:' · sin historial'}</small></div>
+        <input class="inp inp-hint fin-miss-inp" type="number" inputmode="decimal" step="0.5" min="0" data-ex="${esc(m.ex.id)}" placeholder="${m.sug!=null?m.sug+' sugerido':'peso'}" aria-label="Peso de ${esc(m.ex.n)} en kg" oninput="this.classList.remove('need');_finMissLabel()">
+        <span class="fin-miss-u">kg</span>
+      </div>`).join('')}
+      <div class="fin-miss-err" id="fin-miss-err" hidden></div>
+      <button class="fin-miss-skip" id="fin-skip-btn" hidden onclick="finishSkipMissing(${doneEx},${totalEx})">Guardar sin esos pesos</button>
+    </div>`:'';
   root.innerHTML=`<div class="cmov" onclick="if(event.target===this){document.getElementById('cmodal-root').innerHTML=''}"><div class="cmod">
     <div class="cmod-hdl"></div>
     <div class="cmod-t">${esc(title)}</div>
     <div class="cmod-b">${esc(body)}</div>
-    <textarea id="finish-note-inp" class="inp" placeholder="Notas opcionales (ej: dolió el hombro, cardio sin pausa, sueño regular...)" rows="3" maxlength="500" style="width:100%;font-size:14px;font-family:inherit;font-weight:400;resize:vertical;min-height:60px;margin-bottom:14px"></textarea>
+    ${missHtml}
+    <textarea id="finish-note-inp" class="inp" placeholder="Notas opcionales (ej: dolió el hombro, cardio sin pausa, sueño regular...)" rows="3" maxlength="500" style="width:100%;font-size:14px;font-family:inherit;font-weight:400;resize:vertical;min-height:60px;margin-bottom:14px">${esc(note)}</textarea>
     <div class="cmod-btns">
-      <button class="btn bs" onclick="document.getElementById('cmodal-root').innerHTML=''">Cancelar</button>
-      <button class="btn bp" onclick="finishSessionConfirmedWithNote(${doneEx},${totalEx})">Guardar</button>
+      ${miss.length
+        ?`<button class="btn bs" onclick="finishReview()">Revisar</button>
+      <button class="btn bp" id="fin-save-btn" onclick="finishUseSuggested(${doneEx},${totalEx})">${anySug?_finSugLabel(nSug):'Guardar'}</button>`
+        :`<button class="btn bs" onclick="document.getElementById('cmodal-root').innerHTML=''">Cancelar</button>
+      <button class="btn bp" onclick="finishSessionConfirmedWithNote(${doneEx},${totalEx})">Guardar</button>`}
     </div>
   </div></div>`;
-  setTimeout(()=>{const i=document.getElementById('finish-note-inp');if(i)i.focus();},80);
+  // Sin avisos pendientes: foco en la nota. Con avisos: no abrir el teclado encima de la lista.
+  if(!miss.length)setTimeout(()=>{const i=document.getElementById('finish-note-inp');if(i)i.focus();},80);
+}
+
+// ── Pesos sin escribir (modal final) ──
+function _finCollectMissing(){
+  const day=getPlan()[S.day];
+  const out=[];
+  document.querySelectorAll('#fin-miss .fin-miss-inp').forEach(inp=>{
+    const ex=day&&Array.isArray(day.ex)?day.ex.find(e=>e.id===inp.dataset.ex):null;
+    if(!ex)return;
+    const typed=parseFloat(String(inp.value||'').replace(',','.'));
+    const okTyped=typed>0&&typed<1000;
+    const s=sugW(ex.id);
+    out.push({inp,ex,typed:okTyped,w:okTyped?+typed.toFixed(2):(s&&+s.v>0?+s.v:null)});
+  });
+  return out;
+}
+// Escribe en S.logs el peso elegido (y las reps objetivo si estaban vacías)
+function _finWriteMissing(rows,fillReps){
+  rows.forEach(m=>{
+    if(m.w==null)return;
+    if(!S.logs[m.ex.id])S.logs[m.ex.id]={};
+    S.logs[m.ex.id].w=String(m.w);
+    const tr=targetRepsNum(m.ex); // nunca un objetivo por tiempo ('30s') ni un rango
+    if(fillReps&&!(parseInt(S.logs[m.ex.id].r)>0)&&tr)S.logs[m.ex.id].r=String(tr);
+  });
+  saveState();
+}
+// Texto del botón principal: «Usar el/los sugerido(s)» mientras quede alguno vacío con sugerencia
+function _finMissLabel(){
+  const btn=document.getElementById('fin-save-btn');
+  if(!btn)return;
+  const n=_finCollectMissing().filter(m=>!m.typed&&m.w!=null).length;
+  btn.textContent=n?_finSugLabel(n):'Guardar';
+}
+function finishUseSuggested(doneEx,totalEx){
+  const rows=_finCollectMissing();
+  const pend=rows.filter(m=>m.w==null);
+  if(pend.length){
+    // Sin sugerencia (ejercicio sin historial) y sin escribir: no se guarda nada a ciegas
+    pend.forEach(m=>{m.inp.classList.add('need');m.inp.classList.remove('shake');void m.inp.offsetWidth;m.inp.classList.add('shake');});
+    const err=document.getElementById('fin-miss-err');
+    if(err){err.hidden=false;err.textContent=pend.length===1
+      ?`Escribe el peso de «${pend[0].ex.n}»: aún no hay sugerencia.`
+      :`Escribe el peso de ${pend.length} ejercicios: aún no tienen sugerencia.`;}
+    const sk=document.getElementById('fin-skip-btn');if(sk)sk.hidden=false;
+    try{pend[0].inp.focus();}catch(e){}
+    return;
+  }
+  _finWriteMissing(rows,true);
+  finishSessionConfirmedWithNote(doneEx,totalEx);
+}
+// Elección explícita: guardar la sesión aunque algún ejercicio quede sin peso
+function finishSkipMissing(doneEx,totalEx){
+  const rows=_finCollectMissing();
+  _finWriteMissing(rows,true); // los que sí tienen peso (escrito o sugerido) se guardan
+  const skipped=rows.filter(m=>m.w==null).length;
+  finishSessionConfirmedWithNote(doneEx,totalEx,skipped
+    ?`✅ Sesión guardada · ${skipped} ejercicio${skipped!==1?'s':''} sin peso no cuenta${skipped!==1?'n':''} en tu progreso`:null);
+}
+// «Revisar»: cierra el modal y lleva al primer ejercicio sin peso (conserva lo escrito en el modal)
+function finishReview(){
+  _finWriteMissing(_finCollectMissing().filter(m=>m.typed),false);
+  const root=document.getElementById('cmodal-root');if(root)root.innerHTML='';
+  const miss=getMissingWeights(S.day);
+  if(S.tab!=='workout'){S.tab='workout';}
+  S.open=miss.length?miss[0].ex.id:null;
+  render();
+  if(!miss.length)return;
+  const first=miss[0];
+  setTimeout(()=>{
+    const inp=document.querySelector('.excard.open .inp[data-f="w"]');
+    if(inp){
+      inp.classList.add('need');
+      let rm=false;try{rm=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
+      try{inp.scrollIntoView({block:'center',behavior:rm?'auto':'smooth'});}catch(e){}
+      try{inp.focus({preventScroll:true});}catch(e){}
+    }
+  },120);
+  toast(miss.length>1?`Escribe el peso de «${first.ex.n}» y ${miss.length-1} más`:`Escribe el peso de «${first.ex.n}»`,3200);
 }
 
 let _finishInFlight=false;
-function finishSessionConfirmedWithNote(doneEx,totalEx){
+function finishSessionConfirmedWithNote(doneEx,totalEx,doneMsg){
   if(_finishInFlight)return; // anti doble-tap: evita guardar la sesión dos veces
   _finishInFlight=true;
   const inp=document.getElementById('finish-note-inp');
   const note=inp?String(inp.value||'').trim().slice(0,500):'';
   document.getElementById('cmodal-root').innerHTML='';
-  finishSessionConfirmed(doneEx,totalEx,note);
+  finishSessionConfirmed(doneEx,totalEx,note,doneMsg);
   setTimeout(()=>{_finishInFlight=false;},800);
 }
-function finishSessionConfirmed(doneEx,totalEx,note){
+function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
-  const today=fmtDate(new Date()),now=Date.now();
-  // Duración real: desde el primer set marcado hasta ahora.
-  // Si supera el máximo plausible (entreno reanudado horas/días después), se descarta (null).
-  let durationMin=S.sessionStartTs?Math.max(1,Math.round((now-S.sessionStartTs)/60000)):null;
-  if(durationMin!=null&&durationMin>MAX_SESSION_MIN)durationMin=null;
-  const session={day:S.day,date:today,ts:now,doneEx,totalEx,note:note||null,durationMin};
-  S.sessions.push(session);
+  const now=Date.now();
+  // Sesión reabierta de este día: se guarda con su fecha/ts originales (misma semana) y acumula la duración
+  const rs=reopenedFor(S.day);
+  const sessTs=rs?rs.session.ts:now;
+  const today=rs?(rs.session.date||fmtDate(new Date(sessTs))):fmtDate(new Date());
+  let durationMin;
+  if(rs){
+    // Duración original + tiempo extra desde que se reabrió (si el extra no es plausible, se conserva la original)
+    const o=+rs.session.durationMin;
+    const orig=isFinite(o)&&o>0?Math.round(o):null;
+    const extra=rs.reopenTs?Math.max(0,Math.round((now-rs.reopenTs)/60000)):0;
+    durationMin=orig==null?null:(orig+extra<=MAX_SESSION_MIN?orig+extra:orig);
+  }else{
+    // Duración real: desde el primer set marcado hasta ahora.
+    // Si supera el máximo plausible (entreno reanudado horas/días después), se descarta (null).
+    durationMin=S.sessionStartTs?Math.max(1,Math.round((now-S.sessionStartTs)/60000)):null;
+    if(durationMin!=null&&durationMin>MAX_SESSION_MIN)durationMin=null;
+  }
+  const base=rs?Object.assign({},rs.session):{};
+  delete base.snapshot;
+  const session=Object.assign(base,{day:S.day,date:today,ts:sessTs,doneEx,totalEx,note:note||null,durationMin});
+  if(rs)_insertByTs(S.sessions,session);else S.sessions.push(session);
   // Guardar reps, series completadas y RPE promedio
   strEx.forEach(ex=>{
     const l=S.logs[ex.id]||{},w=parseFloat(l.w);
@@ -4158,7 +4406,8 @@ function finishSessionConfirmed(doneEx,totalEx,note){
       const rpeValues=Object.values(rpeMap).filter(v=>v>0);
       const avgRpe=rpeValues.length>0?+(rpeValues.reduce((a,b)=>a+b,0)/rpeValues.length).toFixed(2):null;
       // Guardar también el muscle group para análisis RPE acumulado por zona
-      S.strength[ex.id].push({d:today,v:w,r:reps,setsDone,rpe:avgRpe,muscle:ex.muscle||null,ts:now});
+      const rec={d:today,v:w,r:reps,setsDone,rpe:avgRpe,muscle:ex.muscle||null,ts:sessTs};
+      if(rs)_insertByTs(S.strength[ex.id],rec);else S.strength[ex.id].push(rec);
     }
   });
   // Snapshot del trabajo realizado (series, pesos, RPE) para poder reabrir la sesión SIN pérdida
@@ -4168,7 +4417,11 @@ function finishSessionConfirmed(doneEx,totalEx,note){
     if(S.logs[ex.id]&&Object.keys(S.logs[ex.id]).length)session.snapshot.logs[ex.id]={...S.logs[ex.id]};
     if(S.rpe[ex.id]&&Object.keys(S.rpe[ex.id]).length)session.snapshot.rpe[ex.id]={...S.rpe[ex.id]};
   });
-  S.nextDay=getNextDay(S.day);
+  // Rotación: tras la sesión más reciente (una reabierta antigua no debe saltarse la que vino después)
+  S.nextDay=rs?getNextDay(S.sessions[S.sessions.length-1].day):getNextDay(S.day);
+  if(!getPlan()[S.nextDay])S.nextDay=getNextDay(S.day);
+  // La sesión reabierta ya está guardada de nuevo
+  if(rs)S.reopenedSession=null;
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
   // Limpiar RPE, warmups y tracker de duración de la sesión
   S.rpe={};S.warmups={};S.sessionStartTs=null;
@@ -4181,7 +4434,7 @@ function finishSessionConfirmed(doneEx,totalEx,note){
   // Disparar análisis semanal si toca
   coach_maybeRunWeeklyAnalysis();
   saveState();
-  toast(`✅ Sesión guardada · Próxima: ${getPlan()[S.nextDay].label}`);
+  toast(doneMsg||(rs?`✅ Sesión del ${today} guardada · Próxima: ${getPlan()[S.nextDay].label}`:`✅ Sesión guardada · Próxima: ${getPlan()[S.nextDay].label}`),doneMsg?4200:undefined);
   go('dash');
 }
 
@@ -4197,9 +4450,12 @@ function resumeWorkout(){
 function discardWorkout(){
   const aw=getActiveWorkout();
   if(!aw)return;
+  const rs=reopenedFor(aw.day);
   confirmModal({
-    title:'Descartar entreno',
-    body:`Se borrarán las series marcadas del ${aw.label} sin guardar la sesión. Tu historial y tus pesos NO se tocan. ¿Seguro?`,
+    title:rs?'Descartar cambios':'Descartar entreno',
+    body:rs
+      ?`Se descartarán los cambios y la sesión del ${aw.label} (${rs.session.date||''}) vuelve a tu historial tal como estaba.`
+      :`Se borrarán las series marcadas del ${aw.label} sin guardar la sesión. Tu historial y tus pesos NO se tocan. ¿Seguro?`,
     okText:'Descartar',cancelText:'Cancelar',danger:true,
     onOk:()=>{
       const plan=getPlan();
@@ -4212,10 +4468,12 @@ function discardWorkout(){
         });
       }
       S.activeWorkout=null;S.sessionStartTs=null;_lastSetAction=null;
-      // Re-detectar: si quedara otro día con marcas, su tarjeta vuelve a mostrarse (nada queda huérfano)
+      // Re-detectar: si quedara otro día con marcas, su tarjeta vuelve a mostrarse (nada queda huérfano).
+      // Si era una sesión reabierta, aquí vuelve al historial tal como estaba.
       syncActiveWorkout();
+      const restored=!!(rs&&!getReopened());
       saveState();render();
-      toast('Entreno descartado');
+      toast(restored?`Cambios descartados · la sesión del ${rs.session.date||''} sigue en tu historial`:'Entreno descartado',restored?3600:undefined);
     }
   });
 }
@@ -4223,6 +4481,80 @@ function discardWorkout(){
 // ── REABRIR UNA SESIÓN YA FINALIZADA (rescatar) ──
 // Devuelve la sesión guardada por su ts, o null.
 function findSession(ts){return (S.sessions||[]).find(s=>s.ts===ts)||null;}
+
+// Sesión reabierta (persistida en S.reopenedSession, schema v11):
+//   {session:{...sesión original con snapshot}, strength:{exId:[registros originales]}, reopenTs, prevNextDay}
+// Al volver a guardarla conserva fecha/ts, nota y acumula la duración. Si se descarta (o se quedan sin
+// series marcadas), vuelve al historial tal como estaba: nunca se pierde.
+function _isPlainObj(o){return !!o&&typeof o==='object'&&!Array.isArray(o);}
+function _validReopened(x){
+  if(!_isPlainObj(x)||!_isPlainObj(x.session))return false;
+  const s=x.session;
+  if(typeof s.ts!=='number'||!isFinite(s.ts)||typeof s.day!=='string'||!s.day)return false;
+  // Una sesión de verdad siempre trae su fecha (o su recuento de ejercicios, o su snapshot): si no, es basura
+  if(!(typeof s.date==='string'&&s.date)&&!(typeof s.doneEx==='number'&&isFinite(s.doneEx))&&!_isPlainObj(s.snapshot))return false;
+  // Registros de fuerza apartados: objeto {exId:[...]} (o ausente)
+  if(x.strength!=null&&!_isPlainObj(x.strength))return false;
+  return true;
+}
+function getReopened(){return _validReopened(S.reopenedSession)?S.reopenedSession:null;}
+// La reabierta que corresponde a un día de la rutina (o null)
+function reopenedFor(dayKey){const r=getReopened();return r&&r.session.day===dayKey?r:null;}
+// Inicio del cronómetro de una reabierta: sigue contando desde su duración original
+function _reopenStartTs(r){
+  if(!r)return Date.now();
+  const o=+r.session.durationMin;
+  const orig=isFinite(o)&&o>0&&o<=MAX_SESSION_MIN?o:0;
+  return (r.reopenTs||Date.now())-orig*60000;
+}
+// Inserta manteniendo el orden cronológico por ts (si es el más reciente equivale a push)
+function _insertByTs(arr,rec){
+  let i=arr.length-1;
+  while(i>=0&&((arr[i]&&arr[i].ts)||0)>rec.ts)i--;
+  arr.splice(i+1,0,rec);
+}
+// Saca una sesión del historial (y sus registros de fuerza) y la guarda como reabierta
+function _detachSession(sess,prevNextDay,reopenTs){
+  const ts=sess.ts,strength={};
+  Object.keys(S.strength||{}).forEach(id=>{
+    const arr=Array.isArray(S.strength[id])?S.strength[id]:[];
+    const mine=arr.filter(r=>r&&r.ts===ts);
+    if(mine.length)strength[id]=mine.map(r=>({...r}));
+    S.strength[id]=arr.filter(r=>!(r&&r.ts===ts));
+    if(S.strength[id].length===0)delete S.strength[id];
+  });
+  S.sessions=(S.sessions||[]).filter(s=>s.ts!==ts);
+  S.reopenedSession={session:JSON.parse(JSON.stringify(sess)),strength,reopenTs:reopenTs||Date.now(),prevNextDay:prevNextDay||null};
+}
+// Devuelve la sesión reabierta al historial tal como estaba (sin duplicar)
+function _restoreReopened(){
+  const r=getReopened();
+  S.reopenedSession=null;
+  if(!r)return false;
+  const sess=r.session;
+  if(!Array.isArray(S.sessions))S.sessions=[];
+  if(!S.sessions.some(s=>s&&s.ts===sess.ts))_insertByTs(S.sessions,sess);
+  if(!S.strength||typeof S.strength!=='object')S.strength={};
+  Object.keys(r.strength||{}).forEach(id=>{
+    const recs=r.strength[id];
+    if(!Array.isArray(recs))return;
+    if(!Array.isArray(S.strength[id]))S.strength[id]=[];
+    recs.forEach(rec=>{
+      if(rec&&typeof rec==='object'&&!S.strength[id].some(x=>x&&x.ts===rec.ts))_insertByTs(S.strength[id],rec);
+    });
+    if(!S.strength[id].length)delete S.strength[id];
+  });
+  // Rotación: si nadie la ha cambiado desde que se reabrió, vuelve a la de antes
+  if(S.nextDay===sess.day&&r.prevNextDay&&getPlan()[r.prevNextDay])S.nextDay=r.prevNextDay;
+  return true;
+}
+// Mantiene coherente la reabierta: datos inválidos → fuera; su día sin series marcadas → vuelve al historial
+function _reconcileReopened(){
+  if(S.reopenedSession==null)return false;
+  if(!getReopened()){S.reopenedSession=null;return false;}
+  if(dayMarkCount(S.reopenedSession.session.day).marks>0)return false;
+  return _restoreReopened();
+}
 
 function reopenSession(ts){
   const sess=findSession(ts);
@@ -4232,7 +4564,7 @@ function reopenSession(ts){
   if(!plan[dayKey]){toast('Esa rutina ya no existe — no se puede reabrir');return;}
   confirmModal({
     title:'Reabrir sesión',
-    body:`Se reabrirá el ${plan[dayKey].label} (${sess.date||''}) para que lo termines. Se quita del historial y del Coach hasta que lo vuelvas a guardar. Tus series y pesos se recuperan.`,
+    body:`Se reabrirá el ${plan[dayKey].label} (${sess.date||''}) para que lo termines. Tus series, pesos y nota se recuperan, y al guardarla conserva su fecha y su duración. Mientras tanto no cuenta en el historial ni en el Coach.`,
     okText:'Reabrir',cancelText:'Cancelar',
     onOk:()=>_reopenSessionConfirmed(sess)
   });
@@ -4242,6 +4574,9 @@ function _reopenSessionConfirmed(sess){
   const sessTs=sess.ts, dayKey=sess.day, plan=getPlan();
   const dayObj=plan[dayKey];
   if(!dayObj||!Array.isArray(dayObj.ex)){toast('Esa rutina ya no existe — no se puede reabrir');return;}
+  // Solo una sesión reabierta a la vez (la otra aún tiene series marcadas sin guardar)
+  const prevRs=getReopened();
+  if(prevRs&&prevRs.session.ts!==sessTs){toast('Primero guarda o descarta la sesión que ya tienes reabierta');return;}
   const validIds=new Set(dayObj.ex.map(e=>e.id));
   // 1. CONSTRUIR la restauración (solo para ejercicios que SIGUEN en el plan) — aún sin aplicar
   const restore={sets:{},logs:{},rpe:{}};
@@ -4276,26 +4611,23 @@ function _reopenSessionConfirmed(sess){
   Object.keys(restore.sets).forEach(id=>{S.sets[id]={...restore.sets[id]};});
   Object.keys(restore.logs).forEach(id=>{S.logs[id]={...restore.logs[id]};});
   if(Object.keys(restore.rpe).length){if(!S.rpe)S.rpe={};Object.keys(restore.rpe).forEach(id=>{S.rpe[id]={...restore.rpe[id]};});}
-  // 4. Quitar los registros de fuerza creados por esta sesión (se re-guardarán al finalizar de nuevo)
-  Object.keys(S.strength).forEach(id=>{
-    S.strength[id]=(S.strength[id]||[]).filter(r=>r.ts!==sessTs);
-    if(S.strength[id].length===0)delete S.strength[id];
-  });
-  // 5. Quitar la sesión del historial (deja de contar para el Coach hasta re-guardarla)
-  S.sessions=(S.sessions||[]).filter(s=>s.ts!==sessTs);
+  // 4-5. Quitar sus registros de fuerza y la sesión del historial (deja de contar para el Coach hasta re-guardarla).
+  //    Se guarda entera en S.reopenedSession: al re-guardarla conserva fecha, nota y duración; si se descarta, vuelve.
+  const now=Date.now();
+  _detachSession(sess,S.nextDay,now);
   // 6. Revertir el puntero de rotación y abrir el día
   S.nextDay=dayKey;
   S.day=dayKey;
   S.open=null;
-  // 7. Marcar como entreno activo (cronómetro nuevo desde ahora)
-  S.sessionStartTs=Date.now();
-  S.activeWorkout={day:dayKey,startTs:Date.now()};
+  // 7. Marcar como entreno activo: el cronómetro sigue desde la duración original
+  S.sessionStartTs=_reopenStartTs(S.reopenedSession);
+  S.activeWorkout={day:dayKey,startTs:now};
   syncActiveWorkout();
   saveState();
   go('workout');
   toast(droppedCount>0
     ? `Sesión reabierta · ${droppedCount} ejercicio${droppedCount!==1?'s':''} ya no en tu rutina, omitido${droppedCount!==1?'s':''}`
-    : 'Sesión reabierta — termínala y guárdala otra vez',droppedCount>0?4000:2600);
+    : `Sesión del ${sess.date||''} reabierta — al guardarla conserva su fecha`,droppedCount>0?4000:3000);
 }
 
 // ── SEMANA DE DESCANSO — activar / terminar ──
@@ -5365,7 +5697,11 @@ function renderDash(){
         </div>
         <span class="pill p${aw.day.toLowerCase()}">${aw.strDone}/${aw.strTotal}</span>
       </div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5">Tus series marcadas están guardadas${ago}. Reanúdalo donde lo dejaste.</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5">${(()=>{
+        const rs=reopenedFor(aw.day);
+        return rs?`Sesión del ${esc(rs.session.date||'')} reabierta. Al guardarla conserva su fecha, su duración y su nota.`
+          :`Tus series marcadas están guardadas${ago}. Reanúdalo donde lo dejaste.`;
+      })()}</div>
       <div style="display:flex;gap:8px">
         <button class="btn bp" style="flex:1" onclick="resumeWorkout()">▶ Reanudar entreno</button>
         <button class="btn bs" style="width:120px" onclick="discardWorkout()">Descartar</button>
@@ -5489,7 +5825,7 @@ function renderHist(){
   const data=(S.strength[exId]||[]).slice();
   if(data.length===0){
     root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet">
-      <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${esc(ex.n)}</div><div class="hist-sheet-sub">${esc(ex.eq)}${ex.s&&ex.r&&!ex._orphan?' · '+ex.s+'×'+esc(ex.r)+' reps':''}</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
+      <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${esc(ex.n)}</div><div class="hist-sheet-sub">${esc(ex.eq)}${ex.s&&ex.r&&!ex._orphan?' · '+ex.s+'×'+esc(fmtTargetReps(ex)):''}</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
       <div class="hist-sheet-body"><div class="empty"><div class="eic">📊</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
     </div></div>`;
     return;
@@ -5520,7 +5856,7 @@ function renderHist(){
     <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
       <div class="hist-sheet-title">${esc(ex.n)}</div>
-      <div class="hist-sheet-sub">${ex._orphan?'Ya no está en tu rutina · Solo lectura':esc(ex.eq)+' · '+ex.s+'×'+esc(ex.r)+' reps objetivo'}</div>
+      <div class="hist-sheet-sub">${ex._orphan?'Ya no está en tu rutina · Solo lectura':esc(ex.eq)+' · '+ex.s+'×'+esc(fmtTargetReps(ex))+' objetivo'}</div>
       <button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
@@ -5555,7 +5891,7 @@ function renderWorkout(){
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}">
       <div class="exh" onclick="S.open=S.open==='${ex.id}'?null:'${ex.id}';render()">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${esc(ex.ic||'💪')}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+esc(ex.r)+' reps'}</div></div>
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+esc(fmtTargetReps(ex))}</div></div>
         ${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${esc(ex.tip||'')}</div>
@@ -5570,29 +5906,18 @@ function renderWorkout(){
             <span style="color:var(--text3)">${esc(lw.d||'')}${rpeLbl}</span>
           </div>`;
         })()}
-          ${(()=>{
-            const wu=getWarmupSets(ex);
-            if(!wu||S.warmups[ex.id]?._skipped)return'';
-            const w=S.warmups[ex.id]||{};
-            const allDone=wu.every((_,i)=>w[i]);
-            if(allDone)return`<div class="warmup-block" style="opacity:.6">
-              <div class="warmup-h"><span class="warmup-h-l">🔥 Calentamiento ✓</span></div>
-            </div>`;
-            return`<div class="warmup-block">
-              <div class="warmup-h">
-                <span class="warmup-h-l">🔥 Calentamiento sugerido</span>
-                <button class="warmup-skip" onclick="skipWarmup('${ex.id}')">Saltar</button>
-              </div>
-              ${wu.map((s,i)=>`<div class="warmup-row">
-                <button class="warmup-sb ${w[i]?'on':''}" onclick="toggleWarmupSet('${ex.id}',${i})" aria-label="Calentamiento ${i+1}">${w[i]?'✓':i+1}</button>
-                <div class="warmup-info"><b>${s.w} kg</b> × ${s.reps} reps <span style="color:var(--text3)">(${s.pct}%)</span></div>
-              </div>`).join('')}
-            </div>`;
-          })()}
+          <div class="wu-slot">${warmupBlockHtml(ex)}</div>
           <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span>Series completadas</span><button class="hist-btn" onclick="event.stopPropagation();openHist('${ex.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Historial</button></div>
           <div class="srow">${sbHtml}</div>
-          <div class="irow"><label>Peso</label><input class="inp" type="number" placeholder="${(()=>{const s=sugW(ex.id);return s?s.v+' kg':'kg'})()}" value="${l.w||''}" oninput="updLog('${ex.id}','w',this.value)" step="2.5" inputmode="decimal"/>${(()=>{const s=sugW(ex.id);return s?`<span class="sug-tag ${s.cls}" onclick="useSug('${ex.id}')">${s.label}</span>`:''})()}</div>
-          <div class="irow"><label>Reps</label><input class="inp" type="number" placeholder="${ex.r}" value="${l.r||''}" oninput="updLog('${ex.id}','r',this.value)" inputmode="numeric"/></div>
+          ${(()=>{
+            // El placeholder es una SUGERENCIA (no un valor): «57.5 sugerido». Si hay series marcadas sin peso, se avisa.
+            // Peso corporal / por tiempo (plancha, flexiones…): el peso es opcional, sin aviso.
+            const s=sugW(ex.id),bw=isBodyweightEx(ex);
+            const needW=!bw&&countSetsDone(ex.id,ex.s)>0&&!(parseFloat(l.w)>0);
+            return`<div class="irow"><label>Peso</label><input class="inp inp-hint${needW?' need':''}" data-f="w" type="number" placeholder="${s?esc(s.v)+' sugerido':bw?'opcional':'kg'}" value="${esc(l.w||'')}" oninput="onWeightInput(this,'${ex.id}')" step="2.5" inputmode="decimal" aria-label="Peso en kg${s?', sugerido '+esc(s.v):bw?' (opcional)':''}"/>${s?`<span class="sug-tag ${s.cls}" onclick="useSug('${ex.id}')">${s.label}</span>`:''}</div>
+          ${bw?'':`<div class="need-hint" data-ex="${esc(ex.id)}"${needW?'':' hidden'}>Apunta el peso para que cuente en tu progreso</div>`}`;
+          })()}
+          <div class="irow"><label>Reps</label><input class="inp inp-hint" type="number" placeholder="${esc(ex.r)} objetivo" value="${esc(l.r||'')}" oninput="updLog('${ex.id}','r',this.value)" inputmode="numeric" aria-label="Repeticiones, objetivo ${esc(ex.r)}"/></div>
           ${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}`
         :`${(()=>{
           // Cronómetro de cardio: parsear duración de ex.r (ej: "8 min", "15 min")
@@ -5614,6 +5939,9 @@ function renderWorkout(){
   }).join('');
   return`
   <div class="topbar"><div class="topbar-row"><div><h1>${esc(day.label)}</h1><div class="sub">${esc(day.focus)}${(()=>{
+    const rs=reopenedFor(S.day);
+    return rs?` · <span style="color:var(--amber)">↩ reabierta (${esc(rs.session.date||'')})</span>`:'';
+  })()}${(()=>{
     if(!S.sessionStartTs)return'';
     const elapsedMin=Math.floor((Date.now()-S.sessionStartTs)/60000);
     if(elapsedMin>MAX_SESSION_MIN)return''; // entreno reanudado mucho después: no mostrar contador absurdo
@@ -6608,6 +6936,11 @@ function importData(){
             }
             // Normalizar restWeeks siempre (defensa: un backup v10 editado a mano podría traerlo inválido)
             if(!Array.isArray(migrated.restWeeks))migrated.restWeeks=[];
+            // Sesión reabierta: solo la del backup (nunca heredar la del estado actual) y con forma válida.
+            // Si la sesión es real pero sus registros apartados vienen corruptos, se conserva la sesión sin ellos.
+            const _rsImp=migrated.reopenedSession;
+            if(_isPlainObj(_rsImp)&&_rsImp.strength!=null&&!_isPlainObj(_rsImp.strength))_rsImp.strength={};
+            if(!_validReopened(migrated.reopenedSession))migrated.reopenedSession=null;
             Object.keys(S).forEach(k=>{if(!(k in migrated))migrated[k]=S[k];});
             S=Object.assign(S,migrated);
             // Limpiar estado UI transitorio importado
