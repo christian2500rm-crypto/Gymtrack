@@ -446,6 +446,83 @@ input{font-family:inherit}
 .sb.r1{box-shadow:inset 0 0 0 2px #22c55e}
 .sb.r2{box-shadow:inset 0 0 0 2px #f59e0b}
 .sb.r3{box-shadow:inset 0 0 0 2px #ef4444}
+/* MODO GYM (etapa 07): registro serie a serie, barra «siguiente serie», tarjetas con progreso */
+.ex-dots{display:inline-flex;align-items:center;gap:3px;flex-shrink:0}
+.ex-dots i{width:7px;height:7px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2)}
+.ex-dots i.on{background:var(--green);border-color:var(--green)}
+.ex-today{color:var(--text);font-family:'DM Mono',monospace;font-weight:500}
+.ex-done-sum{font-size:11.5px;color:var(--text2);margin-top:3px;font-family:'DM Mono',monospace;overflow-wrap:anywhere}
+.ex-done-sum b{color:#86efac;font-weight:500;white-space:nowrap}
+.excard.just-done .exic{animation:ckPop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes ckPop{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+.anim-mini{display:flex;align-items:center;gap:12px;min-height:64px;padding:3px 10px 3px 3px;margin-bottom:10px;border:1px solid var(--border);border-radius:var(--rsm);background:#111;cursor:pointer;-webkit-user-select:none;user-select:none}
+.anim-mini:active{background:#161616}
+.anim-mini:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.ex-anim.mini{width:86px;height:56px;margin:0;flex-shrink:0;border-radius:var(--rxs);pointer-events:none}
+.anim-mini-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.anim-mini-t b{font-size:12px;font-weight:600;color:var(--text)}
+.anim-mini-t span{font-size:11px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.anim-mini-go{font-size:11px;font-weight:600;color:var(--green);flex-shrink:0;white-space:nowrap}
+.anim-less{display:block;width:100%;min-height:44px;margin:-8px 0 6px;font-size:12px;font-weight:600;color:var(--text2)}
+.lg-sets{margin:0 -6px 8px}
+.lg-h{display:flex;align-items:center;gap:8px;margin:0 6px 6px;min-height:28px}
+.lg-l{flex:1;min-width:0;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;line-height:1.35}
+.lg-l b{color:var(--text2);font-family:'DM Mono',monospace;font-weight:600}
+.lg-d{display:inline-block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+.lg-h .sug-tag{min-width:0}
+.lg-row{display:flex;align-items:center;gap:6px;padding-left:2px;border-radius:var(--rsm);transition:background .2s}
+.lg-row+.lg-row{margin-top:6px}.lg-ghost+.lg-row{margin-top:3px}
+.lg-row.done{background:rgba(34,197,94,.07)}
+.lg-row.done .stp{border-color:rgba(34,197,94,.28);background:#1d241f}
+.lg-n{width:16px;flex-shrink:0;text-align:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--text3)}
+.lg-row.next .lg-n{color:var(--green)}
+.lg-row.done .lg-n{color:#86efac}
+.stp{display:flex;align-items:stretch;height:48px;min-width:0;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);overflow:hidden;transition:border-color .2s}
+.stp-w{flex:1.2 1 0}
+.stp-r{flex:1 1 0}
+.stp:focus-within{border-color:var(--green)}
+.stp.need,.lg-row.done .stp.need{border-color:rgba(245,158,11,.75);box-shadow:0 0 0 3px rgba(245,158,11,.14)}
+.stp-b{width:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:500;line-height:1;color:var(--text2);touch-action:manipulation}
+.stp-b:active{background:var(--bg4);color:var(--text)}
+.stp-c{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:text}
+.stp-v{width:100%;min-width:0;padding:0;border:none;outline:none;background:none;text-align:center;font-family:'DM Mono',monospace;font-size:16px;font-weight:600;line-height:1.15;color:var(--text2);letter-spacing:-.3px;-webkit-appearance:none;border-radius:0}
+.lg-row.next .stp-v,.lg-row.done .stp-v{color:var(--text)}
+.stp-v::placeholder{color:var(--text3);font-weight:400;font-style:italic}
+.stp-u{font-size:8.5px;line-height:1;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
+.stp-fix{justify-content:center;align-items:center;font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--text2)}
+.lg-ck{position:relative;width:48px;height:48px;flex-shrink:0;border-radius:var(--rsm);border:1px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:20px;font-weight:700;transition:background .15s,color .15s,transform .1s;touch-action:manipulation}
+.lg-ck:active{transform:scale(.92)}
+.lg-row.next .lg-ck{border-color:var(--green-b);color:var(--green)}
+.lg-ck.on{background:var(--green);border-color:var(--green);color:#06140a}
+.lg-ck.r1::after,.lg-ck.r2::after,.lg-ck.r3::after{content:'';position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;border:1.5px solid #0c1a10}
+.lg-ck.r1::after{background:#bbf7d0}.lg-ck.r2::after{background:#f59e0b}.lg-ck.r3::after{background:#ef4444}
+.lg-ghost{margin:1px 0 0 24px;font-size:10.5px;line-height:14px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg-sets .need-hint{margin:6px 6px 0 30px}
+.tgt.cmp{padding:6px 6px 6px 12px}
+.tgt.cmp .tgt-r{margin-top:0;font-size:12px}
+/* Móviles por debajo de 390 px: los −/+ siguen en 44 px y el ✓ en 48; el sitio sale de los márgenes, los huecos y el nº.
+   Solo en los muy estrechos (≤340 px) el ✓ baja a 44 px. */
+@media (max-width:389px){.lg-n{width:10px;font-size:11px}.lg-sets{margin:0 -11px 8px}.lg-row{gap:4px;padding-left:0}.lg-ghost{margin-left:14px}.stp-v{font-size:15px}}
+@media (max-width:340px){.lg-n{display:none}.lg-sets{margin:0 -12px 8px}.lg-ck{width:44px}.stp-w{flex:1.15 1 0}.stp-v{font-size:13.5px;letter-spacing:-.5px}.lg-ghost{margin-left:4px}}
+#nextbar{position:fixed;bottom:calc(58px + var(--sb) + 8px);left:50%;transform:translateX(-50%) translateY(90px);width:calc(100% - 28px);max-width:452px;display:flex;align-items:center;gap:10px;padding:5px 5px 5px 14px;background:#1a1a1a;border:1px solid var(--green-b);border-radius:14px;z-index:140;box-shadow:0 -4px 24px rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:transform .28s cubic-bezier(.34,1.3,.64,1),opacity .2s}
+#nextbar.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
+#app.typing #nextbar{opacity:0;pointer-events:none}
+.nb-info{flex:1;min-width:0;min-height:48px;display:flex;flex-direction:column;justify-content:center;text-align:left;color:inherit}
+.nb-t{font-size:11.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.nb-t b{color:var(--green);font-weight:600}
+.nb-s{font-size:15px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.nb-s b{font-family:'DM Mono',monospace;font-weight:600}
+.nb-go{flex-shrink:0;min-height:48px;min-width:108px;padding:0 14px;border-radius:10px;background:var(--green);color:#06140a;font-size:15px;font-weight:700;touch-action:manipulation}
+.nb-go:active{transform:scale(.96);background:#16a34a}
+#app.nb-on #screen{padding-bottom:calc(64px + 66px + 64px + var(--sb))}
+#app.nb-on #rest-timer{bottom:calc(58px + var(--sb) + 8px + 66px);padding:6px 8px 6px 10px;gap:10px}
+#app.nb-on .rt-ring,#app.nb-on .rt-ring svg{width:40px;height:40px}
+.rpe-pop.dock{left:50%;flex-wrap:wrap;justify-content:center;width:max-content;max-width:calc(100% - 28px);transform:translateX(-50%);animation:rpeDock .16s ease}
+@keyframes rpeDock{from{opacity:0;transform:translate(-50%,8px)}to{opacity:1;transform:translate(-50%,0)}}
+.rpe-q{flex-basis:100%;text-align:center;font-size:11px;font-weight:600;color:var(--text2);padding:0 4px 2px}
+.rpe-pop.dock .rpe-opt{min-height:48px;justify-content:center}
+.rpe-pop.dock .rpe-skip{min-height:48px;min-width:44px}
+.hist-item-w small{display:block;font-size:10.5px;font-weight:400;color:var(--text3);margin-top:1px;overflow-wrap:anywhere}
 .rpe-skip{background:transparent;border:none;color:var(--text3);font-size:11px;text-decoration:underline;align-self:center;padding:4px 6px;cursor:pointer}
 
 /* ── WARMUP SECTION ── */
@@ -651,6 +728,7 @@ input[type=number]{-moz-appearance:textfield}
     </div>
     <button class="rt-btn" id="rt-skip" onclick="RT.skip()" aria-label="Saltar el descanso">Saltar</button>
   </div>
+  <div id="nextbar" role="region" aria-label="Siguiente serie"></div>
 </div>
 
 <div id="toast"></div>
@@ -1276,6 +1354,7 @@ function drawTraces(ctx,cm){if(!cm.traces)return;ctx.save();ctx.setLineDash([2.5
   ctx.restore();}
 
 const PAD={l:10,r:10,t:24,b:26};
+const PADM={l:3,r:3,t:4,b:3},MINI_W=170,MINI_H=110,MINI_OPT={hud:false,traces:false,ol:.8};
 function renderTo(ctx,spec,cm,c,W,H,opt){
   opt=opt||{};drawBG(ctx,W,H);drawFloor(ctx,cm,spec);
   const{sc,b}=buildFrame(spec,c);
@@ -1307,15 +1386,16 @@ function ensureIO(){
     else if(i.vis&&!i.rm)kick();}});
   return io;}
 function camOf(inst){const c=inst.spec.cam||{};return{yaw:(c.yaw||0)+inst.dyaw,pitch:clamp((c.pitch||0)+inst.dpitch,-20,80)};}
-function resize(inst){const r=inst.el.getBoundingClientRect();const W=Math.max(200,Math.round(r.width||inst.el.clientWidth||320)),H=Math.max(120,Math.round(r.height||inst.el.clientHeight||190));
+function resize(inst){const r=inst.el.getBoundingClientRect();const W=Math.max(48,Math.round(r.width||inst.el.clientWidth||320)),H=Math.max(40,Math.round(r.height||inst.el.clientHeight||190));
   if(W===inst.W&&H===inst.H&&inst.cm)return;
+  inst.mini=W<MINI_W||H<MINI_H;inst.pad=inst.mini?PADM:PAD;
   const dpr=Math.min(G.devicePixelRatio||1,2.5);inst.cv.width=Math.round(W*dpr);inst.cv.height=Math.round(H*dpr);inst.cv.style.width=W+'px';inst.cv.style.height=H+'px';
-  inst.W=W;inst.H=H;inst.dpr=dpr;inst.base=fitCam(inst.spec,W,H,PAD);
-  inst.cm=(inst.dyaw||inst.dpitch)?fitCam(inst.spec,W,H,PAD,camOf(inst)):inst.base;inst.dirty=1;if(inst.rm)drawStatic(inst);}
+  inst.W=W;inst.H=H;inst.dpr=dpr;inst.base=fitCam(inst.spec,W,H,inst.pad);
+  inst.cm=(inst.dyaw||inst.dpitch)?fitCam(inst.spec,W,H,inst.pad,camOf(inst)):inst.base;inst.dirty=1;if(inst.rm)drawStatic(inst);}
 function dragCam(inst){const b=inst.base,cm=makeCam(Object.assign({},inst.spec.cam,camOf(inst)));cm.zoom=b.zoom;
   const P0=proj(b,b.wc);cm.ox=0;cm.oy=0;const P1=proj(cm,b.wc);cm.ox=P0[0]-P1[0];cm.oy=P0[1]-P1[1];cm.traces=null;return cm;}
 function lerpCam(a,b,e){return Object.assign({},b,{zoom:mix(a.zoom,b.zoom,e),ox:mix(a.ox,b.ox,e),oy:mix(a.oy,b.oy,e),traces:e>=1?b.traces:null});}
-function settle(inst){const to=(inst.dyaw||inst.dpitch)?fitCam(inst.spec,inst.W,inst.H,PAD,camOf(inst)):inst.base;
+function settle(inst){const to=(inst.dyaw||inst.dpitch)?fitCam(inst.spec,inst.W,inst.H,inst.pad||PAD,camOf(inst)):inst.base;
   if(inst.rm){inst.cm=to;drawStatic(inst);return;}inst.anim={k:'fit',from:inst.cm,to,t0:NOW(),d:260};inst.dirty=1;kick();}
 function resetView(inst){if(!inst.dyaw&&!inst.dpitch)return;
   if(inst.rm){inst.dyaw=inst.dpitch=0;inst.cm=inst.base;drawStatic(inst);return;}
@@ -1323,9 +1403,9 @@ function resetView(inst){if(!inst.dyaw&&!inst.dpitch)return;
 function togglePause(inst){if(inst.rm)return;const n=NOW();if(inst.paused)inst.pauseAcc+=n-inst.pausedAt;else inst.pausedAt=n;inst.paused=!inst.paused;inst.dirty=1;kick();}
 function bindInput(inst){const el=inst.cv,cs=el.style;cs.touchAction='pan-y';cs.cursor='grab';cs.userSelect=cs.webkitUserSelect='none';cs.webkitTouchCallout='none';cs.webkitTapHighlightColor='transparent';
   let st=null,tapT=null,lastEnd=0;
-  el.addEventListener('touchend',e=>{const n=NOW();if(n-lastEnd<350&&e.cancelable)e.preventDefault();lastEnd=n;},{passive:false});
+  el.addEventListener('touchend',e=>{if(inst.mini)return;const n=NOW();if(n-lastEnd<350&&e.cancelable)e.preventDefault();lastEnd=n;},{passive:false});
   el.addEventListener('dblclick',e=>e.preventDefault());
-  el.addEventListener('pointerdown',e=>{st={x:e.clientX,y:e.clientY,t:NOW(),dy:inst.dyaw,dp:inst.dpitch,id:e.pointerId,type:e.pointerType,drag:false};});
+  el.addEventListener('pointerdown',e=>{if(inst.mini){st=null;return;}st={x:e.clientX,y:e.clientY,t:NOW(),dy:inst.dyaw,dp:inst.dpitch,id:e.pointerId,type:e.pointerType,drag:false};});
   el.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;
     if(!st.drag&&Math.abs(dx)>7&&Math.abs(dx)>Math.abs(dy)*1.2){st.drag=true;inst.drag=true;inst.touched=true;inst.anim=null;el.style.cursor='grabbing';try{el.setPointerCapture(e.pointerId);}catch(_){}}
     if(st.drag){inst.dyaw=st.dy+dx*.55;if(st.type==='mouse')inst.dpitch=clamp(st.dp+dy*.35,-30,60);inst.cm=dragCam(inst);inst.dirty=1;if(inst.rm)drawStatic(inst);else kick();if(e.cancelable)e.preventDefault();}});
@@ -1334,7 +1414,7 @@ function bindInput(inst){const el=inst.cv,cs=el.style;cs.touchAction='pan-y';cs.
     if(NOW()-s.t<350){inst.touched=true;if(tapT){clearTimeout(tapT);tapT=null;resetView(inst);}else tapT=setTimeout(()=>{tapT=null;togglePause(inst);},280);}};
   el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);}
 function frame(inst,t){const{ctx,spec,cm,W,H,dpr}=inst;ctx.setTransform(dpr,0,0,dpr,0,0);
-  const c=evalTL(spec._tl,spec,t);renderTo(ctx,spec,cm,c,W,H);drawUI(inst);}
+  const c=evalTL(spec._tl,spec,t);renderTo(ctx,spec,cm,c,W,H,inst.mini?MINI_OPT:null);if(!inst.mini)drawUI(inst);}
 function drawUI(inst){const{ctx,W,H}=inst;ctx.save();
   if(inst.paused){ctx.fillStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.arc(W/2,H/2,19,0,TAU);ctx.fill();ctx.fillStyle='rgba(255,255,255,.92)';ctx.fillRect(W/2-6.5,H/2-7,4.5,14);ctx.fillRect(W/2+2,H/2-7,4.5,14);}
   let txt='';if(inst.dyaw||inst.dpitch)txt='↺ Doble toque: vista óptima';else if(!inst.touched&&NOW()<hintUntil)txt='↔ Arrastra para girar';
@@ -1345,7 +1425,7 @@ function drawUI(inst){const{ctx,W,H}=inst;ctx.save();
   ctx.restore();}
 function drawStatic(inst){const{ctx,spec,cm,W,H,dpr}=inst;ctx.setTransform(dpr,0,0,dpr,0,0);
   const tl=spec._tl;let best=tl.steps[0];for(const s of tl.steps)if((s.to.p||0)>(best.to.p||0))best=s;
-  const c=evalTL(tl,spec,best.t0+best.dur*.999);renderTo(ctx,spec,cm,c,W,H);}
+  const c=evalTL(tl,spec,best.t0+best.dur*.999);renderTo(ctx,spec,cm,c,W,H,inst.mini?MINI_OPT:null);}
 function loop(){raf=0;if(document.hidden){kick();return;}
   const n=NOW();let any=false;
   for(const inst of live){if(!inst.el.isConnected){live.delete(inst);if(io)io.unobserve(inst.el);continue;}
@@ -1358,12 +1438,15 @@ function loop(){raf=0;if(document.hidden){kick();return;}
     if(!moving&&!inst.dirty&&!(NOW()<hintUntil))continue;
     any=any||moving||NOW()<hintUntil;
     if(moving&&!inst.drag&&inst.cost>12&&(inst.skip=(inst.skip+1)%2))continue;
-    const w=inst.el.clientWidth;if(w&&w!==inst.W)resize(inst);
+    const w=inst.el.clientWidth,h=inst.el.clientHeight;if((w&&w!==inst.W)||(h&&h!==inst.H))resize(inst);
     const t=((inst.paused?inst.pausedAt:n)-inst.pauseAcc)/1000-t0s[inst.key];
     const a=NOW();frame(inst,t);inst.dirty=0;if(moving)inst.cost=inst.cost*.9+(NOW()-a)*.1;}
   if(mapTick(n))any=true;
   if(any)kick();}
-function mountAll(root){(root||document).querySelectorAll('[data-gym-anim]').forEach(el=>{if(!el._gaMounted){el._gaMounted=1;mount(el,el.getAttribute('data-gym-anim'));}});}
+function mountAll(root){(root||document).querySelectorAll('[data-gym-anim]').forEach(el=>{if(!el._gaMounted){el._gaMounted=1;mount(el,el.getAttribute('data-gym-anim'));}else if(el._ga)revive(el._ga);});}
+function revive(inst){if(!inst.el.isConnected)return false;if(!live.has(inst)){live.add(inst);if(ensureIO())io.observe(inst.el);}
+  resize(inst);inst.dirty=1;if(inst.rm)drawStatic(inst);else kick();return true;}
+function refresh(el){const i=el&&el._ga;return i?revive(i):false;}
 function unmount(el){if(!el)return false;let ok=false;
   const m=el._gm;if(m){maps.delete(m);if(m.cv.parentNode)m.cv.parentNode.removeChild(m.cv);el._gm=null;ok=true;}
   const i=el._ga;if(i){live.delete(i);if(i.cv.parentNode)i.cv.parentNode.removeChild(i.cv);el._ga=null;el._gaMounted=0;ok=true;}
@@ -1489,7 +1572,7 @@ function mapTick(n){let more=false;
   return more;}
 function mapStats(){let fr=0;for(const m of maps)fr+=m.frames;return{maps:maps.size,anims:live.size,running:!!raf,frames:fr};}
 
-G.GymAnim={def,alias,has:k=>!!getDef(k),get:getDef,keys:()=>Object.keys(DEFS).concat(Object.keys(ALIAS)),mount,mountAll,unmount,muscleMap,
+G.GymAnim={def,alias,has:k=>!!getDef(k),get:getDef,keys:()=>Object.keys(DEFS).concat(Object.keys(ALIAS)),mount,mountAll,unmount,refresh,muscleMap,
   muscles:()=>Object.keys(MUS),
   _:{V,Body,Scene,makeE,makeCam,fitCam,evalTL,compileTL,renderTo,buildFrame,DIM,COL,MUS,EASE,solve,ik2,PAD,fpt,fdir,frot,basis,walkOnTreadmill,heatRGB,standPose,mapStats,mapTick}};
 })(typeof window!=='undefined'?window:globalThis);
@@ -3455,7 +3538,7 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=17;
+const SCHEMA_VERSION=18;
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
 // Duración máxima plausible de una sesión (min); por encima se considera dato no fiable
@@ -3484,6 +3567,9 @@ function _sanitizeLoadSteps(x){
   if(x&&typeof x==='object'&&!Array.isArray(x))Object.keys(LOAD_EQ).forEach(k=>{const v=x[k];if(v!=='auto'&&LOAD_EQ[k].opts.includes(+v))o[k]=+v;});
   return o;
 }
+
+// Registro serie a serie (v18): límites de los valores de cada serie. Aquí arriba porque migrateState los usa al arrancar.
+const SET_MAX_W=999,SET_MAX_R=200,SET_MAX_N=20;
 
 // Claves transitorias de UI que NO deben persistirse (modales abiertos, búsquedas, etc.)
 const TRANSIENT_KEYS=['wmodal','wnew','settingsOpen','_hist','open','_editWeightTarget','_deloadActive','_wdetail','_wdetailN'];
@@ -3937,8 +4023,40 @@ function migrateState(data){
     // v17: mapa muscular 3D. ADITIVO: rango elegido en Progreso (7 días / 4 semanas / ciclo); por defecto 4 semanas.
     if(!['7d','4w','cycle'].includes(data.mmRange))data.mmRange='4w';
   }
+  if(v<18){
+    // v18: registro serie a serie (modo gym). ADITIVO: S.logs[exId].sets (valores de cada serie de hoy) y el campo
+    // sets:[{w,r,rpe}] de los registros de fuerza nuevos. Los datos antiguos no cambian (sin sets siguen valiendo
+    // v/r/setsDone/rpe); solo se sanea lo que venga con mala forma.
+    _sanitizeSetData(data);
+  }
   data.schema_version=SCHEMA_VERSION;
   return data;
+}
+// v18: datos serie a serie con buena forma (backups editados a mano o corruptos). Nunca borra un registro: solo su
+// lista de series si no vale; cada serie queda {w, r} (números o null) y, en los registros, también rpe 1-3 o null.
+function _sanitizeLogEntry(L){
+  if(!_isPlainObj(L))return{};
+  if('sets' in L){
+    if(!Array.isArray(L.sets))delete L.sets;
+    else L.sets=L.sets.slice(0,SET_MAX_N).map(e=>e&&typeof e==='object'&&!Array.isArray(e)?{w:_setNumW(e.w),r:_setNumR(e.r)}:null);
+  }
+  ['w','r'].forEach(k=>{if(k in L&&L[k]!=null&&typeof L[k]!=='string'&&typeof L[k]!=='number')delete L[k];else if(typeof L[k]==='string')L[k]=L[k].slice(0,8);});
+  return L;
+}
+function _sanitizeRecSets(r){
+  if(!r||typeof r!=='object'||!('sets' in r))return;
+  if(!Array.isArray(r.sets)){delete r.sets;return;}
+  const a=r.sets.slice(0,SET_MAX_N).filter(s=>s&&typeof s==='object'&&!Array.isArray(s)).map(s=>{const p=+s.rpe;return{w:_setNumW(s.w),r:_setNumR(s.r),rpe:p>=1&&p<=3?p:null};});
+  if(a.length)r.sets=a;else delete r.sets;
+}
+function _sanitizeSetData(data){
+  if(!data||typeof data!=='object')return;
+  const logs=o=>{if(_isPlainObj(o))Object.keys(o).forEach(id=>{if(_isPlainObj(o[id]))_sanitizeLogEntry(o[id]);});};
+  const recs=st=>{if(_isPlainObj(st))Object.values(st).forEach(a=>{if(Array.isArray(a))a.forEach(_sanitizeRecSets);});};
+  logs(data.logs);recs(data.strength);
+  if(Array.isArray(data.sessions))data.sessions.forEach(s=>{if(s&&_isPlainObj(s.snapshot))logs(s.snapshot.logs);});
+  const rs=data.reopenedSession;
+  if(_isPlainObj(rs)){recs(rs.strength);if(_isPlainObj(rs.session)&&_isPlainObj(rs.session.snapshot))logs(rs.session.snapshot.logs);}
 }
 // Apunta ps/pr en los registros de fuerza de data (y en los de una sesión reabierta) que no los tengan
 function _backfillRecPlans(data){
@@ -4430,15 +4548,18 @@ function getSug(id,sets,reps){
   const c=S.sets[id]||{};
   let done=0;for(let i=0;i<sets;i++){if(c[i])done++;}
   if(done<sets)return null;
-  const l=S.logs[id]||{},w=parseFloat(l.w)||0;if(!w)return null;
+  // Lo de hoy sale de las series (peso máximo y reps más bajas con él); sin series propias, de lo escrito
+  const l=S.logs[id]||{},sm=ex&&!ex.cardio?setsSummary(ex):null;
+  const w=(sm&&sm.w)||parseFloat(l.w)||0;if(!w)return null;
   // Semana ligera: nunca se propone subir
   if(deloadAppliesTo(id))return{t:'ok',m:`Descarga: mantén ${kgTxt(w)} kg con menos series. La subida vuelve cuando termine. 🧘`};
   if(getActiveRest())return{t:'ok',m:`Semana de descanso: entrena suave y mantén ${kgTxt(w)} kg o menos. 🌴`};
   if(!ex)return null;
   const today=coach_prescribe(id);
-  const typedR=parseInt(l.r),r=_todayReps(ex,today);
+  // Reps confirmadas: las de las series (al marcarlas o tocadas) o las escritas; si no, se cuentan las del objetivo
+  const typedR=sm&&sm.own&&sm.r>0?sm.r:parseInt(l.r),r=typedR>0?(sm&&sm.r>0?sm.r:typedR):_todayReps(ex,today);
   // Lo de hoy con el plan de hoy (ps/pr): el motivo sale como «hoy 3×12…», sin paréntesis dentro de paréntesis
-  const next=coach_prescribe(id,{ex,ignoreLight:true,extra:{v:w,r:r>0?r:null,setsDone:done,rpe:_liveRpeAvg(id),ts:Date.now(),ps:_baseSets(ex),pr:ex.r}});
+  const next=coach_prescribe(id,{ex,ignoreLight:true,extra:{v:w,r:r>0?r:null,setsDone:done,rpe:_liveRpeAvg(id),ts:Date.now(),ps:_baseSets(ex),pr:ex.r,sets:sm?sm.sets:undefined}});
   if(!next)return null;
   const asm=!(typedR>0)&&r>0?` Cuento ${r} reps (tu objetivo): si hiciste otras, apúntalas.`:'';
   const kg=kgTxt(next.weight),why=esc(next.reason);
@@ -4610,6 +4731,18 @@ const RT={
     Beep.schedule(S.restTimer.endTs);
     return true;
   },
+  // Cambia la duración del descanso en marcha de exId (el RPE se elige con el descanso ya corriendo): misma hora de
+  // inicio, nuevo final. false si no hay un descanso de ese ejercicio en marcha.
+  adjustRest(exId,secs){
+    const t=S.restTimer;secs=Math.round(+secs);
+    if(!t||t.kind!=='rest'||t.exId!==exId||!(secs>0)||t.endTs<=Date.now())return false;
+    t.total=secs;t.endTs=t.startTs+secs*1000;
+    saveState();
+    if(t.endTs<=Date.now()){this._complete(false);return true;}
+    this._lastSec=null;this._tick();
+    Beep.schedule(t.endTs);
+    return true;
+  },
   // Segundos que faltan del temporizador activo (0 si no hay)
   remaining(){const t=S.restTimer;return t?Math.max(0,Math.ceil((t.endTs-Date.now())/1000)):0;},
   // Resincroniza con el reloj real: al cargar, al volver a primer plano y al restaurar desde bfcache
@@ -4674,7 +4807,11 @@ const RT={
     if(!late)haptic([200,100,200]); // el pitido final ya estaba programado en el reloj de audio
     else Beep.cancel();
     Beep.release();
-    if(marked)render();
+    if(marked){
+      render();
+      // Cardio terminado con su tarjeta abierta delante: se cierra y se abre el siguiente ejercicio (modo gym)
+      if(!late&&S.tab==='workout'&&S.open===t.exId&&t.day===S.day)_scheduleAdvance(t.exId);
+    }
   },
   _showDone(t,late,ago,marked){
     const el=this._el('rest-timer');
@@ -4840,6 +4977,408 @@ function skipWarmup(exId){
   saveState();render();
 }
 
+// ═══ MODO GYM: REGISTRO SERIE A SERIE (v18) ═══════════════════════════════
+// Cada serie es una fila [nº] [− peso +] [− reps +] [✓]. S.logs[exId].sets[i] = {w, r} (números o null) son los
+// valores PROPIOS de la serie i: los que tocaste (−/+ o escritos) y, al marcarla con ✓, los que tenía (quedan fijos).
+// Una serie sin valores propios copia la anterior; la primera parte del peso/reps de hoy: lo ya escrito (S.logs.w/r),
+// si no el objetivo del Coach de carga (coach_prescribe), si no lo último que hiciste. Así las filas vienen rellenas con
+// valores reales. Una serie marcada sin valores propios (datos de antes de esta versión) solo tiene el peso escrito.
+// S.logs[exId].w/r siguen siendo el resumen que usa el resto de la app (modal final, calentamiento, tarjeta de
+// resultado…): el peso máximo de las series hechas y las reps más bajas con ese peso (_syncSetLog).
+function _setNumW(v){if(v==null||v==='')return null;const n=typeof v==='number'?v:parseFloat(String(v).replace(',','.'));return isFinite(n)&&n>0&&n<=SET_MAX_W?_r2(n):null;}
+function _setNumR(v){if(v==null||v==='')return null;const n=typeof v==='number'?v:parseInt(String(v),10);return isFinite(n)&&n>=1&&n<=SET_MAX_R?Math.round(n):null;}
+function _setEntry(x){return x&&typeof x==='object'&&!Array.isArray(x)?{w:_setNumW(x.w),r:_setNumR(x.r)}:null;}
+// Ejercicio del día que se está entrenando (o de cualquier día del plan)
+function _dayEx(id){const d=getPlan()[S.day];return (d&&Array.isArray(d.ex)&&d.ex.find(e=>e.id===id))||findExInPlan(id)||null;}
+// Valores de partida de la primera serie
+function _setBase(ex,p){
+  const l=S.logs[ex.id]||{};
+  if(p===undefined)p=coach_prescribe(ex.id);
+  let w=_setNumW(l.w);
+  if(w==null&&p&&p.weight>0)w=_r2(p.weight);
+  if(w==null){const lw=getLastW(ex.id);if(lw)w=_setNumW(lw.v);}
+  let r=_setNumR(l.r);
+  if(r==null&&p&&p.reps>0)r=p.reps;
+  if(r==null)r=_setNumR(targetRepsNum(ex));
+  return{w,r};
+}
+// Filas de un ejercicio de fuerza: [{i, w, r, own, done, rpe}], tantas como series del plan
+function setRows(ex,p){
+  const n=Math.max(0,Math.min(SET_MAX_N,parseInt(ex&&ex.s)||0));
+  if(!ex||ex.cardio||!n)return[];
+  const L=S.logs[ex.id]||{},arr=Array.isArray(L.sets)?L.sets:[],c=S.sets[ex.id]||{},rp=(S.rpe&&S.rpe[ex.id])||{};
+  const typedW=_setNumW(L.w);
+  let prev=_setBase(ex,p);const out=[];
+  for(let i=0;i<n;i++){
+    const e=_setEntry(arr[i]),done=!!c[i];
+    let v;
+    if(e)v=e;
+    else if(done)v={w:typedW,r:prev.r}; // marcada antes de esta versión: solo vale el peso escrito (si no, falta)
+    else v=prev;
+    out.push({i,w:v.w,r:v.r,own:!!e,done,rpe:+rp[i]||0});
+    // La siguiente copia esta (también un peso borrado). Una marcada antigua sin peso no se copia a las que faltan.
+    if(e)prev={w:e.w,r:e.r};
+    else if(done)prev={w:typedW!=null?typedW:prev.w,r:prev.r};
+  }
+  return out;
+}
+function _setOwn(exId,i,v){
+  if(!S.logs[exId])S.logs[exId]={};
+  const L=S.logs[exId];
+  if(!Array.isArray(L.sets))L.sets=[];
+  while(L.sets.length<i)L.sets.push(null);
+  L.sets[i]={w:_setNumW(v&&v.w),r:_setNumR(v&&v.r)};
+}
+// Resumen S.logs.w/r (ver arriba). Antes fija los valores de las series marcadas antiguas que ya tenían peso (así no
+// cambian si cambia el resumen); las antiguas sin peso siguen tomando el peso del ejercicio, como antes de v18.
+function _syncSetLog(ex){
+  if(!ex||ex.cardio)return;
+  let rows=setRows(ex);
+  if(rows.some(r=>r.done&&!r.own&&r.w>0)){rows.forEach(r=>{if(r.done&&!r.own&&r.w>0)_setOwn(ex.id,r.i,r);});rows=setRows(ex);}
+  const L=S.logs[ex.id]||(S.logs[ex.id]={});
+  const done=rows.filter(r=>r.done);
+  if(done.length){
+    const ws=done.map(r=>r.w).filter(w=>w>0);
+    const top=ws.length?Math.max(...ws):null;
+    const rr=done.filter(r=>r.r>0&&(top==null?r.w==null:r.w!=null&&Math.abs(r.w-top)<0.01)).map(r=>r.r);
+    L.w=top!=null?String(top):'';L.r=rr.length?String(Math.min(...rr)):'';
+  }else if(rows[0]&&rows[0].own){
+    L.w=rows[0].w!=null?String(rows[0].w):'';L.r=rows[0].r!=null?String(rows[0].r):'';
+  }
+}
+// Resumen de las series hechas para guardar: {w (máximo), r (reps más bajas con ese peso), sets:[{w,r,rpe}]}
+function setsSummary(ex,p){
+  const rows=setRows(ex,p),done=rows.filter(r=>r.done);
+  const ws=done.map(r=>r.w).filter(w=>w>0),w=ws.length?Math.max(...ws):null;
+  const rr=w==null?[]:done.filter(r=>r.r>0&&r.w!=null&&Math.abs(r.w-w)<0.01).map(r=>r.r);
+  return{w,r:rr.length?Math.min(...rr):null,own:done.some(r=>r.own&&r.r>0),sets:done.map(r=>({w:r.w,r:r.r,rpe:r.rpe>=1&&r.rpe<=3?r.rpe:null}))};
+}
+// Cambia las series que faltan: la primera pendiente queda con los valores nuevos (fn(fila) → {w,r}) y las siguientes
+// la copian; las que tocaste a mano también cambian (fn), las demás siguen copiando la anterior.
+function _setUndone(ex,fn){
+  let first=true;
+  setRows(ex).forEach(r=>{if(r.done)return;if(first||r.own)_setOwn(ex.id,r.i,fn(r));first=false;});
+}
+// Rellena las series hechas sin peso (modal final «Usar el sugerido» / peso escrito allí). Reps vacías → reps.
+function _fillDoneRows(ex,w,reps){
+  setRows(ex).forEach(r=>{if(r.done&&!(r.w>0))_setOwn(ex.id,r.i,{w,r:r.r!=null?r.r:reps});});
+  _syncSetLog(ex);
+}
+// Series hechas con el peso de referencia de un registro (v) si guarda sus series; null si no las guarda
+function _recTopSets(rec){
+  if(!rec||!Array.isArray(rec.sets)||!rec.sets.length)return null;
+  const v=+rec.v;if(!(v>0))return null;
+  const n=rec.sets.filter(s=>s&&Math.abs(+s.w-v)<0.01).length;
+  return n>0?n:null;
+}
+// Texto fantasma de una fila: lo que hiciste en esa serie la última vez («la última vez: 55×12»)
+function _ghostTxt(lw,i){
+  if(!lw)return'';
+  let w,r;
+  if(Array.isArray(lw.sets)&&lw.sets.length){const e=lw.sets[i];if(!e||typeof e!=='object')return'';w=_setNumW(e.w);r=_setNumR(e.r);}
+  else{const sd=parseInt(lw.setsDone);if(sd>0&&i>=sd)return'';w=_setNumW(lw.v);r=_setNumR(lw.r);}
+  if(w==null&&r==null)return'';
+  return'la última vez: '+(w!=null?kgTxt(w)+(r!=null?'×'+r:' kg'):r+' reps');
+}
+// Peso con el que empezar al tocar «+» en una fila sin peso (ejercicio sin historial)
+const SET_START_W={barra:20,maq:20,maqA:10,manc:5,polea:5};
+function _startWeight(ex){const c=loadEqClass(ex);return c==='bw'?loadStepOf(ex):(SET_START_W[c]||10);}
+// Siguiente serie por hacer del día: la tarjeta abierta si le quedan, si no la empezada, si no la primera pendiente
+function _exComplete(ex){return ex.cardio?!!(S.sets[ex.id]||{})[0]:countSetsDone(ex.id,ex.s)>=ex.s;}
+function _firstUndone(ex){const c=S.sets[ex.id]||{};for(let i=0;i<ex.s;i++)if(!c[i])return i;return -1;}
+function nextSetTarget(){
+  const d=getPlan()[S.day];if(!d||!Array.isArray(d.ex))return null;
+  const exs=d.ex.filter(e=>e&&!e.cardio&&parseInt(e.s)>0);
+  const ex=exs.find(e=>e.id===S.open&&!_exComplete(e))||exs.find(e=>countSetsDone(e.id,e.s)>0&&!_exComplete(e))||exs.find(e=>!_exComplete(e));
+  if(!ex)return null;
+  const i=_firstUndone(ex);
+  return i<0?null:{ex,i};
+}
+// Siguiente ejercicio sin terminar después de exId (fuerza o cardio); si no hay, el primero de fuerza pendiente
+function _nextUnfinishedAfter(exId){
+  const d=getPlan()[S.day];if(!d||!Array.isArray(d.ex))return null;
+  const k=d.ex.findIndex(e=>e.id===exId);
+  return d.ex.slice(k+1).find(e=>!_exComplete(e))||d.ex.slice(0,Math.max(0,k)).find(e=>!e.cardio&&!_exComplete(e))||null;
+}
+function _rm(){try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}}
+const _cssId=id=>{try{return CSS.escape(String(id));}catch(e){return String(id).replace(/["\\]/g,'\\$&');}};
+function _openCard(id){return document.querySelector(`#screen .excard.open[data-ex="${_cssId(id)}"]`);}
+
+// HTML del bloque de series de la tarjeta abierta
+function setRowsHtml(ex,p,rows){
+  const eid=esc(ex.id),bw=isBodyweightEx(ex),fixR=targetRepsNum(ex)==null&&!repRange(ex),lw=getLastW(ex.id);
+  const nx=rows.findIndex(r=>!r.done),nDone=rows.filter(r=>r.done).length;
+  const pw=p&&p.weight>0?kgTxt(p.weight):'';
+  const need=!bw&&rows.some(r=>r.done&&!(r.w>0));
+  const nxRow=nx>=0?rows[nx]:null;
+  const tag=p&&nxRow?`<button type="button" class="sug-tag ${presTagCls(p,nxRow.w>0?nxRow.w:null)}" data-ex="${eid}" onclick="useSug(this.dataset.ex)" aria-label="Poner el objetivo en las series que faltan: ${esc(pw)} kg × ${p.reps}">${esc(presTagTxt(p,nxRow.w>0?nxRow.w:null))}</button>`:'';
+  const rowHtml=rows.map(r=>{
+    const n=r.i+1,rpeA=r.rpe===1?' · fácil':r.rpe===2?' · justo':r.rpe===3?' · al límite':'';
+    const g=_ghostTxt(lw,r.i);
+    const wNeed=r.done&&!bw&&!(r.w>0);
+    const repsCell=fixR
+      ?`<div class="stp stp-r stp-fix" aria-label="Objetivo ${esc(fmtTargetReps(ex))}">${esc(fmtTargetReps(ex))}</div>`
+      :`<div class="stp stp-r"><button type="button" class="stp-b" aria-label="Una rep menos, serie ${n}" onclick="setStep(this,'r',-1)">−</button><label class="stp-c"><input class="stp-v" data-f="r" type="text" inputmode="numeric" autocomplete="off" enterkeyhint="done" value="${r.r!=null?r.r:''}" placeholder="${p&&p.reps>0?p.reps:'reps'}" aria-label="Repeticiones de la serie ${n}" onfocus="setFocus(this)" oninput="setTyped(this,'r')" onblur="setBlur(this)" onkeydown="setKey(event)"><span class="stp-u">reps</span></label><button type="button" class="stp-b" aria-label="Una rep más, serie ${n}" onclick="setStep(this,'r',1)">+</button></div>`;
+    return`<div class="lg-row${r.done?' done':''}${r.i===nx?' next':''}" data-ex="${eid}" data-set="${r.i}">
+      <span class="lg-n" aria-hidden="true">${n}</span>
+      <div class="stp stp-w${wNeed?' need':''}"><button type="button" class="stp-b" aria-label="Menos peso, serie ${n}" onclick="setStep(this,'w',-1)">−</button><label class="stp-c"><input class="stp-v" data-f="w" type="text" inputmode="decimal" autocomplete="off" enterkeyhint="done" value="${r.w!=null?esc(kgTxt(r.w)):''}" placeholder="${pw&&!bw?esc(pw):'—'}" aria-label="Peso de la serie ${n} en kg${bw?' (lastre opcional)':pw?', objetivo '+esc(pw):''}" onfocus="setFocus(this)" oninput="setTyped(this,'w')" onblur="setBlur(this)" onkeydown="setKey(event)"><span class="stp-u">${bw&&r.w==null?'PC':'kg'}</span></label><button type="button" class="stp-b" aria-label="Más peso, serie ${n}" onclick="setStep(this,'w',1)">+</button></div>
+      ${repsCell}
+      <button type="button" class="lg-ck${r.done?' on':''}${r.done&&r.rpe?' r'+r.rpe:''}" aria-pressed="${r.done}" aria-label="${r.done?`Serie ${n} hecha${rpeA}. Toca para desmarcarla`:`Marcar la serie ${n} como hecha`}" onclick="setCheck(this)">✓</button>
+    </div>${g?`<div class="lg-ghost">${esc(g)}</div>`:''}`;
+  }).join('');
+  return`<div class="lg-sets" data-ex="${eid}">
+    <div class="lg-h"><span class="lg-l">Series <b>${nDone}/${rows.length}</b>${lw&&lw.d?` <span class="lg-d">· última ${esc(lw.d)}</span>`:''}</span>${tag}<button class="hist-btn" onclick="event.stopPropagation();openHist(this.dataset.ex)" data-ex="${eid}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Historial</button></div>
+    ${rowHtml}
+    ${bw?'':`<div class="need-hint" data-ex="${eid}"${need?'':' hidden'}>Apunta el peso para que cuente en tu progreso</div>`}
+  </div>`;
+}
+// Actualiza en su sitio las filas de un ejercicio (valores, avisos, etiqueta del objetivo, ajuste en vivo, barra
+// «siguiente serie»…) sin repintar la app: no se pierde el foco, el teclado ni el toque en curso
+function _refreshSets(ex,skipInp){
+  renderNextBar();
+  const card=_openCard(ex.id),box=card&&card.querySelector('.lg-sets');
+  if(!box)return;
+  const p=coach_prescribe(ex.id),rows=setRows(ex,p),bw=isBodyweightEx(ex);
+  rows.forEach(r=>{
+    const row=box.querySelector(`.lg-row[data-set="${r.i}"]`);if(!row)return;
+    const wi=row.querySelector('.stp-v[data-f="w"]'),ri=row.querySelector('.stp-v[data-f="r"]');
+    if(wi&&wi!==skipInp&&document.activeElement!==wi)wi.value=r.w!=null?kgTxt(r.w):'';
+    if(ri&&ri!==skipInp&&document.activeElement!==ri)ri.value=r.r!=null?String(r.r):'';
+    const sw=row.querySelector('.stp-w');if(sw)sw.classList.toggle('need',r.done&&!bw&&!(r.w>0));
+    const u=wi&&wi.parentNode.querySelector('.stp-u');if(u)u.textContent=bw&&r.w==null?'PC':'kg';
+  });
+  const h=box.querySelector('.need-hint');if(h)h.hidden=!(!bw&&rows.some(r=>r.done&&!(r.w>0)));
+  const nx=rows.find(r=>!r.done),tag=box.querySelector('.sug-tag');
+  if(tag&&p&&nx){tag.textContent=presTagTxt(p,nx.w>0?nx.w:null);tag.className='sug-tag '+presTagCls(p,nx.w>0?nx.w:null);}
+  const la=card.querySelector('.la-slot');if(la)la.innerHTML=liveAdjHtml(ex,p);
+  // Calentamiento: sigue al peso de la primera serie (con un pequeño retardo para no parpadear con cada tecla)
+  if(!rows.some(r=>r.done)){
+    clearTimeout(_wuRefreshT);
+    _wuRefreshT=setTimeout(()=>{const slot=card.isConnected?card.querySelector('.wu-slot'):null;if(slot)slot.innerHTML=warmupBlockHtml(ex);},350);
+  }
+  _refreshSugSlot(card,ex.id);
+}
+function _rowCtx(el){
+  const row=el&&el.closest('.lg-row');if(!row)return null;
+  const ex=_dayEx(row.dataset.ex),i=parseInt(row.dataset.set);
+  return ex&&!ex.cardio&&i>=0&&i<(parseInt(ex.s)||0)?{row,ex,i}:null;
+}
+// −/+ de peso (salto del equipo, el mismo del Coach de carga) o de reps (de 1 en 1)
+function setStep(btn,f,dir){
+  const c=_rowCtx(btn);if(!c)return;
+  _cancelAdvance(); // editar la serie recién marcada no deja que la tarjeta se cierre sola
+  const r=setRows(c.ex)[c.i];if(!r)return;
+  let v=r[f];
+  if(f==='w'){
+    const st=loadStepOf(c.ex)||2.5;
+    if(v==null){if(dir<0)return;v=_startWeight(c.ex);}
+    else{const nv=_r2(v+dir*st);if(nv<=0){if(!isBodyweightEx(c.ex))return;v=null;}else v=Math.min(SET_MAX_W,nv);}
+  }else{
+    if(v==null){if(dir<0)return;v=targetRepsNum(c.ex)||10;}
+    else v=Math.min(SET_MAX_R,Math.max(1,v+dir));
+    if(v===r.r)return;
+  }
+  const nv={w:r.w,r:r.r};nv[f]=v;
+  _setOwn(c.ex.id,c.i,nv);_syncSetLog(c.ex);saveState();
+  _refreshSets(c.ex);
+}
+// Escribir el número (teclado numérico): se guarda al momento; el resto de filas se actualiza sin repintar
+function setTyped(inp,f){
+  const c=_rowCtx(inp);if(!c)return;
+  _cancelAdvance();
+  const r=setRows(c.ex)[c.i];if(!r)return;
+  const raw=String(inp.value||'').trim().slice(0,8);
+  const nv={w:r.w,r:r.r};nv[f]=f==='w'?_setNumW(raw):_setNumR(raw);
+  _setOwn(c.ex.id,c.i,nv);_syncSetLog(c.ex);saveState();
+  _refreshSets(c.ex,inp);
+}
+function setFocus(inp){_cancelAdvance();try{inp.select();}catch(e){}const a=document.getElementById('app');if(a)a.classList.add('typing');}
+function setBlur(inp){
+  const a=document.getElementById('app');if(a)a.classList.remove('typing');
+  const c=_rowCtx(inp);if(!c)return;
+  const r=setRows(c.ex)[c.i];if(!r)return;
+  const f=inp.dataset.f;inp.value=r[f]!=null?(f==='w'?kgTxt(r[f]):String(r[f])):''; // normaliza lo escrito («57,50» → 57.5)
+}
+function setKey(e){if(e.key==='Enter'){e.preventDefault();try{e.target.blur();}catch(_){}}}
+// ✓ de una fila: marca (o desmarca) la serie con los valores que muestra.
+// Un doble toque sin querer no la desmarca: el 2.º toque sobre la serie recién marcada (<MARK_GUARD_MS) no cuenta.
+const MARK_GUARD_MS=450;
+let _rowMark=null,_barMarkTs=0;
+function setCheck(btn){
+  const c=_rowCtx(btn);if(!c)return;
+  const id=c.ex.id,i=c.i,on=!!(S.sets[id]&&S.sets[id][i]);
+  if(on&&_rowMark&&_rowMark.id===id&&_rowMark.i===i&&Date.now()-_rowMark.ts<MARK_GUARD_MS)return;
+  toggleSet(id,i,{src:'row'});
+  _rowMark=!on&&S.sets[id]&&S.sets[id][i]?{id,i,ts:Date.now()}:null;
+}
+
+// ── Barra «siguiente serie» (sobre la navegación, con la sesión en marcha) ──
+function renderNextBar(){
+  const el=document.getElementById('nextbar'),app=document.getElementById('app');
+  if(!el||!app)return;
+  // Escribiendo un número la barra se esconde (teclado); si el campo desapareció sin «blur», vuelve
+  const ae=document.activeElement;if(!(ae&&ae.classList&&ae.classList.contains('stp-v')&&ae.isConnected))app.classList.remove('typing');
+  const day=getPlan()[S.day];
+  // Con la sesión en marcha (alguna serie marcada en este día) o con un ejercicio de fuerza abierto: la primera
+  // serie también se puede marcar desde aquí, sin bajar hasta las filas
+  const okDay=!!(S.onboarded&&S.tab==='workout'&&day&&Array.isArray(day.ex));
+  const openEx=okDay&&S.open?day.ex.find(e=>e.id===S.open&&!e.cardio&&!_exComplete(e)):null;
+  const show=okDay&&(dayMarkCount(S.day).marks>0||!!openEx);
+  app.classList.toggle('nb-on',show);el.classList.toggle('show',show);
+  if(!show){if(el.innerHTML)el.innerHTML='';return;}
+  const t=nextSetTarget();
+  let h;
+  if(t){
+    const rows=setRows(t.ex),row=rows[t.i],reps=row.r!=null?row.r:null;
+    const rr=reps!=null?reps:fmtTargetReps(t.ex),bwx=isBodyweightEx(t.ex);
+    const val=row.w!=null?`${kgTxt(row.w)} kg × ${rr}`:bwx?(reps!=null?`${reps} reps`:rr):`— kg × ${rr}`;
+    h=`<button type="button" class="nb-info" onclick="nbOpen()" aria-label="Abrir ${esc(t.ex.n)}"><span class="nb-t">${esc(t.ex.n)} · <b>Serie ${t.i+1}/${rows.length}</b></span><span class="nb-s"><b>${esc(val)}</b></span></button>
+      <button type="button" class="nb-go" id="nb-go" onclick="nbDone()" aria-label="Marcar hecha la serie ${t.i+1} de ${esc(t.ex.n)}: ${esc(val)}">✓ Hecho</button>`;
+  }else{
+    const pend=day.ex.filter(e=>e.cardio&&!_exComplete(e));
+    h=`<div class="nb-info"><span class="nb-t">Fuerza completada 🎉</span><span class="nb-s">${pend.length?'Te queda: '+esc(pend[0].n):'Guarda tu entreno'}</span></div>
+      <button type="button" class="nb-go" id="nb-go" onclick="finishSession()">Guardar</button>`;
+  }
+  if(el.innerHTML!==h)el.innerHTML=h;
+}
+// «✓ Hecho» de la barra: marca la siguiente serie aunque su tarjeta esté cerrada o fuera de pantalla.
+// El botón sigue en el mismo sitio tras marcar: un doble toque (<MARK_GUARD_MS) marca solo una.
+function nbDone(){
+  const now=Date.now();if(now-_barMarkTs<MARK_GUARD_MS)return;
+  const t=nextSetTarget();if(!t)return;
+  _barMarkTs=now;toggleSet(t.ex.id,t.i,{src:'bar'});
+}
+// Tocar el texto de la barra: abre ese ejercicio y lo trae a la vista
+function nbOpen(){
+  const t=nextSetTarget();if(!t)return;
+  _uiGen++;S.open=t.ex.id;render();_scrollToCard(t.ex.id);
+}
+
+// ── Avance automático: ejercicio completado → se cierra y se abre el siguiente pendiente ──
+const ADV_MS=700;
+let _uiGen=0,_advT=null,_advTok=null,_scrollReq=0,_scrollTo=null;
+// Desplazamiento suave pedido por el modo gym: si se repinta a mitad, se continúa desde su destino (no se corta)
+function _smoothScroll(s,top){
+  const req=++_scrollReq;_scrollTo={top,ts:Date.now()};
+  try{s.scrollTo({top,behavior:_rm()?'auto':'smooth'});}catch(e){s.scrollTop=top;}
+  // Red de seguridad (WebViews sin desplazamiento suave, pestaña en segundo plano…): si no llegó y nadie ha tocado la
+  // pantalla mientras tanto, se coloca directamente
+  setTimeout(()=>{if(_scrollReq===req&&Math.abs(s.scrollTop-top)>2)s.scrollTop=top;},650);
+}
+// Tocar o desplazar la lista a mano anula los desplazamientos automáticos pendientes
+['touchstart','wheel','pointerdown'].forEach(ev=>{try{document.getElementById('screen').addEventListener(ev,()=>{_scrollReq++;_scrollTo=null;},{passive:true});}catch(e){}});
+function _scheduleAdvance(id){
+  clearTimeout(_advT);
+  _advTok={id,day:S.day,open:S.open,gen:_uiGen};
+  _advT=setTimeout(_runAdvance,ADV_MS);
+}
+// Tocar un número o un −/+ (editar una serie) también cancela el avance pendiente, incluso a mitad del cierre
+function _cancelAdvance(){
+  if(!_advT&&!_advTok&&!_advAnim)return;
+  clearTimeout(_advT);_advT=null;_advTok=null;
+  const a=_advAnim;_advAnim=null;
+  if(a){_uiGen++;try{a.anim.cancel();}catch(e){}a.body.style.overflow='';}
+}
+let _advAnim=null;
+function _runAdvance(){
+  const t=_advTok;_advTok=null;_advT=null;
+  // Solo si nada ha cambiado desde que se completó (otra serie, otra tarjeta, otra pantalla, un modal…)
+  if(!t||S.tab!=='workout'||S.day!==t.day||S.open!==t.open||_uiGen!==t.gen||_cmodalState||S._hist||S.settingsOpen)return;
+  if(document.querySelector('#cmodal-root .cmov'))return;
+  // …ni mientras escribes un número (el campo desaparecería y se cerraría el teclado)
+  const ae=document.activeElement;if(ae&&ae.classList&&ae.classList.contains('stp-v')&&ae.isConnected)return;
+  const ex=_dayEx(t.id);if(!ex||!_exComplete(ex))return;
+  const next=_nextUnfinishedAfter(t.id),gen=++_uiGen,rm=_rm();
+  const fin=()=>{
+    _advAnim=null;
+    if(_uiGen!==gen||S.tab!=='workout'||S.day!==t.day)return;
+    S.open=next?next.id:(S.open===t.id?null:S.open);
+    render();
+    const c=document.querySelector(`#screen .excard[data-ex="${_cssId(t.id)}"]`);
+    if(c&&!rm){c.classList.add('just-done');setTimeout(()=>c.classList.remove('just-done'),600);}
+    if(next)_scrollToCard(next.id);
+  };
+  const body=t.open===t.id?(()=>{const c=_openCard(t.id);return c&&c.querySelector('.exb');})():null;
+  if(body&&!rm&&typeof body.animate==='function'){
+    let done=false;const once=()=>{if(!done){done=true;fin();}};
+    try{
+      body.style.overflow='hidden';
+      const a=body.animate([{height:body.offsetHeight+'px',opacity:1},{height:'0px',opacity:0,paddingTop:'0px',paddingBottom:'0px'}],{duration:240,easing:'cubic-bezier(.4,0,.2,1)',fill:'forwards'});
+      _advAnim={anim:a,body};
+      a.onfinish=once;a.oncancel=once;setTimeout(once,400);
+    }catch(e){once();}
+  }else fin();
+}
+// Desplaza la lista para que la tarjeta quede arriba (suave salvo movimiento reducido)
+function _scrollToCard(id){
+  const s=document.getElementById('screen'),c=document.querySelector(`#screen .excard[data-ex="${_cssId(id)}"]`);
+  if(!s||!c)return;
+  const top=Math.max(0,c.getBoundingClientRect().top-s.getBoundingClientRect().top+s.scrollTop-_topOff());
+  _smoothScroll(s,top);
+}
+// Lo que tapa arriba el aviso flotante (#toast, p. ej. «Serie 3 marcada · Deshacer», 5 s): px desde el borde superior
+// de la lista. Se mide su posición final (sin la transformación de la entrada, que acaba de empezar).
+function _toastCover(){
+  const t=document.getElementById('toast'),s=document.getElementById('screen');
+  if(!t||!s||!t.classList.contains('show')||!t.offsetHeight)return 0;
+  let ty=0;try{const m=new DOMMatrixReadOnly(getComputedStyle(t).transform);ty=m.m42||0;}catch(e){}
+  return Math.max(0,Math.round(t.getBoundingClientRect().bottom-ty-s.getBoundingClientRect().top));
+}
+// Hueco arriba al colocar una tarjeta: 10 px, o por debajo del aviso si está a la vista (que no tape su nombre)
+function _topOff(){const c=_toastCover();return c?Math.max(10,c+8):10;}
+// Altura que tapan abajo la navegación, la barra «siguiente serie» y el descanso (px desde el borde inferior de #app)
+function _dockH(){
+  let h=0;const bb=document.querySelector('.botbar');h+=bb?bb.offsetHeight:58;h+=8;
+  const nb=document.getElementById('nextbar');if(nb&&nb.classList.contains('show'))h+=nb.offsetHeight+6;
+  const rt=document.getElementById('rest-timer');if(rt&&rt.classList.contains('show'))h+=rt.offsetHeight+6;
+  return h;
+}
+// Tras marcar una serie: que las filas de ese ejercicio queden a la vista por encima de las barras de abajo
+// (Tras la primera serie la tarjeta se compacta y las filas suben: también se corrige si quedan por encima.)
+function _ensureSetsVisible(exId,first){
+  const s=document.getElementById('screen'),card=_openCard(exId),box=card&&card.querySelector('.lg-sets');
+  if(!s||!box)return;
+  const app=document.getElementById('app'),sr=s.getBoundingClientRect(),br=box.getBoundingClientRect();
+  const avail=(app?app.getBoundingClientRect().bottom:window.innerHeight)-_dockH()-sr.top; // alto visible útil
+  const st=s.scrollTop,abs=y=>y-sr.top+st;
+  const bTop=abs(br.top),bBot=abs(br.bottom),cTop=abs(card.getBoundingClientRect().top);
+  // Arriba puede estar el aviso «Serie 1 marcada · Deshacer»: la cabecera se coloca por debajo de él
+  const cover=_toastCover(),off=cover?Math.max(10,cover+8):10;
+  const fits=bBot-cTop+off+6<=avail;
+  // ya se ven enteras (tras la 1.ª serie, que compacta la tarjeta, también su cabecera —fuera o bajo el aviso— si cabe)
+  if(bTop>=st+cover+4&&bBot<=st+avail-4&&!(first&&fits&&cTop<st+cover-1))return;
+  // Si cabe la tarjeta desde su cabecera hasta la última fila, arriba del todo; si no, la última fila sobre las barras
+  let top=fits?cTop-off:bBot-avail+8;
+  top=Math.max(0,Math.min(top,s.scrollHeight-s.clientHeight));
+  if(Math.abs(top-st)<2)return;
+  _smoothScroll(s,top);
+}
+// Abrir / cerrar una tarjeta y cambiar de día (cuentan como «el usuario ha hecho algo»: cancelan el avance pendiente)
+function toggleCard(id){_uiGen++;_scrollTo=null;S.open=S.open===id?null:id;render();}
+function setWorkoutDay(k){if(!getPlan()[k])return;_uiGen++;_scrollTo=null;S.day=k;S.open=null;render();}
+
+// ── Animación compacta: tras la primera serie se encoge (toca para ampliarla) ──
+const _animBig=new Set(); // ejercicios con la animación ampliada a mano (solo en memoria)
+function animGrow(id){_animBig.add(id);render();}
+function animShrink(id){_animBig.delete(id);render();}
+// Las animaciones montadas se reutilizan entre repintados (mismo canvas: conservan giro, pausa y fase)
+const _animKeep=new Map(); // exId → elemento .ex-anim montado · máx. 4
+function animDetach(root){
+  if(!root)return;
+  root.querySelectorAll('.ex-anim[data-ex]').forEach(el=>{if(el._ga){_animKeep.delete(el.dataset.ex);_animKeep.set(el.dataset.ex,el);}});
+  while(_animKeep.size>4){const k=_animKeep.keys().next().value,el=_animKeep.get(k);_animKeep.delete(k);try{if(typeof GymAnim!=='undefined')GymAnim.unmount(el);}catch(e){}}
+}
+function animAttach(root){
+  if(!root)return;
+  root.querySelectorAll('.ex-anim[data-ex]').forEach(ph=>{
+    const id=ph.dataset.ex,el=_animKeep.get(id);
+    if(!el||el===ph)return;
+    if(el.getAttribute('data-gym-anim')!==ph.getAttribute('data-gym-anim')){_animKeep.delete(id);try{GymAnim.unmount(el);}catch(e){}return;}
+    el.className=ph.className;
+    ph.replaceWith(el);
+  });
+}
+
 // Buffer para undo del último toggleSet (5s window)
 let _lastSetAction=null;
 let _undoToastT=null;
@@ -4870,10 +5409,18 @@ function showUndoToast(label,onUndo){
 
 function toggleSet(id,i,evt){
   if(!S.sets[id])S.sets[id]={};
+  _uiGen++; // una serie nueva (o desmarcada) cancela el avance automático pendiente
   const wasOff=!S.sets[id][i];
   // Snapshot para undo
   const prevSet=S.sets[id][i];
   const prevRpe=S.rpe&&S.rpe[id]?S.rpe[id][i]:undefined;
+  // Registro serie a serie: valores de la serie (y resumen) de antes, para deshacer exactamente
+  const exS=_dayEx(id),strS=!!(exS&&!exS.cardio);
+  const L0=S.logs[id]||{};
+  const prevEntry=strS&&Array.isArray(L0.sets)&&L0.sets[i]!=null?JSON.parse(JSON.stringify(L0.sets[i])):null;
+  const prevW=L0.w,prevR=L0.r,hadL=!!S.logs[id];
+  // Al marcarla, la serie se queda con los valores que muestra su fila (los prerrellenados o los que tocaste)
+  if(strS&&wasOff){const row=setRows(exS)[i];if(row)_setOwn(id,i,row);}
   // Marcar inicio de sesión al primer set marcado (para calcular duración real).
   // Si lo primero fue un cardio con temporizador, la sesión empezó cuando arrancó ese cardio.
   if(wasOff&&!S.sessionStartTs)S.sessionStartTs=_cardioStartHint()||Date.now();
@@ -4882,10 +5429,12 @@ function toggleSet(id,i,evt){
   // Marcar a mano un cardio cuyo temporizador sigue en marcha: ese temporizador ya no hace falta
   if(wasOff&&RT.cardioRunning(id))RT.stop();
   S.sets[id][i]=!S.sets[id][i];
-  // Si se desmarca, también limpiar RPE de esa serie
+  // Si se desmarca, también limpiar RPE de esa serie (sus valores se quedan en la fila)
   if(!wasOff){
     if(S.rpe&&S.rpe[id])delete S.rpe[id][i];
   }
+  // Resumen S.logs.w/r para el resto de la app (peso máximo de las series hechas…)
+  if(strS)_syncSetLog(exS);
   // Crear / cerrar el entreno activo según las marcas reales (permite reanudarlo si se interrumpe)
   const rsBefore=getReopened();
   syncActiveWorkout();
@@ -4897,12 +5446,23 @@ function toggleSet(id,i,evt){
   const label=wasOff?`Serie ${i+1} marcada`:(restoredRs?`Serie ${i+1} desmarcada · sesión devuelta al historial`:`Serie ${i+1} desmarcada`);
   showUndoToast(label,()=>{
     if(!_lastSetAction)return;
+    _uiGen++;
     S.sets[id][i]=_lastSetAction.prevSet;
     if(_lastSetAction.prevRpe!==undefined){
       if(!S.rpe[id])S.rpe[id]={};
       S.rpe[id][i]=_lastSetAction.prevRpe;
     }else if(S.rpe&&S.rpe[id]){
       delete S.rpe[id][i];
+    }
+    // Valores de la serie y resumen como estaban
+    if(strS){
+      if(!hadL)S.logs[id]={};
+      const L=S.logs[id]||(S.logs[id]={});
+      if(prevEntry)_setOwn(id,i,prevEntry);else if(Array.isArray(L.sets)&&i<L.sets.length)L.sets[i]=null;
+      if(prevW===undefined)delete L.w;else L.w=prevW;
+      if(prevR===undefined)delete L.r;else L.r=prevR;
+      _syncSetLog(exS);
+      if(S.tab==='workout'&&getPlan()[S.day]&&getPlan()[S.day].ex.some(e=>e.id===id))S.open=id; // volver a esa tarjeta
     }
     // Deshacer también la vuelta al historial: la sesión sigue reabierta como antes
     if(restoredRs&&!getReopened()){
@@ -4919,14 +5479,18 @@ function toggleSet(id,i,evt){
     RT.cancelRest();closeRpeSelector();
     saveState();render();
   });
+  if(wasOff)haptic(12); // toque físico al marcar (Android; iOS no tiene vibrate)
   if(wasOff&&S.tab==='workout'){
     if(ex&&!ex.cardio){
-      // Mostrar selector RPE en lugar de iniciar timer directamente
-      // El timer empezará cuando elija RPE (o lo salte)
-      showRpeSelector(id,i,ex);
-    }else if(ex&&ex.cardio){
-      // Cardio no usa RPE
-      // (no hay timer para cardio)
+      // El descanso empieza YA (antes esperaba al RPE). El RPE se elige mientras corre y ajusta su duración
+      // (al límite +15 %, fácil −15 %), como siempre.
+      const started=RT.start(getRestSecs(id),ex.n,{exId:id});
+      showRpeSelector(id,i,ex,started);
+    }
+    if(ex){
+      // Que las filas sigan a la vista sobre las barras de abajo; al completar el ejercicio, avance automático
+      if(!ex.cardio)_ensureSetsVisible(id,countSetsDone(id,ex.s)===1);
+      if(_exComplete(ex))_scheduleAdvance(id);
     }
   }else if(!wasOff){
     RT.cancelRest();
@@ -4936,118 +5500,89 @@ function toggleSet(id,i,evt){
 
 // ── RPE SELECTOR ──
 let _rpeOpen=null;
-function showRpeSelector(exId,setIdx,ex){
+// Elección rápida del esfuerzo tras marcar una serie. Va anclada abajo, encima de la barra «siguiente serie» y del
+// descanso (que ya está corriendo): siempre a mano del pulgar y nunca apuntando a una fila que se ha movido.
+// rest=true → el descanso de esa serie ya arrancó al marcarla: el RPE solo ajusta su duración.
+function showRpeSelector(exId,setIdx,ex,rest){
   closeRpeSelector();
-  _rpeOpen={exId,setIdx,ex};
-  const root=document.body;
-  // Encontrar el botón de la serie para posicionar cerca
-  const sbBtn=document.querySelector(`.sb[data-ex="${exId}"][data-set="${setIdx}"]`);
+  _rpeOpen={exId,setIdx,ex,rest:!!rest};
+  const n=Math.max(1,parseInt(ex&&ex.s)||1);
   const pop=document.createElement('div');
-  pop.className='rpe-pop';
+  pop.className='rpe-pop dock';
   pop.id='rpe-pop';
-  pop.innerHTML=`
-    <div class="rpe-opt r1" onclick="setRpe(1)" aria-label="Fácil"><div class="rpe-opt-ic">😌</div><div class="rpe-opt-l">Fácil</div></div>
-    <div class="rpe-opt r2" onclick="setRpe(2)" aria-label="Justo"><div class="rpe-opt-ic">💪</div><div class="rpe-opt-l">Justo</div></div>
-    <div class="rpe-opt r3" onclick="setRpe(3)" aria-label="Al límite"><div class="rpe-opt-ic">🥵</div><div class="rpe-opt-l">Al límite</div></div>
-    <button class="rpe-skip" onclick="skipRpe()">Saltar</button>
-  `;
-  root.appendChild(pop);
-  // Posicionar relativo al botón
-  if(sbBtn){
-    const r=sbBtn.getBoundingClientRect();
-    const popH=pop.offsetHeight||60;
-    const popW=pop.offsetWidth||280;
-    let top=r.bottom+8;
-    // Si no cabe abajo, mostrar arriba
-    if(top+popH>window.innerHeight-20)top=r.top-popH-8;
-    let left=r.left+r.width/2-popW/2;
-    if(left<8)left=8;
-    if(left+popW>window.innerWidth-8)left=window.innerWidth-popW-8;
-    pop.style.top=top+'px';
-    pop.style.left=left+'px';
-  }else{
-    // Fallback: centrado
-    pop.style.bottom='100px';
-    pop.style.left='50%';
-    pop.style.transform='translateX(-50%)';
-  }
-  // Cerrar al tocar fuera
-  setTimeout(()=>{
-    document.addEventListener('click',_rpeOutsideClick,{once:true});
-  },50);
+  pop.setAttribute('role','dialog');
+  pop.setAttribute('aria-label',`¿Qué tal la serie ${setIdx+1}?`);
+  pop.innerHTML=`<div class="rpe-q">Serie ${setIdx+1}/${n}${ex&&ex.n?' · '+esc(ex.n):''} · ¿qué tal?</div>
+    <button type="button" class="rpe-opt r1" onclick="setRpe(1)" aria-label="Fácil"><div class="rpe-opt-ic">😌</div><div class="rpe-opt-l">Fácil</div></button>
+    <button type="button" class="rpe-opt r2" onclick="setRpe(2)" aria-label="Justo"><div class="rpe-opt-ic">💪</div><div class="rpe-opt-l">Justo</div></button>
+    <button type="button" class="rpe-opt r3" onclick="setRpe(3)" aria-label="Al límite"><div class="rpe-opt-ic">🥵</div><div class="rpe-opt-l">Al límite</div></button>
+    <button type="button" class="rpe-skip" onclick="skipRpe()">Saltar</button>`;
+  pop.style.bottom=`${_dockH()+6}px`;
+  document.body.appendChild(pop);
+  // Cerrar al TOCAR fuera (en captura: se cierra antes de que ese toque haga lo suyo, p. ej. marcar la siguiente
+  // serie). Desplazar la lista o arrastrar no lo cierra, ni el 2.º toque de un doble toque (RPE_GRACE_MS).
+  _rpeOpenTs=Date.now();_rpeDown=null;
+  clearTimeout(_rpeListenT);
+  _rpeListenT=setTimeout(()=>{if(_rpeOpen)_rpeListen(true);},50);
 }
+let _rpeListenT=null,_rpeOpenTs=0,_rpeDown=null;
+const RPE_GRACE_MS=400,RPE_TAP_PX=12;
+function _rpeListen(on){
+  const f=on?'addEventListener':'removeEventListener';
+  document[f]('pointerdown',_rpeDownH,true);
+  document[f]('pointerup',_rpeOutsideClick,true);
+  document[f]('pointercancel',_rpeCancelH,true);
+}
+function _rpeDownH(e){_rpeDown={x:e.clientX,y:e.clientY,id:e.pointerId};}
+function _rpeCancelH(){_rpeDown=null;} // el toque se convirtió en desplazamiento
 function _rpeOutsideClick(e){
-  if(!_rpeOpen)return;
+  if(!_rpeOpen){_rpeListen(false);return;}
+  const d=_rpeDown;_rpeDown=null;
+  if(!d||(d.id!=null&&e.pointerId!=null&&d.id!==e.pointerId))return;
   const pop=document.getElementById('rpe-pop');
-  if(pop&&!pop.contains(e.target))skipRpe();
+  if(!pop||pop.contains(e.target))return;
+  if(Math.hypot((e.clientX||0)-(d.x||0),(e.clientY||0)-(d.y||0))>RPE_TAP_PX)return; // arrastre, no un toque
+  if(Date.now()-_rpeOpenTs<RPE_GRACE_MS)return; // 2.º toque de un doble toque sobre «✓»
+  skipRpe();
+}
+function _rpeRest(level,exId){
+  const base=getRestSecs(exId);
+  return level===3?Math.round(base*1.15):level===1?Math.round(base*0.85):base;
 }
 function setRpe(level){
   if(!_rpeOpen)return;
-  const {exId,setIdx,ex}=_rpeOpen;
+  const {exId,setIdx,ex,rest}=_rpeOpen;
   if(!S.rpe[exId])S.rpe[exId]={};
   S.rpe[exId][setIdx]=level;
   saveState();
   closeRpeSelector();
-  // Iniciar timer ahora con duración ajustada por RPE (más descanso si RPE alto)
-  const baseRest=getRestSecs(exId);
-  const adjustedRest=level===3?Math.round(baseRest*1.15):level===1?Math.round(baseRest*0.85):baseRest;
-  RT.start(adjustedRest,ex.n,{exId});
+  // Descanso ajustado por el esfuerzo (más si fue al límite, menos si fue fácil). Si arrancó al marcar la serie, solo
+  // se ajusta mientras sigue en marcha: si ya terminó (el RPE se quedó abierto durante el descanso) o lo saltaste, no
+  // vuelve a empezar. Solo arranca aquí si no pudo arrancar al marcar.
+  const secs=_rpeRest(level,exId);
+  if(rest)RT.adjustRest(exId,secs);else RT.start(secs,ex.n,{exId});
   render();
 }
-function skipRpe(){closeRpeSelector();
-  // Aún así iniciar timer (sin ajuste)
-  if(_rpeOpenLast){
-    RT.start(getRestSecs(_rpeOpenLast.exId),_rpeOpenLast.ex.n,{exId:_rpeOpenLast.exId});
-    _rpeOpenLast=null;
-  }
+function skipRpe(){
+  const o=_rpeOpen;
+  closeRpeSelector();
+  // Sin esfuerzo: descanso normal (si no había empezado ya al marcar la serie)
+  const last=o||_rpeOpenLast;
+  if(last&&!last.rest)RT.start(getRestSecs(last.exId),last.ex.n,{exId:last.exId});
+  _rpeOpenLast=null;
 }
 let _rpeOpenLast=null;
 function closeRpeSelector(){
   if(_rpeOpen)_rpeOpenLast=_rpeOpen;
-  _rpeOpen=null;
+  _rpeOpen=null;_rpeDown=null;
+  clearTimeout(_rpeListenT);
+  _rpeListen(false);
   const pop=document.getElementById('rpe-pop');
   if(pop)pop.remove();
 }
-function updLog(id,f,v){
-  if(!S.logs[id])S.logs[id]={};
-  // Sanear: normalizar comas → puntos, limitar longitud, evitar NaN explícito
-  let val=String(v||'').replace(',','.').slice(0,8);
-  // Solo permitir números válidos (incluye '' para borrar)
-  if(val!==''&&!/^-?\d*\.?\d*$/.test(val))return;
-  S.logs[id][f]=val;
-  saveState();
-}
-// Input de peso del ejercicio: guarda y actualiza el aviso «falta el peso» y el calentamiento sin re-renderizar
-// (re-renderizar cerraría el teclado mientras escribes)
+// Temporizadores del refresco en su sitio del calentamiento y de la tarjeta de resultado (los usa _refreshSets).
+// (07) Los manejadores del antiguo campo único de peso/reps se quitaron: las filas usan setStep/setTyped/setFocus.
 let _wuRefreshT=null,_sugRefreshT=null;
-function onWeightInput(inp,id){
-  updLog(id,'w',inp.value);
-  const tv=parseFloat(String(inp.value||'').replace(',','.')),ok=tv>0;
-  const card=inp.closest('.excard');
-  const ex=(getPlan()[S.day]?.ex||[]).find(e=>e.id===id);
-  const need=!ok&&!!ex&&!isBodyweightEx(ex)&&countSetsDone(id,ex.s)>0;
-  inp.classList.toggle('need',need);
-  const h=card&&card.querySelector('.need-hint');
-  if(h)h.hidden=!need;
-  // Etiqueta del objetivo: al momento («✓ objetivo» si coincide, «Objetivo 60» si escribes otro), nunca desfasada
-  const tag=card&&card.querySelector('.sug-tag');
-  if(tag&&ex){
-    const p=coach_prescribe(id);
-    if(p){tag.textContent=presTagTxt(p,ok?tv:null);tag.className='sug-tag '+presTagCls(p,ok?tv:null);}
-  }
-  // Calentamiento: sigue al peso escrito (con un pequeño retardo para no parpadear con cada tecla)
-  clearTimeout(_wuRefreshT);
-  _wuRefreshT=setTimeout(()=>{
-    const slot=card&&card.isConnected?card.querySelector('.wu-slot'):null;
-    if(slot&&ex)slot.innerHTML=warmupBlockHtml(ex);
-  },350);
-  _refreshSugSlot(card,id);
-}
-// Reps escritas: guarda y actualiza la tarjeta de resultado (sin re-render, no se cierra el teclado)
-function onRepsInput(inp,id){
-  updLog(id,'r',inp.value);
-  _refreshSugSlot(inp.closest('.excard'),id);
-}
 // Tarjeta de resultado («Próxima sesión: …»): se recalcula con lo que escribes (peso y reps), con un pequeño retardo
 function _refreshSugSlot(card,id){
   clearTimeout(_sugRefreshT);
@@ -5176,6 +5711,8 @@ function _finWriteMissing(rows,fillReps){
     const tr=_todayReps(m.ex);
     S.logs[m.ex.id].w=String(m.w);
     if(fillReps&&!(parseInt(S.logs[m.ex.id].r)>0)&&tr)S.logs[m.ex.id].r=String(tr);
+    // Registro serie a serie: las series hechas sin peso se quedan con este (y sin reps, con las del objetivo)
+    _fillDoneRows(m.ex,m.w,fillReps?tr:null);
   });
   saveState();
 }
@@ -5222,9 +5759,10 @@ function finishReview(){
   if(!miss.length)return;
   const first=miss[0];
   setTimeout(()=>{
-    const inp=document.querySelector('.excard.open .inp[data-f="w"]');
+    // La primera serie hecha sin peso (o la primera fila)
+    const inp=document.querySelector('.excard.open .stp-w.need .stp-v')||document.querySelector('.excard.open .stp-v[data-f="w"]');
     if(inp){
-      inp.classList.add('need');
+      const cell=inp.closest('.stp');if(cell)cell.classList.add('need');
       let rm=false;try{rm=matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){}
       try{inp.scrollIntoView({block:'center',behavior:rm?'auto':'smooth'});}catch(e){}
       try{inp.focus({preventScroll:true});}catch(e){}
@@ -5269,13 +5807,15 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   if(rs)_insertByTs(S.sessions,session);else S.sessions.push(session);
   // Guardar reps, series completadas y RPE promedio
   strEx.forEach(ex=>{
-    const l=S.logs[ex.id]||{},w=parseFloat(l.w);
+    // Registro serie a serie (v18): peso = el máximo de las series hechas, reps = las más bajas con ese peso, y cada
+    // serie en sets:[{w,r,rpe}]. v/r/setsDone/rpe siguen como siempre (Coach, Progreso y gráficas no cambian).
+    const l=S.logs[ex.id]||{},sm=setsSummary(ex),w=sm.w||parseFloat(l.w);
     if(w){
       if(!S.strength[ex.id])S.strength[ex.id]=[];
       const setsDone=countSetsDone(ex.id,ex.s);
       // Reps sin escribir con series marcadas: cuentan las del objetivo de hoy (el placeholder «N objetivo» y lo que
       // ya daba por hecho la tarjeta de resultado). Antes se guardaba null y la siguiente sugerencia no cuadraba.
-      const reps=parseInt(l.r)||(setsDone>0?(_todayReps(ex)||null):null);
+      const reps=sm.r||parseInt(l.r)||(setsDone>0?(_todayReps(ex)||null):null);
       // Calcular RPE promedio de la sesión
       const rpeMap=S.rpe[ex.id]||{};
       const rpeValues=Object.values(rpeMap).filter(v=>v>0);
@@ -5290,14 +5830,17 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
       if(ex.n)rec.n=String(ex.n).slice(0,120);
       // Sesión ligera (descarga o semana de descanso): queda marcada y no cuenta para la tendencia del Coach
       if(_lightAt(ex.id,sessTs))rec.dl=1;
+      // Cada serie hecha (v18, aditivo): [{w, r, rpe}] en su orden. Los registros antiguos no lo tienen.
+      if(sm.sets.length)rec.sets=sm.sets;
       if(rs)_insertByTs(S.strength[ex.id],rec);else S.strength[ex.id].push(rec);
     }
   });
-  // Snapshot del trabajo realizado (series, pesos, RPE) para poder reabrir la sesión SIN pérdida
+  // Snapshot del trabajo realizado (series, pesos serie a serie, RPE) para poder reabrir la sesión SIN pérdida
   session.snapshot={sets:{},logs:{},rpe:{}};
+  const _cp=o=>JSON.parse(JSON.stringify(o));
   day.ex.forEach(ex=>{
     if(S.sets[ex.id]&&Object.keys(S.sets[ex.id]).length)session.snapshot.sets[ex.id]={...S.sets[ex.id]};
-    if(S.logs[ex.id]&&Object.keys(S.logs[ex.id]).length)session.snapshot.logs[ex.id]={...S.logs[ex.id]};
+    if(S.logs[ex.id]&&Object.keys(S.logs[ex.id]).length)session.snapshot.logs[ex.id]=_cp(S.logs[ex.id]);
     if(S.rpe[ex.id]&&Object.keys(S.rpe[ex.id]).length)session.snapshot.rpe[ex.id]={...S.rpe[ex.id]};
   });
   // Rotación: tras la sesión más reciente (una reabierta antigua no debe saltarse la que vino después)
@@ -5308,6 +5851,7 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
   // Limpiar RPE, warmups y tracker de duración de la sesión
   S.rpe={};S.warmups={};S.sessionStartTs=null;
+  _animBig.clear();clearTimeout(_advT);_advTok=null;closeRpeSelector();
   // La sesión ha terminado: fuera el descanso/cardio en marcha (un cardio no debe marcarse en la siguiente)
   RT.stop();
   // Re-detectar entreno activo: null si no quedan marcas, o reapunta a otro día a medias
@@ -5353,6 +5897,7 @@ function discardWorkout(){
         });
       }
       S.activeWorkout=null;S.sessionStartTs=null;_lastSetAction=null;
+      _animBig.clear();clearTimeout(_advT);_advTok=null;closeRpeSelector();
       RT.stop(); // descanso/cardio de un entreno descartado
       // Re-detectar: si quedara otro día con marcas, su tarjeta vuelve a mostrarse (nada queda huérfano).
       // Si era una sesión reabierta, aquí vuelve al historial tal como estaba.
@@ -5470,18 +6015,24 @@ function _reopenSessionConfirmed(sess){
   if(sess.snapshot&&typeof sess.snapshot==='object'){
     const snap=sess.snapshot;
     Object.keys(snap.sets||{}).forEach(id=>{if(validIds.has(id))restore.sets[id]={...snap.sets[id]};else droppedCount++;});
-    Object.keys(snap.logs||{}).forEach(id=>{if(validIds.has(id))restore.logs[id]={...snap.logs[id]};});
+    // Copia completa (también los pesos y reps de cada serie, v18)
+    Object.keys(snap.logs||{}).forEach(id=>{if(validIds.has(id)&&_isPlainObj(snap.logs[id]))restore.logs[id]=_sanitizeLogEntry(JSON.parse(JSON.stringify(snap.logs[id])));});
     Object.keys(snap.rpe||{}).forEach(id=>{if(validIds.has(id))restore.rpe[id]={...snap.rpe[id]};});
   }else{
-    // Sesión antigua sin snapshot: reconstruir desde los registros de fuerza (peso, reps, nº series)
+    // Sesión antigua sin snapshot: reconstruir desde los registros de fuerza (peso, reps, nº series y, si las
+    // guarda, cada serie con su peso, reps y RPE)
     dayObj.ex.forEach(ex=>{
       const rec=(S.strength[ex.id]||[]).find(r=>r.ts===sessTs);
       if(rec){
         restore.logs[ex.id]={w:rec.v!=null?String(rec.v):'',r:rec.r!=null?String(rec.r):''};
-        const n=rec.setsDone||0;
+        const ss=Array.isArray(rec.sets)?rec.sets.filter(s=>s&&typeof s==='object').slice(0,SET_MAX_N):[];
+        const n=ss.length||rec.setsDone||0;
         restore.sets[ex.id]={};
         for(let i=0;i<n;i++)restore.sets[ex.id][i]=true;
-        if(rec.rpe){restore.rpe[ex.id]={};const lvl=Math.round(rec.rpe);for(let i=0;i<n;i++)restore.rpe[ex.id][i]=lvl;}
+        if(ss.length){
+          restore.logs[ex.id].sets=ss.map(s=>({w:_setNumW(s.w),r:_setNumR(s.r)}));
+          if(ss.some(s=>s.rpe>=1&&s.rpe<=3)){restore.rpe[ex.id]={};ss.forEach((s,i)=>{if(s.rpe>=1&&s.rpe<=3)restore.rpe[ex.id][i]=Math.round(s.rpe);});}
+        }else if(rec.rpe){restore.rpe[ex.id]={};const lvl=Math.round(rec.rpe);for(let i=0;i<n;i++)restore.rpe[ex.id][i]=lvl;}
       }
     });
   }
@@ -6899,6 +7450,8 @@ function coach_fixLegacyDeload(restore){
 // ═══════════════════════════════════════════════════════════
 
 function go(tab){
+  _uiGen++;_scrollTo=null; // cambiar de pantalla cancela el avance automático pendiente del modo gym
+  if(tab!=='workout')closeRpeSelector();
   S.tab=tab;['dash','workout','coach','prog'].forEach(t=>document.getElementById('nb-'+t).classList.toggle('on',t===tab));
   document.getElementById('screen').scrollTop=0;render();saveState();
 }
@@ -7236,7 +7789,11 @@ function coach_prescribe(exId,opts){
   const lp=_recPlan(last,ex),lr=_recRange(last,ex);
   const repsChanged=!!lr&&(lr.lo!==lo||lr.hi!==hi);
   const setsUp=lp.s<baseSets&&!(sd>=baseSets);
-  const setsOk=sd==null||!(sd>=0)||sd>=Math.min(lp.s,baseSets);
+  // Registro serie a serie (v18): cuentan las series hechas CON el peso de referencia (si bajaste en las últimas,
+  // aún no toca subir). Los registros sin series se juzgan como siempre.
+  const topN=_recTopSets(last),sdTop=topN!=null&&sd!=null&&topN<sd?topN:null;
+  const sdj=sdTop!=null?sdTop:sd;
+  const setsOk=sdj==null||!(sdj>=0)||sdj>=Math.min(lp.s,baseSets);
   const sx=sd>0?sd:lp.s; // «3×12»
   const did=r!=null?`${sx}×${r}`:'';
   const rpeT=rc?' '+RPE_TXT[rc]:'';
@@ -7286,7 +7843,9 @@ function coach_prescribe(exId,opts){
     }
   }
   // Series sin completar, contando las que tocaban entonces (si ahora son menos, las de ahora)
-  if(!setsOk)return out('keep',w,Math.min(hi,Math.max(lo,r)),`completa las ${baseSets} series antes de subir; ${when} hiciste ${sd}${lp.s!==baseSets?' de '+lp.s:''}`);
+  if(!setsOk)return out('keep',w,Math.min(hi,Math.max(lo,r)),sdTop!=null
+    ?`haz las ${baseSets} series con ${kgTxt(w)} kg antes de subir; ${when} ${sdTop} de ${sd} con ese peso`
+    :`completa las ${baseSets} series antes de subir; ${when} hiciste ${sd}${lp.s!==baseSets?' de '+lp.s:''}`);
   if(r>=hi){
     // Serie nueva en el plan (Añadir serie / editor): primero todas las series con este peso, luego se sube
     if(setsUp)return out('keep',w,hi,`ahora son ${baseSets} series; complétalas con este peso y luego subes`);
@@ -7332,10 +7891,18 @@ function presTagCls(p,typed){
   if(typed>0)return Math.abs(typed-p.weight)<0.01?'ok':'keep';
   return p.kind==='up'?'':p.kind==='down'?'down':'keep';
 }
+// Etiqueta del objetivo («Objetivo 60» / «Usar 60 kg»): las series que faltan vuelven al peso y reps del Coach
 function useSug(exId){
   const p=coach_prescribe(exId);
   if(!p)return;
   if(!S.logs[exId])S.logs[exId]={};
+  const ex=_dayEx(exId);
+  if(ex&&!ex.cardio){
+    _setUndone(ex,r=>({w:p.weight,r:p.reps>0?p.reps:r.r}));
+    _syncSetLog(ex);saveState();
+    if(_openCard(exId))_refreshSets(ex);else render();
+    return;
+  }
   S.logs[exId].w=String(p.weight);
   saveState();render();
 }
@@ -7345,9 +7912,17 @@ const PRES_WORD={up:'sube',reps:'+ reps',keep:'mantén',down:'baja',deload:'suav
 const PRES_IC={up:'↑',reps:'+',keep:'=',down:'↓',deload:'🧘'};
 const _tgtWhyOpen=new Set(); // «¿Por qué?» abiertos (solo en memoria: no es estado de la app)
 // Bloque «Objetivo de hoy» de la tarjeta abierta: peso × reps, series, motivo y «¿Por qué?» desplegable
-function presTargetHtml(ex,p){
+function presTargetHtml(ex,p,compact){
   if(!ex||!p)return'';
   const open=_tgtWhyOpen.has(ex.id);
+  // Compacto (durante el ejercicio, debajo de las series): solo el motivo y «¿Por qué?» (las filas ya llevan los valores)
+  if(compact)return`<div class="tgt cmp k-${p.kind}">
+    <div class="tgt-top">
+      <div class="tgt-main"><div class="tgt-r">🎯 <b>${esc(p.head)}:</b> ${esc(p.reason)}</div></div>
+      <button type="button" class="tgt-why-btn" data-ex="${esc(ex.id)}" aria-expanded="${open}" onclick="toggleTgtWhy(this)">¿Por qué? <span aria-hidden="true">${open?'▴':'▾'}</span></button>
+    </div>
+    <div class="tgt-why"${open?'':' hidden'}>${presWhyHtml(ex,p)}</div>
+  </div>`;
   return`<div class="tgt k-${p.kind}">
     <div class="tgt-top">
       <div class="tgt-main"><div class="tgt-l">🎯 Objetivo de hoy · ${esc(plural(p.sets,'serie'))}</div>
@@ -7399,27 +7974,51 @@ function liveAdjHtml(ex,p){
   const n=parseInt(ex.s)||0,c=S.sets[ex.id]||{},rp=(S.rpe&&S.rpe[ex.id])||{};
   const marked=[];for(let i=0;i<n;i++)if(c[i])marked.push(i);
   if(!marked.length||marked.length>=n)return'';
-  const typed=parseFloat((S.logs[ex.id]||{}).w),w=typed>0?typed:p.weight,eid=esc(ex.id);
+  // Peso de la SIGUIENTE serie (fila prerrellenada o tocada); sin él, el objetivo
+  const rows=setRows(ex,p),nx=rows.find(r=>!r.done),w=nx&&nx.w>0?nx.w:p.weight,eid=esc(ex.id);
   const lastR=rp[marked[marked.length-1]];
   if(lastR===3){
     const dn=_r2(w-p.step),canDown=dn>0&&w>p.weight-p.step+0.01; // no encadenar bajadas
     return`<div class="live-adj lim"><span>🥵 Serie al límite: mantén ${esc(kgTxt(w))} kg${canDown?` o baja a ${esc(kgTxt(dn))} kg si no llegas a ${p.lo} reps`:' y cuida la técnica'}.</span>${canDown?`<button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${dn})">Bajar a ${esc(kgTxt(dn))}</button>`:''}</div>`;
   }
   if(p.kind!=='down'&&marked.every(i=>rp[i]===1)&&w<=p.weight+0.01){
-    const reps=_todayReps(ex,p);
+    const lastDone=rows[marked[marked.length-1]],reps=lastDone&&lastDone.r>0?lastDone.r:_todayReps(ex,p);
     if(p.step>w*LOAD_CAP+1e-9)return`<div class="live-adj easy"><span>😌 Te sobra: haz 1-2 reps más en la siguiente serie.</span></div>`;
     const up=_r2(w+p.step);
     return`<div class="live-adj easy"><span>😌 Te sobra: si hiciste ${reps?reps+' reps':'tus reps'}, prueba ${esc(kgTxt(up))} kg en la siguiente serie.</span><button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${up})">Poner ${esc(kgTxt(up))}</button></div>`;
   }
   return'';
 }
+// «Bajar a X» / «Poner X»: las series que faltan pasan a ese peso (las hechas no cambian)
 function liveSetWeight(exId,v){
   v=_r2(+v);
   if(!exId||!(v>0)||v>=1000)return;
+  const ex=_dayEx(exId);
   if(!S.logs[exId])S.logs[exId]={};
-  S.logs[exId].w=String(v);
+  if(ex&&!ex.cardio){_setUndone(ex,r=>({w:v,r:r.r}));_syncSetLog(ex);}
+  else S.logs[exId].w=String(v);
   saveState();render();
   toast(`Siguientes series con ${kgTxt(v)} kg`);
+}
+// Lo hecho en una línea: «57.5×12 · 57.5×11 · 55×12»; si todas son iguales, «3 series · 57.5 kg × 12»
+function _setsLine(sets){
+  const ok=(Array.isArray(sets)?sets:[]).filter(s=>s&&typeof s==='object');
+  if(!ok.length)return'';
+  const t=s=>{const w=_setNumW(s.w),r=_setNumR(s.r);return w!=null?kgTxt(w)+(r!=null?'×'+r:' kg'):(r!=null?r+' reps':'—');};
+  const all=ok.map(t);
+  if(ok.length>1&&all.every(x=>x===all[0])){
+    const w=_setNumW(ok[0].w),r=_setNumR(ok[0].r);
+    return`${ok.length} series · `+(w!=null?`${kgTxt(w)} kg${r!=null?' × '+r:''}`:all[0]);
+  }
+  return all.join(' · ');
+}
+// Prescripción de la PRÓXIMA sesión con lo hecho hoy (la misma cuenta que la tarjeta de resultado), o null
+function _nextPres(ex){
+  if(!ex||ex.cardio)return null;
+  const done=countSetsDone(ex.id,ex.s);if(!done)return null;
+  const sm=setsSummary(ex);const w=sm.w||_setNumW((S.logs[ex.id]||{}).w);if(!w)return null;
+  const r=sm.r||_todayReps(ex);
+  return coach_prescribe(ex.id,{ex,ignoreLight:true,extra:{v:w,r:r>0?r:null,setsDone:done,rpe:_liveRpeAvg(ex.id),ts:Date.now(),ps:_baseSets(ex),pr:ex.r,sets:sm.sets}});
 }
 // Objetivos de un día del plan: [{ex, p}] de los ejercicios de fuerza con historial
 function dayTargets(dk){
@@ -7524,7 +8123,11 @@ function renderHist(){
     const isPr=prSet.has(d.ts);
     return`<div class="hist-item${isPr?' pr':''}">
       <div class="hist-item-d">${esc(d.d)}</div>
-      <div class="hist-item-w">${esc(d.v)} kg</div>
+      <div class="hist-item-w">${esc(d.v)} kg${(()=>{
+        // Serie a serie (v18) si el registro la guarda; si no, «3×12» como antes se apuntaba
+        const ln=Array.isArray(d.sets)&&d.sets.length?_setsLine(d.sets):(_setNumR(d.r)&&parseInt(d.setsDone)>0?`${parseInt(d.setsDone)}×${_setNumR(d.r)}`:'');
+        return ln?`<small>${esc(ln)}</small>`:'';
+      })()}</div>
       ${isPr?'<span class="hist-item-pr">PR</span>':
         delta!==0?`<span class="hist-item-ch ${delta>0?'up':'dn'}">${delta>0?'+':''}${delta.toFixed(1)}</span>`:
         '<span class="hist-item-ch" style="color:var(--text3)">=</span>'}
@@ -7552,59 +8155,48 @@ function renderHist(){
 }
 
 function renderWorkout(){
-  const tabs=['A','B','C'].map(k=>`<button class="tab ${S.day===k?'on':''}" onclick="S.day='${k}';S.open=null;render()">${getPlan()[k].label}</button>`).join('');
+  const tabs=['A','B','C'].map(k=>`<button class="tab ${S.day===k?'on':''}" onclick="setWorkoutDay('${k}')">${getPlan()[k].label}</button>`).join('');
   const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
   const doneEx=strEx.filter(e=>countSetsDone(e.id,e.s)>=e.s).length;
   const pct=strEx.length?Math.round(doneEx/strEx.length*100):0,allDone=doneEx===strEx.length&&strEx.length>0;
   const exHtml=day.ex.map(ex=>{
-    const isOpen=S.open===ex.id,c=S.sets[ex.id]||{};
+    const isOpen=S.open===ex.id,c=S.sets[ex.id]||{},eid=esc(ex.id);
     const exDone=ex.cardio?c[0]===true:countSetsDone(ex.id,ex.s)>=ex.s;
-    const l=S.logs[ex.id]||{},sug=!ex.cardio?getSug(ex.id,ex.s,ex.r):null;
-    // Objetivo de hoy del Coach de carga (una sola fuente para chip, objetivo, etiqueta, placeholders y ajuste en vivo)
+    // Objetivo de hoy del Coach de carga (una sola fuente para chip, filas prerrellenadas, etiqueta y ajuste en vivo)
     const pr=!ex.cardio?coach_prescribe(ex.id):null;
-    const sbHtml=!ex.cardio?Array.from({length:ex.s},(_,i)=>{
-      const done=c[i];
-      const rpeLevel=(S.rpe&&S.rpe[ex.id]&&S.rpe[ex.id][i])||0;
-      const rpeClass=done&&rpeLevel?` r${rpeLevel}`:'';
-      const rpeAria=rpeLevel===1?' fácil':rpeLevel===2?' justo':rpeLevel===3?' al límite':'';
-      return`<button class="sb ${done?'on':''}${rpeClass}" data-ex="${ex.id}" data-set="${i}" aria-label="Serie ${i+1}${done?' (completada'+rpeAria+')':''}" onclick="toggleSet('${ex.id}',${i},event)">${done?'✓':i+1}</button>`;
-    }).join(''):'';
-    return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}">
-      <div class="exh" onclick="S.open=S.open==='${ex.id}'?null:'${ex.id}';render()">
+    const nSets=!ex.cardio?Math.max(0,parseInt(ex.s)||0):0,nDone=!ex.cardio?countSetsDone(ex.id,ex.s):0;
+    const sug=!ex.cardio&&isOpen?getSug(ex.id,ex.s,ex.r):null;
+    const rows=!ex.cardio&&(isOpen||nDone>0)?setRows(ex,pr):null;
+    const sum=rows&&nDone?setsSummary(ex,pr):null;
+    // Progreso en la cabecera: puntos por serie (●●○) y el peso de hoy; completado: lo hecho y lo de la próxima vez
+    const dots=!ex.cardio&&!exDone&&nSets?`<span class="ex-dots" role="img" aria-label="${nDone} de ${nSets} series hechas">${Array.from({length:Math.min(nSets,8)},(_,i)=>`<i${i<nDone?' class="on"':''}></i>`).join('')}</span>`:'';
+    const todayW=sum&&sum.w&&!exDone?` · hoy <span class="ex-today">${esc(kgTxt(sum.w))} kg</span>`:'';
+    const nx=!ex.cardio&&exDone&&!isLightNow(ex.id)?_nextPres(ex):null;
+    const doneSum=!ex.cardio&&exDone&&sum&&sum.w?`<div class="ex-done-sum">${esc(_setsLine(sum.sets))}${nx?` · próxima <b>${esc(kgTxt(nx.weight))} kg × ${nx.reps}</b>`:''}</div>`:'';
+    let body='';
+    if(isOpen&&!ex.cardio){
+      // Modo gym: antes de la primera serie, la técnica en grande (animación, consejo, objetivo y calentamiento);
+      // después, las series arriba del todo y la animación en miniatura (se toca para ampliarla)
+      const ak=exAnimKey(ex),training=nDone>0,big=!training||_animBig.has(ex.id);
+      const spec=ak&&typeof GymAnim!=='undefined'?GymAnim.get(ak):null;
+      const anim=!ak?'':big
+        ?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>${training?`<button type="button" class="anim-less" data-ex="${eid}" onclick="animShrink(this.dataset.ex)">Reducir animación ▴</button>`:''}`
+        :`<div class="anim-mini" role="button" tabindex="0" data-ex="${eid}" onclick="animGrow(this.dataset.ex)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();animGrow(this.dataset.ex)}" aria-label="Ver la técnica de ${esc(ex.n)} en grande"><div class="ex-anim mini" data-ex="${eid}" data-gym-anim="${ak}"></div><div class="anim-mini-t"><b>Técnica</b><span>${esc(spec&&spec.labels?spec.labels.join(' · '):(ex.eq||''))}</span></div><span class="anim-mini-go" aria-hidden="true">Ampliar ▾</span></div>`;
+      const setsHtml=setRowsHtml(ex,pr,rows);
+      const la=`<div class="la-slot">${liveAdjHtml(ex,pr)}</div>`;
+      const sugHtml=`<div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}</div>`;
+      body=training
+        ?`${anim}${big?`<div class="tip">${esc(ex.tip||'')}</div>`:''}${setsHtml}${la}${presTargetHtml(ex,pr,true)}${sugHtml}`
+        :`${anim}<div class="tip">${esc(ex.tip||'')}</div>${presTargetHtml(ex,pr)}<div class="wu-slot">${warmupBlockHtml(ex)}</div>${setsHtml}${la}${sugHtml}`;
+    }
+    return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}" data-ex="${eid}">
+      <div class="exh" role="button" tabindex="0" aria-expanded="${isOpen}" data-ex="${eid}" onclick="toggleCard(this.dataset.ex)" onkeydown="if(event.key==='Enter'){event.preventDefault();toggleCard(this.dataset.ex)}">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${esc(ex.ic||'💪')}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+(pr&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex)))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}</div>${pr&&!exDone?`<div class="ex-goal k-${pr.kind}" role="img" aria-label="Objetivo de hoy: ${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones, ${esc(PRES_WORD[pr.kind])}">🎯 ${esc(kgTxt(pr.weight))} kg × ${pr.reps}<span class="ex-goal-k">${PRES_WORD[pr.kind]}</span></div>`:''}</div>
-        ${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+(pr&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex)))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal k-${pr.kind}" role="img" aria-label="Objetivo de hoy: ${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones, ${esc(PRES_WORD[pr.kind])}">🎯 ${esc(kgTxt(pr.weight))} kg × ${pr.reps}<span class="ex-goal-k">${PRES_WORD[pr.kind]}</span></div>`:''}${doneSum}</div>
+        ${dots}${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
-      ${isOpen?`<div class="exb">${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${esc(ex.tip||'')}</div>
-        ${!ex.cardio?`${(()=>{const lw=getLastW(ex.id);
-          if(!lw)return'';
-          const rpeLbl=lw.rpe?(lw.rpe<=1.4?' · 😌 Fácil':lw.rpe<=2.4?' · 💪 Justo':' · 🥵 Al límite'):'';
-          const setsLbl=lw.setsDone?`${lw.setsDone}×`:'';
-          const repsLbl=lw.r?`${lw.r}`:'';
-          return`<div class="last-info" style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:rgba(255,255,255,0.03);border-radius:var(--rxs);border-left:2px solid var(--green-b);margin-bottom:10px;font-size:12px;color:var(--text2);flex-wrap:wrap">
-            <span style="font-family:'DM Mono',monospace"><b style="color:var(--text);font-weight:600">${lw.v} kg</b></span>
-            ${setsLbl||repsLbl?`<span style="color:var(--text3);font-family:'DM Mono',monospace">${setsLbl}${repsLbl} reps</span>`:''}
-            <span style="color:var(--text3)">${esc(lw.d||'')}${rpeLbl}${lw.dl?' · sesión ligera':''}</span>
-          </div>`;
-        })()}
-          ${presTargetHtml(ex,pr)}
-          <div class="wu-slot">${warmupBlockHtml(ex)}</div>
-          <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span>Series completadas</span><button class="hist-btn" onclick="event.stopPropagation();openHist('${ex.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Historial</button></div>
-          <div class="srow">${sbHtml}</div>
-          ${liveAdjHtml(ex,pr)}
-          ${(()=>{
-            // El placeholder es una SUGERENCIA (no un valor): «57.5 sugerido». Si hay series marcadas sin peso, se avisa.
-            // Peso corporal / por tiempo (plancha, flexiones…): el peso es opcional, sin aviso.
-            // La etiqueta (objetivo del Coach de carga) se actualiza al escribir: «✓ objetivo» / «Objetivo 60».
-            const bw=isBodyweightEx(ex),typed=parseFloat(l.w);
-            const needW=!bw&&countSetsDone(ex.id,ex.s)>0&&!(typed>0);
-            const pw=pr?esc(kgTxt(pr.weight)):'';
-            return`<div class="irow"><label>Peso</label><input class="inp inp-hint${needW?' need':''}" data-f="w" type="number" placeholder="${pr?pw+' sugerido':bw?'opcional':'kg'}" value="${esc(l.w||'')}" oninput="onWeightInput(this,'${ex.id}')" step="${pr?pr.step:'any'}" inputmode="decimal" aria-label="Peso en kg${pr?', objetivo '+pw:bw?' (opcional)':''}"/>${pr?`<button type="button" class="sug-tag ${presTagCls(pr,typed>0?typed:null)}" data-ex="${esc(ex.id)}" onclick="useSug(this.dataset.ex)" aria-label="Usar el objetivo: ${pw} kg">${esc(presTagTxt(pr,typed>0?typed:null))}</button>`:''}</div>
-          ${bw?'':`<div class="need-hint" data-ex="${esc(ex.id)}"${needW?'':' hidden'}>Apunta el peso para que cuente en tu progreso</div>`}`;
-          })()}
-          ${(()=>{const rt=pr&&pr.reps>0?pr.reps:ex.r;return`<div class="irow"><label>Reps</label><input class="inp inp-hint" data-f="r" type="number" placeholder="${esc(rt)} objetivo" value="${esc(l.r||'')}" oninput="onRepsInput(this,'${ex.id}')" inputmode="numeric" aria-label="Repeticiones, objetivo ${esc(rt)}"/></div>`;})()}
-          <div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}</div>`
-        :`${(()=>{
+      ${isOpen?`<div class="exb">${!ex.cardio?body
+        :`${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${esc(ex.tip||'')}</div>${(()=>{
           // Cronómetro de cardio: parsear duración de ex.r (ej: "8 min", "15 min")
           const m=String(ex.r||'').match(/(\d+)\s*min/i);
           const mins=m?parseInt(m[1]):0;
@@ -8694,17 +9286,21 @@ function render(){
   // Descarga caducada: el plan vuelve a sus series antes de pintar
   try{deloadTick();}catch(e){console.error(e);}
   // Preservar posición de scroll entre renders (evita el "salto al inicio" al marcar series)
-  const prevScroll=s.scrollTop;
+  const prevScroll=_scrollTo&&Date.now()-_scrollTo.ts<700?_scrollTo.top:s.scrollTop,scrollSeq=_scrollReq;
   const keepMM=mmDetach(s); // mapas musculares en pantalla: se reutilizan tras repintar
+  try{animDetach(s);}catch(e){console.error(e);} // animaciones de ejercicio: mismo canvas (giro/pausa) tras repintar
   if(S.tab==='dash')s.innerHTML=renderDash();
   else if(S.tab==='workout')s.innerHTML=renderWorkout();
   else if(S.tab==='coach')s.innerHTML=renderCoach();
   else s.innerHTML=renderProg();
-  // Montar animaciones de ejercicio (canvas) presentes en la pantalla
+  try{animAttach(s);}catch(e){console.error(e);}
+  // Montar animaciones de ejercicio (canvas) presentes en la pantalla (las reutilizadas se reactivan)
   if(typeof GymAnim!=='undefined'){try{GymAnim.mountAll(s);}catch(e){}}
   try{mmMountAll(s,keepMM);}catch(e){console.error(e);}
-  // Restaurar scroll en el siguiente frame para que el DOM ya esté listo
-  if(prevScroll>0)requestAnimationFrame(()=>{s.scrollTop=prevScroll;});
+  try{renderNextBar();}catch(e){console.error(e);}
+  // Restaurar scroll (ya y en el siguiente frame, por si el DOM aún no estaba listo), salvo que después de repintar se
+  // haya pedido otro desplazamiento (avance automático, filas a la vista…)
+  if(prevScroll>0){s.scrollTop=prevScroll;requestAnimationFrame(()=>{if(_scrollReq===scrollSeq)s.scrollTop=prevScroll;});}
   renderSettings();
   renderWmodal();
   renderHist();
@@ -9100,6 +9696,8 @@ function importData(){
             const _mmImp=['7d','4w','cycle'].includes(data.mmRange)?data.mmRange:mmRangeKey();
             // Aplicar migración por si viene de versión antigua
             const migrated=migrateState(data);
+            // Registro serie a serie (v18): series de hoy y de los registros, siempre saneadas (también en backups v18+)
+            _sanitizeSetData(migrated);
             migrated.timerSound=_sndImp;
             migrated.loadSteps=_lsImp;
             migrated.mmRange=_mmImp;
