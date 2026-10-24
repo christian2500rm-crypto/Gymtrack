@@ -823,6 +823,89 @@ button.mm-row:active{background:rgba(255,255,255,.03)}
 .pr-d small{display:block;font-family:'DM Sans',sans-serif;font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:#fbbf24;font-weight:600}
 .pr-empty{font-size:12.5px;color:var(--text2);line-height:1.55}
 .pr-more{display:block;width:100%;min-height:44px;margin-top:2px;font-size:12px;font-weight:600;color:var(--text2);border-top:1px solid var(--border)}
+/* ── (10) Tarjeta «HOY TOCA» de Inicio ── */
+.hoy{margin-top:12px;padding:14px 14px 10px;border-color:var(--green-b);background:linear-gradient(180deg,rgba(34,197,94,.08),rgba(34,197,94,0) 150px),var(--bg2)}
+.hoy.k-extra{border-color:var(--border2);background:var(--bg2)}
+.hoy.k-live{border-color:rgba(245,158,11,.42);background:linear-gradient(180deg,rgba(245,158,11,.08),rgba(245,158,11,0) 150px),var(--bg2)}
+.hoy.k-done{background:linear-gradient(180deg,rgba(34,197,94,.1),rgba(34,197,94,0) 170px),var(--bg2)}
+.hoy.k-rest{border-color:rgba(59,130,246,.35);background:linear-gradient(180deg,rgba(59,130,246,.1),rgba(59,130,246,0) 170px),var(--bg2)}
+.hoy .dl-banner{margin:0 0 12px}
+.dl-banner.cmp{gap:9px;margin:0 0 10px;padding:2px 2px 2px 11px}
+.dl-banner.cmp .dl-banner-ic{font-size:17px}
+.dl-banner.cmp .dl-banner-t{font-size:12.5px;line-height:1.3}
+.dl-banner.cmp .dl-banner-d{font-size:11.5px;line-height:1.3;margin-top:1px}
+.dl-banner.cmp .dl-banner-btn{background:none;border-color:transparent;color:#93c5fd;padding:0 10px}
+.hoy-k{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--green)}
+.hoy-k span{font-weight:500;letter-spacing:.3px;text-transform:none;color:var(--text2);font-size:11.5px}
+.k-extra .hoy-k{color:var(--text2)}.k-live .hoy-k{color:var(--amber)}.k-rest .hoy-k{color:#93c5fd}
+.hoy-t{display:flex;align-items:center;gap:9px;margin-top:7px;min-width:0}
+.hoy-t .pill{flex-shrink:0}
+.hoy-nm{flex:1;min-width:0;font-size:19px;font-weight:600;letter-spacing:-.3px;line-height:1.2;overflow-wrap:anywhere}
+.hoy-sets{margin-left:auto}
+.hoy-m{font-size:12.5px;color:var(--text2);margin-top:6px;line-height:1.45}
+.hoy-m b{font-family:'DM Mono',monospace;font-weight:500;color:var(--text)}
+.hoy-m em{font-style:normal;font-weight:600;color:var(--text)}
+.hoy-nw{white-space:nowrap}
+.hoy-note{font-size:12.5px;line-height:1.5;color:var(--text2);margin-top:10px;padding:9px 11px;border-radius:var(--rsm);background:var(--bg3)}
+.hoy-note b{color:var(--green);font-weight:600}
+.hoy-bar{height:5px;border-radius:3px;background:var(--bg4);margin-top:10px;overflow:hidden}
+.hoy-bar i{display:block;height:100%;border-radius:3px;background:var(--amber);transition:width .4s ease}
+.hoy-pv{position:relative;width:100%;height:168px;margin-top:12px;border-radius:var(--rsm);background:#111;overflow:hidden;touch-action:pan-y;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.hoy-pv canvas{display:block;width:100%;height:100%;touch-action:pan-y}
+.hoy-pv.hoy-sw{animation:hoyIn .3s ease-out}
+@keyframes hoyIn{from{opacity:.2}to{opacity:1}}
+.hoy-lh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin:12px 0 2px}
+.hoy-lh small{font-size:10px;font-weight:500;text-transform:none;letter-spacing:.2px}
+@media (max-width:359px){.hoy-lh small{display:none}}
+.hoy-ex{display:flex;align-items:center;gap:10px;width:calc(100% + 12px);min-height:44px;margin:0 -6px;padding:5px 6px;text-align:left;color:inherit;border-top:1px solid var(--border);border-radius:8px;transition:background .15s}
+.hoy-l .hoy-ex:first-of-type{border-top-color:transparent}
+.hoy-ex:active{background:rgba(255,255,255,.04)}
+.hoy-ex:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
+.hoy-ex.on{background:rgba(34,197,94,.07);box-shadow:inset 3px 0 0 var(--green)}
+.hoy-ex:disabled{cursor:default;opacity:1;color:inherit}
+.hoy-ex-i{flex:1;min-width:0;display:flex;flex-direction:column}
+.hoy-ex-n{font-size:13.5px;font-weight:500;line-height:1.3;overflow-wrap:anywhere}
+.hoy-ex.on .hoy-ex-n{color:#86efac}
+.hoy-ex-m{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;line-height:1.4;margin-top:1px}
+.hoy-tg{flex-shrink:0;display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap}
+.hoy-tg .tgl-v{font:inherit;color:inherit}
+.hoy-tg i{font-style:normal;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:var(--text2)}
+.hoy-tg.k-up{border-color:rgba(34,197,94,.45);background:rgba(34,197,94,.1);color:#86efac}.hoy-tg.k-up i{color:#86efac}
+.hoy-tg.k-reps,.hoy-tg.k-deload{border-color:rgba(59,130,246,.35);background:rgba(59,130,246,.08);color:#bfdbfe}.hoy-tg.k-reps i{color:#93c5fd}
+.hoy-tg.k-down{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#fcd34d}.hoy-tg.k-down i{color:#fcd34d}
+.hoy-tg.new{font-family:'DM Sans',sans-serif;font-weight:500;font-size:11.5px;color:var(--text2)}
+.hoy-tg.ok{font-family:'DM Sans',sans-serif;font-size:12px;border-color:var(--green-b);background:var(--green-bg);color:var(--green)}
+.hoy-tg.part{border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08);color:#fcd34d}
+.hoy-car{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 0 2px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);line-height:1.4}
+.hoy-car>span:first-child{font-size:15px;flex-shrink:0}
+.hoy-car b{font-family:'DM Mono',monospace;font-weight:500;color:var(--text)}
+.hoy-car .ok{color:var(--green)}
+.hoy-go{margin-top:12px;min-height:52px;font-size:16px}
+.hoy-acts{display:flex;gap:8px;margin-top:12px}
+.hoy-acts .btn{min-height:50px}
+.hoy-acts .hoy-go{margin-top:0;flex:1}
+.hoy-acts .bs{width:112px;flex-shrink:0}
+.hoy-last{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-height:44px;margin-top:2px;font-size:11.5px;color:var(--text3);text-align:center;line-height:1.35}
+.hoy-last:active{color:var(--text2)}
+.hoy-last em{font-style:normal;font-size:15px;line-height:1}
+.hoy-tip{font-size:11.5px;color:var(--text3);text-align:center;line-height:1.5;margin:8px 4px 2px}
+.hoy-kpis{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:6px;margin-top:12px}
+.hoy-kpis .sum-k b{font-size:19px}
+.hoy-sum{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;margin-top:8px;padding:0 12px;border-radius:var(--rsm);background:var(--green-bg);border:1px solid var(--green-b);color:#86efac;font-size:13.5px;font-weight:600;text-align:left}
+.hoy-sum small{font-weight:500;color:#fbbf24;font-size:12px;white-space:nowrap}
+.hoy-sum:active{transform:scale(.98)}
+.hoy-nx{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.hoy-nx .hoy-k{color:var(--text2)}
+.hoy-nx .hoy-t{margin-top:6px}
+.hoy-nx .hoy-nm{font-size:15px}
+.hoy-nx .tgl{margin:10px 0 0}
+.hoy-nx .btn{margin-top:10px}
+.hoy-rest-h{display:flex;align-items:flex-start;gap:12px}
+.hoy-rest-ic{font-size:32px;line-height:1;flex-shrink:0;margin-top:2px}
+.hoy-rest-b{flex:1;min-width:0}
+.hoy-rest-p{font-size:12.5px;color:var(--text2);line-height:1.55;margin:10px 0 12px}
+.hoy-soft{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:6px;font-size:12.5px;font-weight:600;color:var(--text2)}
+.hoy-soft:active{color:var(--text)}
 /* ── iOS-specific tweaks ── */
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
@@ -1548,10 +1631,11 @@ const live=new Set();let raf=0;const t0s={};let io=null,hintUntil=0;
 const RM=()=>{try{return G.matchMedia&&G.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
 const NOW=()=>(G.performance?performance.now():Date.now());
 const kick=()=>{if(!raf&&G.requestAnimationFrame)raf=requestAnimationFrame(loop);};
+const ariaOf=spec=>(spec.title||'Animación del ejercicio')+(spec.labels?'. Músculos: '+spec.labels.join(', '):'')+'. Toca para pausar, arrastra para girar.';
 function mount(el,key,o){
   const spec=getDef(key);if(!spec||!el)return null;o=o||{};
   let cv=el.querySelector('canvas.ga-cv');if(!cv){cv=document.createElement('canvas');cv.className='ga-cv';el.appendChild(cv);}
-  cv.setAttribute('role','img');cv.setAttribute('aria-label',(spec.title||'Animación del ejercicio')+(spec.labels?'. Músculos: '+spec.labels.join(', '):'')+'. Toca para pausar, arrastra para girar.');
+  cv.setAttribute('role','img');cv.setAttribute('aria-label',ariaOf(spec));
   const inst={el,cv,spec,key,W:0,H:0,cm:null,base:null,ctx:cv.getContext('2d'),vis:true,cost:0,skip:0,rm:RM(),
     paused:false,pausedAt:0,pauseAcc:0,dyaw:0,dpitch:0,drag:false,anim:null,dirty:1,touched:false};
   if(t0s[key]==null)t0s[key]=NOW()/1000;
@@ -1628,6 +1712,18 @@ function mountAll(root){(root||document).querySelectorAll('[data-gym-anim]').for
 function revive(inst){if(!inst.el.isConnected)return false;if(!live.has(inst)){live.add(inst);if(ensureIO())io.observe(inst.el);}
   resize(inst);inst.dirty=1;if(inst.rm)drawStatic(inst);else kick();return true;}
 function refresh(el){const i=el&&el._ga;return i?revive(i):false;}
+function swap(el,key){
+  if(!el)return null;const spec=getDef(key);if(!spec)return null;
+  const i=el._ga;el.setAttribute('data-gym-anim',key);
+  if(!i||el._gm){if(el._gm)unmount(el);el._gaMounted=1;return mount(el,key);}
+  if(i.key===key)return i;
+  i.spec=spec;i.key=key;i.dyaw=i.dpitch=0;i.anim=null;i.drag=false;i.paused=false;i.pausedAt=i.pauseAcc=0;i.cost=0;i.skip=0;
+  i.cm=null;i.base=null;i.W=i.H=0; // obliga a reencuadrar con el ejercicio nuevo
+  if(t0s[key]==null)t0s[key]=NOW()/1000;
+  i.cv.setAttribute('aria-label',ariaOf(spec));
+  if(el.isConnected){if(!live.has(i)){live.add(i);if(ensureIO())io.observe(el);}resize(i);}
+  i.dirty=1;if(!i.rm)kick(); // con movimiento reducido, resize() ya pintó la imagen fija nueva
+  return i;}
 function unmount(el){if(!el)return false;let ok=false;
   const m=el._gm;if(m){maps.delete(m);if(m.cv.parentNode)m.cv.parentNode.removeChild(m.cv);el._gm=null;ok=true;}
   const i=el._ga;if(i){live.delete(i);if(i.cv.parentNode)i.cv.parentNode.removeChild(i.cv);el._ga=null;el._gaMounted=0;ok=true;}
@@ -1753,7 +1849,7 @@ function mapTick(n){let more=false;
   return more;}
 function mapStats(){let fr=0;for(const m of maps)fr+=m.frames;return{maps:maps.size,anims:live.size,running:!!raf,frames:fr};}
 
-G.GymAnim={def,alias,has:k=>!!getDef(k),get:getDef,keys:()=>Object.keys(DEFS).concat(Object.keys(ALIAS)),mount,mountAll,unmount,refresh,muscleMap,
+G.GymAnim={def,alias,has:k=>!!getDef(k),get:getDef,keys:()=>Object.keys(DEFS).concat(Object.keys(ALIAS)),mount,mountAll,unmount,refresh,swap,muscleMap,
   muscles:()=>Object.keys(MUS),
   _:{V,Body,Scene,makeE,makeCam,fitCam,evalTL,compileTL,renderTo,buildFrame,DIM,COL,MUS,EASE,solve,ik2,PAD,fpt,fdir,frot,basis,walkOnTreadmill,heatRGB,standPose,mapStats,mapTick}};
 })(typeof window!=='undefined'?window:globalThis);
@@ -4044,6 +4140,10 @@ function lightBannerHtml(where){
     const t=d.kind==='all'?'Semana de descarga':`Descarga${name?' en '+name:''}`;
     const when=over?'Tu plan vuelve al guardar este entreno':`Tu plan vuelve el ${deloadEndTxt(d)}`;
     const desc=where==='workout'?'Menos series y el mismo peso: esta semana no subas peso.':'Menos series, mismo peso. Después vuelves más fuerte.';
+    // (10) Dentro de la tarjeta «HOY TOCA»: versión compacta (las filas ya dicen «descarga» y su objetivo 🧘), para que «Empezar» quepa
+    if(where==='hoy')return`<div class="dl-banner cmp" role="status" title="${esc(desc)}"><span class="dl-banner-ic" aria-hidden="true">🧘</span><div class="dl-banner-b">
+      <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${esc(over?'Acaba al guardar este entreno':'Hasta el '+deloadEndTxt(d))} · menos series</div></div>
+      <button class="dl-banner-btn" onclick="endDeload()">Terminar</button></div>`;
     return`<div class="dl-banner" role="status"><span class="dl-banner-ic" aria-hidden="true">🧘</span><div class="dl-banner-b">
       <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${esc(when)} · ${esc(desc)}</div></div>
       <button class="dl-banner-btn" onclick="endDeload()">Terminar</button></div>`;
@@ -4664,6 +4764,12 @@ function wcMove(ev,id){const c=_wc[id],g=document.getElementById(id+'-h');if(!c|
   q('.wc-tip').setAttribute('transform','translate('+tx.toFixed(1)+','+ty.toFixed(1)+')');}
 function wcLeave(ev,id){if(ev.pointerType!=='mouse')return;const g=document.getElementById(id+'-h');if(g)g.style.display='none';}
 function wLegend(rate){return`<div class="wc-legend"><span><i class="wc-ld"></i>Registro</span><span><i class="wc-ll"></i>Tendencia 7 días</span>${rate!=null?`<span class="wc-rate ${rate<=0?'dn':'up'}">${wSign(rate,2)} kg/sem</span>`:''}</div>`;}
+// Día de la última pesada: «Hoy» / «Ayer» solo si lo es de verdad (con su fecha guardada); si no, «Vie 23 Oct».
+// (10) Sustituye a la etiqueta «kg hoy / kg ayer» de la fila de métricas de Inicio, que se quitó por repetir datos.
+function wWhen(t){
+  const real=(S.weights||[]).some(w=>w&&typeof w.ts==='number'&&w.ts===t),n=Date.now();
+  return real&&sameDayTs(t,n)?'Hoy':real&&sameDayTs(t,n-DAY_MS)?'Ayer':wFmt(t,'wd');
+}
 // Tarjeta de peso (Inicio y Progreso)
 function renderWeightCard(emptyMsg){
   const pts=wSeries();
@@ -4673,7 +4779,7 @@ function renderWeightCard(emptyMsg){
   const vs=rp.map(p=>p.v),avg=vs.reduce((a,b)=>a+b,0)/vs.length;
   return`<div class="card wcard">
     <div class="wc-top">
-      <div><div class="wc-now">${wf1(last.v)}<small> kg</small></div><div class="wc-sub">${wFmt(last.t,'wd')} · tendencia ${wf1(last.tr)} kg</div></div>
+      <div><div class="wc-now">${wf1(last.v)}<small> kg</small></div><div class="wc-sub">${wWhen(last.t)} · tendencia ${wf1(last.tr)} kg</div></div>
       <div class="wc-right"><div class="wc-badge ${ch<=0?'dn':'up'}">${wSign(ch)} kg</div><div class="wc-rl">${wRangeLbl(rp,R)}</div></div>
     </div>
     ${wRangeChips(k)}
@@ -8036,45 +8142,242 @@ function go(tab){
   document.getElementById('screen').scrollTop=0;render();saveState();
 }
 
+// ═══════════════════════════════════════════════════════════
+// TARJETA «HOY TOCA» DE INICIO (10)
+// ═══════════════════════════════════════════════════════════
+// Lo primero de Inicio: qué toca, con qué peso y cuánto vas a tardar, con la técnica en 3D del primer multiarticular.
+// Al tocar otro ejercicio de la lista cambia la vista previa en su sitio (GymAnim.swap: mismo canvas, sin repintar).
+// Estados (hoyState): 'train' toca entrenar · 'extra' objetivo semanal cumplido (sesión extra opcional) ·
+// 'live' entreno a medias (Continuar) · 'done' ya entrenaste hoy (resumen + la próxima) · 'rest' semana de descanso.
+// Una descarga se avisa dentro de la tarjeta (su aviso con «Terminar»). Todo sale de S al pintar: sin campos nuevos;
+// el ejercicio elegido y el elemento montado de la vista previa viven en memoria (no en S).
+let _hoyPick=null;  // {dk, id}: ejercicio elegido a mano para la vista previa (se olvida si cambia el día)
+let _hoyKeep=null;  // elemento #hoy-pv montado: se reutiliza entre repintados (mismo canvas, giro y fase)
+const HOY_MUS={piernas:'piernas',pecho:'pecho',espalda:'espalda',hombros:'hombros',biceps:'bíceps',triceps:'tríceps',core:'abdomen'};
+const HOY_WD=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+function _joinY(a){return a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' y '+a[a.length-1];}
+// Día que toca: el siguiente de la rotación (si el plan no lo tiene, el primero que exista)
+function hoyDayKey(){const p=getPlan();return p[S.nextDay]?S.nextDay:(DAY_ORDER.find(k=>p[k])||Object.keys(p)[0]||'A');}
+// Nombre corto («Jale» de «Jale — espalda y bíceps») y músculos sacados de sus ejercicios (siguen a la rutina editada;
+// se omiten si el nombre ya los dice, como «Piernas + abdomen»)
+function hoyDayInfo(dk){
+  const day=getPlan()[dk];if(!day)return null;
+  const ex=(Array.isArray(day.ex)?day.ex:[]).filter(e=>e&&typeof e==='object'&&e.id!=null);
+  const str=ex.filter(e=>!e.cardio),car=ex.filter(e=>e.cardio);
+  const label=String(day.label||dk),focus=String(day.focus||'').trim(),name=focus.split(/\s+[—–]\s+/)[0].trim()||label;
+  const mus=[];str.forEach(e=>{const m=HOY_MUS[e.muscle];if(m&&!mus.includes(m))mus.push(m);});
+  const nn=normTxt(name),musTxt=mus.length&&!mus.every(m=>nn.includes(normTxt(m)))?_joinY(mus):'';
+  return{dk,day,label,name,focus,ex,str,car,mus:musTxt};
+}
+function _hoyCount(info){return info.str.length?plural(info.str.length,'ejercicio')+(info.car.length?' + cardio':''):info.car.length?'cardio':'sin ejercicios';}
+// Duración estimada: media de las 6 últimas sesiones de ese día con una duración creíble (5-360 min); sin ninguna, la
+// de tus últimas sesiones de cualquier día; sin historial, del plan (≈1 min por ejercicio + 40 s por serie + su
+// descanso entre series + los minutos del cardio), redondeada a 5 min.
+const _okDur=s=>!!s&&s.durationMin!=null&&isFinite(+s.durationMin)&&+s.durationMin>=5&&+s.durationMin<=MAX_SESSION_MIN;
+function _cardioMin(ex){const m=String(ex&&ex.r!=null?ex.r:'').match(/(\d+(?:[.,]\d+)?)\s*min/i);return m?parseFloat(m[1].replace(',','.')):0;}
+function hoyDuration(dk){
+  const L=Array.isArray(S.sessions)?S.sessions:[],avg=a=>Math.round(a.reduce((t,s)=>t+(+s.durationMin),0)/a.length);
+  const own=L.filter(s=>_okDur(s)&&s.day===dk).slice(-6);
+  if(own.length)return{min:avg(own),src:'day',n:own.length};
+  const all=L.filter(_okDur).slice(-6);
+  if(all.length)return{min:avg(all),src:'all',n:all.length};
+  const info=hoyDayInfo(dk);if(!info)return null;
+  let sec=0;
+  info.str.forEach(e=>{const n=Math.max(0,Math.min(SET_MAX_N,parseInt(e.s)||0));if(n)sec+=60+n*40+(n-1)*getRestSecs(e.id);});
+  info.car.forEach(e=>{sec+=(_cardioMin(e)||10)*60;});
+  return sec>0?{min:Math.max(5,Math.round(sec/300)*5),src:'plan',n:0}:null;
+}
+function _hoyDurHtml(d,dk){
+  if(!d)return'';
+  const why=d.src==='day'?(d.n===1?'Lo que duró tu última sesión de este día':`Media de tus ${d.n} últimas sesiones de este día`):d.src==='all'?'Media de tus últimas sesiones':'Estimado con las series, los descansos y el cardio del plan';
+  return`<b title="${esc(why)}">~${d.min} min</b>${d.src==='plan'?' estimado':''}`;
+}
+// Vista previa: la elegida a mano (si es de ese día), si no `def` (en curso: el siguiente ejercicio), si no el primer
+// multiarticular con animación, si no el primero de fuerza, si no cualquiera con animación
+function _hoyAnimOk(e){return !!(e&&exAnimKey(e));}
+function hoyPreviewEx(info,def){
+  if(!info)return null;
+  if(_hoyPick&&_hoyPick.dk===info.dk){const e=info.ex.find(x=>String(x.id)===_hoyPick.id);if(_hoyAnimOk(e))return e;}
+  if(_hoyAnimOk(def))return def;
+  return info.str.find(e=>isCompoundEx(e)&&_hoyAnimOk(e))||info.str.find(_hoyAnimOk)||info.ex.find(_hoyAnimOk)||null;
+}
+// Entreno en curso: el ejercicio empezado sin terminar; si no, el primero pendiente de fuerza; si no, el cardio pendiente
+function _hoyNext(info){
+  const exs=info.str.filter(e=>parseInt(e.s)>0);
+  const ex=exs.find(e=>countSetsDone(e.id,e.s)>0&&!_exComplete(e))||exs.find(e=>!_exComplete(e));
+  if(ex)return{ex,i:_firstUndone(ex)};
+  const c=info.car.find(e=>!_exComplete(e));return c?{ex:c,i:-1}:null;
+}
+function _hoyChip(ex,p,live){
+  if(live){const n=Math.max(0,parseInt(ex.s)||0),c=countSetsDone(ex.id,n);
+    if(n&&c>=n)return`<span class="hoy-tg ok">✓ hecho</span>`;
+    if(c>0)return`<span class="hoy-tg part" role="img" aria-label="${c} de ${n} series">${c}/${n}</span>`;}
+  if(p)return`<span class="hoy-tg k-${p.kind}" role="img" aria-label="Objetivo: ${esc(kgTxt(p.weight))} kilos por ${p.reps}, ${esc(PRES_WORD[p.kind])}"><i aria-hidden="true">${PRES_IC[p.kind]}</i><b class="tgl-v">${esc(kgTxt(p.weight))} kg × ${p.reps}</b></span>`;
+  return`<span class="hoy-tg new">${isBodyweightEx(ex)?'peso corporal':'nuevo'}</span>`;
+}
+function _hoyRowHtml(ex,p,sel,live){
+  const n=Math.max(0,parseInt(ex.s)||0);
+  const reps=p?(p.lo!==p.hi?`${p.lo}-${p.hi}`:String(p.lo)):fmtTargetReps(ex).replace(/\s*reps$/,'');
+  const ok=_hoyAnimOk(ex);
+  return`<button type="button" class="hoy-ex tgl-row${sel?' on':''}" data-ex="${esc(ex.id)}" aria-pressed="${sel?'true':'false'}"${ok?'':' disabled'} onclick="hoyPick(this.dataset.ex)">
+    <span class="hoy-ex-i"><span class="hoy-ex-n">${esc(ex.n)}</span><span class="hoy-ex-m">${n}×${esc(reps)}${deloadAppliesTo(ex.id)?' · descarga':''}</span></span>${_hoyChip(ex,p,live)}</button>`;
+}
+function _hoyCarHtml(info,live){
+  if(!info.car.length)return'';
+  const parts=info.car.map(e=>{const d=live&&_exComplete(e);return`<b${d?' class="ok"':''}>${esc(String(e.r==null?'':e.r))}${d?' ✓':''}</b>`;}).join(' + ');
+  return`<div class="hoy-car"><span aria-hidden="true">🚶</span><span>Cardio ${parts}${info.car[0].eq?` · ${esc(info.car[0].eq)}`:''}</span></div>`;
+}
+function hoyState(){
+  const aw=getActiveWorkout();if(aw)return{k:'live',aw,dk:aw.day};
+  const now=Date.now(),dk=hoyDayKey();let today=null;
+  (Array.isArray(S.sessions)?S.sessions:[]).forEach(s=>{if(s&&s.ts&&sameDayTs(s.ts,now)&&(!today||s.ts>=today.ts))today=s;});
+  if(today)return{k:'done',s:today,dk};
+  const rest=getActiveRest();if(rest)return{k:'rest',rest,dk};
+  const wk=getWeekSessions(),target=getWeeklyTarget();
+  return{k:wk>=target?'extra':'train',dk,wk,target};
+}
+function hoyCardHtml(){
+  const st=hoyState();
+  return st.k==='rest'?_hoyRestHtml(st):st.k==='done'?_hoyDoneHtml(st):_hoyTrainHtml(st);
+}
+// Toca entrenar / sesión extra / entreno en curso
+function _hoyTrainHtml(st){
+  const live=st.k==='live',info=hoyDayInfo(st.dk);if(!info)return'';
+  const pc='p'+esc(String(st.dk).toLowerCase()),tot=(S.sessions||[]).length;
+  const nx=live?_hoyNext(info):null,pv=hoyPreviewEx(info,nx&&nx.ex),ak=pv?exAnimKey(pv):'';
+  const pres=new Map(info.str.map(e=>[e.id,coach_prescribe(e.id)]));
+  const anyP=[...pres.values()].some(Boolean);
+  let kick='Hoy toca',head='',foot='',cta='';
+  if(live){
+    const aw=st.aw;let ago='';
+    if(aw.startTs){const m=Math.floor((Date.now()-aw.startTs)/60000);
+      ago=m>=0&&m<1?'empezado ahora mismo':m>=0&&m<60?`empezado hace ${m} min`:m>=0&&m<1440?`empezado hace ${Math.max(1,Math.round(m/60))} h`:m>=0?`empezado hace ${plural(Math.max(1,Math.round(m/1440)),'día')}`:'';}
+    kick=`En curso${ago?` <span>· ${ago}</span>`:''}`;
+    const pct=aw.setsTotal?Math.min(100,Math.round(aw.setsDone/aw.setsTotal*100)):0;
+    let nxt='¡Todo hecho! Solo te falta guardar la sesión.';
+    if(nx&&nx.ex.cardio)nxt=`Siguiente: <em>${esc(nx.ex.n)}</em> · ${esc(String(nx.ex.r==null?'':nx.ex.r))}`;
+    else if(nx){const rows=setRows(nx.ex,pres.get(nx.ex.id)),row=rows[nx.i];
+      nxt=`Siguiente: <em>${esc(nx.ex.n)}</em> · <span class="hoy-nw">serie ${nx.i+1}/${rows.length}</span>${row?` · <span class="hoy-nw">${esc(_setValTxt(nx.ex,row))}</span>`:''}`;}
+    const rs=reopenedFor(st.dk);
+    head=`<div class="hoy-bar" aria-hidden="true"><i style="width:${pct}%"></i></div><div class="hoy-m">${nxt}</div>
+      ${rs?`<div class="hoy-note">Sesión del ${esc(rs.session.date||'')} reabierta: al guardarla conserva su fecha, su duración y su nota.</div>`:''}`;
+    const exDone=info.ex.filter(_exComplete).length;
+    cta=`<div class="hoy-acts"><button class="btn bp hoy-go" onclick="resumeWorkout()">▶ Continuar (${exDone}/${info.ex.length})</button><button class="btn bs" onclick="discardWorkout()">Descartar</button></div>`;
+  }else{
+    if(st.k==='extra'){kick='Sesión extra <span>· opcional</span>';
+      head=`<div class="hoy-note"><b>¡Semana completa! ${Math.min(st.wk,st.target)}/${st.target}</b> 🎉 Si te apetece, una más.</div>`;}
+    else if(!tot)kick='Tu primera sesión';
+    cta=`<button class="btn ${st.k==='extra'?'bs':'bp'} hoy-go" data-dk="${esc(st.dk)}" onclick="hoyStart(this.dataset.dk)">Empezar ${esc(info.label)}${st.k==='extra'?' (extra)':''} →</button>`;
+    const last=[...(S.sessions||[])].reverse().find(s=>s&&s.day===st.dk&&s.ts);
+    if(last){const bits=[esc(last.date||fmtDate(new Date(last.ts)))];if(_okDur(last))bits.push(Math.round(+last.durationMin)+' min');
+      if(last.totalEx)bits.push(`${+last.doneEx||0}/${plural(+last.totalEx,'ejercicio')}`);
+      foot=`<button class="hoy-last" data-ts="${+last.ts}" onclick="openSessionSummary(+this.dataset.ts)">Última vez: ${bits.join(' · ')} <em aria-hidden="true">›</em></button>`;}
+    else foot=`<div class="hoy-tip">${tot?'Primera vez con este día: elige un peso cómodo y apunta lo que hagas.':'Empieza ligero y céntrate en la técnica: desde la 2.ª sesión te digo qué peso poner.'}</div>`;
+  }
+  const meta=[info.mus?esc(info.mus):'',_hoyDurHtml(hoyDuration(st.dk),st.dk),_hoyCount(info)].filter(Boolean).join(' · ');
+  const rows=info.str.map(e=>_hoyRowHtml(e,pres.get(e.id),pv&&pv.id===e.id,live)).join('');
+  return`<div class="card hoy k-${st.k}" id="hoy" data-dk="${esc(st.dk)}">
+    ${lightBannerHtml('hoy')}
+    <div class="hoy-k">${kick}</div>
+    <div class="hoy-t"><span class="pill ${pc}">${esc(info.label)}</span><span class="hoy-nm">${esc(info.name)}</span>${live?`<span class="pill ${pc} hoy-sets" title="Series hechas">${st.aw.setsDone}/${plural(st.aw.setsTotal,'serie')}</span>`:''}</div>
+    ${live?'':`<div class="hoy-m">${meta}</div>`}
+    ${head}
+    ${ak?`<div class="hoy-pv" id="hoy-pv" data-ex="${esc(pv.id)}" data-gym-anim="${esc(ak)}"></div>`:''}
+    ${info.ex.length?`<div class="hoy-l" role="group" aria-label="Ejercicios de ${esc(info.label)}">
+      ${info.str.length?`<div class="hoy-lh"><span>${live?'Tu entreno de hoy':anyP?'Pesos objetivo de hoy':'Tus ejercicios de hoy'}</span>${ak?'<small>toca uno para ver su técnica</small>':''}</div>${rows}`:''}
+      ${_hoyCarHtml(info,live)}</div>`:`<div class="hoy-note">Este día no tiene ejercicios: añádelos en Ajustes → Editar rutina.</div>`}
+    ${cta}${foot}
+  </div>`;
+}
+// Ya entrenaste hoy: lo de hoy (duración, series, tonelaje y récords → su resumen) y la próxima, con sus objetivos
+function _hoyDoneHtml(st){
+  const s=st.s,d=getPlan()[s.day],info=d?hoyDayInfo(s.day):null,lbl=info?info.label:String(s.day||'');
+  const D=sessSummaryData(s),npr=D.records.length,dur=_okDur(s)?Math.round(+s.durationMin):null;
+  const kp=(l,v,u)=>`<div class="sum-k"><b>${v}</b>${u?`<span>${u}</span>`:''}<small>${l}</small></div>`;
+  const nk=st.dk,ni=hoyDayInfo(nk);
+  const nmeta=ni?[ni.mus?esc(ni.mus):'',_hoyDurHtml(hoyDuration(nk),nk),_hoyCount(ni)].filter(Boolean).join(' · '):'';
+  return`<div class="card hoy k-done" id="hoy" data-dk="${esc(nk)}">
+    ${lightBannerHtml('hoy')}
+    <div class="hoy-k">Hecho hoy ✓</div>
+    <div class="hoy-t"><span class="pill p${esc(String(s.day).toLowerCase())}">${esc(lbl)}</span><span class="hoy-nm">${esc(info?info.name:'')}</span></div>
+    <div class="hoy-kpis">${kp('Duración',dur==null?'—':dur,dur==null?'':'min')}${kp('Series',D.sets,'')}${kp('Tonelaje',_kgK(D.ton),'kg')}</div>
+    <button class="hoy-sum" data-ts="${+s.ts}" onclick="openSessionSummary(+this.dataset.ts)"><span>Ver el resumen de hoy</span>${npr?`<small>🏆 ${plural(npr,'récord')}</small>`:''}<span aria-hidden="true">›</span></button>
+    ${ni?`<div class="hoy-nx">
+      <div class="hoy-k">Próxima sesión</div>
+      <div class="hoy-t"><span class="pill p${esc(String(nk).toLowerCase())}">${esc(ni.label)}</span><span class="hoy-nm">${esc(ni.name)}</span></div>
+      <div class="hoy-m">${nmeta}</div>
+      ${dayTargetsHtml(nk,'dash')}
+      <button class="btn bs" data-dk="${esc(nk)}" onclick="hoyStart(this.dataset.dk)">Adelantar ${esc(ni.label)} →</button>
+    </div>`:''}
+  </div>`;
+}
+// Semana de descanso: un único mensaje (antes salía tres veces en Inicio)
+function _hoyRestHtml(st){
+  const left=restDaysLeft(st.rest),wk=getWeekSessions(),info=hoyDayInfo(st.dk);
+  return`<div class="card hoy k-rest" id="hoy" data-dk="${esc(st.dk)}">
+    ${lightBannerHtml('hoy')}
+    <div class="hoy-rest-h"><span class="hoy-rest-ic" aria-hidden="true">🌴</span><div class="hoy-rest-b">
+      <div class="hoy-k">Semana de descanso</div>
+      <div class="hoy-t"><span class="hoy-nm">Hoy toca recuperar</span></div>
+      <div class="hoy-m">${left>0?`Quedan ${plural(left,'día')}`:'Termina hoy'} · el Coach no penaliza tu constancia</div>
+    </div></div>
+    <p class="hoy-rest-p">El descanso es parte del progreso: recuperas fuerza y evitas lesiones. Duerme bien y come suficiente proteína.${wk>0?` Aun así llevas ${plural(wk,'sesión','sesiones')} esta semana.`:''}</p>
+    <button class="btn bs" onclick="endRestWeek()">Terminar descanso y volver a entrenar</button>
+    ${info?`<button class="hoy-soft" data-dk="${esc(st.dk)}" onclick="hoyStart(this.dataset.dk)">Entrenar suave igualmente · ${esc(info.label)} ›</button>`:''}
+  </div>`;
+}
+function hoyStart(dk){if(!getPlan()[dk])dk=hoyDayKey();S.day=dk;go('workout');}
+// Tocar un ejercicio de la lista: la vista previa cambia en su sitio (mismo canvas), sin repintar la pantalla
+function hoyPick(id){
+  const root=document.getElementById('hoy');if(!root)return;
+  const dk=root.dataset.dk,info=hoyDayInfo(dk),ex=info&&info.ex.find(e=>String(e.id)===String(id));
+  const ak=ex?exAnimKey(ex):'';if(!ak)return;
+  _hoyPick={dk,id:String(ex.id)};
+  const el=document.getElementById('hoy-pv');
+  if(!el||typeof GymAnim==='undefined'||!GymAnim.swap){render();return;}
+  const prev=el.getAttribute('data-gym-anim');
+  if(!GymAnim.swap(el,ak))return;
+  el.dataset.ex=String(ex.id);
+  if(prev!==ak&&!_rm()){el.classList.remove('hoy-sw');void el.offsetWidth;el.classList.add('hoy-sw');} // (clase propia: «.sw» es el interruptor de Ajustes)
+  root.querySelectorAll('.hoy-ex').forEach(b=>{const on=b.dataset.ex===String(ex.id);b.classList.toggle('on',on);b.setAttribute('aria-pressed',on?'true':'false');});
+  haptic(8);
+}
+// Repintados: la vista previa montada se saca antes y se vuelve a poner después (mismo canvas; si el ejercicio de la
+// nueva tarjeta es otro, se cambia con GymAnim.swap). Fuera de Inicio se conserva para cuando vuelvas.
+function hoyDetach(root){const el=root&&root.querySelector('#hoy-pv');if(el&&el._ga)_hoyKeep=el;}
+function hoyAttach(root){
+  const ph=root&&root.querySelector('#hoy-pv'),k=_hoyKeep;
+  if(!ph||!k||k===ph||typeof GymAnim==='undefined'||!GymAnim.swap)return;
+  const key=ph.getAttribute('data-gym-anim');
+  if(k.getAttribute('data-gym-anim')!==key&&!GymAnim.swap(k,key)){_hoyKeep=null;return;}
+  k.className=ph.className;k.dataset.ex=ph.dataset.ex||'';
+  ph.replaceWith(k);
+}
+
+// Saludo de Inicio según la hora: «tardes» hasta las 21:00, como se dice en España
+function dashGreet(hr){return hr>=5&&hr<12?'Buenos días':hr>=12&&hr<21?'Buenas tardes':'Buenas noches';}
 function renderDash(){
-  const lw=S.weights.length?S.weights[S.weights.length-1]:null;
-  const pw=S.weights.length>1?S.weights[S.weights.length-2]:null;
-  const diff=lw&&pw?(lw.v-pw.v):null;
-  const diffStr=diff!==null?(diff>0?'+':'')+diff.toFixed(1):'—';
   const wk=getWeekSessions(),tot=S.sessions.length,target=getWeeklyTarget();
   const nowTs0=Date.now(),trainedToday=S.sessions.some(s=>s&&s.ts&&sameDayTs(s.ts,nowTs0));
-  // Después de entrenar no toca «¡Día de sudar!»
-  const greet=trainedToday?'¡Buen trabajo hoy!':['¡Hola, campeón!','¡Vamos, que puedes!','¡Día de sudar!','¡Sigues en pie!','¡A por ello!'][tot%5];
+  // (10) Saludo según la hora (antes rotaba con el nº de sesiones); después de entrenar, «¡Buen trabajo hoy! 💪»
+  const now0=new Date(nowTs0),hr=now0.getHours();
+  const greet=trainedToday?'¡Buen trabajo hoy!':dashGreet(hr);
+  const emo=trainedToday?'💪':'👋';
   // El emoji va pegado a la última palabra (nunca solo en la segunda línea)
-  const gSp=greet.lastIndexOf(' '),greetHtml=gSp>0?`${greet.slice(0,gSp)} <span style="white-space:nowrap">${greet.slice(gSp+1)} 💪</span>`:`<span style="white-space:nowrap">${greet} 💪</span>`;
-  // «kg hoy» solo si la última pesada es de hoy
-  const lwTs=lw&&typeof lw.ts==='number'?lw.ts:null;
-  const lwLbl=!lw?'kg hoy':lwTs&&sameDayTs(lwTs,nowTs0)?'kg hoy':lwTs&&sameDayTs(lwTs,nowTs0-86400000)?'kg ayer':`kg · ${esc(lwTs?fmtDate(new Date(lwTs)):(lw.d||''))}`;
+  const gSp=greet.lastIndexOf(' '),greetHtml=gSp>0?`${greet.slice(0,gSp)} <span style="white-space:nowrap">${greet.slice(gSp+1)} ${emo}</span>`:`<span style="white-space:nowrap">${greet} ${emo}</span>`;
+  const today0=`${HOY_WD[now0.getDay()]} ${now0.getDate()} ${MONTHS[now0.getMonth()]}`;
+  const rest0=getActiveRest();
   return`
-  <div class="topbar"><div class="topbar-row"><div><h1>${greetHtml}</h1><div class="sub">${tot===0?'Primera sesión — el inicio es hoy':`${tot} ${tot===1?'sesión':'sesiones'} completada${tot!==1?'s':''}`}</div></div>
+  <div class="topbar"><div class="topbar-row"><div><h1>${greetHtml}</h1><div class="sub"><span style="white-space:nowrap">${today0}</span> · <span style="white-space:nowrap">${tot===0?'tu primera sesión':`${tot} ${tot===1?'sesión':'sesiones'}`}</span></div></div>
   <div style="display:flex;gap:8px;align-items:center">
     <button class="icon-btn" onclick="S.wmodal=true;renderWmodal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Peso</button>
     <button class="settings-btn" aria-label="Ajustes" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
   </div></div>
-  <div class="sh">Esta semana</div>
-  ${(()=>{
-    const ar=getActiveRest();
-    if(ar){
-      const dleft=restDaysLeft(ar);
-      return`<div class="card" style="border-color:var(--blue);background:rgba(59,130,246,.06)">
-        <div style="display:flex;align-items:center;gap:11px;margin-bottom:8px">
-          <span style="font-size:22px">🌴</span>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:15px;font-weight:600">Semana de descanso</div>
-            <div style="font-size:12px;color:var(--text2)">${dleft>0?`Quedan ${dleft} día${dleft!==1?'s':''}`:'Termina hoy'} · el Coach no penaliza tu constancia</div>
-          </div>
-        </div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5">El descanso es parte del progreso: recuperas fuerza y evitas lesiones.${wk>0?` Aun así llevas ${wk} ${wk===1?'sesión':'sesiones'} esta semana.`:''}</div>
-        <button class="btn bs" onclick="endRestWeek()">Terminar descanso y volver a entrenar</button>
-      </div>`;
-    }
-    return`<div class="card">
+  ${hoyCardHtml()}
+  ${dashCoachHtml()}
+  ${rest0?'':`<div class="sh">Esta semana</div>
+  <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
       <span style="font-size:15px;font-weight:600;min-width:0">${Math.min(wk,target)} de ${plural(target,'sesión','sesiones')}${wk>target?` <span style="white-space:nowrap">· +${wk-target} extra 🔥</span>`:''}</span>
       <span style="font-size:12px;font-weight:500;white-space:nowrap;flex-shrink:0;color:${wk>=target?'var(--green)':wk>0?'var(--amber)':'var(--text2)'}">${wk>=target?'¡Semana completa! 🎉':wk>0?(target-wk===1?'Una más 🔥':`${target-wk} más 💪`):'Sin sesiones aún'}</span>
@@ -8082,17 +8385,11 @@ function renderDash(){
     <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(wk/target*100))}%"></div></div>
     <div class="wgrid">${weekGrid()}</div>
     <div style="display:flex;gap:12px;margin-top:9px;font-size:10px;color:var(--text3)"><span style="color:var(--green)">■ Completado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span><span>■ Planificado</span></div>
-  </div>`;
-  })()}
-  ${dashCoachHtml()}
-  <div class="mrow">
-    <div class="met"><div class="mval">${tot}</div><div class="mlbl">Sesiones</div></div>
-    <div class="met"><div class="mval" style="color:var(--green)">${lw?esc(lw.v):'—'}</div><div class="mlbl">${lwLbl}</div></div>
-    <div class="met"><div class="mval" style="color:${diff===null?'var(--text2)':diff<=0?'var(--green)':'var(--red)'}">${diffStr}</div><div class="mlbl">kg cambio</div></div>
-  </div>
+  </div>`}
   <div class="sh">Peso corporal</div>
   ${renderWeightCard('Registra tu peso en cada sesión para ver la evolución aquí.')}
   ${(()=>{
+    if(rest0)return''; // (10) en semana de descanso lo dice la tarjeta de arriba (antes se repetía aquí)
     const w=coach_weeklyInsight();
     if(!w)return''; // función nunca debería devolver null ahora, pero por seguridad
     return`<div class="week-card">
@@ -8113,64 +8410,6 @@ function renderDash(){
       </div>
     </div>`;
   })()}
-  ${(()=>{
-    const aw=getActiveWorkout();
-    if(!aw)return'';
-    let ago='';
-    if(aw.startTs){
-      const mins=Math.floor((Date.now()-aw.startTs)/60000);
-      if(mins>=0&&mins<1)ago=' · empezado ahora mismo';
-      else if(mins>=0&&mins<60)ago=` · empezado hace ${mins} min`;
-      else if(mins<1440)ago=` · hace ${Math.round(mins/60)} h`;
-      else ago=` · hace ${Math.round(mins/1440)} d`;
-    }
-    return`<div class="sh">Entreno sin terminar</div>
-    <div class="card" style="border-color:var(--amber);background:rgba(245,158,11,.06)">
-      <div style="display:flex;align-items:center;gap:11px;margin-bottom:8px">
-        <span style="font-size:22px">⏸️</span>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:15px;font-weight:600">${esc(aw.label)} a medias</div>
-          <div style="font-size:12px;color:var(--text2)">${esc(aw.focus)}</div>
-        </div>
-        <span class="pill p${aw.day.toLowerCase()}" title="Series hechas">${aw.setsDone}/${plural(aw.setsTotal,'serie')}</span>
-      </div>
-      <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5">${(()=>{
-        const rs=reopenedFor(aw.day);
-        return rs?`Sesión del ${esc(rs.session.date||'')} reabierta. Al guardarla conserva su fecha, su duración y su nota.`
-          :`Tus series marcadas están guardadas${ago}. Reanúdalo donde lo dejaste.`;
-      })()}</div>
-      <div style="display:flex;gap:8px">
-        <button class="btn bp" style="flex:1" onclick="resumeWorkout()">▶ Reanudar entreno</button>
-        <button class="btn bs" style="width:120px" onclick="discardWorkout()">Descartar</button>
-      </div>
-    </div>`;
-  })()}
-  <div class="sh">Próxima sesión</div>
-  <div class="card">
-    ${(()=>{const nowTs=Date.now();const didToday=S.sessions.find(s=>s.ts&&sameDayTs(s.ts,nowTs));
-      if(didToday){
-        const lbl=getPlan()[didToday.day]?.label||didToday.day;
-        return`<div style="background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--rsm);padding:10px 12px;margin-bottom:12px;font-size:12px;color:#86efac;display:flex;align-items:center;gap:8px">
-          <span style="font-size:16px">✅</span>
-          <span>Ya entrenaste hoy (${esc(lbl)}). ¡Disfruta el descanso!</span>
-        </div>`;
-      }
-      return'';
-    })()}
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
-      <span class="pill p${S.nextDay.toLowerCase()}">${getPlan()[S.nextDay].label}</span>
-      <span style="font-size:14px;color:var(--text2)">${getPlan()[S.nextDay].focus}</span>
-    </div>
-    ${dayTargetsHtml(S.nextDay,'dash')}
-    ${getActiveRest()
-      ? `<div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.5">Estás en semana de descanso. Si te apetece entrenar suave, adelante — no es obligatorio.</div>
-         <button class="btn bs" onclick="S.day=S.nextDay;go('workout')">Entrenar suave de todas formas</button>`
-      : (getActiveWorkout()||{}).day===S.nextDay
-        ? `<div style="font-size:12px;color:var(--text3);line-height:1.5">Ya lo tienes empezado: sigue con «Reanudar entreno» arriba.</div>`
-      : trainedToday
-        ? `<button class="btn bs" onclick="S.day=S.nextDay;go('workout')">Adelantar ${getPlan()[S.nextDay].label} →</button>`
-        : `<button class="btn bp" onclick="S.day=S.nextDay;go('workout')">Empezar ${getPlan()[S.nextDay].label} →</button>`}
-  </div>
   ${S.sessions.length>0?(()=>{
     const lastTs=S.sessions[S.sessions.length-1].ts;
     const canReopen=!getActiveWorkout(); // no ofrecer reabrir si ya hay un entreno en curso
@@ -8197,9 +8436,10 @@ function renderDash(){
   `;
 }
 
-// Inicio: aviso de descarga activa + acceso compacto a las propuestas del Coach (se deciden en el Coach)
+// Inicio: acceso compacto a las propuestas del Coach (se deciden en el Coach).
+// (10) El aviso de descarga activa va ahora dentro de la tarjeta «HOY TOCA» (hoyCardHtml).
 function dashCoachHtml(){
-  let h=lightBannerHtml('dash');
+  let h='';
   if((S.pendingCoachProposals||[]).length&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS){
     const n=coach_pendingView().active.length;
     if(n)h+=`<button class="coach-entry" onclick="goCoachProposals()">
@@ -10328,11 +10568,13 @@ function render(){
   const prevScroll=_scrollTo&&Date.now()-_scrollTo.ts<700?_scrollTo.top:s.scrollTop,scrollSeq=_scrollReq;
   const keepMM=mmDetach(s); // mapas musculares en pantalla: se reutilizan tras repintar
   try{animDetach(s);}catch(e){console.error(e);} // animaciones de ejercicio: mismo canvas (giro/pausa) tras repintar
+  try{hoyDetach(s);}catch(e){console.error(e);} // (10) vista previa 3D de «HOY TOCA»: mismo canvas tras repintar
   if(S.tab==='dash')s.innerHTML=renderDash();
   else if(S.tab==='workout')s.innerHTML=renderWorkout();
   else if(S.tab==='coach')s.innerHTML=renderCoach();
   else s.innerHTML=renderProg();
   try{animAttach(s);}catch(e){console.error(e);}
+  try{hoyAttach(s);}catch(e){console.error(e);}
   // Montar animaciones de ejercicio (canvas) presentes en la pantalla (las reutilizadas se reactivan)
   if(typeof GymAnim!=='undefined'){try{GymAnim.mountAll(s);}catch(e){}}
   try{mmMountAll(s,keepMM);}catch(e){console.error(e);}
