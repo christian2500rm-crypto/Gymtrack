@@ -197,11 +197,13 @@ input{font-family:inherit}
 .rt-ring svg{width:48px;height:48px;transform:rotate(-90deg)}
 .rt-ring-bg{fill:none;stroke:var(--bg3);stroke-width:3}
 .rt-ring-fg{fill:none;stroke:var(--green);stroke-width:3;stroke-linecap:round;transition:stroke-dashoffset .9s linear,stroke .3s}
-.rt-ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--text)}
+.rt-ring-num{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--text);letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.rt-ring-num.long{font-size:11px;letter-spacing:-.5px}
+#rest-timer[data-kind="cardio"] .rt-label{color:var(--blue)}
 .rt-info{flex:1;min-width:0}
 .rt-label{font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
 .rt-msg{font-size:13px;font-weight:500;color:var(--text2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rt-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 12px;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0;cursor:pointer;transition:all .15s}
+.rt-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:8px;padding:7px 14px;min-height:44px;min-width:64px;font-size:12px;font-weight:600;color:var(--text2);flex-shrink:0;cursor:pointer;transition:all .15s}
 .rt-btn:active{transform:scale(.95)}
 #rest-timer.done .rt-ring-fg{stroke:var(--amber)}
 #rest-timer.done .rt-ring-num{color:var(--amber)}
@@ -412,6 +414,15 @@ input{font-family:inherit}
 .set-row-v{font-size:13px;color:var(--text3);font-family:'DM Mono',monospace;flex-shrink:0}
 .set-row.danger .set-row-t{color:var(--red)}
 .set-row-arrow{color:var(--text3);font-size:14px;flex-shrink:0}
+/* Interruptor (Ajustes) */
+.sw{position:relative;width:44px;height:26px;border-radius:13px;background:var(--bg3);border:1px solid var(--border2);flex-shrink:0;transition:background .2s,border-color .2s}
+.sw-k{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--text2);transition:transform .2s,background .2s}
+.sw.on{background:var(--green-bg2);border-color:var(--green-b)}
+.sw.on .sw-k{transform:translateX(18px);background:var(--green)}
+.set-row[role="switch"]:focus-visible{outline:2px solid var(--green-b);outline-offset:-2px}
+/* Cardio en marcha (tarjeta) */
+.cardio-run{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:10px;border-radius:var(--rxs);background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);font-size:13px;color:var(--text2)}
+.cardio-run b{color:var(--text);font-family:'DM Mono',monospace;font-weight:600}
 /* ── iOS-specific tweaks ── */
 input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
@@ -481,16 +492,16 @@ input[type=number]{-moz-appearance:textfield}
       Progreso<div class="bb-dot"></div>
     </button>
   </nav>
-  <div id="rest-timer">
+  <div id="rest-timer" role="timer" aria-live="off">
     <div class="rt-ring">
       <svg viewBox="0 0 48 48"><circle class="rt-ring-bg" cx="24" cy="24" r="20"/><circle class="rt-ring-fg" id="rt-arc" cx="24" cy="24" r="20"/></svg>
-      <div class="rt-ring-num" id="rt-num">90</div>
+      <div class="rt-ring-num" id="rt-num">1:30</div>
     </div>
     <div class="rt-info">
-      <div class="rt-label">Descanso</div>
+      <div class="rt-label" id="rt-label">Descanso</div>
       <div class="rt-msg" id="rt-msg">Recuperando...</div>
     </div>
-    <button class="rt-btn" onclick="RT.skip()">Saltar</button>
+    <button class="rt-btn" id="rt-skip" onclick="RT.skip()" aria-label="Saltar el descanso">Saltar</button>
   </div>
 </div>
 
@@ -3163,7 +3174,7 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=11;
+const SCHEMA_VERSION=12;
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
 // Duración máxima plausible de una sesión (min); por encima se considera dato no fiable
@@ -3428,13 +3439,18 @@ function migrateState(data){
     // v11: sesión reabierta (conserva fecha, duración y nota al volver a guardarla). ADITIVO.
     if(data.reopenedSession===undefined)data.reopenedSession=null;
   }
+  if(v<12){
+    // v12: temporizador de descanso/cardio con hora de fin (sobrevive a recargas) + preferencia de sonido. ADITIVO.
+    if(data.restTimer===undefined)data.restTimer=null;
+    if(typeof data.timerSound!=='boolean')data.timerSound=true;
+  }
   data.schema_version=SCHEMA_VERSION;
   return data;
 }
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',reopenedSession:null},migrateState(loadState())||{});
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',reopenedSession:null,restTimer:null,timerSound:true},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -3462,6 +3478,9 @@ if(S.reopenedSession!=null){
   _reconcileReopened();
   if(S.reopenedSession!==_rsBefore)saveState();
 }
+// Temporizador guardado con forma no válida → descartarlo (uno válido se reanuda o termina con RT.sync() al arrancar)
+if(S.restTimer!=null&&!_validRestTimer(S.restTimer)){S.restTimer=null;saveState();}
+if(typeof S.timerSound!=='boolean')S.timerSound=true;
 
 // ══════════════════════════════════════════════════════════
 // BIBLIOTECA DE EJERCICIOS  (~45 ejercicios, máquinas + pesas libres)
@@ -3864,71 +3883,308 @@ function exAnimKey(ex){
   return k;
 }
 
-// REST TIMER
-const CIRC=2*Math.PI*20;
-const RT={
-  _tid:null,_remaining:0,_total:0,_hideT:null,_onComplete:null,
-  start(secs,name,onComplete){
-    clearInterval(this._tid);clearTimeout(this._hideT);
-    this._total=secs;this._remaining=secs;
-    this._onComplete=(typeof onComplete==='function')?onComplete:null; // callback por-timer (no monkey-patch)
-    const el=document.getElementById('rest-timer');
-    if(!el)return;
-    el.classList.remove('done');el.classList.add('show');
-    document.getElementById('rt-msg').textContent=name||'Recuperando...';
-    this._draw();
-    this._tid=setInterval(()=>{
-      this._remaining--;
-      if(this._remaining<=0){this._remaining=0;this._draw();clearInterval(this._tid);this._done();}
-      else{this._draw();}
-    },1000);
+// ── SONIDO DEL TEMPORIZADOR (WebAudio) ──────────────────────────
+// Pitidos suaves 3-2-1 + pitido final. iOS exige crear/desbloquear el AudioContext dentro de un gesto
+// (marcar una serie, elegir el RPE, iniciar el cardio…). Los pitidos se PROGRAMAN en el reloj de audio,
+// así suenan a su hora aunque los timers de JS vayan con retraso (app en segundo plano en Android).
+// Preferencia S.timerSound (por defecto true). Sin AudioContext → silencio, nunca errores.
+const Beep={
+  _ctx:null,_nodes:[],_primed:false,_idleT:null,
+  on(){return S.timerSound!==false;},
+  _AC(){try{return window.AudioContext||window.webkitAudioContext||null;}catch(e){return null;}},
+  _get(create){
+    if(this._ctx)return this._ctx;
+    if(!create)return null;
+    const AC=this._AC();
+    if(!AC)return null;
+    try{this._ctx=new AC();}catch(e){this._ctx=null;return null;}
+    try{this._ctx.onstatechange=()=>{if(this._ctx&&this._ctx.state==='running')RT._resched();};}catch(e){}
+    // Mezclar con la música del usuario (no la corta) donde el navegador lo permite
+    try{if(navigator.audioSession&&navigator.audioSession.type!=='ambient')navigator.audioSession.type='ambient';}catch(e){}
+    return this._ctx;
   },
-  _draw(){
-    const arc=document.getElementById('rt-arc'),num=document.getElementById('rt-num');
-    if(!arc||!num)return;
-    const pct=this._remaining/this._total;
-    arc.style.strokeDasharray=CIRC;arc.style.strokeDashoffset=CIRC*(1-pct);
-    num.textContent=this._remaining;
-    arc.style.stroke=this._remaining<=10?'var(--amber)':'var(--green)';
+  // Llamar SIEMPRE dentro de un gesto del usuario (iOS solo arranca el audio así)
+  unlock(){
+    if(!this.on())return false;
+    const c=this._get(true);
+    if(!c)return false;
+    clearTimeout(this._idleT);
+    try{
+      if(c.state!=='running'&&typeof c.resume==='function'){
+        const p=c.resume();
+        if(p&&typeof p.then==='function')p.then(()=>RT._resched(),()=>{});
+      }
+    }catch(e){}
+    if(!this._primed){
+      // Buffer mudo de 1 muestra: termina de "desbloquear" el audio en Safari antiguo
+      this._primed=true;
+      try{const b=c.createBuffer(1,1,22050),src=c.createBufferSource();src.buffer=b;src.connect(c.destination);src.start(0);}catch(e){}
+    }
+    if(!S.restTimer)this.release();
+    return true;
   },
-  _done(){
-    const el=document.getElementById('rest-timer');
-    if(el)el.classList.add('done');
-    const num=document.getElementById('rt-num'),msg=document.getElementById('rt-msg');
-    if(num)num.textContent='✓';
-    if(msg)msg.textContent='¡Listo! A la siguiente serie 💪';
-    try{haptic([200,100,200]);}catch(e){}
-    this._hideT=setTimeout(()=>this.hide(),4000);
-    // Ejecutar callback de finalización UNA sola vez (p.ej. auto-marcar cardio)
-    const cb=this._onComplete;this._onComplete=null;
-    if(typeof cb==='function'){try{cb();}catch(e){}}
+  // track=false → tono suelto (prueba) que no se cancela al reprogramar los avisos
+  _tone(at,freq,dur,vol,track){
+    const c=this._ctx;
+    const o=c.createOscillator(),g=c.createGain();
+    o.type='sine';
+    o.frequency.setValueAtTime(freq,at);
+    g.gain.setValueAtTime(0.0001,at);
+    g.gain.exponentialRampToValueAtTime(vol,at+0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001,at+dur);
+    o.connect(g);g.connect(c.destination);
+    o.start(at);o.stop(at+dur+0.03);
+    if(track!==false)this._nodes.push(o);
+    o.onended=()=>{const i=this._nodes.indexOf(o);if(i>=0)this._nodes.splice(i,1);try{g.disconnect();}catch(e){}};
   },
-  skip(){clearInterval(this._tid);clearTimeout(this._hideT);this._onComplete=null;this.hide();},
-  hide(){const el=document.getElementById('rest-timer');if(el)el.classList.remove('show');clearInterval(this._tid);}
+  // Programa los avisos de un temporizador que acaba en endTs (ms). Devuelve cuántos tonos quedaron programados.
+  schedule(endTs){
+    this.cancel();
+    if(!this.on())return 0;
+    const c=this._ctx;
+    if(!c||c.state!=='running')return 0;
+    let n=0;
+    try{
+      const now=Date.now(),t0=c.currentTime;
+      [3,2,1].forEach(k=>{const at=(endTs-k*1000-now)/1000;if(at>0.03){this._tone(t0+at,880,0.08,0.09);n++;}});
+      const atEnd=(endTs-now)/1000;
+      if(atEnd>0.03){this._tone(t0+atEnd,1320,0.34,0.16);n++;}
+    }catch(e){}
+    return n;
+  },
+  cancel(){
+    this._nodes.forEach(o=>{try{o.onended=null;o.stop(0);}catch(e){}try{o.disconnect();}catch(e){}});
+    this._nodes=[];
+  },
+  // Sin temporizador activo, suspender el contexto al cabo de un rato (no gastar batería)
+  release(){
+    clearTimeout(this._idleT);
+    this._idleT=setTimeout(()=>{
+      const c=this._ctx;
+      if(c&&(!S.restTimer||!this.on())&&c.state==='running'&&typeof c.suspend==='function'){try{c.suspend().catch(()=>{});}catch(e){}}
+    },2500);
+  },
+  // Pitido de prueba (al activar el sonido en Ajustes; también desbloquea el audio)
+  preview(){
+    if(!this.unlock())return false;
+    const c=this._ctx;
+    const play=()=>{try{this._tone(c.currentTime+0.02,1320,0.3,0.14,false);}catch(e){}if(!S.restTimer)this.release();};
+    try{
+      if(c.state==='running')play();
+      else if(typeof c.resume==='function'){const p=c.resume();if(p&&p.then)p.then(play,()=>{});}
+    }catch(e){}
+    return true;
+  }
 };
+
+// ── TEMPORIZADOR DE DESCANSO / CARDIO ──────────────────────────
+// Basado en la HORA DE FIN, no en un contador: no se congela ni se desfasa al bloquear el móvil o pasar la
+// PWA a segundo plano, y sobrevive a una recarga. Estado persistido en S.restTimer (schema v12):
+//   {kind:'rest'|'cardio', startTs, endTs, total (s), label, exId, day}
+// Al volver (visibilitychange/pageshow) o al cargar: si sigue en marcha se reanuda; si terminó mientras no
+// mirabas se muestra «listo» un momento y se ejecuta su final UNA vez (el cardio se marca como hecho).
+const CIRC=2*Math.PI*20;
+const RT_LATE_MS=2000;           // detectado >2 s tarde → terminó mientras la app no corría (sin pitido ni vibración)
+const RT_SHOW_LATE_MS=30*60000;  // un descanso que acabó hace >30 min se cierra sin aviso
+// m:ss («1:30», «7:57», «15:00»)
+function fmtClock(secs){
+  const s=Math.max(0,Math.round(+secs||0));
+  return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');
+}
+function _validRestTimer(t){
+  if(!_isPlainObj(t))return false;
+  if(t.kind!=='rest'&&t.kind!=='cardio')return false;
+  if(typeof t.endTs!=='number'||!isFinite(t.endTs))return false;
+  const tot=+t.total;
+  if(!isFinite(tot)||tot<=0||tot>MAX_SESSION_MIN*60)return false;
+  // Fin a más del total en el futuro (reloj cambiado / dato manipulado) → no fiable
+  if(t.endTs-Date.now()>tot*1000+60000)return false;
+  return true;
+}
+const RT={
+  _tid:null,_hideT:null,_lastSec:null,
+  _el(id){return document.getElementById(id);},
+  // start(segundos, texto, {kind:'rest'|'cardio', exId, day}) → true si arrancó
+  start(secs,name,opts){
+    opts=(opts&&typeof opts==='object')?opts:{};
+    secs=Math.round(+secs);
+    if(!(secs>0))return false;
+    const kind=opts.kind==='cardio'?'cardio':'rest';
+    const cur=S.restTimer;
+    // Un cardio en marcha tiene prioridad sobre un descanso (no se pierde su auto-marcado)
+    if(kind==='rest'&&cur&&cur.kind==='cardio'&&cur.endTs>Date.now())return false;
+    clearTimeout(this._hideT);this._hideT=null;
+    const now=Date.now();
+    S.restTimer={kind,startTs:now,endTs:now+secs*1000,total:secs,label:String(name||'').slice(0,140),exId:opts.exId||null,day:opts.day||S.day||null};
+    saveState();
+    Beep.unlock();
+    this._show();
+    this._loop();
+    Beep.schedule(S.restTimer.endTs);
+    return true;
+  },
+  // Segundos que faltan del temporizador activo (0 si no hay)
+  remaining(){const t=S.restTimer;return t?Math.max(0,Math.ceil((t.endTs-Date.now())/1000)):0;},
+  // Resincroniza con el reloj real: al cargar, al volver a primer plano y al restaurar desde bfcache
+  sync(){
+    const t=S.restTimer;
+    if(!t){if(!this._hideT)this._hideEl();return;}
+    if(!_validRestTimer(t)){S.restTimer=null;saveState();this._hideEl();return;}
+    if(t.endTs<=Date.now()){this._complete(Date.now()-t.endTs>RT_LATE_MS);return;}
+    clearTimeout(this._hideT);this._hideT=null;
+    this._show();this._loop();
+    this._resched();
+    // Intento de reanudar el audio (Safari lo deja «interrupted» al volver); si exige gesto, se hará en el siguiente toque
+    try{const c=Beep._get(false);if(c&&c.state!=='running'&&typeof c.resume==='function'){const p=c.resume();if(p&&p.then)p.then(()=>this._resched(),()=>{});}}catch(e){}
+  },
+  _resched(){const t=S.restTimer;if(t&&t.endTs>Date.now())Beep.schedule(t.endTs);},
+  _loop(){
+    clearInterval(this._tid);
+    this._lastSec=null;
+    this._tid=setInterval(()=>this._tick(),250);
+    this._tick();
+  },
+  _tick(){
+    const t=S.restTimer;
+    if(!t){clearInterval(this._tid);this._tid=null;return;}
+    const ms=t.endTs-Date.now();
+    if(ms<=0){this._complete(-ms>RT_LATE_MS);return;}
+    const sec=Math.ceil(ms/1000);
+    if(sec!==this._lastSec){this._lastSec=sec;this._draw(sec,t.total);}
+  },
+  _show(){
+    const t=S.restTimer,el=this._el('rest-timer');
+    if(!t||!el)return;
+    const cardio=t.kind==='cardio';
+    el.classList.remove('done');el.classList.add('show');
+    el.dataset.kind=t.kind;
+    const lab=this._el('rt-label'),msg=this._el('rt-msg'),btn=this._el('rt-skip'),num=this._el('rt-num');
+    if(lab)lab.textContent=cardio?'Cardio':'Descanso';
+    if(msg)msg.textContent=t.label||(cardio?'Cardio':'Recuperando...');
+    if(btn){btn.textContent=cardio?'Parar':'Saltar';btn.setAttribute('aria-label',cardio?'Parar el cardio':'Saltar el descanso');}
+    if(num)num.classList.toggle('long',t.total>=600);
+  },
+  _draw(sec,total){
+    const arc=this._el('rt-arc'),num=this._el('rt-num');
+    if(!arc||!num)return;
+    const pct=Math.max(0,Math.min(1,sec/total));
+    arc.style.strokeDasharray=CIRC;arc.style.strokeDashoffset=CIRC*(1-pct);
+    num.textContent=fmtClock(sec);
+    arc.style.stroke=sec<=10?'var(--amber)':'var(--green)';
+  },
+  // Fin del temporizador. late=true → terminó mientras la app no corría (al volver / al recargar)
+  _complete(late){
+    const t=S.restTimer;
+    clearInterval(this._tid);this._tid=null;this._lastSec=null;
+    if(!t)return;
+    // Consumirlo ANTES de ejecutar su final: así nunca se ejecuta dos veces (recarga, otro evento…)
+    S.restTimer=null;
+    const ago=Math.max(0,Date.now()-t.endTs);
+    const marked=t.kind==='cardio'?_cardioAutoMark(t,ago):false;
+    saveState();
+    if(t.kind==='cardio'||!late||ago<=RT_SHOW_LATE_MS)this._showDone(t,late,ago,marked);
+    else this._hideEl();
+    if(!late)haptic([200,100,200]); // el pitido final ya estaba programado en el reloj de audio
+    else Beep.cancel();
+    Beep.release();
+    if(marked)render();
+  },
+  _showDone(t,late,ago,marked){
+    const el=this._el('rest-timer');
+    if(!el)return;
+    const cardio=t.kind==='cardio';
+    el.classList.add('show','done');
+    el.dataset.kind=t.kind;
+    const num=this._el('rt-num'),msg=this._el('rt-msg'),lab=this._el('rt-label'),btn=this._el('rt-skip'),arc=this._el('rt-arc');
+    if(num){num.textContent='✓';num.classList.remove('long');}
+    if(arc){arc.style.strokeDasharray=CIRC;arc.style.strokeDashoffset=0;arc.style.stroke='';}
+    if(lab)lab.textContent=cardio?'Cardio':'Descanso';
+    const mins=Math.round(ago/60000);
+    // Lo importante primero: la barra recorta el final del texto en pantallas estrechas
+    if(msg)msg.textContent=cardio
+      ?(marked?`¡Hecho! ✓ ${t.label||''}`:`¡Tiempo cumplido! ${t.label||''}`).trim()
+      :(late&&mins>=1?`Terminó hace ${mins} min`:'¡Listo! Siguiente serie 💪');
+    if(btn){btn.textContent='OK';btn.setAttribute('aria-label','Cerrar');}
+    clearTimeout(this._hideT);
+    this._hideT=setTimeout(()=>{this._hideT=null;this._hideEl();},late?6000:4000);
+  },
+  _hideEl(){
+    const el=this._el('rest-timer');
+    if(el)el.classList.remove('show','done');
+  },
+  // Para y descarta el temporizador (y su final) sin ejecutarlo
+  stop(){
+    clearInterval(this._tid);this._tid=null;this._lastSec=null;
+    clearTimeout(this._hideT);this._hideT=null;
+    const had=!!S.restTimer;
+    if(had){S.restTimer=null;saveState();}
+    Beep.cancel();Beep.release();
+    this._hideEl();
+    return had;
+  },
+  // Botón de la barra: «Saltar» (descanso) / «Parar» (cardio) / «OK» (ya terminado)
+  skip(){
+    const wasCardio=!!(S.restTimer&&S.restTimer.kind==='cardio');
+    this.stop();
+    if(wasCardio)render(); // la tarjeta del cardio deja de mostrar «En marcha»
+  },
+  hide(){this.stop();},
+  // Al desmarcar/deshacer series: cierra el DESCANSO pero nunca un cardio en marcha
+  cancelRest(){
+    if(S.restTimer&&S.restTimer.kind==='cardio'&&S.restTimer.endTs>Date.now())return false;
+    return this.stop();
+  },
+  // ¿Hay un cardio en marcha para este ejercicio?
+  cardioRunning(exId){const t=S.restTimer;return !!(t&&t.kind==='cardio'&&t.endTs>Date.now()&&(!exId||t.exId===exId));}
+};
+// Final del cardio: marca el ejercicio como hecho (una vez). Devuelve true si lo marcó.
+function _cardioAutoMark(t,ago){
+  if(!t||!t.exId)return false;
+  if(ago>MAX_SESSION_MIN*60000)return false; // terminó hace horas: ya no pertenece a este entreno
+  const plan=getPlan();
+  const inPlan=(t.day&&plan[t.day]&&plan[t.day].ex.some(e=>e.id===t.exId))||Object.values(plan).some(d=>d.ex.some(e=>e.id===t.exId));
+  if(!inPlan)return false;
+  if(!S.sets[t.exId])S.sets[t.exId]={};
+  if(S.sets[t.exId][0])return false;
+  // El entreno empezó cuando arrancó el cardio (si aún no había nada marcado)
+  if(!S.sessionStartTs&&t.startTs&&Date.now()-t.startTs<MAX_SESSION_MIN*60000)S.sessionStartTs=t.startTs;
+  S.sets[t.exId][0]=true;
+  syncActiveWorkout();
+  return true;
+}
+// Inicio real de la sesión cuando lo primero fue un cardio con temporizador (para la duración)
+function _cardioStartHint(){
+  const t=S.restTimer;
+  return(t&&t.kind==='cardio'&&t.startTs&&Date.now()-t.startTs<MAX_SESSION_MIN*60000)?t.startTs:null;
+}
+// Resincronizar al volver a la app (iOS congela la PWA en segundo plano) y al restaurar desde bfcache
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')RT.sync();});
+window.addEventListener('pageshow',()=>RT.sync());
+// Con un temporizador activo, el siguiente toque desbloquea el audio (p. ej. tras recargar la app)
+['pointerup','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,()=>{
+  if(!S.restTimer||!Beep.on())return;
+  const c=Beep._get(false);
+  if(!c||c.state!=='running')Beep.unlock();
+},{capture:true,passive:true}));
+
 function getRestSecs(id){
   // Resolver al objeto ejercicio para detectar compuestos vía isCompoundEx (resistente a swaps)
   const ex=Object.values(getPlan()).flatMap(d=>d.ex).find(e=>e.id===id);
   return isCompoundEx(ex)?90:60;
 }
 
-// Cronómetro de cardio: reutiliza RT pero con label específico y auto-marca al terminar
+// Cronómetro de cardio: mismo temporizador (con hora de fin) en modo «cardio»; al acabar marca el ejercicio
+// como hecho, también si terminó con la app en segundo plano o cerrada (se hace al volver).
 function startCardioTimer(exId,mins){
   const ex=getPlan()[S.day].ex.find(e=>e.id===exId);
   if(!ex)return;
-  // Marcar inicio de sesión si es la primera acción
-  if(!S.sessionStartTs)S.sessionStartTs=Date.now();
+  mins=+mins;
+  if(!(mins>0))return;
   syncActiveWorkout();
   saveState();
-  // Callback por-timer: al terminar la cuenta atrás, auto-marcar ESTE cardio como hecho.
-  // (Sin parchear RT._done → no hay fuga ni re-marcado de cardios anteriores.)
-  RT.start(mins*60,`${ex.n} — ${mins} min`,()=>{
-    if(!S.sets[exId])S.sets[exId]={};
-    S.sets[exId][0]=true;
-    syncActiveWorkout();
-    saveState();render();
-  });
+  RT.start(Math.round(mins*60),ex.n,{kind:'cardio',exId,day:S.day});
   haptic([60]);
+  render(); // la tarjeta pasa a «En marcha»
 }
 
 // ── CALENTAMIENTO ACTIVO ──
@@ -3985,7 +4241,7 @@ function toggleWarmupSet(exId,wIdx){
   // Tras calentar, descanso corto (45s)
   if(wasOff){
     const ex=getPlan()[S.day].ex.find(e=>e.id===exId);
-    if(ex)RT.start(45,ex.n+' (calentamiento)');
+    if(ex)RT.start(45,ex.n+' · calentamiento',{exId});
   }
 }
 
@@ -4030,8 +4286,13 @@ function toggleSet(id,i,evt){
   // Snapshot para undo
   const prevSet=S.sets[id][i];
   const prevRpe=S.rpe&&S.rpe[id]?S.rpe[id][i]:undefined;
-  // Marcar inicio de sesión al primer set marcado (para calcular duración real)
-  if(wasOff&&!S.sessionStartTs)S.sessionStartTs=Date.now();
+  // Marcar inicio de sesión al primer set marcado (para calcular duración real).
+  // Si lo primero fue un cardio con temporizador, la sesión empezó cuando arrancó ese cardio.
+  if(wasOff&&!S.sessionStartTs)S.sessionStartTs=_cardioStartHint()||Date.now();
+  // Marcar una serie es un gesto del usuario: aquí se crea/desbloquea el audio de los pitidos (iOS)
+  if(wasOff)Beep.unlock();
+  // Marcar a mano un cardio cuyo temporizador sigue en marcha: ese temporizador ya no hace falta
+  if(wasOff&&RT.cardioRunning(id))RT.stop();
   S.sets[id][i]=!S.sets[id][i];
   // Si se desmarca, también limpiar RPE de esa serie
   if(!wasOff){
@@ -4067,7 +4328,7 @@ function toggleSet(id,i,evt){
     }
     _lastSetAction=null;
     syncActiveWorkout();
-    RT.hide();closeRpeSelector();
+    RT.cancelRest();closeRpeSelector();
     saveState();render();
   });
   if(wasOff&&S.tab==='workout'){
@@ -4080,7 +4341,7 @@ function toggleSet(id,i,evt){
       // (no hay timer para cardio)
     }
   }else if(!wasOff){
-    RT.hide();
+    RT.cancelRest();
     closeRpeSelector();
   }
 }
@@ -4142,13 +4403,13 @@ function setRpe(level){
   // Iniciar timer ahora con duración ajustada por RPE (más descanso si RPE alto)
   const baseRest=getRestSecs(exId);
   const adjustedRest=level===3?Math.round(baseRest*1.15):level===1?Math.round(baseRest*0.85):baseRest;
-  RT.start(adjustedRest,ex.n);
+  RT.start(adjustedRest,ex.n,{exId});
   render();
 }
 function skipRpe(){closeRpeSelector();
   // Aún así iniciar timer (sin ajuste)
   if(_rpeOpenLast){
-    RT.start(getRestSecs(_rpeOpenLast.exId),_rpeOpenLast.ex.n);
+    RT.start(getRestSecs(_rpeOpenLast.exId),_rpeOpenLast.ex.n,{exId:_rpeOpenLast.exId});
     _rpeOpenLast=null;
   }
 }
@@ -4425,6 +4686,8 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
   // Limpiar RPE, warmups y tracker de duración de la sesión
   S.rpe={};S.warmups={};S.sessionStartTs=null;
+  // La sesión ha terminado: fuera el descanso/cardio en marcha (un cardio no debe marcarse en la siguiente)
+  RT.stop();
   // Re-detectar entreno activo: null si no quedan marcas, o reapunta a otro día a medias
   S.activeWorkout=null;
   syncActiveWorkout();
@@ -4468,6 +4731,7 @@ function discardWorkout(){
         });
       }
       S.activeWorkout=null;S.sessionStartTs=null;_lastSetAction=null;
+      RT.stop(); // descanso/cardio de un entreno descartado
       // Re-detectar: si quedara otro día con marcas, su tarjeta vuelve a mostrarse (nada queda huérfano).
       // Si era una sesión reabierta, aquí vuelve al historial tal como estaba.
       syncActiveWorkout();
@@ -5926,6 +6190,15 @@ function renderWorkout(){
           if(c[0]){
             return`<button class="btn bs" onclick="toggleSet('${ex.id}',0);render()">✅ Marcado como hecho</button>`;
           }
+          if(RT.cardioRunning(ex.id)){
+            // En marcha: hora de fin (no hace falta refrescar cada segundo; la cuenta atrás va en la barra)
+            const end=new Date(S.restTimer.endTs),hhmm=String(end.getHours()).padStart(2,'0')+':'+String(end.getMinutes()).padStart(2,'0');
+            return`<div class="cardio-run">⏱ En marcha · termina a las <b>${hhmm}</b></div>
+            <div style="display:flex;gap:8px">
+              <button class="btn bs" style="flex:1" onclick="RT.skip()">■ Parar</button>
+              <button class="btn bs" style="width:130px" onclick="toggleSet('${ex.id}',0);render()">Marcar hecho</button>
+            </div>`;
+          }
           if(mins>0){
             return`<div style="display:flex;gap:8px">
               <button class="btn bp" style="flex:1" onclick="startCardioTimer('${ex.id}',${mins})">▶ Iniciar ${mins} min</button>
@@ -6580,6 +6853,17 @@ function render(){
 // ══════════════════════════════════════════════════════════
 // AJUSTES · Export/Import · Editar peso · Reset · Onboarding
 // ══════════════════════════════════════════════════════════
+// Sonido del temporizador (S.timerSound). Al activarlo suena un pitido de prueba (y se desbloquea el audio).
+function toggleTimerSound(){
+  S.timerSound=S.timerSound===false;
+  saveState();
+  if(S.timerSound){Beep.preview();RT._resched();}
+  else{Beep.cancel();Beep.release();}
+  // Actualizar solo la fila (sin re-render: la hoja no salta)
+  const row=document.getElementById('set-sound');
+  if(row){row.setAttribute('aria-checked',String(S.timerSound));const sw=row.querySelector('.sw');if(sw)sw.classList.toggle('on',S.timerSound);}
+  toast(S.timerSound?'🔔 Sonido activado':'🔕 Sonido desactivado');
+}
 function openSettings(){S.settingsOpen=true;renderSettings();}
 function closeSettings(){S.settingsOpen=false;renderSettings();}
 function renderSettings(){
@@ -6623,6 +6907,16 @@ function renderSettings(){
           </div>
           <span class="set-row-v">${ar?`${restDaysLeft(ar)} día${restDaysLeft(ar)!==1?'s':''}`:'—'}</span>
           <span class="set-row-arrow">›</span>
+        </div>`;})()}
+      </div>
+      <div class="sh" style="margin:2px 0 8px">Durante el entreno</div>
+      <div class="set-section">
+        ${(()=>{const on=S.timerSound!==false;return`<div class="set-row" id="set-sound" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleTimerSound()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTimerSound();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Sonido del temporizador</div>
+            <div class="set-row-d">Pitidos suaves 3-2-1 al acabar el descanso y el cardio${Beep._AC()?'':' · este navegador no admite sonido'}</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
         </div>`;})()}
       </div>
       <div class="sh" style="margin:2px 0 8px">Datos personales</div>      <div class="set-section">
@@ -6834,6 +7128,7 @@ function exportData(){
     const payload={...S,_exported:new Date().toISOString(),_version:SCHEMA_VERSION};
     // Excluir claves transitorias del export
     TRANSIENT_KEYS.forEach(k=>delete payload[k]);
+    delete payload.restTimer; // un temporizador en marcha no tiene sentido en otro dispositivo
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -6918,8 +7213,13 @@ function importData(){
           cancelText:'Cancelar',
           danger:true,
           onOk:()=>{
+            // Preferencia de sonido: la del backup solo si la trae (un backup antiguo no cambia la de este móvil)
+            const _sndImp=typeof data.timerSound==='boolean'?data.timerSound:(typeof S.timerSound==='boolean'?S.timerSound:true);
             // Aplicar migración por si viene de versión antigua
             const migrated=migrateState(data);
+            migrated.timerSound=_sndImp;
+            // Temporizador: nunca se importa ni se hereda (el del backup es de otro momento; el actual, de otros datos)
+            migrated.restTimer=null;
             // Sanear nombres y campos de texto del plan personalizado (defensa XSS)
             if(migrated.currentPlan){
               Object.values(migrated.currentPlan).forEach(day=>{
@@ -6945,6 +7245,7 @@ function importData(){
             S=Object.assign(S,migrated);
             // Limpiar estado UI transitorio importado
             TRANSIENT_KEYS.forEach(k=>{if(k in S)delete S[k];});
+            RT.stop();
             // Re-sincronizar el puntero del entreno activo con las series realmente importadas
             syncActiveWorkout();
             S.settingsOpen=true;
@@ -7057,6 +7358,8 @@ setInterval(()=>{
 })();
 
 if(S.onboarded){document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();}
+// Temporizador de descanso/cardio guardado: reanudarlo, o terminarlo si acabó con la app cerrada
+try{RT.sync();}catch(e){console.error(e);}
 </script>
 </body>
 </html>
