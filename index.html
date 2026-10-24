@@ -455,7 +455,7 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .sr-btn{background:var(--bg3);border:1px solid var(--border);border-radius:50%;width:20px;height:20px;font-size:13px;color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;line-height:1}
 .sr-btn:active{transform:scale(.9)}
 /* Biblioteca picker */
-.lib-search{width:100%;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:10px 12px;font-size:14px;color:var(--text);margin-bottom:10px}
+.lib-search{width:100%;min-height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:10px 12px;font-size:16px;color:var(--text);margin-bottom:10px}
 .lib-search::placeholder{color:var(--text3)}
 .lib-group-h{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;padding:8px 0 4px}
 .lib-item{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;border-radius:var(--rxs)}
@@ -465,6 +465,78 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .lib-item-badge{display:inline-block;font-size:9px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--text3);margin-right:4px;vertical-align:middle}
 .lib-item-badge.in{color:var(--green);background:var(--green-bg);border-color:var(--green-b);font-weight:600}
 .lib-item.cur{background:rgba(255,255,255,.03)}
+/* (11) Biblioteca 3D: miniaturas del motor (encima del emoji, que queda como respaldo) */
+.ga-th{opacity:0;transition:opacity .2s;pointer-events:none;-webkit-user-drag:none;user-select:none}
+.ga-th.ga-on{opacity:1}
+.exic{position:relative;overflow:hidden}
+.exic .ga-th{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.ga-th.ga-on~.exic-e{opacity:0}
+.lib-chiprow{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 8px;padding:0 16px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.lib-chiprow::-webkit-scrollbar{display:none}
+.lib-chip{flex-shrink:0;min-height:44px;padding:0 13px;border-radius:22px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12.5px;font-weight:500;white-space:nowrap}
+.lib-chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#0a0a0a;font-weight:600}
+.lib-chip.eq[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:#fff}
+.lib-count{font-size:11.5px;color:var(--text2);margin:2px 0 6px}
+#lib-list.lib-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.lib-grid .lib-group-h{grid-column:1/-1;padding:10px 0 0}
+.lib-grid .empty{grid-column:1/-1}
+.lib-card{padding:0;border:1px solid var(--border);border-radius:12px;background:var(--bg3);overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:border-color .15s,transform .1s}
+.lib-card:active{transform:scale(.98);background:var(--bg3)}
+.lib-card:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.lib-card.cur{border-color:var(--green-b)}
+.lib-th{position:relative;isolation:isolate;aspect-ratio:3/2;background:radial-gradient(circle at 50% 42%,#1b1f25,#0e1013);display:flex;align-items:center;justify-content:center;font-size:28px}
+.lib-th .ga-th{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.lib-th .lib-th-e{opacity:.5}
+.lib-th .ga-th.ga-on~.lib-th-e{opacity:0}
+.lib-th .lib-item-badge.in{position:absolute;left:6px;top:6px;z-index:1;margin:0;font-size:10px;padding:2px 6px;border-radius:6px;max-width:calc(100% - 12px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:rgba(10,20,12,.85)}
+.lib-cb{padding:8px 9px 9px;display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
+.lib-card .lib-item-n{font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.lib-eqt{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-mus{display:flex;flex-wrap:wrap;gap:3px;margin-top:1px}
+.mchip{font-size:10.5px;line-height:1.4;padding:1px 6px;border-radius:6px;background:rgba(255,78,46,.13);color:#ff9a80;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.lib-last{font-size:11px;color:var(--text2);margin-top:auto;padding-top:3px}
+.lib-last b{color:var(--text);font-family:'DM Mono',monospace;font-weight:500}
+/* Ficha de un ejercicio (encima del selector) */
+.lib-d-head{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.lib-d-tag{font-size:11px;padding:3px 8px;border-radius:7px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2)}
+.lib-d-tag.in{color:var(--green);background:var(--green-bg);border-color:var(--green-b);font-weight:600}
+.lib-d-hist{font-size:12.5px;color:var(--text2);line-height:1.55;margin:2px 0 12px}
+.lib-d-hist b{color:var(--text);font-weight:600}
+.lib-d-hist .carea{height:86px;margin-top:6px}
+.lib-d-acts{display:flex;gap:8px;position:sticky;bottom:0;background:var(--bg2);padding:10px 0 4px;margin-top:4px}
+.lib-d-acts .btn{flex:1;min-height:48px;padding:12px 8px;font-size:14px}
+.lib-d-note{font-size:11.5px;color:var(--text2);line-height:1.5;margin-top:6px}
+.hist-sheet-close.x44{width:44px;height:44px;top:8px;right:8px;font-size:15px}
+/* «Máquina ocupada» en la tarjeta abierta de Entreno */
+.ex-busy{display:flex;align-items:center;gap:8px;margin:-2px 0 10px;min-height:44px}
+.ex-busy-t{flex:1;min-width:0;font-size:12px;color:var(--text2);line-height:1.4}
+.ex-busy-t b{color:var(--text);font-weight:600}
+.ex-busy.is-sub{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.25);border-radius:var(--rsm);padding:0 4px 0 10px}
+.ex-busy.is-sub .ex-busy-t b{color:#93c5fd}
+.ex-busy-b{flex-shrink:0;min-height:44px;min-width:44px;padding:0 12px;border-radius:var(--rsm);border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:12.5px;font-weight:600}
+.ex-busy-b.go{border-color:rgba(59,130,246,.45);color:#93c5fd}
+.sub-tag{color:#93c5fd;font-weight:600}
+.edit-ex-sub{font-size:11px;color:#93c5fd;margin-top:2px}
+.edit-ex-ic{width:38px;height:38px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+/* Hoja «¿Máquina ocupada?» */
+.busy-pv{height:170px;margin-bottom:10px}
+.busy-list{display:flex;flex-direction:column;gap:6px}
+.busy-alt{display:flex;align-items:center;gap:10px;width:100%;min-height:64px;padding:6px 10px 6px 6px;border-radius:12px;border:1px solid var(--border2);background:var(--bg3);text-align:left;color:var(--text)}
+.busy-alt[aria-checked="true"]{border-color:var(--green);background:var(--green-bg)}
+.busy-alt .exic{width:52px;height:52px;border-radius:10px;background:#141414}
+.busy-alt-i{flex:1;min-width:0}
+.busy-alt-n{display:block;font-size:13.5px;font-weight:600;line-height:1.3;overflow-wrap:anywhere}
+.busy-alt-m{display:block;font-size:11px;color:var(--text2);margin-top:2px;line-height:1.35}
+.busy-alt-r{flex-shrink:0;text-align:right;font-size:11px;color:var(--text2);line-height:1.35}
+.busy-alt-r .pct{display:block}
+.busy-alt-r b{display:block;font-family:'DM Mono',monospace;font-size:13px;color:var(--text);font-weight:500}
+.busy-alt-r .pct{color:var(--green);font-weight:600}
+.busy-info{font-size:12.5px;color:var(--text2);line-height:1.5;margin:10px 2px 12px;min-height:38px}
+.busy-info b{color:var(--text);font-weight:600}
+.busy-acts{display:flex;gap:8px}
+.busy-acts .btn{flex:1;min-height:48px;padding:12px 8px;font-size:14px}
+.busy-more{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:8px;font-size:13px;font-weight:600;color:var(--text2)}
+.busy-empty{font-size:13px;color:var(--text2);line-height:1.55;padding:10px 2px}
 /* Propuestas del coach */
 .proposal-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);margin:0 14px 10px;overflow:hidden}
 .proposal-head{padding:12px 14px 10px;display:flex;gap:10px;align-items:flex-start}
@@ -1689,8 +1761,9 @@ function drawUI(inst){const{ctx,W,H}=inst;ctx.save();
     ctx.font='600 9.5px "DM Sans",system-ui,sans-serif';ctx.fillStyle='rgba(235,238,242,.9)';ctx.textBaseline='middle';ctx.fillText(txt,W-4-w,y+8.5);}
   ctx.restore();}
 function drawStatic(inst){const{ctx,spec,cm,W,H,dpr}=inst;ctx.setTransform(dpr,0,0,dpr,0,0);
-  const tl=spec._tl;let best=tl.steps[0];for(const s of tl.steps)if((s.to.p||0)>(best.to.p||0))best=s;
-  const c=evalTL(tl,spec,best.t0+best.dur*.999);renderTo(ctx,spec,cm,c,W,H,inst.mini?MINI_OPT:null);}
+  renderTo(ctx,spec,cm,peakC(spec),W,H,inst.mini?MINI_OPT:null);}
+function peakC(spec){const tl=spec._tl;let best=tl.steps[0];for(const s of tl.steps)if((s.to.p||0)>(best.to.p||0))best=s;
+  return evalTL(tl,spec,best.t0+best.dur*.999);}
 function loop(){raf=0;if(document.hidden){kick();return;}
   const n=NOW();let any=false;
   for(const inst of live){if(!inst.el.isConnected){live.delete(inst);if(io)io.unobserve(inst.el);continue;}
@@ -1849,9 +1922,134 @@ function mapTick(n){let more=false;
   return more;}
 function mapStats(){let fr=0;for(const m of maps)fr+=m.frames;return{maps:maps.size,anims:live.size,running:!!raf,frames:fr};}
 
+const TH_VER=1,TH_DB='gymanim',TH_ST='thumbs',BODY_G=/^(torso|head|ua[LR]|fa[LR]|th[LR]|sh[LR])$/;
+const thMem=new Map();       // ck → {v, data, src}
+let thPersist=null,thIdb=null,thIdbState='idle'; // 'idle' | 'pending' | 'ok' | 'none'
+let thIO=null,thT=0,thPutT=0;const thQ=[],thPut=[];
+const thStat={gen:0,ms:0,maxMs:0,idbHit:0,applied:0,slices:0};
+function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);}
+let _thEng=null;
+function thEngHash(){if(!_thEng){const GA=G.GymAnim;_thEng=fnv(TH_VER+'|'+(GA&&GA._&&GA._.buildHash||'')+'|'+
+  [renderTo,drawScene,fillItem,shapePath,drawOver,prepare,bounds,drawBG,drawFloor,Body.prototype.draw,thumbRender,peakC].map(String).join('|')+
+  JSON.stringify([COL,MUS,DIM]));}return _thEng;}
+function thVer(spec){if(!spec._thv){let src='';try{src=String(spec.build);}catch(e){}
+  spec._thv=fnv(thEngHash()+'|'+spec.key+'|'+src+'|'+JSON.stringify([spec.cam,spec.fitBox,spec.muscles,spec.init,spec.timeline,spec.cycle,spec.style,spec.floor]));}
+  return spec._thv;}
+function thOpt(w,h,o){o=o||{};const W=Math.max(16,Math.min(640,Math.round(+w||96))),H=Math.max(16,Math.min(640,Math.round(+h||W)));
+  const dpr=Math.min(2,Math.max(1,+o.dpr||G.devicePixelRatio||1));
+  return{w:W,h:H,fit:o.fit==='body'?'body':'scene',bg:o.bg?String(o.bg):null,dpr:Math.round(dpr*4)/4,q:+o.q>0&&+o.q<=1?+o.q:.86};}
+function thCk(key,o){return key+'|'+o.w+'x'+o.h+'@'+o.dpr+'|'+o.fit+'|'+(o.bg||'-');}
+function thumbRender(spec,o){
+  if(typeof document==='undefined')return null;
+  const W=o.w,H=o.h,dpr=o.dpr,cv=document.createElement('canvas');cv.width=Math.round(W*dpr);cv.height=Math.round(H*dpr);
+  const ctx=cv.getContext('2d');if(!ctx)return null;
+  const{sc}=buildFrame(spec,peakC(spec)),cm=makeCam(spec.cam||{});
+  prepare(cm,sc);let bb=[1e9,1e9,-1e9,-1e9];
+  if(o.fit==='body'){const ext=(x,y,r)=>{if(x-r<bb[0])bb[0]=x-r;if(y-r<bb[1])bb[1]=y-r;if(x+r>bb[2])bb[2]=x+r;if(y+r>bb[3])bb[3]=y+r;};
+    for(const it of sc.items){if(!it.grp||!BODY_G.test(it.grp))continue;
+      if(it.k==='cap'){ext(it._A[0],it._A[1],it._ra);ext(it._B[0],it._B[1],it._rb);}else if(it.k==='ell')ext(it._e.x,it._e.y,it._e.a);}}
+  else if(spec.fitBox){const[a,b]=spec.fitBox;for(let i=0;i<8;i++){const P=proj(cm,[i&1?b[0]:a[0],i&2?b[1]:a[1],i&4?b[2]:a[2]]);
+      if(P[0]<bb[0])bb[0]=P[0];if(P[1]<bb[1])bb[1]=P[1];if(P[0]>bb[2])bb[2]=P[0];if(P[1]>bb[3])bb[3]=P[1];}}
+  else bounds(cm,sc,bb);
+  if(!(bb[2]>bb[0]&&bb[3]>bb[1])){bb=[1e9,1e9,-1e9,-1e9];bounds(cm,sc,bb);}
+  const body=o.fit==='body',pd=body?{l:W*.07,r:W*.07,t:H*.06,b:H*.05}:{l:W*.05,r:W*.05,t:H*.07,b:H*.05};
+  const bw=bb[2]-bb[0],bh=bb[3]-bb[1],aw=W-pd.l-pd.r,ah=H-pd.t-pd.b;
+  const z=Math.min(aw/bw,ah/bh)*(body?1:(spec.cam&&spec.cam.zoom||1));
+  cm.zoom=z;cm.ox=pd.l+aw/2-(bb[0]+bw/2)*z;cm.oy=pd.t+ah/2-(bb[1]+bh/2)*z;cm.traces=null;
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(o.bg==='scene'){drawBG(ctx,W,H);drawFloor(ctx,cm,spec);}else if(o.bg){ctx.fillStyle=o.bg;ctx.fillRect(0,0,W,H);}
+  drawScene(ctx,cm,sc,W,H,{ol:W<120||H<100?.8:1.05});
+  let d='';try{d=cv.toDataURL('image/webp',o.q);}catch(e){d='';}
+  if(!/^data:image\/(webp|png)/.test(d)){try{d=cv.toDataURL('image/png');}catch(e){d='';}}
+  return d||null;}
+function thSrc(data){try{if(!G.URL||!URL.createObjectURL||typeof Blob==='undefined'||typeof atob!=='function')return data;
+  const i=data.indexOf(','),mime=data.slice(5,data.indexOf(';')),bin=atob(data.slice(i+1)),u=new Uint8Array(bin.length);
+  for(let k=0;k<bin.length;k++)u[k]=bin.charCodeAt(k);return URL.createObjectURL(new Blob([u],{type:mime}));}catch(e){return data;}}
+function thMemSet(ck,v,data){const o=thMem.get(ck);if(o&&o.v===v)return o;
+  if(o&&o.src!==o.data){try{URL.revokeObjectURL(o.src);}catch(e){}}
+  const e={v,data,src:thSrc(data)};thMem.set(ck,e);return e;}
+function thLookup(spec,ck){const v=thVer(spec),m=thMem.get(ck);if(m&&m.v===v)return m;
+  const p=thPersist&&thPersist.get(ck);if(p&&p.v===v&&typeof p.d==='string'&&p.d.startsWith('data:image/')){thStat.idbHit++;return thMemSet(ck,v,p.d);}
+  return null;}
+function thumb(key,w,h,o){
+  const spec=getDef(key);if(!spec||typeof document==='undefined')return null;
+  o=thOpt(w,h,o);const ck=thCk(key,o);let e=thLookup(spec,ck);if(e)return e.data;
+  const t0=NOW();let d=null;try{d=thumbRender(spec,o);}catch(err){d=null;}
+  const ms=NOW()-t0;if(!d)return null;
+  thStat.gen++;thStat.ms+=ms;if(ms>thStat.maxMs)thStat.maxMs=ms;
+  e=thMemSet(ck,thVer(spec),d);thStore(ck,e.v,d);return d;}
+function thumbCached(key,w,h,o){const spec=getDef(key);if(!spec)return null;o=thOpt(w,h,o);const e=thLookup(spec,thCk(key,o));return e?e.src:null;}
+function thInit(){
+  if(thIdbState!=='idle')return;
+  let idb=null;try{idb=G.indexedDB||null;}catch(e){idb=null;}
+  if(!idb){thIdbState='none';return;}
+  thIdbState='pending';
+  let to=0;const done=st=>{if(thIdbState!=='pending')return;thIdbState=st;clearTimeout(to);if(st==='none')thPut.length=0;thKick();if(thPut.length&&!thPutT)thPutT=setTimeout(thFlush,300);};
+  to=setTimeout(()=>done('none'),1500);
+  let rq;try{rq=idb.open(TH_DB,1);}catch(e){done('none');return;}
+  rq.onupgradeneeded=()=>{try{rq.result.createObjectStore(TH_ST);}catch(e){}};
+  rq.onerror=()=>done('none');rq.onblocked=()=>done('none');
+  rq.onsuccess=()=>{const db=rq.result,map=new Map();
+    try{const tx=db.transaction(TH_ST,'readwrite'),cur=tx.objectStore(TH_ST).openCursor();
+      cur.onsuccess=()=>{const c=cur.result;if(!c)return;const k=String(c.key),val=c.value,spec=getDef(k.split('|')[0]);
+        if(!spec||!val||val.v!==thVer(spec)){try{c.delete();}catch(e){}}else map.set(k,val);c.continue();};
+      tx.oncomplete=()=>{thIdb=db;thPersist=map;done('ok');};
+      tx.onerror=tx.onabort=()=>{thIdb=db;thPersist=map;done('ok');};
+    }catch(e){done('none');}};}
+function thStore(ck,v,d){if(thPersist)thPersist.set(ck,{v,d});if(thIdbState==='none')return;
+  thPut.push([ck,{v,d,t:Date.now()}]);if(!thPutT)thPutT=setTimeout(thFlush,300);}
+function thFlush(){thPutT=0;if(thIdbState==='none'){thPut.length=0;return;}
+  if(!thIdb){if(thPut.length)thPutT=setTimeout(thFlush,500);return;}
+  const L=thPut.splice(0);try{const os=thIdb.transaction(TH_ST,'readwrite').objectStore(TH_ST);L.forEach(([k,v])=>os.put(v,k));}catch(e){}}
+function thOptEl(el){return thOpt(+el.getAttribute('data-gw'),+el.getAttribute('data-gh'),{fit:el.getAttribute('data-gfit')||'scene',bg:el.getAttribute('data-gbg')||null});}
+function thApply(el,src){if(el.getAttribute('src')!==src){try{el.decoding='async';}catch(e){}el.src=src;}el.setAttribute('data-ga-st','ok');thStat.applied++;
+  if(el.complete&&el.naturalWidth)el.classList.add('ga-on');else el.addEventListener('load',()=>el.classList.add('ga-on'),{once:true});}
+const thObs=new Set();
+function thNear(el){if(!el.isConnected)return false;const r=el.getBoundingClientRect();if(!(r.width>0&&r.height>0))return false;
+  const H=G.innerHeight||800,Wd=G.innerWidth||400;return r.bottom>-200&&r.top<H+200&&r.right>-50&&r.left<Wd+50;}
+function thPend(el){if(thIO)thIO.unobserve(el);thObs.delete(el);thQ.push(el);}
+let thScT=0;
+function thRecheck(){thScT=0;let any=false;thObs.forEach(el=>{if(!el.isConnected){if(thIO)thIO.unobserve(el);thObs.delete(el);}else if(thNear(el)){thPend(el);any=true;}});if(any)thKick();}
+function ensureThIO(){if(!thIO&&G.IntersectionObserver){thIO=new IntersectionObserver(es=>{
+    for(const e of es)if(e.isIntersecting&&thObs.has(e.target))thPend(e.target);
+    if(thQ.length)thKick();},{rootMargin:'200px 0px'});
+    try{document.addEventListener('scroll',()=>{if(thObs.size&&!thScT)thScT=setTimeout(thRecheck,150);},{capture:true,passive:true});}catch(e){}}
+  return thIO;}
+function thumbLazy(root){
+  if(typeof document==='undefined')return 0;thInit();let n=0;
+  if(thObs.size)thRecheck();
+  (root||document).querySelectorAll('img[data-ga-thumb]').forEach(el=>{
+    const st=el.getAttribute('data-ga-st');if(st==='ok'||st==='x'||st==='w')return;
+    const key=el.getAttribute('data-ga-thumb'),spec=getDef(key);if(!spec){el.setAttribute('data-ga-st','x');return;}
+    const e=thLookup(spec,thCk(key,thOptEl(el)));if(e){thApply(el,e.src);return;}
+    el.setAttribute('data-ga-st','w');n++;
+    if(thNear(el)||!ensureThIO())thQ.push(el);else{thIO.observe(el);thObs.add(el);}});
+  if(thQ.length)thKick();
+  return n;}
+const thIdle=f=>{if(G.requestIdleCallback)G.requestIdleCallback(f,{timeout:600});else setTimeout(()=>f({timeRemaining:()=>12,didTimeout:true}),40);};
+function thKick(){if(thT||!thQ.length||thIdbState==='pending'||thIdbState==='idle')return;thT=1;thIdle(thWork);}
+function thWork(dl){thT=0;thStat.slices++;let drew=false;
+  while(thQ.length){
+    const el=thQ[0];
+    if(!el||!el.isConnected||el.getAttribute('data-ga-st')!=='w'){thQ.shift();if(el&&!el.isConnected&&el.getAttribute('data-ga-st')==='w')el.removeAttribute('data-ga-st');continue;}
+    const key=el.getAttribute('data-ga-thumb'),spec=getDef(key),o=thOptEl(el);
+    let e=spec?thLookup(spec,thCk(key,o)):null;
+    if(!e&&spec){if(drew&&!(dl&&dl.timeRemaining&&dl.timeRemaining()>10))break;
+      drew=true;thumb(key,o.w,o.h,o);e=thLookup(spec,thCk(key,o));}
+    thQ.shift();
+    if(e)thApply(el,e.src);else el.setAttribute('data-ga-st','x');}
+  if(thQ.length)thKick();}
+function thumbReady(){thInit();return new Promise(r=>{const ck=()=>thIdbState==='pending'?setTimeout(ck,20):r(thIdbState);ck();});}
+function thumbStats(){return Object.assign({mem:thMem.size,persisted:thPersist?thPersist.size:0,queue:thQ.length,idb:thIdbState},thStat);}
+function thumbReset(o){o=o||{};thMem.forEach(e=>{if(e.src!==e.data){try{URL.revokeObjectURL(e.src);}catch(_){}}});thMem.clear();
+  if(o.idb){if(thPersist)thPersist.clear();if(thIdb){try{thIdb.transaction(TH_ST,'readwrite').objectStore(TH_ST).clear();}catch(e){}}}
+  Object.keys(thStat).forEach(k=>{thStat[k]=0;});return true;}
+
 G.GymAnim={def,alias,has:k=>!!getDef(k),get:getDef,keys:()=>Object.keys(DEFS).concat(Object.keys(ALIAS)),mount,mountAll,unmount,refresh,swap,muscleMap,
+  thumb,thumbCached,thumbLazy,thumbReady,
   muscles:()=>Object.keys(MUS),
-  _:{V,Body,Scene,makeE,makeCam,fitCam,evalTL,compileTL,renderTo,buildFrame,DIM,COL,MUS,EASE,solve,ik2,PAD,fpt,fdir,frot,basis,walkOnTreadmill,heatRGB,standPose,mapStats,mapTick}};
+  _:{V,Body,Scene,makeE,makeCam,fitCam,evalTL,compileTL,renderTo,buildFrame,DIM,COL,MUS,EASE,solve,ik2,PAD,fpt,fdir,frot,basis,walkOnTreadmill,heatRGB,standPose,mapStats,mapTick,
+    peakC,thumbRender,thumbStats,thumbReset,thVer,thCk,thOpt,buildHash:''}};
 })(typeof window!=='undefined'?window:globalThis);
 /* ex/ref.js */
 /* Ejercicios de referencia (patrones para el resto) */
@@ -3782,6 +3980,8 @@ GA.def('lib_cardio_elliptical',{
 });
 
 })(window.GymAnim);
+/* build */
+try{GymAnim._.buildHash="cb35a9ae05f6";}catch(e){}
 </script>
 <!-- GYM-ANIM:END -->
 <script>
@@ -3815,7 +4015,7 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=19;
+const SCHEMA_VERSION=20;
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
 // Duración máxima plausible de una sesión (min); por encima se considera dato no fiable
@@ -4054,7 +4254,9 @@ function _sanitizeDeloadHistory(h){
     .slice(-30);
 }
 function getActiveDeload(){return _validDeload(S.deload)?S.deload:null;}
-function deloadAppliesTo(exId){const d=getActiveDeload();return !!(d&&d.changes.some(c=>c.exId===exId));}
+function deloadAppliesTo(exId){const d=getActiveDeload();if(!d)return false;if(d.changes.some(c=>c.exId===exId))return true;
+  // (11) el sustituto «solo hoy» de un ejercicio en descarga también va ligero
+  const o=_subOrigId(exId);return !!(o&&d.changes.some(c=>c.exId===o));}
 // Semana «ligera» para un ejercicio ahora: una descarga que lo incluye o una semana de descanso (coach_prescribe no sube)
 function isLightNow(exId){return !!getActiveRest()||deloadAppliesTo(exId);}
 // ¿El registro de ese ejercicio en ts cayó en una descarga o en una semana de descanso? No cuenta para la tendencia.
@@ -4334,6 +4536,13 @@ function migrateState(data){
     data.restOverrides=_sanitizeRestOverrides(data.restOverrides);
     if(typeof data.keepAwake!=='boolean')data.keepAwake=true;
   }
+  if(v<20){
+    // v20: «Máquina ocupada» / «Solo hoy». ADITIVO: un ejercicio cambiado solo por hoy lleva el de tu rutina en ex.sub
+    // ({orig, ts, day}: vuelve solo al guardar o descartar la sesión) y la sesión guardada, subs:[{orig, on, alt, lib, n}].
+    // Los datos antiguos no tienen ninguno: solo se sanea lo que venga con mala forma.
+    _sanitizePlanSubs(data.currentPlan);
+    _sanitizeSessSubs(data.sessions);
+  }
   data.schema_version=SCHEMA_VERSION;
   return data;
 }
@@ -4448,6 +4657,8 @@ S.loadSteps=_sanitizeLoadSteps(S.loadSteps);
 // Descanso por ejercicio y pantalla encendida (v19): siempre con forma válida
 S.restOverrides=_sanitizeRestOverrides(S.restOverrides);
 if(typeof S.keepAwake!=='boolean')S.keepAwake=true;
+// «Solo hoy» (v20): sustituciones con forma válida (las caducadas vuelven en el primer render, subTick)
+_sanitizePlanSubs(S.currentPlan);
 
 // ══════════════════════════════════════════════════════════
 // BIBLIOTECA DE EJERCICIOS  (~45 ejercicios, máquinas + pesas libres)
@@ -4575,7 +4786,9 @@ function renderCmodal(){
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(_cmodalState){closeCmodal(true);return;}
+    if(_libDetail){closeLibDetail();return;} // (11) la ficha de un ejercicio, encima del selector
     if(_pickerState){closeExercisePicker();return;}
+    if(_busy){closeBusy();return;} // (11) hoja «¿Máquina ocupada?»
     // Otros modales propios de #cmodal-root (trasladar historial, editar peso, próxima sesión…)
     {const cr=document.getElementById('cmodal-root');if(cr&&cr.firstElementChild){cr.innerHTML='';_restPickEx=null;return;}}
     if(RF.open){RF.close();return;} // modo descanso a pantalla completa
@@ -6526,12 +6739,18 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
     if(S.logs[ex.id]&&Object.keys(S.logs[ex.id]).length)session.snapshot.logs[ex.id]=_cp(S.logs[ex.id]);
     if(S.rpe[ex.id]&&Object.keys(S.rpe[ex.id]).length)session.snapshot.rpe[ex.id]={...S.rpe[ex.id]};
   });
+  // (11) Ejercicios hechos «solo hoy» en lugar de los de tu rutina (aditivo): el resumen lo dice y, si reabres la
+  // sesión, vuelven a sustituirse. Solo los que tienen series hechas.
+  const subs=_sessSubsOf(day,session.snapshot.sets,sessTs);
+  if(subs.length)session.subs=subs;else delete session.subs;
   // Rotación: tras la sesión más reciente (una reabierta antigua no debe saltarse la que vino después)
   S.nextDay=rs?getNextDay(S.sessions[S.sessions.length-1].day):getNextDay(S.day);
   if(!getPlan()[S.nextDay])S.nextDay=getNextDay(S.day);
   // La sesión reabierta ya está guardada de nuevo
   if(rs)S.reopenedSession=null;
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
+  // (11) La sesión ha terminado: los ejercicios cambiados «solo hoy» vuelven a ser los de tu rutina
+  revertDaySubs(S.day);
   // Limpiar RPE, warmups y tracker de duración de la sesión
   S.rpe={};S.warmups={};S.sessionStartTs=null;
   _animBig.clear();clearTimeout(_advT);_advTok=null;closeRpeSelector();
@@ -6582,6 +6801,7 @@ function discardWorkout(){
           if(S.warmups)delete S.warmups[ex.id];
         });
       }
+      revertDaySubs(aw.day); // (11) lo cambiado «solo hoy» vuelve a ser lo de tu rutina
       S.activeWorkout=null;S.sessionStartTs=null;_lastSetAction=null;
       _animBig.clear();clearTimeout(_advT);_advTok=null;closeRpeSelector();
       RT.stop(); // descanso/cardio de un entreno descartado
@@ -6663,6 +6883,8 @@ function _restoreReopened(){
   });
   // Rotación: si nadie la ha cambiado desde que se reabrió, vuelve a la de antes
   if(S.nextDay===sess.day&&r.prevNextDay&&getPlan()[r.prevNextDay])S.nextDay=r.prevNextDay;
+  // (11) lo que volvió a sustituirse al reabrirla vuelve a ser lo de tu rutina
+  revertDaySubs(sess.day,true);
   return true;
 }
 // Mantiene coherente la reabierta: datos inválidos → fuera; su día sin series marcadas → vuelve al historial
@@ -6694,6 +6916,8 @@ function _reopenSessionConfirmed(sess){
   // Solo una sesión reabierta a la vez (la otra aún tiene series marcadas sin guardar)
   const prevRs=getReopened();
   if(prevRs&&prevRs.session.ts!==sessTs){toast('Primero guarda o descarta la sesión que ya tienes reabierta');return;}
+  // (11) Lo que esa sesión hizo «solo hoy» vuelve a sustituir a su ejercicio de la rutina mientras está reabierta
+  const reSubs=_reapplySessSubs(sess,dayKey);
   const validIds=new Set(dayObj.ex.map(e=>e.id));
   // 1. CONSTRUIR la restauración (solo para ejercicios que SIGUEN en el plan) — aún sin aplicar
   const restore={sets:{},logs:{},rpe:{}};
@@ -6727,6 +6951,7 @@ function _reopenSessionConfirmed(sess){
   let willHaveMarks=false;
   Object.keys(restore.sets).forEach(id=>{const c=restore.sets[id];if(c)for(const k in c){if(c[k]){willHaveMarks=true;break;}}});
   if(!willHaveMarks){
+    reSubs.forEach(id=>revertSub(dayKey,id)); // (11) la rutina queda como estaba
     toast('No se puede reabrir: los ejercicios de esa rutina han cambiado');
     return; // historial y datos intactos
   }
@@ -7014,7 +7239,7 @@ const DELOAD_AFTER_WEEKS=6;    // semanas seguidas entrenando sin descanso/desca
 function _dayOfEx(exId){
   if(!exId)return null;
   const plan=getPlan();
-  return Object.keys(plan).find(dk=>plan[dk]&&Array.isArray(plan[dk].ex)&&plan[dk].ex.some(e=>e.id===exId))||null;
+  return Object.keys(plan).find(dk=>plan[dk]&&Array.isArray(plan[dk].ex)&&plan[dk].ex.some(e=>e.id===exId||(e&&e.sub&&e.sub.orig&&e.sub.orig.id===exId)))||null;
 }
 function _propPrio(p){
   if(p&&typeof p.prio==='number')return p.prio;
@@ -7065,7 +7290,7 @@ function _nSeries(n){return plural(n,'serie');}
 // Candidatas, de más a menos prioritaria: fatiga/seguridad (descarga) > retroceso > estancamiento real > progresión > volumen.
 // Los ejercicios «en espera» (it.hold: recién cambiados, en descarga o recuperándose) no están en down/stagnant/flat.
 function coach_buildCandidates(an){
-  const out=[],now=Date.now(),plan=getPlan(),f=an.fatigue;
+  const out=[],now=Date.now(),plan=routinePlan(),f=an.fatigue;
   const hot=new Set((coach_rpeByMuscle(6)||[]).filter(z=>z.avg>=2.6&&z.samples>=3).map(z=>z.muscle));
   if(f.deloadNeeded){
     out.push({id:'deload_week',type:'deload',basis:'fatigue',prio:0,sev:f.weeks,ic:'🧘',tag:'Descarga',createdAt:now,
@@ -7165,7 +7390,8 @@ function _appliedThisCycle(plan){
   return out;
 }
 function coach_analyze(){
-  const plan=getPlan(),items=[],dl=getActiveDeload(),applied=_appliedThisCycle(plan);
+  // (11) la rutina tal cual: un ejercicio sustituido «solo hoy» se juzga por el original (el que vuelve al guardar)
+  const plan=routinePlan(),items=[],dl=getActiveDeload(),applied=_appliedThisCycle(plan);
   const ri=_recoveryInfo(),rec=ri.ts;
   Object.keys(plan).forEach(dk=>{
     const day=plan[dk];if(!day||!Array.isArray(day.ex))return;
@@ -7225,7 +7451,9 @@ function coach_pendingView(an){
 // Ejercicios de biblioteca que ya están en el plan (por lib, por id del plan original o por nombre)
 function _planLibIds(){
   const set=new Set();
-  Object.values(getPlan()).forEach(d=>(d&&Array.isArray(d.ex)?d.ex:[]).forEach(e=>{const k=_libIdOf(e);if(k)set.add(k);}));
+  // (11) también el original de un ejercicio sustituido «solo hoy» (vuelve al guardar)
+  Object.values(getPlan()).forEach(d=>(d&&Array.isArray(d.ex)?d.ex:[]).forEach(e=>{const k=_libIdOf(e);if(k)set.add(k);
+    if(e&&e.sub&&e.sub.orig){const o=_libIdOf(e.sub.orig);if(o)set.add(o);}}));
   return set;
 }
 function _libIdOf(ex){
@@ -7331,7 +7559,7 @@ function coach_generateInsights(an,pend,resIds){
   }
 
   // ═ D) PROGRESIÓN POR EJERCICIO ═ (mismo diagnóstico que el análisis detallado y las propuestas)
-  const strengthEx=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
+  const strengthEx=Object.values(routinePlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
   const pctTxt=v=>(v>=0?'+':'')+v.toFixed(Math.abs(v)<10?1:0)+'%';
 
   if(an.strong.length>0){
@@ -7756,7 +7984,7 @@ function coach_bodyweightPerformanceInsight(){
   const bwPctPerWeek=(bwDelta/wOldest.v)*100*(7/bwDays);
 
   // Ejercicios compuestos (los que más reflejan fuerza global)
-  const compoundIds=Object.values(getPlan()).flatMap(d=>d.ex)
+  const compoundIds=Object.values(routinePlan()).flatMap(d=>d.ex)
     .filter(e=>isCompoundEx(e))
     .map(e=>e.id);
 
@@ -8220,7 +8448,7 @@ function _hoyRowHtml(ex,p,sel,live){
   const reps=p?(p.lo!==p.hi?`${p.lo}-${p.hi}`:String(p.lo)):fmtTargetReps(ex).replace(/\s*reps$/,'');
   const ok=_hoyAnimOk(ex);
   return`<button type="button" class="hoy-ex tgl-row${sel?' on':''}" data-ex="${esc(ex.id)}" aria-pressed="${sel?'true':'false'}"${ok?'':' disabled'} onclick="hoyPick(this.dataset.ex)">
-    <span class="hoy-ex-i"><span class="hoy-ex-n">${esc(ex.n)}</span><span class="hoy-ex-m">${n}×${esc(reps)}${deloadAppliesTo(ex.id)?' · descarga':''}</span></span>${_hoyChip(ex,p,live)}</button>`;
+    <span class="hoy-ex-i"><span class="hoy-ex-n">${esc(ex.n)}</span><span class="hoy-ex-m">${n}×${esc(reps)}${deloadAppliesTo(ex.id)?' · descarga':''}${ex.sub?' · <span class="sub-tag">solo hoy</span>':''}</span></span>${_hoyChip(ex,p,live)}</button>`;
 }
 function _hoyCarHtml(info,live){
   if(!info.car.length)return'';
@@ -8918,7 +9146,7 @@ function renderHist(){
   if(!root)return;
   if(!S._hist){root.innerHTML='';return;}
   const exId=S._hist;
-  let ex=Object.values(getPlan()).flatMap(d=>d.ex).find(e=>e.id===exId);
+  let ex=findExInPlan(exId); // (11) también el de tu rutina sustituido hoy «solo hoy»
   // Si ya no está en el plan, intentar reconstruir desde el histórico guardado
   if(!ex){
     // Ya no está en el plan: nombre guardado en sus registros, plan original, biblioteca… (nunca el id)
@@ -8964,7 +9192,7 @@ function renderHist(){
     <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
       <div class="hist-sheet-title">${esc(ex.n)}</div>
-      <div class="hist-sheet-sub">${ex._orphan?'Ya no está en tu rutina · Solo lectura':esc(ex.eq)+' · '+ex.s+'×'+esc(fmtTargetReps(ex))+' objetivo'}</div>
+      <div class="hist-sheet-sub">${ex._orphan?(_isSubOnly(exId)?'Alternativa «solo hoy» · Solo lectura':'Ya no está en tu rutina · Solo lectura'):esc(ex.eq)+' · '+ex.s+'×'+esc(fmtTargetReps(ex))+' objetivo'}</div>
       <button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
@@ -9013,18 +9241,20 @@ function renderWorkout(){
       const setsHtml=setRowsHtml(ex,pr,rows)+restCtlHtml(ex);
       const la=`<div class="la-slot">${liveAdjHtml(ex,pr)}</div>`;
       const sugHtml=`<div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}</div>`;
+      // (11) «¿Máquina ocupada?»: antes de la primera serie, alternativas en un toque (o el aviso del sustituto de hoy)
+      const busy=busyBarHtml(ex,nDone);
       body=training
-        ?`${anim}${big?`<div class="tip">${esc(ex.tip||'')}</div>`:''}${setsHtml}${la}${presTargetHtml(ex,pr,true)}${sugHtml}`
-        :`${anim}<div class="tip">${esc(ex.tip||'')}</div>${presTargetHtml(ex,pr)}<div class="wu-slot">${warmupBlockHtml(ex)}</div>${setsHtml}${la}${sugHtml}`;
+        ?`${busy}${anim}${big?`<div class="tip">${esc(ex.tip||'')}</div>`:''}${setsHtml}${la}${presTargetHtml(ex,pr,true)}${sugHtml}`
+        :`${busy}${anim}<div class="tip">${esc(ex.tip||'')}</div>${presTargetHtml(ex,pr)}<div class="wu-slot">${warmupBlockHtml(ex)}</div>${setsHtml}${la}${sugHtml}`;
     }
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}" data-ex="${eid}">
       <div class="exh" role="button" tabindex="0" aria-expanded="${isOpen}" data-ex="${eid}" onclick="toggleCard(this.dataset.ex)" onkeydown="if(event.key==='Enter'){event.preventDefault();toggleCard(this.dataset.ex)}">
-        <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${esc(ex.ic||'💪')}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+(pr&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex)))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal k-${pr.kind}" role="img" aria-label="Objetivo de hoy: ${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones, ${esc(PRES_WORD[pr.kind])}">🎯 ${esc(kgTxt(pr.weight))} kg × ${pr.reps}<span class="ex-goal-k">${PRES_WORD[pr.kind]}</span></div>`:''}${doneSum}</div>
+        <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${exIconHtml(ex)}</div>
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+(pr&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex)))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal k-${pr.kind}" role="img" aria-label="Objetivo de hoy: ${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones, ${esc(PRES_WORD[pr.kind])}">🎯 ${esc(kgTxt(pr.weight))} kg × ${pr.reps}<span class="ex-goal-k">${PRES_WORD[pr.kind]}</span></div>`:''}${doneSum}</div>
         ${dots}${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${!ex.cardio?body
-        :`${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${esc(ex.tip||'')}</div>${(()=>{
+        :`${busyBarHtml(ex,c[0]||RT.cardioRunning(ex.id)?1:0)}${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${esc(ex.tip||'')}</div>${(()=>{
           // Cronómetro de cardio: parsear duración de ex.r (ej: "8 min", "15 min")
           const m=String(ex.r||'').match(/(\d+)\s*min/i);
           const mins=m?parseInt(m[1]):0;
@@ -9123,7 +9353,8 @@ function _stampExName(ex){
 // los que ya no están en la rutina, del más reciente al más antiguo); los de día desconocido, al final.
 function progStrengthList(){
   const plan=getPlan(),order={};
-  Object.keys(plan).forEach(dk=>(plan[dk]&&Array.isArray(plan[dk].ex)?plan[dk].ex:[]).forEach((e,i)=>{if(order[e.id]==null)order[e.id]=i;}));
+  // (11) el de tu rutina sustituido hoy «solo hoy» sigue en su sitio
+  Object.keys(plan).forEach(dk=>(plan[dk]&&Array.isArray(plan[dk].ex)?plan[dk].ex:[]).forEach((e,i)=>{if(order[e.id]==null)order[e.id]=i;const o=e&&e.sub&&e.sub.orig;if(o&&order[o.id]==null)order[o.id]=i;}));
   const di=d=>{const k=DAY_ORDER.indexOf(d);return k<0?9:k;};
   return Object.entries(S.strength||{}).filter(([,d])=>Array.isArray(d)&&d.length>0).map(([id,data])=>{
     const day=exDayOf(id),inPlan=order[id]!=null;
@@ -9266,7 +9497,7 @@ function mmStats(k){
 // Volumen PLANIFICADO de la rutina por semana: series de cada día (las de verdad, sin la descarga) × veces por semana
 // que toca ese día (objetivo semanal / nº de días de la rutina)
 function mmPlanStats(){
-  const plan=getPlan(),days=Object.keys(plan).filter(d=>plan[d]&&Array.isArray(plan[d].ex));
+  const plan=routinePlan(),days=Object.keys(plan).filter(d=>plan[d]&&Array.isArray(plan[d].ex));
   const per=days.length?getWeeklyTarget()/days.length:0,items=[];
   days.forEach(dk=>plan[dk].ex.forEach(ex=>{
     if(!ex||ex.cardio)return;
@@ -9791,7 +10022,9 @@ function _kgK(n){return String(Math.round(+n||0)).replace(/\B(?=(\d{3})+(?!\d))/
 // Todo lo que muestra el resumen de la sesión s
 function sessSummaryData(s){
   const ts=+s.ts,plan=getPlan(),dayEx=plan[s.day]&&Array.isArray(plan[s.day].ex)?plan[s.day].ex:[];
-  const ord=id=>{const k=dayEx.findIndex(e=>e&&e.id===id);return k<0?99:k;};
+  // (11) lo hecho «solo hoy» va en el sitio del ejercicio de tu rutina al que sustituyó (y lo dice)
+  const subOf={};_cleanSessSubs(s.subs).forEach(x=>{subOf[x.alt]=x;});
+  const ord=id=>{const o=subOf[id]?subOf[id].orig:null,k=dayEx.findIndex(e=>e&&(e.id===id||(o&&(e.id===o||(e.sub&&e.sub.orig&&e.sub.orig.id===o)))));return k<0?99:k;};
   const pairs=_sessRecs(s),rows=[],records=[],items=[],rpe={0:0,1:0,2:0,3:0};
   let ton=0,sets=0,old=false;
   pairs.forEach(({id,rec})=>{
@@ -9833,6 +10066,7 @@ function sessSummaryData(s){
     rows.push({id,name,line:_sumLine(list),n:list.length,bw:true,k:ord(id)});
     const mus=mmExMuscles(ex);if(mus)items.push({id,ex,mus,sets:list.length,name});
   });
+  rows.forEach(r=>{if(subOf[r.id])r.sub=subOf[r.id].on||'';});
   rows.sort((a,b)=>a.k-b.k);
   records.sort((a,b)=>ord(a.id)-ord(b.id));
   const mm=_mmAggregate(items,1,{k:'sess',lbl:'esta sesión',per:'en esta sesión',weeks:1});
@@ -9898,7 +10132,7 @@ function _renderSummary(){
     :str?`<div class="sum-sec">Récords</div><div class="sum-nopr">${allNew?'Primera vez con estos ejercicios: desde la próxima sesión, cada mejora (más peso o más reps) será un récord.'
       :fresh?'Hoy no hubo récord: la constancia también suma. 💪':'Sin récords en esta sesión.'}</div>`:'';
   // Ejercicios: «55×12×3 ↑+2.5»
-  const exs=D.rows.length?`<div class="sum-sec">Ejercicios</div><div id="sum-exs">${D.rows.map(r=>`<div class="sum-ex" data-ex="${esc(r.id)}"><div class="sum-ex-i"><div class="sum-ex-n">${esc(r.name)}${r.pr?'<em role="img" aria-label="récord">🏆</em>':''}</div><div class="sum-ex-s">${esc(r.line)}${r.dl?' · descarga':''}</div></div>${r.delta?`<span class="sum-ex-d ${r.delta.cls}" aria-label="${esc(r.delta.a)}">${esc(r.delta.t)}</span>`:r.cardio?'<span class="sum-ex-d up" aria-label="hecho">✓</span>':''}</div>`).join('')}</div>`
+  const exs=D.rows.length?`<div class="sum-sec">Ejercicios</div><div id="sum-exs">${D.rows.map(r=>`<div class="sum-ex" data-ex="${esc(r.id)}"><div class="sum-ex-i"><div class="sum-ex-n">${esc(r.name)}${r.pr?'<em role="img" aria-label="récord">🏆</em>':''}</div><div class="sum-ex-s">${esc(r.line)}${r.dl?' · descarga':''}${r.sub!=null?` · <span class="sub-tag">⇄ solo hoy</span>${r.sub?' en lugar de '+esc(r.sub):''}`:''}</div></div>${r.delta?`<span class="sum-ex-d ${r.delta.cls}" aria-label="${esc(r.delta.a)}">${esc(r.delta.t)}</span>`:r.cardio?'<span class="sum-ex-d up" aria-label="hecho">✓</span>':''}</div>`).join('')}</div>`
     :`<div class="sum-nopr" style="margin-top:14px">Esta sesión no tiene series guardadas.</div>`;
   // Reparto del esfuerzo (RPE) por serie
   const R=D.rpe,tot=R[0]+R[1]+R[2]+R[3];let eff='';
@@ -9974,7 +10208,7 @@ function renderProg(){
     return`<div class="card" style="margin-bottom:10px" data-ex="${esc(id)}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">
         <div style="min-width:0"><div class="clbl" style="overflow-wrap:anywhere">${esc(name)}</div>
-          ${inPlan?'':'<div class="prog-out">Ya no está en tu rutina</div>'}
+          ${inPlan?'':`<div class="prog-out">${_isSubOnly(id)?'Alternativa que hiciste «solo hoy»':'Ya no está en tu rutina'}</div>`}
           <div style="display:flex;align-items:baseline;gap:8px">
             <span style="font-size:24px;font-weight:600;font-family:'DM Mono',monospace;color:${color}">${esc(data[data.length-1].v)} kg</span>
             ${gainHtml}
@@ -10054,7 +10288,7 @@ function editorSetDay(d){
 }
 
 function editExSeries(dayKey,idx,delta){
-  const ex=getPlan()[dayKey].ex[idx];
+  const ex=routineEx(getPlan()[dayKey].ex[idx]); // (11) la rutina: el original si hoy está sustituido
   if(!ex)return;
   const nv=Math.max(1,Math.min(6,(ex.s||3)+delta));
   ex.s=nv;
@@ -10068,7 +10302,7 @@ function editExSeries(dayKey,idx,delta){
 }
 
 function editExReps(dayKey,idx,delta){
-  const ex=getPlan()[dayKey].ex[idx];
+  const ex=routineEx(getPlan()[dayKey].ex[idx]);
   if(!ex||ex.cardio)return;
   const cur=parseInt(ex.r)||12;
   const nv=Math.max(1,Math.min(30,cur+delta));
@@ -10090,15 +10324,15 @@ function _edMetaTxt(ex){
 
 function removeExercise(dayKey,idx){
   const plan=getPlan();
-  const ex=plan[dayKey].ex[idx];
+  const slot=plan[dayKey].ex[idx],ex=routineEx(slot);
   if(!ex)return;
   confirmModal({
     title:'Eliminar ejercicio',
     body:`¿Eliminar "${ex.n}" del ${plan[dayKey].label}? Los datos históricos se conservan.`,
     okText:'Eliminar',cancelText:'Cancelar',danger:true,
     onOk:()=>{
-      _stampExName(ex);
-      plan[dayKey].ex.splice(idx,1);
+      _stampExName(ex);if(slot!==ex)_stampExName(slot); // (11) y su sustituto de hoy, si lo tiene
+      const i=plan[dayKey].ex.indexOf(slot);if(i>=0)plan[dayKey].ex.splice(i,1);
       saveState();
       toast('Ejercicio eliminado');
       render(); // repinta la app y el editor, que sigue abierto
@@ -10107,26 +10341,50 @@ function removeExercise(dayKey,idx){
 }
 
 function swapExerciseUI(dayKey,idx){
-  const ex=getPlan()[dayKey].ex[idx];
+  const slot=getPlan()[dayKey].ex[idx],ex=routineEx(slot);
   if(!ex)return;
   showExercisePicker({
     title:`Cambiar "${ex.n}"`,
     muscle:ex.muscle||null,
     currentLib:_libIdOf(ex),
-    onPick:(libEx)=>{
-      const newEx=libExToEx(libEx);
-      // Conservar series/reps personalizadas
-      if(ex.s)newEx.s=ex.s;
-      if(ex.r&&!newEx.cardio)newEx.r=ex.r;
+    mode:'swap',dayKey,
+    onPick:(libEx)=>_routineSwapTo(dayKey,slot,libEx,{keepToday:true})
+  });
+}
+// Cambia un ejercicio de la rutina por otro de la biblioteca (editor y «Cambiar en la rutina» de la hoja «¿Máquina
+// ocupada?»). Conserva series y reps. (11) Si el nuevo ya tiene historial propio (sus «Solo hoy» o un ejercicio que
+// estuvo en tu rutina), sigue con él y el anterior conserva el suyo; si no, se pregunta si trasladar el del anterior.
+// keepToday: en el editor, un hueco sustituido «solo hoy» mantiene hoy su sustituto (cambia la rutina de detrás).
+function _routineSwapTo(dayKey,slot,libEx,o){
+  o=o||{};
+  const plan=getPlan(),day=plan[dayKey];
+  if(!day||!Array.isArray(day.ex)||day.ex.indexOf(slot)<0||!libEx){toast('Ese ejercicio ya no está en tu rutina');render();return;}
+  const ex=routineEx(slot),isSub=slot!==ex;
+  const place=newEx=>{
+    const i=day.ex.indexOf(slot);if(i<0)return false;
+    _stampExName(ex); // si su historial se queda con el id anterior, conserva el nombre
+    if(isSub&&o.keepToday&&newEx.id!==slot.id)slot.sub.orig=newEx; // hoy sigue el sustituto; al guardar vuelve el nuevo
+    else{
+      if(isSub&&newEx.id!==slot.id)_clearExState(slot.id); // el sustituto de hoy (sin series) se va
+      day.ex[i]=newEx;
+      if(S.open===slot.id)S.open=newEx.id;
+    }
+    return true;
+  };
+  const done=newEx=>{saveState();toast(`Cambiado a ${newEx.n}`);if(o.after)o.after(newEx);render();}; // repinta la app y el editor, que sigue abierto
+  const mk=id=>{const n={...libEx,id,lib:libEx.id};if(ex.s)n.s=ex.s;if(ex.r&&!n.cardio)n.r=ex.r;return n;};
+  // Hoy ya lo haces como sustituto: pasa a la rutina con el mismo id (sus series de hoy y su historial siguen)
+  if(isSub&&slot.lib===libEx.id){const n=mk(slot.id);delete n.sub;if(place(n))done(n);return;}
+  const hk=_libHistKey(libEx.id),own=!!hk&&!_planIdTaken(hk)&&Array.isArray(S.strength[hk])&&S.strength[hk].length>0;
+  if(own){const n=mk(hk);if(place(n))done(n);return;}
+  {
+    const newEx=libExToEx(libEx);
+    // Conservar series/reps personalizadas
+    if(ex.s)newEx.s=ex.s;
+    if(ex.r&&!newEx.cardio)newEx.r=ex.r;
       // Si hay histórico, preguntar si migrar
       const oldHist=S.strength[ex.id];
-      const doSwap=()=>{
-        _stampExName(ex); // si su historial se queda con el id anterior, conserva el nombre
-        getPlan()[dayKey].ex[idx]=newEx;
-        saveState();
-        toast(`Cambiado a ${newEx.n}`);
-        render(); // repinta la app y el editor, que sigue abierto
-      };
+      const doSwap=()=>{if(place(newEx))done(newEx);};
       if(oldHist&&oldHist.length>0){
         // Tres opciones reales: trasladar / no trasladar / cancelar todo
         // Usamos un confirmModal personalizado de 3 botones inline
@@ -10150,17 +10408,19 @@ function swapExerciseUI(dayKey,idx){
       }else{
         doSwap();
       }
-    }
-  });
+  }
 }
 
 function addExerciseUI(dayKey,muscle){
   showExercisePicker({
     title:`Añadir al ${getPlan()[dayKey].label}`,
     muscle:MUSCLE_GROUPS.some(m=>m.id===muscle)?muscle:null, // desde el mapa muscular: filtrado por ese grupo
+    mode:'add',dayKey,
 
     onPick:(libEx)=>{
-      const newEx=libExToEx(libEx);
+      // (11) si ya tiene historial propio (sus «Solo hoy» o de cuando estuvo en tu rutina), sigue con él
+      const hk=_libHistKey(libEx.id),own=!!hk&&!_planIdTaken(hk)&&Array.isArray(S.strength[hk])&&S.strength[hk].length>0;
+      const newEx=own?{...libEx,id:hk,lib:libEx.id}:libExToEx(libEx);
       const plan=getPlan();
       // Si el último es cardio, insertar antes del cardio final
       const ex=plan[dayKey].ex;
@@ -10191,125 +10451,589 @@ function resetPlanToDefault(){
   });
 }
 
-// ── PICKER DE EJERCICIOS ──────────────────────────────────────
+// ══════════════════════════════════════════════════════════
+// BIBLIOTECA 3D Y «MÁQUINA OCUPADA» (11)
+// ══════════════════════════════════════════════════════════
+// Miniaturas del motor (GymAnim.thumb: el fotograma de máxima contracción, sin HUD): icono recortado a la figura
+// (tarjetas de Entreno, editor, alternativas) y tarjeta con su fondo (selector). Se generan una vez, en tiempo libre,
+// y se guardan en IndexedDB (versionadas con el motor y el ejercicio). El emoji queda debajo como respaldo.
+const TH_IC={w:56,h:56,fit:'body'},TH_CARD={w:168,h:112,fit:'scene',bg:'scene'};
+function _thKeyOf(x){
+  if(typeof GymAnim==='undefined'||!GymAnim.thumbCached)return'';
+  if(typeof x==='string')return GymAnim.has(x)?x:'';
+  return exAnimKey(x)||'';
+}
+// <img> de la miniatura de un ejercicio (o de una clave del motor). Si ya está en caché sale con su src; si no, la
+// rellena GymAnim.thumbLazy cuando se ve (thumbsIn tras pintar).
+function thumbImgHtml(x,P){
+  const k=_thKeyOf(x);if(!k)return'';
+  let src=null;try{src=GymAnim.thumbCached(k,P.w,P.h,P);}catch(e){src=null;}
+  return`<img class="ga-th${src?' ga-on':''}" alt="" aria-hidden="true" draggable="false" decoding="async" data-ga-thumb="${esc(k)}" data-gw="${P.w}" data-gh="${P.h}"${P.fit==='body'?' data-gfit="body"':''}${P.bg?` data-gbg="${esc(P.bg)}"`:''}${src?` src="${esc(src)}" data-ga-st="ok"`:''}>`;
+}
+// Icono de un ejercicio (dentro de un .exic): miniatura 3D encima del emoji
+function exIconHtml(ex){return`${thumbImgHtml(ex,TH_IC)}<span class="exic-e">${esc(ex&&ex.ic||'💪')}</span>`;}
+function thumbsIn(root){if(root&&typeof GymAnim!=='undefined'&&GymAnim.thumbLazy){try{GymAnim.thumbLazy(root);}catch(e){console.error(e);}}}
+
+// ── Patrón de movimiento y parecido muscular ──
+// Las alternativas de «¿Máquina ocupada?» van por parecido de músculos (coseno entre los vectores spec.muscles de las
+// animaciones) y por patrón de movimiento: primero las del mismo patrón (un jalón se cambia por otro jalón, no por un
+// remo), luego las de uno cercano. Se descartan las de la misma máquina o estación (si está ocupada, también lo está).
+const LIB_PAT={lib_squat_smith:'squat',lib_leg_press:'squat',lib_goblet_squat:'squat',lib_leg_ext:'knee_ext',lib_leg_curl:'knee_flex',lib_leg_curl_seated:'knee_flex',
+  lib_rdl_db:'hinge',lib_hip_abductor:'hip_abd',lib_hip_adductor:'hip_add',lib_calf_machine:'calf',
+  lib_press_incline_smith:'push_h',lib_press_flat_db:'push_h',lib_press_incline_db:'push_h',lib_pushup:'push_h',lib_fly_machine:'fly',lib_cable_fly_low:'fly',lib_cable_fly_high:'fly',
+  lib_lat_pulldown:'pull_v',lib_pullover_db:'pull_v',lib_row_machine:'pull_h',lib_row_db:'pull_h',lib_row_cable:'pull_h',lib_face_pull:'rear',lib_rev_fly_machine:'rear',
+  lib_lat_raise_cable:'raise',lib_lat_raise_db:'raise',lib_front_raise_db:'raise_f',lib_shoulder_press_db:'push_v',lib_shoulder_press_machine:'push_v',
+  lib_curl_cable:'curl',lib_curl_db:'curl',lib_curl_db_concentrated:'curl',lib_curl_machine:'curl',lib_hammer_curl:'curl',
+  lib_tricep_pushdown:'tri',lib_tricep_overhead_cable:'tri',lib_tricep_machine:'tri',lib_skull_crusher_db:'tri',
+  lib_crunch_cable:'core',lib_crunch_machine:'core',lib_leg_raise:'core',lib_plank:'core_iso',
+  lib_cardio_walk:'cardio',lib_cardio_run:'cardio',lib_cardio_bike:'cardio',lib_cardio_elliptical:'cardio'};
+const PAT_NEAR={squat:['knee_ext'],knee_ext:['squat'],knee_flex:['hinge'],hinge:['knee_flex'],push_h:['fly'],fly:['push_h'],push_v:['raise','push_h'],
+  raise:['push_v','raise_f'],raise_f:['raise','push_v'],rear:['pull_h','raise'],pull_v:['pull_h'],pull_h:['pull_v','rear'],core:['core_iso'],core_iso:['core']};
+const PAT_LBL={squat:'Sentadilla',knee_ext:'Extensión de rodilla',knee_flex:'Flexión de rodilla',hinge:'Bisagra de cadera',hip_abd:'Abducción',hip_add:'Aducción',
+  calf:'Gemelo',push_h:'Empuje horizontal',fly:'Aperturas',pull_v:'Jalón vertical',pull_h:'Remo',rear:'Hombro posterior',raise:'Elevación lateral',
+  raise_f:'Elevación frontal',push_v:'Empuje vertical',curl:'Curl de bíceps',tri:'Extensión de tríceps',core:'Flexión de tronco',core_iso:'Estabilidad',cardio:'Cardio'};
+const BUSY_SAME=.6,BUSY_NEAR=.15,BUSY_STATION=.6,BUSY_GROUP=.1,BUSY_MIN_COS=.35;
+const _libVecC=new Map();
+function _libVec(key){
+  if(_libVecC.has(key))return _libVecC.get(key);
+  const sp=key&&typeof GymAnim!=='undefined'?GymAnim.get(key):null,v={};
+  if(sp&&sp.muscles)for(const k in sp.muscles){const n=k.replace(/_(L|R)$/,''),w=+sp.muscles[k];if(w>0)v[n]=Math.max(v[n]||0,w);}
+  // pectoral, superior e inferior: mismas fibras con otro ángulo (cuentan en parte como el mismo músculo)
+  const P=['pecs','upperpecs','lowerpecs'],pm=Math.max(0,...P.map(m=>v[m]||0));
+  if(pm>0)P.forEach(m=>{v[m]=Math.max(v[m]||0,pm*.6);});
+  _libVecC.set(key,v);return v;
+}
+function _cosSim(a,b){let d=0,x=0,y=0;for(const k in a){x+=a[k]*a[k];if(b[k])d+=a[k]*b[k];}for(const k in b)y+=b[k]*b[k];return x&&y?d/Math.sqrt(x*y):0;}
+// Máquina o estación del equipo («Cable dual (polea baja)» → «cable dual»); mancuernas y peso corporal siempre hay
+function _station(eq){return normTxt(eq).replace(/\(.*?\)/g,'').replace(/\+.*$/,'').replace(/\s+/g,' ').trim();}
+const BUSY_FREE=['mancuernas','peso corporal','barra fija / maquina'];
+
+// ── «Solo hoy»: el sustituto va EN el plan (Entreno, la barra, el descanso, Inicio y el guardado lo tratan como uno más,
+// con su propio id = su propio historial) y lleva el ejercicio de tu rutina en ex.sub = {orig, ts, day, re?}. Al guardar
+// o descartar la sesión vuelve el original y la rutina queda exactamente como estaba. ──
+const SUB_GRACE_MS=3*3600000; // sin ninguna serie marcada en ese día, una sustitución vuelve sola pasadas 3 h
+function _validSub(s){return _isPlainObj(s)&&_isPlainObj(s.orig)&&typeof s.orig.id==='string'&&s.orig.id.length>0&&s.orig.id.length<=80&&
+  typeof s.orig.n==='string'&&!('sub' in s.orig)&&isFinite(+s.ts);}
+function routineEx(ex){return ex&&ex.sub&&_validSub(ex.sub)?ex.sub.orig:ex;}
+function _hasSubs(plan){plan=plan||getPlan();for(const dk in plan){const d=plan[dk];if(d&&Array.isArray(d.ex)&&d.ex.some(e=>e&&e.sub))return true;}return false;}
+// La rutina tal cual (sin lo cambiado «solo hoy»): Coach, volumen planificado. Solo lectura.
+function routinePlan(){const p=getPlan();if(!_hasSubs(p))return p;const o={};
+  Object.keys(p).forEach(dk=>{const d=p[dk];o[dk]=d&&Array.isArray(d.ex)?Object.assign({},d,{ex:d.ex.map(routineEx)}):d;});return o;}
+// {dk, i, ex} del sustituto con ese id / del hueco cuyo original tiene ese id (o null)
+function _subSlot(exId){const p=getPlan();for(const dk in p){const d=p[dk];if(!d||!Array.isArray(d.ex))continue;const i=d.ex.findIndex(e=>e&&e.id===exId&&e.sub);if(i>=0)return{dk,i,ex:d.ex[i]};}return null;}
+function _subOfOrig(origId){const p=getPlan();for(const dk in p){const d=p[dk];if(!d||!Array.isArray(d.ex))continue;const i=d.ex.findIndex(e=>e&&e.sub&&e.sub.orig&&e.sub.orig.id===origId);if(i>=0)return{dk,i,ex:d.ex[i]};}return null;}
+function _subOrigId(exId){if(!_hasSubs())return null;const s=_subSlot(exId);return s&&_validSub(s.ex.sub)?s.ex.sub.orig.id:null;}
+// ¿Ese id ya lo usa algún hueco de la rutina (o el original de un sustituto)?
+function _planIdTaken(id){const p=getPlan();for(const dk in p){const d=p[dk];if(!d||!Array.isArray(d.ex))continue;
+  for(const e of d.ex){if(!e)continue;if(e.id===id||(e.sub&&e.sub.orig&&e.sub.orig.id===id))return true;}}return false;}
+function _slotMarks(ex){const c=ex&&S.sets[ex.id];return !!c&&Object.keys(c).some(k=>c[k]);}
+function _clearExState(id){
+  if(S.sets)delete S.sets[id];if(S.logs)delete S.logs[id];if(S.rpe)delete S.rpe[id];if(S.warmups)delete S.warmups[id];
+  try{_animBig.delete(id);}catch(e){} // (al arrancar aún no existe)
+}
+// Biblioteca de un id con historial: el de tu rutina, el de la biblioteca (un «Solo hoy»), el del plan original o su nombre
+function _libOfKey(k){
+  const pe=findExInPlan(k);if(pe)return _libIdOf(pe);
+  if(EXERCISE_DB.some(l=>l.id===k))return k;
+  const o=_origPlanEx(k);if(o)return _libIdOf(o.ex);
+  const nm=exDisplayName(k),l=EXERCISE_DB.find(x=>x.n===nm);return l?l.id:null;
+}
+// Historial «propio» de cada ejercicio de la biblioteca: {libId:{key, last, n}}. Prioridad: el id que usa tu rutina; si no,
+// el de sus «Solo hoy» (el id de la biblioteca); si no, el más reciente de un ejercicio que ya no está en tu rutina
+// (p. ej. a2 si cambiaste la Sentadilla en Smith por otro: al volver a hacerla, sigue su historial).
+function _libHistMap(){
+  const out={},st=_isPlainObj(S.strength)?S.strength:{};
+  Object.keys(st).forEach(k=>{
+    const a=st[k];if(!Array.isArray(a)||!a.length)return;
+    const lib=_libOfKey(k);if(!lib)return;
+    let last=null;for(let i=a.length-1;i>=0;i--){const r=a[i];if(r&&typeof r==='object'&&+r.v>0){last=r;break;}}
+    const c={key:k,last,n:a.filter(r=>r&&typeof r==='object').length,rk:_planIdTaken(k)?3:k===lib?2:1,ts:last&&isFinite(+last.ts)?+last.ts:0};
+    const cur=out[lib];if(!cur||c.rk>cur.rk||(c.rk===cur.rk&&c.ts>cur.ts))out[lib]=c;
+  });
+  return out;
+}
+// Id con el que se registra un ejercicio de la biblioteca hecho «solo hoy» (su propio historial)
+function _libHistKey(libId){
+  const p=routinePlan();
+  for(const dk of Object.keys(p)){const d=p[dk];if(!d||!Array.isArray(d.ex))continue;const e=d.ex.find(x=>x&&_libIdOf(x)===libId);if(e)return e.id;}
+  const h=_libHistMap()[libId];
+  return h&&!_planIdTaken(h.key)?h.key:libId;
+}
+// Alternativas a un ejercicio (el de la rutina si hoy está sustituido) que no estén ya en tu rutina: [{lib, cos, pct,
+// pat, same, near, sameSt, score, hist}], de más a menos parecida. Fuera las poco parecidas (ni su patrón ni un 35 %).
+function busyAlternatives(ex,n){
+  if(!ex)return[];
+  const orig=routineEx(ex),oLib=_libIdOf(orig)||exAnimKey(orig)||null,L=oLib?EXERCISE_DB.find(l=>l.id===oLib):null;
+  const v=_libVec(oLib),p=oLib?LIB_PAT[oLib]:null,st=_station(orig.eq||(L&&L.eq)||''),grp=orig.muscle||(L&&L.muscle)||null;
+  const inPlan=_planLibIds(),hm=_libHistMap(),cur=ex!==orig?ex.lib:null;
+  return EXERCISE_DB.filter(l=>l.id!==oLib&&l.id!==cur&&!!l.cardio===!!orig.cardio&&!inPlan.has(l.id)&&typeof GymAnim!=='undefined'&&GymAnim.has(l.id))
+    .map(l=>{
+      const c=_cosSim(v,_libVec(l.id)),q=LIB_PAT[l.id]||null,same=!!p&&q===p,near=!!p&&!!q&&(PAT_NEAR[p]||[]).includes(q);
+      const sameSt=!!st&&_station(l.eq)===st&&!BUSY_FREE.includes(st);
+      const score=c+(same?BUSY_SAME:near?BUSY_NEAR:0)-(sameSt?BUSY_STATION:0)+(grp&&l.muscle===grp?BUSY_GROUP:0);
+      return{lib:l,cos:c,pct:Math.round(c*100),pat:q,same,near,sameSt,score,hist:hm[l.id]||null};})
+    .filter(a=>!(a.sameSt&&!a.same)&&(a.same||a.near||a.cos>=BUSY_MIN_COS)&&a.score>.3)
+    .sort((a,b)=>b.score-a.score||b.cos-a.cos)
+    .slice(0,n||3);
+}
+const _repsTgt=r=>/^\d{1,3}(\s*[-–]\s*\d{1,3})?$/.test(String(r==null?'':r).trim());
+// El sustituto: el de la biblioteca con su id de historial, las series de tu rutina (también en descarga) y sus reps
+// (las de tu rutina si las dos son reps; un objetivo por tiempo, como la plancha, se queda el suyo). Cardio: tu duración.
+function _subExFor(lib,orig,id){
+  const nx={...lib,id,lib:lib.id};
+  if(lib.cardio){nx.s=1;if(orig&&orig.cardio&&orig.r)nx.r=orig.r;}
+  else{nx.s=Math.max(1,Math.min(10,parseInt(orig&&orig.s)||lib.s||3));if(orig&&_repsTgt(orig.r)&&_repsTgt(lib.r))nx.r=orig.r;}
+  return nx;
+}
+// Cambia SOLO HOY el ejercicio exId del día dk por libId. {ok, ex, msg, back (volvió al de tu rutina)}
+function subToday(dk,exId,libId){
+  if(!S.currentPlan)S.currentPlan=JSON.parse(JSON.stringify(PLAN));
+  const day=getPlan()[dk];if(!day||!Array.isArray(day.ex))return{ok:false,msg:'Ese día ya no está en tu rutina'};
+  const i=day.ex.findIndex(e=>e&&e.id===exId);if(i<0)return{ok:false,msg:'Ese ejercicio ya no está en tu rutina'};
+  const slot=day.ex[i],orig=routineEx(slot),lib=EXERCISE_DB.find(l=>l.id===libId);
+  if(!lib)return{ok:false,msg:'Ese ejercicio no está en la biblioteca'};
+  if(_slotMarks(slot))return{ok:false,msg:`Ya llevas series de ${slot.n}: se quedan con él`};
+  if(RT.cardioRunning(slot.id))return{ok:false,msg:'Para primero el cardio en marcha'};
+  if(libId===_libIdOf(orig)){if(slot!==orig)revertSub(dk,slot.id);saveState();return{ok:true,ex:orig,back:true};}
+  if(slot!==orig&&slot.lib===libId)return{ok:true,ex:slot};
+  if(!!lib.cardio!==!!orig.cardio)return{ok:false,msg:lib.cardio?'Elige un ejercicio de fuerza':'Elige otro cardio'};
+  if(_planLibIds().has(libId))return{ok:false,msg:`${lib.n} ya está en tu rutina: elige otro para hoy`};
+  const key=_libHistKey(libId);
+  if(_planIdTaken(key))return{ok:false,msg:`${lib.n} ya está en tu rutina: elige otro para hoy`};
+  const nx=_subExFor(lib,orig,key);nx.sub={orig,ts:Date.now(),day:dk};
+  if(slot!==orig)_clearExState(slot.id); // el sustituto anterior (sin series)
+  _clearExState(key);                    // restos de otra vez con ese id
+  day.ex[i]=nx;
+  if(S.open===slot.id)S.open=nx.id;
+  _uiGen++;saveState();
+  return{ok:true,ex:nx};
+}
+// Vuelve el ejercicio de tu rutina (el sustituto se va con su estado de hoy)
+function revertSub(dk,exId){
+  const day=getPlan()[dk];if(!day||!Array.isArray(day.ex))return false;
+  const i=day.ex.findIndex(e=>e&&e.id===exId&&e.sub);if(i<0)return false;
+  const e=day.ex[i];if(!_validSub(e.sub)){delete e.sub;return false;}
+  day.ex[i]=e.sub.orig;_clearExState(e.id);if(S.open===e.id)S.open=e.sub.orig.id;
+  return true;
+}
+// Todos los de un día (onlyRe: solo los que volvieron a sustituirse al reabrir una sesión)
+function revertDaySubs(dk,onlyRe){
+  const day=getPlan()[dk];if(!day||!Array.isArray(day.ex))return 0;let n=0;
+  for(let i=0;i<day.ex.length;i++){const e=day.ex[i];if(!e||!e.sub||(onlyRe&&!e.sub.re))continue;
+    if(!_validSub(e.sub)){delete e.sub;continue;}
+    day.ex[i]=e.sub.orig;_clearExState(e.id);if(S.open===e.id)S.open=e.sub.orig.id;n++;}
+  return n;
+}
+// En cada render(): fuera las sustituciones con mala forma; las de un día sin ninguna serie marcada, pasadas 3 h
+// (o con la hora del futuro), vuelven solas. Con series marcadas siguen hasta guardar o descartar.
+function subTick(){
+  const p=getPlan();if(!_hasSubs(p))return false;
+  const now=Date.now();let ch=false;
+  Object.keys(p).forEach(dk=>{const d=p[dk];if(!d||!Array.isArray(d.ex)||!d.ex.some(e=>e&&e.sub))return;
+    const marks=dayMarkCount(dk).marks>0;
+    for(let i=0;i<d.ex.length;i++){const e=d.ex[i];if(!e||!e.sub)continue;
+      if(!_validSub(e.sub)){delete e.sub;ch=true;continue;}
+      const age=now-(+e.sub.ts);
+      if(!marks&&!(age>=0&&age<SUB_GRACE_MS)){d.ex[i]=e.sub.orig;_clearExState(e.id);if(S.open===e.id)S.open=e.sub.orig.id;ch=true;}}
+  });
+  if(ch)saveState();
+  return ch;
+}
+// Lo hecho «solo hoy» en una sesión (para guardarla): [{orig, on, alt, lib, n}], solo con series o registro
+function _sessSubsOf(day,snapSets,ts){
+  const out=[];
+  (day&&Array.isArray(day.ex)?day.ex:[]).forEach(e=>{
+    if(!e||!_validSub(e.sub))return;
+    const ss=snapSets&&snapSets[e.id],did=_isPlainObj(ss)&&Object.values(ss).some(Boolean);
+    const rec=Array.isArray(S.strength[e.id])&&S.strength[e.id].some(r=>r&&+r.ts===ts);
+    if(!did&&!rec)return;
+    out.push({orig:e.sub.orig.id,on:String(e.sub.orig.n||'').slice(0,120),alt:String(e.id).slice(0,80),lib:typeof e.lib==='string'?e.lib.slice(0,80):null,n:String(e.n||'').slice(0,120)});
+  });
+  return out.slice(0,20);
+}
+function _cleanSessSubs(L){
+  if(!Array.isArray(L))return[];
+  const ok=v=>typeof v==='string'&&v.length>0&&v.length<=80;
+  return L.filter(x=>_isPlainObj(x)&&ok(x.orig)&&ok(x.alt)&&x.orig!==x.alt).slice(0,20).map(x=>({orig:x.orig,on:typeof x.on==='string'?x.on.slice(0,120):'',
+    alt:x.alt,lib:ok(x.lib)?x.lib:null,n:typeof x.n==='string'?x.n.slice(0,120):''}));
+}
+// Al reabrir una sesión: lo que hizo «solo hoy» vuelve a sustituir a su ejercicio (si sigue en la rutina). Devuelve sus ids.
+function _reapplySessSubs(sess,dk){
+  const L=_cleanSessSubs(sess&&sess.subs),day=getPlan()[dk],done=[];
+  if(!L.length||!day||!Array.isArray(day.ex))return done;
+  L.forEach(x=>{
+    const i=day.ex.findIndex(e=>e&&e.id===x.orig&&!e.sub);if(i<0)return;
+    const lib=x.lib?EXERCISE_DB.find(l=>l.id===x.lib):null;if(!lib||_planIdTaken(x.alt))return;
+    const orig=day.ex[i],nx=_subExFor(lib,orig,x.alt);nx.sub={orig,ts:Date.now(),day:dk,re:1};
+    day.ex[i]=nx;done.push(nx.id);
+  });
+  return done;
+}
+// Backups e importación (v20): sustituciones con forma válida (textos acotados, sin anidar); si no, fuera
+function _sanitizePlanSubs(plan){
+  if(!_isPlainObj(plan))return;
+  Object.values(plan).forEach(d=>{if(!d||!Array.isArray(d.ex))return;
+    d.ex.forEach(e=>{if(!e||typeof e!=='object'||!('sub' in e))return;
+      const s=e.sub;
+      if(_isPlainObj(s)&&_isPlainObj(s.orig)){
+        delete s.orig.sub;
+        if(s.orig.id!=null&&typeof s.orig.id!=='string')s.orig.id=String(s.orig.id);
+        ['n','eq','tip','ic','r'].forEach(k=>{if(s.orig[k]!=null)s.orig[k]=String(s.orig[k]).slice(0,300);});
+        s.ts=+s.ts;if(typeof s.day==='string')s.day=s.day.slice(0,12);else delete s.day;
+        if(s.re)s.re=1;else delete s.re;
+      }
+      if(!_validSub(s))delete e.sub;});});
+}
+function _sanitizeSessSubs(sessions){
+  if(!Array.isArray(sessions))return;
+  sessions.forEach(s=>{if(!s||typeof s!=='object'||!('subs' in s))return;const L=_cleanSessSubs(s.subs);if(L.length)s.subs=L;else delete s.subs;});
+}
+// Historial que solo existe por alternativas «solo hoy» (Progreso e historial lo dicen así)
+function _isSubOnly(id){
+  if(findExInPlan(id))return false;
+  return (S.sessions||[]).some(s=>s&&Array.isArray(s.subs)&&s.subs.some(x=>x&&x.alt===id));
+}
+
+// ── Tarjeta abierta de Entreno: «⇄ Ocupada» (antes de la primera serie) o el aviso del sustituto de hoy ──
+function busyBarHtml(ex,done){
+  if(!ex)return'';
+  const eid=esc(ex.id);
+  if(ex.sub&&_validSub(ex.sub)){
+    return`<div class="ex-busy is-sub" role="note"><span class="ex-busy-t"><b>⇄ Solo hoy</b> · en lugar de ${esc(ex.sub.orig.n)}</span>${done?'':`<button type="button" class="ex-busy-b" data-ex="${eid}" onclick="busyRevertEx(this.dataset.ex)" aria-label="Volver a ${esc(ex.sub.orig.n)}">Volver</button><button type="button" class="ex-busy-b go" data-ex="${eid}" onclick="openBusy(this.dataset.ex)" aria-label="Ver otras alternativas">⇄ Otra</button>`}</div>`;
+  }
+  if(done)return'';
+  return`<div class="ex-busy"><span class="ex-busy-t">¿Máquina ocupada? Cámbialo solo por hoy</span><button type="button" class="ex-busy-b go" data-ex="${eid}" onclick="openBusy(this.dataset.ex)" aria-label="Máquina ocupada: alternativas a ${esc(ex.n)}">⇄ Ocupada</button></div>`;
+}
+
+// ── Hoja «¿Máquina ocupada?» (en #cmodal-root): 3 alternativas, vista 3D en vivo de la elegida, «Solo hoy» o «Cambiar
+// en la rutina» (el flujo de siempre del editor) ──
+let _busy=null; // {dk, exId, alts, sel} · solo en memoria
+function _busySlot(){if(!_busy)return null;const d=getPlan()[_busy.dk];return d&&Array.isArray(d.ex)?d.ex.find(e=>e&&e.id===_busy.exId)||null:null;}
+function openBusy(exId){
+  const p=getPlan(),dk=p[S.day]&&Array.isArray(p[S.day].ex)&&p[S.day].ex.some(e=>e&&e.id===exId)?S.day:_dayOfEx(exId);
+  const day=dk&&p[dk],ex=day&&Array.isArray(day.ex)?day.ex.find(e=>e&&e.id===exId):null;
+  if(!ex){toast('Ese ejercicio ya no está en tu rutina');return;}
+  if(_slotMarks(ex)){toast(`Ya llevas series de ${ex.n}: se quedan con él`);return;}
+  if(RT.cardioRunning(ex.id)){toast('Para primero el cardio en marcha');return;}
+  closeBusy();
+  const alts=busyAlternatives(ex,3);
+  _busy={dk,exId,alts,sel:alts.length?alts[0].lib.id:null};
+  renderBusy();
+}
+function _busyInfoHtml(a,orig){
+  if(!a)return'';
+  const sp=GymAnim.get(a.lib.id),labs=sp&&sp.labels?sp.labels.join(' · '):'';
+  let h='';
+  if(a.lib.cardio)h=`Mismo tiempo que tu ${esc(orig.n)}: <b>${esc(String(orig.r||a.lib.r||''))}</b>.`;
+  else if(a.hist&&a.hist.last){
+    const L=a.hist.last,pr=coach_prescribe(a.hist.key,{ex:_subExFor(a.lib,orig,a.hist.key)});
+    h=`Su último registro: <b>${esc(kgTxt(L.v))} kg${L.r?' × '+esc(L.r):''}</b>${L.d?' · '+esc(L.d):''}.${pr?` Hoy: <b>${esc(kgTxt(pr.weight))} kg × ${pr.reps}</b>.`:''}`;
+  }else h='Sin historial: empieza con un peso cómodo y apúntalo; desde la próxima vez te diré cuánto poner.';
+  return`${h}${labs?`<br>Trabaja: ${esc(labs)}${a.pct?` · ${a.pct} % de músculos en común`:''}`:''}`;
+}
+function _busyNote(a,orig){return a?`«Solo hoy» se guarda en el historial de ${esc(a.lib.n)}; tu rutina no cambia y la próxima vez vuelve ${esc(orig.n)}.`:'';}
+function renderBusy(){
+  const root=document.getElementById('cmodal-root'),ex=_busySlot();
+  if(!root||!_busy||!ex){closeBusy();return;}
+  const orig=routineEx(ex),isSub=ex!==orig,A=_busy.alts,sel=A.find(a=>a.lib.id===_busy.sel)||A[0]||null;
+  const rows=A.map(a=>{const last=a.lib.cardio?esc(String(a.lib.eq)):a.hist&&a.hist.last?esc(kgTxt(a.hist.last.v))+' kg':'nuevo';
+    return`<button type="button" class="busy-alt" role="radio" aria-checked="${a===sel}" data-lib="${esc(a.lib.id)}" onclick="busySelect(this.dataset.lib)" aria-label="${esc(a.lib.n)}: ${a.pct} % de músculos en común${a.hist&&a.hist.last?', último '+esc(kgTxt(a.hist.last.v))+' kilos':''}">
+      <span class="exic" aria-hidden="true">${thumbImgHtml(a.lib.id,TH_IC)}<span class="exic-e">${esc(a.lib.ic||'💪')}</span></span>
+      <span class="busy-alt-i"><span class="busy-alt-n">${esc(a.lib.n)}</span><span class="busy-alt-m">${esc(a.lib.eq)}${a.pat&&!a.lib.cardio?' · '+esc(PAT_LBL[a.pat]||''):''}</span></span>
+      <span class="busy-alt-r" aria-hidden="true"><span class="pct">${a.pct} %</span><b>${last}</b></span></button>`;}).join('');
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeBusy()" style="z-index:500"><div class="hist-sheet" id="busy-sheet" role="dialog" aria-label="¿Máquina ocupada?" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
+    <div class="hist-sheet-head" style="padding-right:60px"><div class="hist-sheet-hdl"></div>
+      <div class="hist-sheet-title">⇄ ¿Máquina ocupada?</div>
+      <div class="hist-sheet-sub">${isSub?`Hoy haces ${esc(ex.n)} en lugar de ${esc(orig.n)}`:`Alternativas a ${esc(orig.n)} · mismos músculos`}</div>
+      <button class="hist-sheet-close x44" onclick="closeBusy()" aria-label="Cerrar">✕</button></div>
+    <div class="hist-sheet-body">
+      ${sel?`<div class="ex-anim busy-pv" id="busy-pv" data-ex="busy" data-gym-anim="${esc(sel.lib.id)}"></div>
+      <div class="busy-list" role="radiogroup" aria-label="Alternativas">${rows}</div>
+      <div class="busy-info" id="busy-info" aria-live="polite">${_busyInfoHtml(sel,orig)}</div>
+      <div class="busy-acts"><button type="button" class="btn bp" onclick="busySoloHoy()">Solo hoy</button><button type="button" class="btn bs" onclick="busyRoutine()">Cambiar en la rutina</button></div>
+      <div class="lib-d-note" id="busy-note">${_busyNote(sel,orig)}</div>`
+      :`<div class="busy-empty">No encuentro alternativas parecidas a ${esc(orig.n)} fuera de tu rutina. Busca otra en la biblioteca.</div>`}
+      ${isSub?`<button type="button" class="btn bs" style="margin-top:10px;min-height:48px" data-ex="${esc(ex.id)}" onclick="busyRevertEx(this.dataset.ex)">↩ Volver a ${esc(orig.n)}</button>`:''}
+      <button type="button" class="busy-more" onclick="busyOpenLibrary()">Ver toda la biblioteca ›</button>
+    </div></div></div>`;
+  if(typeof GymAnim!=='undefined'){try{GymAnim.mountAll(root);}catch(e){}}
+  thumbsIn(root);
+}
+function busySelect(libId){
+  if(!_busy)return;const a=_busy.alts.find(x=>x.lib.id===libId),ex=_busySlot();if(!a||!ex)return;
+  _busy.sel=libId;
+  document.querySelectorAll('#busy-sheet .busy-alt').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.lib===libId)));
+  const pv=document.getElementById('busy-pv');if(pv&&typeof GymAnim!=='undefined'&&GymAnim.swap){try{GymAnim.swap(pv,libId);}catch(e){}}
+  const orig=routineEx(ex),inf=document.getElementById('busy-info'),nt=document.getElementById('busy-note');
+  if(inf)inf.innerHTML=_busyInfoHtml(a,orig);if(nt)nt.innerHTML=_busyNote(a,orig);
+  haptic(8);
+}
+function closeBusy(){
+  const root=document.getElementById('cmodal-root'),sh=root&&root.querySelector('#busy-sheet');
+  if(sh){const pv=sh.querySelector('[data-gym-anim]');if(pv&&typeof GymAnim!=='undefined'&&GymAnim.unmount){try{GymAnim.unmount(pv);}catch(e){}}root.innerHTML='';}
+  _busy=null;
+}
+// «Solo hoy» (desde la hoja o desde la ficha de la biblioteca): la tarjeta pasa a la alternativa, abierta
+function _applySoloHoy(dk,exId,libId){
+  const r=subToday(dk,exId,libId);
+  if(!r.ok){toast(r.msg);render();return false;}
+  if(S.tab!=='workout'){S.tab='workout';}
+  if(getPlan()[dk])S.day=dk;
+  S.open=r.ex?r.ex.id:S.open;_scrollTo=null;
+  haptic(12);render();
+  toast(r.back?`Vuelves a ${r.ex.n}`:`Hoy: ${r.ex.n} · se guarda en su propio historial`,3200);
+  return true;
+}
+function busySoloHoy(libId){
+  if(!_busy)return;const b=_busy,id=libId||b.sel;if(!id)return;
+  closeBusy();_applySoloHoy(b.dk,b.exId,id);
+}
+// «Cambiar en la rutina»: el cambio de siempre del editor (con «Trasladar historial» si toca), para siempre
+function busyRoutine(libId){
+  if(!_busy)return;const b=_busy,slot=_busySlot(),lib=EXERCISE_DB.find(l=>l.id===(libId||b.sel));
+  if(!slot||!lib)return;
+  if(_slotMarks(slot)){toast(`Ya llevas series de ${slot.n}: termínalo antes de cambiarlo`);return;}
+  closeBusy();
+  _routineSwapTo(b.dk,slot,lib,{keepToday:false,after:nx=>{S.open=nx.id;}});
+}
+function busyRevertEx(exId){
+  const s=_subSlot(exId);if(!s){render();return;}
+  if(_slotMarks(s.ex)){toast(`Ya llevas series de ${s.ex.n}: se quedan con él`);return;}
+  const orig=s.ex.sub.orig;
+  closeBusy();revertSub(s.dk,exId);S.open=orig.id;_uiGen++;saveState();render();
+  toast(`Vuelves a ${orig.n}`);
+}
+function busyOpenLibrary(){
+  if(!_busy)return;const b={dk:_busy.dk,exId:_busy.exId},slot=_busySlot(),orig=routineEx(slot);
+  closeBusy();if(!orig)return;
+  showExercisePicker({title:`Alternativa a ${orig.n}`,muscle:orig.cardio?'cardio':(orig.muscle||null),mode:'busy',busy:b,currentLib:_libIdOf(orig),onPick:null});
+}
+
+// ── PICKER DE EJERCICIOS: rejilla de 2 columnas con miniaturas 3D ──
 // La búsqueda no distingue tildes ni mayúsculas («jalon» encuentra «Jalón al pecho», «cuadriceps» la «Extensión
-// de cuádriceps») y cada palabra puede estar en el nombre, el equipo o el grupo muscular. Al escribir solo se
-// repinta la lista: el input no se recrea (no pierde el foco ni parpadea el teclado en iOS).
-let _pickerState=null;
-function showExercisePicker({title,muscle,onPick,currentLib}){
-  _pickerState={title,muscle,onPick,currentLib:currentLib||null,search:'',filterMuscle:muscle||'all'};
+// de cuádriceps») y cada palabra puede estar en el nombre, el equipo, el grupo, los músculos o el patrón (con algunos
+// sinónimos: «isquios», «femoral», «abdominales»…). Al escribir solo se repinta la lista: el input no se recrea (no
+// pierde el foco ni parpadea el teclado en iOS). Filtros por grupo muscular y por equipo. Tocar una tarjeta abre su
+// ficha (animación 3D en vivo, consejo, músculos, tu historial y «Añadir» / «Cambiar»).
+let _pickerState=null,_libDetail=null;
+const LIB_EQ=[{id:'all',label:'Todo el equipo'},{id:'maquina',label:'Máquina'},{id:'mancuernas',label:'Mancuernas'},{id:'cable',label:'Cable'},{id:'smith',label:'Smith'},{id:'corporal',label:'Peso corporal'}];
+function libEqClass(e){if(!e)return'maquina';if(e.cardio)return'cardio';const q=normTxt(e.eq);
+  return /smith/.test(q)?'smith':/cable|polea/.test(q)?'cable':/mancuerna/.test(q)?'mancuernas':/peso corporal|barra fija/.test(q)?'corporal':'maquina';}
+function showExercisePicker({title,muscle,onPick,currentLib,mode,dayKey,busy}){
+  closeLibDetail();
+  _pickerState={title,muscle,onPick,currentLib:currentLib||null,search:'',filterMuscle:muscle||'all',filterEq:'all',
+    mode:['add','swap','busy'].includes(mode)?mode:'pick',dayKey:dayKey||null,busy:busy||null};
   renderExercisePicker();
 }
+// Sinónimos de la búsqueda (todo normalizado: sin tildes y en minúsculas)
+const LIB_SYN={isquios:['isquiotibiales','femoral'],isquio:['isquiotibiales','femoral'],femoral:['isquiotibiales'],femorales:['isquiotibiales','femoral'],
+  gluteo:['gluteos'],gemelo:['gemelos'],pantorrilla:['gemelos','talones'],pantorrillas:['gemelos','talones'],abdominales:['abdomen','crunch'],abdominal:['abdomen','crunch'],
+  abs:['abdomen'],hombro:['hombros','deltoides'],deltoides:['hombros'],dorsal:['dorsales'],dorsales:['dorsal'],pectoral:['pecho'],pectorales:['pecho','pectoral'],
+  polea:['cable'],cable:['polea'],mancuerna:['mancuernas'],cinta:['caminadora'],correr:['caminadora'],bici:['bicicleta'],sentadillas:['sentadilla'],remos:['remo'],curls:['curl']};
 // Texto de búsqueda normalizado de cada ejercicio de la biblioteca (se calcula una sola vez)
 const _libSearchIdx=new Map();
 function _libSearchText(e){
   let t=_libSearchIdx.get(e.id);
   if(t==null){
     const ml=(MUSCLE_GROUPS.find(m=>m.id===e.muscle)||{}).label||'';
-    t=normTxt([e.n,e.eq,e.muscle,ml].join(' '));
+    const sp=typeof GymAnim!=='undefined'&&GymAnim.get?GymAnim.get(e.id):null;
+    t=normTxt([e.n,e.eq,e.muscle,ml,sp&&sp.labels?sp.labels.join(' '):'',PAT_LBL[LIB_PAT[e.id]]||''].join(' '));
     _libSearchIdx.set(e.id,t);
   }
   return t;
 }
-// Ejercicios de la biblioteca que encajan con la búsqueda (todas las palabras) y el filtro de grupo muscular
-function pickerFilter(search,filterMuscle){
+// Ejercicios de la biblioteca que encajan con la búsqueda (todas las palabras), el grupo muscular y el equipo
+function pickerFilter(search,filterMuscle,filterEq){
   const toks=normTxt(search).split(/\s+/).filter(Boolean);
+  const has=(t,k)=>t.includes(k)||(LIB_SYN[k]||[]).some(s=>t.includes(s));
   let items=EXERCISE_DB;
   if(filterMuscle&&filterMuscle!=='all')items=items.filter(e=>e.muscle===filterMuscle);
+  if(filterEq&&filterEq!=='all')items=items.filter(e=>libEqClass(e)===filterEq);
   if(toks.length){
-    items=items.filter(e=>{const t=_libSearchText(e);return toks.every(k=>t.includes(k));});
-    // Primero los que lo tienen en el nombre (luego los que solo coinciden por equipo o grupo)
-    const inName=e=>{const n=normTxt(e.n);return toks.every(k=>n.includes(k))?0:1;};
+    items=items.filter(e=>{const t=_libSearchText(e);return toks.every(k=>has(t,k));});
+    // Primero los que lo tienen en el nombre (luego los que solo coinciden por equipo, grupo o músculos)
+    const inName=e=>{const n=normTxt(e.n);return toks.every(k=>has(n,k))?0:1;};
     items=items.map((e,i)=>[inName(e),i,e]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>x[2]);
   }
   return items;
 }
-// En qué días de tu rutina está ya cada ejercicio de la biblioteca: {libId:['A','C']}
+// En qué días de tu rutina está ya cada ejercicio de la biblioteca: {libId:['A','C']} (el original de un «solo hoy» cuenta)
 function _libInPlan(){
   const m={},plan=getPlan();
   Object.keys(plan).forEach(dk=>(plan[dk]&&Array.isArray(plan[dk].ex)?plan[dk].ex:[]).forEach(e=>{
-    const k=_libIdOf(e);if(!k)return;
-    if(!m[k])m[k]=[];
-    if(!m[k].includes(dk))m[k].push(dk);
+    [e,routineEx(e)].forEach(x=>{const k=_libIdOf(x);if(!k)return;if(!m[k])m[k]=[];if(!m[k].includes(dk))m[k].push(dk);});
   }));
   return m;
 }
 function _pickerChipsHtml(){
   const fm=_pickerState.filterMuscle;
-  return[{id:'all',label:'Todos'},...MUSCLE_GROUPS].map(m=>`<button style="background:${fm===m.id?'var(--green)':'var(--bg3)'};color:${fm===m.id?'#000':'var(--text2)'};border:1px solid ${fm===m.id?'var(--green)':'var(--border)'};border-radius:20px;padding:5px 11px;font-size:11px;cursor:pointer;font-weight:${fm===m.id?'600':'400'}" aria-pressed="${fm===m.id}" onclick="pickerSetMuscle('${m.id}')">${esc(m.label)}</button>`).join('');
+  return[{id:'all',label:'Todos'},...MUSCLE_GROUPS].map(m=>`<button type="button" class="lib-chip" aria-pressed="${fm===m.id}" onclick="pickerSetMuscle('${m.id}')">${esc(m.label)}</button>`).join('');
+}
+function _pickerEqHtml(){
+  const fe=_pickerState.filterEq||'all';
+  return LIB_EQ.map(q=>`<button type="button" class="lib-chip eq" aria-pressed="${fe===q.id}" onclick="pickerSetEq('${q.id}')">${esc(q.label)}</button>`).join('');
+}
+// En el modo «máquina ocupada» solo salen los del mismo tipo (fuerza o cardio) que el ejercicio a cambiar
+function _pickerItems(){
+  const st=_pickerState;let items=pickerFilter(st.search,st.filterMuscle,st.filterEq);
+  if(st.mode==='busy'&&st.busy){const d=getPlan()[st.busy.dk],sl=d&&Array.isArray(d.ex)?d.ex.find(e=>e&&e.id===st.busy.exId):null,o=routineEx(sl);
+    if(o)items=items.filter(e=>!!e.cardio===!!o.cardio);}
+  return items;
+}
+function _libCardHtml(e,cur,days,plan,hist){
+  const sp=typeof GymAnim!=='undefined'&&GymAnim.get?GymAnim.get(e.id):null,labs=sp&&sp.labels?sp.labels.slice(0,2):[];
+  const where=cur||days.length?`<span class="lib-item-badge in">${cur?'Actual':'En tu rutina'}${days.length?' · '+days.map(d=>esc(plan[d]?.label||d)).join(', '):''}</span>`:'';
+  const last=hist&&hist.last&&!e.cardio?`<div class="lib-last">Último: <b>${esc(kgTxt(hist.last.v))} kg</b>${hist.last.r?` × ${esc(hist.last.r)}`:''}</div>`:'';
+  return`<div class="lib-item lib-card${cur?' cur':''}" role="button" tabindex="0" data-lib="${esc(e.id)}" onclick="pickerDetail(this.dataset.lib)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pickerDetail(this.dataset.lib)}">
+    <div class="lib-th">${where}${thumbImgHtml(e.id,TH_CARD)}<span class="lib-th-e" aria-hidden="true">${esc(e.ic||'💪')}</span></div>
+    <div class="lib-cb"><div class="lib-item-n">${esc(e.n)}</div><div class="lib-eqt">${esc(e.eq)}</div>
+      ${labs.length?`<div class="lib-mus">${labs.map(l=>`<span class="mchip">${esc(l)}</span>`).join('')}</div>`:''}${last}</div>
+  </div>`;
 }
 function _pickerListHtml(){
-  const {search,filterMuscle,currentLib}=_pickerState;
-  const items=pickerFilter(search,filterMuscle);
+  const {search,filterMuscle,filterEq,currentLib}=_pickerState;
+  const items=_pickerItems();
+  _pickerState.count=items.length;
   if(!items.length){
-    const q=String(search||'').trim();
-    return`<div class="empty"><div class="eic">🔍</div><p>${q?`Sin resultados para «${esc(q)}».`:'Sin resultados.'} Prueba con otra palabra${filterMuscle&&filterMuscle!=='all'?' o con «Todos»':''}.</p></div>`;
+    const q=String(search||'').trim(),f=(filterMuscle&&filterMuscle!=='all')||(filterEq&&filterEq!=='all');
+    return`<div class="empty"><div class="eic">🔍</div><p>${q?`Sin resultados para «${esc(q)}».`:'Sin resultados.'} Prueba con otra palabra${f?' o con «Todos»':''}.</p></div>`;
   }
-  const inPlan=_libInPlan(),plan=getPlan(),byMuscle={};
+  const inPlan=_libInPlan(),plan=getPlan(),hm=_libHistMap(),byMuscle={};
   items.forEach(e=>{(byMuscle[e.muscle]=byMuscle[e.muscle]||[]).push(e);});
   return Object.entries(byMuscle).map(([muscle,exs])=>{
     const mLabel=MUSCLE_GROUPS.find(m=>m.id===muscle)?.label||muscle;
-    return`<div class="lib-group-h">${esc(mLabel)}</div>`+exs.map(e=>{
-      const cur=!!currentLib&&e.id===currentLib,days=inPlan[e.id]||[];
-      const where=cur||days.length?`<span class="lib-item-badge in">${cur?'Actual':'En tu rutina'}${days.length?' · '+days.map(d=>esc(plan[d]?.label||d)).join(', '):''}</span>`:'';
-      return`<div class="lib-item${cur?' cur':''}" role="button" tabindex="0" data-lib="${esc(e.id)}" onclick="pickerPick(this.dataset.lib)" onkeydown="if(event.key==='Enter'){event.preventDefault();pickerPick(this.dataset.lib)}">
-        <div class="lib-item-n">${esc(e.ic||'💪')} ${esc(e.n)}</div>
-        <div class="lib-item-d">
-          ${where}<span class="lib-item-badge">${esc(e.eq)}</span>
-          ${e.compound?'<span class="lib-item-badge">Compuesto</span>':''}
-          ${e.cardio?'<span class="lib-item-badge">Cardio</span>':''}
-        </div>
-      </div>`;
-    }).join('');
+    return`<div class="lib-group-h">${esc(mLabel)}</div>`+exs.map(e=>_libCardHtml(e,!!currentLib&&e.id===currentLib,inPlan[e.id]||[],plan,hm[e.id]||null)).join('');
   }).join('');
 }
-
+function _pickerCountTxt(){const n=_pickerState&&_pickerState.count||0;return n?plural(n,'ejercicio'):'';}
 function renderExercisePicker(){
   const root=document.getElementById('cmodal-root');
   if(!root||!_pickerState)return;
-  const {title,search}=_pickerState;
-  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeExercisePicker()" style="z-index:500"><div class="hist-sheet" role="dialog" aria-label="${esc(title)}" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
-    <div class="hist-sheet-head">
+  _libDetail=null;
+  const {title,search,mode}=_pickerState;
+  const list=_pickerListHtml();
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeExercisePicker()" style="z-index:500"><div class="hist-sheet" id="lib-sheet" role="dialog" aria-label="${esc(title)}" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
+    <div class="hist-sheet-head" style="padding-right:60px">
       <div class="hist-sheet-hdl"></div>
       <div class="hist-sheet-title">${esc(title)}</div>
-      <div class="hist-sheet-sub">Elige de la biblioteca o busca</div>
-      <button class="hist-sheet-close" onclick="closeExercisePicker()" aria-label="Cerrar">✕</button>
+      <div class="hist-sheet-sub">${mode==='busy'?'Elige una alternativa para hoy · toca para ver su técnica':'Toca un ejercicio para ver su técnica en 3D'}</div>
+      <button class="hist-sheet-close x44" onclick="closeExercisePicker()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
-      <input class="lib-search" id="lib-search-inp" type="search" placeholder="Buscar ejercicio..." aria-label="Buscar ejercicio" value="${esc(search||'')}" oninput="pickerSearch(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <div id="lib-chips" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${_pickerChipsHtml()}</div>
-      <div id="lib-list">${_pickerListHtml()}</div>
+      <input class="lib-search" id="lib-search-inp" type="search" placeholder="Buscar: jalón, femoral, mancuernas…" aria-label="Buscar ejercicio" value="${esc(search||'')}" oninput="pickerSearch(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <div class="lib-chiprow" id="lib-chips" role="group" aria-label="Grupo muscular">${_pickerChipsHtml()}</div>
+      <div class="lib-chiprow" id="lib-eq" role="group" aria-label="Equipo">${_pickerEqHtml()}</div>
+      <div class="lib-count" id="lib-count" aria-live="polite">${_pickerCountTxt()}</div>
+      <div id="lib-list" class="lib-grid">${list}</div>
       <div style="height:24px"></div>
     </div>
   </div></div>`;
+  thumbsIn(root);
 }
-
+function _pickerRefresh(chips){
+  const list=document.getElementById('lib-list');
+  if(!list){renderExercisePicker();return;}
+  if(chips){const c=document.getElementById('lib-chips'),q=document.getElementById('lib-eq');if(c)c.innerHTML=_pickerChipsHtml();if(q)q.innerHTML=_pickerEqHtml();}
+  list.innerHTML=_pickerListHtml();
+  const n=document.getElementById('lib-count');if(n)n.textContent=_pickerCountTxt();
+  thumbsIn(list);
+}
 // Al escribir: solo la lista (el input sigue siendo el mismo, con su foco y su cursor)
 function pickerSearch(v){
   if(!_pickerState)return;
   _pickerState.search=String(v==null?'':v);
-  const list=document.getElementById('lib-list');
-  if(list)list.innerHTML=_pickerListHtml();
-  else renderExercisePicker();
+  _pickerRefresh(false);
 }
 function pickerSetMuscle(m){
   if(!_pickerState)return;
   _pickerState.filterMuscle=m;
-  const chips=document.getElementById('lib-chips'),list=document.getElementById('lib-list');
-  if(chips&&list){chips.innerHTML=_pickerChipsHtml();list.innerHTML=_pickerListHtml();}
-  else renderExercisePicker();
+  _pickerRefresh(true);
+}
+function pickerSetEq(q){
+  if(!_pickerState||!LIB_EQ.some(x=>x.id===q))return;
+  _pickerState.filterEq=q;
+  _pickerRefresh(true);
 }
 function pickerPick(libId){
   const libEx=EXERCISE_DB.find(e=>e.id===libId);
   if(!libEx||!_pickerState)return;
   const cb=_pickerState.onPick;
+  closeLibDetail();
   _pickerState=null;
   document.getElementById('cmodal-root').innerHTML='';
   if(cb)cb(libEx);
 }
 function closeExercisePicker(){
+  closeLibDetail();
   _pickerState=null;
   document.getElementById('cmodal-root').innerHTML='';
+}
+// Desde la ficha, en el modo «máquina ocupada»: «Solo hoy» o «Cambiar en la rutina»
+function pickerBusy(libId,how){
+  const st=_pickerState;if(!st||!st.busy)return;const b=st.busy;
+  closeExercisePicker();
+  const d=getPlan()[b.dk],slot=d&&Array.isArray(d.ex)?d.ex.find(e=>e&&e.id===b.exId):null,lib=EXERCISE_DB.find(l=>l.id===libId);
+  if(!slot||!lib){toast('Ese ejercicio ya no está en tu rutina');render();return;}
+  if(how==='today'){_applySoloHoy(b.dk,b.exId,libId);return;}
+  if(_slotMarks(slot)){toast(`Ya llevas series de ${slot.n}: termínalo antes de cambiarlo`);render();return;}
+  _routineSwapTo(b.dk,slot,lib,{keepToday:false,after:nx=>{S.open=nx.id;}});
+}
+// ── Ficha de un ejercicio (encima del selector): animación 3D en vivo (arrastra para girar, toca para pausar),
+// músculos, patrón, consejo, tu historial y la acción del selector ──
+function _libDetailHtml(e){
+  const st=_pickerState,sp=typeof GymAnim!=='undefined'&&GymAnim.get?GymAnim.get(e.id):null;
+  const plan=getPlan(),days=_libInPlan()[e.id]||[],cur=st.currentLib===e.id,hist=_libHistMap()[e.id]||null;
+  const ml=(MUSCLE_GROUPS.find(m=>m.id===e.muscle)||{}).label||'';
+  const tags=[...(sp&&sp.labels?sp.labels.map(l=>`<span class="mchip">${esc(l)}</span>`):[]),
+    !e.cardio&&LIB_PAT[e.id]?`<span class="lib-d-tag">${esc(PAT_LBL[LIB_PAT[e.id]])}</span>`:'',
+    `<span class="lib-d-tag">${e.cardio?'Cardio':e.compound?'Multiarticular':'Aislamiento'}</span>`,
+    cur||days.length?`<span class="lib-d-tag in">${cur?'Actual':'En tu rutina'}${days.length?' · '+days.map(d=>esc(plan[d]?.label||d)).join(', '):''}</span>`:''].filter(Boolean).join('');
+  let hh='';
+  const recs=hist?(S.strength[hist.key]||[]).filter(r=>r&&typeof r==='object'&&+r.v>0):[];
+  if(hist&&hist.last&&!e.cardio){
+    const best=Math.max(...recs.map(r=>+r.v)),L=hist.last;
+    hh=`<div class="lib-d-hist">Tu historial: <b>${plural(hist.n,'sesión','sesiones')}</b> · último <b>${esc(kgTxt(L.v))} kg${L.r?' × '+esc(L.r):''}</b>${L.d?' ('+esc(L.d)+')':''}${recs.length>1?` · mejor ${esc(kgTxt(best))} kg`:''}
+      ${recs.length>=2?`<div class="carea">${spark(recs.slice(-10),'#22c55e')}</div>`:''}</div>`;
+  }else hh=`<div class="lib-d-hist">${e.cardio?'Cardio: elige un ritmo que puedas mantener todo el tiempo.':'Aún no lo has hecho: empieza con un peso cómodo y céntrate en la técnica.'}</div>`;
+  let acts='',note='';
+  const back=`<button type="button" class="btn bs" onclick="closeLibDetail()">← Volver</button>`;
+  if(st.mode==='busy'){
+    const otherPlan=days.length>0&&!cur;
+    if(cur){acts=back;note=`<div class="lib-d-note">Es el ejercicio de tu rutina.</div>`;}
+    else{acts=`<button type="button" class="btn bp" data-lib="${esc(e.id)}" onclick="pickerBusy(this.dataset.lib,'today')"${otherPlan?' disabled style="opacity:.45"':''}>Solo hoy</button><button type="button" class="btn bs" data-lib="${esc(e.id)}" onclick="pickerBusy(this.dataset.lib,'routine')">Cambiar en la rutina</button>`;
+      note=`<div class="lib-d-note">${otherPlan?`Ya está en tu rutina (${days.map(d=>esc(plan[d]?.label||d)).join(', ')}): para hoy elige otro.`:'«Solo hoy» se guarda en su propio historial y tu rutina no cambia.'}</div>`;}
+  }else{
+    const lbl=st.mode==='add'?`Añadir al ${esc(plan[st.dayKey]?.label||'día')}`:st.mode==='swap'?'Cambiar por este':'Elegir';
+    acts=back+(st.mode==='swap'&&cur?`<button type="button" class="btn bp" disabled style="opacity:.45">Es el actual</button>`
+      :`<button type="button" class="btn bp" data-lib="${esc(e.id)}" onclick="pickerPick(this.dataset.lib)">${lbl}</button>`);
+  }
+  return`<div class="hist-over" onclick="if(event.target===this)closeLibDetail()" style="z-index:510"><div class="hist-sheet" id="lib-dsheet" role="dialog" aria-label="Ficha: ${esc(e.n)}" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
+    <div class="hist-sheet-head" style="padding-right:60px"><div class="hist-sheet-hdl"></div>
+      <div class="hist-sheet-title">${esc(e.n)}</div><div class="hist-sheet-sub">${esc(e.eq)}${ml?' · '+esc(ml):''}</div>
+      <button class="hist-sheet-close x44" onclick="closeLibDetail()" aria-label="Volver a la lista">✕</button></div>
+    <div class="hist-sheet-body">
+      ${sp?`<div class="ex-anim lib-d-anim" data-ex="lib-detail" data-gym-anim="${esc(e.id)}"></div>`:''}
+      <div class="lib-d-head">${tags}</div>
+      <div class="tip">${esc(e.tip||'')}</div>
+      ${hh}
+      <div class="lib-d-acts">${acts}</div>${note}
+    </div></div></div>`;
+}
+function pickerDetail(libId){
+  const e=EXERCISE_DB.find(x=>x.id===libId),root=document.getElementById('cmodal-root');
+  if(!_pickerState||!e||!root)return;
+  closeLibDetail();
+  _libDetail=libId;
+  const w=document.createElement('div');w.id='lib-detail';w.innerHTML=_libDetailHtml(e);
+  root.appendChild(w);
+  if(typeof GymAnim!=='undefined'){try{GymAnim.mountAll(w);}catch(err){}}
+  const b=w.querySelector('.lib-d-acts .bp:not([disabled])')||w.querySelector('.hist-sheet-close');
+  if(b){try{b.focus({preventScroll:true});}catch(err){}}
+}
+function closeLibDetail(){
+  const w=document.getElementById('lib-detail');
+  if(w){const a=w.querySelector('[data-gym-anim]');if(a&&typeof GymAnim!=='undefined'&&GymAnim.unmount){try{GymAnim.unmount(a);}catch(e){}}w.remove();}
+  _libDetail=null;
 }
 
 // ── DRAG & DROP TÁCTIL PARA REORDENAR ─────────────────────────
@@ -10402,6 +11126,12 @@ function findExInPlan(exId){
     const ex=plan[dk].ex.find(e=>e.id===exId);
     if(ex)return ex;
   }
+  // (11) un ejercicio de tu rutina sustituido «solo hoy» sigue siendo tuyo: el original (ex.sub.orig, el que vuelve al
+  // guardar) es el que cambian el Coach, la descarga y el historial
+  for(const dk of Object.keys(plan)){
+    const s=(plan[dk].ex||[]).find(e=>e&&e.sub&&e.sub.orig&&e.sub.orig.id===exId);
+    if(s)return s.sub.orig;
+  }
   return null;
 }
 
@@ -10445,6 +11175,10 @@ function ignoreProposal(id){
 // «Semana de descarga» y «Reducir volumen» son TEMPORALES (S.deload): guardan las series y vuelven solas.
 function _applyProposalByData(p){
   const plan=getPlan();
+  // (11) Con un ejercicio cambiado «solo hoy», lo que toca a ese ejercicio (o una descarga de todo el plan) espera a
+  // que guardes o descartes el entreno: entonces vuelve el original y se aplica sobre él. La propuesta no se pierde.
+  if(p.type==='deload'?_hasSubs():(p.exId&&(_subSlot(p.exId)||_subOfOrig(p.exId))))
+    return{ok:false,msg:'Hoy tienes un ejercicio cambiado «solo hoy»: aplícala cuando guardes el entreno'};
   const gone={ok:false,drop:true,msg:'Ese ejercicio ya no está en tu rutina'};
   const ex=p.exId?findExInPlan(p.exId):null;
   if(p.type==='add_set'){
@@ -10507,13 +11241,17 @@ function renderRoutineEditor(opts){
   const day=plan[_editDay];
   // El maniquí del volumen planificado se conserva entre repintados (solo cambian sus pesos)
   const keepMM=mmDetach(root);
-  const exItems=day.ex.map((ex,i)=>{
+  const exItems=day.ex.map((slot,i)=>{
+    // (11) La rutina: si hoy está sustituido «solo hoy», se edita el original y se avisa del sustituto
+    const ex=routineEx(slot),sub=slot!==ex?slot:null;
     const isCardio=!!ex.cardio;
     return`<div class="edit-ex-item" data-idx="${i}" id="edi_${i}">
       <div class="drag-handle" aria-label="Arrastrar">⠿</div>
+      <div class="edit-ex-ic exic" aria-hidden="true">${exIconHtml(ex)}</div>
       <div class="edit-ex-info">
-        <div class="edit-ex-name">${esc(ex.ic||'💪')} ${esc(ex.n)}</div>
+        <div class="edit-ex-name">${esc(ex.n)}</div>
         <div class="edit-ex-meta">${esc(_edMetaTxt(ex))}</div>
+        ${sub?`<div class="edit-ex-sub">⇄ Hoy: ${esc(sub.n)} · solo hoy</div>`:''}
         ${!isCardio?`<div class="sr-editor">
           <span class="sr-label">Series</span>
           <button class="sr-btn" onclick="editExSeries('${_editDay}',${i},-1)">−</button>
@@ -10555,6 +11293,7 @@ function renderRoutineEditor(opts){
     </div>
   </div></div>`;
   mmMountAll(root,keepMM);
+  thumbsIn(root); // (11) miniaturas 3D de los ejercicios
   if(keepScroll){const sh=root.querySelector('.hist-sheet');if(sh)sh.scrollTop=keepScroll;}
   initDragDrop(_editDay);
 }
@@ -10564,6 +11303,8 @@ function render(){
   if(!s)return;
   // Descarga caducada: el plan vuelve a sus series antes de pintar
   try{deloadTick();}catch(e){console.error(e);}
+  // (11) Sustituciones «solo hoy» que ya no tienen entreno (o con mala forma): vuelve el original
+  try{subTick();}catch(e){console.error(e);}
   // Preservar posición de scroll entre renders (evita el "salto al inicio" al marcar series)
   const prevScroll=_scrollTo&&Date.now()-_scrollTo.ts<700?_scrollTo.top:s.scrollTop,scrollSeq=_scrollReq;
   const keepMM=mmDetach(s); // mapas musculares en pantalla: se reutilizan tras repintar
@@ -10577,6 +11318,7 @@ function render(){
   try{hoyAttach(s);}catch(e){console.error(e);}
   // Montar animaciones de ejercicio (canvas) presentes en la pantalla (las reutilizadas se reactivan)
   if(typeof GymAnim!=='undefined'){try{GymAnim.mountAll(s);}catch(e){}}
+  thumbsIn(s); // (11) miniaturas 3D (iconos de las tarjetas): las de caché al momento, el resto en tiempo libre
   try{mmMountAll(s,keepMM);}catch(e){console.error(e);}
   try{renderNextBar();}catch(e){console.error(e);}
   // Restaurar scroll (ya y en el siguiente frame, por si el DOM aún no estaba listo), salvo que después de repintar se
@@ -11014,6 +11756,9 @@ function importData(){
                 }
               });
             }
+            // (11) «Solo hoy»: sustituciones del plan y de las sesiones, siempre saneadas (también en backups v20)
+            _sanitizePlanSubs(migrated.currentPlan);
+            _sanitizeSessSubs(migrated.sessions);
             // Normalizar restWeeks siempre (defensa: un backup v10 editado a mano podría traerlo inválido)
             if(!Array.isArray(migrated.restWeeks))migrated.restWeeks=[];
             // Sesión reabierta: solo la del backup (nunca heredar la del estado actual) y con forma válida.
