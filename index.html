@@ -240,11 +240,13 @@ input{font-family:inherit}
 .rec-title{font-size:14px;font-weight:500;flex:1}
 .rec-body{font-size:13px;color:var(--text2);line-height:1.55;margin-bottom:10px}
 .rec-diff{background:#141414;border-radius:var(--rxs);padding:10px 12px;font-size:12px;display:flex;flex-direction:column;gap:5px}
-.rec-diff-row{display:flex;align-items:center;gap:6px}
-.rec-diff-row .sym{font-family:'DM Mono',monospace;width:14px;text-align:center;font-weight:600}
+.rec-diff-row{display:flex;align-items:center;gap:6px;min-width:0}
+.rec-diff-row>span:last-child{min-width:0;overflow-wrap:anywhere}
+.rec-diff-row .sym{font-family:'DM Mono',monospace;width:14px;flex-shrink:0;text-align:center;font-weight:600}
 .rec-diff-row .sym.add{color:var(--green)}
 .rec-diff-row .sym.rm{color:var(--red)}
 .rec-diff-row .sym.ch{color:var(--amber)}
+.rec-diff-row .sym.hold{color:var(--blue)}
 .rec-diff-row span:last-child{color:var(--text2);line-height:1.4}
 .mesocycle-log{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:14px;margin:0 14px 8px}
 .mesocycle-log h4{font-size:13px;font-weight:500;margin-bottom:8px}
@@ -341,6 +343,40 @@ input{font-family:inherit}
 .proposal-ignore{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:10px 14px;font-size:13px;color:var(--text2);cursor:pointer}
 .proposal-ignore:active{transform:scale(.98)}
 .proposal-tag{display:inline-block;font-size:10px;background:rgba(34,197,94,.12);color:#86efac;border-radius:4px;padding:2px 7px;margin-bottom:4px}
+.proposal-tag.pw{background:rgba(245,158,11,.14);color:#fcd34d}
+.proposal-tag.pv{background:rgba(59,130,246,.14);color:#93c5fd}
+.proposal-diff{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;color:var(--text);background:var(--bg3);border:1px solid var(--border2);border-radius:5px;padding:2px 7px;margin:1px 0 6px;line-height:1.45;overflow-wrap:anywhere}
+.proposal-apply,.proposal-ignore{min-height:44px}
+.proposal-apply:disabled{background:var(--bg3);color:var(--text3);border:1px solid var(--border);cursor:default;transform:none}
+.prop-hint{font-size:11px;color:var(--text3);margin:-4px 18px 8px;line-height:1.5}
+.prop-res-tg{display:flex;align-items:center;justify-content:space-between;width:calc(100% - 28px);margin:0 14px 8px;min-height:44px;padding:0 14px;background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--rsm);font-size:12px;font-weight:600;color:var(--text2)}
+.prop-res{margin:0 14px 10px;padding:4px 14px 10px;background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm)}
+.prop-res-row{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:12px}
+.prop-res-n{color:var(--text2);min-width:0}
+.prop-res-d{color:var(--text3);flex-shrink:0}
+.prop-res-note{font-size:11px;color:var(--text3);line-height:1.5;padding-top:8px}
+.rec-chip{display:inline-block;max-width:100%;font-family:'DM Mono',monospace;font-size:10.5px;color:var(--text);background:var(--bg3);border-radius:4px;padding:0 5px;margin-left:2px;white-space:normal;overflow-wrap:anywhere}
+.dl-banner{display:flex;gap:11px;align-items:center;margin:10px 14px 8px;padding:11px 12px 11px 14px;border-radius:var(--rsm);background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.3)}
+.dl-banner-ic{font-size:20px;line-height:1;flex-shrink:0}
+.dl-banner-b{flex:1;min-width:0}
+.dl-banner-t{font-size:13px;font-weight:600;color:#93c5fd;line-height:1.35}
+.dl-banner-d{font-size:12px;color:var(--text2);line-height:1.45;margin-top:2px}
+.dl-banner-btn{flex-shrink:0;min-height:44px;padding:0 12px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);font-size:12px;font-weight:600;color:var(--text)}
+.dl-banner-btn:active{transform:scale(.97)}
+.dl-tag{color:#93c5fd}
+.coach-over{font-size:12px;color:var(--amber);margin-top:3px;line-height:1.4}
+.coach-cycle-sub{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.45}
+.score-ring.fresh .score-val .u{line-height:1.25;text-align:center}
+.topbar-row .score-ring{margin:0 0 6px auto;flex-shrink:0}
+.coach-entry{display:flex;align-items:center;gap:11px;width:calc(100% - 28px);margin:0 14px 10px;padding:12px 14px;min-height:56px;text-align:left;background:rgba(34,197,94,.06);border:1px solid var(--green-b);border-radius:var(--r)}
+.coach-entry:active{transform:scale(.98)}
+.coach-entry-ic{font-size:20px;flex-shrink:0}
+.coach-entry-t{flex:1;min-width:0;font-size:13px;font-weight:600;color:var(--text);line-height:1.35}
+.coach-entry-t small{display:block;font-size:11px;font-weight:400;color:var(--text2);margin-top:2px}
+.coach-entry-go{flex-shrink:0;font-size:12px;font-weight:600;color:var(--green)}
+.legacy-dl{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.05)}
+.legacy-dl-t{font-size:14px;font-weight:600;margin-bottom:4px}
+.legacy-dl-d{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px}
 
 /* ── RPE SELECTOR ── */
 .rpe-pop{position:fixed;background:var(--bg2);border:1px solid var(--border2);border-radius:var(--rsm);padding:8px;display:flex;gap:6px;z-index:250;box-shadow:0 8px 24px rgba(0,0,0,.6);animation:rpeIn .15s ease}
@@ -511,7 +547,6 @@ input[type=number]{-moz-appearance:textfield}
 <div id="wmodal-root"></div>
 <div id="hist-root"></div>
 <div id="wdetail-root"></div>
-<div id="proposals-root"></div>
 
 <!-- GYM-ANIM:BEGIN -->
 <script>
@@ -3174,7 +3209,7 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=12;
+const SCHEMA_VERSION=13;
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
 // Duración máxima plausible de una sesión (min); por encima se considera dato no fiable
@@ -3339,6 +3374,155 @@ function restWeeksInWindow(fromTs,toTs){
   return Math.min(weeks,windowWeeks);
 }
 
+// ── DESCARGA TEMPORAL Y REVERSIBLE (schema v13) ─────────────────
+// S.deload = {id, kind:'all'|'ex', startTs, endTs, label, changes:[{exId, day, from, to}]} o null.
+// Baja las series del plan guardando las originales (from). Vuelve sola al llegar endTs (deloadTick, al cargar
+// y en cada render) o antes con «Terminar descarga». Al restaurar, si cambiaste a mano las series de un ejercicio
+// durante la descarga, se respeta tu cambio. Solo hay una descarga a la vez.
+// Una descarga es «mismo peso, menos series»: en Entreno no se sugiere subir peso mientras dura.
+const DELOAD_MS=7*86400000;
+function _startOfDay(ts){const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime();}
+function _validDeload(d){
+  if(!_isPlainObj(d)||(d.kind!=='all'&&d.kind!=='ex'))return false;
+  if(typeof d.startTs!=='number'||typeof d.endTs!=='number'||!isFinite(d.startTs)||!isFinite(d.endTs))return false;
+  if(d.endTs<=d.startTs||d.endTs-d.startTs>15*86400000)return false;
+  if(!Array.isArray(d.changes)||!d.changes.length||d.changes.length>80)return false;
+  return d.changes.every(c=>_isPlainObj(c)&&typeof c.exId==='string'&&c.exId&&c.exId.length<=80&&
+    Number.isInteger(c.from)&&Number.isInteger(c.to)&&c.from>=1&&c.from<=10&&c.to>=1&&c.to<=10);
+}
+function _sanitizeDeloadHistory(h){
+  if(!Array.isArray(h))return[];
+  return h.filter(x=>_isPlainObj(x)&&typeof x.startTs==='number'&&typeof x.endTs==='number'&&isFinite(x.startTs)&&isFinite(x.endTs)&&x.endTs>=x.startTs)
+    .map(x=>({id:typeof x.id==='string'?x.id.slice(0,40):null,kind:x.kind==='ex'?'ex':'all',startTs:x.startTs,endTs:x.endTs,
+      plannedEndTs:typeof x.plannedEndTs==='number'?x.plannedEndTs:x.endTs,early:!!x.early,
+      exIds:Array.isArray(x.exIds)?x.exIds.filter(i=>typeof i==='string').slice(0,80):null}))
+    .slice(-30);
+}
+function getActiveDeload(){return _validDeload(S.deload)?S.deload:null;}
+function deloadAppliesTo(exId){const d=getActiveDeload();return !!(d&&d.changes.some(c=>c.exId===exId));}
+// Semana «ligera» para un ejercicio ahora: una descarga que lo incluye o una semana de descanso (nunca +2.5 kg)
+function isLightNow(exId){return !!getActiveRest()||deloadAppliesTo(exId);}
+// ¿El registro de ese ejercicio en ts cayó en una descarga o en una semana de descanso? No cuenta para la tendencia.
+function _lightAt(exId,ts){
+  if(typeof ts!=='number'||!isFinite(ts))return false;
+  if(Array.isArray(S.restWeeks)&&S.restWeeks.some(r=>r&&r.startTs!=null&&r.endTs!=null&&ts>=r.startTs&&ts<r.endTs))return true;
+  const d=S.deload;
+  if(_validDeload(d)&&ts>=d.startTs&&d.changes.some(c=>c.exId===exId))return true;
+  return Array.isArray(S.deloadHistory)&&S.deloadHistory.some(h=>h&&ts>=h.startTs&&ts<h.endTs&&(!Array.isArray(h.exIds)||h.exIds.includes(exId)));
+}
+// kind 'all': todas las series de fuerza a la mitad (mín. 1). kind 'ex': una serie menos en esos ejercicios.
+function startDeload(kind,exIds,label){
+  if(getActiveDeload())_restoreDeload(true); // una sola a la vez
+  const now=Date.now(),plan=getPlan(),changes=[];
+  Object.keys(plan).forEach(dk=>{
+    const day=plan[dk];if(!day||!Array.isArray(day.ex))return;
+    day.ex.forEach(ex=>{
+      if(!ex||ex.cardio)return;
+      if(kind==='ex'&&!(exIds||[]).includes(ex.id))return;
+      const from=Math.max(1,Math.min(10,parseInt(ex.s)||3));
+      const to=kind==='all'?Math.max(1,Math.round(from/2)):Math.max(1,from-1);
+      if(to===from)return;
+      ex.s=to;changes.push({exId:ex.id,day:dk,from,to});
+    });
+  });
+  if(!changes.length)return null;
+  S.deload={id:'dl_'+now,kind:kind==='ex'?'ex':'all',startTs:now,endTs:_startOfDay(now)+DELOAD_MS,label:String(label||'').slice(0,120),changes};
+  saveState();
+  return S.deload;
+}
+// Devuelve las series originales. Si se termina en la primera hora, cuenta como cancelada (sin historial).
+function _restoreDeload(early){
+  const d=S.deload;
+  if(d==null)return false;
+  if(_validDeload(d)){
+    d.changes.forEach(c=>{const ex=findExInPlan(c.exId);if(ex&&!ex.cardio&&+ex.s===c.to)ex.s=c.from;});
+    const now=Date.now();
+    if(!(early&&now-d.startTs<3600000)){
+      if(!Array.isArray(S.deloadHistory))S.deloadHistory=[];
+      S.deloadHistory.push({id:d.id||null,kind:d.kind,startTs:d.startTs,endTs:Math.min(now,d.endTs),plannedEndTs:d.endTs,early:!!early,exIds:d.changes.map(c=>c.exId)});
+      if(S.deloadHistory.length>30)S.deloadHistory=S.deloadHistory.slice(-30);
+    }
+  }
+  S.deload=null;
+  return true;
+}
+function endDeload(){
+  const d=getActiveDeload();if(!d)return;
+  confirmModal({
+    title:'Terminar descarga',
+    body:'Tu plan vuelve ahora a sus series normales. ¿Seguro que quieres terminar la descarga antes de tiempo?',
+    okText:'Terminar',cancelText:'Seguir en descarga',
+    onOk:()=>{_restoreDeload(true);saveState();render();toast('Descarga terminada · tu plan vuelve a sus series');}
+  });
+}
+// Caducidad: al pasar endTs vuelve sola. No cambia las series en mitad de un entreno (espera a que lo guardes,
+// como mucho 12 h). Devuelve true si cambió algo (el llamador repinta).
+function deloadTick(){
+  const d=S.deload;
+  if(d==null)return false;
+  if(!_validDeload(d)){S.deload=null;saveState();return true;}
+  const now=Date.now();
+  if(now<d.endTs)return false;
+  const aw=getActiveWorkout();
+  if(aw&&aw.startTs&&now-aw.startTs<12*3600000)return false;
+  _restoreDeload(false);saveState();
+  toast('🧘 Descarga terminada · vuelves a tu plan con todas tus series',4000);
+  return true;
+}
+// Fecha (texto) en que el plan vuelve a la normalidad
+function deloadEndTxt(d){return fmtDate(new Date(d.endTs));}
+// Aviso de descarga (Inicio, Entreno, Coach) y de semana de descanso (solo Entreno: Inicio y Coach ya lo muestran)
+function lightBannerHtml(where){
+  const d=getActiveDeload();
+  if(d){
+    let name='';
+    if(d.kind==='ex'){
+      const ex=findExInPlan(d.changes[0].exId);name=ex?ex.n:'';
+      // en Entreno, la descarga de un solo ejercicio solo se avisa en su día
+      if(where==='workout'){const day=getPlan()[S.day];if(!day||!day.ex.some(e=>d.changes.some(c=>c.exId===e.id)))return'';}
+    }
+    const over=Date.now()>=d.endTs;
+    const t=d.kind==='all'?'Semana de descarga':`Descarga${name?' en '+name:''}`;
+    const when=over?'Tu plan vuelve al guardar este entreno':`Tu plan vuelve el ${deloadEndTxt(d)}`;
+    const desc=where==='workout'?'Menos series y el mismo peso: esta semana no subas peso.':'Menos series, mismo peso. Después vuelves más fuerte.';
+    return`<div class="dl-banner" role="status"><span class="dl-banner-ic" aria-hidden="true">🧘</span><div class="dl-banner-b">
+      <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${esc(when)} · ${esc(desc)}</div></div>
+      <button class="dl-banner-btn" onclick="endDeload()">Terminar</button></div>`;
+  }
+  const r=where==='workout'?getActiveRest():null;
+  if(r){
+    const left=restDaysLeft(r);
+    return`<div class="dl-banner rest" role="status"><span class="dl-banner-ic" aria-hidden="true">🌴</span><div class="dl-banner-b">
+      <div class="dl-banner-t">Semana de descanso · ${left>0?`quedan ${left} día${left!==1?'s':''}`:'termina hoy'}</div>
+      <div class="dl-banner-d">Si entrenas, hazlo suave: mismo peso o menos. Esta semana no se sube peso.</div></div></div>`;
+  }
+  return'';
+}
+
+// Propuestas del Coach guardadas (S.pendingCoachProposals): forma válida, id estable y único, textos acotados.
+// Sirve igual para las de versiones anteriores (sin prio/basis) y para backups importados.
+function _sanitizeProposals(list){
+  if(!Array.isArray(list))return[];
+  const TYPES=['add_set','rm_set','rep_scheme','deload','add_ex','swap'],seen=new Set(),out=[];
+  const str=(v,n)=>typeof v==='string'?v.slice(0,n):'';
+  const idOrNull=v=>typeof v==='string'&&v&&v.length<=80?v:null;
+  list.forEach(p=>{
+    if(!_isPlainObj(p)||typeof p.id!=='string'||!/^[\w.:-]{1,120}$/.test(p.id)||seen.has(p.id)||!TYPES.includes(p.type))return;
+    seen.add(p.id);
+    const q={id:p.id,type:p.type,ic:str(p.ic,8),tag:str(p.tag,40),title:str(p.title,160),description:str(p.description,600),
+      exId:idOrNull(p.exId),dayKey:typeof p.dayKey==='string'&&/^[A-Za-z0-9_]{1,12}$/.test(p.dayKey)?p.dayKey:null,libExId:idOrNull(p.libExId)};
+    if(typeof p.diff==='string'&&p.diff)q.diff=p.diff.slice(0,120);
+    if(typeof p.short==='string'&&p.short)q.short=p.short.slice(0,120);
+    if(typeof p.prio==='number'&&isFinite(p.prio))q.prio=p.prio;
+    if(typeof p.sev==='number'&&isFinite(p.sev))q.sev=p.sev;
+    if(['fatigue','down','stagnant','flat','volume','legacy_up'].includes(p.basis))q.basis=p.basis;
+    if(typeof p.createdAt==='number'&&isFinite(p.createdAt))q.createdAt=p.createdAt;
+    if(_isPlainObj(p.to)&&Number.isInteger(p.to.s)&&p.to.s>=1&&p.to.s<=10&&Number.isInteger(p.to.r)&&p.to.r>=1&&p.to.r<=30)q.to={s:p.to.s,r:p.to.r};
+    out.push(q);
+  });
+  return out.slice(0,30);
+}
+
 // Sincroniza S.activeWorkout con las marcas reales de CUALQUIER día (auto-sana).
 // Reapunta al día con marcas y lo limpia cuando no queda ninguna en ningún día.
 function syncActiveWorkout(){
@@ -3444,13 +3628,28 @@ function migrateState(data){
     if(data.restTimer===undefined)data.restTimer=null;
     if(typeof data.timerSound!=='boolean')data.timerSound=true;
   }
+  if(v<13){
+    // v13: descarga temporal y reversible (guarda las series originales y vuelve sola) + su historial. ADITIVO.
+    if(data.deload===undefined)data.deload=null;
+    if(!Array.isArray(data.deloadHistory))data.deloadHistory=[];
+    // Propuestas pendientes de la versión anterior (detector antiguo): se les asigna el motivo que implicaba su
+    // tipo para revisarlas con el diagnóstico nuevo. Si ya no se cumple (p. ej. un falso «estancado»), no se muestran.
+    if(Array.isArray(data.pendingCoachProposals)){
+      const B={rep_scheme:'stagnant',swap:'stagnant',rm_set:'down',add_ex:'volume',deload:'fatigue',add_set:'legacy_up'};
+      data.pendingCoachProposals.forEach(p=>{
+        if(!p||typeof p!=='object'||p.basis||!B[p.type])return;
+        p.basis=B[p.type];
+        if(p.type==='deload'&&typeof p.createdAt!=='number')p.createdAt=Date.now();
+      });
+    }
+  }
   data.schema_version=SCHEMA_VERSION;
   return data;
 }
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',reopenedSession:null,restTimer:null,timerSound:true},migrateState(loadState())||{});
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[]},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -3481,6 +3680,11 @@ if(S.reopenedSession!=null){
 // Temporizador guardado con forma no válida → descartarlo (uno válido se reanuda o termina con RT.sync() al arrancar)
 if(S.restTimer!=null&&!_validRestTimer(S.restTimer)){S.restTimer=null;saveState();}
 if(typeof S.timerSound!=='boolean')S.timerSound=true;
+// Descarga temporal (v13): forma válida (una corrupta se descarta), historial y propuestas del Coach saneados
+if(S.deload!=null&&!_validDeload(S.deload)){S.deload=null;saveState();}
+S.deloadHistory=_sanitizeDeloadHistory(S.deloadHistory);
+S.pendingCoachProposals=_sanitizeProposals(S.pendingCoachProposals);
+if(!Array.isArray(S.appliedProposals))S.appliedProposals=[];
 
 // ══════════════════════════════════════════════════════════
 // BIBLIOTECA DE EJERCICIOS  (~45 ejercicios, máquinas + pesas libres)
@@ -3858,6 +4062,9 @@ function getSug(id,sets,reps){
   let done=0;for(let i=0;i<sets;i++){if(c[i])done++;}
   if(done<sets)return null;
   const l=S.logs[id]||{},w=parseFloat(l.w)||0,r=parseInt(l.r)||0,rt=parseInt(reps)||12;if(!w)return null;
+  // Semana ligera: nada de «+2.5 kg»
+  if(deloadAppliesTo(id))return{t:'ok',m:`Descarga: mantén ${w} kg con menos series. La subida vuelve cuando termine. 🧘`};
+  if(getActiveRest())return{t:'ok',m:`Semana de descanso: entrena suave y mantén ${w} kg o menos. 🌴`};
   if(r>=rt)return{t:'up',m:`¡Series completas! Próxima sesión prueba con ${(w+2.5).toFixed(1)} kg (+2.5 kg) 🎯`};
   if(r<rt-2)return{t:'dn',m:`Sin problema — mantén ${w} kg hasta que las reps salgan limpias. ✊`};
   return{t:'ok',m:`Buen trabajo con ${w} kg. Mantén este peso la próxima sesión. 👍`};
@@ -4158,7 +4365,7 @@ function _cardioStartHint(){
   return(t&&t.kind==='cardio'&&t.startTs&&Date.now()-t.startTs<MAX_SESSION_MIN*60000)?t.startTs:null;
 }
 // Resincronizar al volver a la app (iOS congela la PWA en segundo plano) y al restaurar desde bfcache
-document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')RT.sync();});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){RT.sync();try{if(S.onboarded&&deloadTick())render();}catch(e){console.error(e);}}});
 window.addEventListener('pageshow',()=>RT.sync());
 // Con un temporizador activo, el siguiente toque desbloquea el audio (p. ej. tras recargar la app)
 ['pointerup','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,()=>{
@@ -4668,6 +4875,8 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
       const avgRpe=rpeValues.length>0?+(rpeValues.reduce((a,b)=>a+b,0)/rpeValues.length).toFixed(2):null;
       // Guardar también el muscle group para análisis RPE acumulado por zona
       const rec={d:today,v:w,r:reps,setsDone,rpe:avgRpe,muscle:ex.muscle||null,ts:sessTs};
+      // Sesión ligera (descarga o semana de descanso): queda marcada y no cuenta para la tendencia del Coach
+      if(_lightAt(ex.id,sessTs))rec.dl=1;
       if(rs)_insertByTs(S.strength[ex.id],rec);else S.strength[ex.id].push(rec);
     }
   });
@@ -4956,34 +5165,92 @@ function coach_cycleStart(){
   return S.coachStart||(S.sessions[0]?.ts)||Date.now();
 }
 
+// Ciclo actual. La semana mostrada nunca pasa de CYCLE_WEEKS: un ciclo que se alarga queda «vencido»
+// (overdue) y se pide cerrarlo. Un ciclo recién empezado (tras cerrar otro) es «fresh»: estado neutro, sin nota.
 function coach_cycleData(){
   const start=coach_cycleStart();
   const sessions=S.sessions.filter(s=>s.ts>=start);
   const days=coach_daysSince(start);
-  const weeks=days/7;
+  const weeks=Math.max(0,(Date.now()-start)/(7*86400000));
   const cycleProgress=Math.min(1,weeks/CYCLE_WEEKS);
-  return{start,sessions,days,weeks,cycleProgress,
-    readyForReview:sessions.length>=CYCLE_MIN_SESSIONS&&weeks>=CYCLE_WEEKS*0.85};
+  const weekNum=Math.min(CYCLE_WEEKS,Math.max(1,Math.ceil(weeks)));
+  const overdue=weeks>CYCLE_WEEKS;
+  const fresh=(S.mesocycles||[]).length>0&&weeks<1;
+  const readyForReview=weeks>=CYCLE_WEEKS*0.85&&(sessions.length>=CYCLE_MIN_SESSIONS||(overdue&&sessions.length>=3));
+  return{start,sessions,days,weeks,cycleProgress,weekNum,overdue,fresh,readyForReview};
 }
 
+// ─── DETECTOR DE PROGRESO: 1RM estimado (Epley) + doble progresión ───
+// Mira las últimas PROG_WINDOW sesiones reales del ejercicio (sin descargas ni semanas de descanso) y no
+// depende del ciclo: cerrar un ciclo no borra lo que sabes de cada ejercicio.
+//  · 'down'      retroceso: las 2 últimas sesiones ≥5% por debajo de tu mejor nivel anterior (una mala no basta)
+//  · 'stagnant'  estancado: ≥4 sesiones y ≥3 semanas sin mejorar el 1RM estimado, ni las reps, ni el peso
+//  · 'strong_up' / 'up' / 'flat' según la pendiente (mínimos cuadrados) del 1RM estimado en %/semana
+// Mismo peso con más reps (doble progresión) sube el 1RM estimado: nunca cuenta como estancamiento.
+const PROG_WINDOW=6,STAG_MIN_SESSIONS=4,STAG_MIN_DAYS=21,REG_DROP=0.95;
+function coach_e1rm(rec,ex){
+  const v=+(rec&&rec.v);
+  if(!(v>0)||!isFinite(v))return 0;
+  let r=parseInt(rec.r);
+  if(!(r>0))r=targetRepsNum(ex)||10; // registros antiguos sin reps: las del objetivo
+  return v*(1+Math.min(r,30)/30);
+}
+function _recReps(r){const n=parseInt(r&&r.r);return n>0?n:null;}
 function coach_exerciseProgression(exId,sinceTs){
-  const data=(S.strength[exId]||[]).filter(r=>!sinceTs||r.ts>=sinceTs);
-  if(data.length<2)return{trend:'insufficient',change:0,sessions:data.length,firstV:data[0]?.v||0,lastV:data[data.length-1]?.v||0};
-  const first=data[0].v,last=data[data.length-1].v,change=last-first;
-  const pct=first>0?(change/first)*100:0;
-  let trend='flat';
-  if(pct>=8)trend='strong_up';
-  else if(pct>=3)trend='up';
-  else if(pct<=-3)trend='down';
-  else if(data.length>=3){
-    // Estancamiento: últimas 3 sesiones con peso prácticamente idéntico (±1% o ±0.5kg)
-    const last3=data.slice(-3).map(r=>r.v);
-    const max3=Math.max(...last3),min3=Math.min(...last3);
-    const dev=max3-min3;
-    const tol=Math.max(0.5,last*0.01);
-    if(dev<=tol)trend='stagnant';
+  const ex=findExInPlan(exId)||{id:exId};
+  const src=Array.isArray(S.strength[exId])?S.strength[exId]:[];
+  const data=[];
+  for(let i=src.length-1;i>=0&&data.length<PROG_WINDOW;i--){
+    const r=src[i];
+    if(!r||!(+r.v>0)||typeof r.ts!=='number'||!isFinite(r.ts))continue;
+    if(sinceTs&&r.ts<sinceTs)continue;
+    if(r.dl||_lightAt(exId,r.ts))continue; // descarga / semana de descanso: no es tu nivel real
+    data.push(r);
   }
-  return{trend,change,pct,sessions:data.length,firstV:first,lastV:last,data};
+  data.sort((a,b)=>a.ts-b.ts);
+  const n=data.length,W=7*86400000;
+  const res={trend:'insufficient',change:0,pct:0,pctWeek:0,sessions:n,firstV:n?+data[0].v:0,lastV:n?+data[n-1].v:0,
+    data,e1rm:[],weeks:0,repsUp:false,dropPct:0,stagSessions:0,stagWeeks:0};
+  if(n<2)return res;
+  const e=data.map(r=>coach_e1rm(r,ex));
+  res.e1rm=e;
+  res.change=+(res.lastV-res.firstV).toFixed(2);
+  const span=(data[n-1].ts-data[0].ts)/W;
+  res.weeks=span;
+  // Tendencia: recta de mínimos cuadrados del 1RM estimado frente al tiempo (no primera contra última)
+  let a=e[0],b=e[n-1];
+  if(n>=3&&span>0){
+    const xs=data.map(r=>(r.ts-data[0].ts)/W),mx=xs.reduce((s,x)=>s+x,0)/n,my=e.reduce((s,y)=>s+y,0)/n;
+    let num=0,den=0;
+    for(let i=0;i<n;i++){num+=(xs[i]-mx)*(e[i]-my);den+=(xs[i]-mx)*(xs[i]-mx);}
+    const sl=den>0?num/den:0;
+    a=my+sl*(xs[0]-mx);b=my+sl*(xs[n-1]-mx);
+  }
+  res.pct=a>0?(b-a)/a*100:0;
+  res.pctWeek=res.pct/Math.max(1,span);
+  const r1=_recReps(data[n-1]),r2=_recReps(data[n-2]);
+  res.repsUp=+data[n-1].v===+data[n-2].v&&r1!=null&&r2!=null&&r1>r2;
+  // Retroceso: 2 sesiones seguidas claramente por debajo de tu mejor nivel previo
+  if(n>=3){
+    const ref=Math.max(...e.slice(0,n-2));
+    if(ref>0&&e[n-1]<ref*REG_DROP&&e[n-2]<ref*REG_DROP){res.trend='down';res.dropPct=(1-e[n-1]/ref)*100;return res;}
+  }
+  // Estancamiento: el tramo final más corto con ≥4 sesiones y ≥3 semanas, sin mejorar a su primera sesión
+  let k=-1;
+  for(let i=n-STAG_MIN_SESSIONS;i>=0;i--){if(data[n-1].ts-data[i].ts>=STAG_MIN_DAYS*86400000){k=i;break;}}
+  if(k>=0){
+    const b0=data[k],eb=e[k],rb=_recReps(b0);
+    let improved=false;
+    for(let i=k+1;i<n&&!improved;i++){
+      const r=data[i],ri=_recReps(r);
+      if(e[i]>eb*1.01)improved=true;                                   // más 1RM estimado
+      else if(+r.v>=+b0.v&&rb!=null&&ri!=null&&ri>rb)improved=true;     // mismo peso, más reps
+      else if(+r.v>+b0.v&&e[i]>=eb*0.97)improved=true;                  // más peso sin hundirse
+    }
+    if(!improved){res.trend='stagnant';res.stagSessions=n-k;res.stagWeeks=(data[n-1].ts-data[k].ts)/W;return res;}
+  }
+  res.trend=res.pctWeek>=1.5?'strong_up':res.pctWeek>=0.4?'up':'flat';
+  return res;
 }
 
 function coach_sessionVolume(sessionTs){
@@ -5015,6 +5282,14 @@ function coach_consistency(weeks){
   const target=getWeeklyTarget();
   const rate=Math.min(1,perWeek/target);
   return{sessions:recent.length,perWeek:perWeek.toFixed(1),rate,target,restWeeks:restCount};
+}
+// Ventana fija de constancia: 4 semanas (o menos si llevas menos tiempo entrenando). No depende del ciclo,
+// así que cerrar un ciclo no cambia tu constancia.
+function coach_consistencyWindow(){
+  let first=Infinity;
+  (S.sessions||[]).forEach(s=>{if(s&&typeof s.ts==='number'&&s.ts<first)first=s.ts;});
+  if(!isFinite(first))return 1;
+  return Math.min(CYCLE_WEEKS,Math.max(1,Math.ceil((Date.now()-first)/(7*86400000))));
 }
 
 function coach_weightTrend(){
@@ -5081,18 +5356,297 @@ function coach_daysSinceLastSession(){
   return Math.floor((Date.now()-last.ts)/86400000);
 }
 
+// ─── 1b. DIAGNÓSTICO ÚNICO ─────────────────────────────────────
+// Una sola fuente de verdad: el análisis, las tarjetas de insights, el «Análisis detallado» y las propuestas
+// salen de coach_analyze(), así que nunca se contradicen.
+const PROP_MAX_TOTAL=3;        // máx. cambios de plan por ciclo (y 1 por día de rutina)
+const DELOAD_AFTER_WEEKS=6;    // semanas seguidas entrenando sin descanso/descarga → proponer descarga
+function _dayOfEx(exId){
+  if(!exId)return null;
+  const plan=getPlan();
+  return Object.keys(plan).find(dk=>plan[dk]&&Array.isArray(plan[dk].ex)&&plan[dk].ex.some(e=>e.id===exId))||null;
+}
+function _propPrio(p){
+  if(p&&typeof p.prio==='number')return p.prio;
+  return({deload:0,rm_set:1,rep_scheme:2,swap:2,add_set:3,add_ex:4})[p&&p.type]??5;
+}
+// Recuperación de TODO el cuerpo: semana de descanso o descarga de todo el plan (≥3 días), o una pausa de 7+ días
+// sin entrenar. «Reducir volumen» (descarga de un solo ejercicio) no lo es: no reinicia la fatiga ni quita la descarga.
+// Devuelve el ts de la última (Date.now() si estás en una ahora) o 0 si nunca hubo ninguna.
+function _fullDeloadNow(){const d=getActiveDeload();return !!(d&&d.kind==='all');}
+function _sessionTsSorted(){return (S.sessions||[]).map(s=>s&&+s.ts).filter(t=>t>0&&isFinite(t)).sort((a,b)=>a-b);}
+// {ts, src:'deload'|'rest'|'gap'|null, now:bool}: la última recuperación, de qué tipo fue y si estás en ella ahora
+function _recoveryInfo(ss){
+  const now=Date.now(),DAY=86400000;
+  ss=ss||_sessionTsSorted();
+  let ts=0,src=null;
+  const at=(t,s)=>{if(t>ts){ts=t;src=s;}};
+  (S.restWeeks||[]).forEach(r=>{if(r&&isFinite(r.startTs)&&isFinite(r.endTs)&&r.startTs<=now){const e=Math.min(now,r.endTs);if(e-r.startTs>=3*DAY)at(e,'rest');}});
+  (S.deloadHistory||[]).forEach(h=>{if(h&&h.kind!=='ex'&&h.endTs-h.startTs>=3*DAY)at(Math.min(now,h.endTs),'deload');});
+  for(let i=1;i<ss.length;i++)if(ss[i]-ss[i-1]>=7*DAY)at(ss[i],'gap');
+  const cur=_fullDeloadNow()?'deload':getActiveRest()?'rest':(ss.length&&now-ss[ss.length-1]>=7*DAY)?'gap':null;
+  if(cur)return{ts:now,src:cur,now:true};
+  return{ts,src,now:false};
+}
+function coach_recoveryTs(ss){return _recoveryInfo(ss).ts;}
+// Fatiga: semanas seguidas entrenando desde la última recuperación de todo el cuerpo y ejercicios en retroceso.
+function coach_fatigue(an){
+  const now=Date.now(),DAY=86400000;
+  const ss=_sessionTsSorted();
+  const last=Math.max(ss.length?ss[0]:now,coach_recoveryTs(ss));
+  const weeks=Math.max(0,(now-last)/(7*DAY));
+  const sessionsSince=ss.filter(t=>t>=last).length;
+  const regress=an.down.length;
+  // Con «Reducir volumen» de un ejercicio en marcha la descarga se sigue proponiendo (se aplica al terminar)
+  const deloadNeeded=!_fullDeloadNow()&&!getActiveRest()&&sessionsSince>=6&&(regress>=2||weeks>=DELOAD_AFTER_WEEKS);
+  const reason=regress>=2
+    ?`${regress} ejercicios llevan dos sesiones seguidas por debajo de tu nivel: es fatiga acumulada.`
+    :`Llevas ${Math.floor(weeks)} semanas seguidas entrenando sin descanso ni descarga.`;
+  return{lastRecoveryTs:last,weeks,sessionsSince,regress,deloadNeeded,reason};
+}
+// Series «de verdad» de un ejercicio: durante una descarga, las de tu plan normal (las que vuelven al terminar).
+// Así lo que propone el Coach (y su diff) es lo que tendrás después de la descarga, no la mitad.
+function _baseSets(ex){
+  const s=parseInt(ex&&ex.s)||3,d=getActiveDeload();
+  const c=d&&ex&&d.changes.find(c=>c.exId===ex.id);
+  return c&&s===c.to?c.from:s;
+}
+function _nSeries(n){return`${n} ${n===1?'serie':'series'}`;}
+// Candidatas, de más a menos prioritaria: fatiga/seguridad (descarga) > retroceso > estancamiento real > progresión > volumen.
+// Los ejercicios «en espera» (it.hold: recién cambiados, en descarga o recuperándose) no están en down/stagnant/flat.
+function coach_buildCandidates(an){
+  const out=[],now=Date.now(),plan=getPlan(),f=an.fatigue;
+  const hot=new Set((coach_rpeByMuscle(6)||[]).filter(z=>z.avg>=2.6&&z.samples>=3).map(z=>z.muscle));
+  if(f.deloadNeeded){
+    out.push({id:'deload_week',type:'deload',basis:'fatigue',prio:0,sev:f.weeks,ic:'🧘',tag:'Descarga',createdAt:now,
+      title:'Semana de descarga',diff:'Mitad de series · mismo peso · 7 días',short:'una semana de descarga',
+      description:`${f.reason} Durante 7 días haces la mitad de series con el mismo peso. Al terminar, tu plan vuelve solo a sus series.`});
+  }
+  an.down.forEach(it=>{
+    const ex=it.ex,s=_baseSets(ex);
+    if(f.deloadNeeded&&an.down.length>=2){it.covered='deload';return;} // la descarga ya lo cubre
+    if(s<=1)return;
+    out.push({id:'rm_set_'+ex.id,type:'rm_set',basis:'down',prio:1,sev:it.p.dropPct,ic:'⚠️',tag:'Recuperación',exId:ex.id,dayKey:it.dayKey,createdAt:now,
+      title:`Reducir volumen en ${ex.n}`,diff:`${s}×${ex.r} → ${s-1}×${ex.r} · 7 días`,short:`bajar a ${_nSeries(s-1)} durante una semana`,
+      description:`Dos sesiones seguidas por debajo de tu nivel (−${Math.round(it.p.dropPct)}% de 1RM estimado): suele ser fatiga. Haz ${_nSeries(s-1)} en vez de ${s} durante 7 días; después vuelve solo a ${_nSeries(s)}.`});
+  });
+  an.stagnant.forEach(it=>{
+    const ex=it.ex,s=_baseSets(ex),tr=targetRepsNum(ex);
+    const why=`${it.p.stagSessions} sesiones (${Math.max(3,Math.round(it.p.stagWeeks))} semanas) sin mejorar peso ni reps con ${s}×${fmtTargetReps(ex).replace(/ reps$/,'')}.`;
+    const base={basis:'stagnant',prio:2,sev:it.p.stagSessions,ic:'🔄',tag:'Variación',exId:ex.id,dayKey:it.dayKey,createdAt:now};
+    if(tr!=null&&tr>=10){
+      const ns=Math.min(6,s+1);
+      out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s:ns,r:8},title:`Cambiar esquema en ${ex.n}`,
+        diff:`${s}×${tr} → ${ns}×8`,short:`pasar a ${ns}×8 con algo más de peso`,
+        description:`${why} Pasa a ${ns}×8 con algo más de peso: misma musculatura, estímulo nuevo.`});
+      return;
+    }
+    const alt=coach_suggestAlternative(ex);
+    if(alt){
+      out.push({...base,id:'swap_'+ex.id,type:'swap',libExId:alt.id,title:`Cambiar ${ex.n} por ${alt.n}`,
+        diff:`${ex.n} → ${alt.n}`,short:`cambiar a ${alt.n}`,
+        description:`${why} Prueba ${alt.n}: ${alt.reason}. Tu historial de ${ex.n} se conserva.`});
+      return;
+    }
+    if(tr!=null){
+      out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s,r:12},title:`Cambiar esquema en ${ex.n}`,
+        diff:`${s}×${tr} → ${s}×12`,short:`pasar a ${s}×12 con algo menos de peso`,
+        description:`${why} Pasa a ${s}×12 con algo menos de peso para retomar el progreso.`});
+    }
+  });
+  an.flat.forEach(it=>{
+    const ex=it.ex,s=_baseSets(ex);
+    // Solo si está estable de verdad (no bajando), con datos y sin zona muscular ya «al límite»
+    if(s>=5||it.p.sessions<3||it.p.pctWeek<-0.4||hot.has(ex.muscle))return;
+    out.push({id:'add_set_'+ex.id,type:'add_set',basis:'flat',prio:3,sev:-s,ic:'💪',tag:'Progresión',exId:ex.id,dayKey:it.dayKey,createdAt:now,
+      title:`Añadir serie a ${ex.n}`,diff:`${s}×${ex.r} → ${s+1}×${ex.r}`,short:`añadir una serie (${s}→${s+1})`,
+      description:`Tu 1RM estimado está estable en tus últimas ${it.p.sessions} sesiones. Una serie más (${s}×${ex.r} → ${s+1}×${ex.r}) le da el empujón que necesita.`});
+  });
+  // Volumen: días con menos de 3 ejercicios de fuerza
+  if((S.sessions||[]).length>=4){
+    const inPlan=_planLibIds();
+    Object.keys(plan).forEach(dk=>{
+      const day=plan[dk];if(!day||!Array.isArray(day.ex))return;
+      const strEx=day.ex.filter(e=>!e.cardio);
+      if(strEx.length>=3)return;
+      const cnt={};strEx.forEach(e=>{if(e.muscle)cnt[e.muscle]=(cnt[e.muscle]||0)+1;});
+      const mainMuscle=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0]||({A:'piernas',B:'pecho',C:'espalda'})[dk]||'piernas';
+      const pick=EXERCISE_DB.find(e=>e.muscle===mainMuscle&&!e.cardio&&!inPlan.has(e.id)&&!strEx.some(s=>s.n===e.n));
+      if(!pick)return;
+      out.push({id:'add_ex_'+dk+'_'+pick.id,type:'add_ex',basis:'volume',prio:4,sev:-strEx.length,ic:'➕',tag:'Volumen',dayKey:dk,libExId:pick.id,createdAt:now,
+        title:`Añadir ejercicio al ${day.label}`,diff:`+ ${pick.n} · 3×${pick.r}`,short:`añadir ${pick.n}`,
+        description:`El ${day.label} tiene pocos ejercicios de fuerza (${strEx.length}). Añadir «${pick.n}» (${pick.eq}) sube el volumen de ${mainMuscle} sin alargar mucho la sesión.`});
+    });
+  }
+  return out.sort((x,y)=>(x.prio-y.prio)||((y.sev||0)-(x.sev||0)));
+}
+// Tope: máx. PROP_MAX_TOTAL cambios por ciclo y 1 por día (la descarga es de todo el plan y no ocupa día).
+// Los cambios ya aplicados en este ciclo cuentan; ignorar una libera su hueco y entra la siguiente de la reserva.
+function coach_selectProposals(list,opts){
+  const fresh=!!(opts&&opts.fresh),cs=coach_cycleStart();
+  const applied=fresh?[]:(S.appliedProposals||[]).filter(a=>a&&+a.appliedAt>=cs);
+  let total=applied.length;
+  const used=new Set();
+  applied.forEach(a=>{if(a.type!=='deload'&&a.dayKey)used.add(a.dayKey);});
+  const sorted=list.slice().sort((x,y)=>(_propPrio(x)-_propPrio(y))||((+y.sev||0)-(+x.sev||0)));
+  const active=[],reserve=[];
+  sorted.forEach(p=>{
+    const dk=p.type==='deload'?null:(p.dayKey||_dayOfEx(p.exId));
+    if(total<PROP_MAX_TOTAL&&(!dk||!used.has(dk))){active.push(p);total++;if(dk)used.add(dk);}
+    else reserve.push(p);
+  });
+  return{active,reserve,appliedCount:applied.length};
+}
+// Ejercicios «en espera» (it.hold): el Coach no propone otro cambio para ellos hasta tener sesiones nuevas que juzgar.
+//  · 'changed'  le aplicaste una propuesta en este ciclo y aún no hay sesiones normales después del cambio.
+//               Con sesiones nuevas, su progresión se juzga SOLO con ellas (it.since): ¿funciona el cambio?
+//  · 'deload'   está en «Reducir volumen» ahora mismo.
+//  · 'recovery' venía en retroceso, pero después hubo (o hay ahora) una descarga de todo el plan, una semana de
+//               descanso o una pausa: lo que cuenta son tus próximas sesiones, no proponer otra descarga.
+function _appliedThisCycle(plan){
+  const cs=coach_cycleStart(),out={};
+  const all=Object.values(plan).flatMap(d=>d&&Array.isArray(d.ex)?d.ex:[]);
+  (S.appliedProposals||[]).forEach(a=>{
+    if(!a||!(+a.appliedAt>=cs)||a.type==='deload')return;
+    let id=a.exId;
+    if(a.type==='swap'||a.type==='add_ex'){const nx=all.find(e=>e&&e.lib&&e.lib===a.libExId);id=nx?nx.id:null;}
+    if(id&&(!out[id]||+a.appliedAt>+out[id].appliedAt))out[id]=a;
+  });
+  return out;
+}
+function coach_analyze(){
+  const plan=getPlan(),items=[],dl=getActiveDeload(),applied=_appliedThisCycle(plan);
+  const ri=_recoveryInfo(),rec=ri.ts;
+  Object.keys(plan).forEach(dk=>{
+    const day=plan[dk];if(!day||!Array.isArray(day.ex))return;
+    day.ex.forEach(ex=>{
+      if(!ex||ex.cardio)return;
+      const it={ex,dayKey:dk,p:coach_exerciseProgression(ex.id)},a=applied[ex.id];
+      if(dl&&dl.kind==='ex'&&dl.changes.some(c=>c.exId===ex.id))it.hold={kind:'deload',until:dl.endTs,prop:a||null};
+      else if(a){
+        const p2=coach_exerciseProgression(ex.id,+a.appliedAt);
+        if(p2.trend==='insufficient')it.hold={kind:'changed',since:+a.appliedAt,prop:a};
+        else{it.p=p2;it.since=+a.appliedAt;}
+      }
+      if(!it.hold&&it.p.trend==='down'&&rec>0){
+        const d=it.p.data,lastTs=d.length?d[d.length-1].ts:0;
+        if(lastTs<rec)it.hold={kind:'recovery',src:ri.src,now:ri.now};
+      }
+      items.push(it);
+    });
+  });
+  const act=items.filter(i=>!i.hold);
+  const of=(arr,...t)=>arr.filter(i=>t.includes(i.p.trend));
+  const an={items,strong:of(items,'strong_up'),up:of(items,'up','strong_up'),flat:of(act,'flat'),stagnant:of(act,'stagnant'),down:of(act,'down'),
+    held:items.filter(i=>i.hold),withData:items.filter(i=>i.p.trend!=='insufficient')};
+  an.fatigue=coach_fatigue(an);
+  an.candidates=coach_buildCandidates(an);
+  an.preview=coach_selectProposals(an.candidates,{fresh:true}); // lo que propondría al cerrar el ciclo
+  an.candByEx={};
+  an.candidates.forEach(c=>{if(c.exId&&!an.candByEx[c.exId])an.candByEx[c.exId]=c;});
+  return an;
+}
+// Propuestas guardadas que siguen vigentes: su ejercicio sigue en el plan y el motivo con el que se crearon
+// (basis) sigue siendo cierto. Si ya no (p. ej. vuelves a progresar), no se muestran: nunca contradicen al análisis.
+function _basisHolds(p,an){
+  if(!p.basis)return true; // propuestas de versiones anteriores: se muestran tal cual
+  if(p.basis==='fatigue')return an.fatigue.lastRecoveryTs<(+p.createdAt||0);
+  if(p.basis==='volume'){const d=getPlan()[p.dayKey];return !!(d&&Array.isArray(d.ex)&&d.ex.filter(e=>!e.cardio).length<3);}
+  const it=an.items.find(i=>i.ex.id===p.exId);
+  if(!it)return false;
+  if(it.hold)return false; // recién cambiado / en descarga / recuperándose: primero sus próximas sesiones
+  // «Añadir serie» antigua (se creaba al progresar): vale mientras no esté estancado ni en retroceso
+  if(p.basis==='legacy_up')return it.p.trend!=='stagnant'&&it.p.trend!=='down';
+  return it.p.trend===p.basis||it.p.trend==='insufficient';
+}
+function coach_livePending(an){
+  const plan=getPlan();
+  return (S.pendingCoachProposals||[]).filter(p=>{
+    if(!p||typeof p.id!=='string')return false;
+    if(p.exId&&!findExInPlan(p.exId))return false; // ese ejercicio ya no está en tu rutina
+    if(p.type==='add_ex'&&p.dayKey&&!plan[p.dayKey])return false;
+    return _basisHolds(p,an);
+  });
+}
+function coach_pendingView(an){
+  an=an||coach_analyze();
+  return coach_selectProposals(coach_livePending(an),{});
+}
+// Ejercicios de biblioteca que ya están en el plan (por lib, por id del plan original o por nombre)
+function _planLibIds(){
+  const set=new Set();
+  Object.values(getPlan()).forEach(d=>(d&&Array.isArray(d.ex)?d.ex:[]).forEach(e=>{const k=_libIdOf(e);if(k)set.add(k);}));
+  return set;
+}
+function _libIdOf(ex){
+  if(!ex)return null;
+  if(ex.lib&&EXERCISE_DB.some(l=>l.id===ex.lib))return ex.lib;
+  if(PLAN_ANIM[ex.id]&&!String(PLAN_ANIM[ex.id]).startsWith('lib_cardio'))return PLAN_ANIM[ex.id];
+  const byName=EXERCISE_DB.find(l=>l.n===ex.n);
+  return byName?byName.id:null;
+}
+
 // ─── 2. GENERADOR DE INSIGHTS ─────────────────────────────
 
-function coach_generateInsights(){
+// Texto del «próximo paso» de un ejercicio: la propuesta pendiente si la hay (o «en reserva» si está en la
+// reserva); si no, la que haría el Coach al cerrar el ciclo. resIds: ids de las pendientes en reserva.
+function _coachNextStep(it,an,pend,resIds){
+  if(it.hold)return`${_holdTxt(it)} · dale unas sesiones`; // en espera: nunca otro cambio
+  const tag=p=>resIds&&resIds.has(p.id)?'en reserva':'propuesta pendiente';
+  const p=(pend||[]).find(x=>x.exId===it.ex.id);
+  if(p)return`${p.short||p.title} (${tag(p)})`;
+  if(it.covered==='deload'){
+    const d=(pend||[]).find(x=>x.type==='deload');
+    return d?`una semana de descarga (${tag(d)})`:'una semana de descarga (te la propondré al cerrar el ciclo)';
+  }
+  const c=an.candByEx&&an.candByEx[it.ex.id];
+  if(!c)return'';
+  const res=an.preview&&an.preview.reserve.some(x=>x.id===c.id);
+  return`${c.short} (${res?'quedará en reserva al cerrar el ciclo':'te lo propondré al cerrar el ciclo'})`;
+}
+// Orden para nombrar ejercicios en un insight: pendiente activa > la que propondrá al cerrar > en reserva > sin cambio
+function _coachStepRank(it,an,pend,resIds){
+  const p=(pend||[]).find(x=>x.exId===it.ex.id);
+  if(p)return resIds&&resIds.has(p.id)?2:0;
+  const c=an.candByEx&&an.candByEx[it.ex.id];
+  if(c)return an.preview&&an.preview.active.some(x=>x.id===c.id)?1:3;
+  return 4;
+}
+// «A y B» / «A, B y 3 más» (en <strong>, escapados)
+function _namesList(arr){
+  const f=x=>`<strong>${esc(x.ex.n)}</strong>`;
+  return arr.length<=2?arr.map(f).join(' y '):`${arr.slice(0,2).map(f).join(', ')} y ${arr.length-2} más`;
+}
+// Por qué un ejercicio está «en espera» (texto corto, sin HTML)
+function _holdTxt(it){
+  const h=it&&it.hold,ex=it&&it.ex;
+  if(!h)return'';
+  if(h.kind==='deload')return`en descarga hasta el ${fmtDate(new Date(h.until))}`;
+  if(h.kind==='recovery'){
+    if(h.now&&h.src!=='gap')return`venía por debajo de tu nivel · lo cubre ${h.src==='rest'?'el descanso':'la descarga'}`;
+    return`venía por debajo de tu nivel antes de ${h.src==='deload'?'la descarga':h.src==='rest'?'tu descanso':'la pausa'}`;
+  }
+  const a=h.prop||{};
+  if(a.type==='swap'||a.type==='add_ex')return'nuevo en tu plan';
+  if(a.type==='rm_set')return`acaba de volver a ${_nSeries(parseInt(ex.s)||1)}`;
+  return`acabas de cambiarlo a ${parseInt(ex.s)||ex.s}×${ex.r}`;
+}
+
+function coach_generateInsights(an,pend,resIds){
   const cycle=coach_cycleData();
-  const consistency=coach_consistency(Math.max(1,Math.ceil(cycle.weeks)));
+  an=an||coach_analyze();
+  pend=pend||coach_livePending(an);
+  const cw=coach_consistencyWindow();
+  const consistency=coach_consistency(cw);
   const weight=coach_weightTrend();
   const balance=coach_balance();
 
   const insights=[];
 
-  // ═ A) CONSISTENCIA ═
-  if(consistency.sessions>=CYCLE_MIN_SESSIONS){
+  // ═ A) CONSISTENCIA ═ (ventana fija de 4 semanas; «Empezando» solo con poco historial total)
+  if((S.sessions||[]).length<CYCLE_MIN_SESSIONS){
+    insights.push({type:'info',ic:'🌱',t:'Empezando',d:`Necesitas <strong>${CYCLE_MIN_SESSIONS-(S.sessions||[]).length}</strong> sesiones más para tu primer análisis completo. Sigue así.`});
+  }else{
     if(consistency.rate>=0.95){
       insights.push({type:'good',ic:'🎯',t:'Constancia impecable',d:`Llevas <strong>${consistency.perWeek}</strong> sesiones/semana (objetivo: ${consistency.target}). Estás entrenando como un profesional.`});
     }else if(consistency.rate>=0.75){
@@ -5100,10 +5654,8 @@ function coach_generateInsights(){
     }else if(consistency.rate>=0.5){
       insights.push({type:'warn',ic:'⚠️',t:'Constancia irregular',d:`Solo <strong>${consistency.perWeek}</strong> sesiones/semana. El progreso viene de la regularidad — intenta marcar los ${consistency.target} días en tu calendario.`});
     }else{
-      insights.push({type:'bad',ic:'⏳',t:'Pocas sesiones',d:`Solo <strong>${consistency.sessions}</strong> sesiones en ${Math.ceil(cycle.weeks)} semanas. Sin constancia no hay progreso — el cuerpo necesita estímulo regular.`});
+      insights.push({type:'bad',ic:'⏳',t:'Pocas sesiones',d:`Solo <strong>${consistency.sessions}</strong> sesiones en ${cw} semana${cw!==1?'s':''}. Sin constancia no hay progreso — el cuerpo necesita estímulo regular.`});
     }
-  }else{
-    insights.push({type:'info',ic:'🌱',t:'Empezando',d:`Necesitas <strong>${CYCLE_MIN_SESSIONS-consistency.sessions}</strong> sesiones más para tu primer análisis completo. Sigue así.`});
   }
 
   // ═ B) PESO CORPORAL ═
@@ -5128,37 +5680,40 @@ function coach_generateInsights(){
     insights.push({type:'warn',ic:'⚖️',t:'Desbalance de días',d:`Has hecho <strong>${balance.cnt.A} días A, ${balance.cnt.B} días B, ${balance.cnt.C} días C</strong>. El día ${worst[0]} quedó relegado — la rotación A→B→C mantiene equilibrio.`});
   }
 
-  // ═ D) PROGRESIÓN POR EJERCICIO ═
+  // ═ D) PROGRESIÓN POR EJERCICIO ═ (mismo diagnóstico que el análisis detallado y las propuestas)
   const strengthEx=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
-  const cycleStart=coach_cycleStart();
-  const progression={strong_up:[],up:[],stagnant:[],down:[]};
+  const pctTxt=v=>(v>=0?'+':'')+v.toFixed(Math.abs(v)<10?1:0)+'%';
 
-  strengthEx.forEach(ex=>{
-    const p=coach_exerciseProgression(ex.id,cycleStart);
-    if(p.trend==='strong_up')progression.strong_up.push({ex,p});
-    else if(p.trend==='up')progression.up.push({ex,p});
-    else if(p.trend==='stagnant')progression.stagnant.push({ex,p});
-    else if(p.trend==='down')progression.down.push({ex,p});
-  });
-
-  if(progression.strong_up.length>0){
-    const top=progression.strong_up.slice().sort((a,b)=>b.p.pct-a.p.pct)[0];
-    insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> subiste de ${top.p.firstV.toFixed(1)} a ${top.p.lastV.toFixed(1)} kg (+${top.p.pct.toFixed(0)}%). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
+  if(an.strong.length>0){
+    const top=an.strong.slice().sort((a,b)=>b.p.pct-a.p.pct)[0];
+    insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> tu 1RM estimado sube un <strong>${pctTxt(top.p.pct)}</strong> en tus últimas ${top.p.sessions} sesiones (${top.p.firstV} → ${top.p.lastV} kg). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
   }
 
-  if(progression.up.length>=2){
-    const names=progression.up.slice(0,3).map(x=>esc(x.ex.n)).join(', ');
-    insights.push({type:'good',ic:'💪',t:'Fuerza subiendo',d:`Has progresado bien en <strong>${progression.up.length}</strong> ejercicios: ${names}.`});
+  if(an.up.length>=2){
+    const names=an.up.slice(0,3).map(x=>esc(x.ex.n)).join(', ');
+    const dp=an.up.filter(x=>x.p.repsUp).length;
+    insights.push({type:'good',ic:'💪',t:'Fuerza subiendo',d:`Progresas en <strong>${an.up.length}</strong> ejercicio${an.up.length!==1?'s':''}: ${names}${an.up.length>3?` y ${an.up.length-3} más`:''}.${dp?` ${dp} con doble progresión (mismo peso, más reps): así se hace.`:''}`});
   }
 
-  if(progression.stagnant.length>0){
-    const names=progression.stagnant.slice(0,2).map(x=>`<strong>${esc(x.ex.n)}</strong>`).join(' y ');
-    insights.push({type:'warn',ic:'🔀',t:'Estancamiento detectado',d:`${names} ${progression.stagnant.length>1?'llevan':'lleva'} 3+ sesiones sin subir peso. Considera: cambiar reps (probar 6-8), bajar 10% y reconstruir, o sustituir por una variante.`});
+  // Primero el ejercicio cuya propuesta está activa: el «próximo paso» nombra la que ves (o verás) arriba
+  const byStep=arr=>arr.slice().sort((a,b)=>_coachStepRank(a,an,pend,resIds)-_coachStepRank(b,an,pend,resIds));
+  if(an.stagnant.length>0){
+    const st=byStep(an.stagnant);
+    const next=_coachNextStep(st[0],an,pend,resIds);
+    insights.push({type:'warn',ic:'🔀',t:'Estancamiento detectado',d:`${_namesList(st)} ${st.length>1?'llevan':'lleva'} 4+ sesiones (3+ semanas) sin mejorar peso ni reps.${next?` Próximo paso${st.length>1?` en ${esc(st[0].ex.n)}`:''}: ${esc(next)}.`:''}`});
   }
 
-  if(progression.down.length>0){
-    const names=progression.down.slice(0,2).map(x=>esc(x.ex.n)).join(', ');
-    insights.push({type:'bad',ic:'📉',t:'Retroceso',d:`Bajaste peso en <strong>${names}</strong>. Puede ser fatiga, mala técnica o falta de sueño. Revisa cómo te sientes esta semana.`});
+  if(an.down.length>0){
+    const dn=byStep(an.down);
+    const next=_coachNextStep(dn[0],an,pend,resIds);
+    insights.push({type:'bad',ic:'📉',t:'Retroceso',d:`En ${_namesList(dn)} llevas dos sesiones seguidas por debajo de tu nivel. Puede ser fatiga, mala técnica o falta de sueño.${next?` Próximo paso${dn.length>1?` en ${esc(dn[0].ex.n)}`:''}: ${esc(next)}.`:''}`});
+  }
+
+  // En espera: recién cambiados, en descarga o recuperándose. El Coach no propone nada nuevo para ellos todavía.
+  if(an.held.length>0){
+    const parts=an.held.map(x=>`<strong>${esc(x.ex.n)}</strong> (${esc(_holdTxt(x))})`),n=parts.length;
+    const txt=n===1?parts[0]:n<=3?`${parts.slice(0,-1).join(', ')} y ${parts[n-1]}`:`${parts.slice(0,2).join(', ')} y ${n-2} más`;
+    insights.push({type:'info',ic:'⏳',t:'Dale unas sesiones',d:`${txt}. Antes de proponerte otro cambio ${n>1?'en estos ejercicios':'en este ejercicio'}, el Coach espera a ver cómo ${n>1?'responden':'responde'}.`});
   }
 
   // ═ E) HITOS Y RÉCORDS ═
@@ -5206,7 +5761,8 @@ function coach_generateInsights(){
       insights.push({type:'warn',ic:'🔥',t:'Zona con RPE alto sostenido',d:`Tus últimas sesiones de <strong>${esc(muscleLbl)}</strong> promedian RPE ${hot[0].avg} ("al límite"). Considera bajar 5% el peso o añadir 1 día de descanso entre sesiones que la trabajen.`});
     }
     const cool=rpeZones.filter(z=>z.avg<=1.4&&z.samples>=3);
-    if(cool.length>0&&hot.length===0){
+    // Sin «margen para subir» si toca descargar o ya estás en descarga (no contradecir a la propuesta)
+    if(cool.length>0&&hot.length===0&&!an.fatigue.deloadNeeded&&!getActiveDeload()){
       const muscleLbl=MUSCLE_GROUPS.find(m=>m.id===cool[0].muscle)?.label||cool[0].muscle;
       insights.push({type:'info',ic:'📈',t:'Margen para progresar',d:`Tus sesiones de <strong>${esc(muscleLbl)}</strong> promedian RPE ${cool[0].avg} ("fácil"). Hay espacio para subir peso o reps con seguridad.`});
     }
@@ -5244,134 +5800,107 @@ function coach_generateInsights(){
   return insights;
 }
 
-// ─── 3. GENERADOR DE RECOMENDACIONES DE PLAN ──────────────
-
-function coach_generateRecommendations(){
-  const cycleStart=coach_cycleStart();
-  const recs=[];
-  const strengthEx=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
-
-  // Analizar cada ejercicio
-  const analyses=strengthEx.map(ex=>({ex,p:coach_exerciseProgression(ex.id,cycleStart)}));
-
-  const stagnant=analyses.filter(a=>a.p.trend==='stagnant');
-  const regressing=analyses.filter(a=>a.p.trend==='down');
-  const strongProg=analyses.filter(a=>a.p.trend==='strong_up');
-
-  // REC 1: Cambiar ejercicios estancados
-  stagnant.forEach(s=>{
-    const alt=coach_suggestAlternative(s.ex);
-    if(alt){
-      recs.push({
-        priority:'med',
-        badge:'Cambio',
-        title:`Sustituir ${s.ex.n}`,
-        body:`Llevas ${s.p.sessions} sesiones sin subir peso. Un nuevo estímulo puede romper el estancamiento.`,
-        diff:[
-          {sym:'–',symType:'rm',text:s.ex.n},
-          {sym:'+',symType:'add',text:alt.n+' — '+alt.reason}
-        ],
-        action:{type:'replace',exId:s.ex.id,newEx:alt}
-      });
-    }else{
-      recs.push({
-        priority:'med',
-        badge:'Ajuste',
-        title:`Ajustar ${s.ex.n}`,
-        body:`Llevas ${s.p.sessions} sesiones estancado. Prueba bajar el peso un 10% y reconstruir con técnica perfecta.`,
-        diff:[
-          {sym:'↻',symType:'ch',text:`${s.ex.n}: ${s.p.lastV} kg → ${(s.p.lastV*0.9).toFixed(1)} kg, mismas reps`}
-        ],
-        action:{type:'deload',exId:s.ex.id}
-      });
-    }
-  });
-
-  // REC 2: Ajustar rango de reps según fase
-  const mesocycleNum=(S.mesocycles?.length||0)+1;
-  const phases=[
-    {n:1,name:'Adaptación',range:'12-15',focus:'Aprender movimiento y construir base'},
-    {n:2,name:'Hipertrofia',range:'8-12',focus:'Ganar músculo'},
-    {n:3,name:'Fuerza',range:'6-8',focus:'Maximizar fuerza con más peso'},
-    {n:4,name:'Volumen',range:'10-15',focus:'Densidad muscular y resistencia'},
-  ];
-  const currentPhase=phases[(mesocycleNum-1)%phases.length];
-  const nextPhase=phases[mesocycleNum%phases.length];
-
-  if(mesocycleNum>=2){
-    recs.push({
-      priority:'high',
-      badge:'Fase nueva',
-      title:`Cambiar a fase: ${nextPhase.name}`,
-      body:`Llevas ~4 semanas en fase ${currentPhase.name} (${currentPhase.range} reps). Rotar te evita estancamiento y da nuevo estímulo a tu cuerpo.`,
-      diff:[
-        {sym:'↻',symType:'ch',text:`Reps: ${currentPhase.range} → ${nextPhase.range} en ejercicios principales`},
-        {sym:'→',symType:'ch',text:`Foco: ${nextPhase.focus}`}
-      ],
-      action:{type:'phase',phase:nextPhase}
-    });
+// ─── 3. ANÁLISIS DETALLADO (del mismo diagnóstico que las propuestas) ──
+// Cada ejercicio sale en un solo sitio: «Mantener» (progresa y no se toca), «A vigilar» (sin cambio propuesto)
+// o en las propuestas. La descarga es temporal: después se vuelve a este mismo plan.
+function coach_detailHtml(an,pv){
+  const pending=pv.active.concat(pv.reserve);
+  const pendEx=new Set(pending.map(p=>p.exId).filter(Boolean));
+  const pendIds=new Set(pending.map(p=>p.id));
+  const pctTxt=v=>(v>=0?'+':'')+v.toFixed(Math.abs(v)<10?1:0)+'%';
+  const hasDeload=!!getActiveDeload()||an.candidates.some(c=>c.type==='deload')||pending.some(p=>p.type==='deload');
+  // Los ejercicios «en espera» (recién cambiados, en descarga o recuperándose) van a «Vigilar» con su motivo
+  const keep=an.up.filter(i=>!i.hold&&!an.candByEx[i.ex.id]&&!pendEx.has(i.ex.id)).sort((a,b)=>b.p.pct-a.p.pct);
+  const watch=an.items.filter(i=>(i.hold||['flat','stagnant','down'].includes(i.p.trend))&&!an.candByEx[i.ex.id]&&!pendEx.has(i.ex.id))
+    .sort((a,b)=>(b.hold?1:0)-(a.hold?1:0));
+  const row=(sym,cls,txt)=>`<div class="rec-diff-row"><span class="sym ${cls}">${sym}</span><span>${txt}</span></div>`;
+  let h='';
+  if(keep.length){
+    h+=`<div class="rec-card">
+      <div class="rec-head"><span class="rec-badge high">Mantener</span><div class="rec-title">No cambies lo que funciona</div></div>
+      <div class="rec-body">${keep.length} ejercicio${keep.length!==1?'s':''} progresa${keep.length!==1?'n':''}: mantén ejercicio, series y reps.${hasDeload?' La descarga es temporal: después vuelves a este mismo plan.':''}</div>
+      <div class="rec-diff">${keep.slice(0,4).map(i=>row('✓','add',`${esc(i.ex.n)}: 1RM est. ${pctTxt(i.p.pct)}${i.p.repsUp?' · más reps, mismo peso':''}`)).join('')}
+        ${keep.length>4?row('+','add',`y ${keep.length-4} más`):''}</div>
+    </div>`;
   }
-
-  // REC 3: Celebrar progresión fuerte (no cambiar lo que funciona)
-  if(strongProg.length>=2){
-    recs.push({
-      priority:'high',
-      badge:'Mantener',
-      title:'No cambies lo que funciona',
-      body:`${strongProg.length} ejercicios progresan excelentemente. Mantén estos ejercicios intactos — los cambios solo donde hay estancamiento.`,
-      diff:strongProg.slice(0,3).map(s=>({sym:'✓',symType:'add',text:`${s.ex.n}: +${s.p.change.toFixed(1)} kg (${s.p.pct.toFixed(0)}%)`})),
-      action:{type:'keep'}
-    });
+  if(watch.length){
+    const st=i=>i.hold?(i.hold.kind==='changed'?`${_holdTxt(i)} · dale unas sesiones`:_holdTxt(i))
+      :i.p.trend==='down'?(i.covered==='deload'?'por debajo de tu nivel · lo cubre la descarga':'por debajo de tu nivel · si sigue, el Coach lo ajustará')
+      :i.p.trend==='stagnant'?`${i.p.stagSessions} sesiones sin mejorar`:'estable · sigue el plan';
+    h+=`<div class="rec-card">
+      <div class="rec-head"><span class="rec-badge med">Vigilar</span><div class="rec-title">Sin cambios por ahora</div></div>
+      <div class="rec-diff">${watch.slice(0,5).map(i=>i.hold?row('…','hold',`${esc(i.ex.n)}: ${esc(st(i))}`)
+        :row(i.p.trend==='down'?'▼':i.p.trend==='stagnant'?'▬':'=','ch',`${esc(i.ex.n)}: ${st(i)}`)).join('')}
+        ${watch.length>5?row('+','ch',`y ${watch.length-5} más`):''}</div>
+    </div>`;
   }
-
-  // REC 4: Deload preventivo si hay regresiones múltiples
-  if(regressing.length>=2){
-    recs.push({
-      priority:'high',
-      badge:'Descarga',
-      title:'Semana de descarga recomendada',
-      body:`${regressing.length} ejercicios con retroceso puede indicar fatiga acumulada. Una semana con 60% del peso y mismo volumen permite recuperar.`,
-      diff:[{sym:'↻',symType:'ch',text:'Próxima semana: baja todos los pesos al 60%, mantén series y reps'}],
-      action:{type:'deload_all'}
-    });
-  }
-
-  // REC 5: Si no hay problemas mayores, sugerir progresar
-  if(stagnant.length===0&&regressing.length===0&&strongProg.length===0&&analyses.length>=4){
-    recs.push({
-      priority:'med',
-      badge:'Progresión',
-      title:'Añade intensidad gradual',
-      body:'Todo avanza estable. Prueba añadir una serie extra en los ejercicios principales esta semana para acelerar ganancias.',
-      diff:[
-        {sym:'+',symType:'add',text:'Sentadilla, Press y Jalón: 3→4 series'},
-        {sym:'=',symType:'ch',text:'Resto: mantener'}
-      ],
-      action:{type:'add_volume'}
-    });
-  }
-
-  return recs;
+  const next=an.preview.active.filter(p=>!pendIds.has(p.id));
+  const nRes=an.preview.reserve.filter(p=>!pendIds.has(p.id)).length;
+  h+=`<div class="rec-card">
+    <div class="rec-head"><span class="rec-badge">Próximo ciclo</span><div class="rec-title">Al cerrar el ciclo te propondré</div></div>
+    ${next.length?`<div class="rec-diff">${next.map((p,i)=>row(String(i+1),_propPrio(p)<=1?'ch':'add',`${esc(p.title)}${p.diff?` <span class="rec-chip">${esc(p.diff)}</span>`:''}`)).join('')}
+      ${nRes?row('…','ch',`y ${nRes} más en reserva (máx. ${PROP_MAX_TOTAL} cambios por ciclo y 1 por día)`):''}</div>`
+      :`<div class="rec-body" style="margin:0">${pending.length?'Tus propuestas actuales siguen vigentes.':'Ningún cambio: tu plan funciona. Sigue así.'}</div>`}
+  </div>`;
+  return h;
 }
 
+// Alternativas REALES de la biblioteca (EXERCISE_DB), por ejercicio de biblioteca, en orden de preferencia.
+// Solo máquinas, cables, mancuernas y Smith que ya hay en tu gimnasio, y seguras para principiantes.
+const COACH_ALTS={
+  lib_squat_smith:[['lib_leg_press','misma musculatura con la espalda apoyada: más carga con menos técnica'],['lib_goblet_squat','sentadilla libre y ligera para afinar técnica y profundidad']],
+  lib_leg_press:[['lib_squat_smith','patrón de sentadilla guiado: más trabajo de glúteo y core'],['lib_goblet_squat','sentadilla libre y ligera para afinar técnica y profundidad']],
+  lib_goblet_squat:[['lib_leg_press','más carga con la espalda apoyada'],['lib_squat_smith','patrón guiado para seguir subiendo peso']],
+  lib_leg_ext:[['lib_leg_press','cuádriceps con un movimiento compuesto: más carga total'],['lib_goblet_squat','cuádriceps y glúteo con un patrón funcional']],
+  lib_leg_curl:[['lib_leg_curl_seated','cambia el ángulo de la cadera: más estiramiento del femoral'],['lib_rdl_db','femoral y glúteo en estiramiento, con mancuernas']],
+  lib_leg_curl_seated:[['lib_leg_curl','tumbado: otro ángulo para el femoral'],['lib_rdl_db','femoral y glúteo en estiramiento, con mancuernas']],
+  lib_rdl_db:[['lib_leg_curl_seated','aísla el femoral sin cargar la espalda']],
+  lib_press_incline_smith:[['lib_press_incline_db','más recorrido y cada brazo trabaja por su cuenta'],['lib_press_flat_db','press plano: otro ángulo para el pecho']],
+  lib_press_flat_db:[['lib_press_incline_smith','guiado e inclinado: más pecho superior'],['lib_press_incline_db','inclinado: más pecho superior']],
+  lib_press_incline_db:[['lib_press_incline_smith','guiado: más estable para subir peso'],['lib_press_flat_db','press plano: otro ángulo para el pecho']],
+  lib_fly_machine:[['lib_cable_fly_low','tensión constante y énfasis en la parte alta del pecho'],['lib_cable_fly_high','tensión constante y énfasis en la parte baja del pecho']],
+  lib_cable_fly_low:[['lib_fly_machine','más estable: centras el esfuerzo en el pecho'],['lib_cable_fly_high','otro ángulo: pecho inferior']],
+  lib_cable_fly_high:[['lib_fly_machine','más estable: centras el esfuerzo en el pecho'],['lib_cable_fly_low','otro ángulo: pecho superior']],
+  lib_pushup:[['lib_press_flat_db','permite subir la carga poco a poco']],
+  lib_lat_pulldown:[['lib_pullover_db','trabaja el dorsal con otro ángulo y más estiramiento'],['lib_row_cable','jale horizontal: dorsal y espalda media']],
+  lib_pullover_db:[['lib_lat_pulldown','jale vertical: más carga para el dorsal']],
+  lib_row_machine:[['lib_row_cable','agarre libre y más recorrido para la espalda media'],['lib_row_db','un brazo cada vez: corrige desequilibrios']],
+  lib_row_db:[['lib_row_cable','tensión constante en todo el recorrido'],['lib_row_machine','con apoyo de pecho: más estable para subir peso']],
+  lib_row_cable:[['lib_row_machine','con apoyo de pecho: más estable para subir peso'],['lib_row_db','un brazo cada vez: corrige desequilibrios']],
+  lib_face_pull:[['lib_rev_fly_machine','deltoides posterior con un recorrido guiado']],
+  lib_rev_fly_machine:[['lib_face_pull','deltoides posterior con rotación externa: muy sano para el hombro']],
+  lib_lat_raise_cable:[['lib_lat_raise_db','otra curva de resistencia: más tensión arriba']],
+  lib_lat_raise_db:[['lib_lat_raise_cable','tensión constante desde abajo']],
+  lib_shoulder_press_db:[['lib_shoulder_press_machine','guiado: más seguro para subir peso']],
+  lib_shoulder_press_machine:[['lib_shoulder_press_db','más recorrido y estabilidad del hombro']],
+  lib_front_raise_db:[['lib_shoulder_press_machine','deltoides frontal con un press guiado']],
+  lib_curl_cable:[['lib_hammer_curl','agarre neutro: suma el braquial y el antebrazo'],['lib_curl_db','un brazo cada vez, con supinación'],['lib_curl_machine','con apoyo: aísla mejor el bíceps']],
+  lib_curl_db:[['lib_curl_cable','tensión constante en todo el recorrido'],['lib_hammer_curl','agarre neutro: suma el braquial']],
+  lib_hammer_curl:[['lib_curl_cable','tensión constante en todo el recorrido']],
+  lib_curl_machine:[['lib_curl_db','más libertad de movimiento']],
+  lib_curl_db_concentrated:[['lib_curl_cable','tensión constante en todo el recorrido']],
+  lib_tricep_pushdown:[['lib_tricep_overhead_cable','brazos sobre la cabeza: más estiramiento de la cabeza larga del tríceps'],['lib_tricep_machine','con apoyo: más estable para subir peso']],
+  lib_tricep_overhead_cable:[['lib_tricep_pushdown','más carga con los codos pegados']],
+  lib_tricep_machine:[['lib_tricep_pushdown','tensión constante en polea']],
+  lib_skull_crusher_db:[['lib_tricep_overhead_cable','mismo estiramiento con menos estrés en el codo']],
+  lib_crunch_cable:[['lib_crunch_machine','más estable: centras el esfuerzo en el abdomen'],['lib_leg_raise','abdomen inferior con tu peso corporal']],
+  lib_crunch_machine:[['lib_crunch_cable','más recorrido y tensión constante']],
+  lib_plank:[['lib_crunch_cable','permite progresar con carga']],
+  lib_leg_raise:[['lib_crunch_cable','permite progresar con carga']],
+};
+// Devuelve {id, n, reason, lib} de un ejercicio de la biblioteca que no esté ya en el plan, o null.
 function coach_suggestAlternative(ex){
-  // Mapeo de alternativas dentro del equipamiento disponible
-  const alts={
-    'a2':{n:'Sentadilla búlgara con mancuerna',reason:'trabaja cada pierna por separado, rompe desbalances'},
-    'a3':{n:'Sentadilla goblet con mancuerna',reason:'variación funcional del patrón de sentadilla'},
-    'a4':{n:'Buenos días en Smith',reason:'cambia el ángulo de tensión sobre femorales'},
-    'a5':{n:'Elevación de piernas colgado',reason:'progresión más exigente del abdomen'},
-    'b2':{n:'Press con mancuernas en banco inclinado',reason:'mayor rango de movimiento y activación del pecho'},
-    'b3':{n:'Cruce de cables alto',reason:'enfatiza la contracción final del pecho'},
-    'b4':{n:'Elevación lateral con mancuerna',reason:'control unilateral y mejor mente-músculo'},
-    'b5':{n:'Press francés con mancuerna',reason:'mayor estiramiento en tríceps'},
-    'c2':{n:'Jalón en polea con agarre neutro',reason:'mejor activación de dorsales y menos estrés en hombros'},
-    'c3':{n:'Remo en polea con agarre ancho',reason:'más trabajo en dorsales y trapecios medios'},
-    'c4':{n:'Remo en T con mancuerna',reason:'enfatiza zona media de la espalda'},
-    'c5':{n:'Curl martillo con mancuernas',reason:'cambia ángulo, trabaja braquial y antebrazo'},
-    'c6':{n:'Face pull en polea alta',reason:'mejor activación de deltoides posteriores y trapecios'},
-  };
-  return alts[ex.id]||null;
+  if(!ex||ex.cardio)return null;
+  const src=_libIdOf(ex),inPlan=_planLibIds();
+  const ok=id=>{const l=EXERCISE_DB.find(e=>e.id===id);return l&&!l.cardio&&id!==src&&!inPlan.has(id)?l:null;};
+  for(const [id,reason] of (COACH_ALTS[src]||[])){const l=ok(id);if(l)return{id:l.id,n:l.n,reason,lib:l};}
+  // Sin mapa: otro ejercicio del mismo grupo muscular (mejor si es del mismo tipo, compuesto o de aislamiento)
+  const srcLib=EXERCISE_DB.find(e=>e.id===src);
+  const muscle=ex.muscle||(srcLib&&srcLib.muscle);
+  if(!muscle)return null;
+  const same=EXERCISE_DB.filter(e=>e.muscle===muscle&&ok(e.id));
+  const pick=same.find(e=>!!e.compound===isCompoundEx(ex))||same[0];
+  return pick?{id:pick.id,n:pick.n,reason:'mismo grupo muscular con otro estímulo',lib:pick}:null;
 }
 
 // ─── 4. APLICAR RECOMENDACIONES AL PLAN ───────────────────
@@ -5379,7 +5908,7 @@ function coach_suggestAlternative(ex){
 function coach_applyRecommendations(){
   confirmModal({
     title:'Cerrar ciclo actual',
-    body:'Se archivará el ciclo con su resumen y empezará un nuevo período de análisis de ~4 semanas. Las recomendaciones son sugerencias para que tú las apliques manualmente en tu entrenamiento.',
+    body:'Se archivará el ciclo con su resumen y empezará uno nuevo de 4 semanas. El Coach te dejará sus propuestas (máx. 3 cambios) y tú decides cuáles aplicar.',
     okText:'Cerrar ciclo',
     cancelText:'Cancelar',
     onOk:coach_applyRecommendationsConfirmed
@@ -5387,17 +5916,15 @@ function coach_applyRecommendations(){
 }
 function coach_applyRecommendationsConfirmed(){
   const cycle=coach_cycleData();
-  const insights=coach_generateInsights();
+  const an=coach_analyze();
+  const insights=coach_generateInsights(an,[]);
 
-  // Generar propuestas reales que el usuario puede aprobar/ignorar
-  const proposals=coach_generateProposals(cycle);
-  // Serializar las propuestas (sin funciones) para guardar en estado
-  S.pendingCoachProposals=(proposals||[]).map(p=>({
-    id:p.id,type:p.type,ic:p.ic,tag:p.tag,title:p.title,description:p.description,
-    exId:p.exId||null,dayKey:p.dayKey||null,libExId:p.libExId||null
-  }));
+  // Propuestas reales (todas, ordenadas por prioridad): las 3 primeras activas, el resto en reserva
+  const proposals=coach_generateProposals(cycle,an);
+  S.pendingCoachProposals=_sanitizeProposals(proposals);
+  const nAct=proposals.filter(p=>!p.reserve).length,nRes=proposals.length-nAct;
 
-  const summary=`Ciclo completado: ${cycle.sessions.length} sesiones en ${Math.round(cycle.weeks)} semanas. ${proposals.length} propuesta${proposals.length!==1?'s':''} del coach.`;
+  const summary=`Ciclo completado: ${cycle.sessions.length} sesiones en ${Math.max(1,Math.round(cycle.weeks))} semanas. ${nAct} propuesta${nAct!==1?'s':''} del coach${nRes?` (+${nRes} en reserva)`:''}.`;
   const mesocycle={
     num:(S.mesocycles?.length||0)+1,startTs:cycle.start,endTs:Date.now(),appliedAt:Date.now(),
     sessionCount:cycle.sessions.length,summary,
@@ -5409,11 +5936,17 @@ function coach_applyRecommendationsConfirmed(){
   S.coachStart=Date.now(); // reiniciar ciclo
   saveState();
 
-  const msg=proposals.length>0
-    ?`🚀 Ciclo cerrado · ${proposals.length} propuesta${proposals.length!==1?'s':''} esperan tu aprobación`
+  const msg=nAct>0
+    ?`🚀 Ciclo cerrado · ${nAct} propuesta${nAct!==1?'s':''} ${nAct!==1?'esperan':'espera'} tu decisión`
     :`🚀 Nuevo ciclo iniciado · ${cycle.sessions.length} sesiones completadas`;
   toast(msg,3500);
   go('coach');
+  if(nAct>0)goCoachProposals();
+}
+// Abre el Coach con sus propuestas a la vista (desde Inicio o al cerrar el ciclo)
+function goCoachProposals(){
+  if(S.tab!=='coach')go('coach');
+  requestAnimationFrame(()=>{const el=document.getElementById('coach-props');if(el)el.scrollIntoView({block:'start'});});
 }
 
 // ─── ANÁLISIS SEMANAL (mini-insight cada 7 días) ─────────────
@@ -5530,7 +6063,7 @@ function coach_weeklyInsight(){
 
   // ── Casos normales (ya hay sesiones) ──
   if(prev.sessions===0){
-    description=`Llevas ${cur.sessions} sesión${cur.sessions!==1?'es':''} esta semana. Sigue así para construir un baseline.`;
+    description=`Llevas ${cur.sessions} ${cur.sessions===1?'sesión':'sesiones'} esta semana. Sigue así para construir un baseline.`;
   }else if(sessionsDiff>0){
     description=`Has hecho ${sessionsDiff} sesión más que la semana pasada. ${volumePct>=10?`Volumen total: +${volumePct}%, gran progreso.`:'Buena consistencia.'}`;
   }else if(sessionsDiff<0){
@@ -5663,33 +6196,33 @@ function coach_bodyweightPerformanceInsight(){
 
 // ─── 5. SCORE GENERAL DEL MESOCICLO ────────────────────────
 
-function coach_score(){
-  const consistency=coach_consistency(CYCLE_WEEKS);
+function coach_score(an){
+  an=an||coach_analyze();
+  const consistency=coach_consistency(coach_consistencyWindow());
   const cycle=coach_cycleData();
 
   let score=0,max=100;
   // Consistencia (40 pts)
   score+=Math.min(40,consistency.rate*40);
 
-  // Progresión (40 pts)
-  const strengthEx=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
-  const progs=strengthEx.map(ex=>coach_exerciseProgression(ex.id,cycle.start));
-  const progressing=progs.filter(p=>p.trend==='up'||p.trend==='strong_up').length;
-  const stagnant=progs.filter(p=>p.trend==='stagnant').length;
-  const regressing=progs.filter(p=>p.trend==='down').length;
-  const withData=progs.filter(p=>p.trend!=='insufficient').length;
+  // Progresión (40 pts) — mismo diagnóstico que el resto del Coach (últimas sesiones de cada ejercicio)
+  const progressing=an.up.length,regressing=an.down.length,withData=an.withData.length;
   if(withData>0){
     score+=Math.max(0,Math.min(40,(progressing/withData)*40-(regressing/withData)*10));
   }
 
-  // Volumen total (20 pts) — completaste las sesiones planeadas (según tu objetivo semanal).
-  // Las semanas de descanso planificado no cuentan como semanas esperadas.
-  const restInCycle=restWeeksInWindow(cycle.start,Date.now());
-  const effCycleWeeks=Math.max(1,CYCLE_WEEKS-restInCycle);
-  const expectedSessions=effCycleWeeks*getWeeklyTarget();
-  score+=Math.min(20,(cycle.sessions.length/expectedSessions)*20);
+  // Volumen (20 pts) — sesiones hechas frente a las esperadas en lo que llevas de ciclo (máx. sus 4 últimas
+  // semanas), según tu objetivo semanal. Las semanas de descanso planificado no cuentan como esperadas.
+  const now=Date.now(),winStart=Math.max(cycle.start,now-CYCLE_WEEKS*7*86400000);
+  const elapsedW=Math.max(1,Math.ceil((now-winStart)/(7*86400000)));
+  const restInWin=restWeeksInWindow(winStart,now);
+  const expectedSessions=Math.max(1,elapsedW-restInWin)*getWeeklyTarget();
+  const done=S.sessions.filter(s=>s.ts>=winStart).length;
+  score+=Math.min(20,(done/expectedSessions)*20);
 
   score=Math.max(0,Math.min(100,Math.round(score)));
+  // Ciclo recién empezado: estado neutro (sin nota) hasta que pase su primera semana
+  if(cycle.fresh)return{score,grade:'Nuevo ciclo',color:'var(--blue)',fresh:true};
   let grade='—',color='var(--text3)';
   if(score>=90){grade='Excelente';color='var(--green)';}
   else if(score>=75){grade='Muy bien';color='#86efac';}
@@ -5713,7 +6246,7 @@ function renderCoach(){
     <div class="coach-hero">
       <div class="coach-hero-icon">🧠</div>
       <div class="coach-hero-title">Analizando tu progreso</div>
-      <div class="coach-hero-sub">Después de <strong style="color:var(--green)">${remaining}</strong> sesión${remaining!==1?'es':''} más, el coach podrá analizar tu patrón de entrenamiento y darte recomendaciones personalizadas.</div>
+      <div class="coach-hero-sub">Después de <strong style="color:var(--green)">${remaining}</strong> ${remaining===1?'sesión':'sesiones'} más, el coach podrá analizar tu patrón de entrenamiento y darte recomendaciones personalizadas.</div>
     </div>
     <div class="sh">Qué hace el coach</div>
     <div class="insight">
@@ -5727,7 +6260,7 @@ function renderCoach(){
       <div class="insight-ic info">🔄</div>
       <div class="insight-body">
         <div class="insight-t">Renueva tu plan cada 4 semanas</div>
-        <div class="insight-d">Cambia ejercicios estancados, ajusta el rango de reps, rota fases (adaptación → hipertrofia → fuerza).</div>
+        <div class="insight-d">Te propone cambios concretos (series, esquema o ejercicio) y semanas de descarga cuando toca. Tú decides si los aplicas.</div>
       </div>
     </div>
     <div class="insight">
@@ -5742,55 +6275,77 @@ function renderCoach(){
     </div>`;
   }
 
-  // Caso 2: Ciclo activo — mostrar dashboard del coach
-  const consistency=coach_consistency(Math.max(1,Math.ceil(cycle.weeks)));
-  const scoreData=coach_score();
-  const insights=coach_generateInsights();
-  const recs=cycle.readyForReview?coach_generateRecommendations():[];
-
-  // Métricas clave
-  const cycleStart=cycle.start;
-  const strengthEx=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio);
-  const progs=strengthEx.map(ex=>coach_exerciseProgression(ex.id,cycleStart));
-  const progressing=progs.filter(p=>p.trend==='up'||p.trend==='strong_up').length;
-  const withData=progs.filter(p=>p.trend!=='insufficient').length;
-  const totalGain=progs.filter(p=>p.change>0).reduce((a,p)=>a+p.change,0);
+  // Caso 2: Ciclo activo — mostrar dashboard del coach (todo sale de un único diagnóstico)
+  const an=coach_analyze();
+  const pv=coach_pendingView(an);
+  const pend=pv.active.concat(pv.reserve);
+  const cw=coach_consistencyWindow();
+  const consistency=coach_consistency(cw);
+  const scoreData=coach_score(an);
+  const insights=coach_generateInsights(an,pend,new Set(pv.reserve.map(p=>p.id)));
   const weight=coach_weightTrend();
 
-  // Ciclo progress circle
+  // Métricas clave: progresan / fuerza estimada (media del % de 1RM estimado de cada ejercicio)
+  const progressing=an.up.length,withData=an.withData.length;
+  const avgPct=withData?an.withData.reduce((a,i)=>a+i.p.pct,0)/withData:null;
+
+  // Ciclo: semana con tope (nunca «28/4»), anillo, estado vencido / nuevo
   const C=2*Math.PI*20;
   const cycleOff=C*(1-cycle.cycleProgress);
+  const overW=cycle.overdue?Math.floor(cycle.weeks-CYCLE_WEEKS):0;
+  const weeksTxt=cycle.weeks<1?`${cycle.days} día${cycle.days!==1?'s':''}`:`${Math.round(cycle.weeks*10)/10} semanas`;
+  const R=2*Math.PI*32;
+  const ringOff=scoreData.fresh?R:R*(1-scoreData.score/100);
+  // Descarga de todo el plan: no se cambia nada. De un solo ejercicio: solo espera lo que le toca.
+  const dlNow=getActiveDeload();
+  const blockedAll=!!(dlNow&&dlNow.kind==='all');
+  const blockedSome=!blockedAll&&pv.active.some(_proposalBlocked);
+  const legacy=coach_legacyDeload();
 
   return`
   <div class="topbar">
     <div class="topbar-row">
-      <div><h1>Coach IA</h1><div class="sub">Mesociclo ${(S.mesocycles?.length||0)+1} · Semana ${Math.ceil(cycle.weeks)||1}/${CYCLE_WEEKS}</div></div>
-      <div class="score-ring">
+      <div><h1>Coach IA</h1><div class="sub">Mesociclo ${(S.mesocycles?.length||0)+1} · Semana ${cycle.weekNum}/${CYCLE_WEEKS}</div>
+        ${cycle.overdue?`<div class="coach-over">Ciclo terminado${overW>=1?` hace ${overW} sem.`:''}${cycle.readyForReview?' · ciérralo abajo':''}</div>`:''}</div>
+      <div class="score-ring${scoreData.fresh?' fresh':''}" role="img" aria-label="${scoreData.fresh?'Ciclo nuevo: la nota aparece tras la primera semana':`Nota del ciclo: ${scoreData.score} de 100, ${esc(scoreData.grade)}`}">
         <svg viewBox="0 0 80 80">
           <circle class="sbg" cx="40" cy="40" r="32"/>
-          <circle class="sfg" cx="40" cy="40" r="32" style="stroke:${scoreData.color};stroke-dasharray:${2*Math.PI*32};stroke-dashoffset:${2*Math.PI*32*(1-scoreData.score/100)}"/>
+          <circle class="sfg" cx="40" cy="40" r="32" style="${scoreData.fresh?'stroke:var(--blue);stroke-dasharray:3 6;stroke-linecap:butt;opacity:.55':`stroke:${scoreData.color};stroke-dasharray:${R};stroke-dashoffset:${ringOff}`}"/>
         </svg>
-        <div class="score-val"><span class="n" style="color:${scoreData.color}">${scoreData.score}</span><span class="u">${scoreData.grade}</span></div>
+        <div class="score-val">${scoreData.fresh
+          ?`<span class="n" style="color:#93c5fd">—</span><span class="u">Nuevo<br>ciclo</span>`
+          :`<span class="n" style="color:${scoreData.color}">${scoreData.score}</span><span class="u">${scoreData.grade}</span>`}</div>
       </div>
     </div>
   </div>
 
-  ${cycle.readyForReview?`<div class="cta-banner" onclick="coach_applyRecommendations()">
-    <div class="cta-banner-t">✨ Tu análisis de ciclo está listo</div>
-    <div class="cta-banner-d">Revisa las sugerencias abajo e inicia un nuevo período de análisis</div>
+  ${lightBannerHtml('coach')}
+
+  ${legacy?`<div class="card legacy-dl">
+    <div class="legacy-dl-t">🔧 Tu plan sigue con series reducidas</div>
+    <div class="legacy-dl-d">Una descarga anterior bajó tus series y nunca se deshizo. ¿Las devuelvo a lo normal?</div>
+    <div class="rec-diff" style="margin-bottom:10px">${legacy.fixes.slice(0,6).map(f=>`<div class="rec-diff-row"><span class="sym add">↑</span><span>${esc(f.n)}: ${f.from} → ${f.to} series</span></div>`).join('')}${legacy.fixes.length>6?`<div class="rec-diff-row"><span class="sym add">+</span><span>y ${legacy.fixes.length-6} más</span></div>`:''}</div>
+    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="coach_fixLegacyDeload(true)">Restaurar series</button><button class="btn bs" style="width:120px" onclick="coach_fixLegacyDeload(false)">Dejar así</button></div>
+  </div>`:''}
+
+  ${cycle.readyForReview?`<div class="cta-banner" role="button" tabindex="0" onclick="coach_applyRecommendations()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();coach_applyRecommendations()}">
+    <div class="cta-banner-t">${cycle.overdue?`⏰ Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:'✨ Tu análisis de ciclo está listo'}</div>
+    <div class="cta-banner-d">${cycle.overdue?'Ciérralo para recibir tus propuestas y empezar uno nuevo':'Revisa el análisis abajo y cierra el ciclo para recibir tus propuestas'}</div>
   </div>`:''}
 
   <div class="coach-cycle">
     <div class="coach-cycle-info">
-      <div class="coach-cycle-lbl">Ciclo actual</div>
-      <div class="coach-cycle-val">${cycle.sessions.length} sesiones · ${Math.round(cycle.weeks*10)/10} semanas</div>
+      <div class="coach-cycle-lbl">${cycle.fresh?'Ciclo nuevo':'Ciclo actual'}</div>
+      <div class="coach-cycle-val">${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} · ${weeksTxt}</div>
+      ${cycle.fresh?`<div class="coach-cycle-sub">Tu nota aparece tras la primera semana. Tus datos anteriores siguen contando.</div>`
+        :cycle.overdue?`<div class="coach-cycle-sub">El ciclo es de ${CYCLE_WEEKS} semanas${cycle.readyForReview?': ciérralo para recibir propuestas':''}</div>`:''}
     </div>
     <div class="coach-cycle-prog">
       <svg viewBox="0 0 50 50">
         <circle class="cbg" cx="25" cy="25" r="20"/>
         <circle class="cfg" cx="25" cy="25" r="20" style="stroke-dasharray:${C};stroke-dashoffset:${cycleOff}"/>
       </svg>
-      <div class="cpct">${Math.round(cycle.cycleProgress*100)}%</div>
+      <div class="cpct">${cycle.overdue?'✓':Math.round(cycle.cycleProgress*100)+'%'}</div>
     </div>
   </div>
 
@@ -5798,7 +6353,7 @@ function renderCoach(){
     <div class="metric-box">
       <div class="ml">Consistencia</div>
       <div class="mv" style="color:${consistency.rate>=0.75?'var(--green)':consistency.rate>=0.5?'var(--amber)':'var(--red)'}">${consistency.perWeek}</div>
-      <div class="md">sesiones/semana</div>
+      <div class="md">sesiones/semana${cw>1?` · ${cw} sem.`:''}</div>
     </div>
     <div class="metric-box">
       <div class="ml">Progresan</div>
@@ -5806,9 +6361,9 @@ function renderCoach(){
       <div class="md">ejercicios</div>
     </div>
     <div class="metric-box">
-      <div class="ml">Fuerza ganada</div>
-      <div class="mv" style="color:var(--green)">+${totalGain.toFixed(1)}</div>
-      <div class="md">kg totales en ciclo</div>
+      <div class="ml">Fuerza estimada</div>
+      <div class="mv" style="color:${avgPct==null?'var(--text3)':avgPct>=0?'var(--green)':'var(--amber)'}">${avgPct==null?'—':(avgPct>=0?'+':'')+avgPct.toFixed(1)+'%'}</div>
+      <div class="md">1RM medio · últimas sesiones</div>
     </div>
     <div class="metric-box">
       <div class="ml">Peso corporal</div>
@@ -5821,46 +6376,95 @@ function renderCoach(){
   ${insights.length===0?`<div class="insight"><div class="insight-ic info">⏳</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
     insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${i.ic}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${i.d}</div></div></div>`).join('')}
 
-  ${(S.pendingCoachProposals&&S.pendingCoachProposals.length>0)?`
-  <div class="sh">💡 El Coach propone — tú decides</div>
-  ${S.pendingCoachProposals.map((p,i)=>`<div class="proposal-card">
-    <div class="proposal-head">
-      <div class="proposal-ic">${esc(p.ic||'')}</div>
-      <div>
-        <div class="proposal-tag">${esc(p.tag||'')}</div>
-        <div class="proposal-t">${esc(p.title||'')}</div>
-        <div class="proposal-d">${esc(p.description||'')}</div>
-      </div>
-    </div>
-    <div class="proposal-actions">
-      <button class="proposal-apply" onclick="applyProposal(${i})">✓ Aplicar</button>
-      <button class="proposal-ignore" onclick="ignoreProposal(${i})">Ignorar</button>
-    </div>
-  </div>`).join('')}`:''}
+  ${pend.length?`<div class="sh" id="coach-props">💡 El Coach propone — tú decides</div>
+  <div class="prop-hint">${blockedAll?'Durante la descarga no se cambia el plan: podrás aplicarlas al terminar.'
+    :`Máximo ${PROP_MAX_TOTAL} cambios por ciclo y 1 por día de rutina${pv.appliedCount?` · llevas ${pv.appliedCount}`:''}.${blockedSome?' Lo que afecta a la descarga en curso podrás aplicarlo al terminarla.':''}`}</div>
+  ${pv.active.map(p=>_proposalCardHtml(p,_proposalBlocked(p))).join('')}
+  ${pv.reserve.length?`<button class="prop-res-tg" aria-expanded="${_coachShowReserve}" onclick="_coachShowReserve=!_coachShowReserve;render()">En reserva (${pv.reserve.length}) <span aria-hidden="true">${_coachShowReserve?'▴':'▾'}</span></button>
+    ${_coachShowReserve?`<div class="prop-res">${pv.reserve.map(p=>`<div class="prop-res-row"><span class="prop-res-n">${esc(p.title||'')}</span><span class="prop-res-d">${esc(_propWhere(p))}</span></div>`).join('')}
+      <div class="prop-res-note">${pv.active.length?'Entran si ignoras alguna de arriba':'Este ciclo ya tiene sus cambios'} (máx. ${PROP_MAX_TOTAL} por ciclo y 1 por día).</div></div>`:''}`:''}`:''}
 
-  ${recs.length>0?`<div class="sh">Análisis detallado</div>
-    ${recs.map(r=>`<div class="rec-card">
-      <div class="rec-head">
-        <span class="rec-badge ${r.priority}">${r.badge}</span>
-        <div class="rec-title">${r.title}</div>
-      </div>
-      <div class="rec-body">${r.body}</div>
-      <div class="rec-diff">
-        ${r.diff.map(d=>`<div class="rec-diff-row"><span class="sym ${d.symType}">${d.sym}</span><span>${d.text}</span></div>`).join('')}
-      </div>
-    </div>`).join('')}
+  ${cycle.readyForReview?`<div class="sh">Análisis detallado</div>
+    ${coach_detailHtml(an,pv)}
     <div style="padding:4px 14px 14px">
       <button class="btn bp" onclick="coach_applyRecommendations()">Cerrar ciclo e iniciar uno nuevo</button>
     </div>`:
     (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">Faltan ~<strong>${Math.max(0,Math.ceil(CYCLE_WEEKS-cycle.weeks))}</strong> semanas para el análisis profundo. Mientras tanto, sigue el plan actual.</div></div></div>`:'')}
+    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">Faltan ~<strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
+    :`<div class="sh">Recomendaciones</div>
+    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`)}
 
   ${S.mesocycles&&S.mesocycles.length>0?`<div class="sh">Ciclos anteriores</div>
     ${S.mesocycles.slice().reverse().slice(0,3).map(m=>`<div class="mesocycle-log">
-      <h4>Mesociclo ${m.num} · ${m.sessionCount} sesiones</h4>
+      <h4>Mesociclo ${esc(m.num)} · ${esc(m.sessionCount)} sesiones</h4>
       <p>${esc(m.summary||'')}</p>
     </div>`).join('')}`:''}
   `;
+}
+
+// ─── 7. TARJETAS DE PROPUESTA (ids estables) ───────────────────
+let _coachShowReserve=false;
+function _propWhere(p){
+  if(p.type==='deload')return'Todo el plan';
+  const dk=p.dayKey||_dayOfEx(p.exId),d=dk&&getPlan()[dk];
+  return d?d.label:'';
+}
+// ¿La descarga activa impide aplicar esta propuesta ahora? Descarga de todo el plan: cualquier cambio.
+// «Reducir volumen» de un ejercicio: solo lo de ese ejercicio y otra descarga (solo hay una a la vez).
+function _proposalBlocked(p){
+  const d=getActiveDeload();
+  if(!d||!p)return false;
+  if(d.kind==='all'||p.type==='deload'||p.type==='rm_set')return true;
+  return !!(p.exId&&d.changes.some(c=>c.exId===p.exId));
+}
+function _proposalCardHtml(p,blocked){
+  const pid=esc(p.id),where=_propWhere(p),pr=_propPrio(p);
+  return`<div class="proposal-card" data-pid="${pid}">
+    <div class="proposal-head">
+      <div class="proposal-ic" aria-hidden="true">${esc(p.ic||'💡')}</div>
+      <div style="min-width:0;flex:1">
+        <div class="proposal-tag p${pr<=1?'w':pr===2?'v':'g'}">${esc(p.tag||'Propuesta')}${where?` · ${esc(where)}`:''}</div>
+        <div class="proposal-t">${esc(p.title||'')}</div>
+        ${p.diff?`<div class="proposal-diff">${esc(p.diff)}</div>`:''}
+        <div class="proposal-d">${esc(p.description||'')}</div>
+      </div>
+    </div>
+    <div class="proposal-actions">
+      <button class="proposal-apply" data-pid="${pid}" onclick="applyProposal(this.dataset.pid)"${blocked?' disabled':''}>${blocked?'Tras la descarga':'✓ Aplicar'}</button>
+      <button class="proposal-ignore" data-pid="${pid}" onclick="ignoreProposal(this.dataset.pid)">Ignorar</button>
+    </div>
+  </div>`;
+}
+
+// ─── 8. SERIES REDUCIDAS POR UNA DESCARGA ANTIGUA (antes de v13 era permanente) ───
+// Busca descargas / «Reducir volumen» aplicadas con la versión anterior (sin dlId) que nunca se deshicieron y
+// ofrece devolver esos ejercicios a sus series por defecto. Tú decides: restaurar o dejarlo así.
+function _defaultSets(ex){
+  const o=Object.values(PLAN).flatMap(d=>d.ex).find(p=>p.id===ex.id);
+  if(o)return parseInt(o.s)||null;
+  const lib=EXERCISE_DB.find(l=>l.id===ex.lib);
+  return lib?parseInt(lib.s)||null:null;
+}
+function coach_legacyDeload(){
+  if(getActiveDeload())return null;
+  const entries=(S.appliedProposals||[]).filter(a=>a&&(a.type==='deload'||a.type==='rm_set')&&!a.dlId&&!a.legacyResolved);
+  if(!entries.length)return null;
+  const all=entries.some(e=>e.type==='deload'),ids=new Set(entries.map(e=>e.exId).filter(Boolean));
+  const plan=getPlan(),fixes=[];
+  Object.keys(plan).forEach(dk=>(plan[dk]&&Array.isArray(plan[dk].ex)?plan[dk].ex:[]).forEach(ex=>{
+    if(!ex||ex.cardio||(!all&&!ids.has(ex.id)))return;
+    const def=_defaultSets(ex),cur=parseInt(ex.s)||0;
+    if(def&&cur>0&&cur<def)fixes.push({exId:ex.id,n:ex.n,from:cur,to:def});
+  }));
+  return fixes.length?{entries,fixes}:null;
+}
+function coach_fixLegacyDeload(restore){
+  const L=coach_legacyDeload();
+  if(!L){render();return;}
+  if(restore)L.fixes.forEach(f=>{const ex=findExInPlan(f.exId);if(ex)ex.s=f.to;});
+  L.entries.forEach(e=>{e.legacyResolved=true;});
+  saveState();render();
+  toast(restore?`✓ Series restauradas en ${L.fixes.length} ejercicio${L.fixes.length!==1?'s':''}`:'De acuerdo, tu plan se queda así');
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -5880,7 +6484,7 @@ function renderDash(){
   const wk=getWeekSessions(),tot=S.sessions.length,target=getWeeklyTarget();
   const greet=['¡Hola, campeón!','¡Vamos, que puedes!','¡Día de sudar!','¡Sigues en pie!','¡A por ello!'][tot%5];
   return`
-  <div class="topbar"><div class="topbar-row"><div><h1>${greet} 💪</h1><div class="sub">${tot===0?'Primera sesión — el inicio es hoy':`${tot} sesión${tot!==1?'es':''} completada${tot!==1?'s':''}`}</div></div>
+  <div class="topbar"><div class="topbar-row"><div><h1>${greet} 💪</h1><div class="sub">${tot===0?'Primera sesión — el inicio es hoy':`${tot} ${tot===1?'sesión':'sesiones'} completada${tot!==1?'s':''}`}</div></div>
   <div style="display:flex;gap:8px;align-items:center">
     <button class="icon-btn" onclick="S.wmodal=true;renderWmodal()"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>Peso</button>
     <button class="settings-btn" aria-label="Ajustes" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
@@ -5899,7 +6503,7 @@ function renderDash(){
             <div style="font-size:12px;color:var(--text2)">${dleft>0?`Quedan ${dleft} día${dleft!==1?'s':''}`:'Termina hoy'} · el Coach no penaliza tu constancia</div>
           </div>
         </div>
-        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5">El descanso es parte del progreso: recuperas fuerza y evitas lesiones.${wk>0?` Aun así llevas ${wk} sesión${wk!==1?'es':''} esta semana.`:''}</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px;line-height:1.5">El descanso es parte del progreso: recuperas fuerza y evitas lesiones.${wk>0?` Aun así llevas ${wk} ${wk===1?'sesión':'sesiones'} esta semana.`:''}</div>
         <button class="btn bs" onclick="endRestWeek()">Terminar descanso y volver a entrenar</button>
       </div>`;
     }
@@ -5913,6 +6517,7 @@ function renderDash(){
     <div style="display:flex;gap:12px;margin-top:9px;font-size:10px;color:var(--text3)"><span style="color:var(--green)">■ Completado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span><span>■ Planificado</span></div>
   </div>`;
   })()}
+  ${dashCoachHtml()}
   <div class="mrow">
     <div class="met"><div class="mval">${tot}</div><div class="mlbl">Sesiones</div></div>
     <div class="met"><div class="mval" style="color:var(--green)">${lw?lw.v:'—'}</div><div class="mlbl">kg hoy</div></div>
@@ -6015,6 +6620,19 @@ function renderDash(){
   `;
 }
 
+// Inicio: aviso de descarga activa + acceso compacto a las propuestas del Coach (se deciden en el Coach)
+function dashCoachHtml(){
+  let h=lightBannerHtml('dash');
+  if((S.pendingCoachProposals||[]).length&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS){
+    const n=coach_pendingView().active.length;
+    if(n)h+=`<button class="coach-entry" onclick="goCoachProposals()">
+      <span class="coach-entry-ic" aria-hidden="true">💡</span>
+      <span class="coach-entry-t">El Coach tiene ${n} propuesta${n!==1?'s':''} para tu rutina<small>Tú decides: aplicar o ignorar</small></span>
+      <span class="coach-entry-go">Ver ›</span></button>`;
+  }
+  return h;
+}
+
 function renderWmodal(){
   const root=document.getElementById('wmodal-root');
   if(!root)return;
@@ -6039,10 +6657,15 @@ function getLastW(exId){
 }
 
 function sugW(exId){
-  const d=S.strength[exId];
-  if(!d||d.length===0)return null;
+  const all=S.strength[exId];
+  if(!all||all.length===0)return null;
+  // Las sesiones de descarga / semana de descanso (dl) no cuentan para decidir si subir: se mira tu última sesión normal
+  const real=all.filter(r=>r&&!r.dl);
+  const d=real.length?real:all;
   const lastRec=d[d.length-1];
   const last=lastRec.v;
+  // Semana de descarga o de descanso: mantener el peso (nunca +2.5)
+  if(isLightNow(exId))return{v:last,label:last+' kg',cls:'keep',light:true};
   // Buscar reps objetivo del ejercicio
   const ex=Object.values(getPlan()).flatMap(day=>day.ex).find(e=>e.id===exId);
   const targetReps=ex?parseInt(ex.r)||12:12;
@@ -6155,7 +6778,7 @@ function renderWorkout(){
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}">
       <div class="exh" onclick="S.open=S.open==='${ex.id}'?null:'${ex.id}';render()">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${esc(ex.ic||'💪')}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+esc(fmtTargetReps(ex))}</div></div>
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+esc(fmtTargetReps(ex))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}</div></div>
         ${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${esc(ex.tip||'')}</div>
@@ -6167,7 +6790,7 @@ function renderWorkout(){
           return`<div class="last-info" style="display:flex;align-items:center;gap:10px;padding:9px 11px;background:rgba(255,255,255,0.03);border-radius:var(--rxs);border-left:2px solid var(--green-b);margin-bottom:10px;font-size:12px;color:var(--text2);flex-wrap:wrap">
             <span style="font-family:'DM Mono',monospace"><b style="color:var(--text);font-weight:600">${lw.v} kg</b></span>
             ${setsLbl||repsLbl?`<span style="color:var(--text3);font-family:'DM Mono',monospace">${setsLbl}${repsLbl} reps</span>`:''}
-            <span style="color:var(--text3)">${esc(lw.d||'')}${rpeLbl}</span>
+            <span style="color:var(--text3)">${esc(lw.d||'')}${rpeLbl}${lw.dl?' · sesión ligera':''}</span>
           </div>`;
         })()}
           <div class="wu-slot">${warmupBlockHtml(ex)}</div>
@@ -6223,6 +6846,7 @@ function renderWorkout(){
   })()}</div></div><span class="pill p${S.day.toLowerCase()}">${doneEx}/${strEx.length}</span></div></div>
   <div class="pbar" style="border-radius:0;height:3px"><div class="pinner" style="width:${pct}%;border-radius:0"></div></div>
   <div class="tabs">${tabs}</div>
+  ${lightBannerHtml('workout')}
   ${allDone?`<div class="fbanner">🎉 ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
   ${exHtml}
   <div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?'✅ Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>
@@ -6246,13 +6870,13 @@ function renderProg(){
             ${parseFloat(gain)>0?`<span style="font-size:12px;color:var(--green);font-weight:500">+${gain} kg</span>`:parseFloat(gain)<0?`<span style="font-size:12px;color:var(--amber)">${gain} kg</span>`:`<span style="font-size:12px;color:var(--text3)">primer registro</span>`}
           </div>
         </div>
-        <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${data.length} sesión${data.length!==1?'es':''}</span>
+        <span style="font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">${data.length} ${data.length===1?'sesión':'sesiones'}</span>
       </div>
       ${data.length>=2?`<div class="carea">${spark(data,color)}</div>`:`<div style="font-size:12px;color:var(--text3);padding:4px 0">Necesitas al menos 2 sesiones para ver la gráfica.</div>`}
     </div>`;
   }).join('');
   return`
-  <div class="topbar"><h1>Tu progreso</h1><div class="sub">${tot} sesión${tot!==1?'es':''} completada${tot!==1?'s':''}</div></div>
+  <div class="topbar"><h1>Tu progreso</h1><div class="sub">${tot} ${tot===1?'sesión':'sesiones'} completada${tot!==1?'s':''}</div></div>
   <div class="sh">Constancia por día</div>
   <div class="card">
     <div style="display:flex;gap:10px">${['A','B','C'].map(d=>`<div style="flex:1;text-align:center">
@@ -6422,6 +7046,7 @@ function resetPlanToDefault(){
     body:'Se volverá al plan inicial. Los cambios personalizados se perderán. Los datos de entrenamiento (historial, pesos) NO se tocan.',
     okText:'Restaurar',cancelText:'Cancelar',danger:true,
     onOk:()=>{
+      if(S.deload)_restoreDeload(true); // la descarga iba con el plan anterior
       S.currentPlan=JSON.parse(JSON.stringify(PLAN));
       saveState();
       toast('Rutina restaurada al plan original');
@@ -6592,106 +7217,13 @@ function initDragDrop(dayKey){
 // ══════════════════════════════════════════════════════════
 // PROPUESTAS DEL COACH — generación y aplicación real
 // ══════════════════════════════════════════════════════════
-function coach_generateProposals(cycle){
-  const proposals=[];
-  const plan=getPlan();
-  const cycleStart=cycle.start;
-  const allEx=Object.values(plan).flatMap(d=>d.ex).filter(e=>!e.cardio);
-
-  allEx.forEach(ex=>{
-    const prog=coach_exerciseProgression(ex.id,cycleStart);
-    if(prog.trend==='insufficient')return; // sin datos suficientes
-
-    // Propuesta 1: añadir serie si progresa fuerte y tiene pocas series
-    if((prog.trend==='strong_up'||prog.trend==='up')&&ex.s<5){
-      proposals.push({
-        id:'add_set_'+ex.id,
-        type:'add_set',
-        ic:'💪',
-        tag:'Progresión',
-        title:`Añadir serie a ${ex.n}`,
-        description:`Progresas bien (+${prog.pct?.toFixed(0)||0}% en este ciclo). Pasar de ${ex.s}×${ex.r} a ${ex.s+1}×${ex.r} aumentará el volumen para seguir estimulando músculo.`,
-        dayKey:Object.keys(plan).find(d=>plan[d].ex.some(e=>e.id===ex.id)),
-        exId:ex.id,
-        apply:()=>{ const e=findExInPlan(ex.id); if(e)e.s=Math.min(6,e.s+1); }
-      });
-    }
-
-    // Propuesta 2: quitar serie si hay regresión constante (posible fatiga)
-    if(prog.trend==='down'&&ex.s>2){
-      proposals.push({
-        id:'rm_set_'+ex.id,
-        type:'rm_set',
-        ic:'⚠️',
-        tag:'Recuperación',
-        title:`Reducir volumen en ${ex.n}`,
-        description:`El peso ha bajado. Puede ser fatiga acumulada. Bajar de ${ex.s}×${ex.r} a ${ex.s-1}×${ex.r} una semana puede ayudar a recuperar.`,
-        dayKey:Object.keys(plan).find(d=>plan[d].ex.some(e=>e.id===ex.id)),
-        exId:ex.id,
-        apply:()=>{ const e=findExInPlan(ex.id); if(e)e.s=Math.max(1,e.s-1); }
-      });
-    }
-
-    // Propuesta 3: bajar reps y subir series para más fuerza si lleva muchas semanas
-    if(prog.trend==='stagnant'&&cycle.weeks>=3&&ex.r>=12&&!ex.cardio){
-      proposals.push({
-        id:'change_rep_scheme_'+ex.id,
-        type:'rep_scheme',
-        ic:'🔄',
-        tag:'Variación',
-        title:`Cambiar esquema en ${ex.n}`,
-        description:`Estancado en ${ex.s}×${ex.r}. Cambiar a ${ex.s+1}×8 con más peso puede romper la meseta — trabajas la misma musculatura con un estímulo diferente.`,
-        dayKey:Object.keys(plan).find(d=>plan[d].ex.some(e=>e.id===ex.id)),
-        exId:ex.id,
-        apply:()=>{ const e=findExInPlan(ex.id); if(e){e.s=Math.min(6,e.s+1);e.r=8;} }
-      });
-    }
-  });
-
-  // Propuesta 4: semana de descarga si llevan muchas sesiones seguidas
-  if(cycle.sessions.length>=10){
-    proposals.push({
-      id:'deload_week',
-      type:'deload',
-      ic:'🧘',
-      tag:'Descarga',
-      title:'Semana de descarga',
-      description:`Con ${cycle.sessions.length} sesiones en el ciclo llevas mucho trabajo acumulado. Reducir las series a la mitad (mantener el peso) durante una semana mejora la recuperación y suele producir un rebote de fuerza.`,
-      apply:()=>{
-        const p=getPlan();
-        Object.keys(p).forEach(dk=>{
-          p[dk].ex.forEach(e=>{ if(!e.cardio)e.s=Math.max(1,Math.round((e.s||3)/2)); });
-        });
-      }
-    });
-  }
-
-  // Propuesta 5: añadir ejercicio si el día tiene pocos ejercicios de fuerza
-  Object.keys(plan).forEach(dk=>{
-    const strEx=plan[dk].ex.filter(e=>!e.cardio);
-    if(strEx.length<3&&cycle.sessions.length>=4){
-      // Sugerir ejercicio del grupo muscular principal
-      const mainMuscle=dk==='A'?'piernas':dk==='B'?'pecho':'espalda';
-      const candidates=EXERCISE_DB.filter(e=>e.muscle===mainMuscle&&!strEx.some(s=>s.n===e.n));
-      if(candidates.length>0){
-        const pick=candidates[0];
-        proposals.push({
-          id:'add_ex_'+dk+'_'+pick.id,
-          type:'add_ex',
-          ic:'➕',
-          tag:'Volumen',
-          title:`Añadir ejercicio al ${plan[dk].label}`,
-          description:`El ${plan[dk].label} tiene pocos ejercicios de fuerza (${strEx.length}). Añadir "${pick.n}" (${pick.eq}) aumentaría el volumen de ${mainMuscle} sin saturar la sesión.`,
-          dayKey:dk,
-          libExId:pick.id,
-          apply:()=>{ getPlan()[dk].ex.splice(-1,0,libExToEx(pick)); } // antes del cardio final
-        });
-      }
-    }
-  });
-
-  // Limitar a 4 propuestas (principiante — no saturar)
-  return proposals.slice(0,4);
+function coach_generateProposals(cycle,an){
+  // Todas las candidatas del diagnóstico único, ordenadas por prioridad.
+  // reserve:false = las que se muestran (máx. 3 y 1 por día); reserve:true = en reserva.
+  an=an||coach_analyze();
+  const sel=coach_selectProposals(an.candidates,{fresh:true});
+  const res=new Set(sel.reserve.map(p=>p.id));
+  return sel.active.concat(sel.reserve).map(p=>({...p,reserve:res.has(p.id)}));
 }
 
 function findExInPlan(exId){
@@ -6703,76 +7235,93 @@ function findExInPlan(exId){
   return null;
 }
 
-// Renderizar propuestas pendientes en el Coach
-let _proposalsRoot=null;
-function renderPendingProposals(){
-  const root=document.getElementById('proposals-root');
-  if(!root)return;
-  const props=S.pendingCoachProposals||[];
-  if(props.length===0){root.innerHTML='';return;}
-
-  root.innerHTML=`<div style="padding:0 0 4px">
-    <div class="sh" style="padding:0 14px 8px">📋 El Coach propone — tú decides</div>
-    ${props.map((p,i)=>`<div class="proposal-card">
-      <div class="proposal-head">
-        <div class="proposal-ic">${esc(p.ic||'')}</div>
-        <div>
-          <div class="proposal-tag">${esc(p.tag||'')}</div>
-          <div class="proposal-t">${esc(p.title||'')}</div>
-          <div class="proposal-d">${esc(p.description||'')}</div>
-        </div>
-      </div>
-      <div class="proposal-actions">
-        <button class="proposal-apply" onclick="applyProposal(${i})">✓ Aplicar</button>
-        <button class="proposal-ignore" onclick="ignoreProposal(${i})">Ignorar</button>
-      </div>
-    </div>`).join('')}
-  </div>`;
-}
-
-function applyProposal(idx){
-  const props=S.pendingCoachProposals||[];
-  const p=props[idx];
-  if(!p)return;
-  // Reconstruir la función apply desde el tipo y exId guardados
-  _applyProposalByData(p);
-  const title=p.title;
-  props.splice(idx,1);
-  if(!S.appliedProposals)S.appliedProposals=[];
-  S.appliedProposals.push({...p,appliedAt:Date.now()});
+// Aplicar / ignorar por id ESTABLE (nunca por índice) y repintar siempre: el siguiente toque actúa sobre
+// la propuesta que ves. Los botones llevan el id en data-pid (escapado), no dentro del JS del onclick.
+function applyProposal(id){
+  const list=S.pendingCoachProposals||[];
+  const i=list.findIndex(p=>p&&p.id===id);
+  if(i<0){render();return;}
+  const p=list[i];
+  if(_proposalBlocked(p)){
+    toast(getActiveDeload().kind==='all'?'Durante la descarga no se cambia el plan · aplícala al terminar':'Espera a que termine la descarga en curso para aplicar esta');
+    render();return;
+  }
+  const pv=coach_pendingView();
+  if(!pv.active.some(x=>x.id===id)){toast('Esa propuesta está en reserva');render();return;}
+  const r=_applyProposalByData(p);
+  if(!r.ok){
+    if(r.drop){list.splice(i,1);saveState();}
+    toast(r.msg||'No se pudo aplicar');render();return;
+  }
+  list.splice(i,1);
+  if(!Array.isArray(S.appliedProposals))S.appliedProposals=[];
+  const rec={...p,dayKey:p.type==='deload'?null:(p.dayKey||r.dayKey||null),appliedAt:Date.now()};
+  if(r.dlId)rec.dlId=r.dlId;
+  S.appliedProposals.push(rec);
+  if(S.appliedProposals.length>60)S.appliedProposals=S.appliedProposals.slice(-60);
   saveState();
-  toast(`✓ Aplicado: ${title}`);
-  renderPendingProposals();
+  toast(r.msg||`✓ Aplicado: ${p.title}`,3200);
   render();
 }
 
-function ignoreProposal(idx){
-  const props=S.pendingCoachProposals||[];
-  props.splice(idx,1);
-  saveState();
-  renderPendingProposals();
+function ignoreProposal(id){
+  const list=S.pendingCoachProposals||[];
+  const i=list.findIndex(p=>p&&p.id===id);
+  if(i>=0){list.splice(i,1);saveState();toast('Propuesta ignorada · tu plan no cambia');}
+  render();
 }
 
+// Aplica una propuesta guardada. Devuelve {ok, msg, dlId?, dayKey?, drop?}.
+// «Semana de descarga» y «Reducir volumen» son TEMPORALES (S.deload): guardan las series y vuelven solas.
 function _applyProposalByData(p){
   const plan=getPlan();
-  if(p.type==='add_set'&&p.exId){
-    const ex=findExInPlan(p.exId);
-    if(ex)ex.s=Math.min(6,(ex.s||3)+1);
-  }else if(p.type==='rm_set'&&p.exId){
-    const ex=findExInPlan(p.exId);
-    if(ex)ex.s=Math.max(1,(ex.s||3)-1);
-  }else if(p.type==='rep_scheme'&&p.exId){
-    const ex=findExInPlan(p.exId);
-    if(ex){ex.s=Math.min(6,(ex.s||3)+1);ex.r=8;}
+  const gone={ok:false,drop:true,msg:'Ese ejercicio ya no está en tu rutina'};
+  const ex=p.exId?findExInPlan(p.exId):null;
+  if(p.type==='add_set'){
+    if(!ex)return gone;
+    ex.s=Math.min(6,(parseInt(ex.s)||3)+1);
+  }else if(p.type==='rm_set'){
+    if(!ex)return gone;
+    // Con sus series a medias, la sesión se guardaría recortada y marcada como descarga
+    if(S.sets[ex.id]&&Object.values(S.sets[ex.id]).some(Boolean))return{ok:false,msg:'Termina o descarta el entreno en curso antes de reducir este ejercicio'};
+    const d=startDeload('ex',[ex.id],p.title);
+    if(!d)return{ok:false,drop:true,msg:'Ese ejercicio ya tiene el mínimo de series'};
+    return{ok:true,dlId:d.id,dayKey:_dayOfEx(ex.id),msg:`✓ ${ex.n}: ${_nSeries(d.changes[0].to)} hasta el ${deloadEndTxt(d)} · luego vuelve solo`};
+  }else if(p.type==='rep_scheme'){
+    if(!ex)return gone;
+    if(p.to){ex.s=p.to.s;ex.r=p.to.r;}
+    else{ex.s=Math.min(6,(parseInt(ex.s)||3)+1);ex.r=8;} // propuestas de la versión anterior
   }else if(p.type==='deload'){
-    Object.keys(plan).forEach(dk=>{
-      plan[dk].ex.forEach(e=>{ if(!e.cardio)e.s=Math.max(1,Math.round((e.s||3)/2)); });
-    });
-  }else if(p.type==='add_ex'&&p.libExId&&p.dayKey){
-    const libEx=EXERCISE_DB.find(e=>e.id===p.libExId);
-    if(libEx)plan[p.dayKey].ex.splice(-1,0,libExToEx(libEx));
+    // Con un entreno a medias, la sesión se guardaría recortada y marcada como descarga
+    if(getActiveWorkout())return{ok:false,msg:'Termina o descarta el entreno en curso antes de empezar la descarga'};
+    const d=startDeload('all',null,'Semana de descarga');
+    if(!d)return{ok:false,drop:true,msg:'Tu plan ya está en el mínimo de series'};
+    return{ok:true,dlId:d.id,msg:`🧘 Descarga activada · tu plan vuelve solo el ${deloadEndTxt(d)}`};
+  }else if(p.type==='swap'){
+    if(!ex)return gone;
+    const lib=EXERCISE_DB.find(e=>e.id===p.libExId);
+    if(!lib||lib.cardio)return{ok:false,drop:true,msg:'Ese ejercicio ya no está en la biblioteca'};
+    if(S.sets[ex.id]&&Object.values(S.sets[ex.id]).some(Boolean))return{ok:false,msg:'Termina o descarta el entreno en curso antes de cambiar este ejercicio'};
+    const dk=_dayOfEx(ex.id),day=plan[dk],idx=day.ex.indexOf(ex);
+    const nx=libExToEx(lib);
+    if(ex.s)nx.s=ex.s;
+    if(ex.r&&!nx.cardio)nx.r=ex.r;
+    day.ex[idx]=nx; // el historial del anterior se conserva con su id
+    delete S.sets[ex.id];delete S.logs[ex.id];
+    if(S.open===ex.id)S.open=null;
+    saveState();
+    return{ok:true,dayKey:dk,msg:`✓ ${day.label}: ${ex.n} → ${nx.n}`};
+  }else if(p.type==='add_ex'){
+    const lib=EXERCISE_DB.find(e=>e.id===p.libExId);
+    if(!lib||!p.dayKey||!plan[p.dayKey])return{ok:false,drop:true,msg:'Esa propuesta ya no se puede aplicar'};
+    if(_planLibIds().has(lib.id))return{ok:false,drop:true,msg:`${lib.n} ya está en tu rutina`};
+    const arr=plan[p.dayKey].ex;
+    if(arr.length&&arr[arr.length-1].cardio)arr.splice(arr.length-1,0,libExToEx(lib));else arr.push(libExToEx(lib));
+  }else{
+    return{ok:false,drop:true,msg:'Propuesta desconocida'};
   }
   saveState();
+  return{ok:true,dayKey:ex?_dayOfEx(ex.id):p.dayKey||null};
 }
 
 function renderRoutineEditor(){
@@ -6833,6 +7382,8 @@ function renderRoutineEditor(){
 function render(){
   const s=document.getElementById('screen');
   if(!s)return;
+  // Descarga caducada: el plan vuelve a sus series antes de pintar
+  try{deloadTick();}catch(e){console.error(e);}
   // Preservar posición de scroll entre renders (evita el "salto al inicio" al marcar series)
   const prevScroll=s.scrollTop;
   if(S.tab==='dash')s.innerHTML=renderDash();
@@ -6847,7 +7398,6 @@ function render(){
   renderWmodal();
   renderHist();
   renderWDetail();
-  renderPendingProposals();
 }
 
 // ══════════════════════════════════════════════════════════
@@ -7241,6 +7791,19 @@ function importData(){
             const _rsImp=migrated.reopenedSession;
             if(_isPlainObj(_rsImp)&&_rsImp.strength!=null&&!_isPlainObj(_rsImp.strength))_rsImp.strength={};
             if(!_validReopened(migrated.reopenedSession))migrated.reopenedSession=null;
+            // Descarga: solo la del backup (va con SU plan; nunca heredar la de este móvil) y con forma válida.
+            // Si ya caducó, vuelve sola al pintar (deloadTick). Propuestas e historial, saneados.
+            if(!_validDeload(migrated.deload))migrated.deload=null;
+            // Backup sin plan (parcial o editado a mano): se queda el plan de este móvil. Si está en descarga,
+            // antes vuelve a sus series (si no, quedaría a la mitad para siempre). La descarga del backup no se
+            // aplica: iba con un plan que no viene en el archivo.
+            if(!('currentPlan' in migrated)){
+              if(getActiveDeload())_restoreDeload(true);
+              migrated.deload=null;
+            }
+            migrated.deloadHistory=_sanitizeDeloadHistory(migrated.deloadHistory);
+            migrated.pendingCoachProposals=_sanitizeProposals(migrated.pendingCoachProposals);
+            if(!Array.isArray(migrated.appliedProposals))migrated.appliedProposals=[];
             Object.keys(S).forEach(k=>{if(!(k in migrated))migrated[k]=S[k];});
             S=Object.assign(S,migrated);
             // Limpiar estado UI transitorio importado
