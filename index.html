@@ -76,6 +76,7 @@ input{font-family:inherit}
 .sb.on{background:var(--green);color:#000;border-color:var(--green)}
 .irow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
 .irow label{font-size:12px;color:var(--text2);width:42px;flex-shrink:0}
+.irow .inp{min-width:0}
 .inp{flex:1;padding:9px 12px;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);color:var(--text);font-size:15px;font-family:'DM Mono',monospace;font-weight:500;outline:none;transition:border-color .2s;-webkit-appearance:none}
 .inp:focus{border-color:var(--green)}
 .inp::placeholder{color:var(--text3)}
@@ -298,9 +299,60 @@ input{font-family:inherit}
 .hist-item-ch{font-size:11px;font-family:'DM Mono',monospace;font-weight:500;flex-shrink:0}
 .hist-item-ch.up{color:var(--green)}.hist-item-ch.dn{color:var(--amber)}
 .hist-item-pr{font-size:9px;background:var(--green);color:#000;padding:2px 6px;border-radius:10px;font-weight:700}
-.sug-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;background:rgba(34,197,94,.15);color:#86efac;padding:3px 7px;border-radius:4px;font-weight:600;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid rgba(34,197,94,.3);margin-left:6px;vertical-align:middle}
+.sug-tag{display:inline-flex;align-items:center;justify-content:center;gap:3px;flex-shrink:0;min-height:44px;min-width:72px;padding:0 10px;font-size:12px;background:rgba(34,197,94,.15);color:#86efac;border-radius:var(--rsm);font-weight:600;font-family:'DM Mono',monospace;cursor:pointer;border:1px solid rgba(34,197,94,.3);white-space:nowrap}
 .sug-tag:active{opacity:.7}
 .sug-tag.keep{background:rgba(59,130,246,.12);color:#93c5fd;border-color:rgba(59,130,246,.25)}
+.sug-tag.down{background:rgba(245,158,11,.12);color:#fcd34d;border-color:rgba(245,158,11,.3)}
+.sug-tag.ok{background:var(--bg3);color:#86efac;border-color:var(--green-b);font-family:'DM Sans',sans-serif}
+/* Coach de carga: chip en la cabecera, «Objetivo de hoy», ajuste en vivo y listas de objetivos */
+.ex-goal{display:inline-flex;align-items:center;gap:6px;max-width:100%;margin-top:5px;padding:2px 8px 2px 7px;border-radius:20px;background:var(--bg3);border:1px solid var(--border2);font-family:'DM Mono',monospace;font-size:11.5px;font-weight:500;color:var(--text);white-space:nowrap}
+.ex-goal-k{font-family:'DM Sans',sans-serif;font-size:9.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)}
+.k-up .ex-goal-k{color:#86efac}.k-reps .ex-goal-k,.k-deload .ex-goal-k{color:#93c5fd}.k-down .ex-goal-k{color:#fcd34d}
+.ex-goal.k-up{border-color:rgba(34,197,94,.3)}.ex-goal.k-down{border-color:rgba(245,158,11,.3)}
+.tgt{border:1px solid var(--border2);border-radius:var(--rsm);padding:10px 12px;margin-bottom:10px;background:rgba(255,255,255,.02)}
+.tgt.k-up{border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.06)}
+.tgt.k-reps,.tgt.k-deload{border-color:rgba(59,130,246,.3);background:rgba(59,130,246,.06)}
+.tgt.k-down{border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.06)}
+.tgt-top{display:flex;align-items:center;gap:10px}
+.tgt-main{flex:1;min-width:0}
+.tgt-l{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+.tgt-v{font-family:'DM Mono',monospace;font-size:20px;font-weight:600;color:var(--text);line-height:1.3}
+.tgt-v small{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;color:var(--text2)}
+.tgt-why-btn{flex-shrink:0;min-height:44px;padding:0 12px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);font-size:12px;font-weight:600;color:var(--text2)}
+.tgt-r{font-size:12.5px;color:var(--text2);line-height:1.45;margin-top:6px;overflow-wrap:anywhere}
+.tgt-r b{color:var(--text);font-weight:600}
+.tgt.k-up .tgt-r b{color:#86efac}.tgt.k-reps .tgt-r b,.tgt.k-deload .tgt-r b{color:#93c5fd}.tgt.k-down .tgt-r b{color:#fcd34d}
+.tgt-why{margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
+.tgt-spark{display:block;width:100%;height:64px}
+.tgt-sp-t{font-size:10px;fill:var(--text2);font-family:'DM Mono',monospace}
+.tgt-leg{display:flex;gap:12px;flex-wrap:wrap;font-size:10.5px;color:var(--text3);margin:2px 0 8px}
+.tgt-leg i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:4px}
+.tgt-rules{list-style:none;display:flex;flex-direction:column;gap:6px;font-size:12px;color:var(--text2);line-height:1.5}
+.tgt-rules li{position:relative;padding-left:12px}
+.tgt-rules li::before{content:'•';position:absolute;left:1px;color:var(--text3)}
+.tgt-rules b{color:var(--text);font-weight:600}
+.tgt-set{margin-top:6px;min-height:44px;padding:0 2px;font-size:12px;font-weight:600;color:var(--green)}
+.live-adj{display:flex;align-items:center;gap:10px;margin:-4px 0 12px;padding:8px 8px 8px 12px;border-radius:var(--rsm);font-size:12.5px;line-height:1.45}
+.live-adj span{flex:1;min-width:0}
+.live-adj.lim{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.28);color:#fca5a5}
+.live-adj.easy{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.28);color:#86efac}
+.live-adj-btn{flex-shrink:0;min-height:44px;padding:0 12px;border-radius:var(--rxs);background:var(--bg3);border:1px solid var(--border2);font-size:12px;font-weight:600;color:var(--text);white-space:nowrap}
+.tgl{background:var(--bg3);border-radius:var(--rsm);padding:2px 12px;margin-bottom:14px}
+.tgl-h{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;padding:8px 0 2px}
+.tgl-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-top:1px solid var(--border)}
+.tgl-row:first-child,.tgl-h+.tgl-row{border-top:none}
+.tgl-ic{width:22px;height:22px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;border-radius:50%;background:var(--bg4);color:var(--text2);font-size:12px;font-weight:700}
+.tgl-ic.k-up{background:rgba(34,197,94,.15);color:#86efac}.tgl-ic.k-reps,.tgl-ic.k-deload{background:rgba(59,130,246,.14);color:#93c5fd}.tgl-ic.k-down{background:rgba(245,158,11,.15);color:#fcd34d}
+.tgl-n{flex:1;min-width:0;font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tgl.full .tgl-n{white-space:normal}
+.tgl-n small{display:block;margin-top:1px;font-size:11.5px;color:var(--text2);line-height:1.4;white-space:normal}
+.tgl-v{flex-shrink:0;font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;color:var(--text)}
+.coach-plan .tgl{background:none;padding:0;margin-bottom:8px}
+.coach-plan-f{font-size:11.5px;color:var(--text3);line-height:1.5;margin-bottom:12px}
+.ls-row{cursor:default}
+.ls-row:active{background:none}
+.ls-sel{flex-shrink:0;min-height:44px;width:104px;padding:0 10px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Mono',monospace;font-size:14px}
+.ls-note{padding:12px 16px;font-size:11.5px;color:var(--text3);line-height:1.5}
 /* ── EDITOR DE RUTINA ── */
 .edit-day-tab{display:flex;gap:6px;padding:0 14px 12px}
 .edit-day-btn{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:9px 6px;font-size:13px;font-weight:500;color:var(--text2);text-align:center;cursor:pointer;transition:all .15s}
@@ -3212,13 +3264,35 @@ const PLAN={
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 const DAY_ORDER=['A','B','C'];
-const SCHEMA_VERSION=14;
+const SCHEMA_VERSION=16;
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
 // Duración máxima plausible de una sesión (min); por encima se considera dato no fiable
 const MAX_SESSION_MIN=360;
 // Duración de una semana de descanso planificada (ms)
 const REST_WEEK_MS=7*86400000;
+// Coach de carga (v15): salto de peso por tipo de equipo (S.loadSteps, editable en Ajustes → Coach de carga).
+// Va aquí arriba porque S y migrateState lo usan al arrancar. La lógica está en coach_prescribe().
+const LOAD_EQ={
+  barra:{l:'Barra o Smith',d:'Sentadilla y press en Smith',opts:[1.25,2.5,5],def:2.5},
+  maq:{l:'Máquina multiarticular',d:'Prensa, jalón, remos, press en máquina',opts:[1,2.5,5],def:2.5},
+  maqA:{l:'Máquina de aislamiento',d:'Extensión, curl femoral, aperturas',opts:[1,2.5,5],def:2.5},
+  manc:{l:'Mancuernas',d:'Por mancuerna (cada mano)',opts:[1,2,2.5],def:1},
+  polea:{l:'Polea o cable',d:'Elevaciones, tríceps y curl en polea',opts:[0.5,1,1.25,2.5],def:1}
+};
+const LOAD_CAP=0.10;     // una subida de peso no pasa del 10 % (salvo el salto mínimo del equipo, tras sumar reps)
+const LOAD_MAX=0.25;     // y nunca de un 25 % (8.5 → 11 kg en polea es un +29 %: no se propone)
+const LOAD_DOWN=0.075;   // bajada tras dos sesiones seguidas por debajo del rango (5-10 %, al menos un salto)
+const LOAD_PER_REP=0.025; // cambio de esquema (Coach o editor): ~2.5 % de peso por cada rep de diferencia
+const LOAD_GAP_DAYS=21;  // tras 3 semanas sin hacer un ejercicio, se repite el peso antes de subir
+// 'auto' (por defecto) = el salto que ya usas en cada ejercicio según tu historial; si aún no hay, el de su equipo (def)
+function _defaultLoadSteps(){const o={};Object.keys(LOAD_EQ).forEach(k=>{o[k]='auto';});return o;}
+// Solo 'auto' o un valor de la lista de cada equipo; lo que falte o no valga, 'auto'
+function _sanitizeLoadSteps(x){
+  const o=_defaultLoadSteps();
+  if(x&&typeof x==='object'&&!Array.isArray(x))Object.keys(LOAD_EQ).forEach(k=>{const v=x[k];if(v!=='auto'&&LOAD_EQ[k].opts.includes(+v))o[k]=+v;});
+  return o;
+}
 
 // Claves transitorias de UI que NO deben persistirse (modales abiertos, búsquedas, etc.)
 const TRANSIENT_KEYS=['wmodal','wnew','settingsOpen','_hist','open','_editWeightTarget','_deloadActive','_wdetail','_wdetailN'];
@@ -3409,7 +3483,7 @@ function _sanitizeDeloadHistory(h){
 }
 function getActiveDeload(){return _validDeload(S.deload)?S.deload:null;}
 function deloadAppliesTo(exId){const d=getActiveDeload();return !!(d&&d.changes.some(c=>c.exId===exId));}
-// Semana «ligera» para un ejercicio ahora: una descarga que lo incluye o una semana de descanso (nunca +2.5 kg)
+// Semana «ligera» para un ejercicio ahora: una descarga que lo incluye o una semana de descanso (coach_prescribe no sube)
 function isLightNow(exId){return !!getActiveRest()||deloadAppliesTo(exId);}
 // ¿El registro de ese ejercicio en ts cayó en una descarga o en una semana de descanso? No cuenta para la tendencia.
 function _lightAt(exId,ts){
@@ -3658,9 +3732,44 @@ function migrateState(data){
     // interno («A3», «ex_…») si después lo quitas o lo cambias. Los registros nuevos ya lo traen.
     _backfillStrengthNames(data);
   }
+  if(v<15){
+    // v15: Coach de carga. ADITIVO: saltos de peso por tipo de equipo (los de por defecto si faltan o no valen).
+    data.loadSteps=_sanitizeLoadSteps(data.loadSteps);
+  }
+  if(v<16){
+    // v16: cada registro de fuerza guarda el plan con el que se hizo (ps = series, pr = reps del plan). ADITIVO: en los
+    // antiguos se apunta el de antes de un «Añadir serie» / «Cambiar esquema» aplicado después y, si no, el de ahora.
+    // Así un cambio de series o reps posterior (Coach o editor) no se confunde con series sin completar.
+    _backfillRecPlans(data);
+  }
   data.schema_version=SCHEMA_VERSION;
   return data;
 }
+// Apunta ps/pr en los registros de fuerza de data (y en los de una sesión reabierta) que no los tengan
+function _backfillRecPlans(data){
+  if(!data||typeof data!=='object')return;
+  const plan=_isPlainObj(data.currentPlan)?data.currentPlan:PLAN,byId={};
+  Object.values(plan).forEach(d=>{if(d&&Array.isArray(d.ex))d.ex.forEach(e=>{if(e&&e.id!=null&&!e.cardio)byId[String(e.id)]=e;});});
+  const dl=_isPlainObj(data.deload)&&Array.isArray(data.deload.changes)?data.deload.changes:[];
+  // Series de verdad (las de antes de una descarga en curso), como _baseSets
+  const base=e=>{const s=parseInt(e.s)||3,c=dl.find(c=>c&&c.exId===e.id);return c&&s===+c.to&&+c.from>0?+c.from:s;};
+  const stamp=st=>{
+    if(!_isPlainObj(st))return;
+    Object.keys(st).forEach(id=>{
+      const e=byId[id],arr=st[id];
+      if(!e||!Array.isArray(arr))return;
+      arr.forEach(r=>{
+        if(!r||typeof r!=='object')return;
+        const b=_planBefore(data.appliedProposals,e.id,+r.ts);
+        if(!(parseInt(r.ps)>0))r.ps=b&&b.s>0?b.s:base(e);
+        if(!_validPr(r.pr)){const pr=b&&b.r!=null?b.r:e.r;if(_validPr(pr))r.pr=typeof pr==='number'?pr:String(pr).slice(0,20);}
+      });
+    });
+  };
+  stamp(data.strength);
+  if(_isPlainObj(data.reopenedSession))stamp(data.reopenedSession.strength);
+}
+function _validPr(x){return(typeof x==='number'&&x>0&&isFinite(x))||(typeof x==='string'&&x.trim()!==''&&x.length<=20);}
 // Pone n (nombre) en el último registro de cada ejercicio de data.strength que no lo tenga, si el nombre se conoce
 function _backfillStrengthNames(data){
   const st=data&&data.strength;
@@ -3680,7 +3789,7 @@ function _backfillStrengthNames(data){
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[]},migrateState(loadState())||{});
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],loadSteps:_defaultLoadSteps()},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -3716,6 +3825,8 @@ if(S.deload!=null&&!_validDeload(S.deload)){S.deload=null;saveState();}
 S.deloadHistory=_sanitizeDeloadHistory(S.deloadHistory);
 S.pendingCoachProposals=_sanitizeProposals(S.pendingCoachProposals);
 if(!Array.isArray(S.appliedProposals))S.appliedProposals=[];
+// Saltos de peso (v15): siempre con forma válida
+S.loadSteps=_sanitizeLoadSteps(S.loadSteps);
 
 // ══════════════════════════════════════════════════════════
 // BIBLIOTECA DE EJERCICIOS  (~45 ejercicios, máquinas + pesas libres)
@@ -4101,18 +4212,46 @@ function renderWDetail(){
   const sc2=root.querySelector('.hist-sheet');if(sc2&&keepScroll)sc2.scrollTop=keepScroll;
 }
 
+// RPE medio de las series marcadas hoy (1-3) o null
+function _liveRpeAvg(id){
+  const v=Object.values((S.rpe&&S.rpe[id])||{}).filter(x=>x>0);
+  return v.length?+(v.reduce((a,b)=>a+b,0)/v.length).toFixed(2):null;
+}
+// Reps de hoy para guardar/juzgar: las escritas o, si están vacías, las del objetivo de hoy (el placeholder).
+// null si el objetivo no es un nº de reps («30s»).
+function _todayReps(ex,p){
+  const t=parseInt((S.logs[ex.id]||{}).r);
+  if(t>0)return t;
+  if(p===undefined)p=coach_prescribe(ex.id);
+  return p&&p.reps>0?p.reps:targetRepsNum(ex);
+}
+// Tarjeta de resultado al completar todas las series: qué toca la PRÓXIMA sesión, con la misma lógica que el
+// objetivo de hoy (coach_prescribe sobre tu historial + lo de hoy). Así nunca contradice a la etiqueta.
 function getSug(id,sets,reps){
+  const ex=findExInPlan(id);
+  sets=ex?(parseInt(ex.s)||sets):sets;
+  if(!(sets>0))return null;
   const c=S.sets[id]||{};
-  // Contar solo series dentro del rango válido del ejercicio
   let done=0;for(let i=0;i<sets;i++){if(c[i])done++;}
   if(done<sets)return null;
-  const l=S.logs[id]||{},w=parseFloat(l.w)||0,r=parseInt(l.r)||0,rt=parseInt(reps)||12;if(!w)return null;
-  // Semana ligera: nada de «+2.5 kg»
-  if(deloadAppliesTo(id))return{t:'ok',m:`Descarga: mantén ${w} kg con menos series. La subida vuelve cuando termine. 🧘`};
-  if(getActiveRest())return{t:'ok',m:`Semana de descanso: entrena suave y mantén ${w} kg o menos. 🌴`};
-  if(r>=rt)return{t:'up',m:`¡Series completas! Próxima sesión prueba con ${(w+2.5).toFixed(1)} kg (+2.5 kg) 🎯`};
-  if(r<rt-2)return{t:'dn',m:`Sin problema — mantén ${w} kg hasta que las reps salgan limpias. ✊`};
-  return{t:'ok',m:`Buen trabajo con ${w} kg. Mantén este peso la próxima sesión. 👍`};
+  const l=S.logs[id]||{},w=parseFloat(l.w)||0;if(!w)return null;
+  // Semana ligera: nunca se propone subir
+  if(deloadAppliesTo(id))return{t:'ok',m:`Descarga: mantén ${kgTxt(w)} kg con menos series. La subida vuelve cuando termine. 🧘`};
+  if(getActiveRest())return{t:'ok',m:`Semana de descanso: entrena suave y mantén ${kgTxt(w)} kg o menos. 🌴`};
+  if(!ex)return null;
+  const today=coach_prescribe(id);
+  const typedR=parseInt(l.r),r=_todayReps(ex,today);
+  // Lo de hoy con el plan de hoy (ps/pr): el motivo sale como «hoy 3×12…», sin paréntesis dentro de paréntesis
+  const next=coach_prescribe(id,{ex,ignoreLight:true,extra:{v:w,r:r>0?r:null,setsDone:done,rpe:_liveRpeAvg(id),ts:Date.now(),ps:_baseSets(ex),pr:ex.r}});
+  if(!next)return null;
+  const asm=!(typedR>0)&&r>0?` Cuento ${r} reps (tu objetivo): si hiciste otras, apúntalas.`:'';
+  const kg=kgTxt(next.weight),why=esc(next.reason);
+  if(next.kind==='up')return{t:'up',m:`¡Objetivo cumplido! Próxima sesión: ${kg} kg × ${next.reps} (${why}). 🎯${asm}`};
+  if(next.kind==='down')return{t:'dn',m:/^dos sesiones/.test(next.reason)
+    ?`Dos sesiones por debajo del rango: la próxima, baja a ${kg} kg y busca ${next.lo}-${next.hi} reps limpias. No pasa nada. 💪${asm}`
+    :`Próxima sesión: baja a ${kg} kg y busca ${next.reps} reps (${why}). 💪${asm}`};
+  if(next.kind==='reps')return{t:'ok',m:`Buen trabajo con ${kgTxt(w)} kg. Próxima sesión: mismo peso y busca ${next.reps} reps${/%/.test(next.reason)?' antes de subir':''}. 👍${asm}`};
+  return{t:r>0&&r<next.lo?'dn':'ok',m:`Próxima sesión: mantén ${kg} kg y busca ${next.reps} reps (${why}). ✊${asm}`};
 }
 
 // ─── ANIMACIONES DE EJERCICIOS ───────────────────────────────────────────────
@@ -4441,8 +4580,8 @@ function startCardioTimer(exId,mins){
 
 // ── CALENTAMIENTO ACTIVO ──
 // Peso objetivo de HOY para calcular el calentamiento:
-// el que ya hayas escrito para hoy → si no, la sugerencia si es mayor que el último peso → si no, el último.
-// Sin historial no hay calentamiento (null).
+// el que ya hayas escrito para hoy → si no, el objetivo del Coach de carga (coach_prescribe: también si toca bajar)
+// → si no, el último. Sin historial no hay calentamiento (null).
 function getWarmupTarget(ex){
   if(!ex)return null;
   const lw=getLastW(ex.id);
@@ -4450,19 +4589,20 @@ function getWarmupTarget(ex){
   if(!(last>0))return null;
   const typed=parseFloat((S.logs[ex.id]||{}).w);
   if(typed>0&&typed<1000)return typed;
-  const s=sugW(ex.id);
-  const sv=s?+s.v:0;
-  return sv>last?sv:last;
+  const p=coach_prescribe(ex.id);
+  return p&&p.weight>0?p.weight:last;
 }
-// Devuelve series de calentamiento sugeridas, o null si el ejercicio no las necesita
+// Devuelve series de calentamiento sugeridas, o null si el ejercicio no las necesita.
+// Los pesos se redondean al salto de su equipo (2.5 kg en Smith, 1 kg en mancuernas…).
 function getWarmupSets(ex){
   if(!ex||ex.cardio)return null;
   if(!isCompoundEx(ex))return null;
   const target=getWarmupTarget(ex);
   if(!target||target<20)return null; // peso muy bajo no necesita warmup
+  const st=loadStepOf(ex)||2.5,rd=v=>_r2(Math.round(v/st)*st);
   return[
-    {pct:50,w:+(target*0.5/2.5).toFixed(0)*2.5,reps:8},
-    {pct:75,w:+(target*0.75/2.5).toFixed(0)*2.5,reps:5}
+    {pct:50,w:rd(target*0.5),reps:8},
+    {pct:75,w:rd(target*0.75),reps:5}
   ];
 }
 // Bloque de calentamiento de la tarjeta (va dentro de .wu-slot para poder refrescarlo al escribir el peso)
@@ -4683,22 +4823,44 @@ function updLog(id,f,v){
 }
 // Input de peso del ejercicio: guarda y actualiza el aviso «falta el peso» y el calentamiento sin re-renderizar
 // (re-renderizar cerraría el teclado mientras escribes)
-let _wuRefreshT=null;
+let _wuRefreshT=null,_sugRefreshT=null;
 function onWeightInput(inp,id){
   updLog(id,'w',inp.value);
-  const ok=parseFloat(String(inp.value||'').replace(',','.'))>0;
+  const tv=parseFloat(String(inp.value||'').replace(',','.')),ok=tv>0;
   const card=inp.closest('.excard');
   const ex=(getPlan()[S.day]?.ex||[]).find(e=>e.id===id);
   const need=!ok&&!!ex&&!isBodyweightEx(ex)&&countSetsDone(id,ex.s)>0;
   inp.classList.toggle('need',need);
   const h=card&&card.querySelector('.need-hint');
   if(h)h.hidden=!need;
+  // Etiqueta del objetivo: al momento («✓ objetivo» si coincide, «Objetivo 60» si escribes otro), nunca desfasada
+  const tag=card&&card.querySelector('.sug-tag');
+  if(tag&&ex){
+    const p=coach_prescribe(id);
+    if(p){tag.textContent=presTagTxt(p,ok?tv:null);tag.className='sug-tag '+presTagCls(p,ok?tv:null);}
+  }
   // Calentamiento: sigue al peso escrito (con un pequeño retardo para no parpadear con cada tecla)
   clearTimeout(_wuRefreshT);
   _wuRefreshT=setTimeout(()=>{
     const slot=card&&card.isConnected?card.querySelector('.wu-slot'):null;
     if(slot&&ex)slot.innerHTML=warmupBlockHtml(ex);
   },350);
+  _refreshSugSlot(card,id);
+}
+// Reps escritas: guarda y actualiza la tarjeta de resultado (sin re-render, no se cierra el teclado)
+function onRepsInput(inp,id){
+  updLog(id,'r',inp.value);
+  _refreshSugSlot(inp.closest('.excard'),id);
+}
+// Tarjeta de resultado («Próxima sesión: …»): se recalcula con lo que escribes (peso y reps), con un pequeño retardo
+function _refreshSugSlot(card,id){
+  clearTimeout(_sugRefreshT);
+  _sugRefreshT=setTimeout(()=>{
+    const slot=card&&card.isConnected?card.querySelector('.sug-slot'):null;
+    if(!slot)return;
+    const g=getSug(id);
+    slot.innerHTML=g?`<div class="sug ${g.t}">${g.m}</div>`:'';
+  },250);
 }
 function logW(){
   const v=parseFloat(S.wnew);
@@ -4746,9 +4908,9 @@ function getMissingWeights(dayKey){
   const day=getPlan()[dayKey||S.day];
   if(!day||!Array.isArray(day.ex))return[];
   return day.ex.filter(ex=>!ex.cardio&&!isBodyweightEx(ex)&&countSetsDone(ex.id,ex.s)>0&&!(parseFloat((S.logs[ex.id]||{}).w)>0)).map(ex=>{
-    const s=sugW(ex.id),lw=getLastW(ex.id),typedR=parseInt((S.logs[ex.id]||{}).r);
-    return{ex,done:countSetsDone(ex.id,ex.s),sug:s&&+s.v>0?+s.v:null,last:lw&&+lw.v>0?+lw.v:null,
-      repsLbl:typedR>0?typedR+' reps':fmtTargetReps(ex)};
+    const p=coach_prescribe(ex.id),lw=getLastW(ex.id),typedR=parseInt((S.logs[ex.id]||{}).r);
+    return{ex,done:countSetsDone(ex.id,ex.s),sug:p&&p.weight>0?p.weight:null,last:lw&&+lw.v>0?+lw.v:null,
+      repsLbl:typedR>0?typedR+' reps':p&&p.reps>0?p.reps+' reps':fmtTargetReps(ex)};
   });
 }
 function _finSugLabel(n){return n>1?'Usar los sugeridos':'Usar el sugerido';}
@@ -4803,8 +4965,8 @@ function _finCollectMissing(){
     if(!ex)return;
     const typed=parseFloat(String(inp.value||'').replace(',','.'));
     const okTyped=typed>0&&typed<1000;
-    const s=sugW(ex.id);
-    out.push({inp,ex,typed:okTyped,w:okTyped?+typed.toFixed(2):(s&&+s.v>0?+s.v:null)});
+    const p=coach_prescribe(ex.id);
+    out.push({inp,ex,typed:okTyped,w:okTyped?+typed.toFixed(2):(p&&p.weight>0?p.weight:null)});
   });
   return out;
 }
@@ -4813,8 +4975,10 @@ function _finWriteMissing(rows,fillReps){
   rows.forEach(m=>{
     if(m.w==null)return;
     if(!S.logs[m.ex.id])S.logs[m.ex.id]={};
+    // Reps vacías → las del objetivo de hoy (Coach de carga; nunca un objetivo por tiempo «30s»). Se calculan
+    // ANTES de escribir el peso, con el historial tal cual.
+    const tr=_todayReps(m.ex);
     S.logs[m.ex.id].w=String(m.w);
-    const tr=targetRepsNum(m.ex); // nunca un objetivo por tiempo ('30s') ni un rango
     if(fillReps&&!(parseInt(S.logs[m.ex.id].r)>0)&&tr)S.logs[m.ex.id].r=String(tr);
   });
   saveState();
@@ -4913,13 +5077,19 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
     if(w){
       if(!S.strength[ex.id])S.strength[ex.id]=[];
       const setsDone=countSetsDone(ex.id,ex.s);
-      const reps=parseInt(l.r)||null;
+      // Reps sin escribir con series marcadas: cuentan las del objetivo de hoy (el placeholder «N objetivo» y lo que
+      // ya daba por hecho la tarjeta de resultado). Antes se guardaba null y la siguiente sugerencia no cuadraba.
+      const reps=parseInt(l.r)||(setsDone>0?(_todayReps(ex)||null):null);
       // Calcular RPE promedio de la sesión
       const rpeMap=S.rpe[ex.id]||{};
       const rpeValues=Object.values(rpeMap).filter(v=>v>0);
       const avgRpe=rpeValues.length>0?+(rpeValues.reduce((a,b)=>a+b,0)/rpeValues.length).toFixed(2):null;
       // Guardar también el muscle group para análisis RPE acumulado por zona
       const rec={d:today,v:w,r:reps,setsDone,rpe:avgRpe,muscle:ex.muscle||null,ts:sessTs};
+      // Plan con el que se hizo (v16): series de verdad (sin la descarga) y reps del plan. El Coach de carga juzga
+      // esta sesión con él aunque después cambies las series o las reps.
+      rec.ps=_baseSets(ex);
+      if(_validPr(ex.r))rec.pr=typeof ex.r==='number'?ex.r:String(ex.r).slice(0,20);
       // Nombre del ejercicio (v14): Progreso lo sigue mostrando aunque luego lo quites o lo cambies en la rutina
       if(ex.n)rec.n=String(ex.n).slice(0,120);
       // Sesión ligera (descarga o semana de descanso): queda marcada y no cuenta para la tendencia del Coach
@@ -6165,9 +6335,10 @@ function coach_bodyweightPerformanceInsight(){
   compoundIds.forEach(id=>{
     const data=(S.strength[id]||[]).filter(r=>r.ts>=sinceTs);
     if(data.length<2)return;
-    const change=data[data.length-1].v-data[0].v;
-    if(change>=2.5)progressing++;
-    else if(change<=-2.5)regressing++;
+    // «Sube» = al menos un salto de su equipo (2.5 kg en Smith, 1 kg en polea…), no un 2.5 fijo
+    const change=data[data.length-1].v-data[0].v,st=loadStepOf(findExInPlan(id)||{id})||2.5;
+    if(change>=st-1e-9)progressing++;
+    else if(change<=-st+1e-9)regressing++;
     else stable++;
   });
 
@@ -6295,12 +6466,20 @@ function renderCoach(){
       <div class="coach-hero-title">Analizando tu progreso</div>
       <div class="coach-hero-sub">Después de <strong style="color:var(--green)">${remaining}</strong> ${remaining===1?'sesión':'sesiones'} más, el coach podrá analizar tu patrón de entrenamiento y darte recomendaciones personalizadas.</div>
     </div>
+    ${coachPlanCardHtml()}
     <div class="sh">Qué hace el coach</div>
     <div class="insight">
       <div class="insight-ic good">📊</div>
       <div class="insight-body">
         <div class="insight-t">Analiza tu progresión</div>
         <div class="insight-d">Detecta qué ejercicios progresan, cuáles se estancan, y tu consistencia semanal.</div>
+      </div>
+    </div>
+    <div class="insight">
+      <div class="insight-ic good">🎯</div>
+      <div class="insight-body">
+        <div class="insight-t">Te dice qué peso poner</div>
+        <div class="insight-d">En cada ejercicio: primero más reps y luego más peso, con los saltos de tu equipo y según tu esfuerzo.</div>
       </div>
     </div>
     <div class="insight">
@@ -6418,6 +6597,8 @@ function renderCoach(){
       <div class="md">kg ${weight.trend==='insufficient'?'sin datos':'desde el inicio'}</div>
     </div>
   </div>
+
+  ${coachPlanCardHtml()}
 
   <div class="sh">Análisis del ciclo</div>
   ${insights.length===0?`<div class="insight"><div class="insight-ic info">⏳</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
@@ -6648,6 +6829,7 @@ function renderDash(){
       <span class="pill p${S.nextDay.toLowerCase()}">${getPlan()[S.nextDay].label}</span>
       <span style="font-size:14px;color:var(--text2)">${getPlan()[S.nextDay].focus}</span>
     </div>
+    ${dayTargetsHtml(S.nextDay,'dash')}
     ${getActiveRest()
       ? `<div style="font-size:12px;color:var(--text3);margin-bottom:10px;line-height:1.5">Estás en semana de descanso. Si te apetece entrenar suave, adelante — no es obligatorio.</div>
          <button class="btn bs" onclick="S.day=S.nextDay;go('workout')">Entrenar suave de todas formas</button>`
@@ -6715,43 +6897,395 @@ function getLastW(exId){
   return d&&d.length>0?d[d.length-1]:null;
 }
 
-function sugW(exId){
-  const all=S.strength[exId];
-  if(!all||all.length===0)return null;
-  // Las sesiones de descarga / semana de descanso (dl) no cuentan para decidir si subir: se mira tu última sesión normal
-  const real=all.filter(r=>r&&!r.dl);
-  const d=real.length?real:all;
-  const lastRec=d[d.length-1];
-  const last=lastRec.v;
-  // Semana de descarga o de descanso: mantener el peso (nunca +2.5)
-  if(isLightNow(exId))return{v:last,label:last+' kg',cls:'keep',light:true};
-  // Buscar reps objetivo del ejercicio
-  const ex=Object.values(getPlan()).flatMap(day=>day.ex).find(e=>e.id===exId);
-  const targetReps=ex?parseInt(ex.r)||12:12;
-  const targetSets=ex?ex.s:3;
-  // Si tenemos datos históricos de reps, usar esa info para decidir
-  const didCompleteReps=lastRec.r!=null?lastRec.r>=targetReps:true; // compat con registros antiguos sin reps
-  const didCompleteSets=lastRec.setsDone!=null?lastRec.setsDone>=targetSets:true;
-  const fullyCompleted=didCompleteReps&&didCompleteSets;
-  if(d.length===1){
-    // Primera sesión: si completó todo, sugerir subir; si no, mantener
-    if(fullyCompleted&&lastRec.r!=null)return{v:+(last+2.5).toFixed(1),label:'+2.5 → '+(last+2.5).toFixed(1)+' kg',cls:''};
-    return{v:last,label:last+' kg',cls:'keep'};
+// ═══ COACH DE CARGA (v15) ═══════════════════════════════════════════════
+// coach_prescribe(exId) decide el peso y las reps de HOY de un ejercicio a partir de tus sesiones normales
+// (las de descarga o descanso, dl, no cuentan). Es la ÚNICA fuente de sugerencias de carga: objetivo y etiqueta de
+// la tarjeta, placeholders, tarjeta de resultado, ajuste en vivo, calentamiento, modal final, objetivos de Inicio y
+// «Tu próxima sesión» del Coach. Reglas:
+//  · Doble progresión en un rango de reps (repRange): mismo peso y +1 rep hasta llegar al tope en todas las series;
+//    entonces sube el salto de tu equipo y vuelve al mínimo del rango.
+//  · RPE medio de la última sesión (1-3, el mismo corte que la etiqueta 😌/💪/🥵): todo fácil → salto doble (si cabe
+//    en el tope del 10 %) o +2 reps; al límite → mismo peso con un objetivo de reps (nunca sube).
+//  · Dos sesiones seguidas con el mismo peso claramente por debajo del rango → baja un 5-10 % (al menos un salto).
+//  · Saltos según el equipo (loadStepFor: Ajustes, o el que ya usas en ese ejercicio, o el de su tipo de equipo).
+//    Tope del 10 % por salto: si hasta el salto más pequeño lo supera (1 kg sobre 8.5 kg), antes suma hasta 2 reps
+//    por encima del tope del rango; y un salto de más del 25 % no se propone nunca (8.5 → 11 kg en polea).
+//  · Semana de descarga o de descanso: mismo peso (nunca sube). Tras 3+ semanas sin hacerlo: repite antes de subir.
+//  · Cada sesión se juzga con el plan con el que se hizo (ps/pr del registro, _recPlan): si luego cambian las series
+//    o las reps (Coach o editor), no cuenta como series sin completar. Con menos reps en el plan, sube el peso; con
+//    más, lo baja (~2.5 % por rep de diferencia). Con una serie más, mismo peso hasta completarlas.
+// Devuelve null si no hay historial (o el objetivo es por tiempo). Si no:
+// {exId, kind:'up'|'reps'|'keep'|'down'|'deload', weight, reps, lo, hi, sets, last, step, eq, reason, head, ...}
+function _r2(v){return Math.round(v*100)/100;}
+// 57.5 → «57.5», 60 → «60», 9.25 → «9.25»
+function kgTxt(v){const n=+v;return isFinite(n)?String(_r2(n)):'';}
+// RPE medio guardado (1-3) → 1 fácil · 2 justo · 3 al límite (null sin dato)
+function rpeCat(v){v=+v;return v>0&&isFinite(v)?(v<=1.4?1:v<=2.4?2:3):null;}
+const RPE_TXT={1:'fácil',2:'a esfuerzo justo',3:'al límite'};
+// Tipo de equipo para el salto de peso (por equipo, nombre e id de biblioteca)
+function loadEqClass(ex){
+  if(!ex)return'maqA';
+  if(isBodyweightEx(ex))return'bw';
+  const lib=String(_libIdOf(ex)||ex.lib||'');
+  const t=normTxt(`${ex.eq||''} ${ex.n||''}`);
+  const comp=isCompoundEx(ex);
+  if(/mancuern|dumbbell/.test(t)||/_db(_|$)/.test(lib))return'manc';
+  if(/cable|polea/.test(t))return comp?'maq':'polea';
+  if(/smith|barra|barbell/.test(t))return'barra';
+  return comp?'maq':'maqA';
+}
+// Salto que ya usas en un ejercicio: el aumento más repetido entre tus últimos registros normales, ajustado a un salto
+// real (0.5, 1, 1.25, 2, 2.5 o 5). Así nunca te propone un peso que tu máquina no tiene. null si aún no has subido nunca.
+// Solo cuentan las subidas de verdad: un récord de peso nuevo sobre el mejor anterior (volver a tu peso tras una
+// bajada no es un salto), sin las sesiones ligeras (dl: descarga o semana de descanso) y sin saltos de más del 25 %
+// (un error al teclear). Si ese salto grande se repite en la sesión siguiente, pasa a ser tu nueva referencia.
+const LOAD_SNAP=[0.5,1,1.25,2,2.5,5];
+function _histStep(exId){
+  const a=(Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&!r.dl&&+r.v>0&&isFinite(+r.v)).slice(-12);
+  const cnt={};
+  let top=a.length?+a[0].v:0;
+  for(let i=1;i<a.length;i++){
+    const v=+a[i].v,dv=_r2(v-top);
+    if(!(dv>0))continue;
+    if(dv>top*LOAD_MAX+1e-9){if(+a[i-1].v>top*(1+LOAD_MAX)+1e-9)top=v;continue;}
+    const s=LOAD_SNAP.reduce((b,x)=>Math.abs(x-dv)<Math.abs(b-dv)?x:b,LOAD_SNAP[0]);cnt[s]=(cnt[s]||0)+1;
+    top=v;
   }
-  const prev=d[d.length-2].v;
-  // Solo sugerir subir si: subió respecto a anterior Y completó las reps objetivo
-  if(last>prev&&fullyCompleted)return{v:+(last+2.5).toFixed(1),label:'+2.5 → '+(last+2.5).toFixed(1)+' kg',cls:''};
-  // Si completó todo y se mantiene, ofrecer subir
-  if(fullyCompleted&&lastRec.r!=null)return{v:+(last+2.5).toFixed(1),label:'+2.5 → '+(last+2.5).toFixed(1)+' kg',cls:''};
-  return{v:last,label:last+' kg',cls:'keep'};
+  let best=null,bn=0;
+  Object.keys(cnt).forEach(k=>{const n=cnt[k];if(n>bn||(n===bn&&+k<best)){best=+k;bn=n;}});
+  return best;
+}
+// Salto de peso de un ejercicio → {step, src:'ajuste'|'historial'|'equipo'}
+function loadStepFor(ex,cls){
+  cls=cls||loadEqClass(ex);
+  const set=LOAD_EQ[cls]&&S.loadSteps?S.loadSteps[cls]:'auto';
+  if(set!=='auto'&&LOAD_EQ[cls]&&LOAD_EQ[cls].opts.includes(+set))return{step:+set,src:'ajuste'};
+  const h=ex?_histStep(ex.id):null;
+  if(h)return{step:h,src:'historial'};
+  return{step:LOAD_EQ[cls]?LOAD_EQ[cls].def:2.5,src:'equipo'}; // peso corporal con lastre: 2.5
+}
+function loadStepOf(ex){return loadStepFor(ex).step;}
+// Rango de reps de la doble progresión. Un rango escrito en el plan («8-12») se respeta tal cual. Si es un número:
+// multiarticular → [r-2, r] (12 → 10-12); aislamiento → [r, r+3] (12 → 12-15); con 15+ reps → [r-3, r].
+// Objetivo por tiempo («30s») → null.
+function repRange(ex){
+  const raw=String(ex&&ex.r!=null?ex.r:'').trim();
+  const m=raw.match(/^(\d{1,3})\s*[-–]\s*(\d{1,3})$/);
+  if(m&&+m[1]>0&&+m[2]>=+m[1])return{lo:+m[1],hi:+m[2]};
+  const r=targetRepsNum(ex);
+  if(r==null)return null;
+  if(r>=15)return{lo:r-3,hi:r};
+  return isCompoundEx(ex)?{lo:Math.max(1,r-2),hi:r}:{lo:r,hi:r+3};
+}
+// ¿Sesión fallida? Claramente por debajo del rango: 2+ reps por debajo del mínimo, o por debajo y al límite
+function _loadFail(rec,lo){
+  const r=_recReps(rec);
+  return r!=null&&(r<lo-1||(r<lo&&rpeCat(rec.rpe)===3));
+}
+// Plan que había ANTES de una propuesta aplicada de «Añadir serie» o «Cambiar esquema», sacado de su diff
+// («3×12 → 4×8»): {s, r} (r = null si solo cambiaron las series). null si es de otro tipo o no se entiende.
+function _propPrevPlan(a){
+  if(!a||(a.type!=='add_set'&&a.type!=='rep_scheme')||typeof a.diff!=='string')return null;
+  const m=a.diff.match(/^\s*(\d{1,2})\s*×\s*([^\s→·]{1,20})/);
+  if(!m||!(+m[1]>0))return null;
+  return{s:+m[1],r:a.type==='rep_scheme'?m[2]:null};
+}
+// El primero de esos cambios de exId aplicado después de ts → el plan de antes {s, r}; null si no hubo ninguno.
+// (Se usa también en la migración v16 con las propuestas de los datos que se migran.)
+function _planBefore(applied,exId,ts){
+  if(!Array.isArray(applied)||!(ts>0))return null;
+  let best=null,bp=null;
+  applied.forEach(a=>{
+    if(!a||a.exId!==exId||!(+a.appliedAt>ts)||(best&&+a.appliedAt>=+best.appliedAt))return;
+    const p=_propPrevPlan(a);if(p){best=a;bp=p;}
+  });
+  return bp;
+}
+// Plan (series y reps) con el que se hizo un registro de fuerza. Los nuevos lo guardan (ps/pr, v16); si falta, el de
+// antes de un «Añadir serie» / «Cambiar esquema» aplicado después y, si tampoco, el plan de ahora.
+function _recPlan(rec,ex){
+  const ps=parseInt(rec&&rec.ps),hasR=!!rec&&_validPr(rec.pr);
+  if(ps>0&&hasR)return{s:ps,r:rec.pr};
+  const b=_planBefore(S.appliedProposals,ex.id,rec&&+rec.ts);
+  return{s:ps>0?ps:b&&b.s>0?b.s:_baseSets(ex),r:hasR?rec.pr:b&&b.r!=null?b.r:ex.r};
+}
+// Rango de reps de un registro según SU plan (si las reps del plan cambiaron después); null si es el mismo de ahora
+function _recRange(rec,ex){
+  const p=_recPlan(rec,ex);
+  if(String(p.r).trim()===String(ex.r).trim())return null;
+  return repRange(Object.assign({},ex,{r:p.r}));
+}
+function coach_prescribe(exId,opts){
+  opts=opts||{};
+  const ex=opts.ex||findExInPlan(exId);
+  if(!ex||ex.cardio)return null;
+  const rr=repRange(ex);
+  if(!rr)return null;
+  const src=(Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&+r.v>0&&isFinite(+r.v));
+  if(opts.extra)src.push(opts.extra);
+  if(!src.length)return null;
+  const real=src.filter(r=>!r.dl),d=real.length?real:src;
+  const last=d[d.length-1],w=+last.v;
+  const cls=loadEqClass(ex),ls=loadStepFor(ex,cls),step=ls.step;
+  const lo=rr.lo,hi=rr.hi,baseSets=_baseSets(ex);
+  const r=_recReps(last),rc=rpeCat(last.rpe);
+  const sd=last.setsDone==null||last.setsDone===''?null:parseInt(last.setsDone);
+  // Lo de hoy (tarjeta de resultado: el registro «extra») se describe como «hoy», no como «la última vez»
+  const today=!!opts.extra&&last===opts.extra,when=today?'hoy':'la última vez';
+  // Plan con el que se hizo esa sesión (ps/pr). Si después cambiaron las series o las reps (propuesta del Coach o
+  // editor), se juzga con aquel plan y se explica el cambio, en vez de tomarlo por series sin completar.
+  const lp=_recPlan(last,ex),lr=_recRange(last,ex);
+  const repsChanged=!!lr&&(lr.lo!==lo||lr.hi!==hi);
+  const setsUp=lp.s<baseSets&&!(sd>=baseSets);
+  const setsOk=sd==null||!(sd>=0)||sd>=Math.min(lp.s,baseSets);
+  const sx=sd>0?sd:lp.s; // «3×12»
+  const did=r!=null?`${sx}×${r}`:'';
+  const rpeT=rc?' '+RPE_TXT[rc]:'';
+  const tr=targetRepsNum(ex),scheme=`${baseSets}×${tr!=null?tr:lo+'-'+hi}`; // «4×8» (solo números)
+  const P={exId,eq:cls,step,stepSrc:ls.src,lo,hi,sets:Math.max(1,parseInt(ex.s)||baseSets),last:w,lastR:r,lastRpe:rc,lastSets:sd,lastD:last.d||'',lastTs:last.ts||null};
+  const out=(kind,weight,reps,reason)=>{
+    weight=_r2(Math.max(0,weight));
+    const head=kind==='up'?`Sube a ${kgTxt(weight)} kg`:kind==='down'?`Baja a ${kgTxt(weight)} kg`
+      :kind==='deload'?(deloadAppliesTo(exId)?'Descarga':'Semana de descanso')
+      :`Mantén ${kgTxt(weight)} kg${reps?` y busca ${reps} reps`:''}`;
+    return Object.assign(P,{kind,weight,reps,reason,head});
+  };
+  // Semana ligera: descarga de este ejercicio o semana de descanso → nunca sube
+  if(!opts.ignoreLight&&isLightNow(exId)){
+    const reps=r!=null?Math.min(hi,Math.max(lo,r)):hi;
+    return out('deload',w,reps,deloadAppliesTo(exId)?`mantén ${kgTxt(w)} kg con menos series; la subida vuelve al terminar`:`${kgTxt(w)} kg o menos y entrena suave`);
+  }
+  // Reps sin apuntar (registros antiguos): mismo peso hasta saber cuántas haces
+  if(r==null)return out('keep',w,Math.min(hi,Math.max(lo,targetRepsNum(ex)||hi)),'apunta tus reps al terminar y ajusto el peso');
+  // Esquema nuevo (las reps del plan cambiaron después de esa sesión) y lo que hiciste queda fuera del rango nuevo:
+  // el peso se adapta, ~2.5 % por rep de diferencia (como mucho un 10 %, al menos un salto).
+  //  · Menos reps («pasar a 4×8 con algo más de peso») → sube.
+  //  · Más reps («pasar a 3×12 con algo menos de peso») → baja (si fue fácil, una rep menos de margen).
+  if(repsChanged&&(r>hi||r<lo)){
+    if(r>hi){
+      if(step>w*LOAD_MAX+1e-9)return out('keep',w,hi,`nuevo esquema ${scheme}; +${kgTxt(step)} kg sería un ${Math.round(step/w*100)} % más, elige un salto menor en Ajustes`);
+      let k=Math.max(1,Math.round(w*Math.min(LOAD_CAP,LOAD_PER_REP*(r-hi))/step));
+      while(k>1&&k*step>w*LOAD_CAP+1e-9)k--;
+      return out('up',w+k*step,hi,`nuevo esquema ${scheme}, con más peso; ${when} ${did}${rpeT}`);
+    }
+    let k=Math.round(w*Math.min(LOAD_CAP,LOAD_PER_REP*(lo-r-(rc===1?1:0)))/step);
+    if(rc!==1)k=Math.max(1,k);
+    while(k>1&&k*step>w*LOAD_CAP+1e-9)k--;
+    if(k>0&&w-k*step>0)return out('down',w-k*step,lo,`nuevo esquema ${scheme}, con algo menos de peso; ${when} ${did}${rpeT}`);
+    return out('keep',w,lo,`nuevo esquema ${scheme}, con este peso; ${when} ${did}${rpeT}`);
+  }
+  // Dos sesiones seguidas con este peso claramente por debajo del rango (el de su plan) → bajar un 5-10 % (al menos
+  // un salto). Con un esquema nuevo no: aquellas sesiones se hicieron con otro objetivo de reps.
+  if(!repsChanged){
+    let fails=0;
+    for(let i=d.length-1;i>=0&&Math.abs(+d[i].v-w)<0.01;i--){const rg=_recRange(d[i],ex)||rr;if(!_loadFail(d[i],rg.lo))break;fails++;}
+    if(fails>=2){
+      let k=Math.max(1,Math.round(w*LOAD_DOWN/step));
+      while(k>1&&k*step>w*LOAD_CAP+1e-9)k--;
+      if(w-k*step>0)return out('down',w-k*step,lo,`dos sesiones seguidas por debajo de ${lo} reps con ${kgTxt(w)} kg`);
+      return out('keep',w,lo,`dos sesiones por debajo de ${lo} reps; prueba una variante más fácil o un peso menor si lo hay`);
+    }
+  }
+  // Series sin completar, contando las que tocaban entonces (si ahora son menos, las de ahora)
+  if(!setsOk)return out('keep',w,Math.min(hi,Math.max(lo,r)),`completa las ${baseSets} series antes de subir; ${when} hiciste ${sd}${lp.s!==baseSets?' de '+lp.s:''}`);
+  if(r>=hi){
+    // Serie nueva en el plan (Añadir serie / editor): primero todas las series con este peso, luego se sube
+    if(setsUp)return out('keep',w,hi,`ahora son ${baseSets} series; complétalas con este peso y luego subes`);
+    const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}`;
+    if(rc===3)return out('keep',w,hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+    // Pausa larga: repetir antes de subir
+    const gapD=last.ts?Math.floor((Date.now()-last.ts)/86400000):0;
+    if(gapD>=LOAD_GAP_DAYS)return out('keep',w,hi,`hace ${plural(Math.floor(gapD/7),'semana')} que no lo haces: repite antes de subir`);
+    // Salto: doble si fue fácil (o te sobraron 3+ reps), sin pasar del 10 %
+    let k=rc===1||r>=hi+3?2:1;
+    while(k>1&&k*step>w*LOAD_CAP+1e-9)k--;
+    if(step>w*LOAD_CAP+1e-9){
+      // Hasta el salto mínimo supera el 10 % (carga ligera): antes, un par de reps por encima del tope.
+      // Y un salto de más del 25 % no se propone nunca (8.5 → 11 kg en una polea).
+      const pct=Math.round(step/w*100);
+      if(r<hi+2)return out('reps',w,r+1,`${repsTxt}; +${kgTxt(step)} kg sería un ${pct} % más, así que antes llega a ${hi+2} reps`);
+      if(step>w*LOAD_MAX+1e-9)return out('keep',w,hi+2,`+${kgTxt(step)} kg sería un ${pct} % más; sigue con ${hi+2} reps o elige un salto menor en Ajustes`);
+    }
+    return out('up',w+k*step,lo,`${repsTxt}${k>1?', salto doble':''}`);
+  }
+  if(r>=lo){
+    const nx=Math.min(hi,r+(rc===1?2:1));
+    return out('reps',w,nx,`${when} ${did}${rpeT}`);
+  }
+  // Por debajo del rango (aún sin dos fallos seguidos): mismo peso, una rep más
+  return out('keep',w,Math.min(lo,r+1),`${when} ${did}${rpeT}; rango ${lo}-${hi}`);
+}
+// Compatibilidad (pruebas y código antiguo): {v, label, cls, light} a partir de coach_prescribe
+function sugW(exId){
+  const p=coach_prescribe(exId);
+  if(!p)return null;
+  return{v:p.weight,label:presTagTxt(p,null),cls:p.kind==='up'?'':p.kind==='down'?'down':'keep',light:p.kind==='deload',p};
+}
+// Texto de la etiqueta junto al peso. typed = peso escrito hoy (o null)
+function presTagTxt(p,typed){
+  if(!p)return'';
+  if(typed>0&&Math.abs(typed-p.weight)<0.01)return'✓ objetivo';
+  if(typed>0)return`Objetivo ${kgTxt(p.weight)}`;
+  return`Usar ${kgTxt(p.weight)} kg`;
+}
+function presTagCls(p,typed){
+  if(!p)return'';
+  if(typed>0)return Math.abs(typed-p.weight)<0.01?'ok':'keep';
+  return p.kind==='up'?'':p.kind==='down'?'down':'keep';
+}
+function useSug(exId){
+  const p=coach_prescribe(exId);
+  if(!p)return;
+  if(!S.logs[exId])S.logs[exId]={};
+  S.logs[exId].w=String(p.weight);
+  saveState();render();
 }
 
-function useSug(exId){
-  const s=sugW(exId);
-  if(!s)return;
+// ── Coach de carga: piezas de la interfaz ──
+const PRES_WORD={up:'sube',reps:'+ reps',keep:'mantén',down:'baja',deload:'suave'};
+const PRES_IC={up:'↑',reps:'+',keep:'=',down:'↓',deload:'🧘'};
+const _tgtWhyOpen=new Set(); // «¿Por qué?» abiertos (solo en memoria: no es estado de la app)
+// Bloque «Objetivo de hoy» de la tarjeta abierta: peso × reps, series, motivo y «¿Por qué?» desplegable
+function presTargetHtml(ex,p){
+  if(!ex||!p)return'';
+  const open=_tgtWhyOpen.has(ex.id);
+  return`<div class="tgt k-${p.kind}">
+    <div class="tgt-top">
+      <div class="tgt-main"><div class="tgt-l">🎯 Objetivo de hoy · ${esc(plural(p.sets,'serie'))}</div>
+        <div class="tgt-v">${esc(kgTxt(p.weight))} kg × ${p.reps}</div></div>
+      <button type="button" class="tgt-why-btn" data-ex="${esc(ex.id)}" aria-expanded="${open}" onclick="toggleTgtWhy(this)">¿Por qué? <span aria-hidden="true">${open?'▴':'▾'}</span></button>
+    </div>
+    <div class="tgt-r"><b>${esc(p.head)}:</b> ${esc(p.reason)}</div>
+    <div class="tgt-why"${open?'':' hidden'}>${presWhyHtml(ex,p)}</div>
+  </div>`;
+}
+function toggleTgtWhy(btn){
+  const id=btn&&btn.dataset.ex,box=btn&&btn.closest('.tgt'),why=box&&box.querySelector('.tgt-why');
+  if(!id||!why)return;
+  const open=why.hidden;
+  why.hidden=!open;
+  if(open)_tgtWhyOpen.add(id);else _tgtWhyOpen.delete(id);
+  btn.setAttribute('aria-expanded',String(open));
+  const ar=btn.querySelector('span');if(ar)ar.textContent=open?'▴':'▾';
+}
+// «¿Por qué?»: tus 5 últimas sesiones (peso, reps y esfuerzo) + la regla que aplica
+const RPE_COL={1:'#22c55e',2:'#f59e0b',3:'#ef4444'};
+function presWhyHtml(ex,p){
+  const recs=(Array.isArray(S.strength[ex.id])?S.strength[ex.id]:[]).filter(r=>r&&+r.v>0&&!r.dl).slice(-5);
+  let svg='';
+  if(recs.length){
+    const n=recs.length,W=300,vs=recs.map(r=>+r.v),mn=Math.min(...vs),mx=Math.max(...vs);
+    const X=i=>n===1?W/2:24+i*((W-48)/(n-1)),Y=v=>mx===mn?24:36-((v-mn)/(mx-mn))*24;
+    const pts=recs.map((r,i)=>`${X(i).toFixed(1)},${Y(+r.v).toFixed(1)}`).join(' ');
+    svg=`<svg class="tgt-spark" viewBox="0 0 ${W} 64" role="img" aria-label="Últimas ${n} sesiones">
+      ${n>1?`<polyline points="${pts}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="1.5"/>`:''}
+      ${recs.map((r,i)=>{const c=RPE_COL[rpeCat(r.rpe)]||'#555',rr=_recReps(r);
+        return`<circle cx="${X(i).toFixed(1)}" cy="${Y(+r.v).toFixed(1)}" r="4.5" fill="${c}"/>
+        <text x="${X(i).toFixed(1)}" y="54" text-anchor="middle" class="tgt-sp-t">${esc(kgTxt(r.v))}${rr?'×'+rr:''}</text>`;}).join('')}
+    </svg>`;
+  }
+  const st=kgTxt(p.step);
+  const src=p.stepSrc==='ajuste'?`+${st} kg (lo elegiste en Ajustes)`:p.stepSrc==='historial'?`+${st} kg, el que sueles usar aquí`:`+${st} kg (${(LOAD_EQ[p.eq]||{l:'tu equipo'}).l.toLowerCase()})`;
+  return`${svg}<div class="tgt-leg"><span><i style="background:#22c55e"></i>fácil</span><span><i style="background:#f59e0b"></i>justo</span><span><i style="background:#ef4444"></i>al límite</span></div>
+    <ul class="tgt-rules">
+      <li>Rango <b>${p.lo}-${p.hi} reps</b>: mismo peso y una rep más cada vez. Al hacer ${p.hi} en todas las series, sube un salto y vuelve a ${p.lo}.</li>
+      <li>Salto: <b>${esc(src)}</b>. Sube como mucho un 10 % (doble si fue fácil). Con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.</li>
+      <li>«Al límite» no sube peso. Dos sesiones seguidas por debajo de ${p.lo} reps: baja un 5-10 %, al menos un salto.</li>
+    </ul>
+    <button type="button" class="tgt-set" onclick="openLoadSettings()">Cambiar saltos de peso ›</button>`;
+}
+// Ajuste en vivo entre series: tras una serie «al límite», mantener o bajar; si todo va «fácil», probar un salto más
+function liveAdjHtml(ex,p){
+  if(!ex||!p||p.kind==='deload')return'';
+  const n=parseInt(ex.s)||0,c=S.sets[ex.id]||{},rp=(S.rpe&&S.rpe[ex.id])||{};
+  const marked=[];for(let i=0;i<n;i++)if(c[i])marked.push(i);
+  if(!marked.length||marked.length>=n)return'';
+  const typed=parseFloat((S.logs[ex.id]||{}).w),w=typed>0?typed:p.weight,eid=esc(ex.id);
+  const lastR=rp[marked[marked.length-1]];
+  if(lastR===3){
+    const dn=_r2(w-p.step),canDown=dn>0&&w>p.weight-p.step+0.01; // no encadenar bajadas
+    return`<div class="live-adj lim"><span>🥵 Serie al límite: mantén ${esc(kgTxt(w))} kg${canDown?` o baja a ${esc(kgTxt(dn))} kg si no llegas a ${p.lo} reps`:' y cuida la técnica'}.</span>${canDown?`<button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${dn})">Bajar a ${esc(kgTxt(dn))}</button>`:''}</div>`;
+  }
+  if(p.kind!=='down'&&marked.every(i=>rp[i]===1)&&w<=p.weight+0.01){
+    const reps=_todayReps(ex,p);
+    if(p.step>w*LOAD_CAP+1e-9)return`<div class="live-adj easy"><span>😌 Te sobra: haz 1-2 reps más en la siguiente serie.</span></div>`;
+    const up=_r2(w+p.step);
+    return`<div class="live-adj easy"><span>😌 Te sobra: si hiciste ${reps?reps+' reps':'tus reps'}, prueba ${esc(kgTxt(up))} kg en la siguiente serie.</span><button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${up})">Poner ${esc(kgTxt(up))}</button></div>`;
+  }
+  return'';
+}
+function liveSetWeight(exId,v){
+  v=_r2(+v);
+  if(!exId||!(v>0)||v>=1000)return;
   if(!S.logs[exId])S.logs[exId]={};
-  S.logs[exId].w=s.v.toString();
+  S.logs[exId].w=String(v);
   saveState();render();
+  toast(`Siguientes series con ${kgTxt(v)} kg`);
+}
+// Objetivos de un día del plan: [{ex, p}] de los ejercicios de fuerza con historial
+function dayTargets(dk){
+  const day=getPlan()[dk];
+  if(!day||!Array.isArray(day.ex))return[];
+  return day.ex.filter(e=>e&&!e.cardio).map(ex=>({ex,p:coach_prescribe(ex.id)})).filter(x=>x.p);
+}
+// Lista de objetivos: 'dash' (compacta, en «Próxima sesión» de Inicio) o 'coach' (con el motivo de cada uno)
+function dayTargetsHtml(dk,mode){
+  const t=dayTargets(dk);
+  if(!t.length)return'';
+  const rows=t.map(({ex,p})=>`<div class="tgl-row">
+      <span class="tgl-ic k-${p.kind}" role="img" aria-label="${esc(PRES_WORD[p.kind])}">${PRES_IC[p.kind]}</span>
+      <span class="tgl-n">${esc(ex.n)}${mode==='coach'?`<small>${esc(p.head)}: ${esc(p.reason)}</small>`:''}</span>
+      <span class="tgl-v">${esc(kgTxt(p.weight))} kg × ${p.reps}</span></div>`).join('');
+  return`<div class="tgl${mode==='coach'?' full':''}">${mode==='dash'?'<div class="tgl-h">🎯 Objetivos de carga</div>':''}${rows}</div>`;
+}
+// Día para «Tu próxima sesión» del Coach: el entreno a medias si lo hay; si no, el que toca
+function _coachPlanDay(){const aw=getActiveWorkout();return aw?aw.day:S.nextDay;}
+function coachPlanCardHtml(){
+  const dk=_coachPlanDay(),day=getPlan()[dk];
+  const list=day?dayTargetsHtml(dk,'coach'):'';
+  if(!list)return'';
+  const aw=getActiveWorkout();
+  return`<div class="sh">🎯 ${aw?'Tu entreno de hoy':'Tu próxima sesión'} · ${esc(day.label)}</div>
+  <div class="card coach-plan">${list}
+    <div class="coach-plan-f">Doble progresión: primero reps, luego peso. Con tu esfuerzo (😌 💪 🥵) ajusto el salto.</div>
+    <button class="btn bs" onclick="${aw?'resumeWorkout()':"S.day=S.nextDay;go('workout')"}">${aw?'Seguir entrenando':'Ir a entrenar'} ${esc(day.label)} →</button>
+  </div>`;
+}
+// ── Ajustes → Coach de carga: salto de peso por tipo de equipo ──
+function loadStepsSettingsHtml(){
+  return`<div class="sh" id="set-load">Coach de carga</div>
+  <div class="set-section">
+    ${Object.keys(LOAD_EQ).map(k=>{const q=LOAD_EQ[k],cur=(S.loadSteps||{})[k]===undefined?'auto':String(S.loadSteps[k]);
+      return`<div class="set-row ls-row">
+        <div class="set-row-info"><div class="set-row-t">${esc(q.l)}</div><div class="set-row-d">${esc(q.d)}</div></div>
+        <select class="ls-sel" data-k="${k}" aria-label="Salto de peso: ${esc(q.l)}" onchange="setLoadStep(this.dataset.k,this.value)">
+          <option value="auto"${cur==='auto'?' selected':''}>Auto</option>
+          ${q.opts.map(v=>`<option value="${v}"${cur===String(v)?' selected':''}>+${kgTxt(v)} kg</option>`).join('')}
+        </select></div>`;}).join('')}
+    <div class="ls-note">Auto: el salto que ya usas en cada ejercicio. Si aún no has subido, el habitual de su equipo (+2.5 kg en barra y máquinas, +1 kg en mancuernas y polea). Sube como mucho un 10 %; con pesos ligeros, antes suma 2 reps y luego da el salto mínimo de tu equipo.</div>
+  </div>`;
+}
+function setLoadStep(k,v){
+  if(!LOAD_EQ[k])return;
+  const nv=v==='auto'?'auto':+v;
+  if(nv!=='auto'&&!LOAD_EQ[k].opts.includes(nv))return;
+  S.loadSteps=_sanitizeLoadSteps(Object.assign({},S.loadSteps,{[k]:nv}));
+  saveState();
+  // Repintar la app (objetivos nuevos) sin perder la posición de la hoja de Ajustes
+  const sh=document.querySelector('#settings-root .hist-sheet'),sc=sh?sh.scrollTop:0;
+  render();
+  const sh2=document.querySelector('#settings-root .hist-sheet');if(sh2)sh2.scrollTop=sc;
+  toast(nv==='auto'?`${LOAD_EQ[k].l}: salto automático`:`${LOAD_EQ[k].l}: +${kgTxt(nv)} kg`);
+}
+function openLoadSettings(){
+  openSettings();
+  // Bajar hasta «Coach de carga» (por debajo de la cabecera fija de la hoja)
+  setTimeout(()=>{
+    const sh=document.querySelector('#settings-root .hist-sheet'),el=document.getElementById('set-load');
+    if(!sh||!el)return;
+    const hd=sh.querySelector('.hist-sheet-head');
+    sh.scrollTop+=el.getBoundingClientRect().top-sh.getBoundingClientRect().top-(hd?hd.offsetHeight:0)-6;
+  },60);
 }
 
 function openHist(exId){S._hist=exId;renderHist();}
@@ -6827,6 +7361,8 @@ function renderWorkout(){
     const isOpen=S.open===ex.id,c=S.sets[ex.id]||{};
     const exDone=ex.cardio?c[0]===true:countSetsDone(ex.id,ex.s)>=ex.s;
     const l=S.logs[ex.id]||{},sug=!ex.cardio?getSug(ex.id,ex.s,ex.r):null;
+    // Objetivo de hoy del Coach de carga (una sola fuente para chip, objetivo, etiqueta, placeholders y ajuste en vivo)
+    const pr=!ex.cardio?coach_prescribe(ex.id):null;
     const sbHtml=!ex.cardio?Array.from({length:ex.s},(_,i)=>{
       const done=c[i];
       const rpeLevel=(S.rpe&&S.rpe[ex.id]&&S.rpe[ex.id][i])||0;
@@ -6837,7 +7373,7 @@ function renderWorkout(){
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}">
       <div class="exh" onclick="S.open=S.open==='${ex.id}'?null:'${ex.id}';render()">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${esc(ex.ic||'💪')}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+esc(fmtTargetReps(ex))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}</div></div>
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+(pr&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex)))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}</div>${pr&&!exDone?`<div class="ex-goal k-${pr.kind}" role="img" aria-label="Objetivo de hoy: ${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones, ${esc(PRES_WORD[pr.kind])}">🎯 ${esc(kgTxt(pr.weight))} kg × ${pr.reps}<span class="ex-goal-k">${PRES_WORD[pr.kind]}</span></div>`:''}</div>
         ${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${esc(ex.tip||'')}</div>
@@ -6852,19 +7388,23 @@ function renderWorkout(){
             <span style="color:var(--text3)">${esc(lw.d||'')}${rpeLbl}${lw.dl?' · sesión ligera':''}</span>
           </div>`;
         })()}
+          ${presTargetHtml(ex,pr)}
           <div class="wu-slot">${warmupBlockHtml(ex)}</div>
           <div style="font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center"><span>Series completadas</span><button class="hist-btn" onclick="event.stopPropagation();openHist('${ex.id}')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:12px;height:12px"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>Historial</button></div>
           <div class="srow">${sbHtml}</div>
+          ${liveAdjHtml(ex,pr)}
           ${(()=>{
             // El placeholder es una SUGERENCIA (no un valor): «57.5 sugerido». Si hay series marcadas sin peso, se avisa.
             // Peso corporal / por tiempo (plancha, flexiones…): el peso es opcional, sin aviso.
-            const s=sugW(ex.id),bw=isBodyweightEx(ex);
-            const needW=!bw&&countSetsDone(ex.id,ex.s)>0&&!(parseFloat(l.w)>0);
-            return`<div class="irow"><label>Peso</label><input class="inp inp-hint${needW?' need':''}" data-f="w" type="number" placeholder="${s?esc(s.v)+' sugerido':bw?'opcional':'kg'}" value="${esc(l.w||'')}" oninput="onWeightInput(this,'${ex.id}')" step="2.5" inputmode="decimal" aria-label="Peso en kg${s?', sugerido '+esc(s.v):bw?' (opcional)':''}"/>${s?`<span class="sug-tag ${s.cls}" onclick="useSug('${ex.id}')">${s.label}</span>`:''}</div>
+            // La etiqueta (objetivo del Coach de carga) se actualiza al escribir: «✓ objetivo» / «Objetivo 60».
+            const bw=isBodyweightEx(ex),typed=parseFloat(l.w);
+            const needW=!bw&&countSetsDone(ex.id,ex.s)>0&&!(typed>0);
+            const pw=pr?esc(kgTxt(pr.weight)):'';
+            return`<div class="irow"><label>Peso</label><input class="inp inp-hint${needW?' need':''}" data-f="w" type="number" placeholder="${pr?pw+' sugerido':bw?'opcional':'kg'}" value="${esc(l.w||'')}" oninput="onWeightInput(this,'${ex.id}')" step="${pr?pr.step:'any'}" inputmode="decimal" aria-label="Peso en kg${pr?', objetivo '+pw:bw?' (opcional)':''}"/>${pr?`<button type="button" class="sug-tag ${presTagCls(pr,typed>0?typed:null)}" data-ex="${esc(ex.id)}" onclick="useSug(this.dataset.ex)" aria-label="Usar el objetivo: ${pw} kg">${esc(presTagTxt(pr,typed>0?typed:null))}</button>`:''}</div>
           ${bw?'':`<div class="need-hint" data-ex="${esc(ex.id)}"${needW?'':' hidden'}>Apunta el peso para que cuente en tu progreso</div>`}`;
           })()}
-          <div class="irow"><label>Reps</label><input class="inp inp-hint" type="number" placeholder="${esc(ex.r)} objetivo" value="${esc(l.r||'')}" oninput="updLog('${ex.id}','r',this.value)" inputmode="numeric" aria-label="Repeticiones, objetivo ${esc(ex.r)}"/></div>
-          ${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}`
+          ${(()=>{const rt=pr&&pr.reps>0?pr.reps:ex.r;return`<div class="irow"><label>Reps</label><input class="inp inp-hint" data-f="r" type="number" placeholder="${esc(rt)} objetivo" value="${esc(l.r||'')}" oninput="onRepsInput(this,'${ex.id}')" inputmode="numeric" aria-label="Repeticiones, objetivo ${esc(rt)}"/></div>`;})()}
+          <div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}</div>`
         :`${(()=>{
           // Cronómetro de cardio: parsear duración de ex.r (ej: "8 min", "15 min")
           const m=String(ex.r||'').match(/(\d+)\s*min/i);
@@ -7022,9 +7562,9 @@ function renderProg(){
   <div class="sh">Guía de progresión</div>
   <div class="card">
     <div style="display:flex;flex-direction:column;gap:12px">
-      ${[['var(--green)','✓','¿Completaste todas las series y reps?','Sube 2.5 kg la próxima sesión.'],
-         ['var(--amber)','~','¿Te costó pero casi lo completaste?','Mantén el peso hasta que las reps salgan limpias.'],
-         ['var(--red)','↓','¿No llegaste a las reps?','Reduce 2.5 kg o mantén. No pasa nada.'],
+      ${[['var(--green)','↑','¿Llegaste al tope del rango en todas las series?','Sube un salto de tu equipo (2.5 kg en Smith, 1 kg en polea o mancuerna…) y vuelve al mínimo del rango. Si fue fácil, puede ser doble. Como mucho un 10 %: con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.'],
+         ['var(--blue)','+','¿Dentro del rango, o al límite?','Mismo peso y una rep más la próxima vez. «Al límite» nunca sube peso.'],
+         ['var(--amber)','↓','¿Dos sesiones seguidas por debajo del rango?','Baja un 5-10 % (al menos un salto) y vuelve a subir desde ahí. No pasa nada.'],
          ['var(--blue)','→','La regla de oro',`${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}/semana durante meses = resultados reales. La constancia lo es todo.`],
       ].map(([c,i,t,d])=>`<div style="display:flex;gap:12px;align-items:flex-start">
         <span style="color:${c};font-size:18px;font-weight:700;line-height:1.3;flex-shrink:0;width:20px;text-align:center">${i}</span>
@@ -7074,10 +7614,7 @@ function editExSeries(dayKey,idx,delta){
   if(el)el.textContent=nv;
   // Actualizar el meta text
   const meta=document.querySelector(`#edi_${idx} .edit-ex-meta`);
-  if(meta){
-    const isCardio=!!ex.cardio;
-    meta.textContent=`${ex.eq} · ${isCardio?ex.s+' × '+ex.r:_nSeries(ex.s)+' × '+ex.r+' reps'}`;
-  }
+  if(meta)meta.textContent=_edMetaTxt(ex);
 }
 
 function editExReps(dayKey,idx,delta){
@@ -7090,7 +7627,15 @@ function editExReps(dayKey,idx,delta){
   const el=document.getElementById('rpv_'+idx);
   if(el)el.textContent=nv;
   const meta=document.querySelector(`#edi_${idx} .edit-ex-meta`);
-  if(meta)meta.textContent=`${ex.eq} · ${_nSeries(ex.s)} × ${ex.r} reps`;
+  if(meta)meta.textContent=_edMetaTxt(ex);
+}
+// Texto de un ejercicio en el editor: «Smith · 3 series × 12 reps · rango 10-12». El rango es el que usa el Coach de
+// carga (el de las tarjetas de Entreno); solo se añade si el plan tiene un número de reps, no un rango ya escrito.
+function _edMetaTxt(ex){
+  if(!ex)return'';
+  if(ex.cardio)return`${ex.eq} · ${ex.s} × ${ex.r}`;
+  const rr=targetRepsNum(ex)!=null?repRange(ex):null;
+  return`${ex.eq} · ${_nSeries(ex.s)} × ${ex.r} reps${rr&&rr.lo!==rr.hi?` · rango ${rr.lo}-${rr.hi}`:''}`;
 }
 
 function removeExercise(dayKey,idx){
@@ -7511,20 +8056,19 @@ function renderRoutineEditor(opts){
   const day=plan[_editDay];
   const exItems=day.ex.map((ex,i)=>{
     const isCardio=!!ex.cardio;
-    const sLabel=isCardio?`${ex.s} × ${ex.r}`:`${_nSeries(ex.s)} × ${ex.r} reps`;
     return`<div class="edit-ex-item" data-idx="${i}" id="edi_${i}">
       <div class="drag-handle" aria-label="Arrastrar">⠿</div>
       <div class="edit-ex-info">
         <div class="edit-ex-name">${esc(ex.ic||'💪')} ${esc(ex.n)}</div>
-        <div class="edit-ex-meta">${esc(ex.eq)} · ${esc(sLabel)}</div>
+        <div class="edit-ex-meta">${esc(_edMetaTxt(ex))}</div>
         ${!isCardio?`<div class="sr-editor">
           <span class="sr-label">Series</span>
           <button class="sr-btn" onclick="editExSeries('${_editDay}',${i},-1)">−</button>
-          <span class="sr-val" id="srv_${i}">${ex.s}</span>
+          <span class="sr-val" id="srv_${i}">${esc(ex.s)}</span>
           <button class="sr-btn" onclick="editExSeries('${_editDay}',${i},1)">+</button>
           <span class="sr-label" style="margin-left:8px">Reps</span>
           <button class="sr-btn" onclick="editExReps('${_editDay}',${i},-1)">−</button>
-          <span class="sr-val" id="rpv_${i}">${ex.r}</span>
+          <span class="sr-val" id="rpv_${i}">${esc(ex.r)}</span>
           <button class="sr-btn" onclick="editExReps('${_editDay}',${i},1)">+</button>
         </div>`:''}
       </div>
@@ -7657,6 +8201,7 @@ function renderSettings(){
           <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
         </div>`;})()}
       </div>
+      ${loadStepsSettingsHtml()}
       <div class="sh">Datos personales</div>
       <div class="set-section">
         <div class="set-row" onclick="openEditWeight('first')">
@@ -7962,9 +8507,12 @@ function importData(){
           onOk:()=>{
             // Preferencia de sonido: la del backup solo si la trae (un backup antiguo no cambia la de este móvil)
             const _sndImp=typeof data.timerSound==='boolean'?data.timerSound:(typeof S.timerSound==='boolean'?S.timerSound:true);
+            // Saltos de peso (v15): los del backup solo si los trae (uno antiguo no pisa los de este móvil); siempre saneados
+            const _lsImp=_sanitizeLoadSteps(_isPlainObj(data.loadSteps)?data.loadSteps:S.loadSteps);
             // Aplicar migración por si viene de versión antigua
             const migrated=migrateState(data);
             migrated.timerSound=_sndImp;
+            migrated.loadSteps=_lsImp;
             // Temporizador: nunca se importa ni se hereda (el del backup es de otro momento; el actual, de otros datos)
             migrated.restTimer=null;
             // Sanear nombres y campos de texto del plan personalizado (defensa XSS)
@@ -8003,7 +8551,13 @@ function importData(){
             if(!Array.isArray(migrated.appliedProposals))migrated.appliedProposals=[];
             // Nombres guardados en los registros de fuerza (v14): solo texto y acotado (se muestran escapados)
             if(migrated.strength&&typeof migrated.strength==='object')Object.values(migrated.strength).forEach(a=>{
-              if(Array.isArray(a))a.forEach(r=>{if(r&&typeof r==='object'&&'n' in r){if(typeof r.n==='string')r.n=r.n.slice(0,120);else delete r.n;}});
+              if(Array.isArray(a))a.forEach(r=>{
+                if(!r||typeof r!=='object')return;
+                if('n' in r){if(typeof r.n==='string')r.n=r.n.slice(0,120);else delete r.n;}
+                // Plan del registro (v16): series 1-20 y reps del plan como texto corto o número; lo demás, fuera
+                if('ps' in r&&!(Number.isInteger(+r.ps)&&+r.ps>=1&&+r.ps<=20))delete r.ps;else if('ps' in r)r.ps=+r.ps;
+                if('pr' in r&&!_validPr(r.pr))delete r.pr;
+              });
             });
             Object.keys(S).forEach(k=>{if(!(k in migrated))migrated[k]=S[k];});
             S=Object.assign(S,migrated);
