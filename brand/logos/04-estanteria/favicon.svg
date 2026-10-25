@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Gymteca — Estantería (original)</title>
+  <rect width="1024" height="1024" fill="#0f0f0f"/>
+  <g transform="translate(512 512) scale(1.26) translate(-512 -532)">
+  <rect x="196" y="716" width="632" height="48" rx="24" fill="#22c55e"/>
+  <rect x="232" y="300" width="92" height="400" rx="22" fill="#22c55e"/>
+  <rect x="232" y="356" width="92" height="20" fill="#0f0f0f"/>
+  <rect x="232" y="620" width="92" height="20" fill="#0f0f0f"/>
+  <rect x="340" y="388" width="78" height="312" rx="20" fill="#4ade80"/>
+  <rect x="340" y="440" width="78" height="18" fill="#0f0f0f"/>
+  <circle cx="626" cy="530" r="170" fill="#22c55e"/>
+  <circle cx="626" cy="530" r="58" fill="#0f0f0f"/>
+  </g>
+</svg>

@@ -1,0 +1,62 @@
+/* Paletas Gymteca: copiar el bloque elegido dentro de :root en index.html.
+   --green sigue siendo el acento para no romper nada; --accent-ink es nuevo (texto sobre el acento). */
+
+/* 00-verde-actual · Verde actual */
+[data-paleta="verde-actual"] {
+  --bg:#0f0f0f;--bg2:#181818;--bg3:#222222;--bg4:#2a2a2a;
+  --text:#f0f0f0;--text2:#888888;--text3:#555555;
+  --green:#22c55e;--green-bg:rgba(34,197,94,0.1);--green-bg2:rgba(34,197,94,0.18);--green-b:rgba(34,197,94,0.3);
+  --accent-ink:#0f0f0f;--pr:#f59e0b;
+  --red:#ef4444;--blue:#3b82f6;--amber:#f59e0b;
+  --marca:#22c55e;--teca:#0f0f0f;
+}
+
+/* 01-lima-voltio · Lima voltio */
+[data-paleta="lima-voltio"] {
+  --bg:#0e0f0c;--bg2:#171914;--bg3:#20231b;--bg4:#2a2e23;
+  --text:#f3f5ec;--text2:#8d9384;--text3:#5b6053;
+  --green:#c8f031;--green-bg:rgba(200,240,49,0.1);--green-bg2:rgba(200,240,49,0.18);--green-b:rgba(200,240,49,0.3);
+  --accent-ink:#10120c;--pr:#ff6bd6;
+  --red:#ff5a4e;--blue:#4cc3ff;--amber:#ffb020;
+  --marca:#c8f031;--teca:#10120c;
+}
+
+/* 02-lampara-biblioteca · Lámpara de biblioteca */
+[data-paleta="lampara-biblioteca"] {
+  --bg:#0d1210;--bg2:#141c18;--bg3:#1c2621;--bg4:#24302a;
+  --text:#f1ead8;--text2:#9c9a88;--text3:#666556;
+  --green:#e8b84a;--green-bg:rgba(232,184,74,0.1);--green-bg2:rgba(232,184,74,0.18);--green-b:rgba(232,184,74,0.3);
+  --accent-ink:#17120a;--pr:#e8b84a;
+  --red:#e5584c;--blue:#79aee0;--amber:#e0803f;
+  --marca:#1d5a3d;--teca:#e8b84a;
+}
+
+/* 03-discos-competicion · Discos de competición */
+[data-paleta="discos-competicion"] {
+  --bg:#101114;--bg2:#181a1f;--bg3:#21242b;--bg4:#2b2f37;
+  --text:#f2f3f5;--text2:#8b909a;--text3:#5a5f69;
+  --green:#ffc81e;--green-bg:rgba(255,200,30,0.1);--green-bg2:rgba(255,200,30,0.18);--green-b:rgba(255,200,30,0.3);
+  --accent-ink:#111214;--pr:#2fbf63;
+  --red:#f5504b;--blue:#4f8af7;--amber:#ff8a1f;
+  --marca:#ffc81e;--teca:#111214;
+}
+
+/* 04-tiza-menta · Tiza y menta */
+[data-paleta="tiza-menta"] {
+  --bg:#0b1514;--bg2:#11201e;--bg3:#182b28;--bg4:#203632;
+  --text:#eef6f4;--text2:#86a19c;--text3:#557069;
+  --green:#4fe3c1;--green-bg:rgba(79,227,193,0.1);--green-bg2:rgba(79,227,193,0.18);--green-b:rgba(79,227,193,0.3);
+  --accent-ink:#062320;--pr:#ff8a65;
+  --red:#ff6b6b;--blue:#7aa7ff;--amber:#ffb547;
+  --marca:#4fe3c1;--teca:#0b1514;
+}
+
+/* 05-violeta-20kg · Violeta 20 kg */
+[data-paleta="violeta-20kg"] {
+  --bg:#0f0d15;--bg2:#17141f;--bg3:#201c2b;--bg4:#2a2538;
+  --text:#f3f0fa;--text2:#938da3;--text3:#5f5a6e;
+  --green:#a78bfa;--green-bg:rgba(167,139,250,0.1);--green-bg2:rgba(167,139,250,0.18);--green-b:rgba(167,139,250,0.3);
+  --accent-ink:#140f20;--pr:#f472b6;
+  --red:#f87171;--blue:#60a5fa;--amber:#fbbf24;
+  --marca:#8b5cf6;--teca:#0f0d15;
+}

@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Gymteca — Teca de noche</title>
+  <rect width="1024" height="1024" fill="#0f0f0f"/>
+  <path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="#22c55e" stroke-width="92" stroke-linecap="round"/>
+  <path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="#22c55e"/>
+  <circle cx="436" cy="648" r="34" fill="#0f0f0f"/>
+  <path d="M554 658q34-46 68 0" fill="none" stroke="#0f0f0f" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M442 728q70 66 140 0" fill="none" stroke="#0f0f0f" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Gymteca — Teca en la última rep</title>
+  <rect width="1024" height="1024" fill="#22c55e"/>
+  <path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="#0f0f0f" stroke-width="92" stroke-linecap="round"/>
+  <path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="#0f0f0f"/>
+  <path d="M406 618l50 32-50 32" fill="none" stroke="#22c55e" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M618 618l-50 32 50 32" fill="none" stroke="#22c55e" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M456 718h112a56 56 0 0 1-112 0z" fill="#22c55e"/>
+  <path d="M772 238q-50 70-50 100a50 50 0 0 0 100 0q0-30-50-100z" fill="#ffffff"/>
+</svg>

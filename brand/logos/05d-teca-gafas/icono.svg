@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Gymteca — Teca bibliotecaria</title>
+  <rect width="1024" height="1024" fill="#22c55e"/>
+  <path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="#0f0f0f" stroke-width="92" stroke-linecap="round"/>
+  <path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="#0f0f0f"/>
+  <circle cx="440" cy="642" r="22" fill="#22c55e"/>
+  <circle cx="584" cy="642" r="22" fill="#22c55e"/>
+  <circle cx="440" cy="642" r="58" fill="none" stroke="#22c55e" stroke-width="20"/>
+  <circle cx="584" cy="642" r="58" fill="none" stroke="#22c55e" stroke-width="20"/>
+  <path d="M498 634q14-12 28 0" fill="none" stroke="#22c55e" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M456 742q56 46 112 0" fill="none" stroke="#22c55e" stroke-width="26" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

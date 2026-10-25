@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Gymteca — Teca con cinta</title>
+  <rect width="1024" height="1024" fill="#22c55e"/>
+  <path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="#0f0f0f" stroke-width="92" stroke-linecap="round"/>
+  <path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="#0f0f0f"/>
+  <clipPath id="cuerpo"><path d="M398.4 840a230 230 0 1 1 227.2 0z"/></clipPath>
+  <rect x="270" y="448" width="484" height="62" fill="#ffffff" clip-path="url(#cuerpo)"/>
+  <path d="M694 470l78-30" fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M694 486l70 44" fill="none" stroke="#ffffff" stroke-width="34" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="440" cy="628" r="32" fill="#22c55e"/>
+  <circle cx="584" cy="628" r="32" fill="#22c55e"/>
+  <path d="M438 700h148a74 74 0 0 1-148 0z" fill="#22c55e"/>
+</svg>

@@ -1,0 +1,358 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gymteca · Paletas</title>
+<link rel="icon" href="00-verde-actual/png/favicon-32.png">
+<style>
+  @font-face { font-family: "DM Sans"; src: url("../../../web/assets/fonts/dm-sans.woff2") format("woff2"); font-weight: 100 1000; }
+  @font-face { font-family: "DM Mono"; src: url("../../../web/assets/fonts/dm-mono-500.woff2") format("woff2"); font-weight: 500; }
+  :root { --pbg: #0f0f0f; --panel: #171717; --line: #262626; --ptext: #f5f5f5; --muted: #a3a3a3; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--pbg); color: var(--ptext); font: 16px/1.5 "DM Sans", system-ui, sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 48px 16px 96px; }
+  h1 { font-size: clamp(28px, 4vw, 44px); line-height: 1.1; margin: 0 0 8px; letter-spacing: -0.02em; }
+  .lead { color: var(--muted); max-width: 760px; margin: 0 0 28px; }
+  .label { display: block; margin-bottom: 12px; font: 500 12px/1 "DM Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+  .mono { font-family: "DM Mono", monospace; }
+
+  .overview { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 14px; }
+  .ov { display: grid; gap: 10px; padding: 14px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); color: inherit; text-decoration: none; }
+  .ov:hover { border-color: #555; }
+  .ov img { width: 72px; height: 72px; border-radius: 22.5%; }
+  .ov .strip { display: flex; height: 18px; border-radius: 6px; overflow: hidden; }
+  .ov .strip i { flex: 1; }
+  .ov b { font-size: 15px; } .ov small { color: var(--muted); font-size: 12px; }
+
+  .pal { margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--line); }
+  .pal header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; }
+  .pal h2 { margin: 0; font-size: 28px; letter-spacing: -0.01em; }
+  .num { font: 500 16px "DM Mono", monospace; color: var(--muted); }
+  .tag { font: 500 12px "DM Mono", monospace; text-transform: uppercase; letter-spacing: .08em; padding: 4px 10px; border: 1px solid var(--line); border-radius: 99px; color: var(--muted); }
+  .idea { color: var(--muted); max-width: 780px; margin: 6px 0 24px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+  .stack { display: grid; gap: 14px; align-content: start; }
+  .box { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 18px; min-width: 0; }
+  .box.light { background: #f6f6f4; border-color: #e5e5e5; }
+  .hero { display: flex; flex-wrap: wrap; align-items: center; gap: 24px; }
+  .hero .app { width: 132px; height: 132px; border-radius: 22.5%; }
+  .av { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+  .ring { padding: 3px; border-radius: 50%; background: conic-gradient(#f9ce34, #ee2a7b, #6228d7, #f9ce34); }
+  .ring img { display: block; width: 76px; height: 76px; border-radius: 50%; border: 3px solid #000; }
+  .av .sm { width: 40px; height: 40px; border-radius: 50%; }
+  .av .fv { border-radius: 3px; }
+  .logo img { display: block; width: 100%; max-width: 340px; height: auto; }
+  .sws { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .sw { display: flex; align-items: center; gap: 10px; padding: 6px; border: 1px solid var(--line); border-radius: 12px; background: #111; color: inherit; font: inherit; text-align: left; cursor: pointer; min-width: 0; }
+  .sw:hover { border-color: #555; }
+  .sw i { flex: none; width: 36px; height: 36px; border-radius: 9px; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12); }
+  .sw span { display: grid; min-width: 0; line-height: 1.25; }
+  .sw b { font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sw em { font: 500 12px "DM Mono", monospace; font-style: normal; color: var(--muted); }
+  .sw small { font: 500 10px "DM Mono", monospace; color: #6b6b6b; }
+  .sw.copied { border-color: #fff; }
+  .checks { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 6px 14px; }
+  .checks li { display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 4px 0; border-bottom: 1px solid var(--line); }
+  .checks b { font: 500 12px "DM Mono", monospace; }
+  .checks .aaa b::after { content: " AAA"; color: #4ade80; } .checks .aa b::after { content: " AA"; color: #a3e635; } .checks .ko b::after { content: " ✕"; color: #f87171; }
+  .files { margin-top: 14px; font: 500 12px "DM Mono", monospace; } .files a { color: var(--muted); margin-right: 12px; }
+
+  /* Maqueta de la app (usa las variables de la paleta) */
+  .phonewrap { position: sticky; top: 16px; }
+  .phone { width: 100%; max-width: 360px; margin: 0 auto; border-radius: 40px; padding: 10px; background: #000; box-shadow: 0 0 0 1px #333, 0 30px 80px rgba(0,0,0,.5); }
+  .scr { border-radius: 31px; overflow: hidden; background: var(--bg); color: var(--text); padding: 10px 12px 0; display: grid; gap: 10px; font-size: 13px; }
+  .sbar { display: flex; justify-content: space-between; padding: 2px 10px; font-size: 12px; } .sbar span { letter-spacing: 1px; font-size: 9px; color: var(--text2); }
+  .hdr { display: flex; align-items: center; gap: 10px; }
+  .hdr img { width: 34px; height: 34px; border-radius: 10px; }
+  .hdr div { display: grid; line-height: 1.2; } .hdr small { color: var(--text2); font-size: 11px; } .hdr b { font-size: 16px; }
+  .chip { margin-left: auto; font-size: 11px; padding: 4px 9px; border-radius: 99px; background: color-mix(in srgb, var(--accent) 14%, transparent); color: var(--accent); white-space: nowrap; }
+  .card { background: var(--bg2); border-radius: 14px; padding: 12px; display: grid; gap: 6px; border: 1px solid rgba(255,255,255,.06); }
+  .hoy { background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 16%, var(--bg2)), var(--bg2)); border-color: color-mix(in srgb, var(--accent) 30%, transparent); }
+  .k { font: 500 10px "DM Mono", monospace; letter-spacing: .1em; color: var(--accent); }
+  .hoy b { font-size: 16px; } .m { color: var(--text2); font-size: 12px; }
+  .btn { margin-top: 4px; border: 0; border-radius: 10px; padding: 10px; font: 700 14px "DM Sans", sans-serif; background: var(--accent); color: var(--ink); }
+  .exh { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .coach { font-size: 10.5px; padding: 3px 8px; border-radius: 99px; background: color-mix(in srgb, var(--blue) 15%, transparent); color: var(--blue); white-space: nowrap; }
+  .sets { display: grid; gap: 4px; }
+  .row { display: grid; grid-template-columns: 44px 1fr 1fr 26px; align-items: center; gap: 6px; font-family: "DM Mono", monospace; font-size: 13px; padding: 4px 6px; border-radius: 8px; }
+  .row.hd { font-size: 9.5px; color: var(--text3); letter-spacing: .08em; padding-top: 0; padding-bottom: 0; }
+  .row.done { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+  .row .in { background: var(--bg4); border-radius: 6px; padding: 3px 7px; }
+  .ck { width: 24px; height: 24px; border-radius: 7px; display: grid; place-items: center; font-style: normal; font-size: 13px; font-weight: 700; background: var(--accent); color: var(--ink); }
+  .ck.off { background: transparent; box-shadow: inset 0 0 0 2px var(--bg4); }
+  .prb { font: 700 9.5px "DM Sans", sans-serif; font-style: normal; padding: 2px 6px; border-radius: 99px; background: var(--pr); color: var(--bg); margin-left: 4px; vertical-align: 1px; }
+  .rest { grid-template-columns: auto 1fr auto auto; align-items: center; gap: 10px; }
+  .tring { width: 44px; height: 44px; transform: rotate(-90deg); }
+  .bgc { fill: none; stroke: var(--bg4); stroke-width: 5; } .fgc { fill: none; stroke: var(--accent); stroke-width: 5; stroke-linecap: round; }
+  .rest div { display: grid; line-height: 1.1; } .rest small { color: var(--text2); font-size: 11px; } .rest b { font-size: 22px; }
+  .pill { font: 500 11px "DM Mono", monospace; padding: 5px 8px; border-radius: 8px; background: var(--bg3); color: var(--text2); }
+  .vol .up { color: var(--accent); font-size: 12px; }
+  .bars { display: flex; align-items: end; gap: 6px; height: 54px; } .bars i { flex: 1; border-radius: 4px 4px 2px 2px; }
+  .warn { font-size: 11px; color: var(--amber); }
+  .tabs { display: grid; grid-template-columns: repeat(4, 1fr); margin: 2px -12px 0; padding: 8px 6px 16px; background: var(--bg2); border-top: 1px solid rgba(255,255,255,.06); }
+  .tabs span { display: grid; justify-items: center; gap: 2px; font-size: 10px; color: var(--text3); } .tabs svg { width: 20px; height: 20px; }
+  .tabs .on { color: var(--accent); }
+
+  @media (max-width: 900px) { .grid { grid-template-columns: minmax(0, 1fr); } .phonewrap { position: static; } }
+</style>
+</head>
+<body>
+<main>
+  <span class="label">brand/logos/paletas · Teca (05)</span>
+  <h1>Paletas de color para Gymteca</h1>
+  <p class="lead">Seis paletas pensadas para la temática de la app (gimnasio, series, récords y la «-teca»), todas con Teca como logo. Cada una trae el icono, el favicon, los logotipos y una maqueta de la app con los colores aplicados. Los roles coinciden con las variables de <code>index.html</code> (<code>--bg</code>, <code>--green</code>, <code>--amber</code>…), y en <a href="paletas.css" style="color:inherit">paletas.css</a> está cada una lista para pegar.</p>
+  <div class="overview"><a class="ov" href="#00-verde-actual"><img src="00-verde-actual/icono.svg" alt=""><div class="strip"><i style="background:#0f0f0f"></i><i style="background:#181818"></i><i style="background:#2a2a2a"></i><i style="background:#f0f0f0"></i><i style="background:#22c55e"></i><i style="background:#22c55e"></i><i style="background:#f59e0b"></i><i style="background:#f59e0b"></i><i style="background:#3b82f6"></i><i style="background:#ef4444"></i></div><div><b>Verde actual</b><br><small>Referencia</small></div></a><a class="ov" href="#01-lima-voltio"><img src="01-lima-voltio/icono.svg" alt=""><div class="strip"><i style="background:#0e0f0c"></i><i style="background:#171914"></i><i style="background:#2a2e23"></i><i style="background:#f3f5ec"></i><i style="background:#c8f031"></i><i style="background:#c8f031"></i><i style="background:#ff6bd6"></i><i style="background:#ffb020"></i><i style="background:#4cc3ff"></i><i style="background:#ff5a4e"></i></div><div><b>Lima voltio</b><br><small>Energía</small></div></a><a class="ov" href="#02-lampara-biblioteca"><img src="02-lampara-biblioteca/icono.svg" alt=""><div class="strip"><i style="background:#0d1210"></i><i style="background:#141c18"></i><i style="background:#24302a"></i><i style="background:#f1ead8"></i><i style="background:#1d5a3d"></i><i style="background:#e8b84a"></i><i style="background:#e8b84a"></i><i style="background:#e0803f"></i><i style="background:#79aee0"></i><i style="background:#e5584c"></i></div><div><b>Lámpara de biblioteca</b><br><small>«-teca»</small></div></a><a class="ov" href="#03-discos-competicion"><img src="03-discos-competicion/icono.svg" alt=""><div class="strip"><i style="background:#101114"></i><i style="background:#181a1f"></i><i style="background:#2b2f37"></i><i style="background:#f2f3f5"></i><i style="background:#ffc81e"></i><i style="background:#ffc81e"></i><i style="background:#2fbf63"></i><i style="background:#ff8a1f"></i><i style="background:#4f8af7"></i><i style="background:#f5504b"></i></div><div><b>Discos de competición</b><br><small>Gimnasio</small></div></a><a class="ov" href="#04-tiza-menta"><img src="04-tiza-menta/icono.svg" alt=""><div class="strip"><i style="background:#0b1514"></i><i style="background:#11201e"></i><i style="background:#203632"></i><i style="background:#eef6f4"></i><i style="background:#4fe3c1"></i><i style="background:#4fe3c1"></i><i style="background:#ff8a65"></i><i style="background:#ffb547"></i><i style="background:#7aa7ff"></i><i style="background:#ff6b6b"></i></div><div><b>Tiza y menta</b><br><small>Fresca</small></div></a><a class="ov" href="#05-violeta-20kg"><img src="05-violeta-20kg/icono.svg" alt=""><div class="strip"><i style="background:#0f0d15"></i><i style="background:#17141f"></i><i style="background:#2a2538"></i><i style="background:#f3f0fa"></i><i style="background:#8b5cf6"></i><i style="background:#a78bfa"></i><i style="background:#f472b6"></i><i style="background:#fbbf24"></i><i style="background:#60a5fa"></i><i style="background:#f87171"></i></div><div><b>Violeta 20 kg</b><br><small>Atrevida</small></div></a></div>
+  
+  <section class="pal" id="00-verde-actual">
+    <header><span class="num">00</span><h2>Verde actual</h2><span class="tag">Referencia</span></header>
+    <p class="idea">La paleta de hoy, para comparar. Funciona, pero el verde #22c55e es el verde por defecto de Tailwind y lo usan muchísimas apps.</p>
+    <div class="grid">
+      <div class="stack">
+        <div class="box hero" style="background:#0f0f0f">
+          <img class="app" src="00-verde-actual/icono.svg" alt="Icono">
+          <div class="av"><div class="ring"><img src="00-verde-actual/png/icono-512.png" alt=""></div><img class="sm" src="00-verde-actual/png/icono-64.png" alt=""><img class="fv" src="00-verde-actual/png/favicon-32.png" width="32" height="32" alt=""><img class="fv" src="00-verde-actual/png/favicon-16.png" width="16" height="16" alt=""></div>
+        </div>
+        <div class="box logo" style="background:#0f0f0f"><img src="00-verde-actual/logo-horizontal.svg" alt=""></div>
+        <div class="box logo light"><img src="00-verde-actual/logo-claro.svg" alt=""></div>
+        <div class="box"><span class="label">Colores · clic para copiar</span><div class="sws"><button class="sw" data-hex="#0f0f0f" title="Copiar #0f0f0f"><i style="background:#0f0f0f"></i><span><b>Fondo</b><em>#0f0f0f</em><small>--bg</small></span></button><button class="sw" data-hex="#181818" title="Copiar #181818"><i style="background:#181818"></i><span><b>Tarjeta</b><em>#181818</em><small>--bg2</small></span></button><button class="sw" data-hex="#222222" title="Copiar #222222"><i style="background:#222222"></i><span><b>Elevado</b><em>#222222</em><small>--bg3</small></span></button><button class="sw" data-hex="#2a2a2a" title="Copiar #2a2a2a"><i style="background:#2a2a2a"></i><span><b>Campos</b><em>#2a2a2a</em><small>--bg4</small></span></button><button class="sw" data-hex="#f0f0f0" title="Copiar #f0f0f0"><i style="background:#f0f0f0"></i><span><b>Texto</b><em>#f0f0f0</em><small>--text</small></span></button><button class="sw" data-hex="#888888" title="Copiar #888888"><i style="background:#888888"></i><span><b>Texto 2</b><em>#888888</em><small>--text2</small></span></button><button class="sw" data-hex="#22c55e" title="Copiar #22c55e"><i style="background:#22c55e"></i><span><b>Acento</b><em>#22c55e</em><small>--green</small></span></button><button class="sw" data-hex="#0f0f0f" title="Copiar #0f0f0f"><i style="background:#0f0f0f"></i><span><b>Tinta sobre acento</b><em>#0f0f0f</em><small>--accent-ink</small></span></button><button class="sw" data-hex="#f59e0b" title="Copiar #f59e0b"><i style="background:#f59e0b"></i><span><b>Récord</b><em>#f59e0b</em><small>--pr</small></span></button><button class="sw" data-hex="#f59e0b" title="Copiar #f59e0b"><i style="background:#f59e0b"></i><span><b>Aviso / descanso</b><em>#f59e0b</em><small>--amber</small></span></button><button class="sw" data-hex="#3b82f6" title="Copiar #3b82f6"><i style="background:#3b82f6"></i><span><b>Info / cardio</b><em>#3b82f6</em><small>--blue</small></span></button><button class="sw" data-hex="#ef4444" title="Copiar #ef4444"><i style="background:#ef4444"></i><span><b>Error / borrar</b><em>#ef4444</em><small>--red</small></span></button><button class="sw" data-hex="#22c55e" title="Copiar #22c55e"><i style="background:#22c55e"></i><span><b>Marca (icono)</b><em>#22c55e</em><small>--marca</small></span></button><button class="sw" data-hex="#0f0f0f" title="Copiar #0f0f0f"><i style="background:#0f0f0f"></i><span><b>Teca</b><em>#0f0f0f</em><small>--teca</small></span></button><button class="sw" data-hex="#15803d" title="Copiar #15803d"><i style="background:#15803d"></i><span><b>Logo en claro</b><em>#15803d</em></span></button></div></div>
+        <div class="box"><span class="label">Contraste (WCAG)</span><ul class="checks"><li class="aaa"><span>Texto / fondo</span><b>16.8:1</b></li><li class="aa"><span>Texto 2 / tarjeta</span><b>5:1</b></li><li class="aaa"><span>Botón (tinta / acento)</span><b>8.4:1</b></li><li class="aa"><span>Acento / fondo</span><b>8.4:1</b></li><li class="aa"><span>Teca / icono</span><b>8.4:1</b></li><li class="aa"><span>Logo claro / blanco</span><b>5:1</b></li><li class="aaa"><span>Aviso / tarjeta</span><b>8.3:1</b></li><li class="aa"><span>Info / tarjeta</span><b>4.8:1</b></li><li class="aa"><span>Error / tarjeta</span><b>4.7:1</b></li><li class="aaa"><span>Récord / tarjeta</span><b>8.3:1</b></li></ul>
+          <div class="files"><a href="00-verde-actual/icono.svg">icono.svg</a><a href="00-verde-actual/favicon.svg">favicon.svg</a><a href="00-verde-actual/logo-horizontal.svg">logo-horizontal.svg</a><a href="00-verde-actual/logo-claro.svg">logo-claro.svg</a></div></div>
+      </div>
+      <div class="phonewrap"><div class="phone" style="--bg:#0f0f0f;--bg2:#181818;--bg3:#222222;--bg4:#2a2a2a;--text:#f0f0f0;--text2:#888888;--text3:#555555;--accent:#22c55e;--ink:#0f0f0f;--amber:#f59e0b;--blue:#3b82f6;--red:#ef4444;--pr:#f59e0b;--tile:#22c55e"><div class="scr">
+    <div class="sbar"><b>9:41</b><span>●●● ▮</span></div>
+    <div class="hdr"><img src="00-verde-actual/favicon.svg" alt=""><div><small>Domingo 25</small><b>¡A por ello!</b></div><span class="chip">Racha · 5 días</span></div>
+    <div class="card hoy"><small class="k">HOY TOCA</small><b>Empuje · Pecho y tríceps</b><span class="m">6 ejercicios · ~55 min</span><button class="btn">Empezar entreno</button></div>
+    <div class="card">
+      <div class="exh"><b>Press banca</b><span class="coach">Coach: sube a 65 kg</span></div>
+      <div class="sets">
+        <div class="row hd"><span>SERIE</span><span>KG</span><span>REPS</span><span></span></div>
+        <div class="row done"><span>1</span><span>60</span><span>10</span><i class="ck">✓</i></div>
+        <div class="row done"><span>2</span><span>62,5</span><span>8 <em class="prb">Récord</em></span><i class="ck">✓</i></div>
+        <div class="row cur"><span>3</span><span class="in">65</span><span class="in">–</span><i class="ck off"></i></div>
+      </div>
+    </div>
+    <div class="card rest">
+      <svg viewBox="0 0 44 44" class="tring"><circle cx="22" cy="22" r="18" class="bgc"/><circle cx="22" cy="22" r="18" class="fgc" stroke-dasharray="113" stroke-dashoffset="36"/></svg>
+      <div><small>Descanso</small><b class="mono">1:24</b></div><span class="pill">−15 s</span><span class="pill">+15 s</span>
+    </div>
+    <div class="card vol"><div class="exh"><b>Volumen semanal</b><span class="up mono">+12 %</span></div>
+      <div class="bars"><i style="height:42%;background:var(--bg4)"></i><i style="height:55%;background:var(--bg4)"></i><i style="height:38%;background:var(--bg4)"></i><i style="height:61%;background:var(--bg4)"></i><i style="height:48%;background:var(--bg4)"></i><i style="height:70%;background:var(--bg4)"></i><i style="height:84%;background:var(--accent)"></i></div>
+      <div class="warn">Hombro: carga baja esta semana</div>
+    </div>
+    <nav class="tabs"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Inicio</span><span class="on"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h2v6H3zM19 9h2v6h-2zM6 7h3v10H6zM15 7h3v10h-3zM9 11h6v2H9z"/></svg>Entreno</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h4v16H4zM9 6h4v14H9zM14.5 6.6l3.6-1 3.6 13.6-3.6 1z"/></svg>Biblioteca</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20V10h4v10zM10 20V4h4v16zM16 20v-7h4v7z"/></svg>Progreso</span></nav>
+  </div></div></div>
+    </div>
+  </section>
+  <section class="pal" id="01-lima-voltio">
+    <header><span class="num">01</span><h2>Lima voltio</h2><span class="tag">Energía</span></header>
+    <p class="idea">Grafito y verde lima eléctrico, el color de la cinta de agarre y de la ropa de entreno. Evoluciona el verde actual hacia algo más propio y llamativo en TikTok.</p>
+    <div class="grid">
+      <div class="stack">
+        <div class="box hero" style="background:#0e0f0c">
+          <img class="app" src="01-lima-voltio/icono.svg" alt="Icono">
+          <div class="av"><div class="ring"><img src="01-lima-voltio/png/icono-512.png" alt=""></div><img class="sm" src="01-lima-voltio/png/icono-64.png" alt=""><img class="fv" src="01-lima-voltio/png/favicon-32.png" width="32" height="32" alt=""><img class="fv" src="01-lima-voltio/png/favicon-16.png" width="16" height="16" alt=""></div>
+        </div>
+        <div class="box logo" style="background:#0e0f0c"><img src="01-lima-voltio/logo-horizontal.svg" alt=""></div>
+        <div class="box logo light"><img src="01-lima-voltio/logo-claro.svg" alt=""></div>
+        <div class="box"><span class="label">Colores · clic para copiar</span><div class="sws"><button class="sw" data-hex="#0e0f0c" title="Copiar #0e0f0c"><i style="background:#0e0f0c"></i><span><b>Fondo</b><em>#0e0f0c</em><small>--bg</small></span></button><button class="sw" data-hex="#171914" title="Copiar #171914"><i style="background:#171914"></i><span><b>Tarjeta</b><em>#171914</em><small>--bg2</small></span></button><button class="sw" data-hex="#20231b" title="Copiar #20231b"><i style="background:#20231b"></i><span><b>Elevado</b><em>#20231b</em><small>--bg3</small></span></button><button class="sw" data-hex="#2a2e23" title="Copiar #2a2e23"><i style="background:#2a2e23"></i><span><b>Campos</b><em>#2a2e23</em><small>--bg4</small></span></button><button class="sw" data-hex="#f3f5ec" title="Copiar #f3f5ec"><i style="background:#f3f5ec"></i><span><b>Texto</b><em>#f3f5ec</em><small>--text</small></span></button><button class="sw" data-hex="#8d9384" title="Copiar #8d9384"><i style="background:#8d9384"></i><span><b>Texto 2</b><em>#8d9384</em><small>--text2</small></span></button><button class="sw" data-hex="#c8f031" title="Copiar #c8f031"><i style="background:#c8f031"></i><span><b>Acento</b><em>#c8f031</em><small>--green</small></span></button><button class="sw" data-hex="#10120c" title="Copiar #10120c"><i style="background:#10120c"></i><span><b>Tinta sobre acento</b><em>#10120c</em><small>--accent-ink</small></span></button><button class="sw" data-hex="#ff6bd6" title="Copiar #ff6bd6"><i style="background:#ff6bd6"></i><span><b>Récord</b><em>#ff6bd6</em><small>--pr</small></span></button><button class="sw" data-hex="#ffb020" title="Copiar #ffb020"><i style="background:#ffb020"></i><span><b>Aviso / descanso</b><em>#ffb020</em><small>--amber</small></span></button><button class="sw" data-hex="#4cc3ff" title="Copiar #4cc3ff"><i style="background:#4cc3ff"></i><span><b>Info / cardio</b><em>#4cc3ff</em><small>--blue</small></span></button><button class="sw" data-hex="#ff5a4e" title="Copiar #ff5a4e"><i style="background:#ff5a4e"></i><span><b>Error / borrar</b><em>#ff5a4e</em><small>--red</small></span></button><button class="sw" data-hex="#c8f031" title="Copiar #c8f031"><i style="background:#c8f031"></i><span><b>Marca (icono)</b><em>#c8f031</em><small>--marca</small></span></button><button class="sw" data-hex="#10120c" title="Copiar #10120c"><i style="background:#10120c"></i><span><b>Teca</b><em>#10120c</em><small>--teca</small></span></button><button class="sw" data-hex="#4d7c0f" title="Copiar #4d7c0f"><i style="background:#4d7c0f"></i><span><b>Logo en claro</b><em>#4d7c0f</em></span></button></div></div>
+        <div class="box"><span class="label">Contraste (WCAG)</span><ul class="checks"><li class="aaa"><span>Texto / fondo</span><b>17.5:1</b></li><li class="aa"><span>Texto 2 / tarjeta</span><b>5.6:1</b></li><li class="aaa"><span>Botón (tinta / acento)</span><b>14.3:1</b></li><li class="aa"><span>Acento / fondo</span><b>14.6:1</b></li><li class="aa"><span>Teca / icono</span><b>14.3:1</b></li><li class="aa"><span>Logo claro / blanco</span><b>5:1</b></li><li class="aaa"><span>Aviso / tarjeta</span><b>9.7:1</b></li><li class="aaa"><span>Info / tarjeta</span><b>8.9:1</b></li><li class="aa"><span>Error / tarjeta</span><b>5.8:1</b></li><li class="aaa"><span>Récord / tarjeta</span><b>7:1</b></li></ul>
+          <div class="files"><a href="01-lima-voltio/icono.svg">icono.svg</a><a href="01-lima-voltio/favicon.svg">favicon.svg</a><a href="01-lima-voltio/logo-horizontal.svg">logo-horizontal.svg</a><a href="01-lima-voltio/logo-claro.svg">logo-claro.svg</a></div></div>
+      </div>
+      <div class="phonewrap"><div class="phone" style="--bg:#0e0f0c;--bg2:#171914;--bg3:#20231b;--bg4:#2a2e23;--text:#f3f5ec;--text2:#8d9384;--text3:#5b6053;--accent:#c8f031;--ink:#10120c;--amber:#ffb020;--blue:#4cc3ff;--red:#ff5a4e;--pr:#ff6bd6;--tile:#c8f031"><div class="scr">
+    <div class="sbar"><b>9:41</b><span>●●● ▮</span></div>
+    <div class="hdr"><img src="01-lima-voltio/favicon.svg" alt=""><div><small>Domingo 25</small><b>¡A por ello!</b></div><span class="chip">Racha · 5 días</span></div>
+    <div class="card hoy"><small class="k">HOY TOCA</small><b>Empuje · Pecho y tríceps</b><span class="m">6 ejercicios · ~55 min</span><button class="btn">Empezar entreno</button></div>
+    <div class="card">
+      <div class="exh"><b>Press banca</b><span class="coach">Coach: sube a 65 kg</span></div>
+      <div class="sets">
+        <div class="row hd"><span>SERIE</span><span>KG</span><span>REPS</span><span></span></div>
+        <div class="row done"><span>1</span><span>60</span><span>10</span><i class="ck">✓</i></div>
+        <div class="row done"><span>2</span><span>62,5</span><span>8 <em class="prb">Récord</em></span><i class="ck">✓</i></div>
+        <div class="row cur"><span>3</span><span class="in">65</span><span class="in">–</span><i class="ck off"></i></div>
+      </div>
+    </div>
+    <div class="card rest">
+      <svg viewBox="0 0 44 44" class="tring"><circle cx="22" cy="22" r="18" class="bgc"/><circle cx="22" cy="22" r="18" class="fgc" stroke-dasharray="113" stroke-dashoffset="36"/></svg>
+      <div><small>Descanso</small><b class="mono">1:24</b></div><span class="pill">−15 s</span><span class="pill">+15 s</span>
+    </div>
+    <div class="card vol"><div class="exh"><b>Volumen semanal</b><span class="up mono">+12 %</span></div>
+      <div class="bars"><i style="height:42%;background:var(--bg4)"></i><i style="height:55%;background:var(--bg4)"></i><i style="height:38%;background:var(--bg4)"></i><i style="height:61%;background:var(--bg4)"></i><i style="height:48%;background:var(--bg4)"></i><i style="height:70%;background:var(--bg4)"></i><i style="height:84%;background:var(--accent)"></i></div>
+      <div class="warn">Hombro: carga baja esta semana</div>
+    </div>
+    <nav class="tabs"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Inicio</span><span class="on"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h2v6H3zM19 9h2v6h-2zM6 7h3v10H6zM15 7h3v10h-3zM9 11h6v2H9z"/></svg>Entreno</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h4v16H4zM9 6h4v14H9zM14.5 6.6l3.6-1 3.6 13.6-3.6 1z"/></svg>Biblioteca</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20V10h4v10zM10 20V4h4v16zM16 20v-7h4v7z"/></svg>Progreso</span></nav>
+  </div></div></div>
+    </div>
+  </section>
+  <section class="pal" id="02-lampara-biblioteca">
+    <header><span class="num">02</span><h2>Lámpara de biblioteca</h2><span class="tag">«-teca»</span></header>
+    <p class="idea">Verde botella, latón y crema, como las lámparas de las bibliotecas clásicas. Teca en latón sobre verde: la opción más premium y la que mejor cuenta el nombre.</p>
+    <div class="grid">
+      <div class="stack">
+        <div class="box hero" style="background:#0d1210">
+          <img class="app" src="02-lampara-biblioteca/icono.svg" alt="Icono">
+          <div class="av"><div class="ring"><img src="02-lampara-biblioteca/png/icono-512.png" alt=""></div><img class="sm" src="02-lampara-biblioteca/png/icono-64.png" alt=""><img class="fv" src="02-lampara-biblioteca/png/favicon-32.png" width="32" height="32" alt=""><img class="fv" src="02-lampara-biblioteca/png/favicon-16.png" width="16" height="16" alt=""></div>
+        </div>
+        <div class="box logo" style="background:#0d1210"><img src="02-lampara-biblioteca/logo-horizontal.svg" alt=""></div>
+        <div class="box logo light"><img src="02-lampara-biblioteca/logo-claro.svg" alt=""></div>
+        <div class="box"><span class="label">Colores · clic para copiar</span><div class="sws"><button class="sw" data-hex="#0d1210" title="Copiar #0d1210"><i style="background:#0d1210"></i><span><b>Fondo</b><em>#0d1210</em><small>--bg</small></span></button><button class="sw" data-hex="#141c18" title="Copiar #141c18"><i style="background:#141c18"></i><span><b>Tarjeta</b><em>#141c18</em><small>--bg2</small></span></button><button class="sw" data-hex="#1c2621" title="Copiar #1c2621"><i style="background:#1c2621"></i><span><b>Elevado</b><em>#1c2621</em><small>--bg3</small></span></button><button class="sw" data-hex="#24302a" title="Copiar #24302a"><i style="background:#24302a"></i><span><b>Campos</b><em>#24302a</em><small>--bg4</small></span></button><button class="sw" data-hex="#f1ead8" title="Copiar #f1ead8"><i style="background:#f1ead8"></i><span><b>Texto</b><em>#f1ead8</em><small>--text</small></span></button><button class="sw" data-hex="#9c9a88" title="Copiar #9c9a88"><i style="background:#9c9a88"></i><span><b>Texto 2</b><em>#9c9a88</em><small>--text2</small></span></button><button class="sw" data-hex="#e8b84a" title="Copiar #e8b84a"><i style="background:#e8b84a"></i><span><b>Acento</b><em>#e8b84a</em><small>--green</small></span></button><button class="sw" data-hex="#17120a" title="Copiar #17120a"><i style="background:#17120a"></i><span><b>Tinta sobre acento</b><em>#17120a</em><small>--accent-ink</small></span></button><button class="sw" data-hex="#e8b84a" title="Copiar #e8b84a"><i style="background:#e8b84a"></i><span><b>Récord</b><em>#e8b84a</em><small>--pr</small></span></button><button class="sw" data-hex="#e0803f" title="Copiar #e0803f"><i style="background:#e0803f"></i><span><b>Aviso / descanso</b><em>#e0803f</em><small>--amber</small></span></button><button class="sw" data-hex="#79aee0" title="Copiar #79aee0"><i style="background:#79aee0"></i><span><b>Info / cardio</b><em>#79aee0</em><small>--blue</small></span></button><button class="sw" data-hex="#e5584c" title="Copiar #e5584c"><i style="background:#e5584c"></i><span><b>Error / borrar</b><em>#e5584c</em><small>--red</small></span></button><button class="sw" data-hex="#1d5a3d" title="Copiar #1d5a3d"><i style="background:#1d5a3d"></i><span><b>Marca (icono)</b><em>#1d5a3d</em><small>--marca</small></span></button><button class="sw" data-hex="#e8b84a" title="Copiar #e8b84a"><i style="background:#e8b84a"></i><span><b>Teca</b><em>#e8b84a</em><small>--teca</small></span></button><button class="sw" data-hex="#1d5a3d" title="Copiar #1d5a3d"><i style="background:#1d5a3d"></i><span><b>Logo en claro</b><em>#1d5a3d</em></span></button></div></div>
+        <div class="box"><span class="label">Contraste (WCAG)</span><ul class="checks"><li class="aaa"><span>Texto / fondo</span><b>15.8:1</b></li><li class="aa"><span>Texto 2 / tarjeta</span><b>6.1:1</b></li><li class="aaa"><span>Botón (tinta / acento)</span><b>10.1:1</b></li><li class="aa"><span>Acento / fondo</span><b>10.2:1</b></li><li class="aa"><span>Teca / icono</span><b>4.4:1</b></li><li class="aa"><span>Logo claro / blanco</span><b>8.1:1</b></li><li class="aa"><span>Aviso / tarjeta</span><b>6.1:1</b></li><li class="aaa"><span>Info / tarjeta</span><b>7.4:1</b></li><li class="aa"><span>Error / tarjeta</span><b>4.8:1</b></li><li class="aaa"><span>Récord / tarjeta</span><b>9.4:1</b></li></ul>
+          <div class="files"><a href="02-lampara-biblioteca/icono.svg">icono.svg</a><a href="02-lampara-biblioteca/favicon.svg">favicon.svg</a><a href="02-lampara-biblioteca/logo-horizontal.svg">logo-horizontal.svg</a><a href="02-lampara-biblioteca/logo-claro.svg">logo-claro.svg</a></div></div>
+      </div>
+      <div class="phonewrap"><div class="phone" style="--bg:#0d1210;--bg2:#141c18;--bg3:#1c2621;--bg4:#24302a;--text:#f1ead8;--text2:#9c9a88;--text3:#666556;--accent:#e8b84a;--ink:#17120a;--amber:#e0803f;--blue:#79aee0;--red:#e5584c;--pr:#e8b84a;--tile:#1d5a3d"><div class="scr">
+    <div class="sbar"><b>9:41</b><span>●●● ▮</span></div>
+    <div class="hdr"><img src="02-lampara-biblioteca/favicon.svg" alt=""><div><small>Domingo 25</small><b>¡A por ello!</b></div><span class="chip">Racha · 5 días</span></div>
+    <div class="card hoy"><small class="k">HOY TOCA</small><b>Empuje · Pecho y tríceps</b><span class="m">6 ejercicios · ~55 min</span><button class="btn">Empezar entreno</button></div>
+    <div class="card">
+      <div class="exh"><b>Press banca</b><span class="coach">Coach: sube a 65 kg</span></div>
+      <div class="sets">
+        <div class="row hd"><span>SERIE</span><span>KG</span><span>REPS</span><span></span></div>
+        <div class="row done"><span>1</span><span>60</span><span>10</span><i class="ck">✓</i></div>
+        <div class="row done"><span>2</span><span>62,5</span><span>8 <em class="prb">Récord</em></span><i class="ck">✓</i></div>
+        <div class="row cur"><span>3</span><span class="in">65</span><span class="in">–</span><i class="ck off"></i></div>
+      </div>
+    </div>
+    <div class="card rest">
+      <svg viewBox="0 0 44 44" class="tring"><circle cx="22" cy="22" r="18" class="bgc"/><circle cx="22" cy="22" r="18" class="fgc" stroke-dasharray="113" stroke-dashoffset="36"/></svg>
+      <div><small>Descanso</small><b class="mono">1:24</b></div><span class="pill">−15 s</span><span class="pill">+15 s</span>
+    </div>
+    <div class="card vol"><div class="exh"><b>Volumen semanal</b><span class="up mono">+12 %</span></div>
+      <div class="bars"><i style="height:42%;background:var(--bg4)"></i><i style="height:55%;background:var(--bg4)"></i><i style="height:38%;background:var(--bg4)"></i><i style="height:61%;background:var(--bg4)"></i><i style="height:48%;background:var(--bg4)"></i><i style="height:70%;background:var(--bg4)"></i><i style="height:84%;background:var(--accent)"></i></div>
+      <div class="warn">Hombro: carga baja esta semana</div>
+    </div>
+    <nav class="tabs"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Inicio</span><span class="on"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h2v6H3zM19 9h2v6h-2zM6 7h3v10H6zM15 7h3v10h-3zM9 11h6v2H9z"/></svg>Entreno</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h4v16H4zM9 6h4v14H9zM14.5 6.6l3.6-1 3.6 13.6-3.6 1z"/></svg>Biblioteca</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20V10h4v10zM10 20V4h4v16zM16 20v-7h4v7z"/></svg>Progreso</span></nav>
+  </div></div></div>
+    </div>
+  </section>
+  <section class="pal" id="03-discos-competicion">
+    <header><span class="num">03</span><h2>Discos de competición</h2><span class="tag">Gimnasio</span></header>
+    <p class="idea">Los colores oficiales de los discos (25 rojo, 20 azul, 15 amarillo, 10 verde). El amarillo es la marca y el resto colorea gráficos y series por peso: un código que cualquier persona del gym reconoce.</p>
+    <div class="grid">
+      <div class="stack">
+        <div class="box hero" style="background:#101114">
+          <img class="app" src="03-discos-competicion/icono.svg" alt="Icono">
+          <div class="av"><div class="ring"><img src="03-discos-competicion/png/icono-512.png" alt=""></div><img class="sm" src="03-discos-competicion/png/icono-64.png" alt=""><img class="fv" src="03-discos-competicion/png/favicon-32.png" width="32" height="32" alt=""><img class="fv" src="03-discos-competicion/png/favicon-16.png" width="16" height="16" alt=""></div>
+        </div>
+        <div class="box logo" style="background:#101114"><img src="03-discos-competicion/logo-horizontal.svg" alt=""></div>
+        <div class="box logo light"><img src="03-discos-competicion/logo-claro.svg" alt=""></div>
+        <div class="box"><span class="label">Colores · clic para copiar</span><div class="sws"><button class="sw" data-hex="#101114" title="Copiar #101114"><i style="background:#101114"></i><span><b>Fondo</b><em>#101114</em><small>--bg</small></span></button><button class="sw" data-hex="#181a1f" title="Copiar #181a1f"><i style="background:#181a1f"></i><span><b>Tarjeta</b><em>#181a1f</em><small>--bg2</small></span></button><button class="sw" data-hex="#21242b" title="Copiar #21242b"><i style="background:#21242b"></i><span><b>Elevado</b><em>#21242b</em><small>--bg3</small></span></button><button class="sw" data-hex="#2b2f37" title="Copiar #2b2f37"><i style="background:#2b2f37"></i><span><b>Campos</b><em>#2b2f37</em><small>--bg4</small></span></button><button class="sw" data-hex="#f2f3f5" title="Copiar #f2f3f5"><i style="background:#f2f3f5"></i><span><b>Texto</b><em>#f2f3f5</em><small>--text</small></span></button><button class="sw" data-hex="#8b909a" title="Copiar #8b909a"><i style="background:#8b909a"></i><span><b>Texto 2</b><em>#8b909a</em><small>--text2</small></span></button><button class="sw" data-hex="#ffc81e" title="Copiar #ffc81e"><i style="background:#ffc81e"></i><span><b>Acento</b><em>#ffc81e</em><small>--green</small></span></button><button class="sw" data-hex="#111214" title="Copiar #111214"><i style="background:#111214"></i><span><b>Tinta sobre acento</b><em>#111214</em><small>--accent-ink</small></span></button><button class="sw" data-hex="#2fbf63" title="Copiar #2fbf63"><i style="background:#2fbf63"></i><span><b>Récord</b><em>#2fbf63</em><small>--pr</small></span></button><button class="sw" data-hex="#ff8a1f" title="Copiar #ff8a1f"><i style="background:#ff8a1f"></i><span><b>Aviso / descanso</b><em>#ff8a1f</em><small>--amber</small></span></button><button class="sw" data-hex="#4f8af7" title="Copiar #4f8af7"><i style="background:#4f8af7"></i><span><b>Info / cardio</b><em>#4f8af7</em><small>--blue</small></span></button><button class="sw" data-hex="#f5504b" title="Copiar #f5504b"><i style="background:#f5504b"></i><span><b>Error / borrar</b><em>#f5504b</em><small>--red</small></span></button><button class="sw" data-hex="#ffc81e" title="Copiar #ffc81e"><i style="background:#ffc81e"></i><span><b>Marca (icono)</b><em>#ffc81e</em><small>--marca</small></span></button><button class="sw" data-hex="#111214" title="Copiar #111214"><i style="background:#111214"></i><span><b>Teca</b><em>#111214</em><small>--teca</small></span></button><button class="sw" data-hex="#111214" title="Copiar #111214"><i style="background:#111214"></i><span><b>Logo en claro</b><em>#111214</em></span></button><button class="sw" data-hex="#f5504b" title="Copiar #f5504b"><i style="background:#f5504b"></i><span><b>Disco 25</b><em>#f5504b</em></span></button><button class="sw" data-hex="#4f8af7" title="Copiar #4f8af7"><i style="background:#4f8af7"></i><span><b>Disco 20</b><em>#4f8af7</em></span></button><button class="sw" data-hex="#ffc81e" title="Copiar #ffc81e"><i style="background:#ffc81e"></i><span><b>Disco 15</b><em>#ffc81e</em></span></button><button class="sw" data-hex="#2fbf63" title="Copiar #2fbf63"><i style="background:#2fbf63"></i><span><b>Disco 10</b><em>#2fbf63</em></span></button><button class="sw" data-hex="#f2f3f5" title="Copiar #f2f3f5"><i style="background:#f2f3f5"></i><span><b>Disco 5</b><em>#f2f3f5</em></span></button></div></div>
+        <div class="box"><span class="label">Contraste (WCAG)</span><ul class="checks"><li class="aaa"><span>Texto / fondo</span><b>17:1</b></li><li class="aa"><span>Texto 2 / tarjeta</span><b>5.4:1</b></li><li class="aaa"><span>Botón (tinta / acento)</span><b>12.1:1</b></li><li class="aa"><span>Acento / fondo</span><b>12.2:1</b></li><li class="aa"><span>Teca / icono</span><b>12.1:1</b></li><li class="aa"><span>Logo claro / blanco</span><b>18.7:1</b></li><li class="aaa"><span>Aviso / tarjeta</span><b>7.4:1</b></li><li class="aa"><span>Info / tarjeta</span><b>5.2:1</b></li><li class="aa"><span>Error / tarjeta</span><b>5.1:1</b></li><li class="aaa"><span>Récord / tarjeta</span><b>7.3:1</b></li></ul>
+          <div class="files"><a href="03-discos-competicion/icono.svg">icono.svg</a><a href="03-discos-competicion/favicon.svg">favicon.svg</a><a href="03-discos-competicion/logo-horizontal.svg">logo-horizontal.svg</a><a href="03-discos-competicion/logo-claro.svg">logo-claro.svg</a></div></div>
+      </div>
+      <div class="phonewrap"><div class="phone" style="--bg:#101114;--bg2:#181a1f;--bg3:#21242b;--bg4:#2b2f37;--text:#f2f3f5;--text2:#8b909a;--text3:#5a5f69;--accent:#ffc81e;--ink:#111214;--amber:#ff8a1f;--blue:#4f8af7;--red:#f5504b;--pr:#2fbf63;--tile:#ffc81e"><div class="scr">
+    <div class="sbar"><b>9:41</b><span>●●● ▮</span></div>
+    <div class="hdr"><img src="03-discos-competicion/favicon.svg" alt=""><div><small>Domingo 25</small><b>¡A por ello!</b></div><span class="chip">Racha · 5 días</span></div>
+    <div class="card hoy"><small class="k">HOY TOCA</small><b>Empuje · Pecho y tríceps</b><span class="m">6 ejercicios · ~55 min</span><button class="btn">Empezar entreno</button></div>
+    <div class="card">
+      <div class="exh"><b>Press banca</b><span class="coach">Coach: sube a 65 kg</span></div>
+      <div class="sets">
+        <div class="row hd"><span>SERIE</span><span>KG</span><span>REPS</span><span></span></div>
+        <div class="row done"><span>1</span><span>60</span><span>10</span><i class="ck">✓</i></div>
+        <div class="row done"><span>2</span><span>62,5</span><span>8 <em class="prb">Récord</em></span><i class="ck">✓</i></div>
+        <div class="row cur"><span>3</span><span class="in">65</span><span class="in">–</span><i class="ck off"></i></div>
+      </div>
+    </div>
+    <div class="card rest">
+      <svg viewBox="0 0 44 44" class="tring"><circle cx="22" cy="22" r="18" class="bgc"/><circle cx="22" cy="22" r="18" class="fgc" stroke-dasharray="113" stroke-dashoffset="36"/></svg>
+      <div><small>Descanso</small><b class="mono">1:24</b></div><span class="pill">−15 s</span><span class="pill">+15 s</span>
+    </div>
+    <div class="card vol"><div class="exh"><b>Volumen semanal</b><span class="up mono">+12 %</span></div>
+      <div class="bars"><i style="height:42%;background:#f5504b"></i><i style="height:55%;background:#4f8af7"></i><i style="height:38%;background:#ffc81e"></i><i style="height:61%;background:#2fbf63"></i><i style="height:48%;background:#f2f3f5"></i><i style="height:70%;background:#f5504b"></i><i style="height:84%;background:#4f8af7"></i></div>
+      <div class="warn">Hombro: carga baja esta semana</div>
+    </div>
+    <nav class="tabs"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Inicio</span><span class="on"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h2v6H3zM19 9h2v6h-2zM6 7h3v10H6zM15 7h3v10h-3zM9 11h6v2H9z"/></svg>Entreno</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h4v16H4zM9 6h4v14H9zM14.5 6.6l3.6-1 3.6 13.6-3.6 1z"/></svg>Biblioteca</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20V10h4v10zM10 20V4h4v16zM16 20v-7h4v7z"/></svg>Progreso</span></nav>
+  </div></div></div>
+    </div>
+  </section>
+  <section class="pal" id="04-tiza-menta">
+    <header><span class="num">04</span><h2>Tiza y menta</h2><span class="tag">Fresca</span></header>
+    <p class="idea">Verde azulado profundo, menta y un coral para los récords. Más calmada y limpia, como la tiza en las manos antes de levantar.</p>
+    <div class="grid">
+      <div class="stack">
+        <div class="box hero" style="background:#0b1514">
+          <img class="app" src="04-tiza-menta/icono.svg" alt="Icono">
+          <div class="av"><div class="ring"><img src="04-tiza-menta/png/icono-512.png" alt=""></div><img class="sm" src="04-tiza-menta/png/icono-64.png" alt=""><img class="fv" src="04-tiza-menta/png/favicon-32.png" width="32" height="32" alt=""><img class="fv" src="04-tiza-menta/png/favicon-16.png" width="16" height="16" alt=""></div>
+        </div>
+        <div class="box logo" style="background:#0b1514"><img src="04-tiza-menta/logo-horizontal.svg" alt=""></div>
+        <div class="box logo light"><img src="04-tiza-menta/logo-claro.svg" alt=""></div>
+        <div class="box"><span class="label">Colores · clic para copiar</span><div class="sws"><button class="sw" data-hex="#0b1514" title="Copiar #0b1514"><i style="background:#0b1514"></i><span><b>Fondo</b><em>#0b1514</em><small>--bg</small></span></button><button class="sw" data-hex="#11201e" title="Copiar #11201e"><i style="background:#11201e"></i><span><b>Tarjeta</b><em>#11201e</em><small>--bg2</small></span></button><button class="sw" data-hex="#182b28" title="Copiar #182b28"><i style="background:#182b28"></i><span><b>Elevado</b><em>#182b28</em><small>--bg3</small></span></button><button class="sw" data-hex="#203632" title="Copiar #203632"><i style="background:#203632"></i><span><b>Campos</b><em>#203632</em><small>--bg4</small></span></button><button class="sw" data-hex="#eef6f4" title="Copiar #eef6f4"><i style="background:#eef6f4"></i><span><b>Texto</b><em>#eef6f4</em><small>--text</small></span></button><button class="sw" data-hex="#86a19c" title="Copiar #86a19c"><i style="background:#86a19c"></i><span><b>Texto 2</b><em>#86a19c</em><small>--text2</small></span></button><button class="sw" data-hex="#4fe3c1" title="Copiar #4fe3c1"><i style="background:#4fe3c1"></i><span><b>Acento</b><em>#4fe3c1</em><small>--green</small></span></button><button class="sw" data-hex="#062320" title="Copiar #062320"><i style="background:#062320"></i><span><b>Tinta sobre acento</b><em>#062320</em><small>--accent-ink</small></span></button><button class="sw" data-hex="#ff8a65" title="Copiar #ff8a65"><i style="background:#ff8a65"></i><span><b>Récord</b><em>#ff8a65</em><small>--pr</small></span></button><button class="sw" data-hex="#ffb547" title="Copiar #ffb547"><i style="background:#ffb547"></i><span><b>Aviso / descanso</b><em>#ffb547</em><small>--amber</small></span></button><button class="sw" data-hex="#7aa7ff" title="Copiar #7aa7ff"><i style="background:#7aa7ff"></i><span><b>Info / cardio</b><em>#7aa7ff</em><small>--blue</small></span></button><button class="sw" data-hex="#ff6b6b" title="Copiar #ff6b6b"><i style="background:#ff6b6b"></i><span><b>Error / borrar</b><em>#ff6b6b</em><small>--red</small></span></button><button class="sw" data-hex="#4fe3c1" title="Copiar #4fe3c1"><i style="background:#4fe3c1"></i><span><b>Marca (icono)</b><em>#4fe3c1</em><small>--marca</small></span></button><button class="sw" data-hex="#0b1514" title="Copiar #0b1514"><i style="background:#0b1514"></i><span><b>Teca</b><em>#0b1514</em><small>--teca</small></span></button><button class="sw" data-hex="#0f766e" title="Copiar #0f766e"><i style="background:#0f766e"></i><span><b>Logo en claro</b><em>#0f766e</em></span></button></div></div>
+        <div class="box"><span class="label">Contraste (WCAG)</span><ul class="checks"><li class="aaa"><span>Texto / fondo</span><b>16.9:1</b></li><li class="aa"><span>Texto 2 / tarjeta</span><b>6.1:1</b></li><li class="aaa"><span>Botón (tinta / acento)</span><b>10.3:1</b></li><li class="aa"><span>Acento / fondo</span><b>11.6:1</b></li><li class="aa"><span>Teca / icono</span><b>11.6:1</b></li><li class="aa"><span>Logo claro / blanco</span><b>5.5:1</b></li><li class="aaa"><span>Aviso / tarjeta</span><b>9.6:1</b></li><li class="aaa"><span>Info / tarjeta</span><b>7:1</b></li><li class="aa"><span>Error / tarjeta</span><b>6.1:1</b></li><li class="aaa"><span>Récord / tarjeta</span><b>7.3:1</b></li></ul>
+          <div class="files"><a href="04-tiza-menta/icono.svg">icono.svg</a><a href="04-tiza-menta/favicon.svg">favicon.svg</a><a href="04-tiza-menta/logo-horizontal.svg">logo-horizontal.svg</a><a href="04-tiza-menta/logo-claro.svg">logo-claro.svg</a></div></div>
+      </div>
+      <div class="phonewrap"><div class="phone" style="--bg:#0b1514;--bg2:#11201e;--bg3:#182b28;--bg4:#203632;--text:#eef6f4;--text2:#86a19c;--text3:#557069;--accent:#4fe3c1;--ink:#062320;--amber:#ffb547;--blue:#7aa7ff;--red:#ff6b6b;--pr:#ff8a65;--tile:#4fe3c1"><div class="scr">
+    <div class="sbar"><b>9:41</b><span>●●● ▮</span></div>
+    <div class="hdr"><img src="04-tiza-menta/favicon.svg" alt=""><div><small>Domingo 25</small><b>¡A por ello!</b></div><span class="chip">Racha · 5 días</span></div>
+    <div class="card hoy"><small class="k">HOY TOCA</small><b>Empuje · Pecho y tríceps</b><span class="m">6 ejercicios · ~55 min</span><button class="btn">Empezar entreno</button></div>
+    <div class="card">
+      <div class="exh"><b>Press banca</b><span class="coach">Coach: sube a 65 kg</span></div>
+      <div class="sets">
+        <div class="row hd"><span>SERIE</span><span>KG</span><span>REPS</span><span></span></div>
+        <div class="row done"><span>1</span><span>60</span><span>10</span><i class="ck">✓</i></div>
+        <div class="row done"><span>2</span><span>62,5</span><span>8 <em class="prb">Récord</em></span><i class="ck">✓</i></div>
+        <div class="row cur"><span>3</span><span class="in">65</span><span class="in">–</span><i class="ck off"></i></div>
+      </div>
+    </div>
+    <div class="card rest">
+      <svg viewBox="0 0 44 44" class="tring"><circle cx="22" cy="22" r="18" class="bgc"/><circle cx="22" cy="22" r="18" class="fgc" stroke-dasharray="113" stroke-dashoffset="36"/></svg>
+      <div><small>Descanso</small><b class="mono">1:24</b></div><span class="pill">−15 s</span><span class="pill">+15 s</span>
+    </div>
+    <div class="card vol"><div class="exh"><b>Volumen semanal</b><span class="up mono">+12 %</span></div>
+      <div class="bars"><i style="height:42%;background:var(--bg4)"></i><i style="height:55%;background:var(--bg4)"></i><i style="height:38%;background:var(--bg4)"></i><i style="height:61%;background:var(--bg4)"></i><i style="height:48%;background:var(--bg4)"></i><i style="height:70%;background:var(--bg4)"></i><i style="height:84%;background:var(--accent)"></i></div>
+      <div class="warn">Hombro: carga baja esta semana</div>
+    </div>
+    <nav class="tabs"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Inicio</span><span class="on"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h2v6H3zM19 9h2v6h-2zM6 7h3v10H6zM15 7h3v10h-3zM9 11h6v2H9z"/></svg>Entreno</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h4v16H4zM9 6h4v14H9zM14.5 6.6l3.6-1 3.6 13.6-3.6 1z"/></svg>Biblioteca</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20V10h4v10zM10 20V4h4v16zM16 20v-7h4v7z"/></svg>Progreso</span></nav>
+  </div></div></div>
+    </div>
+  </section>
+  <section class="pal" id="05-violeta-20kg">
+    <header><span class="num">05</span><h2>Violeta 20 kg</h2><span class="tag">Atrevida</span></header>
+    <p class="idea">Morado como la kettlebell de competición de 20 kg, con rosa para los récords. La más diferente del resto de apps de gimnasio y la más «redes sociales».</p>
+    <div class="grid">
+      <div class="stack">
+        <div class="box hero" style="background:#0f0d15">
+          <img class="app" src="05-violeta-20kg/icono.svg" alt="Icono">
+          <div class="av"><div class="ring"><img src="05-violeta-20kg/png/icono-512.png" alt=""></div><img class="sm" src="05-violeta-20kg/png/icono-64.png" alt=""><img class="fv" src="05-violeta-20kg/png/favicon-32.png" width="32" height="32" alt=""><img class="fv" src="05-violeta-20kg/png/favicon-16.png" width="16" height="16" alt=""></div>
+        </div>
+        <div class="box logo" style="background:#0f0d15"><img src="05-violeta-20kg/logo-horizontal.svg" alt=""></div>
+        <div class="box logo light"><img src="05-violeta-20kg/logo-claro.svg" alt=""></div>
+        <div class="box"><span class="label">Colores · clic para copiar</span><div class="sws"><button class="sw" data-hex="#0f0d15" title="Copiar #0f0d15"><i style="background:#0f0d15"></i><span><b>Fondo</b><em>#0f0d15</em><small>--bg</small></span></button><button class="sw" data-hex="#17141f" title="Copiar #17141f"><i style="background:#17141f"></i><span><b>Tarjeta</b><em>#17141f</em><small>--bg2</small></span></button><button class="sw" data-hex="#201c2b" title="Copiar #201c2b"><i style="background:#201c2b"></i><span><b>Elevado</b><em>#201c2b</em><small>--bg3</small></span></button><button class="sw" data-hex="#2a2538" title="Copiar #2a2538"><i style="background:#2a2538"></i><span><b>Campos</b><em>#2a2538</em><small>--bg4</small></span></button><button class="sw" data-hex="#f3f0fa" title="Copiar #f3f0fa"><i style="background:#f3f0fa"></i><span><b>Texto</b><em>#f3f0fa</em><small>--text</small></span></button><button class="sw" data-hex="#938da3" title="Copiar #938da3"><i style="background:#938da3"></i><span><b>Texto 2</b><em>#938da3</em><small>--text2</small></span></button><button class="sw" data-hex="#a78bfa" title="Copiar #a78bfa"><i style="background:#a78bfa"></i><span><b>Acento</b><em>#a78bfa</em><small>--green</small></span></button><button class="sw" data-hex="#140f20" title="Copiar #140f20"><i style="background:#140f20"></i><span><b>Tinta sobre acento</b><em>#140f20</em><small>--accent-ink</small></span></button><button class="sw" data-hex="#f472b6" title="Copiar #f472b6"><i style="background:#f472b6"></i><span><b>Récord</b><em>#f472b6</em><small>--pr</small></span></button><button class="sw" data-hex="#fbbf24" title="Copiar #fbbf24"><i style="background:#fbbf24"></i><span><b>Aviso / descanso</b><em>#fbbf24</em><small>--amber</small></span></button><button class="sw" data-hex="#60a5fa" title="Copiar #60a5fa"><i style="background:#60a5fa"></i><span><b>Info / cardio</b><em>#60a5fa</em><small>--blue</small></span></button><button class="sw" data-hex="#f87171" title="Copiar #f87171"><i style="background:#f87171"></i><span><b>Error / borrar</b><em>#f87171</em><small>--red</small></span></button><button class="sw" data-hex="#8b5cf6" title="Copiar #8b5cf6"><i style="background:#8b5cf6"></i><span><b>Marca (icono)</b><em>#8b5cf6</em><small>--marca</small></span></button><button class="sw" data-hex="#0f0d15" title="Copiar #0f0d15"><i style="background:#0f0d15"></i><span><b>Teca</b><em>#0f0d15</em><small>--teca</small></span></button><button class="sw" data-hex="#7c3aed" title="Copiar #7c3aed"><i style="background:#7c3aed"></i><span><b>Logo en claro</b><em>#7c3aed</em></span></button></div></div>
+        <div class="box"><span class="label">Contraste (WCAG)</span><ul class="checks"><li class="aaa"><span>Texto / fondo</span><b>17.1:1</b></li><li class="aa"><span>Texto 2 / tarjeta</span><b>5.7:1</b></li><li class="aa"><span>Botón (tinta / acento)</span><b>6.9:1</b></li><li class="aa"><span>Acento / fondo</span><b>7.1:1</b></li><li class="aa"><span>Teca / icono</span><b>4.6:1</b></li><li class="aa"><span>Logo claro / blanco</span><b>5.7:1</b></li><li class="aaa"><span>Aviso / tarjeta</span><b>10.9:1</b></li><li class="aaa"><span>Info / tarjeta</span><b>7.1:1</b></li><li class="aa"><span>Error / tarjeta</span><b>6.6:1</b></li><li class="aa"><span>Récord / tarjeta</span><b>6.9:1</b></li></ul>
+          <div class="files"><a href="05-violeta-20kg/icono.svg">icono.svg</a><a href="05-violeta-20kg/favicon.svg">favicon.svg</a><a href="05-violeta-20kg/logo-horizontal.svg">logo-horizontal.svg</a><a href="05-violeta-20kg/logo-claro.svg">logo-claro.svg</a></div></div>
+      </div>
+      <div class="phonewrap"><div class="phone" style="--bg:#0f0d15;--bg2:#17141f;--bg3:#201c2b;--bg4:#2a2538;--text:#f3f0fa;--text2:#938da3;--text3:#5f5a6e;--accent:#a78bfa;--ink:#140f20;--amber:#fbbf24;--blue:#60a5fa;--red:#f87171;--pr:#f472b6;--tile:#8b5cf6"><div class="scr">
+    <div class="sbar"><b>9:41</b><span>●●● ▮</span></div>
+    <div class="hdr"><img src="05-violeta-20kg/favicon.svg" alt=""><div><small>Domingo 25</small><b>¡A por ello!</b></div><span class="chip">Racha · 5 días</span></div>
+    <div class="card hoy"><small class="k">HOY TOCA</small><b>Empuje · Pecho y tríceps</b><span class="m">6 ejercicios · ~55 min</span><button class="btn">Empezar entreno</button></div>
+    <div class="card">
+      <div class="exh"><b>Press banca</b><span class="coach">Coach: sube a 65 kg</span></div>
+      <div class="sets">
+        <div class="row hd"><span>SERIE</span><span>KG</span><span>REPS</span><span></span></div>
+        <div class="row done"><span>1</span><span>60</span><span>10</span><i class="ck">✓</i></div>
+        <div class="row done"><span>2</span><span>62,5</span><span>8 <em class="prb">Récord</em></span><i class="ck">✓</i></div>
+        <div class="row cur"><span>3</span><span class="in">65</span><span class="in">–</span><i class="ck off"></i></div>
+      </div>
+    </div>
+    <div class="card rest">
+      <svg viewBox="0 0 44 44" class="tring"><circle cx="22" cy="22" r="18" class="bgc"/><circle cx="22" cy="22" r="18" class="fgc" stroke-dasharray="113" stroke-dashoffset="36"/></svg>
+      <div><small>Descanso</small><b class="mono">1:24</b></div><span class="pill">−15 s</span><span class="pill">+15 s</span>
+    </div>
+    <div class="card vol"><div class="exh"><b>Volumen semanal</b><span class="up mono">+12 %</span></div>
+      <div class="bars"><i style="height:42%;background:var(--bg4)"></i><i style="height:55%;background:var(--bg4)"></i><i style="height:38%;background:var(--bg4)"></i><i style="height:61%;background:var(--bg4)"></i><i style="height:48%;background:var(--bg4)"></i><i style="height:70%;background:var(--bg4)"></i><i style="height:84%;background:var(--accent)"></i></div>
+      <div class="warn">Hombro: carga baja esta semana</div>
+    </div>
+    <nav class="tabs"><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/></svg>Inicio</span><span class="on"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M3 9h2v6H3zM19 9h2v6h-2zM6 7h3v10H6zM15 7h3v10h-3zM9 11h6v2H9z"/></svg>Entreno</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 4h4v16H4zM9 6h4v14H9zM14.5 6.6l3.6-1 3.6 13.6-3.6 1z"/></svg>Biblioteca</span><span><svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 20V10h4v10zM10 20V4h4v16zM16 20v-7h4v7z"/></svg>Progreso</span></nav>
+  </div></div></div>
+    </div>
+  </section>
+</main>
+<script>
+document.addEventListener('click', (e) => {
+  const b = e.target.closest('.sw');
+  if (!b) return;
+  try { navigator.clipboard.writeText(b.dataset.hex); } catch (err) {}
+  b.classList.add('copied');
+  setTimeout(() => b.classList.remove('copied'), 700);
+});
+</script>
+</body>
+</html>

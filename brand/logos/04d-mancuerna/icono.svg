@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Gymteca — Mancuerna en la balda</title>
+  <rect width="1024" height="1024" fill="#0f0f0f"/>
+  <rect x="200" y="724" width="624" height="64" rx="32" fill="#22c55e"/>
+  <rect x="222" y="268" width="116" height="436" rx="30" fill="#22c55e"/>
+  <rect x="222" y="326" width="116" height="26" fill="#0f0f0f"/>
+  <rect x="222" y="628" width="116" height="26" fill="#0f0f0f"/>
+  <rect x="354" y="372" width="76" height="332" rx="22" fill="#4ade80"/>
+  <rect x="354" y="420" width="76" height="20" fill="#0f0f0f"/>
+  <g fill="#22c55e">
+    <rect x="440" y="459" width="50" height="190" rx="18"/>
+    <rect x="498" y="394" width="82" height="310" rx="26"/>
+    <rect x="578" y="524" width="106" height="60" rx="10"/>
+    <rect x="682" y="394" width="82" height="310" rx="26"/>
+    <rect x="772" y="459" width="50" height="190" rx="18"/>
+  </g>
+  <rect x="606" y="524" width="50" height="60" fill="#0f0f0f" opacity="0.35"/>
+  <rect x="498" y="432" width="82" height="18" fill="#0f0f0f" opacity="0.45"/>
+  <rect x="682" y="432" width="82" height="18" fill="#0f0f0f" opacity="0.45"/>
+</svg>

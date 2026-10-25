@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Gymteca — Kettlebell en verde</title>
+  <rect width="1024" height="1024" fill="#22c55e"/>
+  <g transform="translate(512 512) scale(1.28) translate(-512 -528)">
+  <rect x="200" y="724" width="624" height="64" rx="32" fill="#0f0f0f"/>
+  <rect x="222" y="268" width="116" height="436" rx="30" fill="#0f0f0f"/>
+  <rect x="354" y="372" width="76" height="332" rx="22" fill="#14532d"/>
+  <rect x="354" y="420" width="76" height="20" fill="#22c55e"/>
+  <g transform="translate(310 150) scale(0.66)">
+  <path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="#0f0f0f" stroke-width="92" stroke-linecap="round"/>
+  <path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="#0f0f0f"/>
+  </g>
+  </g>
+</svg>

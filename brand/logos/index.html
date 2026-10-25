@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gymteca · Propuestas de logo</title>
+<link rel="icon" href="05-teca-la-pesa/png/favicon-32.png">
+<style>
+  @font-face { font-family: "DM Sans"; src: url("../../web/assets/fonts/dm-sans.woff2") format("woff2"); font-weight: 100 1000; }
+  @font-face { font-family: "DM Mono"; src: url("../../web/assets/fonts/dm-mono-500.woff2") format("woff2"); font-weight: 500; }
+  :root {
+    --bg: #0f0f0f; --panel: #171717; --line: #262626; --text: #f5f5f5; --muted: #a3a3a3;
+    --green: #22c55e; --green-2: #4ade80; --light: #f6f6f4;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.5 "DM Sans", system-ui, sans-serif; }
+  main { max-width: 1180px; margin: 0 auto; padding: 48px 16px 96px; }
+  h1 { font-size: clamp(28px, 4vw, 44px); line-height: 1.1; margin: 0 0 8px; letter-spacing: -0.02em; }
+  h1 span { color: var(--green); }
+  .lead { color: var(--muted); max-width: 720px; margin: 0 0 32px; }
+  .mono { font-family: "DM Mono", ui-monospace, monospace; }
+  .label { font: 500 12px/1 "DM Mono", monospace; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+
+  /* Vista rápida */
+  .overview { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .ov { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 18px 8px 14px; background: var(--panel); border: 1px solid var(--line); border-radius: 16px; text-decoration: none; color: inherit; }
+  .ov:hover { border-color: var(--green); }
+  .fam { grid-column: 1 / -1; margin: 12px 0 -4px; font-size: 20px; }
+  .fam small { display: block; font-size: 14px; font-weight: 400; color: var(--muted); }
+  .concept header .label { margin-left: auto; }
+  .ov img { width: 96px; height: 96px; border-radius: 22.5%; }
+  .ov b { font-size: 14px; }
+  .tiny { display: flex; flex-wrap: wrap; gap: 24px; align-items: center; padding: 16px 20px; border-radius: 16px; margin-bottom: 12px; }
+  .tiny.dark { background: #202124; } .tiny.lightbg { background: #fff; color: #111; }
+  .tiny figure { margin: 0; display: flex; align-items: center; gap: 8px; }
+  .tiny figcaption { font: 500 12px "DM Mono", monospace; opacity: .7; }
+  .tiny img { display: block; image-rendering: auto; }
+
+  /* Tarjeta de concepto */
+  .concept { margin-top: 56px; padding-top: 40px; border-top: 1px solid var(--line); scroll-margin-top: 16px; }
+  .concept header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; margin-bottom: 6px; }
+  .concept h2 { margin: 0; font-size: 28px; letter-spacing: -0.01em; }
+  .concept .num { color: var(--green); font: 500 16px "DM Mono", monospace; }
+  .concept p.idea { margin: 0 0 24px; color: var(--muted); max-width: 760px; }
+  .grid { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 16px; }
+  .box { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 20px; min-width: 0; }
+  .box.light { background: var(--light); border-color: #e5e5e5; color: #111; }
+  .box .label { margin-bottom: 14px; display: block; }
+  .light .label { color: #6b6b6b; }
+  .hero { display: grid; place-items: center; background: var(--bg); padding: 32px 20px; }
+  .hero img { width: min(240px, 60vw); border-radius: 22.5%; box-shadow: 0 20px 60px rgba(34,197,94,.12); }
+  .logo-row img { display: block; width: 100%; max-width: 380px; height: auto; max-height: 92px; object-fit: contain; object-position: left center; }
+  .stack { display: grid; gap: 16px; align-content: start; }
+
+  /* Pantalla de inicio simulada */
+  .home { border-radius: 20px; padding: 22px 14px 16px; background: radial-gradient(120% 90% at 20% 0%, #31406b 0%, #1b1f33 45%, #0d0f18 100%); }
+  .home.lightwall { background: radial-gradient(120% 90% at 80% 0%, #ffe3c2 0%, #f3d3e4 45%, #cfd8f5 100%); }
+  .apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px 8px; justify-items: center; }
+  .app { display: flex; flex-direction: column; align-items: center; gap: 5px; width: 72px; }
+  .app i, .app img { width: 60px; height: 60px; border-radius: 22.5%; display: grid; place-items: center; }
+  .app span { font-size: 11px; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,.5); white-space: nowrap; }
+  .lightwall .app span { color: #1c1c1c; text-shadow: none; }
+  .app svg { width: 34px; height: 34px; }
+
+  /* Avatares */
+  .avatars { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+  .ring { padding: 3px; border-radius: 50%; background: conic-gradient(#f9ce34, #ee2a7b, #6228d7, #f9ce34); }
+  .ring img { display: block; width: 92px; height: 92px; border-radius: 50%; border: 3px solid var(--panel); }
+  .light .ring img { border-color: var(--light); }
+  .avatars .plain img { display: block; border-radius: 50%; }
+  .handle { font-size: 13px; font-weight: 700; }
+  .handle small { display: block; font-weight: 400; color: var(--muted); }
+
+  /* Pestañas de navegador */
+  .tabs { border-radius: 12px; overflow: hidden; }
+  .tabbar { display: flex; gap: 2px; padding: 8px 8px 0; background: #dee1e6; }
+  .tab { display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border-radius: 10px 10px 0 0; font: 12px system-ui, sans-serif; color: #3c4043; min-width: 0; flex: 0 1 220px; }
+  .tab.on { background: #fff; color: #1f1f1f; }
+  .tab img, .tab .gen { width: 16px; height: 16px; flex: none; border-radius: 3px; }
+  .tab .gen { background: #9aa0a6; border-radius: 50%; }
+  .tab em { font-style: normal; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .urlbar { background: #fff; padding: 7px 10px; }
+  .urlbar div { background: #f1f3f4; border-radius: 16px; padding: 5px 14px; font: 12px system-ui, sans-serif; color: #5f6368; }
+  .tabs.dk .tabbar { background: #202124; } .tabs.dk .tab { color: #bdc1c6; } .tabs.dk .tab.on { background: #35363a; color: #e8eaed; }
+  .tabs.dk .urlbar { background: #35363a; } .tabs.dk .urlbar div { background: #202124; color: #bdc1c6; }
+
+  .sizes { display: flex; flex-wrap: wrap; align-items: end; gap: 18px; }
+  .sizes figure { margin: 0; display: grid; justify-items: center; gap: 6px; }
+  .sizes figcaption { font: 500 11px "DM Mono", monospace; color: var(--muted); }
+  .light .sizes figcaption { color: #6b6b6b; }
+  .files { margin-top: 14px; font: 500 12px "DM Mono", monospace; color: var(--muted); }
+  .files a { color: var(--green-2); margin-right: 14px; }
+
+  @media (max-width: 860px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+  @media (max-width: 420px) { .app { width: 64px; } .app i, .app img { width: 52px; height: 52px; } }
+</style>
+</head>
+<body>
+<main>
+  <p class="label">brand/logos · borrador para elegir</p>
+  <h1>Propuestas de logo para <span>Gymteca</span></h1>
+  <p class="lead">Segunda ronda, centrada en <b>La estantería</b> y en <b>Teca</b>. En la estantería, el disco liso se sustituye por objetos con más detalle. Todo está dibujado a mano en SVG, con la paleta actual (verde #22c55e sobre #0f0f0f) y la palabra en DM Sans convertida a trazados. Cada variante se muestra como icono de app, avatar, favicon y logotipo sobre fondo oscuro y claro.</p>
+
+  <section class="overview" id="overview"></section>
+  <div class="tiny dark" id="tiny-dark"></div>
+  <div class="tiny lightbg" id="tiny-light"></div>
+
+  <div id="concepts"></div>
+</main>
+
+<script>
+const CONCEPTS = [
+  {id: "04-estanteria",family: "Estantería",name: "Estantería (original)",idea: "Punto de partida, para comparar: balda, dos lomos de libro y un disco liso.",favicon: true},
+  {id: "04b-disco-olimpico",family: "Estantería",name: "Disco olímpico",idea: "El disco pasa a ser un disco olímpico de verdad: tres agarres, surco, buje y su «20» en DM Mono (la fuente de los números de la app). Un libro se apoya en él.",favicon: true},
+  {id: "04c-kettlebell",family: "Estantería",name: "Kettlebell en la balda",idea: "En lugar del disco, una kettlebell de 16 kg guardada entre los libros, con brillo y base plana. Enlaza con Teca sin necesidad de cara.",favicon: true},
+  {id: "04d-mancuerna",family: "Estantería",name: "Mancuerna en la balda",idea: "Una mancuerna tumbada junto a los lomos, como un libro más de la colección. La lectura «gimnasio» es inmediata.",favicon: true},
+  {id: "04e-kettlebell-verde",family: "Estantería",name: "Kettlebell en verde",idea: "La balda con kettlebell en negro sobre verde intenso, el mismo color que Teca. La que más destaca entre otros iconos.",favicon: true},
+  {id: "04f-pila",family: "Estantería",name: "Pila de libros",idea: "Variante sin balda: una pila de libros con una mancuerna encima. La biblioteca de ejercicios contada sin palabras.",favicon: false},
+  {id: "05-teca-la-pesa",family: "Teca",name: "Teca (original)",idea: "Kettlebell que guiña un ojo, en negro sobre verde. Simpática y muy visible en redes.",favicon: true},
+  {id: "05b-teca-noche",family: "Teca",name: "Teca de noche",idea: "Misma Teca en verde sobre negro, la paleta de la app. Más sobria junto a otros iconos y sigue funcionando como avatar.",favicon: true},
+  {id: "05c-teca-esfuerzo",family: "Teca",name: "Teca en la última rep",idea: "Ojos apretados, boca abierta y una gota de sudor: la cara de la última repetición. La más divertida para TikTok y stickers.",favicon: true},
+  {id: "05d-teca-gafas",family: "Teca",name: "Teca bibliotecaria",idea: "Teca con gafas redondas: la bibliotecaria de la «-teca», la que se sabe los 45 ejercicios. Une la mascota con la idea de colección.",favicon: true},
+  {id: "05e-teca-cinta",family: "Teca",name: "Teca con cinta",idea: "Cinta deportiva en la frente y sonrisa grande. Más energía y más «gym», sin músculos ni rayos.",favicon: true},
+  {id: "45-teca-sujetalibros",family: "Mezcla",name: "Teca sujetalibros",idea: "Las dos ideas juntas: Teca en la balda, sujetando los libros como un sujetalibros. La biblioteca de ejercicios y su mascota en un solo icono.",favicon: false},
+];
+
+// Iconos genéricos de relleno para la pantalla de inicio (formas simples, sin marcas reales)
+const FILLER = [
+  { n: 'Reloj', bg: 'linear-gradient(#3a3a3c,#1c1c1e)', s: '<circle cx="12" cy="12" r="9" fill="none" stroke="#fff" stroke-width="2"/><path d="M12 7v5l3 2" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>' },
+  { n: 'Fotos', bg: 'linear-gradient(#fff,#ececec)', s: '<circle cx="9" cy="9" r="4" fill="#f59e0b"/><circle cx="15" cy="9" r="4" fill="#ef4444" opacity=".8"/><circle cx="12" cy="15" r="4" fill="#3b82f6" opacity=".8"/>' },
+  { n: 'Mensajes', bg: 'linear-gradient(#5ee36f,#1fbf3f)', s: '<path d="M4 11c0-4 3.6-6.5 8-6.5S20 7 20 11s-3.6 6.5-8 6.5c-.9 0-1.8-.1-2.6-.4L5 19l1.2-3.4C4.8 14.4 4 12.8 4 11z" fill="#fff"/>' },
+  { n: 'Mapas', bg: 'linear-gradient(#e9f5e1,#c9e7f7)', s: '<path d="M12 3a6 6 0 0 0-6 6c0 4.5 6 12 6 12s6-7.5 6-12a6 6 0 0 0-6-6z" fill="#ef4444"/><circle cx="12" cy="9" r="2.2" fill="#fff"/>' },
+  { n: 'Música', bg: 'linear-gradient(#ff5f6d,#e11d48)', s: '<path d="M9 17V6l10-2v11" fill="none" stroke="#fff" stroke-width="2"/><circle cx="7" cy="17" r="2.5" fill="#fff"/><circle cx="17" cy="15" r="2.5" fill="#fff"/>' },
+  { n: 'Calendario', bg: '#fff', s: '<text x="12" y="9" font-size="5.5" text-anchor="middle" fill="#ef4444" font-family="system-ui" font-weight="700">DOM</text><text x="12" y="20" font-size="11" text-anchor="middle" fill="#111" font-family="system-ui">25</text>' },
+  { n: 'Notas', bg: 'linear-gradient(#fde68a,#facc15)', s: '<rect x="5" y="4" width="14" height="16" rx="2" fill="#fff"/><path d="M8 9h8M8 12h8M8 15h5" stroke="#bbb" stroke-width="1.5"/>' },
+];
+
+const $ = (s) => document.querySelector(s);
+const icon = (id, size) => size ? `${id}/png/icono-${size}.png` : `${id}/icono.svg`;
+// Favicon simplificado (más grande y sin detalles finos) cuando existe
+const fav = (c, size) => c.favicon ? (size ? `${c.id}/png/favicon-${size}.png` : `${c.id}/favicon.svg`) : icon(c.id, size);
+const code = (c) => c.id.split('-')[0];
+const FAMILIES = [
+  ['Estantería', 'Variantes de la balda: el disco liso se cambia por un disco olímpico, una kettlebell o una mancuerna.'],
+  ['Teca', 'Variantes de la mascota: color, expresión y accesorios.'],
+  ['Mezcla', 'Las dos ideas en un solo icono.'],
+];
+
+$('#overview').innerHTML = FAMILIES.map(([fam, desc]) =>
+  `<h3 class="fam">${fam}<small>${desc}</small></h3>` + CONCEPTS.filter((c) => c.family === fam).map((c) =>
+    `<a class="ov" href="#${c.id}"><img src="${icon(c.id)}" alt=""><span class="label">${code(c)}</span><b>${c.name}</b></a>`).join('')).join('');
+
+const tiny = () => `<span class="label" style="color:inherit;opacity:.6">Favicon a tamaño real · 32 y 16 px</span>` + CONCEPTS.map((c) =>
+  `<figure><img src="${fav(c, 32)}" width="32" height="32" alt=""><img src="${fav(c, 16)}" width="16" height="16" alt=""><figcaption>${code(c)}</figcaption></figure>`).join('');
+$('#tiny-dark').innerHTML = tiny();
+$('#tiny-light').innerHTML = tiny();
+
+function homeScreen(c, cls) {
+  const apps = FILLER.slice(0, 7).map((f) =>
+    `<div class="app"><i style="background:${f.bg}"><svg viewBox="0 0 24 24">${f.s}</svg></i><span>${f.n}</span></div>`);
+  apps.splice(5, 0, `<div class="app"><img src="${icon(c.id)}" alt="Gymteca"><span>Gymteca</span></div>`);
+  return `<div class="home ${cls}"><div class="apps">${apps.join('')}</div></div>`;
+}
+
+function tabs(c, dk) {
+  return `<div class="tabs ${dk ? 'dk' : ''}"><div class="tabbar">
+      <div class="tab on"><img src="${fav(c)}" alt=""><em>Gymteca · Tu entreno de hoy</em></div>
+      <div class="tab"><span class="gen"></span><em>Bandeja de entrada</em></div>
+    </div><div class="urlbar"><div>gymteca.app</div></div></div>`;
+}
+
+$('#concepts').innerHTML = CONCEPTS.map((c) => `
+  <section class="concept" id="${c.id}">
+    <header><span class="num">${code(c)}</span><h2>${c.name}</h2><span class="label">${c.family}</span></header>
+    <p class="idea">${c.idea}</p>
+    <div class="grid">
+      <div class="stack">
+        <div class="box hero"><img src="${icon(c.id)}" alt="Icono ${c.name}"></div>
+        <div class="box logo-row"><span class="label">Logotipo · fondo oscuro</span><img src="${c.id}/logo-horizontal.svg" alt=""></div>
+        <div class="box light logo-row"><span class="label">Logotipo · fondo claro</span><img src="${c.id}/logo-claro.svg" alt=""></div>
+        <div class="box"><span class="label">PNG exportados (tamaño real)</span>
+          <div class="sizes">${[180, 64, 32, 16].map((s) => `<figure><img src="${icon(c.id, s)}" width="${s === 180 ? 90 : s}" height="${s === 180 ? 90 : s}" alt=""><figcaption>${s === 180 ? '180 (al 50 %)' : s}</figcaption></figure>`).join('')}${c.favicon ? [32, 16].map((s) => `<figure><img src="${fav(c, s)}" width="${s}" height="${s}" alt=""><figcaption>favicon ${s}</figcaption></figure>`).join('') : ''}</div>
+          <div class="files"><a href="${c.id}/icono.svg">icono.svg</a>${c.favicon ? `<a href="${c.id}/favicon.svg">favicon.svg</a>` : ''}<a href="${c.id}/logo-horizontal.svg">logo-horizontal.svg</a><a href="${c.id}/logo-claro.svg">logo-claro.svg</a><a href="${c.id}/png/icono-1024.png">png 1024</a></div>
+        </div>
+      </div>
+      <div class="stack">
+        <div class="box"><span class="label">Pantalla de inicio</span>${homeScreen(c, '')}</div>
+        <div class="box light"><span class="label">Fondo claro · avatar @gymteca</span>
+          ${homeScreen(c, 'lightwall')}
+          <div class="avatars" style="margin-top:16px">
+            <div class="ring"><img src="${icon(c.id, 512)}" alt=""></div>
+            <div class="plain"><img src="${icon(c.id, 64)}" width="40" height="40" alt=""></div>
+            <div class="plain"><img src="${icon(c.id, 64)}" width="24" height="24" alt=""></div>
+            <div class="handle">gymteca<small>Entrena serie a serie</small></div>
+          </div>
+        </div>
+        <div class="box"><span class="label">Favicon en pestaña</span>
+          <div class="stack" style="gap:10px">${tabs(c, false)}${tabs(c, true)}</div>
+        </div>
+      </div>
+    </div>
+  </section>`).join('');
+</script>
+</body>
+</html>
