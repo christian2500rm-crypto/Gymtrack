@@ -6,12 +6,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Gymteca"/>
-<meta name="theme-color" content="#0f0f0f"/>
+<meta name="theme-color" content="#0b1514"/>
 <title>Gymteca</title>
 <meta name="description" content="Gymteca: apunta tus entrenos de gimnasio serie a serie, descansa con temporizador y deja que el Coach te diga cuándo subir el peso. Gratis y sin registro."/>
 <link rel="canonical" href="https://gymteca.app/"/>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0f0f'/%3E%3Cpath d='M16 24h6v16h-6zm26 0h6v16h-6zM22 30h20v4H22z' fill='%2322c55e'/%3E%3C/svg%3E"/>
-<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230f0f0f'/%3E%3Cpath d='M44 68h17v44H44zm75 0h17v44h-17zM61 84h58v12H61z' fill='%2322c55e'/%3E%3C/svg%3E"/>
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml"/>
+<link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png"/>
+<link rel="apple-touch-icon" href="assets/icons/icono-180.png"/>
 <link rel="preload" href="assets/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin/>
 <style>
 /* Tipografías servidas desde el propio dominio (sin Google Fonts) */
@@ -21,18 +22,24 @@
 </style>
 <style>
 :root{
-  --bg:#0f0f0f;--bg2:#181818;--bg3:#222;--bg4:#2a2a2a;
-  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
-  --text:#f0f0f0;--text2:#888;--text3:#555;--text4:#333;
-  --green:#22c55e;--green-bg:color-mix(in srgb,var(--green) 10%,transparent);--green-bg2:color-mix(in srgb,var(--green) 18%,transparent);--green-b:color-mix(in srgb,var(--green) 30%,transparent);
-  --red:#ef4444;--blue:#3b82f6;--amber:#f59e0b;--pink:#ec4899;
-  --accent-ink:#0a0a0a; /* texto sobre el acento */
-  --pr:#fbbf24;--pr-ink:#3b2700; /* récords */
+  /* Paleta «Tiza y menta». Cambiar de paleta solo toca este bloque */
+  --bg:#0b1514;--bg2:#11201e;--bg3:#182b28;--bg4:#203632;
+  --text:#eef6f4;--text2:#86a19c;--text3:#557069;--text4:#2c403c;
+  --green:#4fe3c1; /* acento (menta) */
+  --accent-ink:#062320; /* texto sobre el acento */
+  --pr:#ff8a65;--pr-ink:#2b0f06; /* récords (coral) y su texto encima */
+  --red:#ff6b6b;--blue:#7aa7ff;--amber:#ffb547;--pink:#f283d8;
+  --border:color-mix(in srgb,var(--text) 8%,transparent);--border2:color-mix(in srgb,var(--text) 14%,transparent);
+  --green-bg:color-mix(in srgb,var(--green) 10%,transparent);--green-bg2:color-mix(in srgb,var(--green) 18%,transparent);--green-b:color-mix(in srgb,var(--green) 30%,transparent);
   /* Tonos de apoyo: claros para texto sobre fondos tintados, oscuro para pulsado */
-  --green-d:#16a34a;--green-hi:#86efac;--green-hi2:#bbf7d0;
-  --amber-hi:#fcd34d;--amber-hi2:#fde68a;--pr-hi:#fde68a;
-  --blue-hi:#93c5fd;--blue-hi2:#bfdbfe;--red-hi:#fca5a5;--red-hi2:#fecaca;--pink-hi:#f9a8d4;
-  --inset:#141414;--stage:#111; /* paneles hundidos y fondo de animaciones */
+  --green-d:color-mix(in srgb,var(--green) 80%,#000);
+  --green-hi:color-mix(in srgb,var(--green) 70%,#fff);--green-hi2:color-mix(in srgb,var(--green) 45%,#fff);
+  --amber-hi:color-mix(in srgb,var(--amber) 70%,#fff);--amber-hi2:color-mix(in srgb,var(--amber) 45%,#fff);
+  --pr-hi:color-mix(in srgb,var(--pr) 55%,#fff);
+  --blue-hi:color-mix(in srgb,var(--blue) 70%,#fff);--blue-hi2:color-mix(in srgb,var(--blue) 45%,#fff);
+  --red-hi:color-mix(in srgb,var(--red) 70%,#fff);--red-hi2:color-mix(in srgb,var(--red) 45%,#fff);
+  --pink-hi:color-mix(in srgb,var(--pink) 70%,#fff);
+  --inset:color-mix(in srgb,var(--bg) 50%,var(--bg2));--stage:color-mix(in srgb,var(--bg) 60%,var(--bg2)); /* paneles hundidos y fondo de animaciones */
   --r:14px;--rsm:9px;--rxs:6px;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
   --kb:0px; /* virtual keyboard height — se actualiza vía JS con visualViewport */
@@ -181,6 +188,7 @@ input{font-family:inherit}
 .ob-step{display:none;flex-direction:column;gap:22px}
 .ob-step.active{display:flex;animation:fu .35s ease}
 @keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.ob-teca{display:block;width:44px;height:auto;margin-bottom:14px}
 .ob-title{font-size:30px;font-weight:600;letter-spacing:-.6px;line-height:1.15}
 .ob-sub{font-size:15px;color:var(--text2);line-height:1.65}
 .ob-lbl{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:8px}
@@ -835,8 +843,8 @@ button.mm-row:active{background:rgba(255,255,255,.03)}
 .hist-item.tap{cursor:pointer}
 .hist-item.tap:active{background:var(--bg2)}
 .hist-item.pr.pw{border-color:color-mix(in srgb,var(--pr) 45%,transparent);background:color-mix(in srgb,var(--pr) 6%,transparent)}
-.hist-item-pr.r{background:var(--pr)}
-.hist-item-pr.w{background:var(--pr)}
+.hist-item-pr.r{background:var(--pr);color:var(--pr-ink)}
+.hist-item-pr.w{background:var(--pr);color:var(--pr-ink)}
 .hist-e1{font-size:11.5px;color:var(--text2);margin:-6px 0 14px;line-height:1.5}
 .hist-e1 b{font-family:'DM Mono',monospace;color:var(--text);font-weight:600}
 .sum-sheet{max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))}
@@ -1009,7 +1017,7 @@ input[type=number]{-moz-appearance:textfield}
   <div class="ob-step active" id="ob1">
     <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div></div>
     <div>
-      <div style="font-size:44px;margin-bottom:8px">💪</div>
+      <svg class="ob-teca" viewBox="278 206 468 638" role="img" aria-label="Teca, la pesa de Gymteca"><path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="var(--green)" stroke-width="92" stroke-linecap="round"/><path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="var(--green)"/><g fill="none" stroke="var(--bg)" stroke-linecap="round" stroke-linejoin="round"><circle cx="436" cy="648" r="34" fill="var(--bg)" stroke="none"/><path d="M554 658q34-46 68 0" stroke-width="28"/><path d="M442 728q70 66 140 0" stroke-width="30"/></g></svg>
       <div class="ob-title">Bienvenido a Gymteca</div>
     </div>
     <div class="ob-sub">Tu app de entrenamiento personal. Simple, sin distracciones, diseñada para ir al gym 3 veces por semana y ver resultados reales.</div>
@@ -1162,15 +1170,14 @@ const DIM={hipW:.088,sacUp:.07,sacBack:.03,lumb:.14,thor:.30,shW:.183,shDn:.035,
   ua:.30,fa:.255,grip:.075,th:.44,sh:.43,ankH:.075,heel:.055,toe:.205};
 DIM.hipH=DIM.th+DIM.sh+DIM.ankH; // altura de cadera de pie (0.945)
 
-// Colores de la paleta (:root) para el canvas, que no entiende var()
 function themeHex(v,fb){try{const x=getComputedStyle(document.documentElement).getPropertyValue(v).trim();if(/^#[0-9a-f]{6}$/i.test(x))return x;}catch(e){}return fb;}
 function hexA(h,a){const n=parseInt(h.slice(1),16);return'rgba('+((n>>16)&255)+','+((n>>8)&255)+','+(n&255)+','+a+')';}
 
 const COL={
   skin:'#d39a72',hair:'#2b1e16',shirt:'#3f5674',shorts:'#232b37',shoe:'#e4e7eb',sole:'#8b95a1',
   frame:'#56606e',frameD:'#3b4450',pad:'#2b313a',chrome:'#c4ccd4',plate:'#30363e',plateRim:'#4d5662',
-  rubber:'#17191d',cable:'#b5bec8',accent:themeHex('--green','#22c55e'),glow:'255,78,46',wood:'#6b5440',screen:'#0b1220',
-  outline:'#07090c',stage0:themeHex('--bg3','#1b1f25'),stage1:themeHex('--bg','#0e1013')
+  rubber:'#17191d',cable:'#b5bec8',accent:themeHex('--green','#4fe3c1'),glow:'255,78,46',wood:'#6b5440',screen:'#0b1220',
+  outline:'#07090c',stage0:themeHex('--bg3','#182b28'),stage1:themeHex('--bg','#0b1514')
 };
 const _cc={};
 function rgb(h){if(_cc[h])return _cc[h];const n=parseInt(h.slice(1),16);return(_cc[h]=[(n>>16)&255,(n>>8)&255,n&255]);}
@@ -3999,7 +4006,7 @@ GA.def('lib_cardio_elliptical',{
 
 })(window.GymAnim);
 /* build */
-try{GymAnim._.buildHash="cb35a9ae05f6";}catch(e){}
+try{GymAnim._.buildHash="a1fccc04d44e";}catch(e){}
 </script>
 <!-- GYM-ANIM:END -->
 <script>
@@ -4795,7 +4802,7 @@ function renderCmodal(){
     <div class="cmod-b">${esc(s.body)}</div>
     <div class="cmod-btns">
       <button class="btn bs" onclick="closeCmodal(true)">${esc(s.cancelText)}</button>
-      <button class="btn ${s.danger?'bp':'bp'}" style="${s.danger?'background:var(--red);color:var(--text)':''}" onclick="cmodalOk()">${esc(s.okText)}</button>
+      <button class="btn ${s.danger?'bp':'bp'}" style="${s.danger?'background:var(--red);color:var(--bg)':''}" onclick="cmodalOk()">${esc(s.okText)}</button>
     </div>
   </div></div>`;
 }
@@ -9895,7 +9902,7 @@ function prBurst(el){
   c.setAttribute('aria-hidden','true');
   document.body.appendChild(c);
   g.scale(dpr,dpr);
-  const pr=paletteHex('--pr','#fbbf24'),cols=[pr,paletteHex('--pr',pr,.45),paletteHex('--pr',pr,-.18),paletteHex('--pr',pr,.8),paletteHex('--amber','#f59e0b'),paletteHex('--green','#22c55e')],N=30,P=[];
+  const pr=paletteHex('--pr','#ff8a65'),cols=[pr,paletteHex('--pr',pr,.45),paletteHex('--pr',pr,-.18),paletteHex('--pr',pr,.8),paletteHex('--amber','#ffb547'),paletteHex('--green','#4fe3c1')],N=30,P=[];
   for(let k=0;k<N;k++){const a=k/N*Math.PI*2+Math.random()*.5,v=80+Math.random()*120;P.push({vx:Math.cos(a)*v,vy:Math.sin(a)*v-50,s:1.8+Math.random()*2.6,c:cols[k%cols.length],rot:Math.random()*6.3,sq:k%3===0});}
   const T=850,t0=performance.now();let done=false;
   const end=()=>{if(done)return;done=true;try{c.remove();}catch(e){}};
@@ -11878,8 +11885,7 @@ setInterval(()=>{
 // ── PWA: registrar manifest dinámico (single-file friendly) ────────
 (function setupManifest(){
   try{
-    const iconSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0f0f0f"/><path d="M124 192h48v128h-48zm216 0h48v128h-48zM172 240h168v32H172z" fill="#22c55e"/></svg>`;
-    const iconUrl='data:image/svg+xml,'+encodeURIComponent(iconSvg);
+    const icon=f=>new URL('assets/icons/'+f,location.href).href;
     const manifest={
       name:'Gymteca',
       short_name:'Gymteca',
@@ -11887,12 +11893,13 @@ setInterval(()=>{
       start_url:'./',
       display:'standalone',
       orientation:'portrait',
-      background_color:'#0f0f0f',
-      theme_color:'#0f0f0f',
+      background_color:'#0b1514',
+      theme_color:'#0b1514',
       lang:'es',
       icons:[
-        {src:iconUrl,sizes:'192x192',type:'image/svg+xml',purpose:'any maskable'},
-        {src:iconUrl,sizes:'512x512',type:'image/svg+xml',purpose:'any maskable'}
+        {src:icon('icono.svg'),sizes:'any',type:'image/svg+xml',purpose:'any maskable'},
+        {src:icon('icono-512.png'),sizes:'512x512',type:'image/png',purpose:'any maskable'},
+        {src:icon('icono-180.png'),sizes:'180x180',type:'image/png',purpose:'any'}
       ]
     };
     const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
