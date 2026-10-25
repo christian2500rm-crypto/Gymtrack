@@ -1,0 +1,5 @@
+# Web de gymteca.com (repositorio propio: gymteca-web)
+web/
+# Herramientas locales y datos de prueba
+.claude/
+__seed.html

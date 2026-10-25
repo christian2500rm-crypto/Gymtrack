@@ -5,13 +5,20 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-<meta name="apple-mobile-web-app-title" content="GymTrack"/>
+<meta name="apple-mobile-web-app-title" content="Gymteca"/>
 <meta name="theme-color" content="#0f0f0f"/>
-<title>GymTrack</title>
+<title>Gymteca</title>
+<meta name="description" content="Gymteca: apunta tus entrenos de gimnasio serie a serie, descansa con temporizador y deja que el Coach te diga cuándo subir el peso. Gratis y sin registro."/>
+<link rel="canonical" href="https://gymteca.app/"/>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230f0f0f'/%3E%3Cpath d='M16 24h6v16h-6zm26 0h6v16h-6zM22 30h20v4H22z' fill='%2322c55e'/%3E%3C/svg%3E"/>
 <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect width='180' height='180' rx='40' fill='%230f0f0f'/%3E%3Cpath d='M44 68h17v44H44zm75 0h17v44h-17zM61 84h58v12H61z' fill='%2322c55e'/%3E%3C/svg%3E"/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="preload" href="assets/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin/>
+<style>
+/* Tipografías servidas desde el propio dominio (sin Google Fonts) */
+@font-face{font-family:'DM Sans';src:url(assets/fonts/dm-sans.woff2) format('woff2');font-weight:300 700;font-display:swap}
+@font-face{font-family:'DM Mono';src:url(assets/fonts/dm-mono-400.woff2) format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'DM Mono';src:url(assets/fonts/dm-mono-500.woff2) format('woff2');font-weight:500;font-display:swap}
+</style>
 <style>
 :root{
   --bg:#0f0f0f;--bg2:#181818;--bg3:#222;--bg4:#2a2a2a;
@@ -996,7 +1003,7 @@ input[type=number]{-moz-appearance:textfield}
     <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div></div>
     <div>
       <div style="font-size:44px;margin-bottom:8px">💪</div>
-      <div class="ob-title">Bienvenido a GymTrack</div>
+      <div class="ob-title">Bienvenido a Gymteca</div>
     </div>
     <div class="ob-sub">Tu app de entrenamiento personal. Simple, sin distracciones, diseñada para ir al gym 3 veces por semana y ver resultados reales.</div>
     <div>
@@ -11517,7 +11524,8 @@ function renderSettings(){
         </div>
       </div>
       <div style="text-align:center;padding:12px 14px 24px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">
-        GymTrack · Schema ${SCHEMA_VERSION}
+        <div style="margin-bottom:6px"><a href="https://gymteca.com/privacidad" target="_blank" rel="noopener" style="color:var(--text2)">Privacidad</a> · <a href="https://gymteca.com/soporte" target="_blank" rel="noopener" style="color:var(--text2)">Soporte</a> · <a href="https://gymteca.com/" target="_blank" rel="noopener" style="color:var(--text2)">gymteca.com</a></div>
+        Gymteca · Schema ${SCHEMA_VERSION}
       </div>
     </div>
   </div></div>`;
@@ -11858,8 +11866,8 @@ setInterval(()=>{
     const iconSvg=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><rect width="512" height="512" rx="112" fill="#0f0f0f"/><path d="M124 192h48v128h-48zm216 0h48v128h-48zM172 240h168v32H172z" fill="#22c55e"/></svg>`;
     const iconUrl='data:image/svg+xml,'+encodeURIComponent(iconSvg);
     const manifest={
-      name:'GymTrack',
-      short_name:'GymTrack',
+      name:'Gymteca',
+      short_name:'Gymteca',
       description:'Tu app de entrenamiento personal',
       start_url:'./',
       display:'standalone',
