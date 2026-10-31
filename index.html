@@ -619,7 +619,7 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 /* Hoja «¿Máquina ocupada?» */
 .busy-pv{height:170px;margin-bottom:10px}
 .busy-list{display:flex;flex-direction:column;gap:6px}
-.busy-alt{display:flex;align-items:center;gap:10px;width:100%;min-height:64px;padding:6px 10px 6px 6px;border-radius:12px;border:1px solid var(--border2);background:var(--bg3);text-align:left;color:var(--text)}
+.busy-alt{display:flex;align-items:center;gap:10px;width:100%;min-height:64px;padding:6px 10px 6px 6px;border-radius:12px;border:1px solid var(--border2);background:var(--bg3);text-align:left;color:var(--text);touch-action:manipulation}
 .busy-alt[aria-checked="true"]{border-color:var(--green);background:var(--green-bg)}
 .busy-alt .exic{width:52px;height:52px;border-radius:10px;background:var(--inset)}
 .busy-alt-i{flex:1;min-width:0}
@@ -1421,9 +1421,12 @@ class Body{
     const hg={grp:'head'};
     E.cap(V.madd(this.neckB,H.U,-.02),this.neckT,.05,.046,C.skin,hg);
     const hc=this.headC;
-    E.ell(hc,[V.mul(H.R,.078),V.mul(H.U,.108),V.mul(H.F,.096)],C.skin,hg);
-    E.ell(V.add(hc,fdir(H,0,-.052,.028)),[V.mul(H.R,.062),V.mul(H.U,.058),V.mul(H.F,.072)],C.skin,hg);
+    const skAx=[V.mul(H.R,.078),V.mul(H.U,.108),V.mul(H.F,.096)];
+    const skull=E.ell(hc,skAx,C.skin,hg);
+    const jaw=E.ell(V.add(hc,fdir(H,0,-.052,.028)),[V.mul(H.R,.062),V.mul(H.U,.058),V.mul(H.F,.072)],C.skin,hg);
     E.over(Object.assign({k:'ell',c:V.add(hc,fdir(H,0,.04,-.045)),ax:[V.mul(H.R,.086),V.mul(H.U,.1),V.mul(H.F,.094)],col:C.hair},hg));
+    const cut=(m,off)=>({m,rim:ellCut(hc,skAx,m,off)});
+    E.over(Object.assign({k:'face',c:hc,ax:skAx,cuts:[cut(V.norm(V.sub(H.F,V.mul(H.U,.85))),.016)],skin:[skull,jaw]},hg));
     for(const k of[-1,1])E.over(Object.assign({k:'ell',c:fpt({o:hc,R:H.R,U:H.U,F:H.F},k*.076,-.006,-.004),ax:[V.mul(H.R,.012),V.mul(H.U,.026),V.mul(H.F,.018)],col:shadeHex(C.skin,.85),n:V.mul(H.R,k)},hg));
     for(const s of['L','R']){const S=this.S[s],k=s==='R'?1:-1,g1={grp:'ua'+s},g2={grp:'fa'+s};
       const AF=this._armFr(s),ud=AF.ud,fd=AF.fd,ant=AF.ua,lat=V.norm(V.cross(ud,ant));
@@ -1725,12 +1728,36 @@ function fillItem(ctx,cm,it){
 function drawOver(ctx,cm,o){const e=o._e;o._vis=0;if(e.a<.3)return;
   let vis=1;if(o.n){const dn=V.dot(o.n,cm.d);vis=o.nv!=null?(dn<o.nv?0:1):sstep(-.28,.42,dn);}o._vis=vis;if(vis<=.01)return;
   if(o.k==='glow'&&o.w<.005)return; // brillo nulo (el mapa muscular lo usa solo como zona para tocar)
+  if(o.k==='face'){drawCap(ctx,cm,o);return;}
   ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.r);ctx.scale(e.a,Math.max(e.b,.2));
   if(o.k==='glow'){const a=clamp(o.w,0,1.2)*vis,gc=o.gc||COL.glow;const g=ctx.createRadialGradient(0,0,0,0,0,1);
     g.addColorStop(0,'rgba('+gc+','+Math.min(.92,.95*a).toFixed(3)+')');g.addColorStop(.6,'rgba('+gc+','+(.62*a).toFixed(3)+')');g.addColorStop(1,'rgba('+gc+',0)');ctx.fillStyle=g;}
   else{ctx.globalAlpha=vis;const tn=toneOf(e.z);const cr=Math.cos(-e.r),sr=Math.sin(-e.r);let lx=(L2[0]*cr-L2[1]*sr)/e.a,ly=(L2[0]*sr+L2[1]*cr)/Math.max(e.b,.2);const ll=Math.hypot(lx,ly)||1;lx=lx/ll*.4;ly=ly/ll*.4;
     const g=ctx.createRadialGradient(lx,ly,0,0,0,1.3);g.addColorStop(0,shade(o.col,tn*1.25));g.addColorStop(1,shade(o.col,tn*.7));ctx.fillStyle=g;}
   ctx.beginPath();ctx.arc(0,0,1,0,TAU);ctx.fill();ctx.restore();ctx.globalAlpha=1;}
+function ellCut(c,ax,m,off){const w=ax.map(a=>V.dot(a,m)),w2=V.dot(w,w)||1e-9,s0=V.mul(w,off/w2),rho=Math.sqrt(Math.max(0,1-off*off/w2));
+  const wn=V.norm(w),e1=V.norm(V.perp(Math.abs(wn[0])<.9?[1,0,0]:[0,1,0],wn)),e2=V.cross(wn,e1);
+  const A=s=>V.add(V.add(V.mul(ax[0],s[0]),V.mul(ax[1],s[1])),V.mul(ax[2],s[2]));
+  return{c:V.add(c,A(s0)),u1:V.mul(A(e1),rho),u2:V.mul(A(e2),rho)};}
+function capPasses(cm,o,cut){const ax=o.ax,r=cut.rim,md=V.dot(cut.m,cm.d),re=ellipse2(cm,r.c,[r.u1,r.u2,[0,0,0]]);
+  const Q=x=>ax.reduce((s,a)=>V.add(s,V.mul(a,V.dot(a,x)/Math.pow(V.dot(a,a),2))),[0,0,0]);
+  const dc=V.sub(r.c,o.c),A=V.dot(Q(r.u1),cm.d),B=V.dot(Q(r.u2),cm.d),C0=V.dot(Q(dc),cm.d),Rr=Math.hypot(A,B);
+  if(Rr<1e-9||Math.abs(C0)>=Rr){const seen=V.dot(Q(V.add(dc,r.u1)),cm.d)>0;
+    return seen?[[{k:md>=0?'in':'out',e:re}]]:md>=0?[[]]:[];}
+  const ph=Math.atan2(B,A),dl=Math.acos(clamp(-C0/Rr,-1,1));
+  const T=[ph+dl,ph-dl].map(t=>proj(cm,V.add(r.c,V.add(V.mul(r.u1,Math.cos(t)),V.mul(r.u2,Math.sin(t))))));
+  const pm=pvec(cm,cut.m,1),vx=T[1][0]-T[0][0],vy=T[1][1]-T[0][1],L=Math.hypot(vx,vy);
+  let nx,ny;if(L>1e-6){nx=-vy/L;ny=vx/L;}else{const l=Math.hypot(pm[0],pm[1])||1;nx=pm[0]/l;ny=pm[1]/l;}
+  if(nx*pm[0]+ny*pm[1]<0){nx=-nx;ny=-ny;}
+  const half={k:'half',x:T[0][0],y:T[0][1],nx,ny};
+  return md>=0?[[half],[{k:'in',e:re}]]:[[half,{k:'out',e:re}]];}
+function drawCap(ctx,cm,o){let P=[[]];
+  for(const cut of o.cuts){const Q=capPasses(cm,o,cut),N=[];for(const p of P)for(const q of Q)N.push(p.concat(q));P=N;if(!P.length)return;}
+  const S=1e4,clip=op=>{ctx.beginPath();
+    if(op.k==='half'){const vx=-op.ny,vy=op.nx;ctx.moveTo(op.x+vx*S,op.y+vy*S);ctx.lineTo(op.x+vx*S+op.nx*S,op.y+vy*S+op.ny*S);
+      ctx.lineTo(op.x-vx*S+op.nx*S,op.y-vy*S+op.ny*S);ctx.lineTo(op.x-vx*S,op.y-vy*S);ctx.closePath();ctx.clip();return;}
+    const e=op.e;if(op.k==='out')ctx.rect(-S,-S,2*S,2*S);ctx.ellipse(e.x,e.y,Math.max(e.a,.01),Math.max(e.b,.01),e.r,0,TAU);ctx.clip(op.k==='out'?'evenodd':'nonzero');};
+  for(const p of P){ctx.save();p.forEach(clip);for(const it of o.skin)fillItem(ctx,cm,it);ctx.restore();}}
 
 const RESERVED={dur:1,label:1,ease:1};
 function compileTL(spec){
@@ -1821,11 +1848,11 @@ const live=new Set();let raf=0;const t0s={};let io=null,hintUntil=0;
 const RM=()=>{try{return G.matchMedia&&G.matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(e){return false;}};
 const NOW=()=>(G.performance?performance.now():Date.now());
 const kick=()=>{if(!raf&&G.requestAnimationFrame)raf=requestAnimationFrame(loop);};
-const ariaOf=spec=>(spec.title||'Animación del ejercicio')+(spec.labels?'. Músculos: '+spec.labels.join(', '):'')+'. Toca para pausar, arrastra para girar.';
+const ariaOf=(spec,el)=>(spec.title||'Animación del ejercicio')+(spec.labels?'. Músculos: '+spec.labels.join(', '):'')+(el&&el.hasAttribute&&el.hasAttribute('data-ga-notap')?'. Arrastra para girar.':'. Toca para pausar, arrastra para girar.');
 function mount(el,key,o){
   const spec=getDef(key);if(!spec||!el)return null;o=o||{};
   let cv=el.querySelector('canvas.ga-cv');if(!cv){cv=document.createElement('canvas');cv.className='ga-cv';el.appendChild(cv);}
-  cv.setAttribute('role','img');cv.setAttribute('aria-label',ariaOf(spec));
+  cv.setAttribute('role','img');cv.setAttribute('aria-label',ariaOf(spec,el));
   const inst={el,cv,spec,key,W:0,H:0,cm:null,base:null,ctx:cv.getContext('2d'),vis:true,cost:0,skip:0,rm:RM(),
     paused:false,pausedAt:0,pauseAcc:0,dyaw:0,dpitch:0,drag:false,anim:null,dirty:1,touched:false};
   if(t0s[key]==null)t0s[key]=NOW()/1000;
@@ -1860,14 +1887,19 @@ function bindInput(inst){const el=inst.cv,cs=el.style;cs.touchAction='pan-y';cs.
   let st=null,tapT=null,lastEnd=0;
   el.addEventListener('touchend',e=>{if(inst.mini)return;const n=NOW();if(n-lastEnd<350&&e.cancelable)e.preventDefault();lastEnd=n;},{passive:false});
   el.addEventListener('dblclick',e=>e.preventDefault());
-  el.addEventListener('pointerdown',e=>{if(inst.mini){st=null;return;}st={x:e.clientX,y:e.clientY,t:NOW(),dy:inst.dyaw,dp:inst.dpitch,id:e.pointerId,type:e.pointerType,drag:false};});
-  el.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;
+  el.addEventListener('pointerdown',e=>{if(inst.mini){st=null;return;}st={x:e.clientX,y:e.clientY,t:NOW(),dy:inst.dyaw,dp:inst.dpitch,id:e.pointerId,type:e.pointerType,drag:false,mv:0};});
+  el.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;st.mv=Math.max(st.mv,Math.hypot(dx,dy));
     if(!st.drag&&Math.abs(dx)>7&&Math.abs(dx)>Math.abs(dy)*1.2){st.drag=true;inst.drag=true;inst.touched=true;inst.anim=null;el.style.cursor='grabbing';try{el.setPointerCapture(e.pointerId);}catch(_){}}
     if(st.drag){inst.dyaw=st.dy+dx*.55;if(st.type==='mouse')inst.dpitch=clamp(st.dp+dy*.35,-30,60);inst.cm=dragCam(inst);inst.dirty=1;if(inst.rm)drawStatic(inst);else kick();if(e.cancelable)e.preventDefault();}});
   const end=e=>{if(!st||e.pointerId!==st.id)return;const s=st;st=null;inst.drag=false;el.style.cursor='grab';
-    if(s.drag){settle(inst);return;}if(e.type==='pointercancel')return;
-    if(NOW()-s.t<350){inst.touched=true;if(tapT){clearTimeout(tapT);tapT=null;resetView(inst);}else tapT=setTimeout(()=>{tapT=null;togglePause(inst);},280);}};
-  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);}
+    try{if(el.hasPointerCapture&&el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId);}catch(_){}
+    if(s.drag){settle(inst);return;}if(e.type!=='pointerup')return;
+    const r=el.getBoundingClientRect(),inP=(x,y)=>x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom,inR=inP(e.clientX,e.clientY);
+    if(NOW()-s.t<350&&s.mv<10&&!inR&&!inP(s.x,s.y)&&G.document){const t=document.elementFromPoint(e.clientX,e.clientY),
+      b=t&&t!==el&&t.closest&&t.closest('button,a,[role="radio"],[onclick]');if(b&&!el.contains(b))b.click();return;}
+    if(NOW()-s.t<350&&s.mv<10&&inR){inst.touched=true;if(tapT){clearTimeout(tapT);tapT=null;resetView(inst);}
+      else if(!inst.el.hasAttribute('data-ga-notap'))tapT=setTimeout(()=>{tapT=null;togglePause(inst);},280);else tapT=setTimeout(()=>{tapT=null;},280);}};
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);el.addEventListener('lostpointercapture',e=>{if(st&&e.pointerId===st.id&&!st.drag)st=null;});}
 function frame(inst,t){const{ctx,spec,cm,W,H,dpr}=inst;ctx.setTransform(dpr,0,0,dpr,0,0);
   const c=evalTL(spec._tl,spec,t);renderTo(ctx,spec,cm,c,W,H,inst.mini?MINI_OPT:null);if(!inst.mini)drawUI(inst);}
 function drawUI(inst){const{ctx,W,H}=inst;ctx.save();
@@ -1911,7 +1943,7 @@ function swap(el,key){
   i.spec=spec;i.key=key;i.dyaw=i.dpitch=0;i.anim=null;i.drag=false;i.paused=false;i.pausedAt=i.pauseAcc=0;i.cost=0;i.skip=0;
   i.cm=null;i.base=null;i.W=i.H=0; // obliga a reencuadrar con el ejercicio nuevo
   if(t0s[key]==null)t0s[key]=NOW()/1000;
-  i.cv.setAttribute('aria-label',ariaOf(spec));
+  i.cv.setAttribute('aria-label',ariaOf(spec,el));
   if(el.isConnected){if(!live.has(i)){live.add(i);if(ensureIO())io.observe(el);}resize(i);}
   i.dirty=1;if(!i.rm)kick(); // con movimiento reducido, resize() ya pintó la imagen fija nueva
   return i;}
@@ -2011,18 +2043,19 @@ function bindMapInput(m){const el=m.cv,cs=el.style;cs.touchAction='pan-y';cs.cur
   let st=null,tapT=null,lastEnd=0;
   el.addEventListener('touchend',e=>{const n=NOW();if(n-lastEnd<350&&e.cancelable)e.preventDefault();lastEnd=n;},{passive:false});
   el.addEventListener('dblclick',e=>e.preventDefault());
-  el.addEventListener('pointerdown',e=>{st={x:e.clientX,y:e.clientY,t:NOW(),dy:m.dyaw,dp:m.dpitch,id:e.pointerId,type:e.pointerType,drag:false};m.lastAct=NOW();kick();});
-  el.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;
+  el.addEventListener('pointerdown',e=>{st={x:e.clientX,y:e.clientY,t:NOW(),dy:m.dyaw,dp:m.dpitch,id:e.pointerId,type:e.pointerType,drag:false,mv:0};m.lastAct=NOW();kick();});
+  el.addEventListener('pointermove',e=>{if(!st||e.pointerId!==st.id)return;const dx=e.clientX-st.x,dy=e.clientY-st.y;st.mv=Math.max(st.mv,Math.hypot(dx,dy));
     if(!st.drag&&Math.abs(dx)>7&&Math.abs(dx)>Math.abs(dy)*1.2){st.drag=true;m.drag=true;m.touched=true;m.anim=null;el.style.cursor='grabbing';try{el.setPointerCapture(e.pointerId);}catch(_){}}
     if(st.drag){m.dyaw=st.dy+dx*.55;if(st.type==='mouse')m.dpitch=clamp(st.dp+dy*.35,-25,50);m.lastAct=NOW();m.dirty=1;kick();if(e.cancelable)e.preventDefault();}});
   const end=e=>{if(!st||e.pointerId!==st.id)return;const s=st;st=null;m.drag=false;el.style.cursor='grab';m.lastAct=NOW();
-    if(s.drag){m.dirty=1;kick();return;}if(e.type==='pointercancel')return;
-    if(NOW()-s.t>=350)return;m.touched=true;m.dirty=1;kick();
+    try{if(el.hasPointerCapture&&el.hasPointerCapture(e.pointerId))el.releasePointerCapture(e.pointerId);}catch(_){}
+    if(s.drag){m.dirty=1;kick();return;}if(e.type!=='pointerup')return;
     const r=el.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+    if(NOW()-s.t>=350||s.mv>=10||x<0||y<0||x>r.width||y>r.height)return;m.touched=true;m.dirty=1;kick();
     const fire=()=>{const k=mapHit(m,x,y);if(k&&m.onPick){try{m.onPick(k);}catch(err){if(G.console)console.error(err);}}};
     if(tapT){clearTimeout(tapT);tapT=null;resetMapView(m);return;}
     if(!m.dyaw&&!m.dpitch)fire();else tapT=setTimeout(()=>{tapT=null;fire();},280);};
-  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);}
+  el.addEventListener('pointerup',end);el.addEventListener('pointercancel',end);el.addEventListener('lostpointercapture',e=>{if(st&&e.pointerId===st.id&&!st.drag)st=null;});}
 function mapTick(n){let more=false;
   for(const m of maps){
     if(!m.el.isConnected||!m.cv.isConnected){maps.delete(m);if(io)io.unobserve(m.el);continue;}
@@ -8257,7 +8290,7 @@ GA.def('lib_plate_pinch',{title:'Agarre de pinza con discos',cam:{yaw:40,pitch:6
 
 })(window.GymAnim);
 /* build */
-try{GymAnim._.buildHash="01e20c5d1d73";}catch(e){}
+try{GymAnim._.buildHash="1dfa2d3fb279";}catch(e){}
 </script>
 <!-- GYM-ANIM:END -->
 <script>
@@ -16408,7 +16441,7 @@ function renderBusy(){
       <div class="hist-sheet-sub">${isSub?`Hoy haces ${esc(ex.n)} en lugar de ${esc(orig.n)}`:`Alternativas a ${esc(orig.n)} · mismos músculos`}</div>
       <button class="hist-sheet-close x44" onclick="closeBusy()" aria-label="Cerrar">✕</button></div>
     <div class="hist-sheet-body">
-      ${sel?`<div class="ex-anim busy-pv" id="busy-pv" data-ex="busy"${GymAnim.has(sel.lib.id)?` data-gym-anim="${esc(sel.lib.id)}"`:''}></div>
+      ${sel?`<div class="ex-anim busy-pv" id="busy-pv" data-ex="busy" data-ga-notap${GymAnim.has(sel.lib.id)?` data-gym-anim="${esc(sel.lib.id)}"`:''}></div>
       <div class="busy-list" role="radiogroup" aria-label="Alternativas">${rows}</div>
       <div class="busy-info" id="busy-info" aria-live="polite">${_busyInfoHtml(sel,orig)}</div>
       <div class="busy-acts"><button type="button" class="btn bp" onclick="busySoloHoy()">Solo hoy</button><button type="button" class="btn bs" onclick="busyRoutine()">Cambiar en la rutina</button></div>
