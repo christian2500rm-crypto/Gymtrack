@@ -483,48 +483,91 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .sr-btn{background:var(--bg3);border:1px solid var(--border);border-radius:50%;width:30px;height:30px;font-size:15px;position:relative;color:var(--text2);display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;line-height:1}
 .sr-btn::after{content:'';position:absolute;inset:-7px}
 .sr-btn:active{transform:scale(.9)}
-/* Biblioteca picker */
-.lib-search{width:100%;min-height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:10px 12px;font-size:16px;color:var(--text);margin-bottom:10px}
-.lib-search::placeholder{color:var(--text3)}
-.lib-group-h{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;padding:8px 0 4px}
-.lib-item{padding:10px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s;border-radius:var(--rxs)}
-.lib-item:active{background:var(--bg3)}
-.lib-item-n{font-size:13px;font-weight:500;color:var(--text)}
-.lib-item-d{font-size:11px;color:var(--text3);margin-top:2px}
-.lib-item-badge{display:inline-block;font-size:9px;background:var(--bg3);border:1px solid var(--border);border-radius:3px;padding:1px 5px;color:var(--text3);margin-right:4px;vertical-align:middle}
-.lib-item-badge.in{color:var(--green);background:var(--green-bg);border-color:var(--green-b);font-weight:600}
-.lib-item.cur{background:rgba(255,255,255,.03)}
 /* (11) Biblioteca 3D: miniaturas del motor (encima del emoji, que queda como respaldo) */
 .ga-th{opacity:0;transition:opacity .2s;pointer-events:none;-webkit-user-drag:none;user-select:none}
 .ga-th.ga-on{opacity:1}
 .exic{position:relative;overflow:hidden}
 .exic .ga-th{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
 .ga-th.ga-on~.exic-e{opacity:0}
-.lib-chiprow{display:flex;gap:6px;overflow-x:auto;margin:0 -16px 8px;padding:0 16px 2px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+/* Selector de ejercicios: una cabecera fija (búsqueda, lugar, zonas, contador) y filas con miniatura 3D o figura teñida */
+#lib-sheet{height:calc(92vh - var(--kb));height:calc(92dvh - var(--kb))} /* alto fijo: la búsqueda no salta al cambiar los resultados */
+#lib-sheet .hist-sheet-head{padding:8px 16px 4px;z-index:2}
+#lib-sheet .hist-sheet-hdl{margin-bottom:8px}
+#lib-sheet .hist-sheet-title{min-height:28px;padding-right:44px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#lib-sheet .hist-sheet-body{padding:0 0 24px}
+#lib-list{padding:0 16px}
+.lib-sbox{position:relative;margin:6px 0 8px}
+.lib-search{width:100%;min-height:44px;background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:10px 44px 10px 12px;font-size:16px;color:var(--text);outline:none;-webkit-appearance:none;appearance:none}
+.lib-search:focus{border-color:var(--green)}
+.lib-search:focus-visible{outline:2px solid var(--green);outline-offset:-1px}
+.lib-search::placeholder{color:var(--text2)}
+.lib-search::-webkit-search-cancel-button{-webkit-appearance:none;display:none}
+.lib-clear{position:absolute;top:0;right:0;width:44px;height:44px;border:0;background:none;color:var(--text2);font-size:14px;cursor:pointer}
+#lib-sheet.lib-q .lib-hq{display:none}
+.lib-place{display:flex;margin-bottom:8px;background:var(--bg3);border:1px solid var(--border2);border-radius:22px;overflow:hidden}
+.lib-pl{flex:1;min-height:44px;border:0;border-radius:22px;background:none;color:var(--text2);font-size:13.5px;font-weight:500;white-space:nowrap;cursor:pointer}
+.lib-pl[aria-checked="true"]{background:var(--green);color:var(--accent-ink);font-weight:600}
+.lib-chiprow{display:flex;gap:6px;overflow-x:auto;margin:-3px -16px 3px;padding:3px 16px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
 .lib-chiprow::-webkit-scrollbar{display:none}
-.lib-chip{flex-shrink:0;min-height:44px;padding:0 13px;border-radius:22px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:12.5px;font-weight:500;white-space:nowrap}
+.lib-chip{flex-shrink:0;min-height:44px;min-width:44px;padding:0 13px;border-radius:22px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer}
 .lib-chip[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--accent-ink);font-weight:600}
 .lib-chip.eq[aria-pressed="true"]{background:var(--blue);border-color:var(--blue);color:var(--bg)}
-.lib-count{font-size:11.5px;color:var(--text2);margin:2px 0 6px}
-#lib-list.lib-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-.lib-grid .lib-group-h{grid-column:1/-1;padding:10px 0 0}
-.lib-grid .empty{grid-column:1/-1}
-.lib-card{padding:0;border:1px solid var(--border);border-radius:12px;background:var(--bg3);overflow:hidden;display:flex;flex-direction:column;min-width:0;transition:border-color .15s,transform .1s}
-.lib-card:active{transform:scale(.98);background:var(--bg3)}
-.lib-card:focus-visible{outline:2px solid var(--green);outline-offset:2px}
-.lib-card.cur{border-color:var(--green-b)}
-.lib-th{position:relative;isolation:isolate;aspect-ratio:3/2;background:radial-gradient(circle at 50% 42%,var(--bg3),var(--bg));display:flex;align-items:center;justify-content:center;font-size:28px}
+.lib-cn{margin-left:5px;font:500 11px 'DM Mono',monospace}
+.lib-count{font-size:12px;color:var(--text2);min-height:18px}
+.lib-count.more{display:flex;flex-wrap:wrap;align-items:center;column-gap:4px;min-height:44px}
+.lib-strips{margin-top:10px}
+.lib-group-h{font-size:10.5px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.7px;margin:14px 0 2px}
+.lib-gn{font-family:'DM Mono',monospace;font-weight:500}
+.lib-sec{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px}
+.lib-sec .lib-group-h{margin:0}
+.lib-all{min-height:44px;min-width:44px;padding:0 2px;border:0;background:none;color:var(--green);font-size:12.5px;font-weight:600;cursor:pointer}
+.lib-ul{list-style:none;margin:0;padding:0}
+.lib-li{display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);content-visibility:auto;contain-intrinsic-block-size:auto 64px}
+.lib-row{flex:1;min-width:0;display:grid;grid-template-columns:72px 1fr 14px;align-items:center;gap:10px;min-height:64px;padding:8px 0;border:0;background:none;color:var(--text);font:inherit;text-align:left;cursor:pointer;border-radius:var(--rxs)}
+.lib-row:active{background:var(--bg3)}
+/* foco: anillo menta de 2 px en todo botón de las hojas (dentro de «Gimnasio | Casa», que recorta, por dentro) */
+:is(#lib-sheet,#lib-dsheet,#lib-ksheet,#busy-sheet) button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+#lib-sheet:focus{outline:none}
+#lib-sheet .lib-pl:focus-visible{outline-offset:-4px}
+#lib-sheet .lib-pl[aria-checked="true"]:focus-visible{outline-color:var(--accent-ink)}
+#lib-list :is(.lib-row,.lib-today):focus-visible{outline-offset:-2px} /* content-visibility de .lib-li recorta lo que sale de él */
+.lib-th{position:relative;width:72px;height:48px;border-radius:var(--rsm);background:var(--inset);overflow:hidden;display:flex;align-items:center;justify-content:center}
 .lib-th .ga-th{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.lib-th .lib-th-e{opacity:.5}
-.lib-th .ga-th.ga-on~.lib-th-e{opacity:0}
-.lib-th .lib-item-badge.in{position:absolute;left:6px;top:6px;z-index:1;margin:0;font-size:10px;padding:2px 6px;border-radius:6px;max-width:calc(100% - 12px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;background:color-mix(in srgb,var(--bg) 85%,transparent)}
-.lib-cb{padding:8px 9px 9px;display:flex;flex-direction:column;gap:3px;min-width:0;flex:1}
-.lib-card .lib-item-n{font-size:13px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
-.lib-eqt{font-size:11px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.lib-mus{display:flex;flex-wrap:wrap;gap:3px;margin-top:1px}
-.mchip{font-size:10.5px;line-height:1.4;padding:1px 6px;border-radius:6px;background:rgba(255,78,46,.13);color:#ff9a80;white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
-.lib-last{font-size:11px;color:var(--text2);margin-top:auto;padding-top:3px}
-.lib-last b{color:var(--text);font-family:'DM Mono',monospace;font-weight:500}
+.lib-fig{display:block;width:100%;height:100%}
+.lib-th-e{position:absolute;left:50%;top:3px;transform:translateX(-50%);font-size:13px;line-height:1} /* entre las dos figuras: no tapa músculos */
+.lib-th.cardio .lib-th-e{position:static;transform:none;font-size:26px}
+.ga-th.ga-on~.lib-fig,.ga-th.ga-on~.lib-th-e{opacity:0}
+.lib-row.off .lib-th{filter:grayscale(1)}
+.lib-rb{display:flex;flex-direction:column;gap:2px;min-width:0}
+.lib-item-n{font-size:14px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.lib-star{color:var(--green)}
+.lib-meta{font-size:12px;color:var(--text2);line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-tags{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;margin-top:2px}
+.lib-item-badge{font-size:10.5px;line-height:1.4;padding:1px 6px;border-radius:var(--rxs);background:var(--bg3);border:1px solid var(--border2);color:var(--text2);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.lib-item-badge.in{color:var(--green);background:var(--green-bg);border-color:var(--green-b);font-weight:600}
+.lib-last,.lib-pct{font:11px 'DM Mono',monospace;color:var(--text2)}
+.lib-last b{color:var(--text);font-weight:500}
+.lib-pct{color:var(--green)}
+.lib-why{font-size:11.5px;font-weight:600;color:var(--amber-hi)}
+.lib-chev{color:var(--text3);font-size:17px;text-align:center}
+.lib-today{flex:none;min-height:44px;min-width:44px;padding:0 12px;border-radius:22px;border:1px solid var(--green-b);background:var(--green-bg);color:var(--green);font-size:12.5px;font-weight:600;cursor:pointer}
+.lib-today:disabled{max-width:96px;line-height:1.2;border-color:var(--border2);background:var(--bg3);color:var(--text2);cursor:default}
+@media (max-width:359px){.lib-li.td{flex-wrap:wrap;row-gap:0}.lib-li.td .lib-row{flex-basis:100%}.lib-li.td .lib-today{margin:-6px 0 8px 82px}} /* «Solo hoy» bajo la fila: el nombre se lee */
+.lib-tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:6px 0 2px}
+.lib-tile{display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0;min-height:44px;padding:8px 2px 6px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg3);color:var(--text);cursor:pointer}
+.lib-tile .lib-fig{width:54px;height:36px}
+.lib-tile-e{font-size:24px;line-height:36px}
+.lib-tile-n{max-width:100%;font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lib-tile-c{font:11px 'DM Mono',monospace;color:var(--text2)}
+.lib-tile:disabled{cursor:default;color:var(--text2)}
+.lib-tile:disabled .lib-fig{filter:grayscale(1)}
+.lib-tail-h{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:44px;margin-top:10px;padding:0;border:0;border-top:1px solid var(--border2);background:none;color:var(--text2);font-size:10.5px;font-weight:600;letter-spacing:.7px;text-transform:uppercase;cursor:pointer}
+.lib-tail-h span{font-size:14px}
+.lib-chunk{display:contents}
+.lib-more{height:1px}
+.lib-empty .lib-relax{margin-top:12px;min-height:44px;padding:10px 16px}
+.mchip{font-size:10.5px;line-height:1.4;padding:1px 6px;border-radius:var(--rxs);background:color-mix(in srgb,var(--pr) 13%,transparent);color:var(--pr-hi);white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+@media (prefers-reduced-motion:reduce){.ga-th{transition:none}}
 /* Ficha de un ejercicio (encima del selector) */
 .lib-d-head{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
 .lib-d-tag{font-size:11px;padding:3px 8px;border-radius:7px;background:var(--bg3);border:1px solid var(--border2);color:var(--text2)}
@@ -536,6 +579,32 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .lib-d-acts .btn{flex:1;min-height:48px;padding:12px 8px;font-size:14px}
 .lib-d-note{font-size:11.5px;color:var(--text2);line-height:1.5;margin-top:6px}
 .hist-sheet-close.x44{width:44px;height:44px;top:8px;right:8px;font-size:15px}
+#lib-dsheet .lib-d-hd{padding-right:104px}
+.hist-sheet-close.lib-fav{right:56px;font-size:19px}
+.lib-fav[aria-pressed="true"]{color:var(--green);border-color:var(--green-b)}
+.lib-d-map{position:relative;display:flex;align-items:center;justify-content:center;height:200px;margin-bottom:12px;border-radius:var(--rsm);background:var(--stage);overflow:hidden;touch-action:pan-y}
+.lib-d-map>.lib-fig{width:auto;height:80%}
+.lib-d-map.on>.lib-fig{display:none}
+.lib-d-map canvas{display:block;width:100%;height:100%}
+.lib-d-need{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:44px;margin:-4px 0 10px}
+.lib-d-need .lib-have{flex:none;width:auto;min-height:44px;padding:0 16px;font-size:13px}
+.lib-d-need.ok{font-size:12.5px;font-weight:600;color:var(--green);outline:none}
+/* «Mi material» (casa) */
+.lib-plrow{display:flex;gap:8px;margin-bottom:8px}
+.lib-plrow .lib-place{flex:1;min-width:0;margin-bottom:0}
+.lib-kitbtn{flex:none;min-height:44px;padding:0 12px;border-radius:22px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;font-weight:500;white-space:nowrap;cursor:pointer}
+.lib-kitbtn .lib-cn{color:var(--text2)}
+@media (max-width:359px){.lib-wd{display:none}} /* a 320 px: «🎒 2» (el texto queda en su aria-label) y «67 con tu material · +29 con más material ›» */
+.lib-cmore{display:inline-flex;align-items:center;min-width:44px;min-height:44px;padding:0 4px;border:0;background:none;color:var(--green);font-size:12px;font-weight:600;cursor:pointer}
+.lib-cmore b{font:600 12px 'DM Mono',monospace;margin-right:4px}
+.lib-kit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.lib-kt{display:flex;align-items:center;gap:8px;min-width:0;min-height:48px;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);color:var(--text);font-size:13px;font-weight:500;text-align:left;cursor:pointer}
+.lib-kt[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--accent-ink);font-weight:600}
+.lib-kt-e{font-size:18px;line-height:1}
+.lib-kt-n{flex:1;min-width:0;line-height:1.25;overflow-wrap:break-word}
+.lib-kt-c{display:block;font:500 11px 'DM Mono',monospace;color:var(--text2)} /* el número, bajo el nombre (a 320 px no caben juntos) */
+.lib-kt[aria-pressed="true"] .lib-kt-c{color:inherit}
+.lib-kit-ok{min-height:48px;margin-top:14px}
 /* «Máquina ocupada» en la tarjeta abierta de Entreno */
 .ex-busy{display:flex;align-items:center;gap:8px;margin:-2px 0 10px;min-height:44px}
 .ex-busy-t{flex:1;min-width:0;font-size:12px;color:var(--text2);line-height:1.4}
@@ -4676,7 +4745,8 @@ function _backfillStrengthNames(data){
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true},migrateState(loadState())||{});
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true,
+  libPlace:'g',libKit:null,libFav:[],libRecent:[]},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -4743,16 +4813,17 @@ const MUSCLE_GROUPS=[
 const LT=['w','bw','r','t','d','c'];
 // Material (una clave por ejercicio): l nombre · eq equipo que se enseña si la fila no trae otro (si falta, l) · cls clase de
 // carga (loadEqClass; maq y polea según sea multiarticular, ver LOAD_EQ) · free no es una estación que se pueda ocupar
-// («¿Máquina ocupada?») · home sale en «Mi material» (sin material siempre está)
+// («¿Máquina ocupada?») · home sale en «Mi material» (sin material siempre está) · ic su emoji (selector) · mach es una
+// máquina del gimnasio (el filtro «Sin máquina» la quita)
 const MAT={
-  barra:{l:'Barra',cls:'barra'},barraz:{l:'Barra Z',cls:'barra',free:1},smith:{l:'Smith',cls:'barra'},
-  mancuernas:{l:'Mancuernas',cls:'manc',free:1,home:1},kettlebell:{l:'Kettlebell',cls:'kb',free:1,home:1},
-  disco:{l:'Disco',cls:'disco',free:1},balon:{l:'Balón medicinal',cls:'disco',free:1,home:1},otro:{l:'Otro material',cls:'disco',home:1},
-  maquina:{l:'Máquina',cls:'maq'},polea:{l:'Polea',cls:'polea'},
-  corporal:{l:'Sin material',eq:'Peso corporal',cls:'bw',free:1},dominadas:{l:'Barra de dominadas',cls:'bw',home:1},
-  banda:{l:'Banda elástica',cls:'banda',free:1,home:1},minibanda:{l:'Minibanda',cls:'banda',free:1,home:1},
-  trx:{l:'TRX o anillas',cls:'none',free:1,home:1},fitball:{l:'Fitball',cls:'none',free:1,home:1},rueda:{l:'Rueda abdominal',cls:'none',free:1,home:1},
-  comba:{l:'Comba',cls:'none',free:1,home:1},step:{l:'Step o cajón',cls:'none',free:1,home:1},cardio:{l:'Máquina de cardio',cls:'none'}};
+  barra:{l:'Barra',ic:'🏋️',cls:'barra'},barraz:{l:'Barra Z',ic:'🏋️',cls:'barra',free:1},smith:{l:'Smith',ic:'🏗️',cls:'barra',mach:1},
+  mancuernas:{l:'Mancuernas',ic:'💪',cls:'manc',free:1,home:1},kettlebell:{l:'Kettlebell',ic:'🔔',cls:'kb',free:1,home:1},
+  disco:{l:'Disco',ic:'💿',cls:'disco',free:1},balon:{l:'Balón medicinal',ic:'🏐',cls:'disco',free:1,home:1},otro:{l:'Otro material',ic:'🧰',cls:'disco',home:1},
+  maquina:{l:'Máquina',ic:'⚙️',cls:'maq',mach:1},polea:{l:'Polea',ic:'⚡',cls:'polea',mach:1},
+  corporal:{l:'Sin material',ic:'🤸',eq:'Peso corporal',cls:'bw',free:1},dominadas:{l:'Barra de dominadas',ic:'🧗',cls:'bw',home:1},
+  banda:{l:'Banda elástica',ic:'➰',cls:'banda',free:1,home:1},minibanda:{l:'Minibanda',ic:'⭕',cls:'banda',free:1,home:1},
+  trx:{l:'TRX o anillas',ic:'🔗',cls:'none',free:1,home:1},fitball:{l:'Fitball',ic:'🔵',cls:'none',free:1,home:1},rueda:{l:'Rueda abdominal',ic:'🛞',cls:'none',free:1,home:1},
+  comba:{l:'Comba',ic:'🪢',cls:'none',free:1,home:1},step:{l:'Step o cajón',ic:'📦',cls:'none',free:1,home:1},cardio:{l:'Máquina de cardio',ic:'🏃',cls:'none',mach:1}};
 // Patrón de movimiento (alternativas de «¿Máquina ocupada?» y del Coach): nombre y patrones cercanos
 const PAT_LBL={squat:'Sentadilla',lunge:'Zancada',knee_ext:'Extensión de rodilla',knee_flex:'Flexión de rodilla',hinge:'Bisagra de cadera',
   hip_ext:'Extensión de cadera',hip_abd:'Abducción',hip_add:'Aducción',calf:'Gemelo',push_h:'Empuje horizontal',fly:'Aperturas',pull_v:'Jalón vertical',
@@ -5210,6 +5281,21 @@ const EXERCISE_DB=_parseLib(LIB_ROWS);
 const LIB_BY_ID=new Map(EXERCISE_DB.map(e=>[e.id,e])),LIB_BY_N=new Map(EXERCISE_DB.map(e=>[e.n,e]));
 const LIB_DOWN={};EXERCISE_DB.forEach(e=>{if(e.up&&!LIB_DOWN[e.up])LIB_DOWN[e.up]=e.id;}); // versión más fácil
 const LIB_PAT={};EXERCISE_DB.forEach(e=>{LIB_PAT[e.id]=e.pat;});
+// Preferencias del selector (aditivas, sin subir la versión del esquema; se sanean al cargar y al importar):
+// libPlace 'g' gimnasio | 'c' casa · libKit null (aún no lo has dicho) o tu material de casa (claves de MAT con home) ·
+// libFav tus favoritos y libRecent los últimos que elegiste (ids de la biblioteca, el más nuevo primero; como mucho 100 y
+// 12). Un id con buena forma que no está en el catálogo se guarda (puede venir de una versión más nueva) pero no se pinta.
+// El estado de las hojas (selector, ficha, «Mi material») vive solo en memoria: si un backup lo trae, fuera.
+function _sanitizeLibPrefs(o){
+  if(!_isPlainObj(o))return o;
+  ['_pickerState','_libDetail','_libKitOpen'].forEach(k=>{delete o[k];});
+  const ids=(a,n)=>Array.isArray(a)?[...new Set(a.filter(x=>typeof x==='string'&&/^lib_[a-z0-9_]{1,60}$/.test(x)))].slice(0,n):[];
+  if(o.libPlace!=='g'&&o.libPlace!=='c')o.libPlace='g';
+  o.libKit=Array.isArray(o.libKit)?[...new Set(o.libKit.filter(k=>typeof k==='string'&&Object.prototype.hasOwnProperty.call(MAT,k)&&MAT[k].home))]:null;
+  o.libFav=ids(o.libFav,100);o.libRecent=ids(o.libRecent,12);
+  return o;
+}
+_sanitizeLibPrefs(S);
 // Ejercicio de la biblioteca de uno del plan (o null): su lib → el del plan original (PLAN_ANIM, salvo cardio: ese va por
 // nombre) → su nombre. Nunca lee el tipo ni los campos del catálogo de la copia del plan: siempre del catálogo.
 function _libIdOf(ex){
@@ -5389,6 +5475,7 @@ function renderCmodal(){
 document.addEventListener('keydown',e=>{
   if(e.key==='Escape'){
     if(_cmodalState){closeCmodal(true);return;}
+    if(_libKitOpen){closeLibKit();return;} // «Mi material», encima del selector (y de la ficha)
     if(_libDetail){closeLibDetail();return;} // (11) la ficha de un ejercicio, encima del selector
     if(_pickerState){closeExercisePicker();return;}
     if(_busy){closeBusy();return;} // (11) hoja «¿Máquina ocupada?»
@@ -5404,7 +5491,7 @@ document.addEventListener('keydown',e=>{
     if(S.settingsOpen){closeSettings();return;}
   }else if(e.key==='Enter'&&_cmodalState&&!document.querySelector('#cmodal-root input,#cmodal-root textarea')){
     e.preventDefault();cmodalOk();
-  }
+  }else if(e.key==='Tab'&&(_pickerState||_busy)&&!_cmodalState)_sheetTrap(e);
 });
 
 // Haptic feedback — iOS Safari no implementa navigator.vibrate, pero no rompe si no existe
@@ -10841,7 +10928,8 @@ function mmAddFor(gid){
   const g=MM_GROUPS.find(x=>x.id===gid);if(!g)return;
   const dk=getPlan()[_editDay]?_editDay:'A';
   closeMuscleSheet();
-  addExerciseUI(dk,g.lib);
+  const [z,sub]=MM2SUB[gid]||[g.lib,null];
+  addExerciseUI(dk,z,sub);
 }
 function renderMuscleSheet(){
   const root=document.getElementById('mmap-root');if(!root)return;
@@ -11633,7 +11721,8 @@ function swapExerciseUI(dayKey,idx){
     muscle:ex.muscle||null,
     currentLib:_libIdOf(ex),
     mode:'swap',dayKey,
-    onPick:(libEx)=>_routineSwapTo(dayKey,slot,libEx,{keepToday:true})
+    onPick:(libEx)=>_routineSwapTo(dayKey,slot,libEx,{keepToday:true}),
+    refocus:()=>document.querySelector(`#edi_${idx} .edit-ex-btn`)||document.querySelector('#routine-ed .hist-sheet-close') // el ⇄ de su fila, ya repintada
   });
 }
 // Cambia un ejercicio de la rutina por otro de la biblioteca (editor y «Cambiar en la rutina» de la hoja «¿Máquina
@@ -11699,12 +11788,12 @@ function _routineSwapTo(dayKey,slot,libEx,o){
   }
 }
 
-function addExerciseUI(dayKey,muscle){
+function addExerciseUI(dayKey,muscle,sub){
   showExercisePicker({
     title:`Añadir al ${getPlan()[dayKey].label}`,
-    muscle:MUSCLE_GROUPS.some(m=>m.id===muscle)?muscle:null, // desde el mapa muscular: filtrado por ese grupo
+    muscle:MUSCLE_GROUPS.some(m=>m.id===muscle)?muscle:null,sub, // desde el mapa muscular: en esa zona y subzona
     mode:'add',dayKey,
-
+    refocus:()=>document.querySelector('#routine-ed .edit-add-btn')||document.querySelector('#routine-ed .hist-sheet-close'), // el editor ya repintado
     onPick:(libEx)=>{
       // (11) si ya tiene historial propio (sus «Solo hoy» o de cuando estuvo en tu rutina), sigue con él
       const hk=_libHistKey(libEx.id),own=!!hk&&!_planIdTaken(hk)&&Array.isArray(S.strength[hk])&&S.strength[hk].length>0;
@@ -12011,10 +12100,13 @@ function openBusy(exId){
   if(!ex){toast('Ese ejercicio ya no está en tu rutina');return;}
   if(_slotMarks(ex)){toast(`Ya llevas series de ${ex.n}: se quedan con él`);return;}
   if(RT.cardioRunning(ex.id)){toast('Para primero el cardio en marcha');return;}
-  closeBusy();
+  const op=_busy&&_busy.opener||document.activeElement;closeBusy(1);
   const alts=busyAlternatives(ex,3);
-  _busy={dk,exId,alts,sel:alts.length?alts[0].lib.id:null};
+  _busy={dk,exId,alts,sel:alts.length?alts[0].lib.id:null,opener:op};
   renderBusy();
+  // el foco entra en la hoja: en la alternativa elegida (o en ✕ si no hay ninguna); al cerrarla vuelve a quien la abrió
+  const f=document.querySelector('#busy-sheet .busy-alt[tabindex="0"]')||document.querySelector('#busy-sheet .hist-sheet-close');
+  if(f){try{f.focus({preventScroll:true});}catch(e){}}
 }
 // Nombres de los músculos de un ejercicio de la biblioteca: los de su animación o, si no tiene, los del catálogo (de más
 // a menos trabajado). n: cuántos como mucho.
@@ -12050,13 +12142,13 @@ function renderBusy(){
   if(!root||!_busy||!ex){closeBusy();return;}
   const orig=routineEx(ex),isSub=ex!==orig,A=_busy.alts,sel=A.find(a=>a.lib.id===_busy.sel)||A[0]||null;
   const rows=A.map(a=>{const last=a.lib.cardio?esc(String(a.lib.eq)):_histNoKg(a.hist)?esc(_recValTxt(a.hist.lastAny)):a.hist&&a.hist.last?esc(kgTxt(a.hist.last.v))+' kg':'nuevo';
-    return`<button type="button" class="busy-alt" role="radio" aria-checked="${a===sel}" data-lib="${esc(a.lib.id)}" onclick="busySelect(this.dataset.lib)" aria-label="${esc(a.lib.n)}: ${a.pct} % de músculos en común${a.lib.cardio?'':_histNoKg(a.hist)?', último '+esc(_recValTxt(a.hist.lastAny)):a.hist&&a.hist.last?', último '+esc(kgTxt(a.hist.last.v))+' kilos':''}">
+    return`<button type="button" class="busy-alt" role="radio" aria-checked="${a===sel}" tabindex="${a===sel?0:-1}" data-lib="${esc(a.lib.id)}" onclick="busySelect(this.dataset.lib)" onkeydown="busyKey(event)" aria-label="${esc(a.lib.n)}: ${a.pct} % de músculos en común${a.lib.cardio?'':_histNoKg(a.hist)?', último '+esc(_recValTxt(a.hist.lastAny)):a.hist&&a.hist.last?', último '+esc(kgTxt(a.hist.last.v))+' kilos':''}">
       <span class="exic" aria-hidden="true">${thumbImgHtml(a.lib.id,TH_IC)}<span class="exic-e">${esc(a.lib.ic||'💪')}</span></span>
       <span class="busy-alt-i"><span class="busy-alt-n">${esc(a.lib.n)}</span><span class="busy-alt-m">${esc(a.lib.eq)}${a.pat&&!a.lib.cardio?' · '+esc(PAT_LBL[a.pat]||''):''}</span></span>
       <span class="busy-alt-r" aria-hidden="true"><span class="pct">${a.pct} %</span><b>${last}</b></span></button>`;}).join('');
-  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeBusy()" style="z-index:500"><div class="hist-sheet" id="busy-sheet" role="dialog" aria-label="¿Máquina ocupada?" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeBusy()" style="z-index:500"><div class="hist-sheet" id="busy-sheet" role="dialog" aria-modal="true" aria-labelledby="busy-t" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
     <div class="hist-sheet-head" style="padding-right:60px"><div class="hist-sheet-hdl"></div>
-      <div class="hist-sheet-title">⇄ ¿Máquina ocupada?</div>
+      <div class="hist-sheet-title" id="busy-t"><span aria-hidden="true">⇄ </span>¿Máquina ocupada?</div>
       <div class="hist-sheet-sub">${isSub?`Hoy haces ${esc(ex.n)} en lugar de ${esc(orig.n)}`:`Alternativas a ${esc(orig.n)} · mismos músculos`}</div>
       <button class="hist-sheet-close x44" onclick="closeBusy()" aria-label="Cerrar">✕</button></div>
     <div class="hist-sheet-body">
@@ -12076,21 +12168,31 @@ function renderBusy(){
 function busySelect(libId){
   if(!_busy)return;const a=_busy.alts.find(x=>x.lib.id===libId),ex=_busySlot();if(!a||!ex)return;
   _busy.sel=libId;
-  document.querySelectorAll('#busy-sheet .busy-alt').forEach(b=>b.setAttribute('aria-checked',String(b.dataset.lib===libId)));
+  document.querySelectorAll('#busy-sheet .busy-alt').forEach(b=>{const on=b.dataset.lib===libId;b.setAttribute('aria-checked',String(on));b.tabIndex=on?0:-1;});
   _busyPv(document.getElementById('busy-pv'),a.lib);
   const orig=routineEx(ex),inf=document.getElementById('busy-info'),nt=document.getElementById('busy-note');
   if(inf)inf.innerHTML=_busyInfoHtml(a,orig);if(nt)nt.innerHTML=_busyNote(a,orig);
   haptic(8);
 }
-function closeBusy(){
-  const root=document.getElementById('cmodal-root'),sh=root&&root.querySelector('#busy-sheet');
+// Las alternativas son un grupo de radios: Tab entra en la elegida y las flechas (Inicio / Fin) la cambian
+function busyKey(ev){
+  const B=[...document.querySelectorAll('#busy-sheet .busy-alt')],i=B.indexOf(ev.target),n=B.length;
+  const to={ArrowDown:i+1,ArrowRight:i+1,ArrowUp:i-1,ArrowLeft:i-1,Home:0,End:n-1}[ev.key];
+  if(to===undefined||i<0||!n)return;
+  ev.preventDefault();const b=B[(to+n)%n];busySelect(b.dataset.lib);try{b.focus();}catch(e){}
+}
+// keep: se vuelve a abrir enseguida (el foco no se devuelve)
+function closeBusy(keep){
+  const root=document.getElementById('cmodal-root'),sh=root&&root.querySelector('#busy-sheet'),o=_busy&&_busy.opener;
   if(sh){const pv=sh.querySelector('#busy-pv');if(pv&&typeof GymAnim!=='undefined'&&GymAnim.unmount){try{GymAnim.unmount(pv);}catch(e){}}root.innerHTML='';}
   _busy=null;
+  if(sh&&!keep&&o&&o.isConnected&&o.focus){try{o.focus({preventScroll:true});}catch(e){}}
 }
 // «Solo hoy» (desde la hoja o desde la ficha de la biblioteca): la tarjeta pasa a la alternativa, abierta
 function _applySoloHoy(dk,exId,libId){
   const r=subToday(dk,exId,libId);
   if(!r.ok){toast(r.msg);render();return false;}
+  if(!r.back)_libTouch(libId);
   if(S.tab!=='workout'){S.tab='workout';}
   if(getPlan()[dk])S.day=dk;
   S.open=r.ex?r.ex.id:S.open;_scrollTo=null;
@@ -12107,7 +12209,7 @@ function busyRoutine(libId){
   if(!_busy)return;const b=_busy,slot=_busySlot(),lib=LIB_BY_ID.get(libId||b.sel);
   if(!slot||!lib)return;
   if(_slotMarks(slot)){toast(`Ya llevas series de ${slot.n}: termínalo antes de cambiarlo`);return;}
-  closeBusy();
+  closeBusy();_libTouch(lib.id);
   _routineSwapTo(b.dk,slot,lib,{keepToday:false,after:nx=>{S.open=nx.id;}});
 }
 function busyRevertEx(exId){
@@ -12118,60 +12220,280 @@ function busyRevertEx(exId){
   toast(`Vuelves a ${orig.n}`);
 }
 function busyOpenLibrary(){
-  if(!_busy)return;const b={dk:_busy.dk,exId:_busy.exId},slot=_busySlot(),orig=routineEx(slot);
+  if(!_busy)return;const b={dk:_busy.dk,exId:_busy.exId,seen:_busy.alts.map(a=>a.lib.id)},slot=_busySlot(),orig=routineEx(slot);
   closeBusy();if(!orig)return;
   showExercisePicker({title:`Alternativa a ${orig.n}`,muscle:orig.cardio?'cardio':(orig.muscle||null),mode:'busy',busy:b,currentLib:_libIdOf(orig),onPick:null});
 }
 
-// ── PICKER DE EJERCICIOS: rejilla de 2 columnas con miniaturas 3D ──
-// La búsqueda no distingue tildes ni mayúsculas («jalon» encuentra «Jalón al pecho», «cuadriceps» la «Extensión
-// de cuádriceps») y cada palabra puede estar en el nombre, el equipo, el grupo, los músculos o el patrón (con algunos
-// sinónimos: «isquios», «femoral», «abdominales»…). Al escribir solo se repinta la lista: el input no se recrea (no
-// pierde el foco ni parpadea el teclado en iOS). Filtros por grupo muscular y por equipo. Tocar una tarjeta abre su
-// ficha (animación 3D en vivo, consejo, músculos, tu historial y «Añadir» / «Cambiar»).
-let _pickerState=null,_libDetail=null;
+// ── PICKER DE EJERCICIOS ──
+// Una sola cabecera fija (título, búsqueda, «Gimnasio | Casa», zonas y contador) y debajo la lista: al abrir, el inicio
+// (recientes, favoritos, las zonas con su número y lo de tu rutina); con una zona, sus ejercicios por familias de
+// movimiento (con tiras de subzona y de material); al escribir, de más a menos parecidos y al final los que no puedes
+// hacer aquí. Cada fila lleva su miniatura 3D o, si no tiene, una figura con sus músculos teñidos y su emoji. La búsqueda
+// no distingue tildes ni mayúsculas y entiende sinónimos (libQuery). Al escribir solo se repinta la lista: el input no se
+// recrea (no pierde el foco ni parpadea el teclado en iOS). La lista se pinta a trozos de 40 filas según bajas. Tocar una
+// fila abre su ficha (animación 3D en vivo, consejo, músculos, tu historial y «Añadir» / «Cambiar»).
+let _pickerState=null,_libDetail=null,_libKitOpen=null;
 const LIB_EQ=[{id:'all',label:'Todo el equipo'},{id:'maquina',label:'Máquina'},{id:'mancuernas',label:'Mancuernas'},{id:'cable',label:'Cable'},{id:'smith',label:'Smith'},{id:'corporal',label:'Peso corporal'}];
 // Equipo de un ejercicio para los chips, por su material: cable = polea, peso corporal = sin material o barra de
 // dominadas; el resto (barra, kettlebell, bandas…) es su propio material y sale con «Todo el equipo»
 function libEqClass(e){if(!e)return'maquina';if(e.cardio)return'cardio';const m=e.mat;
   return m==='polea'?'cable':m==='corporal'||m==='dominadas'?'corporal':m==='maquina'||m==='mancuernas'||m==='smith'?m:m||'otro';}
-function showExercisePicker({title,muscle,onPick,currentLib,mode,dayKey,busy}){
-  closeLibDetail();
-  _pickerState={title,muscle,onPick,currentLib:currentLib||null,search:'',filterMuscle:muscle||'all',filterEq:'all',
-    mode:['add','swap','busy'].includes(mode)?mode:'pick',dayKey:dayKey||null,busy:busy||null};
+// Abre el selector. add / pick: en el inicio (o en la zona y subzona que se pidan, p. ej. desde el maniquí) · swap: en la
+// zona y subzona del actual, que sale primero · busy («¿Máquina ocupada?» → toda la biblioteca): donde entrenas según tu
+// rutina, solo los del mismo tipo (fuerza o cardio) y sin el original, en su zona y subzona, con «Parecidos» primero
+// (las alternativas que la hoja aún no te enseñó, busy.seen, de más a menos parecidas). refocus: dónde volver a poner el foco
+// tras elegir si onPick repinta (y se lleva) el botón que lo abrió
+function showExercisePicker({title,muscle,sub,onPick,currentLib,mode,dayKey,busy,refocus}){
+  closeLibDetail();_pickerStop();
+  mode=['add','swap','busy'].includes(mode)?mode:'pick';
+  const st={title,muscle,onPick,currentLib:currentLib||null,mode,dayKey:dayKey||null,busy:busy||null,search:'',filterMuscle:null,filterSub:null,
+    mat:'all',more:{},tail:false,ctx:_libCtx(),gen:0,count:0,opener:document.activeElement,refocus:typeof refocus==='function'?refocus:null};
+  const L=st.currentLib?LIB_BY_ID.get(st.currentLib):null,zone=z=>MUSCLE_GROUPS.some(m=>m.id===z)?z:null;
+  if(mode==='busy'&&st.busy){
+    const d=getPlan()[st.busy.dk],sl=d&&Array.isArray(d.ex)?d.ex.find(e=>e&&e.id===st.busy.exId):null,o=routineEx(sl);
+    const seen=new Set(Array.isArray(st.busy.seen)?st.busy.seen:[]),alts=o?busyAlternatives(o,8).filter(a=>!seen.has(a.lib.id)):[];
+    Object.assign(st,{place:routinePlace(),cardio:!!(o&&o.cardio),excl:st.currentLib,pct:{},station:L?_stationOf(L.eq,L):'',
+      pin:alts.slice(0,5).sort((a,b)=>b.pct-a.pct).map(a=>a.lib.id)});
+    alts.forEach(a=>{st.pct[a.lib.id]=a.pct;});
+    st.filterMuscle=L?_grp(L):o&&o.cardio?'cardio':zone(muscle)||'all';
+  }else st.filterMuscle=mode==='swap'&&L?_grp(L):zone(muscle);
+  if(L&&mode!=='add'&&st.filterMuscle===_grp(L))st.filterSub=_libTopSub(L);
+  else if(SUB_BY_ID[sub]&&SUB_BY_ID[sub].z===st.filterMuscle)st.filterSub=sub;
+  _pickerState=st;
   renderExercisePicker();
+  // el foco entra en la hoja (no en la búsqueda: en el móvil no salta el teclado); al cerrar vuelve a st.opener
+  const sh=document.getElementById('lib-sheet');if(sh){try{sh.focus({preventScroll:true});}catch(e){}}
 }
-// Sinónimos de la búsqueda (todo normalizado: sin tildes y en minúsculas)
+// ── Datos del selector: zonas (los 8 grupos), subzonas por músculo y familias por patrón ──
+// Subzonas de cada zona: id (único), nombre y sus músculos. Un ejercicio es de una subzona si trabaja alguno de ellos a
+// ≥ 50 % (_subW); sale entre los principales si llega al 90 % o si su músculo más trabajado es de ella, y si no, debajo,
+// en «También trabajan…».
+const ZONE_SUBS={
+  piernas:[{id:'cuads',l:'Cuádriceps',mus:['quads']},{id:'isquios',l:'Isquios · femoral',mus:['hams']},{id:'gluteos',l:'Glúteos',mus:['glutes','abductors']},
+    {id:'gemelos',l:'Gemelos · pantorrilla',mus:['calves']},{id:'aductores',l:'Aductores',mus:['adductors']}],
+  espalda:[{id:'lats',l:'Dorsales',mus:['lats']},{id:'midback',l:'Espalda media',mus:['midback']},{id:'traps',l:'Trapecio',mus:['traps']},{id:'lowback',l:'Lumbares',mus:['lowback']}],
+  hombros:[{id:'front',l:'Deltoides anterior',mus:['frontdelts']},{id:'side',l:'Deltoides lateral',mus:['sidedelts']},{id:'rear',l:'Deltoides posterior',mus:['reardelts']}],
+  core:[{id:'abs',l:'Abdomen',mus:['abs']},{id:'obliques',l:'Oblicuos',mus:['obliques']}]};
+const SUB_BY_ID={};Object.keys(ZONE_SUBS).forEach(z=>ZONE_SUBS[z].forEach(s=>{s.z=z;SUB_BY_ID[s.id]=s;}));
+// Grupo del mapa muscular → [zona, subzona] del selector («Añadir» desde el maniquí abre ahí)
+const MM2SUB={};MM_GROUPS.forEach(g=>{const s=SUB_BY_ID[g.id];MM2SUB[g.id]=[g.lib,s&&s.z===g.lib?g.id:null];});
+// Familias (encabezados de la lista de una zona), por patrón de movimiento y en este orden. «Otros» debe quedar vacía.
+const LIB_FAM=[['squat','Sentadillas y prensa'],['lunge','Zancadas y subidas'],['hinge hip_ext','Peso muerto y puentes'],['knee_ext','Extensión de rodilla'],
+  ['knee_flex','Curl femoral'],['hip_abd hip_add','Abducción y aducción'],['calf','Pantorrillas'],['push_h','Press de pecho y flexiones'],['fly','Aperturas'],
+  ['push_v','Press de hombro'],['raise raise_f rear','Elevaciones y pájaros'],['pull_v','Jalones y dominadas'],['pull_h shrug','Remos'],['curl forearm','Curl y antebrazo'],
+  ['tri','Tríceps'],['core','Crunch'],['core_iso','Planchas'],['core_rot','Rotaciones'],['full plyo carry','Cuerpo completo y saltos'],['cardio','Cardio']]
+  .map(([p,h])=>({k:p.split(' ')[0],h,pats:p.split(' ')}));
+const LIB_FAM_X={k:'otros',h:'Otros',pats:[]},LIB_FAM_OF={};LIB_FAM.forEach(f=>f.pats.forEach(p=>{LIB_FAM_OF[p]=f;}));
+// Material y grupo de un ejercicio (mat puede venir como lista: vale el primero), su ficha de MAT y su nombre
+function _mat(e){return e?Array.isArray(e.mat)?e.mat[0]:e.mat:'';}
+function _grp(e){return e?e.grp||e.muscle:'';}
+function matOf(k){return MAT[k]||MAT.otro;}
+function matLabel(k){return MAT[k]?MAT[k].l:'';}
+// «Necesita kettlebell», «Necesita TRX o anillas»: el nombre en minúscula salvo las siglas
+function _matLow(k){const l=matLabel(k);return /^[A-ZÁÉÍÓÚÑ]{2}/.test(l)?l:l.charAt(0).toLowerCase()+l.slice(1);}
+// Sinónimos de la búsqueda (todo normalizado: sin tildes y en minúsculas); lo que se encuentra por un sinónimo puntúa un
+// 20 % menos. Los plurales no hacen falta: una palabra de más de 4 letras también se busca sin la «s» final (y sin «es»).
 const LIB_SYN={isquios:['isquiotibiales','femoral'],isquio:['isquiotibiales','femoral'],femoral:['isquiotibiales'],femorales:['isquiotibiales','femoral'],
   gluteo:['gluteos'],gemelo:['gemelos'],pantorrilla:['gemelos','talones'],pantorrillas:['gemelos','talones'],abdominales:['abdomen','crunch'],abdominal:['abdomen','crunch'],
   abs:['abdomen'],hombro:['hombros','deltoides'],deltoides:['hombros'],dorsal:['dorsales'],dorsales:['dorsal'],pectoral:['pecho'],pectorales:['pecho','pectoral'],
-  polea:['cable'],cable:['polea'],mancuerna:['mancuernas'],cinta:['caminadora'],correr:['caminadora'],bici:['bicicleta'],sentadillas:['sentadilla'],remos:['remo'],curls:['curl']};
-// Texto de búsqueda normalizado de cada ejercicio de la biblioteca (se calcula una sola vez): nombre, equipo, grupo,
-// músculos, patrón, sus otros nombres (alias) y su material
-const _libSearchIdx=new Map();
-function _libSearchText(e){
-  let t=_libSearchIdx.get(e.id);
-  if(t==null){
-    const ml=(MUSCLE_GROUPS.find(m=>m.id===e.muscle)||{}).label||'';
-    t=normTxt([e.n,e.eq,e.muscle,ml,_libMusLbl(e).join(' '),PAT_LBL[e.pat]||'',(e.al||[]).join(' '),MAT[e.mat]?MAT[e.mat].l:''].join(' '));
-    _libSearchIdx.set(e.id,t);
-  }
-  return t;
+  polea:['cable'],cable:['polea'],mancuerna:['mancuernas'],cinta:['caminadora'],correr:['caminadora'],bici:['bicicleta'],sentadillas:['sentadilla'],remos:['remo'],curls:['curl'],
+  liga:['banda'],goma:['banda'],elastico:['banda'],suspension:['trx'],anillas:['trx'],anilla:['trx'],suiza:['comba'],cuerda:['comba'],saltar:['comba'],
+  pelota:['fitball'],cajon:['step'],dips:['fondos'],rdl:['rumano'],trotadora:['caminadora'],brazo:['biceps','triceps'],brazos:['biceps','triceps']};
+// Frases que cuentan como una palabra (en lo que escribes se cambian; en nombres y alias se añaden)
+const LIB_PHRASE=[['pesas? rusas?','kettlebell'],['pelotas? suizas?','fitball'],['barra z','barraz'],['pull ?ups?','dominada']].map(([p,w])=>[new RegExp(' (?:'+p+')(?= )','g'),w]);
+// Texto del índice: sin tildes, en minúsculas, solo letras y números, con un espacio delante (para saber si una palabra
+// empieza ahí). _libPh le añade las palabras de sus frases.
+function _libN(s){return' '+normTxt(s).replace(/[^a-z0-9]+/g,' ').trim();}
+function _libPh(t){LIB_PHRASE.forEach(([re,w])=>{if((t+' ').search(re)>=0)t+=' '+w;});return t;}
+// Índice de búsqueda (una vez, al primer uso): por ejercicio (i su puesto en el catálogo) su nombre, sus alias, sus
+// músculos (zona, subzonas y los que trabaja a ≥ 50 %) y su material, equipo, patrón y familia. mu: sus músculos sin lado
+// (el mayor de los dos) · top: el más trabajado · m: su material · a3: tiene animación 3D.
+let _libIdxArr=null,_libIdxMap=null;
+function _subWm(mu,s){let w=0;if(s)s.mus.forEach(m=>{if((mu[m]||0)>w)w=mu[m];});return w;}
+function _libIdx(){
+  if(_libIdxArr)return _libIdxArr;
+  const lbl={};MUSCLE_GROUPS.forEach(g=>{lbl[g.id]=g.label;});
+  _libIdxArr=EXERCISE_DB.map((e,i)=>{
+    const mu={};Object.keys(e.mus||{}).forEach(k=>{const m=k.replace(/_(L|R)$/,''),v=+e.mus[k];if(v>0&&isFinite(v))mu[m]=Math.max(mu[m]||0,v);});
+    let top=null;Object.keys(mu).forEach(m=>{if(top==null||mu[m]>mu[top])top=m;});
+    const g=_grp(e),m=_mat(e),f=LIB_FAM_OF[e.pat]||LIB_FAM_X;
+    return{e,i,mu,top,m,a3:typeof GymAnim!=='undefined'&&!!GymAnim.has&&GymAnim.has(e.id),
+      nn:_libPh(_libN(e.n)),na:(e.al||[]).map(a=>_libPh(_libN(a))),
+      nm:_libN([lbl[g]||g,...(ZONE_SUBS[g]||[]).filter(s=>_subWm(mu,s)>=.5).map(s=>s.l),...Object.keys(mu).filter(k=>mu[k]>=.5).map(k=>MUS_LBL[k]||k)].join(' ')),
+      nt:_libPh(_libN([matLabel(m),m,e.eq,PAT_LBL[e.pat]||'',f.h].join(' ')))};
+  });
+  _libIdxMap=new Map(_libIdxArr.map(x=>[x.e.id,x]));
+  return _libIdxArr;
 }
-// Ejercicios de la biblioteca que encajan con la búsqueda (todas las palabras), el grupo muscular y el equipo
-function pickerFilter(search,filterMuscle,filterEq){
-  const toks=normTxt(search).split(/\s+/).filter(Boolean);
-  const has=(t,k)=>t.includes(k)||(LIB_SYN[k]||[]).some(s=>t.includes(s));
-  let items=EXERCISE_DB;
-  if(filterMuscle&&filterMuscle!=='all')items=items.filter(e=>e.muscle===filterMuscle);
-  if(filterEq&&filterEq!=='all')items=items.filter(e=>libEqClass(e)===filterEq);
-  if(toks.length){
-    items=items.filter(e=>{const t=_libSearchText(e);return toks.every(k=>has(t,k));});
-    // Primero los que lo tienen en el nombre (luego los que solo coinciden por equipo, grupo o músculos)
-    const inName=e=>{const n=normTxt(e.n);return toks.every(k=>has(n,k))?0:1;};
-    items=items.map((e,i)=>[inName(e),i,e]).sort((a,b)=>a[0]-b[0]||a[1]-b[1]).map(x=>x[2]);
+function _libIx(id){_libIdx();return _libIdxMap.get(id)||null;}
+// Peso de un ejercicio en una subzona (su músculo de ella más trabajado, 0-1) y su subzona principal (la de su músculo más
+// trabajado o, si no es de ninguna, la de más peso; null si su zona no tiene subzonas o no llega al 50 % en ninguna)
+function _subW(e,s){const x=e&&_libIx(e.id);return x?_subWm(x.mu,typeof s==='string'?SUB_BY_ID[s]:s):0;}
+function _libTopSub(e){
+  const x=e&&_libIx(e.id),subs=x?ZONE_SUBS[_grp(e)]||[]:[];
+  const t=subs.find(s=>s.mus.includes(x.top));if(t&&_subWm(x.mu,t)>=.5)return t.id;
+  let b=null,bw=.5;subs.forEach(s=>{const w=_subWm(x.mu,s);if(w>=bw&&(!b||w>bw)){b=s;bw=w;}});
+  return b?b.id:null;
+}
+// Lo que escribes, listo para buscar: qn el texto normalizado (con las frases ya cambiadas) y toks sus palabras, cada
+// una con sus variantes [palabra, factor]: ella, sin «s» / «es» si es larga, y sus sinónimos (×0,8)
+function _libQ(q){
+  let qn=_libN(q)+' ';LIB_PHRASE.forEach(([re,w])=>{qn=qn.replace(re,' '+w);});
+  qn=qn.trim().replace(/\s+/g,' ');
+  const toks=qn?qn.split(' ').map(k=>{
+    const base=[k];if(k.length>4&&k.endsWith('s'))base.push(k.slice(0,-1));if(k.length>5&&k.endsWith('es'))base.push(k.slice(0,-2));
+    const vs=base.map(w=>[w,1]);base.forEach(w=>(LIB_SYN[w]||[]).forEach(s=>{if(!vs.some(v=>v[0]===s))vs.push([s,.8]);}));
+    return vs;
+  }):[];
+  return{qn,toks};
+}
+// 2 si una palabra del texto empieza por k, 1 si k está dentro, 0 si no
+function _libAt(t,k){return t.indexOf(k)<0?0:t.indexOf(' '+k)>=0?2:1;}
+// Palabras que nombran una zona o una subzona («pecho», «core», «abdomen», «gluteos», «femoral»…) → [{g: zona} | {s: subzona}]
+let _libZW=null;
+function _libZoneW(){
+  if(_libZW)return _libZW;
+  const m={},add=(l,t)=>String(l).split(/ · | \/ /).forEach(p=>{const w=_libN(p).trim();if(w&&!w.includes(' '))(m[w]=m[w]||[]).push(t);});
+  MUSCLE_GROUPS.forEach(g=>add(g.label,{g:g.id}));Object.values(SUB_BY_ID).forEach(s=>add(s.l,{s}));
+  return(_libZW=m);
+}
+// ¿Es de esa zona (o de las principales de esa subzona: ≥ 90 % o su músculo más trabajado)?
+function _libInZ(x,t){return t.g?_grp(x.e)===t.g:_grp(x.e)===t.s.z&&(_subWm(x.mu,t.s)>=.9||t.s.mus.includes(x.top));}
+// Puntos de un ejercicio para una búsqueda (0 si alguna palabra no está): cada palabra suma su mejor sitio (nombre 100 si
+// empieza una palabra, 80 dentro · su zona o subzona 90 · alias 60 / 50 · músculo 30 · material, equipo o patrón 20); +40
+// si es de la zona que nombras (al buscar «pecho», «Jalón al pecho» va detrás de los de pecho), +15 si el nombre empieza
+// por lo que escribes, +15 si un alias es justo eso, +4 si es de los tuyos. al: el alias por el que se encontró (o -1).
+function _libScore(x,Q,mine){
+  let s=0,zb=0;const ah={},ZW=_libZoneW();
+  for(const vs of Q.toks){
+    let b=0,ba=-1;
+    for(const [w,f] of vs){
+      const h=_libAt(x.nn,w);if(h&&(h===2?100:80)*f>b){b=(h===2?100:80)*f;ba=-1;}
+      if(ZW[w]&&ZW[w].some(t=>_libInZ(x,t))){zb=40;if(90*f>b){b=90*f;ba=-1;}}
+      if(b>=60*f)continue;
+      x.na.forEach((a,j)=>{const g=_libAt(a,w);if(g&&(g===2?60:50)*f>b){b=(g===2?60:50)*f;ba=j;}});
+      if(30*f>b&&x.nm.includes(w)){b=30*f;ba=-1;}
+      if(20*f>b&&x.nt.includes(w)){b=20*f;ba=-1;}
+    }
+    if(!b)return{s:0,al:-1};
+    s+=b;if(ba>=0)ah[ba]=(ah[ba]||0)+1;
   }
-  return items;
+  s+=zb;
+  const q=' '+Q.qn;
+  if(x.nn.startsWith(q))s+=15;
+  if(x.na.some(a=>a===q))s+=15;
+  if(mine&&mine.has&&mine.has(x.e.id))s+=4;
+  let al=-1;Object.keys(ah).forEach(j=>{if(al<0||ah[j]>ah[al])al=+j;});
+  return{s,al};
+}
+// Los de una lista del índice que encajan con la búsqueda, de más a menos puntos (empate: orden del catálogo)
+function _libRank(Q,pool,mine){
+  const out=[];
+  pool.forEach(x=>{const r=_libScore(x,Q,mine);if(r.s>0)out.push({x,s:r.s,al:r.al});});
+  return out.sort((a,b)=>b.s-a.s||a.x.i-b.x.i);
+}
+// Lugar: ¿se hace en ese sitio? ¿Y con tu material de casa? (sin decirlo aún, vale todo lo de casa) Y si no, por qué
+function libAtPlace(e,place){return plOk(e,place);}
+function libDoable(e,place,kit){const m=_mat(e);return libAtPlace(e,place)&&(place!=='c'||!Array.isArray(kit)||m==='corporal'||kit.includes(m));}
+function libWhyNot(e,place,kit){
+  if(libDoable(e,place,kit))return'';
+  if(!libAtPlace(e,place))return place==='c'?'Solo en gimnasio':'Solo en casa';
+  return'Necesita '+_matLow(_mat(e));
+}
+// Contexto del selector (al abrirlo y al cambiar favoritos o tu material): en qué días de tu rutina está cada uno, tu
+// historial, «los tuyos» (en tu rutina o con historial), favoritos, recientes, tu material y tu lugar
+function _libCtx(){
+  const inPlan=_libInPlan(),hist=_libHistMap();
+  return{inPlan,hist,mine:new Set([...Object.keys(inPlan),...Object.keys(hist)]),fav:(S.libFav||[]).slice(),rec:(S.libRecent||[]).slice(),
+    kit:Array.isArray(S.libKit)?S.libKit.slice():null,place:S.libPlace==='c'?'c':'g'};
+}
+// Lo último que eliges (añadir, cambiar, «Solo hoy») va primero en «Recientes»
+function _libTouch(id){
+  if(!LIB_BY_ID.has(id))return;
+  S.libRecent=[id,...(Array.isArray(S.libRecent)?S.libRecent:[]).filter(x=>x!==id)].slice(0,12);
+  saveState();
+}
+// Consulta del selector (pura y memorizada: mismo estado y mismo ctx → el mismo resultado). st:
+//   search · filterMuscle null (inicio) | 'all' | grupo · filterSub subzona · mat 'all' | 'free' (sin máquina) | material ·
+//   place / kit (si faltan, los del ctx) · mode · cardio true/false (solo los de ese tipo) · excl id que no sale ·
+//   currentLib «Actual» (swap; su familia va primero) · pin «Parecidos» (busy, ya sin los vistos) · dayKey (add: el día, que
+//   no sale en «En tu rutina») · ctx (_libCtx)
+// Devuelve {view:'idle'|'list'|'search', items (las filas, en orden y sin repetir), groups [{k, h, items}], tail [{e, why}]
+// (búsqueda: los que no puedes hacer aquí), hints {id: alias}, n, more (casa: los que harías con más material; inicio y zona), counts
+// {zone, sub, mat}}. Filtros en orden: lugar (y tu material) → tipo → zona → subzona → material; la búsqueda no mira zona
+// ni subzona. Orden de una lista: los tuyos, más fáciles, con 3D, catálogo.
+const _lqMemo={ctx:null,m:new Map()};
+function libQuery(st){
+  st=st||{};const ctx=st.ctx||{};
+  if(_lqMemo.ctx!==ctx){_lqMemo.ctx=ctx;_lqMemo.m.clear();}
+  const place=st.place==='c'||st.place==='g'?st.place:ctx.place==='c'?'c':'g';
+  const kit=st.kit!==undefined?st.kit:ctx.kit!==undefined?ctx.kit:null;
+  const zone=st.filterMuscle||null,sd=zone&&zone!=='all'&&SUB_BY_ID[st.filterSub]&&SUB_BY_ID[st.filterSub].z===zone?SUB_BY_ID[st.filterSub]:null;
+  const mat=st.mat||'all',Q=_libQ(st.search),cardio=st.cardio==null?null:!!st.cardio,excl=st.excl||null,mode=st.mode||'pick';
+  const cur=mode==='swap'&&st.currentLib||null,pin=mode==='busy'&&Array.isArray(st.pin)?st.pin:[],dk=mode==='add'&&st.dayKey||null;
+  const key=[Q.qn,zone,sd&&sd.id,mat,place,Array.isArray(kit)?kit.join(','):'-',cardio,excl,cur,pin.join(','),mode,dk].join('|');
+  const hit=_lqMemo.m.get(key);if(hit)return hit;
+  const X=_libIdx(),mine=ctx.mine instanceof Set?ctx.mine:new Set();
+  const okB=x=>(cardio==null||!!x.e.cardio===cardio)&&x.e.id!==excl,okK=x=>libDoable(x.e,place,kit);
+  const okM=x=>mat==='all'||(mat==='free'?!(MAT[x.m]||{}).mach:x.m===mat),okZ=x=>!zone||zone==='all'||_grp(x.e)===zone;
+  const so=(a,b)=>(mine.has(b.e.id)?1:0)-(mine.has(a.e.id)?1:0)||a.e.dif-b.e.dif||(b.a3?1:0)-(a.a3?1:0)||a.i-b.i;
+  const counts={zone:{all:0},sub:{},mat:{}},matCount=a=>{counts.mat.all=a.length;counts.mat.free=0;a.forEach(x=>{counts.mat[x.m]=(counts.mat[x.m]||0)+1;if(!(MAT[x.m]||{}).mach)counts.mat.free++;});};
+  const avail=X.filter(x=>okB(x)&&okK(x));
+  avail.forEach(x=>{const g=_grp(x.e);counts.zone[g]=(counts.zone[g]||0)+1;counts.zone.all++;});
+  let view,groups=[],tail=[],hints={},more=0;
+  if(Q.toks.length){
+    view='search';
+    const r=_libRank(Q,X.filter(okB),mine),ok=r.filter(y=>okK(y.x));
+    matCount(ok.map(y=>y.x));
+    const rows=ok.filter(y=>okM(y.x));
+    rows.forEach(y=>{if(y.al>=0)hints[y.x.e.id]=y.x.e.al[y.al];});
+    groups=[{k:'q',h:'',items:rows.map(y=>y.x.e)}];
+    tail=r.filter(y=>!okK(y.x)&&okM(y.x)).map(y=>({e:y.x.e,why:libWhyNot(y.x.e,place,kit)}));
+  }else if(!zone){
+    view='idle';
+    const sec=(k,h,ids)=>{const a=[];ids.forEach(id=>{const x=_libIdxMap.get(id);if(x&&okB(x)&&okK(x)&&!a.includes(x.e))a.push(x.e);});if(a.length)groups.push({k,h,items:a});};
+    sec('rec','Recientes',Array.isArray(ctx.rec)?ctx.rec:[]);
+    sec('fav','Favoritos',Array.isArray(ctx.fav)?ctx.fav:[]);
+    // (añadir: sin los que ya están en ese día)
+    if(mode==='add'||mode==='pick')sec('plan','En tu rutina',Object.keys(ctx.inPlan||{}).filter(id=>!dk||!(ctx.inPlan[id]||[]).includes(dk)));
+    if(place==='c'&&Array.isArray(kit))more=X.filter(x=>okB(x)&&libAtPlace(x.e,place)&&!okK(x)).length;
+  }else{
+    view='list';
+    const inZ=avail.filter(okZ);
+    (ZONE_SUBS[zone]||[]).forEach(s=>{counts.sub[s.id]=inZ.filter(x=>_subWm(x.mu,s)>=.5).length;});
+    const inS=sd?inZ.filter(x=>_subWm(x.mu,sd)>=.5):inZ;
+    matCount(inS);
+    let rows=inS.filter(okM);
+    if(place==='c'&&Array.isArray(kit))more=X.filter(x=>okB(x)&&okZ(x)&&(!sd||_subWm(x.mu,sd)>=.5)&&okM(x)&&libAtPlace(x.e,place)&&!okK(x)).length;
+    const take=(k,h,ids)=>{const a=[];ids.forEach(id=>{const x=rows.find(y=>y.e.id===id);if(x&&!a.includes(x))a.push(x);});
+      if(a.length){groups.push({k,h,items:a.map(x=>x.e)});rows=rows.filter(x=>!a.includes(x));}};
+    if(cur)take('cur','Actual',[cur]);
+    if(pin.length){const pz=inZ.filter(okM),a=[];pin.forEach(id=>{const x=pz.find(y=>y.e.id===id);if(x&&!a.includes(x))a.push(x);});
+      if(a.length){groups.push({k:'sim',h:'Parecidos',items:a.map(x=>x.e)});rows=rows.filter(x=>!a.includes(x));}}
+    let also=[];
+    if(sd){also=rows.filter(x=>!(_subWm(x.mu,sd)>=.9||sd.mus.includes(x.top)));rows=rows.filter(x=>!also.includes(x));}
+    // (cambiar: la familia del actual, justo después de él)
+    const cf=cur&&LIB_FAM_OF[(LIB_BY_ID.get(cur)||{}).pat],fams=[...LIB_FAM,LIB_FAM_X];if(cf)fams.sort((a,b)=>(b===cf)-(a===cf));
+    if(zone==='all')MUSCLE_GROUPS.forEach(g=>{const a=rows.filter(x=>_grp(x.e)===g.id).sort(so);if(a.length)groups.push({k:g.id,h:g.label,items:a.map(x=>x.e)});});
+    else fams.forEach(f=>{const a=rows.filter(x=>(LIB_FAM_OF[x.e.pat]||LIB_FAM_X)===f).sort(so);if(a.length)groups.push({k:f.k,h:f.h,items:a.map(x=>x.e)});});
+    if(also.length)groups.push({k:'also',h:'También trabajan '+sd.l.split(' · ')[0].toLowerCase(),items:also.sort(so).map(x=>x.e)});
+  }
+  const seen=new Set(),items=[];groups.forEach(g=>g.items.forEach(e=>{if(!seen.has(e)){seen.add(e);items.push(e);}}));
+  const res={view,items,groups,tail,hints,n:view==='idle'?counts.zone.all:items.length,more,counts};
+  if(_lqMemo.m.size>=40)_lqMemo.m.clear();
+  _lqMemo.m.set(key,res);
+  return res;
+}
+// Ejercicios de la biblioteca para una búsqueda, un grupo y un equipo (todo el catálogo, sin mirar el lugar), de más a
+// menos relevante (sin búsqueda, en el orden del catálogo). El equipo es el de los chips de siempre (libEqClass; 'polea'
+// vale como 'cable').
+function pickerFilter(search,filterMuscle,filterEq){
+  const eq=filterEq==='polea'?'cable':filterEq,Q=_libQ(search);
+  let pool=_libIdx();
+  if(filterMuscle&&filterMuscle!=='all')pool=pool.filter(x=>_grp(x.e)===filterMuscle);
+  if(eq&&eq!=='all')pool=pool.filter(x=>libEqClass(x.e)===eq);
+  return(Q.toks.length?_libRank(Q,pool).map(y=>y.x):pool).map(x=>x.e);
 }
 // En qué días de tu rutina está ya cada ejercicio de la biblioteca: {libId:['A','C']} (el original de un «solo hoy» cuenta)
 function _libInPlan(){
@@ -12181,110 +12503,327 @@ function _libInPlan(){
   }));
   return m;
 }
+// ── Pintado del selector ──
+const PK_CHUNK=40;
+let _pkT=0;
+// Lo que el selector le pide a libQuery (su estado tal cual) y dónde busca (en «ocupada», el de tu rutina)
+function _pickerArgs(){const s=_pickerState;return{search:s.search,filterMuscle:s.filterMuscle,filterSub:s.filterSub,mat:s.mat,place:s.place,mode:s.mode,
+  cardio:s.cardio,excl:s.excl,currentLib:s.currentLib,pin:s.pin,dayKey:s.dayKey,ctx:s.ctx};}
+function _pickerPlace(){const s=_pickerState;return s&&(s.place||s.ctx&&s.ctx.place)||'g';}
+// Nombre corto de una zona («Core / Abdomen» → «Core») y de un chip de material
+function _zoneLbl(g){return String(g&&g.label||'').split(' / ')[0];}
+// (en «ocupada», «Sin máquina» y «Sin material» irían juntos: el segundo es «Peso corporal»)
+function _matChipLbl(k){return k==='free'?'Sin máquina':k==='corporal'&&_pickerState&&_pickerState.mode==='busy'?'Peso corporal':matLabel(k);}
+// Figura de cuerpo (de frente y de espaldas) que comparten filas y zonas: un único <symbol>; cada grupo del maniquí se
+// tiñe con --f-<grupo> (si no, queda del color del cuerpo)
+function _libSpriteOnce(){
+  if(document.getElementById('lib-fig'))return;
+  const E=(x,y,rx,ry)=>`<ellipse cx="${x}" cy="${y}" rx="${rx}" ry="${ry}"/>`,R=(x,y,w,h,r)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r==null?Math.min(w,h)/2:r}"/>`;
+  const two=f=>f(-1)+f(1),g=(id,s)=>`<g style="fill:var(--f-${id},var(--bg4))">${s}</g>`;
+  const fig=(c,back)=>`<circle cx="${c}" cy="3.4" r="2.8"/>`+R(c-1.2,5.6,2.4,2.4)+two(d=>R(c+d*8.1-1.2,16.2,2.4,6.6))+(back?'':R(c-4,20.4,8,3.8)+two(d=>R(c+d*2.3-1.5,32.4,3,6.8)))
+    +g('hombros',two(d=>E(c+d*5.6,9.4,2.5,2.1)))
+    +(back?g('espalda',E(c,8.3,4,1.7)+`<path d="M${c-4.6} 9.8h9.2l-1.7 10.8h-5.8z"/>`)+g('triceps',two(d=>E(c+d*7.1,13.2,1.5,2.9)))+g('gluteos',two(d=>E(c+d*2.2,22.7,2.3,2.3)))
+      +g('isquios',two(d=>R(c+d*2.3-2,25.4,4,7)))+g('gemelos',two(d=>E(c+d*2.3,35,1.6,3.3)))
+      :g('pecho',two(d=>R(c+d*2.4-2.2,8.2,4.4,4.4,1.4)))+g('abdomen',R(c-3.3,13,6.6,7.4,1.6))+g('biceps',two(d=>E(c+d*7.1,13.2,1.5,2.9)))+g('cuads',two(d=>R(c+d*2.3-2,24.4,4,8))));
+  document.body.insertAdjacentHTML('beforeend',`<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden"><symbol id="lib-fig" viewBox="0 0 60 40"><g style="fill:var(--bg4);stroke:var(--text4);stroke-width:.4">${fig(15,0)}${fig(45,1)}</g></symbol></svg>`);
+}
+// Tinte de la figura: los grupos de una zona (mosaico) o los de un ejercicio, en menta los principales (≥ 90 % o el más
+// trabajado) y más tenues los secundarios (≥ 50 %)
+function _zoneFigStyle(z){return MM_GROUPS.filter(g=>g.lib===z).map(g=>`--f-${g.id}:var(--green)`).join(';');}
+function _libFigStyle(e){
+  const x=_libIx(e.id),w={};if(!x)return'';
+  Object.keys(x.mu).forEach(m=>{const g=_MM_MUS2G[m];if(g&&x.mu[m]>(w[g]||0))w[g]=x.mu[m];});
+  const top=Math.max(0,...Object.values(w));
+  return Object.keys(w).filter(g=>w[g]>=.5).map(g=>`--f-${g}:var(${w[g]>=.9||w[g]===top?'--green':'--green-b'})`).join(';');
+}
+// Miniatura de una fila (72×48): la 3D encima (si tiene) y debajo, de respaldo, la figura teñida y su emoji (cardio: solo
+// el emoji, grande)
+function _libThumbHtml(e){
+  return`<span class="lib-th${e.cardio?' cardio':''}" aria-hidden="true">${thumbImgHtml(e.id,TH_CARD)}${e.cardio?'':`<svg class="lib-fig" viewBox="0 0 60 40" style="${_libFigStyle(e)}"><use href="#lib-fig"/></svg>`}<span class="lib-th-e">${esc(e.ic||matOf(_mat(e)).ic)}</span></span>`;
+}
+// Lo último que hiciste de un ejercicio, en su medida («80 kg × 10», «45 s», «12 reps»…); '' sin historial o en cardio
+function _libLastTxt(e,h){
+  if(!h||e.cardio)return'';
+  if(_histNoKg(h))return`<b>${esc(_recValTxt(h.lastAny))}</b>`;
+  return h.last?`<b>${esc(kgTxt(h.last.v))} kg</b>${h.last.r?' × '+esc(h.last.r):''}`:'';
+}
+// Una fila: miniatura, nombre (★ si es favorito), [«alias» ·] material · 2 músculos y sus etiquetas. o: why (por qué no
+// puedes hacerlo aquí), hint (alias por el que se encontró), pct (parecido, «ocupada»), today (botón «Solo hoy» al lado)
+function _libRowHtml(e,o){
+  const st=_pickerState,c=st.ctx,id=esc(e.id),days=c.inPlan[e.id]||[],cur=e.id===st.currentLib,plan=st.plan||getPlan(),last=_libLastTxt(e,c.hist[e.id]||null);
+  const mus=_libMusLbl(e,2).map((l,i)=>i?l.charAt(0).toLowerCase()+l.slice(1):l).join(', ');
+  const tags=[cur||days.length?`<span class="lib-item-badge in">${cur?'Actual':'En tu rutina'}${days.length?' · '+days.map(d=>esc(plan[d]?.label||d)).join(', '):''}</span>`:'',
+    o.why?`<span class="lib-why">${esc(o.why)}</span>`:'',o.pct?`<span class="lib-pct">${o.pct} %</span>`:'',
+    e.dif>1?`<span class="lib-item-badge">${e.dif>2?'Avanzado':'Intermedio'}</span>`:'',last?`<span class="lib-last">${last}</span>`:'',
+    st.station&&!cur&&_stationOf(e.eq,e)===st.station?'<span class="lib-item-badge">Misma máquina</span>':''].join('');
+  const inP=days.length>0,today=o.today?`<button type="button" class="lib-today" data-lib="${id}" onclick="pickerBusy(this.dataset.lib,'today')" aria-label="${inP?`${esc(e.n)}: ya está en tu rutina`:`Solo hoy: ${esc(e.n)}`}"${inP?' disabled':''}>${inP?'Ya está en tu rutina':'Solo hoy'}</button>`:'';
+  return`<li class="lib-li${today?' td':''}"><button type="button" class="lib-item lib-card lib-row${cur?' cur':''}${o.why?' off':''}" data-lib="${id}" onclick="pickerDetail(this.dataset.lib)">${_libThumbHtml(e)}<span class="lib-rb">`
+    +`<span class="lib-item-n">${st.favS&&st.favS.has(e.id)?'<span class="lib-star" role="img" aria-label="Favorito">★</span> ':''}${esc(e.n)}</span>`
+    +`<span class="lib-meta">${o.hint?`“${esc(o.hint)}” · `:''}<span class="lib-eqt">${esc(matLabel(_mat(e)))}</span>${mus?' · '+esc(mus):''}</span>${tags?`<span class="lib-tags">${tags}</span>`:''}</span>`
+    +`<span class="lib-chev" aria-hidden="true">›</span></button>${today}</li>`;
+}
+// Zonas de la cabecera (Todo y los 8 grupos; tocar la activa vuelve al inicio) y «Gimnasio | Casa»
 function _pickerChipsHtml(){
   const fm=_pickerState.filterMuscle;
-  return[{id:'all',label:'Todos'},...MUSCLE_GROUPS].map(m=>`<button type="button" class="lib-chip" aria-pressed="${fm===m.id}" onclick="pickerSetMuscle('${m.id}')">${esc(m.label)}</button>`).join('');
+  return[{id:'all',label:'Todo'},...MUSCLE_GROUPS].map(m=>`<button type="button" class="lib-chip" data-z="${m.id}" aria-pressed="${fm===m.id}" onclick="pickerSetMuscle(this.getAttribute('aria-pressed')==='true'?null:this.dataset.z)">${esc(_zoneLbl(m))}</button>`).join('');
 }
-function _pickerEqHtml(){
-  const fe=_pickerState.filterEq||'all';
-  return LIB_EQ.map(q=>`<button type="button" class="lib-chip eq" aria-pressed="${fe===q.id}" onclick="pickerSetEq('${q.id}')">${esc(q.label)}</button>`).join('');
+function _pickerPlaceHtml(){
+  const p=_pickerPlace();
+  return[['g','🏋️ Gimnasio'],['c','🏠 Casa']].map(([k,l])=>`<button type="button" class="lib-pl" role="radio" data-pl="${k}" aria-checked="${p===k}" tabindex="${p===k?0:-1}" onclick="pickerSetPlace(this.dataset.pl)" onkeydown="pickerPlaceKey(event)">${l}</button>`).join('');
 }
-// En el modo «máquina ocupada» solo salen los del mismo tipo (fuerza o cardio) que el ejercicio a cambiar
-function _pickerItems(){
-  const st=_pickerState;let items=pickerFilter(st.search,st.filterMuscle,st.filterEq);
-  if(st.mode==='busy'&&st.busy){const d=getPlan()[st.busy.dk],sl=d&&Array.isArray(d.ex)?d.ex.find(e=>e&&e.id===st.busy.exId):null,o=routineEx(sl);
-    if(o)items=items.filter(e=>!!e.cardio===!!o.cardio);}
-  return items;
+// Mosaico de zonas del inicio: figura, nombre y cuántos hay (sin ninguno, desactivada)
+function _pickerTilesHtml(R){
+  return`<div class="lib-tiles">${MUSCLE_GROUPS.map(g=>{const n=R.counts.zone[g.id]||0,l=_zoneLbl(g);
+    return`<button type="button" class="lib-tile" data-z="${g.id}" onclick="pickerSetMuscle(this.dataset.z)" aria-label="${esc(l)}: ${plural(n,'ejercicio')}"${n?'':' disabled'}>`
+      +`${g.id==='cardio'?'<span class="lib-tile-e" aria-hidden="true">🏃</span>':`<svg class="lib-fig" viewBox="0 0 60 40" aria-hidden="true" style="${_zoneFigStyle(g.id)}"><use href="#lib-fig"/></svg>`}`
+      +`<span class="lib-tile-n" aria-hidden="true">${esc(l)}</span><span class="lib-tile-c" aria-hidden="true">${n}</span></button>`;}).join('')}</div>`;
 }
-function _libCardHtml(e,cur,days,plan,hist){
-  const labs=_libMusLbl(e,2);
-  const where=cur||days.length?`<span class="lib-item-badge in">${cur?'Actual':'En tu rutina'}${days.length?' · '+days.map(d=>esc(plan[d]?.label||d)).join(', '):''}</span>`:'';
-  const last=!e.cardio&&_histNoKg(hist)?`<div class="lib-last">Último: <b>${esc(_recValTxt(hist.lastAny))}</b></div>`:hist&&hist.last&&!e.cardio?`<div class="lib-last">Último: <b>${esc(kgTxt(hist.last.v))} kg</b>${hist.last.r?` × ${esc(hist.last.r)}`:''}</div>`:'';
-  return`<div class="lib-item lib-card${cur?' cur':''}" role="button" tabindex="0" data-lib="${esc(e.id)}" onclick="pickerDetail(this.dataset.lib)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();pickerDetail(this.dataset.lib)}">
-    <div class="lib-th">${where}${thumbImgHtml(e.id,TH_CARD)}<span class="lib-th-e" aria-hidden="true">${esc(e.ic||'💪')}</span></div>
-    <div class="lib-cb"><div class="lib-item-n">${esc(e.n)}</div><div class="lib-eqt">${esc(e.eq)}</div>
-      ${labs.length?`<div class="lib-mus">${labs.map(l=>`<span class="mchip">${esc(l)}</span>`).join('')}</div>`:''}${last}</div>
-  </div>`;
+// Tiras que bajan con la lista: subzonas de la zona (tocar la elegida la quita) y material (Todo, «Sin material» en casa o «Sin máquina» si está
+// ocupada, y los que hay, de más a menos), con su número; un material sale si tiene alguno o si es el elegido (sin
+// ninguno, el elegido va justo después de «Todo»: si no, quedaría al final, fuera de la vista)
+function _pickerStripsHtml(R,subs){
+  const st=_pickerState,z=st.filterMuscle,SB=subs&&ZONE_SUBS[z]||[],cm=R.counts.mat,busy=st.mode==='busy',first=busy?'free':_pickerPlace()==='c'?'corporal':'';
+  const chip=(cls,k,v,on,l,n)=>`<button type="button" class="lib-chip ${cls}" data-${k}="${v}" aria-pressed="${on}" aria-label="${esc(l)}: ${plural(n,'ejercicio')}" onclick="${k==='sub'?'pickerSetSub':'pickerSetMat'}(this.getAttribute('aria-pressed')==='true'&&this.dataset.${k}?'${k==='sub'?'':'all'}':this.dataset.${k})">${esc(l)}<span class="lib-cn">${n}</span></button>`;
+  let h='';
+  if(SB.length)h+=`<div class="lib-chiprow" id="lib-subs" role="group" aria-label="Subzona">${SB.filter(s=>R.counts.sub[s.id]||st.filterSub===s.id).map(s=>chip('sub','sub',s.id,st.filterSub===s.id,s.l,R.counts.sub[s.id]||0)).join('')}</div>`;
+  const K=k=>cm[k]||(k===st.mat?1e9:0),ks=Object.keys(MAT).filter(k=>k!==first&&(cm[k]||st.mat===k)).sort((a,b)=>K(b)-K(a)),f=first&&(cm[first]||st.mat===first);
+  if(ks.length+(f?1:0)>1||st.mat!=='all')h+=`<div class="lib-chiprow" id="lib-eq" role="group" aria-label="Material">${chip('eq','mat','all',st.mat==='all','Todo',cm.all||0)}${f?chip('eq','mat',first,st.mat===first,_matChipLbl(first),cm[first]||0):''}${ks.map(k=>chip('eq','mat',k,st.mat===k,_matChipLbl(k),cm[k]||0)).join('')}</div>`;
+  return h?`<div class="lib-strips">${h}</div>`:'';
 }
-function _pickerListHtml(){
-  const {search,filterMuscle,filterEq,currentLib}=_pickerState;
-  const items=_pickerItems();
-  _pickerState.count=items.length;
-  if(!items.length){
-    const q=String(search||'').trim(),f=(filterMuscle&&filterMuscle!=='all')||(filterEq&&filterEq!=='all');
-    return`<div class="empty"><div class="eic">🔍</div><p>${q?`Sin resultados para «${esc(q)}».`:'Sin resultados.'} Prueba con otra palabra${f?' o con «Todos»':''}.</p></div>`;
+// Sin nada: lo dice y ofrece quitar el primer filtro que devuelve algo (material, subzona, lugar, tu material de casa) o
+// borrar la búsqueda
+function _pickerRelaxOpt(){
+  const st=_pickerState,base=_pickerArgs(),q=!!st.search.trim(),op=_pickerPlace()==='c'?'g':'c';
+  const T=[st.mat!=='all'&&{s:{mat:'all'},l:n=>`Hay ${n} sin «${_matChipLbl(st.mat)}» · Ver`},!q&&st.filterSub&&{s:{filterSub:null},l:n=>`Hay ${n} en toda la zona · Ver`},
+    !q&&st.mode!=='busy'&&{s:{place:op},l:n=>`Hay ${n} en ${op==='c'?'casa':'el gimnasio'} · Ver`},
+    !q&&_pickerPlace()==='c'&&Array.isArray(st.ctx.kit)&&{s:{kit:null},l:n=>`Hay ${n} con más material · Elegir`}].filter(Boolean);
+  for(const t of T){const n=libQuery(Object.assign({},base,t.s)).items.length;if(n)return{s:t.s,l:t.l(n)};}
+  return q?{s:{search:''},l:'Borrar la búsqueda'}:null;
+}
+function _pickerEmptyHtml(){
+  const q=_pickerState.search.trim(),r=_pickerRelaxOpt();
+  return`<div class="empty lib-empty"><div class="eic" aria-hidden="true">🔍</div><p>${q?`Sin resultados para «${esc(q)}».`:'Ningún ejercicio con estos filtros.'}</p>${r?`<button type="button" class="btn bs lib-relax" onclick="pickerRelax()">${esc(r.l)}</button>`:''}</div>`;
+}
+// La lista en piezas, en orden: filas {e, g, o} y trozos de HTML {h} (encabezados, tiras, mosaico, avisos)
+function _pickerSeq(R){
+  const st=_pickerState,seq=[],H=h=>seq.push({h}),rows=(g,a,o)=>a.forEach(e=>seq.push({e,g,o:o?o(e):{}}));
+  const head=(h,n)=>`<h3 class="lib-group-h">${esc(h)}${n?`<span class="lib-gn"> · ${n}</span>`:''}</h3>`;
+  if(R.view==='idle'){
+    // una sección no repite lo que ya enseña otra de más arriba («Ver todos (N)» cuenta lo que saldrá)
+    const shown=new Set(),sec=k=>{const g=R.groups.find(x=>x.k===k),a=g?g.items.filter(e=>!shown.has(e)):[],all=!!st.more[k],n=a.length;if(!n)return;
+      H(`<div class="lib-sec" data-k="${k}">${head(g.h)}${n>3?`<button type="button" class="lib-all" data-k="${k}" aria-expanded="${all}" onclick="pickerMore(this.dataset.k)">${all?'Ver menos':`Ver todos (${n})`}</button>`:''}</div>`);
+      const v=all?a:a.slice(0,3);v.forEach(e=>shown.add(e));rows(k,v);};
+    sec('rec');sec('fav');H(head('Elige una zona')+_pickerTilesHtml(R));sec('plan');
+  }else if(R.view==='search'){
+    const a=R.groups[0]?R.groups[0].items:[];
+    H(_pickerStripsHtml(R,false));rows('q',a,e=>({hint:R.hints[e.id]}));
+    if(R.tail.length){const open=st.tail||!a.length,t=`No disponibles aquí (${R.tail.length})`;
+      H(a.length?`<button type="button" class="lib-tail-h" aria-expanded="${open}" onclick="pickerTail()">${t}<span aria-hidden="true">${open?'▴':'▾'}</span></button>`:`<h3 class="lib-group-h lib-tail-t">${t}</h3>`);
+      if(open)R.tail.forEach(x=>seq.push({e:x.e,g:'tail',o:{why:x.why}}));}
+    else if(!a.length)H(_pickerEmptyHtml());
+  }else{
+    let strips=false;
+    R.groups.forEach(g=>{
+      const top=g.k==='cur'||g.k==='sim';
+      if(!top&&!strips){H(_pickerStripsHtml(R,true));strips=true;}
+      H(head(g.h,top?0:g.items.length));
+      rows(g.k,g.items,g.k==='sim'?e=>({pct:st.pct&&st.pct[e.id],today:1}):null);
+    });
+    if(!strips)H(_pickerStripsHtml(R,true));
+    if(!R.items.length)H(_pickerEmptyHtml());
   }
-  const inPlan=_libInPlan(),plan=getPlan(),hm=_libHistMap(),byMuscle={};
-  items.forEach(e=>{(byMuscle[e.muscle]=byMuscle[e.muscle]||[]).push(e);});
-  return Object.entries(byMuscle).map(([muscle,exs])=>{
-    const mLabel=MUSCLE_GROUPS.find(m=>m.id===muscle)?.label||muscle;
-    return`<div class="lib-group-h">${esc(mLabel)}</div>`+exs.map(e=>_libCardHtml(e,!!currentLib&&e.id===currentLib,inPlan[e.id]||[],plan,hm[e.id]||null)).join('');
-  }).join('');
+  return seq;
 }
-function _pickerCountTxt(){const n=_pickerState&&_pickerState.count||0;return n?plural(n,'ejercicio'):'';}
+// Las siguientes n filas (con los encabezados y tiras que vengan antes); cada tramo de un grupo, en su <ul>
+function _pickerChunk(n){
+  const st=_pickerState,seq=st.seq;let h='',k=0,ul=null;
+  while(st.pos<seq.length&&k<n){
+    const p=seq[st.pos++];
+    if(p.e){if(ul!==p.g){if(ul!==null)h+='</ul>';h+='<ul class="lib-ul">';ul=p.g;}h+=_libRowHtml(p.e,p.o);k++;}
+    else{if(ul!==null){h+='</ul>';ul=null;}h+=p.h;}
+  }
+  return ul!==null?h+'</ul>':h;
+}
+// Añade el siguiente trozo (div.lib-chunk, display:contents) antes del centinela; false si ya no queda nada o si la lista
+// ya es otra (los trozos de una lista anterior se descartan)
+function _pickerAppend(gen){
+  const st=_pickerState,s=document.getElementById('lib-more');
+  if(!st||st.gen!==gen||!s)return false;
+  const ch=document.createElement('div');ch.className='lib-chunk';ch.innerHTML=_pickerChunk(PK_CHUNK);s.before(ch);thumbsIn(ch);
+  if(st.pos<st.seq.length)return true;
+  s.remove();return false;
+}
+// El resto llega al acercarse al final (600 px antes, sobre la hoja que se desplaza); sin IntersectionObserver, en tiempo libre
+function _pickerObserve(){
+  const st=_pickerState,sh=document.getElementById('lib-sheet'),s=document.getElementById('lib-more');
+  if(!st||!sh||!s)return;
+  const gen=st.gen;
+  if(typeof IntersectionObserver==='function'){
+    const io=st.io=new IntersectionObserver(en=>{
+      if(!en.some(x=>x.isIntersecting))return;
+      if(!_pickerAppend(gen)){io.disconnect();return;}
+      const m=document.getElementById('lib-more');if(m){io.unobserve(m);io.observe(m);} // vuelve a mirar: puede seguir a la vista
+    },{root:sh,rootMargin:'0px 0px 600px 0px'});
+    io.observe(s);
+  }else{const ric=window.requestIdleCallback||(f=>setTimeout(f,40)),step=()=>{if(_pickerAppend(gen))ric(step);};ric(step);}
+}
+// Toda la lista de una vez (pruebas)
+function _pickerRenderAll(){const st=_pickerState;if(!st)return;while(_pickerAppend(st.gen));if(st.io){st.io.disconnect();st.io=null;}}
+function _pickerStop(){clearTimeout(_pkT);_pkT=0;const st=_pickerState;if(st&&st.io){st.io.disconnect();st.io=null;}}
+// Contador: «3 resultados · 6 no disponibles» · «386 ejercicios en el gimnasio» · en casa con tu material dicho, «41
+// ejercicios con tu material · +37 con más material ›» (ese botón abre «Mi material»; con él, la línea mide 44 px: .more)
+function _pickerCountHtml(R){
+  if(R.view==='search'){const n=R.items.length,t=R.tail.length;return n||t?plural(n,'resultado')+(t?` · ${t} no disponible${t>1?'s':''}`:''):'';}
+  const c=_pickerPlace()==='c',k=c&&Array.isArray(_pickerState.ctx.kit),n=R.view==='idle'?R.n:R.items.length;
+  return(k&&R.more?`${n}<span class="lib-wd"> ${n===1?'ejercicio':'ejercicios'}</span>`:plural(n,'ejercicio'))+(k?' con tu material':R.view==='idle'?c?' en casa':' en el gimnasio':'')
+    +(k&&R.more?` · <button type="button" class="lib-cmore" aria-haspopup="dialog" onclick="openLibKit()" aria-label="${plural(R.more,'ejercicio')} más con otro material: elige el tuyo"><b>+${R.more}</b> con más material ›</button>`:'');
+}
 function renderExercisePicker(){
-  const root=document.getElementById('cmodal-root');
-  if(!root||!_pickerState)return;
-  _libDetail=null;
-  const {title,search,mode}=_pickerState;
-  const list=_pickerListHtml();
-  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeExercisePicker()" style="z-index:500"><div class="hist-sheet" id="lib-sheet" role="dialog" aria-label="${esc(title)}" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
-    <div class="hist-sheet-head" style="padding-right:60px">
+  const root=document.getElementById('cmodal-root'),st=_pickerState;
+  if(!root||!st)return;
+  _libDetail=null;_libKitOpen=null;_libSpriteOnce();
+  const busy=st.mode==='busy';
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeExercisePicker()" style="z-index:500"><div class="hist-sheet" id="lib-sheet" role="dialog" aria-modal="true" aria-labelledby="lib-title" tabindex="-1" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
+    <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
-      <div class="hist-sheet-title">${esc(title)}</div>
-      <div class="hist-sheet-sub">${mode==='busy'?'Elige una alternativa para hoy · toca para ver su técnica':'Toca un ejercicio para ver su técnica en 3D'}</div>
-      <button class="hist-sheet-close x44" onclick="closeExercisePicker()" aria-label="Cerrar">✕</button>
+      <div class="hist-sheet-title" id="lib-title">${esc(st.title)}</div>
+      <button type="button" class="hist-sheet-close x44" onclick="closeExercisePicker()" aria-label="Cerrar">✕</button>
+      <div class="lib-sbox"><input class="lib-search" id="lib-search-inp" type="search" enterkeyhint="search" placeholder="${busy?`Buscar en ${_pickerPlace()==='c'?'casa':'el gimnasio'}…`:'Buscar: jalón, femoral, liga…'}" aria-label="Buscar ejercicio" aria-controls="lib-list" aria-describedby="lib-count" value="${esc(st.search)}" oninput="pickerSearchInput(event)" oncompositionend="pickerSearchInput(event)" onkeydown="pickerSearchKey(event)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/><button type="button" class="lib-clear" id="lib-clear" onclick="pickerClear()" aria-label="Borrar la búsqueda" hidden>✕</button></div>
+      ${busy?'':'<div class="lib-plrow lib-hq"><div class="lib-place" id="lib-place" role="radiogroup" aria-label="Dónde entrenas"></div><button type="button" class="lib-kitbtn" id="lib-kitbtn" aria-haspopup="dialog" onclick="openLibKit()" hidden></button></div>'}
+      <div class="lib-chiprow lib-hq" id="lib-chips" role="group" aria-label="Zona"></div>
+      <div class="lib-count" id="lib-count" aria-live="polite"></div>
     </div>
-    <div class="hist-sheet-body">
-      <input class="lib-search" id="lib-search-inp" type="search" placeholder="Buscar: jalón, femoral, mancuernas…" aria-label="Buscar ejercicio" value="${esc(search||'')}" oninput="pickerSearch(this.value)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-      <div class="lib-chiprow" id="lib-chips" role="group" aria-label="Grupo muscular">${_pickerChipsHtml()}</div>
-      <div class="lib-chiprow" id="lib-eq" role="group" aria-label="Equipo">${_pickerEqHtml()}</div>
-      <div class="lib-count" id="lib-count" aria-live="polite">${_pickerCountTxt()}</div>
-      <div id="lib-list" class="lib-grid">${list}</div>
-      <div style="height:24px"></div>
-    </div>
+    <div class="hist-sheet-body"><div id="lib-list"></div></div>
   </div></div>`;
-  thumbsIn(root);
+  _pickerRefresh();
 }
-function _pickerRefresh(chips){
-  const list=document.getElementById('lib-list');
-  if(!list){renderExercisePicker();return;}
-  if(chips){const c=document.getElementById('lib-chips'),q=document.getElementById('lib-eq');if(c)c.innerHTML=_pickerChipsHtml();if(q)q.innerHTML=_pickerEqHtml();}
-  list.innerHTML=_pickerListHtml();
-  const n=document.getElementById('lib-count');if(n)n.textContent=_pickerCountTxt();
-  thumbsIn(list);
+// El botón con el foco, como selector (clase y data-*, y su puesto entre los iguales), para volver a él tras repintar:
+// zonas, subzonas, material, lugar, «Ver todos», filas, «No disponibles aquí», «Hay N… · Ver», «+N con más material»
+function _pkKey(el){
+  const sh=document.getElementById('lib-sheet');if(!el||!sh||el===sh||el.tagName!=='BUTTON'||!sh.contains(el))return null;
+  const a=['z','sub','mat','pl','k','lib'].find(k=>el.dataset[k]!=null),c=['lib-tail-h','lib-relax','lib-cmore'].find(c=>el.classList.contains(c));
+  const s=a?`.${el.classList[0]}[data-${a}="${el.dataset[a]}"]`:c?'.'+c:null;
+  return s?{s,i:[...sh.querySelectorAll(s)].indexOf(el),tile:el.classList.contains('lib-tile')}:null;
 }
-// Al escribir: solo la lista (el input sigue siendo el mismo, con su foco y su cursor)
+function _pkFind(k){const sh=document.getElementById('lib-sheet'),m=k&&sh?sh.querySelectorAll(k.s):[];return m[k&&k.i]||m[0]||null;}
+function _pkFocus(el){if(el){try{el.focus({preventScroll:true});}catch(e){}}}
+// Repinta lo que depende de los filtros (zonas, lugar, contador y la lista; el input no se toca) con el primer trozo de
+// 40 filas. keep: sin volver arriba («Ver todos», «No disponibles aquí»). El foco vuelve al botón que se tocó (o a su
+// zona, si era del mosaico, o a la hoja) y el chip elegido de cada tira queda a la vista.
+function _pickerRefresh(keep){
+  const st=_pickerState,list=document.getElementById('lib-list'),sh=document.getElementById('lib-sheet');
+  if(!st)return;if(!list||!sh){renderExercisePicker();return;}
+  st.gen++;if(st.io){st.io.disconnect();st.io=null;}
+  const R=_pickerQ();st.R=R;st.count=R.view==='idle'?R.n:R.items.length;st.plan=getPlan();st.favS=new Set(st.ctx.fav||[]);
+  sh.classList.toggle('lib-q',!!st.search.trim());
+  const fk=_pkKey(document.activeElement),sl={},sz=st.slz===st.filterMuscle;st.slz=st.filterMuscle;
+  ['lib-chips','lib-subs','lib-eq'].forEach(i=>{const e=document.getElementById(i);if(e&&(sz||i==='lib-chips'))sl[i]=e.scrollLeft;});
+  const set=(i,h)=>{const e=document.getElementById(i);if(e)e.innerHTML=h;};
+  set('lib-chips',_pickerChipsHtml());set('lib-place',_pickerPlaceHtml());set('lib-count',_pickerCountHtml(R));
+  const cn=document.getElementById('lib-count');if(cn)cn.classList.toggle('more',!!cn.querySelector('.lib-cmore'));
+  const kb=document.getElementById('lib-kitbtn'),kit=st.ctx.kit,kn=kit&&kit.length;
+  if(kb){kb.hidden=_pickerPlace()!=='c';kb.innerHTML=`<span aria-hidden="true">🎒</span><span class="lib-wd"> Mi material</span>${kn?`<span class="lib-cn"><span class="lib-wd">· </span>${kn}</span>`:''}`;
+    kb.setAttribute('aria-label','Mi material'+(kn?': '+plural(kn,'elegido'):''));}
+  const x=document.getElementById('lib-clear');if(x)x.hidden=!st.search;
+  st.seq=_pickerSeq(R);st.pos=0;
+  list.innerHTML=_pickerChunk(PK_CHUNK)+(st.pos<st.seq.length?'<div id="lib-more" class="lib-more" aria-hidden="true"></div>':'');
+  Object.keys(sl).forEach(i=>{const e=document.getElementById(i);if(e)e.scrollLeft=sl[i];});
+  if(!keep)sh.scrollTop=0;
+  ['lib-chips','lib-subs','lib-eq'].forEach(i=>{const c=document.getElementById(i),a=c&&c.querySelector('[aria-pressed="true"]');if(!a)return;
+    const r=a.getBoundingClientRect(),cr=c.getBoundingClientRect();
+    if(r.left<cr.left)c.scrollLeft+=r.left-cr.left-16;else if(r.right>cr.right)c.scrollLeft+=r.right-cr.right+16;});
+  const ae=document.activeElement;
+  if(fk&&(!ae||ae===document.body||!ae.isConnected))_pkFocus(_pkFind(fk)||fk.tile&&document.querySelector('#lib-chips [aria-pressed="true"]')||sh);
+  thumbsIn(list);_pickerObserve();
+}
+function _pickerQ(){return libQuery(_pickerArgs());}
+// Al escribir, la lista se repinta 120 ms después de la última tecla (al borrarlo todo, en el acto); mientras se compone
+// una letra (tildes, teclados asiáticos) no se busca
+function pickerSearchInput(ev){
+  if(ev&&ev.isComposing)return;
+  clearTimeout(_pkT);
+  const i=document.getElementById('lib-search-inp');
+  if(!i||!i.value.trim()){pickerSearchFlush();return;}
+  _pkT=setTimeout(pickerSearchFlush,120);
+}
+function pickerSearchFlush(){clearTimeout(_pkT);_pkT=0;const i=document.getElementById('lib-search-inp');if(i&&_pickerState&&i.value!==_pickerState.search)pickerSearch(i.value);}
+// La búsqueda, en el acto (el input sigue siendo el mismo, con su foco y su cursor)
 function pickerSearch(v){
-  if(!_pickerState)return;
-  _pickerState.search=String(v==null?'':v);
-  _pickerRefresh(false);
+  const st=_pickerState;if(!st)return;
+  st.search=String(v==null?'':v);st.tail=false;
+  const i=document.getElementById('lib-search-inp');if(i&&i.value!==st.search)i.value=st.search;
+  _pickerRefresh();
 }
-function pickerSetMuscle(m){
-  if(!_pickerState)return;
-  _pickerState.filterMuscle=m;
-  _pickerRefresh(true);
+// Intro busca ya y cierra el teclado; Escape con algo escrito solo lo borra (no cierra el selector)
+function pickerSearchKey(ev){
+  if(ev.key==='Enter'){ev.preventDefault();pickerSearchFlush();ev.target.blur();}
+  else if(ev.key==='Escape'&&ev.target.value){ev.preventDefault();ev.stopPropagation();pickerClear();}
 }
-function pickerSetEq(q){
-  if(!_pickerState||!LIB_EQ.some(x=>x.id===q))return;
-  _pickerState.filterEq=q;
-  _pickerRefresh(true);
+function pickerClear(){
+  const i=document.getElementById('lib-search-inp');clearTimeout(_pkT);
+  if(i)i.value='';pickerSearch('');
+  if(i){try{i.focus({preventScroll:true});}catch(e){}}
+}
+// Zona (null: el inicio · 'all': todas, por zonas) y, si se da, su subzona (solo vale dentro de su zona)
+function pickerSetMuscle(m,sub){
+  const st=_pickerState;if(!st)return;
+  st.filterMuscle=m==='all'||MUSCLE_GROUPS.some(g=>g.id===m)?m:null;
+  st.filterSub=SUB_BY_ID[sub]&&SUB_BY_ID[sub].z===st.filterMuscle?sub:null;
+  _pickerRefresh();
+}
+function pickerSetSub(s){const st=_pickerState;if(!st)return;st.filterSub=SUB_BY_ID[s]&&SUB_BY_ID[s].z===st.filterMuscle?s:null;_pickerRefresh();}
+// Material: 'all', 'free' (sin máquina) o uno; se mantiene al cambiar de zona
+function pickerSetMat(k){const st=_pickerState;if(!st)return;st.mat=k==='free'||MAT[k]?k:'all';_pickerRefresh();}
+// (compatibilidad) el filtro de equipo de antes: 'cable' es la polea
+function pickerSetEq(q){if(LIB_EQ.some(x=>x.id===q))pickerSetMat(q==='cable'?'polea':q);}
+// Gimnasio | Casa: se guarda (la próxima vez abre donde lo dejaste); en «ocupada» manda tu rutina. La primera vez que
+// eliges Casa (aún no has dicho tu material) se abre «Mi material».
+function pickerSetPlace(p){
+  const st=_pickerState;if(!st||st.mode==='busy'||(p!=='g'&&p!=='c'))return;
+  if(S.libPlace!==p){S.libPlace=p;saveState();}
+  st.ctx=_libCtx();_pickerRefresh();
+  if(p==='c'&&S.libKit===null)openLibKit();
+}
+// Radios con tabindex itinerante: flechas (cambian de uno a otro), Inicio (Gimnasio) y Fin (Casa)
+function pickerPlaceKey(ev){
+  const to=ev.key==='Home'?'g':ev.key==='End'?'c':/^Arrow(Left|Right|Up|Down)$/.test(ev.key)?_pickerPlace()==='c'?'g':'c':null;
+  if(!to)return;
+  ev.preventDefault();if(to!==_pickerPlace())pickerSetPlace(to);
+  const b=!_libKitOpen&&document.querySelector('#lib-place [aria-checked="true"]');if(b)b.focus();
+}
+function pickerMore(k){const st=_pickerState;if(!st)return;st.more[k]=!st.more[k];_pickerRefresh(true);}
+function pickerTail(){const st=_pickerState;if(!st)return;st.tail=!st.tail;_pickerRefresh(true);}
+function pickerRelax(){
+  const st=_pickerState,r=st&&_pickerRelaxOpt();if(!r)return;
+  if(r.s.place){pickerSetPlace(r.s.place);return;}
+  if('kit' in r.s){openLibKit();return;}
+  if('search' in r.s){pickerClear();return;}
+  Object.assign(st,r.s);_pickerRefresh();
 }
 function pickerPick(libId){
   const libEx=LIB_BY_ID.get(libId);
   if(!libEx||!_pickerState)return;
-  const cb=_pickerState.onPick;
-  closeLibDetail();
-  _pickerState=null;
-  document.getElementById('cmodal-root').innerHTML='';
+  const cb=_pickerState.onPick,op=_pickerState.opener,rf=_pickerState.refocus,root=document.getElementById('cmodal-root');
+  closeLibDetail();_pickerStop();
+  _pickerState=null;_libKitOpen=null;
+  root.innerHTML='';
+  _libTouch(libId);
   if(cb)cb(libEx);
+  // el foco vuelve a quien abrió el selector si nadie lo ha movido: si lo repintó onPick (el editor), a su copia (refocus);
+  // si onPick abrió otra ventana (trasladar historial), a ella
+  const a=document.activeElement;if(a&&a!==document.body&&a.isConnected)return;
+  let t=root.querySelector('button')||(op&&op.isConnected&&op!==document.body?op:null);
+  if(!t&&rf){try{t=rf();}catch(e){}}
+  _pkFocus(t);
 }
 function closeExercisePicker(){
-  closeLibDetail();
-  _pickerState=null;
+  const st=_pickerState;
+  closeLibDetail();_pickerStop();
+  _pickerState=null;_libKitOpen=null;
   document.getElementById('cmodal-root').innerHTML='';
+  if(st&&st.opener&&st.opener.isConnected&&st.opener.focus){try{st.opener.focus({preventScroll:true});}catch(e){}}
 }
-// Desde la ficha, en el modo «máquina ocupada»: «Solo hoy» o «Cambiar en la rutina»
+// Desde la ficha o desde «Parecidos», en el modo «máquina ocupada»: «Solo hoy» o «Cambiar en la rutina»
 function pickerBusy(libId,how){
   const st=_pickerState;if(!st||!st.busy)return;const b=st.busy;
   closeExercisePicker();
@@ -12292,49 +12831,57 @@ function pickerBusy(libId,how){
   if(!slot||!lib){toast('Ese ejercicio ya no está en tu rutina');render();return;}
   if(how==='today'){_applySoloHoy(b.dk,b.exId,libId);return;}
   if(_slotMarks(slot)){toast(`Ya llevas series de ${slot.n}: termínalo antes de cambiarlo`);render();return;}
+  _libTouch(libId);
   _routineSwapTo(b.dk,slot,lib,{keepToday:false,after:nx=>{S.open=nx.id;}});
 }
-// ── Ficha de un ejercicio (encima del selector): animación 3D en vivo (arrastra para girar, toca para pausar),
-// músculos, patrón, consejo, tu historial y la acción del selector ──
+// ── Ficha de un ejercicio (encima del selector): su animación 3D en vivo (arrastra para girar, toca para pausar) o, si no
+// tiene, su mapa muscular; ☆ favorito; material · zona · dificultad; sus 3 músculos principales, patrón y tipo; si aquí no
+// puedes hacerlo, por qué (y «La tengo» si es por tu material de casa); consejo; tu historial (lo último en su medida:
+// kg, reps, segundos o metros) y la acción del selector ──
+const LIB_DIF=['','Principiante','Intermedio','Avanzado'];
 function _libDetailHtml(e){
-  const st=_pickerState,sp=typeof GymAnim!=='undefined'&&GymAnim.get?GymAnim.get(e.id):null;
-  const plan=getPlan(),days=_libInPlan()[e.id]||[],cur=st.currentLib===e.id,hist=_libHistMap()[e.id]||null;
-  const ml=(MUSCLE_GROUPS.find(m=>m.id===e.muscle)||{}).label||'';
-  const tags=[..._libMusLbl(e).map(l=>`<span class="mchip">${esc(l)}</span>`),
+  const st=_pickerState,sp=typeof GymAnim!=='undefined'&&GymAnim.get?GymAnim.get(e.id):null,id=esc(e.id);
+  const plan=getPlan(),days=_libInPlan()[e.id]||[],cur=st.currentLib===e.id,hist=_libHistMap()[e.id]||null,fav=(S.libFav||[]).includes(e.id);
+  const pl=_pickerPlace(),m=_mat(e),why=libWhyNot(e,pl,st.ctx.kit),g=MUSCLE_GROUPS.find(x=>x.id===_grp(e));
+  const sub=[e.eq||matLabel(m),g?_zoneLbl(g):'',LIB_DIF[e.dif]||''].filter(Boolean).join(' · ');
+  const tags=[..._libMusLbl(e,3).map(l=>`<span class="mchip">${esc(l)}</span>`),
     !e.cardio&&PAT_LBL[e.pat]?`<span class="lib-d-tag">${esc(PAT_LBL[e.pat])}</span>`:'',
     `<span class="lib-d-tag">${e.cardio?'Cardio':e.compound?'Multiarticular':'Aislamiento'}</span>`,
+    st.station&&!cur&&_stationOf(e.eq,e)===st.station?'<span class="lib-d-tag">Misma máquina</span>':'',
     cur||days.length?`<span class="lib-d-tag in">${cur?'Actual':'En tu rutina'}${days.length?' · '+days.map(d=>esc(plan[d]?.label||d)).join(', '):''}</span>`:''].filter(Boolean).join('');
-  let hh='';
-  const recs=hist?(S.strength[hist.key]||[]).filter(r=>r&&typeof r==='object'&&+r.v>0):[];
-  if(!e.cardio&&_histNoKg(hist)){
-    const L=hist.lastAny;
-    hh=`<div class="lib-d-hist">Tu historial: <b>${plural(hist.n,'sesión','sesiones')}</b> · último <b>${esc(_recValTxt(L))}</b>${L.d?' ('+esc(L.d)+')':''}</div>`;
-  }else if(hist&&hist.last&&!e.cardio){
-    const best=Math.max(...recs.map(r=>+r.v)),L=hist.last;
-    hh=`<div class="lib-d-hist">Tu historial: <b>${plural(hist.n,'sesión','sesiones')}</b> · último <b>${esc(kgTxt(L.v))} kg${L.r?' × '+esc(L.r):''}</b>${L.d?' ('+esc(L.d)+')':''}${recs.length>1?` · mejor ${esc(kgTxt(best))} kg`:''}
-      ${recs.length>=2?`<div class="carea">${spark(recs.slice(-10),'var(--green)')}</div>`:''}</div>`;
-  }else hh=`<div class="lib-d-hist">${e.cardio?'Cardio: elige un ritmo que puedas mantener todo el tiempo.':e.lt!=='w'?'Aún no lo has hecho: céntrate en la técnica y apunta lo que hagas; desde la próxima vez te diré cuánto buscar.':'Aún no lo has hecho: empieza con un peso cómodo y céntrate en la técnica.'}</div>`;
+  const vis=sp?`<div class="ex-anim lib-d-anim" data-ex="lib-detail" data-gym-anim="${id}"></div>`
+    :Object.keys(e.mus||{}).length?`<div class="lib-d-map"><svg class="lib-fig" viewBox="0 0 60 40" aria-hidden="true" style="${_libFigStyle(e)}"><use href="#lib-fig"/></svg></div>`:'';
+  const need=why?`<div class="lib-d-need"><span class="lib-why">${esc(why)}</span>${pl==='c'&&libAtPlace(e,pl)&&(MAT[m]||{}).home?`<button type="button" class="btn bs lib-have" data-k="${esc(m)}" onclick="libKitHave(this.dataset.k)">La tengo</button>`:''}</div>`:'';
+  const last=hist?_libLastTxt(e,hist):'';
+  let hh;
+  if(last){
+    const nk=_histNoKg(hist),L=nk?hist.lastAny:hist.last,recs=nk?[]:(S.strength[hist.key]||[]).filter(r=>r&&typeof r==='object'&&+r.v>0);
+    hh=`Tu historial: <b>${plural(hist.n,'sesión','sesiones')}</b> · último ${last}${L.d?' ('+esc(L.d)+')':''}${recs.length>1?` · mejor ${esc(kgTxt(Math.max(...recs.map(r=>+r.v))))} kg`:''}`
+      +(recs.length>=2?`<div class="carea">${spark(recs.slice(-10),'var(--green)')}</div>`:'');
+  }else hh=e.cardio?'Cardio: elige un ritmo que puedas mantener todo el tiempo.':e.lt!=='w'?'Aún no lo has hecho: céntrate en la técnica y apunta lo que hagas; desde la próxima vez te diré cuánto buscar.':'Aún no lo has hecho: empieza con un peso cómodo y céntrate en la técnica.';
   let acts='',note='';
   const back=`<button type="button" class="btn bs" onclick="closeLibDetail()">← Volver</button>`;
   if(st.mode==='busy'){
     const otherPlan=days.length>0&&!cur;
     if(cur){acts=back;note=`<div class="lib-d-note">Es el ejercicio de tu rutina.</div>`;}
-    else{acts=`<button type="button" class="btn bp" data-lib="${esc(e.id)}" onclick="pickerBusy(this.dataset.lib,'today')"${otherPlan?' disabled style="opacity:.45"':''}>Solo hoy</button><button type="button" class="btn bs" data-lib="${esc(e.id)}" onclick="pickerBusy(this.dataset.lib,'routine')">Cambiar en la rutina</button>`;
+    else{acts=`<button type="button" class="btn bp" data-lib="${id}" onclick="pickerBusy(this.dataset.lib,'today')"${otherPlan?' disabled style="opacity:.45"':''}>Solo hoy</button><button type="button" class="btn bs" data-lib="${id}" onclick="pickerBusy(this.dataset.lib,'routine')">Cambiar en la rutina</button>`;
       note=`<div class="lib-d-note">${otherPlan?`Ya está en tu rutina (${days.map(d=>esc(plan[d]?.label||d)).join(', ')}): para hoy elige otro.`:'«Solo hoy» se guarda en su propio historial y tu rutina no cambia.'}</div>`;}
   }else{
-    const lbl=st.mode==='add'?`Añadir al ${esc(plan[st.dayKey]?.label||'día')}`:st.mode==='swap'?'Cambiar por este':'Elegir';
-    acts=back+(st.mode==='swap'&&cur?`<button type="button" class="btn bp" disabled style="opacity:.45">Es el actual</button>`
-      :`<button type="button" class="btn bp" data-lib="${esc(e.id)}" onclick="pickerPick(this.dataset.lib)">${lbl}</button>`);
+    const dl=esc(plan[st.dayKey]?.label||'día'),lbl=st.mode==='add'?`Añadir al ${dl}`:st.mode==='swap'?'Cambiar por este':'Elegir';
+    const no=st.mode==='swap'&&cur?'Es el actual':st.mode==='add'&&days.includes(st.dayKey)?`Ya está en el ${dl}`:''; // (añadirlo otra vez lo repetiría)
+    acts=back+(no?`<button type="button" class="btn bp" disabled style="opacity:.45">${no}</button>`
+      :`<button type="button" class="btn bp" data-lib="${id}" onclick="pickerPick(this.dataset.lib)">${lbl}</button>`);
   }
-  return`<div class="hist-over" onclick="if(event.target===this)closeLibDetail()" style="z-index:510"><div class="hist-sheet" id="lib-dsheet" role="dialog" aria-label="Ficha: ${esc(e.n)}" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
-    <div class="hist-sheet-head" style="padding-right:60px"><div class="hist-sheet-hdl"></div>
-      <div class="hist-sheet-title">${esc(e.n)}</div><div class="hist-sheet-sub">${esc(e.eq)}${ml?' · '+esc(ml):''}</div>
-      <button class="hist-sheet-close x44" onclick="closeLibDetail()" aria-label="Volver a la lista">✕</button></div>
+  return`<div class="hist-over" onclick="if(event.target===this)closeLibDetail()" style="z-index:510"><div class="hist-sheet" id="lib-dsheet" role="dialog" aria-modal="true" aria-labelledby="lib-d-title" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
+    <div class="hist-sheet-head lib-d-hd"><div class="hist-sheet-hdl"></div>
+      <div class="hist-sheet-title" id="lib-d-title">${esc(e.n)}</div><div class="hist-sheet-sub">${esc(sub)}</div>
+      <button type="button" class="hist-sheet-close x44 lib-fav" id="lib-fav" data-lib="${id}" aria-pressed="${fav}" aria-label="Favorito" onclick="libToggleFav(this.dataset.lib)">${fav?'★':'☆'}</button>
+      <button type="button" class="hist-sheet-close x44" onclick="closeLibDetail()" aria-label="Volver a la lista">✕</button></div>
     <div class="hist-sheet-body">
-      ${sp?`<div class="ex-anim lib-d-anim" data-ex="lib-detail" data-gym-anim="${esc(e.id)}"></div>`:''}
-      <div class="lib-d-head">${tags}</div>
+      ${vis}
+      <div class="lib-d-head">${tags}</div>${need}
       <div class="tip">${esc(e.tip||'')}</div>
-      ${hh}
+      <div class="lib-d-hist">${hh}</div>
       <div class="lib-d-acts">${acts}</div>${note}
     </div></div></div>`;
 }
@@ -12342,17 +12889,112 @@ function pickerDetail(libId){
   const e=LIB_BY_ID.get(libId),root=document.getElementById('cmodal-root');
   if(!_pickerState||!e||!root)return;
   closeLibDetail();
-  _libDetail=libId;
+  // (la fila que la abre: Safari no da el foco a un botón al tocarlo, y entonces vale la primera fila suya)
+  const a=document.activeElement;_libDetail=libId;_libDetailOp=a&&a.dataset&&a.dataset.lib===libId?a:null;
   const w=document.createElement('div');w.id='lib-detail';w.innerHTML=_libDetailHtml(e);
   root.appendChild(w);
-  if(typeof GymAnim!=='undefined'){try{GymAnim.mountAll(w);}catch(err){}}
-  const b=w.querySelector('.lib-d-acts .bp:not([disabled])')||w.querySelector('.hist-sheet-close');
+  if(typeof GymAnim!=='undefined'){
+    try{GymAnim.mountAll(w);}catch(err){}
+    // sin animación: su mapa muscular (si el motor no está, queda la figura teñida)
+    const mp=w.querySelector('.lib-d-map');
+    if(mp&&GymAnim.muscleMap){try{GymAnim.muscleMap(mp,{weights:e.mus,label:'Músculos: '+_libMusLbl(e,3).join(', '),view:'both',hint:false,breathe:false});mp.classList.add('on');}catch(err){}}
+  }
+  const b=w.querySelector('.lib-d-acts .bp:not([disabled])')||w.querySelector('.lib-d-acts .btn:not([disabled])')||w.querySelector('.hist-sheet-close'); // (sin acción: «← Volver», no ☆)
   if(b){try{b.focus({preventScroll:true});}catch(err){}}
 }
+// Al cerrarla, si el foco estaba en ella, vuelve a la fila que la abrió (en el inicio un ejercicio puede salir en más de una
+// sección); si ya no está (p. ej. quitaste el ☆ en «Favoritos»), a otra fila suya o a la hoja
+let _libDetailOp=null;
 function closeLibDetail(){
-  const w=document.getElementById('lib-detail');
-  if(w){const a=w.querySelector('[data-gym-anim]');if(a&&typeof GymAnim!=='undefined'&&GymAnim.unmount){try{GymAnim.unmount(a);}catch(e){}}w.remove();}
-  _libDetail=null;
+  const w=document.getElementById('lib-detail'),id=_libDetail,op=_libDetailOp,inD=!!w&&(w.contains(document.activeElement)||document.activeElement===document.body);
+  if(w){w.querySelectorAll('[data-gym-anim],.lib-d-map').forEach(a=>{if(typeof GymAnim!=='undefined'&&GymAnim.unmount){try{GymAnim.unmount(a);}catch(e){}}});w.remove();}
+  _libDetail=null;_libDetailOp=null;
+  if(inD&&id)_pkFocus(op&&op.isConnected&&op!==document.body?op:document.querySelector(`#lib-list .lib-row[data-lib="${id}"]`)||document.getElementById('lib-sheet'));
+}
+// Tab no sale de la hoja de arriba (Mi material → ficha → selector → «¿Máquina ocupada?»): del último control vuelve al
+// primero y al revés (si el foco está fuera o en la propia hoja, entra por un extremo)
+function _sheetTrap(ev){
+  const sh=document.querySelector('#lib-kit .hist-sheet')||document.querySelector('#lib-detail .hist-sheet')||document.getElementById('lib-sheet')||document.getElementById('busy-sheet');if(!sh)return;
+  const f=[...sh.querySelectorAll('button:not([disabled]),input,[tabindex="0"]')].filter(x=>x.tabIndex>=0&&x.getClientRects().length);if(!f.length)return;
+  const a=f[0],z=f[f.length-1],c=document.activeElement,to=!sh.contains(c)||c===sh?ev.shiftKey?z:a:ev.shiftKey&&c===a?z:!ev.shiftKey&&c===z?a:null;
+  if(to){ev.preventDefault();try{to.focus();}catch(e){}}
+}
+// ☆ en la ficha: el primero de «Favoritos» (como mucho 100). La lista de detrás se entera (★ en su fila; en el inicio, su sección).
+function libToggleFav(id){
+  if(!LIB_BY_ID.has(id))return;
+  const a=Array.isArray(S.libFav)?S.libFav:[],on=!a.includes(id);
+  S.libFav=on?[id,...a].slice(0,100):a.filter(x=>x!==id);saveState();
+  const b=document.getElementById('lib-fav');if(b&&b.dataset.lib===id){b.setAttribute('aria-pressed',on);b.textContent=on?'★':'☆';}
+  const st=_pickerState;if(!st)return;
+  st.ctx=_libCtx();st.favS=new Set(st.ctx.fav);
+  if(st.R&&st.R.view==='idle'){_pickerRefresh(true);return;}
+  document.querySelectorAll(`#lib-list .lib-row[data-lib="${id}"] .lib-item-n`).forEach(n=>{n.innerHTML=(on?'<span class="lib-star" role="img" aria-label="Favorito">★</span> ':'')+esc(LIB_BY_ID.get(id).n);});
+}
+// ── «Mi material» (casa): marca lo que tienes; cada toque se guarda y la lista de detrás cambia en el acto. Se abre sola la
+// primera vez que eliges Casa, con 🎒 y con «+N ›»; sin material siempre cuenta. Cada material dice cuántos ejercicios de
+// casa lo usan (+N). ──
+let _libKitNs=null;
+function _libKitN(){
+  if(_libKitNs)return _libKitNs;
+  const n={};EXERCISE_DB.forEach(e=>{const k=_mat(e);if(libAtPlace(e,'c')&&MAT[k]&&MAT[k].home)n[k]=(n[k]||0)+1;});
+  return(_libKitNs=n);
+}
+// Cuántos verás al pulsar «Listo · ver N ejercicios»: lo de la lista o, si aún no has dicho tu material, lo que se hace
+// sin material («Listo» sin marcar nada lo deja así)
+function _pickerShown(){
+  const st=_pickerState,R=st&&(st.ctx.kit===null&&_pickerPlace()==='c'?libQuery(Object.assign(_pickerArgs(),{kit:[]})):st.R);
+  return R?R.view==='idle'?R.n:R.items.length:0;
+}
+function _libKitHtml(){
+  const kit=Array.isArray(S.libKit)?S.libKit:[],N=_libKitN(),ks=Object.keys(MAT).filter(k=>MAT[k].home&&N[k]).sort((a,b)=>(a==='otro')-(b==='otro')||N[b]-N[a]);
+  return`<div class="hist-over" onclick="if(event.target===this)closeLibKit()" style="z-index:520"><div class="hist-sheet" id="lib-ksheet" role="dialog" aria-modal="true" aria-labelledby="lib-k-title">
+    <div class="hist-sheet-head" style="padding-right:60px"><div class="hist-sheet-hdl"></div>
+      <div class="hist-sheet-title" id="lib-k-title">🎒 Mi material</div><div class="hist-sheet-sub">Marca lo que tienes en casa y verás lo que puedes hacer con ello. Sin material siempre cuenta.</div>
+      <button type="button" class="hist-sheet-close x44" onclick="closeLibKit()" aria-label="Cerrar">✕</button></div>
+    <div class="hist-sheet-body">
+      <div class="lib-kit" role="group" aria-label="Tu material">${ks.map(k=>`<button type="button" class="lib-kt" data-k="${k}" aria-pressed="${kit.includes(k)}" aria-label="${esc(MAT[k].l)}: ${plural(N[k],'ejercicio')}" onclick="libKitToggle(this.dataset.k)"><span class="lib-kt-e" aria-hidden="true">${MAT[k].ic}</span><span class="lib-kt-n">${esc(MAT[k].l)}<span class="lib-kt-c" aria-hidden="true">+${N[k]}</span></span></button>`).join('')}</div>
+      <button type="button" class="btn bp lib-kit-ok" onclick="closeLibKit(1)">Listo · ver ${plural(_pickerShown(),'ejercicio')}</button>
+    </div></div></div>`;
+}
+function openLibKit(){
+  const root=document.getElementById('cmodal-root');if(!_pickerState||!root)return;
+  const o=_libKitOpen&&_libKitOpen.opener;closeLibKit();
+  _libKitOpen={opener:o||document.activeElement};_libKitOpen.key=_pkKey(_libKitOpen.opener);
+  const w=document.createElement('div');w.id='lib-kit';w.innerHTML=_libKitHtml();root.appendChild(w);
+  const b=w.querySelector('.lib-kt');if(b){try{b.focus({preventScroll:true});}catch(e){}}
+}
+// Cerrar (✕, fuera, Escape) deja tu material como esté; «Listo» sin marcar nada cuenta como «solo sin material»
+function closeLibKit(done){
+  const w=document.getElementById('lib-kit'),k=_libKitOpen;_libKitOpen=null;
+  if(w)w.remove();
+  if(done&&S.libKit===null){S.libKit=[];saveState();_libKitChanged();}
+  // el foco vuelve a quien la abrió (o a su copia si la lista se repintó: «+N con más material», «Hay N…») o a 🎒
+  const kb=document.getElementById('lib-kitbtn'),o=k&&(k.opener&&k.opener.isConnected&&k.opener!==document.body?k.opener:_pkFind(k.key)||(kb&&!kb.hidden?kb:null));
+  if(o&&k)_pkFocus(o);
+}
+function libKitToggle(k){
+  if(!MAT[k]||!MAT[k].home)return;
+  const kit=Array.isArray(S.libKit)?S.libKit:[];
+  S.libKit=kit.includes(k)?kit.filter(x=>x!==k):[...kit,k];saveState();_libKitChanged();
+}
+// «La tengo» en la ficha: ese material pasa a tu material de casa
+function libKitHave(k){
+  if(!MAT[k]||!MAT[k].home)return;
+  const kit=Array.isArray(S.libKit)?S.libKit:[];if(!kit.includes(k)){S.libKit=[...kit,k];saveState();}
+  _libKitChanged();
+  // el botón se va: el foco pasa al aviso que lo sustituye (o a la acción de la ficha)
+  const n=document.querySelector('#lib-detail .lib-d-need');if(!n)return;
+  n.outerHTML=`<div class="lib-d-need ok" tabindex="-1">✓ ${esc(MAT[k].l)}: añadido a tu material</div>`;
+  const a=document.activeElement;
+  if(!a||a===document.body||!a.isConnected)_pkFocus(document.querySelector('#lib-detail .lib-d-need')||document.querySelector('#lib-detail .lib-d-acts .bp:not([disabled])'));
+}
+// Tu material cambió: la lista (sin volver arriba), la hoja abierta y su «Listo · ver N»
+function _libKitChanged(){
+  const st=_pickerState;if(!st)return;
+  st.ctx=_libCtx();_pickerRefresh(true);
+  const w=document.getElementById('lib-kit');if(!w)return;
+  const kit=S.libKit||[];w.querySelectorAll('.lib-kt').forEach(b=>b.setAttribute('aria-pressed',kit.includes(b.dataset.k)));
+  const ok=w.querySelector('.lib-kit-ok');if(ok)ok.textContent='Listo · ver '+plural(_pickerShown(),'ejercicio');
 }
 
 // ── DRAG & DROP TÁCTIL PARA REORDENAR ─────────────────────────
@@ -13130,6 +13772,8 @@ function importData(){
             });
             Object.keys(S).forEach(k=>{if(!(k in migrated))migrated[k]=S[k];});
             S=Object.assign(S,migrated);
+            // Selector (lugar, material de casa, favoritos, recientes): los del backup si los trae; si no, los de este móvil
+            _sanitizeLibPrefs(S);
             // Limpiar estado UI transitorio importado
             TRANSIENT_KEYS.forEach(k=>{if(k in S)delete S[k];});
             RT.stop();closeRpeSelector();RF.close();closeSessionSummary();
@@ -13155,6 +13799,8 @@ function resetOnboarding(){
     cancelText:'Cancelar',
     onOk:()=>{
       S.onboarded=false;S.settingsOpen=false;
+      // El selector vuelve a empezar en el gimnasio y te volverá a preguntar tu material de casa (favoritos y recientes se quedan)
+      S.libPlace='g';S.libKit=null;
       saveState();
       document.getElementById('app').style.display='none';
       document.getElementById('onboarding').style.display='flex';
