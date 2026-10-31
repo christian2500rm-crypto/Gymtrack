@@ -8401,11 +8401,13 @@ function targetRepsNum(ex){
   const r=String(ex&&ex.r!=null?ex.r:'').trim();
   return /^\d{1,3}$/.test(r)&&+r>0?+r:null;
 }
-// Texto del objetivo: «12 reps» / «8-12 reps», o tal cual cuando no son reps («30s»)
+// Texto del objetivo: «12 reps» / «8-12 reps»; por tiempo o distancia como en el resto de la app (fmtSecs / fmtM: el
+// «30s» del catálogo sale «30 s», «90s» «1:30 min», «30m» «30 m»); lo demás, tal cual («8 min»)
 function fmtTargetReps(ex){
   const n=targetRepsNum(ex),raw=String(ex&&ex.r!=null?ex.r:'').trim();
   // Un número suelto en uno por tiempo o distancia (planchas que el editor antiguo dejó en «29») son segundos o metros
-  if(n!=null){const lt=ex&&!ex.cardio?exLT(ex):'w';return lt==='t'?n+'s':lt==='d'?n+'m':n+' reps';}
+  if(n!=null){const lt=ex&&!ex.cardio?exLT(ex):'w';return lt==='t'?fmtSecs(n):lt==='d'?fmtM(n):n+' reps';}
+  const u=/^(\d{1,4})\s*([sm])$/.exec(raw);if(u&&+u[1]>0)return u[2]==='s'?fmtSecs(u[1]):fmtM(u[1]);
   return /^\d{1,3}\s*[-–]\s*\d{1,3}$/.test(raw)?raw+' reps':raw;
 }
 // Peso OPCIONAL (peso corporal, bandas, por tiempo o por distancia: flexiones, plancha, elevaciones colgado…):
@@ -8849,6 +8851,9 @@ function _sanitizeRecMeta(r){
   if('t' in r){const t=_setNumT(r.t);if(t==null)delete r.t;else r.t=t;}
   if('m' in r){const m=_setNumD(r.m);if(m==null)delete r.m;else r.m=m;}
   if('lt' in r&&!REC_LT.includes(r.lt))delete r.lt;
+  // por tiempo o distancia sin su medida (un backup editado a mano): sin tipo, como lo guarda la app (tdNoX al terminar);
+  // si no, un registro vacío por tiempo al final de un ejercicio de kilos lo pasaría todo a «0 s»
+  if((r.lt==='t'&&r.t==null)||(r.lt==='d'&&r.m==null))delete r.lt;
 }
 function _sanitizeSetData(data){
   if(!data||typeof data!=='object')return;
@@ -12069,8 +12074,10 @@ function coach_exerciseProgression(exId,sinceTs){
   }
   data.sort((a,b)=>a.ts-b.ts);
   const n=data.length,W=7*86400000;
+  // lastre: peso corporal con chaleco, mochila o disco. Sus kilos son solo el lastre, así que su % no es fuerza (de 2.5 a
+  // 5 kg es un +100 %): fuera de «Fuerza estimada» y del 1RM estimado; la tendencia (más o menos lastre) sí vale
   const res={trend:'insufficient',change:0,pct:0,pctWeek:0,sessions:n,firstV:n?+data[0].v:0,lastV:n?+data[n-1].v:0,
-    data,e1rm:[],weeks:0,repsUp:false,dropPct:0,stagSessions:0,stagWeeks:0,metric:'e1rm'};
+    data,e1rm:[],weeks:0,repsUp:false,dropPct:0,stagSessions:0,stagWeeks:0,metric:'e1rm',lastre:exLT(ex)==='bw'||data.some(r=>_recLT(r)==='bw')};
   if(n<2)return res;
   const e=data.map(r=>coach_e1rm(r,ex));
   res.e1rm=e;
@@ -12551,7 +12558,7 @@ function _holdTxt(it){
   const a=h.prop||{};
   if(a.type==='swap'||a.type==='add_ex')return'nuevo en tu plan';
   if(a.type==='rm_set')return`acaba de volver a ${_nSeries(parseInt(ex.s)||1)}`;
-  return`acabas de cambiarlo a ${parseInt(ex.s)||ex.s}×${ex.r}`;
+  return`acabas de cambiarlo a ${parseInt(ex.s)||ex.s}×${fmtTargetReps(ex).replace(/ reps$/,'')}`;
 }
 
 function coach_generateInsights(an,pend,resIds){
@@ -12607,8 +12614,10 @@ function coach_generateInsights(an,pend,resIds){
   const pctTxt=v=>(v>=0?'+':'')+v.toFixed(Math.abs(v)<10?1:0)+'%';
 
   if(an.strong.length>0){
-    const top=an.strong.slice().sort((a,b)=>b.p.pct-a.p.pct)[0];
-    insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${_progWhat(top.p).su} ${_progWhat(top.p).v} un <strong>${pctTxt(top.p.pct)}</strong> en tus últimas ${top.p.sessions} sesiones (${top.p.metric==='e1rm'?top.p.firstV:_progVal(top.p,top.p.firstV).replace(/ \S+$/,'')} → ${_progVal(top.p,top.p.lastV)}). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
+    // (los de lastre, detrás: su % es solo del lastre; si es el único, en kilos de lastre)
+    const top=an.strong.slice().sort((a,b)=>(a.p.lastre?1:0)-(b.p.lastre?1:0)||b.p.pct-a.p.pct)[0];
+    if(top.p.lastre)insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${top.p.lastV>top.p.firstV?`llevas más lastre: de ${esc(kgTxt(top.p.firstV))} a <strong>${esc(kgTxt(top.p.lastV))} kg</strong>`:`haces más con <strong>${esc(kgTxt(top.p.lastV))} kg</strong> de lastre`} en tus últimas ${top.p.sessions} sesiones. Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
+    else insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${_progWhat(top.p).su} ${_progWhat(top.p).v} un <strong>${pctTxt(top.p.pct)}</strong> en tus últimas ${top.p.sessions} sesiones (${top.p.metric==='e1rm'?top.p.firstV:_progVal(top.p,top.p.firstV).replace(/ \S+$/,'')} → ${_progVal(top.p,top.p.lastV)}). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
   }
 
   if(an.up.length>=2){
@@ -12742,7 +12751,7 @@ function coach_detailHtml(an,pv){
     h+=`<div class="rec-card">
       <div class="rec-head"><span class="rec-badge high">Mantener</span><div class="rec-title">No cambies lo que funciona</div></div>
       <div class="rec-body">${keep.length} ejercicio${keep.length!==1?'s':''} progresa${keep.length!==1?'n':''}: mantén ejercicio, series y reps.${hasDeload?' La descarga es temporal: después vuelves a este mismo plan.':''}</div>
-      <div class="rec-diff">${keep.slice(0,4).map(i=>row('✓','add',`${esc(i.ex.n)}: ${_progWhat(i.p).sh} ${pctTxt(i.p.pct)}${i.p.repsUp?' · más reps, mismo peso':''}`)).join('')}
+      <div class="rec-diff">${keep.slice(0,4).map(i=>row('✓','add',`${esc(i.ex.n)}: ${i.p.lastre?`lastre ${i.p.lastV!==i.p.firstV?esc(kgTxt(i.p.firstV))+' → ':''}${esc(kgTxt(i.p.lastV))} kg`:`${_progWhat(i.p).sh} ${pctTxt(i.p.pct)}`}${i.p.repsUp?' · más reps, mismo peso':''}`)).join('')}
         ${keep.length>4?row('+','add',`y ${keep.length-4} más`):''}</div>
     </div>`;
   }
@@ -13232,7 +13241,8 @@ function renderCoach(){
 
   // Métricas clave: progresan / fuerza estimada (media del % de 1RM estimado de cada ejercicio)
   // (la fuerza estimada es de los ejercicios con kilos: las reps o el tiempo no son 1RM)
-  const progressing=an.up.length,withData=an.withData.length,kgData=an.withData.filter(i=>i.p.metric==='e1rm');
+  // (ni el lastre del peso corporal: su % es solo del lastre)
+  const progressing=an.up.length,withData=an.withData.length,kgData=an.withData.filter(i=>i.p.metric==='e1rm'&&!i.p.lastre);
   const avgPct=kgData.length?kgData.reduce((a,i)=>a+i.p.pct,0)/kgData.length:null;
 
   // Ciclo: semana con tope (nunca «28/4»), anillo, estado vencido / nuevo
@@ -14549,6 +14559,8 @@ function renderHist(){
   const bestX=d=>Math.max(_recMetric(d,H.lt)||0,...prRecSetsX(d).map(x=>x.val));
   // Banda más dura (_bandUp): el progreso cuenta desde la última; si es la de hoy, «banda más dura» en vez de «−3 reps»
   const bx=ex._orphan?_mmExOf(exId):ex,cuts=H.kg?[]:_bandCuts(bx,kd),k0=cuts.length?cuts[cuts.length-1]:0,bandNow=k0>0&&k0===kd.length-1;
+  // Peso corporal con lastre: sus kilos son solo el lastre, sin 1RM estimado (con 5 kg × 11 no son «7 kg» de dominada)
+  const lastreH=H.kg&&(exLT(bx)==='bw'||kd.some(r=>_recLT(r)==='bw'));
   const mx=H.kg?Math.max(...ws):Math.max(...kd.map(bestX)), first=ws[k0], last=ws[ws.length-1];
   const gain=last-first;
   // Con peso por tiempo o distancia (paseo, plancha con disco) y el mismo peso: lo ganado en segundos o metros (frente
@@ -14604,7 +14616,7 @@ function renderHist(){
         :`<div class="hist-m"><div class="hist-m-v" style="color:${gain>=0?'var(--green)':'var(--amber)'}">${gain>0?'+':''}${gain} ${_metricU(H.lt)}</div><div class="hist-m-l">Progreso</div></div>`}`}
         <div class="hist-m"><div class="hist-m-v">${data.length}</div><div class="hist-m-l">Sesiones</div></div>
       </div>
-      ${H.kg&&PA&&PA.eRef&&PA.eRef.r?`<div class="hist-e1">1RM estimado: <b>${esc(prKg(PA.maxE))} kg</b> · con ${esc(kgTxt(PA.eRef.w))} kg × ${PA.eRef.r}${PA.eRef.d?` (${esc(PA.eRef.d)})`:''}</div>`:''}
+      ${H.kg&&!lastreH&&PA&&PA.eRef&&PA.eRef.r?`<div class="hist-e1">1RM estimado: <b>${esc(prKg(PA.maxE))} kg</b> · con ${esc(kgTxt(PA.eRef.w))} kg × ${PA.eRef.r}${PA.eRef.d?` (${esc(PA.eRef.d)})`:''}</div>`:''}
       ${kd.length>=2?`<div class="hist-chart">${spark(H.kg?kd:kd.map(r=>Object.assign({},r,{v:_recMetric(r,H.lt)||0})),exColorOf(exId),cuts)}</div>`:''}
       <div class="hist-list-h">Historial completo</div>
       ${entries}
@@ -15892,7 +15904,7 @@ function swapExerciseUI(dayKey,idx){
   const slot=getPlan()[dayKey].ex[idx],ex=routineEx(slot);
   if(!ex)return;
   showExercisePicker({
-    title:`Cambiar "${ex.n}"`,
+    title:`Cambiar «${ex.n}»`,
     muscle:ex.muscle||null,
     currentLib:_libIdOf(ex),
     mode:'swap',dayKey,
@@ -16101,7 +16113,7 @@ function _pkThWork(){
 // cercano. Se descartan las de la misma máquina o estación (si está ocupada, también lo está; tampoco cuentan como
 // alternativa) y las que no se pueden hacer donde entrenas (routinePlace).
 // (LIB_PAT, PAT_NEAR y PAT_LBL salen del catálogo: ver BIBLIOTECA DE EJERCICIOS)
-const BUSY_SAME=.6,BUSY_NEAR=.15,BUSY_STATION=.6,BUSY_GROUP=.1,BUSY_MIN_COS=.35,BUSY_ALT=.25,BUSY_LT=.15;
+const BUSY_SAME=.6,BUSY_NEAR=.15,BUSY_STATION=.6,BUSY_GROUP=.1,BUSY_MIN_COS=.35,BUSY_ALT=.25,BUSY_LT=.15,BUSY_LOAD=.2;
 const _libVecC=new Map();
 function _libVec(key){
   if(_libVecC.has(key))return _libVecC.get(key);
@@ -16175,23 +16187,24 @@ function _libHistKey(libId){
   return h&&!_planIdTaken(h.key)?h.key:libId;
 }
 // Alternativas a un ejercicio (el de la rutina si hoy está sustituido) que no estén ya en tu rutina: [{lib, cos, pct,
-// pat, same, near, sameSt, ai, score, hist}]. Primero sus alternativas (libAlts, en su orden; ai = su puesto, -1 si
+// pat, same, near, sameSt, ai, lm, score, hist}]. Primero sus alternativas (libAlts, en su orden; ai = su puesto, -1 si
 // no es una o si va en la misma estación, que está ocupada); después, de más a menos parecida. Fuera las poco parecidas
-// (ni su patrón ni un 35 %). Cardio de máquina en el gimnasio: otra máquina de cardio.
+// (ni su patrón ni un 35 %). Cardio de máquina en el gimnasio: otra máquina de cardio. lm: el tuyo va en kg y este no
+// (banda, peso corporal…): va detrás de los que llevan carga aunque trabaje los mismos músculos.
 function busyAlternatives(ex,n){
   if(!ex)return[];
   // Sin biblioteca (personalizado): el ejercicio de la animación de su grupo hace de referencia, como siempre
   const orig=routineEx(ex),own=exLib(orig),oLib=own?own.id:(exAnimKey(orig)||null),L=oLib?LIB_BY_ID.get(oLib)||null:null;
   const v=_libVec(oLib),p=L?L.pat:null,st=_stationOf(orig.eq||(L&&L.eq)||'',own),grp=orig.muscle||(L&&L.muscle)||null;
   const inPlan=_planLibIds(),hm=_libHistMap(),cur=ex!==orig?ex.lib:null,place=routinePlace(),fam=_tgtFam(exLT(orig)),alt=libAlts(own).map(a=>a[0]);
-  const cm=!!orig.cardio&&!!own&&own.mat==='cardio'&&place==='g';
+  const cm=!!orig.cardio&&!!own&&own.mat==='cardio'&&place==='g',kgO=exLT(orig)==='w';
   return EXERCISE_DB.filter(l=>l.id!==oLib&&l.id!==cur&&!!l.cardio===!!orig.cardio&&!inPlan.has(l.id)&&plOk(l,place)&&(!cm||l.mat==='cardio'))
     .map(l=>{
       const c=_cosSim(v,_libVec(l.id)),q=l.pat||null,same=!!p&&q===p,near=!!p&&!!q&&(PAT_NEAR[p]||[]).includes(q);
-      const sameSt=!!st&&_stationOf(l.eq,l)===st,ai=sameSt?-1:alt.indexOf(l.id);
+      const sameSt=!!st&&_stationOf(l.eq,l)===st,ai=sameSt?-1:alt.indexOf(l.id),lm=kgO&&l.lt!=='w';
       const score=c+(same?BUSY_SAME:near?BUSY_NEAR:0)-(sameSt?BUSY_STATION:0)+(grp&&l.muscle===grp?BUSY_GROUP:0)
-        +(ai>=0?BUSY_ALT*(1-.1*ai):0)-(_tgtFam(l.lt)!==fam?BUSY_LT:0);
-      return{lib:l,cos:c,pct:Math.round(c*100),pat:q,same,near,sameSt,ai,score,hist:hm[l.id]||null};})
+        +(ai>=0?BUSY_ALT*(1-.1*ai):0)-(_tgtFam(l.lt)!==fam?BUSY_LT:0)-(lm?BUSY_LOAD:0);
+      return{lib:l,cos:c,pct:Math.round(c*100),pat:q,same,near,sameSt,ai,lm,score,hist:hm[l.id]||null};})
     .filter(a=>!(a.sameSt&&!a.same)&&(a.same||a.near||a.cos>=BUSY_MIN_COS)&&a.score>.3)
     .sort((a,b)=>(a.ai<0)-(b.ai<0)||a.ai-b.ai||b.score-a.score||b.cos-a.cos)
     .slice(0,n||3);
@@ -16497,7 +16510,7 @@ function showExercisePicker({title,muscle,sub,onPick,currentLib,mode,dayKey,busy
     const d=getPlan()[st.busy.dk],sl=d&&Array.isArray(d.ex)?d.ex.find(e=>e&&e.id===st.busy.exId):null,o=routineEx(sl);
     const seen=new Set(Array.isArray(st.busy.seen)?st.busy.seen:[]),alts=o?busyAlternatives(o,8).filter(a=>!seen.has(a.lib.id)):[];
     Object.assign(st,{place:routinePlace(),cardio:!!(o&&o.cardio),excl:st.currentLib,pct:{},station:L?_stationOf(L.eq,L):'',
-      pin:alts.slice(0,5).sort((a,b)=>b.pct-a.pct).map(a=>a.lib.id)});
+      pin:[...alts.filter(a=>!a.lm),...alts.filter(a=>a.lm)].slice(0,5).sort((a,b)=>b.pct-a.pct).map(a=>a.lib.id)});
     alts.forEach(a=>{st.pct[a.lib.id]=a.pct;});
     st.filterMuscle=L?_grp(L):o&&o.cardio?'cardio':zone(muscle)||'all';
   }else st.filterMuscle=mode==='swap'&&L?_grp(L):zone(muscle);
@@ -16684,7 +16697,7 @@ function libQuery(st){
   const counts={zone:{all:0},sub:{},mat:{}},matCount=a=>{counts.mat.all=a.length;counts.mat.free=0;a.forEach(x=>{counts.mat[x.m]=(counts.mat[x.m]||0)+1;if(!(MAT[x.m]||{}).mach)counts.mat.free++;});};
   const avail=X.filter(x=>okB(x)&&okK(x));
   avail.forEach(x=>{const g=_grp(x.e);counts.zone[g]=(counts.zone[g]||0)+1;counts.zone.all++;});
-  let view,groups=[],tail=[],hints={},more=0;
+  let view,groups=[],tail=[],hints={},more=0,off=0;
   if(Q.toks.length){
     view='search';
     const r=_libRank(Q,X.filter(okB),mine),ok=r.filter(y=>okK(y.x));
@@ -16709,9 +16722,12 @@ function libQuery(st){
     matCount(inS);
     let rows=inS.filter(okM);
     if(place==='c'&&Array.isArray(kit))more=X.filter(x=>okB(x)&&okZ(x)&&(!sd||_subWm(x.mu,sd)>=.5)&&okM(x)&&libAtPlace(x.e,place)&&!okK(x)).length;
-    const take=(k,h,ids)=>{const a=[];ids.forEach(id=>{const x=rows.find(y=>y.e.id===id);if(x&&!a.includes(x))a.push(x);});
+    const take=(k,h,ids,pool)=>{const a=[];ids.forEach(id=>{const x=rows.find(y=>y.e.id===id)||pool&&pool.find(y=>y.e.id===id);if(x&&!a.includes(x))a.push(x);});
       if(a.length){groups.push({k,h,items:a.map(x=>x.e)});rows=rows.filter(x=>!a.includes(x));}};
-    if(cur)take('cur','Actual',[cur]);
+    // «Actual» sale aunque no se pueda hacer aquí (cambiar una máquina con «Casa» elegido), con su porqué y fuera de la
+    // cuenta («N con tu material»); la zona, la subzona y el material lo filtran como al resto
+    if(cur){take('cur','Actual',[cur],X.filter(x=>okB(x)&&okZ(x)&&(!sd||_subWm(x.mu,sd)>=.5)&&okM(x)));
+      const x=_libIdxMap.get(cur);if(x&&!okK(x)&&groups.some(g=>g.k==='cur'))off=1;}
     if(pin.length){const pz=inZ.filter(okM),a=[];pin.forEach(id=>{const x=pz.find(y=>y.e.id===id);if(x&&!a.includes(x))a.push(x);});
       if(a.length){groups.push({k:'sim',h:'Parecidos',items:a.map(x=>x.e)});rows=rows.filter(x=>!a.includes(x));}}
     let also=[];
@@ -16723,7 +16739,7 @@ function libQuery(st){
     if(also.length)groups.push({k:'also',h:'También trabajan '+sd.l.split(' · ')[0].toLowerCase(),items:also.sort(so).map(x=>x.e)});
   }
   const seen=new Set(),items=[];groups.forEach(g=>g.items.forEach(e=>{if(!seen.has(e)){seen.add(e);items.push(e);}}));
-  const res={view,items,groups,tail,hints,n:view==='idle'?counts.zone.all:items.length,more,counts};
+  const res={view,items,groups,tail,hints,n:view==='idle'?counts.zone.all:items.length-off,more,off,counts};
   if(_lqMemo.m.size>=40)_lqMemo.m.clear();
   _lqMemo.m.set(key,res);
   return res;
@@ -16840,7 +16856,7 @@ function _pickerRelaxOpt(){
   const T=[st.mat!=='all'&&{s:{mat:'all'},l:n=>`Hay ${n} sin «${_matChipLbl(st.mat)}» · Ver`},!q&&st.filterSub&&{s:{filterSub:null},l:n=>`Hay ${n} en toda la zona · Ver`},
     !q&&st.mode!=='busy'&&{s:{place:op},l:n=>`Hay ${n} en ${op==='c'?'casa':'el gimnasio'} · Ver`},
     !q&&_pickerPlace()==='c'&&Array.isArray(st.ctx.kit)&&{s:{kit:null},l:n=>`Hay ${n} con más material · Elegir`}].filter(Boolean);
-  for(const t of T){const n=libQuery(Object.assign({},base,t.s)).items.length;if(n)return{s:t.s,l:t.l(n)};}
+  for(const t of T){const n=libQuery(Object.assign({},base,t.s)).n;if(n)return{s:t.s,l:t.l(n)};}
   return q?{s:{search:''},l:'Borrar la búsqueda'}:null;
 }
 function _pickerEmptyHtml(){
@@ -16870,10 +16886,10 @@ function _pickerSeq(R){
       const top=g.k==='cur'||g.k==='sim';
       if(!top&&!strips){H(_pickerStripsHtml(R,true));strips=true;}
       H(head(g.h,top?0:g.items.length));
-      rows(g.k,g.items,g.k==='sim'?e=>({pct:st.pct&&st.pct[e.id],today:1}):null);
+      rows(g.k,g.items,g.k==='sim'?e=>({pct:st.pct&&st.pct[e.id],today:1}):g.k==='cur'&&R.off?e=>({why:libWhyNot(e,_pickerPlace(),st.ctx.kit)}):null);
     });
     if(!strips)H(_pickerStripsHtml(R,true));
-    if(!R.items.length)H(_pickerEmptyHtml());
+    if(!R.n)H(_pickerEmptyHtml());
   }
   return seq;
 }
@@ -16917,7 +16933,7 @@ function _pickerStop(){clearTimeout(_pkT);_pkT=0;_pkThStop();const st=_pickerSta
 // ejercicios con tu material · +37 con más material ›» (ese botón abre «Mi material»; con él, la línea mide 44 px: .more)
 function _pickerCountHtml(R){
   if(R.view==='search'){const n=R.items.length,t=R.tail.length;return n||t?plural(n,'resultado')+(t?` · ${t} no disponible${t>1?'s':''}`:''):'';}
-  const c=_pickerPlace()==='c',k=c&&Array.isArray(_pickerState.ctx.kit),n=R.view==='idle'?R.n:R.items.length;
+  const c=_pickerPlace()==='c',k=c&&Array.isArray(_pickerState.ctx.kit),n=R.n;
   return(k&&R.more?`${n}<span class="lib-wd"> ${n===1?'ejercicio':'ejercicios'}</span>`:plural(n,'ejercicio'))+(k?' con tu material':R.view==='idle'?c?' en casa':' en el gimnasio':'')
     +(k&&R.more?` · <button type="button" class="lib-cmore" aria-haspopup="dialog" onclick="openLibKit()" aria-label="${plural(R.more,'ejercicio')} más con otro material: elige el tuyo"><b>+${R.more}</b> con más material ›</button>`:'');
 }
@@ -16957,7 +16973,7 @@ function _pickerRefresh(keep){
   const st=_pickerState,list=document.getElementById('lib-list'),sh=document.getElementById('lib-sheet');
   if(!st)return;if(!list||!sh){renderExercisePicker();return;}
   st.gen++;if(st.io){st.io.disconnect();st.io=null;}
-  const R=_pickerQ();st.R=R;st.count=R.view==='idle'?R.n:R.items.length;st.plan=getPlan();st.favS=new Set(st.ctx.fav||[]);
+  const R=_pickerQ();st.R=R;st.count=R.n;st.plan=getPlan();st.favS=new Set(st.ctx.fav||[]);
   sh.classList.toggle('lib-q',!!st.search.trim());
   const fk=_pkKey(document.activeElement),sl={},sz=st.slz===st.filterMuscle;st.slz=st.filterMuscle;
   ['lib-chips','lib-subs','lib-eq'].forEach(i=>{const e=document.getElementById(i);if(e&&(sz||i==='lib-chips'))sl[i]=e.scrollLeft;});
@@ -17187,7 +17203,7 @@ function _libKitN(){
 // sin material («Listo» sin marcar nada lo deja así)
 function _pickerShown(){
   const st=_pickerState,R=st&&(st.ctx.kit===null&&_pickerPlace()==='c'?libQuery(Object.assign(_pickerArgs(),{kit:[]})):st.R);
-  return R?R.view==='idle'?R.n:R.items.length:0;
+  return R?R.n:0;
 }
 function _libKitHtml(){
   const kit=Array.isArray(S.libKit)?S.libKit:[],N=_libKitN(),ks=Object.keys(MAT).filter(k=>MAT[k].home&&N[k]).sort((a,b)=>(a==='otro')-(b==='otro')||N[b]-N[a]);
