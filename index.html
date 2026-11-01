@@ -311,6 +311,7 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .rf-nt{min-width:0}
 .rf-nl{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600}
 .rf-nn{font-size:14px;font-weight:600;color:var(--text);line-height:1.3;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.rf-nv{display:inline-block;max-width:100%} /* (18 r2) el valor de la serie pasa entero a la línea siguiente antes que partirse entre «57.5 kg» y «× 12» */
 .rf-ns{font-size:13px;color:var(--text2);margin-top:2px}
 .rf-ns b{font-family:'DM Mono',monospace;font-size:15px;color:var(--text);font-weight:600}
 .rf-go{min-height:52px;min-width:108px;padding:0 16px;border-radius:12px;background:var(--green);color:var(--accent-ink);font-size:15px;font-weight:700;touch-action:manipulation}
@@ -498,6 +499,8 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .tgt-v small{font-family:'DM Sans',sans-serif;font-size:12px;font-weight:400;color:var(--text2)}
 .tgt-why-btn{flex-shrink:0;min-height:44px;padding:0 12px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);font-size:12px;font-weight:600;color:var(--text2)}
 .tgt-r{font-size:12.5px;color:var(--text2);line-height:1.45;margin-top:6px;overflow-wrap:anywhere}
+@media (max-width:340px){.tgt-v:not(.var){font-size:17px}.tgt-why-btn{padding:0 8px}} /* (18 r2) «57.5 kg × 12» cabe en una línea junto a «¿Por qué?» desde 310 px */
+@media (max-width:320px){.tgt-v:not(.var){font-size:16px}}
 .tgt-r b{color:var(--text);font-weight:600}
 .tgt.k-up .tgt-r b,.tgt.k-harder .tgt-r b{color:var(--green-hi)}.tgt.k-reps .tgt-r b,.tgt.k-deload .tgt-r b{color:var(--blue-hi)}.tgt.k-down .tgt-r b{color:var(--amber-hi)}
 .tgt-why{margin-top:10px;padding-top:8px;border-top:1px solid var(--border)}
@@ -11632,10 +11635,10 @@ const RF={
           const g=_ghostTxt(getLastW(nx.ex.id),nx.i);
           // (09) pista de récord para esa serie («🏆 Haz 11 reps para nuevo récord»)
           const lv=prLive(nx.ex,rows),ph=lv.next===nx.i?prHintTxt(lv.hint):'';
-          h=`<div class="rf-nl">Siguiente serie</div><div class="rf-nn">Serie ${nx.i+1}/${rows.length} · ${esc(val)}</div>${g?`<div class="rf-ns">${esc(g)}</div>`:''}${ph?`<div class="rf-ns rf-pr">${esc(ph)}</div>`:''}`;
+          h=`<div class="rf-nl">Siguiente serie</div><div class="rf-nn">Serie ${nx.i+1}/${rows.length} · <span class="rf-nv">${_nwX(esc(val))}</span></div>${g?`<div class="rf-ns">${esc(g)}</div>`:''}${ph?`<div class="rf-ns rf-pr">${esc(ph)}</div>`:''}`;
         }else{
           key=exAnimKey(nx.ex);
-          h=`<div class="rf-nl">Siguiente ejercicio</div><div class="rf-nn">${esc(nx.ex.n)}</div><div class="rf-ns">Serie ${nx.i+1}/${rows.length} · <b>${esc(val)}</b></div>`;
+          h=`<div class="rf-nl">Siguiente ejercicio</div><div class="rf-nn">${esc(nx.ex.n)}</div><div class="rf-ns">Serie ${nx.i+1}/${rows.length} · <b>${_nwX(esc(val))}</b></div>`;
         }
       }
       this._act=act;
@@ -12338,8 +12341,8 @@ function _ensureSetsVisible(exId,first){
   _smoothScroll(s,top);
 }
 // Abrir / cerrar una tarjeta y cambiar de día (cuentan como «el usuario ha hecho algo»: cancelan el avance pendiente)
-function toggleCard(id){_uiGen++;_scrollTo=null;S.open=S.open===id?null:id;render();if(S.open===id)_revealOpenCard(id);}
-function setWorkoutDay(k){if(!getPlan()[k])return;_uiGen++;_scrollTo=null;S.day=k;S.open=null;render();}
+function toggleCard(id){_uiGen++;_scrollReq++;_scrollTo=null;S.open=S.open===id?null:id;render();if(S.open===id)_revealOpenCard(id);}
+function setWorkoutDay(k){if(!getPlan()[k])return;_uiGen++;_scrollReq++;_scrollTo=null;S.day=k;S.open=null;render();}
 
 // ── Animación compacta: tras la primera serie se encoge (toca para ampliarla) ──
 const _animBig=new Set(); // ejercicios con la animación ampliada a mano (solo en memoria)
@@ -12365,7 +12368,13 @@ function animAttach(root){
 
 // (16) Cifra y unidad juntas en un texto ya escapado: «80 kg», «12 reps», «8 min», «3 series», «1 × 8 min», «1RM est. 86.5 kg» van en un
 // .nw (no se parten entre líneas; textContent igual, sin espacios duros que cambien lo que leen los pasos y los lectores)
-function _nwUnits(h){return String(h).replace(/(1RM est\. |\d+ × )?(\d[\d.,:]*) (series\/semana|series\/sem|días\/semana|día\/semana|kg|reps|rep|series|serie|min|s|m|h|días|día|meses|mes|semanas|semana|ejercicios|ejercicio|sesiones|sesión|%)(?=$|[\s·,.:;)<])/g,'<span class="nw">$1$2 $3</span>');} // (16e) + «7 días»; (16e r1) + series/sem, días/semana, meses, semanas y %; (17) + ejercicios y sesiones
+function _nwUnits(h){return String(h).replace(/(<span class="nw">[^<]*<\/span>)|(1RM est\. |\d+ × )?(\d[\d.,:]*(?:[-–]\d[\d.,:]*)?) (series\/semana|series\/sem|días\/semana|día\/semana|kg|reps|rep|series|serie|min|s|m|h|días|día|meses|mes|semanas|semana|ejercicios|ejercicio|sesiones|sesión|%)(?=$|[\s·,.:;)<…])/g,(m,sp,a,b,c)=>sp?sp:'<span class="nw">'+(a||'')+b+' '+c+'</span>');} // (18 r2) los .nw ya hechos se copian tal cual (llamarla dos veces no anida .nw); (16e) + «7 días»; (16e r1) + series/sem, días/semana, meses, semanas y %; (17) + ejercicios y sesiones; (18) + «24 kg…» y rangos «8-12 reps» (el guion también parte línea)
+// (18) Como _nwUnits y además «× 12» de un peso × reps en un .nw («57.5 kg × 12» parte, si acaso, antes del «×», nunca
+// entre «×» y «12»). Un «× » delante de un .nw («3 series × 12 reps») entra en ese mismo .nw: nunca hay .nw anidados
+// ni cambia el texto (los .nw ya hechos se copian tal cual, con su «×» dentro). (18 r1) El .nw siguiente entra entero (sin
+// volver a mirar dentro), «× 12.»/«× 12, 10» al final de frase también se pegan, «× 8-10» va entero y un rango suelto
+// («rango 10-12» del editor) no se parte por el guion
+function _nwX(h){return _nwUnits(h).replace(/(<span class="nw">[^<]*<\/span>)|× <span class="nw">([^<]*)<\/span>|× (\d+(?:[.,]\d+)?(?:[-–]\d+)?)(?!\d|[.,]\d)|(\d+[-–]\d+)(?![\d\-–]|[.,]\d)/g,(m,sp,inr,n,rg,off,str)=>sp?sp:inr!=null?'<span class="nw">× '+inr+'</span>':n!=null?'<span class="nw">× '+n+'</span>':(off>0&&/[\d.,\-–]/.test(str[off-1]))?m:'<span class="nw">'+rg+'</span>');} // (18 r2) sin aserción hacia atrás (Safari < 16.4 no lo entiende y no cargaría la app): el carácter de antes del rango se mira con su posición
 // (16 r2) «antes 8.5 × 11» de los récords: la marca anterior entera en un .nw (partía «8.5 / × 11»); escapa el texto
 function _nwPrev(pv){return esc(pv).replace(/^antes (.+)$/,'antes <span class="nw">$1</span>');}
 // Buffer para undo del último toggleSet (5s window)
@@ -12377,7 +12386,7 @@ function showUndoToast(label,onUndo,cls){
   const el=document.getElementById('toast');
   if(!el)return;
   // (16) «80 kg», «12 reps», «45 s» (y «1RM est. 86.5 kg») no se parten entre líneas (el texto no cambia: solo se envuelven)
-  const lbl=_nwUnits(esc(label));
+  const lbl=_nwX(esc(label)); // (18) y «× 10» de «15 kg × 10» junto
   el.innerHTML=`<span style="margin-right:14px">${lbl}</span><button id="undo-btn" style="background:transparent;border:1px solid var(--green);color:var(--green);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;pointer-events:auto">Deshacer</button>`;
   el.classList.toggle('pr',cls==='pr');
   el.classList.add('show');
@@ -12566,7 +12575,7 @@ function _refreshSugSlot(card,id){
     const slot=card&&card.isConnected?card.querySelector('.sug-slot'):null;
     if(!slot)return;
     const g=getSug(id);
-    slot.innerHTML=g?`<div class="sug ${g.t}">${g.m}</div>`:'';
+    slot.innerHTML=g?`<div class="sug ${g.t}">${_nwX(g.m)}</div>`:'';
   },250);
 }
 function logW(){
@@ -14091,11 +14100,11 @@ function coach_generateInsights(an,pend,resIds){
     insights.push({type:'info',ic:'🌱',t:'Empezando',d:`Necesitas <strong>${CYCLE_MIN_SESSIONS-(S.sessions||[]).length}</strong> ${CYCLE_MIN_SESSIONS-(S.sessions||[]).length===1?'sesión':'sesiones'} más para tu primer análisis completo. Sigue así.`});
   }else{
     if(consistency.rate>=0.95){
-      insights.push({type:'good',ic:'🎯',t:'Constancia impecable',d:`Llevas <strong>${consistency.perWeek}</strong> sesiones/semana (objetivo: ${consistency.target}). Estás entrenando como un profesional.`});
+      insights.push({type:'good',ic:'🎯',t:'Constancia impecable',d:`Llevas <strong>${consistency.perWeek}</strong>${NB}sesiones/semana (objetivo: ${consistency.target}). Estás entrenando como un profesional.`});
     }else if(consistency.rate>=0.75){
-      insights.push({type:'good',ic:'✓',t:'Buena constancia',d:`Vas a <strong>${consistency.perWeek}</strong> sesiones/semana. Si llegas a ${consistency.target} consistentes vas a ver cambios importantes.`});
+      insights.push({type:'good',ic:'✓',t:'Buena constancia',d:`Vas a <strong>${consistency.perWeek}</strong>${NB}sesiones/semana. Si llegas a ${consistency.target} consistentes vas a ver cambios importantes.`});
     }else if(consistency.rate>=0.5){
-      insights.push({type:'warn',ic:'⚠️',t:'Constancia irregular',d:`Solo <strong>${consistency.perWeek}</strong> sesiones/semana. El progreso viene de la regularidad — intenta marcar los ${consistency.target} días en tu calendario.`});
+      insights.push({type:'warn',ic:'⚠️',t:'Constancia irregular',d:`Solo <strong>${consistency.perWeek}</strong>${NB}sesiones/semana. El progreso viene de la regularidad — intenta marcar los ${consistency.target} días en tu calendario.`});
     }else{
       insights.push({type:'bad',ic:'⏳',t:'Pocas sesiones',d:`Solo <strong>${consistency.sessions}</strong> ${consistency.sessions===1?'sesión':'sesiones'} en ${plural(cw,'semana')}. Sin constancia no hay progreso — el cuerpo necesita estímulo regular.`});
     }
@@ -14231,7 +14240,7 @@ function coach_generateInsights(an,pend,resIds){
   if(activeRest){
     // Semana de descanso planificada: mensaje positivo, sin avisos de inactividad
     const dleft=restDaysLeft(activeRest);
-    insights.push({type:'info',ic:'🌴',t:'Semana de descanso',d:`Estás en una semana de descanso planificada${dleft>0?` · quedan <strong class="nw">${dleft} día${dleft!==1?'s':''}</strong>`:''}. El descanso es donde el músculo crece y se previenen lesiones — tu constancia no se penaliza.`});
+    insights.push({type:'info',ic:'🌴',t:'Semana de descanso',d:`Estás en una semana de descanso planificada${dleft>0?` · quedan <strong>${dleft} día${dleft!==1?'s':''}</strong>`:''}. El descanso es donde el músculo crece y se previenen lesiones — tu constancia no se penaliza.`});
   }else{
     const daysSinceLast=coach_daysSinceLastSession();
     if(daysSinceLast!=null){
@@ -14265,7 +14274,7 @@ function coach_detailHtml(an,pv){
     h+=`<div class="rec-card">
       <div class="rec-head"><span class="rec-badge high">Mantener</span><div class="rec-title">No cambies lo que funciona</div></div>
       <div class="rec-body">${keep.length} ejercicio${keep.length!==1?'s':''} progresa${keep.length!==1?'n':''}: mantén ejercicio, series y reps.${hasDeload?' La descarga es temporal: después vuelves a este mismo plan.':''}</div>
-      <div class="rec-diff">${keep.slice(0,4).map(i=>row('✓','add',`${esc(i.ex.n)}: ${i.p.lastre?`lastre ${i.p.lastV!==i.p.firstV?esc(kgTxt(i.p.firstV))+' → ':''}${esc(kgTxt(i.p.lastV))} kg`:`${_progWhat(i.p).sh} ${pctTxt(i.p.pct)}`}${i.p.repsUp?' · más reps, mismo peso':''}`)).join('')}
+      <div class="rec-diff">${keep.slice(0,4).map(i=>row('✓','add',`${esc(i.ex.n)}: ${i.p.lastre?`lastre ${i.p.lastV!==i.p.firstV?esc(kgTxt(i.p.firstV))+' → ':''}${esc(kgTxt(i.p.lastV))}${NB}kg`:`${_progWhat(i.p).sh} ${pctTxt(i.p.pct)}`}${i.p.repsUp?' · más reps, mismo peso':''}`)).join('')}
         ${keep.length>4?row('+','add',`y ${keep.length-4} más`):''}</div>
     </div>`;
   }
@@ -14839,7 +14848,7 @@ function renderCoach(){
     <div class="metric-box">
       <div class="ml">Consistencia</div>
       <div class="mv" style="color:${consistency.rate>=0.75?'var(--green)':consistency.rate>=0.5?'var(--amber)':'var(--red)'}">${consistency.perWeek}</div>
-      <div class="md">sesiones/semana${cw>1?` · ${cw} sem.`:''}</div>
+      <div class="md">sesiones/semana${cw>1?` · ${cw}${NB}sem.`:''}</div>
     </div>
     <div class="metric-box">
       <div class="ml">Progresan</div>
@@ -15885,7 +15894,7 @@ function presTargetHtml(ex,p,compact){
   return`<div class="tgt ${presKCls(p)}">
     <div class="tgt-top">
       <div class="tgt-main"><div class="tgt-l sepw"><span class="sepw-a">🎯 Objetivo de hoy</span> <span class="nw sepw-s"><i class="sep">· </i>${esc(plural(p.sets,'serie'))}</span></div>
-        <div class="tgt-v${p.up||p.dn||p.band?' var':''}">${esc(presValTxt(p))}</div></div>
+        <div class="tgt-v${p.up||p.dn||p.band?' var':''}">${_nwX(esc(presValTxt(p)))}</div></div>
       <button type="button" class="tgt-why-btn" data-ex="${esc(ex.id)}" aria-expanded="${open}" onclick="toggleTgtWhy(this)">¿Por qué? <span aria-hidden="true">${open?'▴':'▾'}</span></button>
     </div>
     <div class="tgt-r"><b>${_nwUnits(esc(p.head))}:</b> ${_nwUnits(esc(p.reason))}</div>${_presVarBtn(ex,p)}
@@ -16081,12 +16090,12 @@ function loadStepsSettingsHtml(){
   <div class="set-section">
     ${Object.keys(LOAD_EQ).map(k=>{const q=LOAD_EQ[k],cur=(S.loadSteps||{})[k]===undefined?'auto':String(S.loadSteps[k]);
       return`<div class="set-row ls-row">
-        <div class="set-row-info"><div class="set-row-t">${esc(q.l)}</div><div class="set-row-d">${esc(q.d)}</div></div>
+        <div class="set-row-info"><div class="set-row-t">${esc(q.l)}</div><div class="set-row-d">${_nwUnits(esc(q.d))}</div></div>
         <select class="ls-sel" data-k="${k}" aria-label="Salto de peso: ${esc(q.l)}" onchange="setLoadStep(this.dataset.k,this.value)">
           <option value="auto"${cur==='auto'?' selected':''}>Auto</option>
           ${q.opts.map(v=>`<option value="${v}"${cur===String(v)?' selected':''}>+${kgTxt(v)} kg</option>`).join('')}
         </select></div>`;}).join('')}
-    <div class="ls-note">Auto: el salto que ya usas en cada ejercicio. Si aún no has subido, el habitual de su equipo (+2.5 kg en barra, máquinas y discos, +1 kg en mancuernas y polea, +4 kg en kettlebell). Sube como mucho un 10 %; con pesos ligeros o pesas fijas (kettlebell, discos), antes suma 2 reps y luego da el salto mínimo de tu equipo.</div>
+    <div class="ls-note">Auto: el salto que ya usas en cada ejercicio. Si aún no has subido, el habitual de su equipo (<span class="nw">+2.5 kg</span> en barra, máquinas y discos, <span class="nw">+1 kg</span> en mancuernas y polea, <span class="nw">+4 kg</span> en kettlebell). Sube como mucho un 10 %; con pesos ligeros o pesas fijas (kettlebell, discos), antes suma <span class="nw">2 reps</span> y luego da el salto mínimo de tu equipo.</div>
   </div>`;
 }
 function setLoadStep(k,v){
@@ -16331,7 +16340,7 @@ function renderHist(){
   if(data.length===0){
     const fresh0=!root.querySelector('.hist-sheet')||root.dataset.ex!==exId;root.dataset.ex=exId;
     root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet" role="dialog" aria-modal="true" aria-label="Ficha de ${esc(ex.n)}">
-      <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${esc(ex.n)}</div><div class="hist-sheet-sub">${esc(ex.eq)}${ex.s&&ex.r&&!ex._orphan?' · '+ex.s+'×'+esc(fmtTargetReps(ex)):''}</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
+      <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${esc(ex.n)}</div><div class="hist-sheet-sub">${esc(ex.eq)}${ex.s&&ex.r&&!ex._orphan?' · '+_nwUnits(esc(ex.s)+'×'+esc(fmtTargetReps(ex))):''}</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
       <div class="hist-sheet-body"><div class="empty"><div class="eic">📊</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
     </div></div>`;
     if(fresh0)_histFocusIn(root);
@@ -16368,14 +16377,15 @@ function renderHist(){
     if(H.kg&&next&&Math.abs(delta)<PR_EPS){const g=_tdGain(d,next);if(g&&g.v){delta=g.v;du=g.lt==='t'?'s':'m';}}
     const band=!H.kg&&next&&delta<0&&_bandUp(bx,next,d);
     // Solo peso × reps se resume en «57.5 kg»; con lastre, tiempo o distancia, todo lo hecho («21 kg · 3×25 m»)
-    // Con lastre, «+15 kg lastre × 8» (no «15 kg», que parecería el peso del ejercicio)
+    // Con lastre, «+15 kg lastre × 8» (no «15 kg», que parecería el peso del ejercicio). (18) «× 8» con espacio duro
+    // (texto suelto en la fila, sin .nw: así lo leen las pruebas y el lector)
     const full=!(H.kg&&mine&&_recLT(d)==='w'),vt=(lastreAny||_recLT(d)==='bw')&&+d.v>0?esc(_lastreTxt(d)):full?esc(_recValTxt(d)):esc(d.v)+' kg';
     const pj=flags[data.length-1-i]||null,isPr=!!pj;
     const sess=d&&typeof d.ts==='number'&&isFinite(d.ts)?findSession(d.ts):null;
     const tapA=sess?` role="button" tabindex="0" data-ts="${d.ts}" onclick="openSessionSummary(+this.dataset.ts)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSessionSummary(+this.dataset.ts)}" aria-label="Sesión del ${esc(d.d)}: ${vt}${isPr?', récord':''}. Ver el resumen"`:'';
     return`<div class="hist-item${isPr?' pr pw':''}${sess?' tap':''}"${tapA}${isPr?` title="${esc(prToastTxt(pj))}"`:''}>
       <div class="hist-item-d">${esc(d.d)}</div>
-      <div class="hist-item-w">${vt}${(()=>{
+      <div class="hist-item-w">${vt.replace(/ × (?=\d)/g,' ×'+NB)}${(()=>{
         // Serie a serie (v18) si el registro la guarda; si no, «3×12» como antes se apuntaba. Sin kilos, solo si las
         // series no son todas iguales (si lo son, ya lo dice «3×45 s»)
         let ln=Array.isArray(d.sets)&&d.sets.length?_setsLine(d.sets):(_setNumR(d.r)&&parseInt(d.setsDone)>0&&!(H.kg&&!mine)?`${parseInt(d.setsDone)}×${_setNumR(d.r)}`:'');
@@ -16402,7 +16412,7 @@ function renderHist(){
     <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
       <div class="hist-sheet-title">${esc(ex.n)}</div>
-      <div class="hist-sheet-sub">${ex._orphan?(_isSubOnly(exId)?'Alternativa «solo hoy» · Solo lectura':'Ya no está en tu rutina · Solo lectura'):esc(ex.eq)+' · '+ex.s+'×'+esc(fmtTargetReps(ex))+' objetivo'}</div>
+      <div class="hist-sheet-sub">${ex._orphan?(_isSubOnly(exId)?'Alternativa «solo hoy» · Solo lectura':'Ya no está en tu rutina · Solo lectura'):esc(ex.eq)+' · '+_nwUnits(esc(ex.s)+'×'+esc(fmtTargetReps(ex)))+' objetivo'}</div>
       <button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
@@ -16448,7 +16458,7 @@ function renderWorkout(){
     // (el peso, «157.5 kg», con espacio duro: no se parte entre el número y «kg»)
     const todayW=sum&&sum.w&&!exDone&&!nk?` · hoy <span class="ex-today">${esc(_kgNB(sum.w))}</span>`:sumV&&!exDone?` · hoy <span class="ex-today">${esc(sumV)}</span>`:'';
     const nx=!ex.cardio&&exDone&&!isLightNow(ex.id)?_nextPres(ex):null;
-    const doneSum=!ex.cardio&&exDone&&sum&&(sum.w||(nk&&sum.sets.length))?`<div class="ex-done-sum">${esc(_setsLine(sum.sets))}${nx?` · próxima <b>${esc(presValTxt(nx))}</b>`:''}</div>`:'';
+    const doneSum=!ex.cardio&&exDone&&sum&&(sum.w||(nk&&sum.sets.length))?`<div class="ex-done-sum">${_nwX(esc(_setsLine(sum.sets)))}${nx?` · próxima <b>${_nwX(esc(presValTxt(nx)))}</b>`:''}</div>`:'';
     let body='';
     if(isOpen&&!ex.cardio){
       // Modo gym: antes de la primera serie, la técnica en grande (animación, consejo, objetivo y calentamiento);
@@ -16461,7 +16471,7 @@ function renderWorkout(){
       // (08) debajo de las series: el descanso entre series de este ejercicio (automático o el elegido)
       const setsHtml=setRowsHtml(ex,pr,rows)+restCtlHtml(ex);
       const la=`<div class="la-slot">${liveAdjHtml(ex,pr)}</div>`;
-      const sugHtml=`<div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${sug.m}</div>`:''}</div>`;
+      const sugHtml=`<div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${_nwX(sug.m)}</div>`:''}</div>`;
       // (11) «¿Máquina ocupada?»: antes de la primera serie, alternativas en un toque (o el aviso del sustituto de hoy)
       const busy=busyBarHtml(ex,nDone);
       body=training
@@ -16471,7 +16481,7 @@ function renderWorkout(){
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}" data-ex="${eid}">
       <div class="exh" role="button" tabindex="0" aria-expanded="${isOpen}" data-ex="${eid}" onclick="toggleCard(this.dataset.ex)" onkeydown="if(event.key==='Enter'){event.preventDefault();toggleCard(this.dataset.ex)}">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${exIconHtml(ex)}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+(pr&&(pr.unit==='kg'||pr.unit==='reps')&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex)))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal ${presKCls(pr)}" role="img" aria-label="Objetivo de hoy: ${_presIsKg(pr)&&!pr.up?`${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones`:esc(presValTxt(pr))}, ${esc(presWord(pr))}"><span class="ex-goal-v">🎯 ${esc(presShortTxt(pr))}</span><span class="ex-goal-k">${presWord(pr)}</span></div>`:''}${doneSum}</div>
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)}${NB}· ${_nwUnits(ex.cardio?esc(ex.r):esc(ex.s)+'×'+(pr&&(pr.unit==='kg'||pr.unit==='reps')&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex))))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal ${presKCls(pr)}" role="img" aria-label="Objetivo de hoy: ${_presIsKg(pr)&&!pr.up?`${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones`:esc(presValTxt(pr))}, ${esc(presWord(pr))}"><span class="ex-goal-v">🎯 ${esc(presShortTxt(pr))}</span><span class="ex-goal-k">${presWord(pr)}</span></div>`:''}${doneSum}</div>
         ${dots}${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${!ex.cardio?body
@@ -16840,7 +16850,7 @@ function mmProgBodyHtml(st){
   }
   const ins=mmInsight(st,mmPlanStats());
   return`${ins?`<div class="mm-ins" id="mm-ins-prog">💡 ${_nwUnits(esc(ins))}</div>`:''}
-    <div class="mm-sub">Series efectivas por semana · ${esc(st.R.lbl)}</div>
+    <div class="mm-sub">Series efectivas por semana · ${_nwUnits(esc(st.R.lbl))}</div>
     <div class="mm-bars">${mmBarsHtml(st,{tap:true,src:'prog'})}</div>
     <div class="mm-foot"><i aria-hidden="true"></i><span>Zona productiva: <span class="nw">${MM_ZONE.lo}–${MM_ZONE.hi} series</span> por semana y grupo. Es una guía orientativa, no una regla. Toca un grupo para ver sus ejercicios.</span></div>`;
 }
@@ -16946,17 +16956,17 @@ function renderMuscleSheet(){
     <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
       <div class="hist-sheet-title">${g.n}</div>
-      <div class="hist-sheet-sub">${plan?`Tu rutina planificada · <span class="nw">${esc(plural(getWeeklyTarget(),'día'))}/semana</span>`:`Series efectivas · ${esc(st.R.lbl)}`}</div>
+      <div class="hist-sheet-sub">${plan?`Tu rutina planificada · <span class="nw">${esc(plural(getWeeklyTarget(),'día'))}/semana</span>`:`Series efectivas · ${_nwUnits(esc(st.R.lbl))}`}</div>
       <button class="hist-sheet-close" onclick="closeMuscleSheet()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
       <div class="mm-sh-top"><div class="mm-sh-v ${cls}">${mmFmt(g.v)}<small> series/semana</small></div><div class="mm-sh-z ${cls}">${mmZoneTxt(g.v)}</div></div>
       <div class="mm-track"><i class="mm-zone" style="left:${pct(MM_ZONE.lo)}%;width:${(pct(MM_ZONE.hi)-pct(MM_ZONE.lo)).toFixed(1)}%"></i><i class="mm-fill ${cls}" style="width:${pct(g.v)}%"></i></div>
       <div class="mm-scale" aria-hidden="true"><span style="left:0;transform:none">0</span><span style="left:${pct(MM_ZONE.lo)}%">${MM_ZONE.lo}</span><span style="left:${pct(MM_ZONE.hi)}%">${MM_ZONE.hi}</span></div>
-      ${pg?`<div class="mm-sh-plan">Tu rutina tiene planificadas <b>${mmFmt(pg.v)}</b> series/semana de ${g.n.toLowerCase()}.</div>`:''}
+      ${pg?`<div class="mm-sh-plan">Tu rutina tiene planificadas <b>${mmFmt(pg.v)}</b>${NB}series/semana de ${g.n.toLowerCase()}.</div>`:''}
       <div class="hist-list-h" style="margin-top:16px">Ejercicios que lo trabajan ${where}</div>
       ${rows||`<div class="mm-empty" style="padding-top:4px">Ningún ejercicio ${where} trabaja ${g.n.toLowerCase()} directamente.</div>`}
-      <div class="mm-note">Cada serie cuenta según cuánto trabaja este grupo el ejercicio: en el remo, los hombros cuentan un 50 %. La zona de ${MM_ZONE.lo}-${MM_ZONE.hi} series por semana es una guía orientativa: empezando, menos también funciona.</div>
+      <div class="mm-note">Cada serie cuenta según cuánto trabaja este grupo el ejercicio: en el remo, los hombros cuentan un 50 %. La zona de <span class="nw">${MM_ZONE.lo}-${MM_ZONE.hi} series</span> por semana es una guía orientativa: empezando, menos también funciona.</div>
       ${act}
     </div>
   </div></div>`;
@@ -17478,7 +17488,7 @@ function _renderSummary(){
   const note=s.note?`<div class="sum-sec">Nota</div><div class="sum-note">«${esc(String(s.note).slice(0,500))}»</div>`:'';
   const foot=`<div class="sum-foot">Tonelaje = kg × reps de cada serie${D.old?' (en registros antiguos, peso × reps × series)':''}. Récord: más peso que nunca, o más reps con ese peso (sin peso: más reps, más tiempo o más distancia); el 1RM estimado usa la fórmula de Epley.</div>`;
   root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeSessionSummary()"><div class="hist-sheet sum-sheet${anim?' sum-anim':''}" id="sum-sheet" role="dialog" aria-modal="true" aria-labelledby="sum-t" data-ts="${+s.ts}">
-    <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title" id="sum-t">${esc(title)}</div><div class="hist-sheet-sub">${esc(sub)}</div><button class="hist-sheet-close" onclick="closeSessionSummary()" aria-label="Cerrar el resumen">✕</button></div>
+    <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title" id="sum-t">${esc(title)}</div><div class="hist-sheet-sub">${_nwUnits(esc(sub))}</div><button class="hist-sheet-close" onclick="closeSessionSummary()" aria-label="Cerrar el resumen">✕</button></div>
     <div class="hist-sheet-body">${kpis}${cmp}${recs}${exs}${eff}${mus}${note}${foot}<button class="btn ${fresh?'bp':'bs'}" id="sum-ok" onclick="closeSessionSummary()">${fresh?'Listo':'Cerrar'}</button></div>
   </div></div>`;
   const fig=root.querySelector('[data-sum-map]');
@@ -19041,14 +19051,14 @@ function recompCardHtml(){
   const nw=wl?'':`<div class="rc-nw"><p class="rc-hint">${d.wAll?'No hay pesadas suficientes en este periodo para la línea del peso.':'Registra tu peso (en «Peso corporal», justo debajo) y lo verás aquí frente a tu fuerza.'}</p></div>`;
   return`<div class="card rc-card" id="prog-rc">
     <div class="rc-k">
-      <div class="rc-kp s"><span>Fuerza</span><b>${_rcPct(sl.p)}<small> %</small></b><em>${plural(d.nEx,'ejercicio')} con kilos</em></div>
+      <div class="rc-kp s"><span>Fuerza</span><b>${_rcPct(sl.p)}<small> %</small></b><em>${_nwUnits(plural(d.nEx,'ejercicio'))} con kilos</em></div>
       <div class="rc-kp w"><span>Peso</span><b>${wl?_rcPct(wl.p)+'<small> %</small>':'—'}</b><em>${wl?_rcKgDelta(wl.kg-d.w[0].kg)+' '+_nwUnits(wRangeLbl(d.w,d.R)):d.wAll?'pocas pesadas':'sin registrar'}</em></div>
     </div>
     <div class="rc-v" id="rc-v">${_rcVerdict(sl.p,wl?wl.p:null)} <span>${_nwUnits(per)}</span></div>
     ${chips}
     <div class="wchart rc-chart">${rcChartSVG(d)}</div>
-    <div class="wc-legend rc-lg"><span><i class="rc-ks"></i>Fuerza</span>${wl?`<span><i class="rc-kw"></i>Peso (tendencia 7 días${_rcDual(d)?' · escala a la derecha':''})</span>`:''}<span><i class="rc-k0"></i>Inicio del periodo</span></div>
-    <p class="rc-hint"><b>Fuerza</b>: media de tu 1RM estimado en cada ejercicio con kilos frente a su primera sesión del periodo (sin semanas ligeras).${wl?' <b>Peso</b>: tendencia de 7 días.':''}${und}</p>
+    <div class="wc-legend rc-lg"><span><i class="rc-ks"></i>Fuerza</span>${wl?`<span><i class="rc-kw"></i>Peso (tendencia 7${NB}días${_rcDual(d)?' · escala a la derecha':''})</span>`:''}<span><i class="rc-k0"></i>Inicio del periodo</span></div>
+    <p class="rc-hint"><b>Fuerza</b>: media de tu 1RM estimado en cada ejercicio con kilos frente a su primera sesión del periodo (sin semanas ligeras).${wl?` <b>Peso</b>: tendencia de 7${NB}días.`:''}${und}</p>
     ${nw}
   </div>`;
 }
@@ -19150,7 +19160,7 @@ function constancyCardHtml(){
   let sum;
   if(!ss.length)sum=`Aún no hay sesiones. Cada entreno pinta su día aquí; entrena <b>${plural(T,'día')}</b> por semana para empezar una racha.`;
   else{
-    sum=`<b>${plural(inWin.length,'sesión','sesiones')}</b> en ${CAL_WEEKS} semanas. Objetivo: <b>${plural(T,'día')}</b> por semana`+(counted?`, cumplido en <b>${met} de ${counted}</b> semanas.`:'.');
+    sum=`<b>${plural(inWin.length,'sesión','sesiones')}</b> en ${CAL_WEEKS} semanas. Objetivo: <b>${plural(T,'día')}</b> por semana`+(counted?`, cumplido en <b>${met} de ${counted}</b>${NB}semanas.`:'.');
     if(nw&&nw.st==='open'&&nw.req>0){const f=nw.req-nw.n;sum+=` Esta semana llevas ${nw.n} de ${nw.req}: ${f===1?'te falta 1':'te faltan '+f} para ${st.cur?'alargar la racha':'empezar una racha'}.`;}
     else if(nw&&nw.st==='met'&&nw.mon===cur)sum+=' Esta semana ya está cumplida. 💪';
     else if(nw&&nw.st==='rest')sum+=' Semana de descanso: no corta la racha.';
@@ -19165,7 +19175,7 @@ function constancyCardHtml(){
   const aria=`Constancia: racha actual ${plural(st.cur,'semana')}, mejor racha ${plural(st.best,'semana')}, objetivo ${plural(T,'día')} por semana.`;
   return`<div class="card cal-card" id="prog-cal" role="group" aria-label="${esc(aria)}">
     <div class="cal-k">${kp(st.cur,'Racha actual',st.cur>0)}${kp(st.best,'Mejor racha',false)}</div>
-    <p class="cal-sum" id="cal-sum">${sum}</p>
+    <p class="cal-sum" id="cal-sum">${_nwUnits(sum)}</p>
     <div class="cal-wrap" role="group" aria-label="Calendario de las últimas ${CAL_WEEKS} semanas, de lunes a domingo" aria-describedby="cal-sum" onkeydown="calKey(event)" onclick="calWrapTap(event)">${cells}</div>
     <div class="cal-lg">${lg}</div>
     <div class="cal-pick" id="cal-pick" aria-live="polite">${pickHtml}</div>
@@ -19288,7 +19298,7 @@ function editExSeries(dayKey,idx,delta){
   if(el)el.textContent=nv;
   // Actualizar el meta text
   const meta=document.querySelector(`#edi_${idx} .edit-ex-meta`);
-  if(meta)meta.innerHTML=_nwUnits(esc(_edMetaTxt(ex)));
+  if(meta)meta.innerHTML=_nwX(esc(_edMetaTxt(ex)));
   mmPlanRefresh(); // el volumen planificado de la cabecera cambia al momento
 }
 
@@ -19312,7 +19322,7 @@ function editExReps(dayKey,idx,delta){
   const el=document.getElementById('rpv_'+idx);
   if(el)el.textContent=nv;
   const meta=document.querySelector(`#edi_${idx} .edit-ex-meta`);
-  if(meta)meta.innerHTML=_nwUnits(esc(_edMetaTxt(ex)));
+  if(meta)meta.innerHTML=_nwX(esc(_edMetaTxt(ex)));
 }
 // Texto de un ejercicio en el editor: «Smith · 3 series × 12 reps · rango 10-12». El rango es el que usa el Coach de
 // carga (el de las tarjetas de Entreno); solo se añade si el plan tiene un número de reps, no un rango ya escrito.
@@ -19849,7 +19859,7 @@ function _busyInfoHtml(a,orig){
   if(a.lib.cardio)h=`Mismo tiempo que tu ${esc(orig.n)}: <b>${esc(String(orig.r||a.lib.r||''))}</b>.`;
   else if(a.hist&&(a.hist.last||_histNoKg(a.hist))){
     const nk=_histNoKg(a.hist),L=nk?a.hist.lastAny:a.hist.last,pr=coach_prescribe(a.hist.key,{ex:_subExFor(a.lib,orig,a.hist.key)});
-    h=`Su último registro: <b>${nk?esc(_recValTxt(L)):`${esc(kgTxt(L.v))} kg${L.r?' × '+esc(L.r):''}`}</b>${L.d?' · '+esc(L.d):''}.${pr?` Hoy: <b>${esc(presValTxt(pr))}</b>.`:''}`;
+    h=`Su último registro: <b>${nk?_nwX(esc(_recValTxt(L))):_nwX(`${esc(kgTxt(L.v))} kg${L.r?' × '+esc(L.r):''}`)}</b>${L.d?' · '+esc(L.d):''}.${pr?` Hoy: <b>${_nwX(esc(presValTxt(pr)))}</b>.`:''}`;
   }else h=a.lib.lt==='t'?'Sin historial: aguanta lo que puedas con buena técnica y apúntalo; desde la próxima vez te diré cuánto aguantar.'
     :a.lib.lt==='d'?'Sin historial: recorre la distancia del plan con buena técnica y apúntala; desde la próxima vez te diré cuánto recorrer.'
     :a.lib.lt==='bw'||a.lib.lt==='r'?'Sin historial: haz las reps que puedas con buena técnica y apúntalas; desde la próxima vez te diré cuántas buscar.'
@@ -20580,7 +20590,7 @@ function _libDetailHtml(e){
   let hh;
   if(last){
     const nk=_histNoKg(hist),L=nk?hist.lastAny:hist.last,recs=nk?[]:(S.strength[hist.key]||[]).filter(r=>r&&typeof r==='object'&&+r.v>0);
-    hh=`Tu historial: <b>${plural(hist.n,'sesión','sesiones')}</b> · último ${last}${L.d?' ('+esc(L.d)+')':''}${recs.length>1?` · mejor ${esc(kgTxt(Math.max(...recs.map(r=>+r.v))))} kg`:''}`
+    hh=`Tu historial: <b>${plural(hist.n,'sesión','sesiones')}</b> · último ${_nwX(last)}${L.d?' ('+esc(L.d)+')':''}${recs.length>1?` · mejor ${esc(kgTxt(Math.max(...recs.map(r=>+r.v))))}${NB}kg`:''}`
       +(recs.length>=2?`<div class="carea">${spark(recs.slice(-10),'var(--green)')}</div>`:'');
   }else hh=e.cardio?'Cardio: elige un ritmo que puedas mantener todo el tiempo.':e.lt!=='w'?'Aún no lo has hecho: céntrate en la técnica y apunta lo que hagas; desde la próxima vez te diré cuánto buscar.':'Aún no lo has hecho: empieza con un peso cómodo y céntrate en la técnica.';
   let acts='',note='';
@@ -20935,7 +20945,7 @@ function renderRoutineEditor(opts){
       <div class="edit-ex-ic exic" aria-hidden="true">${exIconHtml(ex)}</div>
       <div class="edit-ex-info">
         <div class="edit-ex-name">${esc(ex.n)}</div>
-        <div class="edit-ex-meta">${_nwUnits(esc(_edMetaTxt(ex)))}</div>
+        <div class="edit-ex-meta">${_nwX(esc(_edMetaTxt(ex)))}</div>
         ${sub?`<div class="edit-ex-sub">⇄ Hoy: ${esc(sub.n)} · solo hoy</div>`:''}
         ${!isCardio?_srEditorHtml(ex,i):''}
       </div>
@@ -21652,6 +21662,8 @@ function importData(){
                     ['n','eq','tip','ic','r'].forEach(k=>{
                       if(ex[k]!=null)ex[k]=String(ex[k]).slice(0,300);
                     });
+                    // Series: siempre un número (se pinta tal cual en «3×12 reps»)
+                    if(ex.s!=null)ex.s=ex.cardio?1:Math.max(1,Math.min(10,parseInt(ex.s)||3));
                     _slimEx(ex);
                     [ex,_isPlainObj(ex.sub)&&_isPlainObj(ex.sub.orig)?ex.sub.orig:null].forEach(o=>{if(o)_impExId(o,migrated);});
                   });
