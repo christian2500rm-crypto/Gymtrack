@@ -373,6 +373,56 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .metric-box .md{font-size:11px;color:var(--text2);margin-top:2px}
 .metric-box .md.up{color:var(--green)}
 .metric-box .md.down{color:var(--amber)}
+/* (13c) Medidor de fatiga y barras de esfuerzo */
+.fat-card{padding:14px 14px 12px}
+.fat-top{display:flex;justify-content:center}
+.fat-g{width:100%;max-width:230px;height:auto;display:block;overflow:visible}
+.fat-tr{fill:none;stroke:url(#fat-grad);stroke-width:14;stroke-linecap:round;opacity:.22}
+.fat-v{fill:none;stroke:url(#fat-grad);stroke-width:14;stroke-linecap:round}
+.fat-tk{stroke:var(--bg2);stroke-width:2.5}
+.fat-k{fill:var(--bg2);stroke-width:4}
+.fat-sc{font-family:'DM Mono',monospace;font-size:34px;font-weight:600;letter-spacing:-1px}
+.fat-lv{fill:var(--text2);font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:1px}
+.fat-why{font-size:12.5px;color:var(--text);line-height:1.5;text-align:center;margin:6px 4px 10px}
+.fat-main{color:var(--text2)}
+.fat-fs{list-style:none;margin:0;padding:0;border-top:1px solid var(--border)}
+.fat-f{display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.fat-fd{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.fat-fb{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.fat-fl{font-size:12.5px;font-weight:600;color:var(--text)}
+.fat-fv{font-size:11.5px;color:var(--text2);line-height:1.4;overflow-wrap:anywhere}
+.fat-f.off .fat-fl,.fat-f.off .fat-fv{color:var(--text2)}
+.fat-fp{position:relative;font-family:'DM Mono',monospace;font-size:13px;font-weight:600;color:var(--text);flex-shrink:0;min-width:40px;text-align:right}
+.fat-fp small{font-size:10px;color:var(--text2);font-weight:500}
+.fat-how{margin:8px 0 2px;font-size:11.5px;color:var(--text2)}
+.fat-how summary{cursor:pointer;min-height:44px;display:flex;align-items:center;color:var(--text2);font-weight:600;list-style:none}
+.fat-how summary::-webkit-details-marker{display:none}
+.fat-how summary::after{content:'›';margin-left:7px;font-size:15px;line-height:1;transition:transform .2s}
+.fat-how[open] summary::after{transform:rotate(90deg)}
+@media (prefers-reduced-motion:reduce){.fat-how summary::after{transition:none}}
+.fat-how p{margin:0 0 6px;line-height:1.5}
+.fat-sub{font-size:10px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin:6px 0 10px}
+.fat-bars{display:flex;align-items:stretch;gap:5px;height:118px}
+.fat-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:stretch}
+.fat-n{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);text-align:center;margin-bottom:3px;line-height:1}
+.fat-col.empty .fat-n{color:var(--text2)}
+.fat-st{display:flex;flex-direction:column;border-radius:4px 4px 2px 2px;overflow:hidden;gap:1px;min-height:4px}
+.fat-st i{display:block;min-height:1px}
+.fat-st .r1{background:var(--green)}.fat-st .r2{background:var(--amber)}.fat-st .r3{background:var(--red)}.fat-st .r0{background:var(--text4)}
+.fat-st.none{height:4px;border:1px dashed var(--border2);border-radius:2px;background:none}
+.fat-col.now .fat-n{color:var(--text)}
+.fat-bl{display:flex;gap:5px;margin-top:5px}
+.fat-bl span{flex:1 1 0;min-width:0;text-align:center;font-size:9.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:clip;display:flex;flex-direction:column;align-items:center;line-height:1.25}
+.fat-bl span.now{color:var(--text);font-weight:600}
+.fat-bl i{font-style:normal;font-size:10px}
+.fat-lg{margin-top:10px}
+.fat-empty{font-size:12px;color:var(--text2);line-height:1.5;padding:4px 0 2px}
+@media (max-width:359px){.fat-bars,.fat-bl{gap:3px}.fat-bl span{font-size:9px;letter-spacing:-.3px}.fat-f{gap:8px}}
+.fat-go{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin:-2px 0 10px;padding:0 12px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);color:var(--blue-hi);font:inherit;font-size:13px;font-weight:600;cursor:pointer}
+.fat-go:active{transform:scale(.98)}
+.fat-go:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.fat-go:active{transform:none}}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 /* coach tab adjustment */
 .botbar.coach-enabled{padding:0}
 .botbar.coach-enabled .bb{font-size:9.5px}
@@ -669,6 +719,34 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .dl-banner-d{font-size:12px;color:var(--text2);line-height:1.45;margin-top:2px}
 .dl-banner-btn{flex-shrink:0;min-height:44px;padding:0 12px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);font-size:12px;font-weight:600;color:var(--text)}
 .dl-banner-btn:active{transform:scale(.97)}
+/* (13e) Semana de descanso en menta (🌴), como en Ajustes y en el calendario de Progreso; la descarga sigue en azul (🧘) */
+.dl-when{white-space:nowrap}
+.dl-banner.rest{background:color-mix(in srgb,var(--green) 8%,transparent);border-color:var(--green-b)}
+.dl-banner.rest .dl-banner-t{color:var(--green-hi)}
+.tgl-ic.k-deload.k-rest,.hoy-tg.k-deload.k-rest{background:var(--green-bg);color:var(--green-hi)}
+.hoy-tg.k-deload.k-rest{border-color:var(--green-b);color:var(--green-hi2)}
+.k-deload.k-rest .ex-goal-k,.tgt.k-deload.k-rest .tgt-r b{color:var(--green-hi)}
+.tgt.k-deload.k-rest{border-color:var(--green-b);background:color-mix(in srgb,var(--green) 6%,transparent)}
+/* (13b) Ajustes → «Descarga o descanso»: dos opciones grandes con su explicación */
+.rc-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:12px}
+.rc-opt{display:flex;gap:12px;align-items:flex-start;width:100%;min-height:44px;padding:13px 14px;text-align:left;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font:inherit;cursor:pointer}
+.rc-opt:active{transform:scale(.985);background:var(--bg4)}
+.rc-opt:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.rc-ic{font-size:22px;line-height:1.1;flex-shrink:0}
+.rc-b{display:flex;flex-direction:column;gap:3px;min-width:0}
+.rc-t{font-size:14.5px;font-weight:600;color:var(--blue-hi)}
+.rc-opt[data-k="rest"] .rc-t{color:var(--green-hi)}
+.rc-d{font-size:12.5px;color:var(--text2);line-height:1.45}
+.rc-cancel{width:100%}
+.rc-plan{margin:8px 0 10px}
+/* (13e) La descarga es un bloque (plan + «Empezar descarga»), no un botón: no se encoge al tocarlo */
+.rc-dl{cursor:default}
+.rc-dl:active{transform:none;background:var(--bg3)}
+.rc-dl .rc-b{flex:1}
+.rc-go{width:100%}
+.rc-note{display:block;margin:0 0 10px;font-size:12px;line-height:1.45;color:var(--text2)}
+@media (max-width:359px){.rc-dl{gap:9px;padding:12px 11px}.rc-dl .rc-plan{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:reduce){.rc-opt:active{transform:none}}
 .dl-tag{color:var(--blue-hi)}
 .coach-over{font-size:12px;color:var(--amber);margin-top:3px;line-height:1.4}
 .coach-cycle-sub{font-size:11px;color:var(--text3);margin-top:3px;line-height:1.45}
@@ -681,6 +759,38 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .coach-entry-t small{display:block;font-size:11px;font-weight:400;color:var(--text2);margin-top:2px}
 .coach-entry-go{flex-shrink:0;font-size:12px;font-weight:600;color:var(--green)}
 .legacy-dl{border-color:color-mix(in srgb,var(--amber) 35%,transparent);background:color-mix(in srgb,var(--amber) 5%,transparent)}
+/* (13d) Recomendación «Semana de descarga» (Coach) y su entrada en Inicio */
+.dlr-entry{background:color-mix(in srgb,var(--blue) 7%,transparent);border-color:color-mix(in srgb,var(--blue) 32%,transparent)}
+.dlr-entry .coach-entry-go{color:var(--blue-hi)}
+.dlr-card{padding:14px;border-color:color-mix(in srgb,var(--blue) 32%,transparent);background:color-mix(in srgb,var(--blue) 6%,var(--bg2));scroll-margin-top:12px}
+.dlr-h{display:flex;gap:11px;align-items:center}
+.dlr-ic{font-size:24px;line-height:1;flex-shrink:0}
+.dlr-hb{min-width:0;flex:1}
+.dlr-tag{font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:.8px;color:var(--blue-hi);line-height:1.35}
+.dlr-tag.hot{color:var(--amber-hi)}
+.dlr-t{font-size:17px;font-weight:700;color:var(--text);line-height:1.3;margin-top:1px}
+.dlr-why{font-size:13px;color:var(--text);line-height:1.5;margin:9px 0 10px}
+.dlr-dates{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:12px;color:var(--text2);line-height:1.45;padding:8px 10px;border-radius:var(--rsm);background:var(--inset);margin-bottom:10px}
+.dlr-dates b{color:var(--text);font-weight:600;white-space:nowrap}
+.dlr-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.dlr-opt{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;min-height:44px;padding:10px 11px;text-align:left;border-radius:var(--rsm);background:var(--bg3);border:1.5px solid var(--border2);color:var(--text);font:inherit;cursor:pointer}
+.dlr-opt:active{transform:scale(.98)}
+.dlr-opt:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){.dlr-opt:active{transform:none}}
+.dlr-opt.on{border-color:var(--green);background:var(--green-bg)}
+.dlr-opt-t{font-size:13.5px;font-weight:700;line-height:1.3}
+.dlr-opt.on .dlr-opt-t::before{content:'✓ ';color:var(--green-hi)}
+.dlr-opt-d{font-size:11.5px;color:var(--text2);line-height:1.4}
+.dlr-prev{list-style:none;margin:0 0 8px;padding:0;border-top:1px solid var(--border)}
+.dlr-prev li{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12.5px}
+.dlr-prev li.more{color:var(--text2);font-size:11.5px;justify-content:flex-start}
+.dlr-pn{min-width:0;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dlr-pv{flex-shrink:0;font-family:'DM Mono',monospace;font-size:11.5px;color:var(--blue-hi);white-space:nowrap}
+.dlr-note{font-size:11.5px;color:var(--text2);line-height:1.5;margin:0 0 12px}
+.dlr-acts{display:flex;gap:8px}
+.dlr-acts .dlr-go{flex:1;min-width:0}
+.dlr-acts .dlr-later{width:112px;flex-shrink:0}
+@media(max-width:340px){.dlr-acts .dlr-later{width:96px}.dlr-acts .btn{font-size:14px;padding:13px 8px}.dlr-opt{padding:9px}}
 .legacy-dl-t{font-size:14px;font-weight:600;margin-bottom:4px}
 .legacy-dl-d{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px}
 
@@ -951,8 +1061,9 @@ button.mm-row:active{background:rgba(255,255,255,.03)}
 .sc-pt.lt{fill:var(--inset);stroke:var(--c);stroke-width:1.4}
 .sc-pr{fill:var(--pr);stroke:var(--inset);stroke-width:1.6}
 .sc-pr.lt{fill:var(--inset);stroke:var(--pr);stroke-width:2.2}
-.sc-band rect{fill:color-mix(in srgb,var(--blue) 13%,transparent)}
-.sc-band.dl rect{fill:color-mix(in srgb,var(--amber) 13%,transparent)}
+/* (13 r1) descarga en azul, como en el resto de la app; descanso en menta (🌴, como en Ajustes) */
+.sc-band rect{fill:color-mix(in srgb,var(--green) 11%,transparent)}
+.sc-band.dl rect{fill:color-mix(in srgb,var(--blue) 13%,transparent)}
 .sc-bl{font-size:10px;fill:var(--text2);font-family:'DM Sans',sans-serif;paint-order:stroke;stroke:var(--inset);stroke-width:3px;stroke-linejoin:round}
 .sc-u{font-family:'DM Sans',sans-serif}
 .sc-lastv{fill:var(--text)}
@@ -965,8 +1076,8 @@ button.mm-row:active{background:rgba(255,255,255,.03)}
 .sc-k1{width:14px;height:2.5px;border-radius:2px;display:inline-block}
 .sc-k2{width:14px;height:0;border-top:2px dashed var(--text2);display:inline-block}
 .sc-kpr{width:8px;height:8px;border-radius:50%;background:var(--pr);display:inline-block}
-.sc-kb{width:12px;height:10px;border-radius:2px;display:inline-block;background:color-mix(in srgb,var(--blue) 30%,transparent)}
-.sc-kb.dl{background:color-mix(in srgb,var(--amber) 30%,transparent)}
+.sc-kb{width:12px;height:10px;border-radius:2px;display:inline-block;background:color-mix(in srgb,var(--green) 28%,transparent)}
+.sc-kb.dl{background:color-mix(in srgb,var(--blue) 30%,transparent)}
 .sc-kcut{width:0;height:10px;border-left:1px dashed var(--text3);display:inline-block}
 .hist-chart-empty{font-size:12px;color:var(--text3);margin:0 2px 14px}
 .hist-chart-empty:empty{display:none}
@@ -1046,7 +1157,7 @@ button.card.pl-w:focus-visible{outline:2px solid var(--green);outline-offset:2px
 .cal-c.on{background:var(--dc);cursor:pointer}
 .cal-c.on:active{transform:scale(.85)}
 .cal-c.on.old{cursor:default;transform:none}
-.cal-c.rest{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--blue) 55%,transparent) 0 1.5px,var(--bg3) 1.5px 3.5px)}
+.cal-c.rest{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--green) 55%,transparent) 0 1.5px,var(--bg3) 1.5px 3.5px)}
 .cal-c.fut{background:none;box-shadow:inset 0 0 0 1px var(--border)}
 .cal-c.today{outline:1.5px solid var(--text);outline-offset:1px;position:relative;z-index:1}
 button.cal-c:focus-visible{outline:2px solid var(--green);outline-offset:1px;position:relative;z-index:2}
@@ -1054,11 +1165,11 @@ button.cal-c:focus-visible{outline:2px solid var(--green);outline-offset:1px;pos
 .cal-w{display:block;height:3px;border-radius:2px;background:none}
 .cal-w.wk-ok{background:var(--text3)}
 .cal-w.wk-ok.wk-cur{background:var(--green)}
-.cal-w.wk-rest{background:color-mix(in srgb,var(--blue) 45%,transparent)}
+.cal-w.wk-rest{background:repeating-linear-gradient(90deg,color-mix(in srgb,var(--green) 60%,transparent) 0 3px,transparent 3px 5px)} /* (13e r1) descanso en menta, discontinuo: no se confunde con la racha */
 .cal-lg{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:10px;font-size:11px;color:var(--text2)}
 .cal-lg>span{display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
 .cal-lg i{display:inline-block;width:9px;height:9px;border-radius:2px;flex-shrink:0}
-.cal-lg i.rest{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--blue) 55%,transparent) 0 1.5px,var(--bg3) 1.5px 3.5px)}
+.cal-lg i.rest{background:repeating-linear-gradient(135deg,color-mix(in srgb,var(--green) 55%,transparent) 0 1.5px,var(--bg3) 1.5px 3.5px)}
 .cal-lg i.today{outline:1.5px solid var(--text);outline-offset:-1.5px;background:var(--bg4)}
 .cal-lg i.wk{height:3px;width:12px;background:var(--text3)}.cal-lg i.wk.cur{background:var(--green)}
 .cal-lg b{font-family:'DM Mono',monospace;font-weight:600;color:var(--text)}
@@ -1181,7 +1292,7 @@ button.cal-c:focus-visible{outline:2px solid var(--green);outline-offset:1px;pos
 .hoy.k-extra{border-color:var(--border2);background:var(--bg2)}
 .hoy.k-live{border-color:color-mix(in srgb,var(--amber) 42%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--amber) 8%,transparent),color-mix(in srgb,var(--amber) 0%,transparent) 150px),var(--bg2)}
 .hoy.k-done{background:linear-gradient(180deg,var(--green-bg),color-mix(in srgb,var(--green) 0%,transparent) 170px),var(--bg2)}
-.hoy.k-rest{border-color:color-mix(in srgb,var(--blue) 35%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--blue) 10%,transparent),color-mix(in srgb,var(--blue) 0%,transparent) 170px),var(--bg2)}
+.hoy.k-rest{border-color:var(--green-b);background:linear-gradient(180deg,var(--green-bg),color-mix(in srgb,var(--green) 0%,transparent) 170px),var(--bg2)}
 .hoy .dl-banner{margin:0 0 12px}
 .dl-banner.cmp{gap:9px;margin:0 0 10px;padding:2px 2px 2px 11px}
 .dl-banner.cmp .dl-banner-ic{font-size:17px}
@@ -1190,7 +1301,7 @@ button.cal-c:focus-visible{outline:2px solid var(--green);outline-offset:1px;pos
 .dl-banner.cmp .dl-banner-btn{background:none;border-color:transparent;color:var(--blue-hi);padding:0 10px}
 .hoy-k{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--green)}
 .hoy-k span{font-weight:500;letter-spacing:.3px;text-transform:none;color:var(--text2);font-size:11.5px}
-.k-extra .hoy-k{color:var(--text2)}.k-live .hoy-k{color:var(--amber)}.k-rest .hoy-k{color:var(--blue-hi)}
+.k-extra .hoy-k{color:var(--text2)}.k-live .hoy-k{color:var(--amber)}.k-rest .hoy-k{color:var(--green-hi)}
 .hoy-t{display:flex;align-items:center;gap:9px;margin-top:7px;min-width:0}
 .hoy-t .pill{flex-shrink:0}
 .hoy-nm{flex:1;min-width:0;font-size:19px;font-weight:600;letter-spacing:-.3px;line-height:1.2;overflow-wrap:anywhere}
@@ -8674,7 +8785,10 @@ function getActiveWorkout(){
   return {day,startTs,strDone:mc.strDone,strTotal:mc.strTotal,setsDone:mc.setsDone,setsTotal:mc.setsTotal,label:plan[day].label,focus:plan[day].focus};
 }
 
-// ── SEMANA DE DESCANSO (deload planificado) ──────────────────
+// ── SEMANA DE DESCANSO (descanso de verdad: 7 días sin entrenar) ──────────────────
+// (13b) No es una descarga: S.restWeeks solo guarda periodos sin entrenar (no cambia el plan). La descarga (entrenar
+// con menos series) es S.deload, más abajo. Las dos se eligen en el mismo sitio (Ajustes → «Descarga o descanso») y
+// nunca a la vez: empezar el descanso termina la descarga y, durante el descanso, no se empieza ninguna.
 // Periodo de descanso que cubre AHORA, o null.
 function getActiveRest(){
   const now=Date.now();
@@ -8718,6 +8832,11 @@ function restWeeksInWindow(fromTs,toTs){
 // Una descarga es «mismo peso, menos series»: en Entreno no se sugiere subir peso mientras dura.
 const DELOAD_MS=7*86400000;
 function _startOfDay(ts){const d=new Date(ts);d.setHours(0,0,0,0);return d.getTime();}
+// (13a) n días de calendario después (hora local). Con un cambio de hora en medio, 7 días no son 7×24 h: la medianoche
+// sigue siendo medianoche (antes el fin caía a las 23:00 o a la 01:00).
+function _addDaysLocal(ts,n){const d=new Date(ts);d.setDate(d.getDate()+n);return d.getTime();}
+// Fin de una descarga que empieza en ts: la medianoche local de dentro de 7 días
+function _deloadEndFrom(ts){return _addDaysLocal(_startOfDay(ts),7);}
 function _validDeload(d){
   if(!_isPlainObj(d)||(d.kind!=='all'&&d.kind!=='ex'))return false;
   if(typeof d.startTs!=='number'||typeof d.endTs!=='number'||!isFinite(d.startTs)||!isFinite(d.endTs))return false;
@@ -8735,7 +8854,11 @@ function _sanitizeDeloadHistory(h){
     .slice(-30);
 }
 function getActiveDeload(){return _validDeload(S.deload)?S.deload:null;}
-function deloadAppliesTo(exId){const d=getActiveDeload();if(!d)return false;if(d.changes.some(c=>c.exId===exId))return true;
+// (13a) Descarga de todo el plan: TODOS los ejercicios de fuerza van ligeros (los de 1 serie, que no bajan, y los
+// cambiados o añadidos durante la descarga también): ninguno sube peso, reps, tiempo ni distancia. Solo el cardio no.
+function deloadAppliesTo(exId){const d=getActiveDeload();if(!d)return false;
+  if(d.kind==='all'){const ex=findExInPlan(exId);return !(ex&&ex.cardio);}
+  if(d.changes.some(c=>c.exId===exId))return true;
   // (11) el sustituto «solo hoy» de un ejercicio en descarga también va ligero
   const o=_subOrigId(exId);return !!(o&&d.changes.some(c=>c.exId===o));}
 // Semana «ligera» para un ejercicio ahora: una descarga que lo incluye o una semana de descanso (coach_prescribe no sube)
@@ -8745,28 +8868,84 @@ function _lightAt(exId,ts){
   if(typeof ts!=='number'||!isFinite(ts))return false;
   if(Array.isArray(S.restWeeks)&&S.restWeeks.some(r=>r&&r.startTs!=null&&r.endTs!=null&&ts>=r.startTs&&ts<r.endTs))return true;
   const d=S.deload;
-  if(_validDeload(d)&&ts>=d.startTs&&d.changes.some(c=>c.exId===exId))return true;
+  if(_validDeload(d)&&ts>=d.startTs&&(d.kind==='all'||d.changes.some(c=>c.exId===exId)))return true;
   return Array.isArray(S.deloadHistory)&&S.deloadHistory.some(h=>h&&ts>=h.startTs&&ts<h.endTs&&(!Array.isArray(h.exIds)||h.exIds.includes(exId)));
 }
-// kind 'all': todas las series de fuerza a la mitad (mín. 1). kind 'ex': una serie menos en esos ejercicios.
-function startDeload(kind,exIds,label){
+// kind 'all': todo el plan, con uno de sus dos planes (13d):
+//   · plan 'sets' (por defecto): −40 % de series (mín. 1), mismo peso.
+//   · plan 'weight': mismas series y −15 % de la carga (DELOAD_LOAD): kilos en peso × reps; en los de tiempo o distancia,
+//     sus kilos si los llevan y, si no, segundos o metros. Lo que no tiene carga que bajar (peso corporal, bandas) va con
+//     −40 % de series. Cada ejercicio de fuerza lleva su cambio (los de carga con m:'load' y from = to), para que el
+//     historial, las bandas de Progreso y el cambio de ejercicio lo sigan igual que en el plan de series.
+// kind 'ex': una serie menos en esos ejercicios.
+const DELOAD_SETS=0.6,DELOAD_LOAD=0.85;
+function _dlSetsTo(from){return Math.max(1,Math.round(from*DELOAD_SETS));}
+function _dlPlanOf(d){return !d?null:d.kind==='ex'?'ex':d.plan==='weight'?'weight':'sets';}
+function startDeload(kind,exIds,label,plan){
   if(getActiveDeload())_restoreDeload(true); // una sola a la vez
-  const now=Date.now(),plan=getPlan(),changes=[];
-  Object.keys(plan).forEach(dk=>{
-    const day=plan[dk];if(!day||!Array.isArray(day.ex))return;
+  const now=Date.now(),P=getPlan(),changes=[],wp=kind!=='ex'&&plan==='weight';
+  Object.keys(P).forEach(dk=>{
+    const day=P[dk];if(!day||!Array.isArray(day.ex))return;
     day.ex.forEach(ex=>{
       if(!ex||ex.cardio)return;
       if(kind==='ex'&&!(exIds||[]).includes(ex.id))return;
-      const from=Math.max(1,Math.min(10,parseInt(ex.s)||3));
-      const to=kind==='all'?Math.max(1,Math.round(from/2)):Math.max(1,from-1);
-      if(to===from)return;
+      const from=Math.max(1,Math.min(10,parseInt(ex.s)||3)),lt=exLT(ex);
+      if(lt==='c')return;
+      if(wp&&(lt==='w'||lt==='t'||lt==='d')){changes.push({exId:ex.id,day:dk,from,to:from,m:'load'});return;}
+      const to=kind==='ex'?Math.max(1,from-1):_dlSetsTo(from);
+      if(to===from){if(wp)changes.push({exId:ex.id,day:dk,from,to});return;}
       ex.s=to;changes.push({exId:ex.id,day:dk,from,to});
     });
   });
   if(!changes.length)return null;
-  S.deload={id:'dl_'+now,kind:kind==='ex'?'ex':'all',startTs:now,endTs:_startOfDay(now)+DELOAD_MS,label:String(label||'').slice(0,120),changes};
+  S.deload={id:'dl_'+now,kind:kind==='ex'?'ex':'all',startTs:now,endTs:_deloadEndFrom(now),label:String(label||'').slice(0,120),changes};
+  if(kind!=='ex')S.deload.plan=wp?'weight':'sets';
+  // (13 r1) Con «Menos peso», el que no puede bajar la carga con los saltos de su equipo (kettlebell de 8 kg, mancuernas
+  // ligeras, 5 s de plancha) no se queda igual: baja series, como el plan de series.
+  if(wp)changes.forEach(c=>{if(c.m!=='load'||!_dlNoLoadCut(c.exId))return;
+    const day=P[c.day],ex=day&&Array.isArray(day.ex)?day.ex.find(e=>e&&e.id===c.exId):null,to=_dlSetsTo(c.from);
+    delete c.m;if(ex&&to<c.from){ex.s=to;c.to=to;}});
   saveState();
   return S.deload;
+}
+// (13 r1) Con la descarga actual de «Menos peso», ¿este ejercicio se queda sin bajar carga? (tiene cifra, pero un salto
+// menos sería demasiado). Sin historial no se sabe: sigue con carga (la vista previa dice «−15 % de peso»).
+function _dlNoLoadCut(exId){
+  let p=null;try{p=coach_prescribe(exId);}catch(e){return false;}
+  return !!(p&&p.kind==='deload'&&p.dlFrom==null&&(p.weight>0||p.t>0||p.m>0));
+}
+// (13 r1) ¿La descarga en marcha le bajó las series a este ejercicio (o al original de un «solo hoy»)? Los de 1 serie y
+// los añadidos durante la descarga van ligeros con sus series: su texto dice «más suave», no «con menos series».
+function _dlFewerSets(exId){
+  const d=getActiveDeload();if(!d)return false;
+  const o=_subOrigId(exId),c=d.changes.find(x=>x.exId===exId)||(o&&d.changes.find(x=>x.exId===o));
+  return !!(c&&c.to<c.from);
+}
+// (13 r1) Lo que de verdad baja un ejercicio con «Menos peso»: «15 %», o el real si el salto de tu equipo da otro
+function _dlPctTxt(from,to){const p=from>0&&to>=0?Math.round((1-to/from)*100):15;return(p>0?p:15)+NB+'%';}
+// (13d) ¿Hoy toca bajar la carga de este ejercicio (plan 'weight')? Su cambio lo dice; uno añadido o cambiado durante la
+// descarga sin cambio propio, si se mide con carga (peso × reps, tiempo o distancia).
+function _dlLoadMode(exId){
+  const d=getActiveDeload();if(!d||d.kind!=='all'||d.plan!=='weight')return false;
+  const o=_subOrigId(exId),c=d.changes.find(x=>x.exId===exId)||(o&&d.changes.find(x=>x.exId===o));
+  if(c)return c.m==='load';
+  const ex=findExInPlan(exId);if(!ex||ex.cardio)return false;
+  const lt=exLT(ex);return lt==='w'||lt==='t'||lt==='d';
+}
+// −15 % de unos kilos con los saltos de tu equipo: el salto más cercano, al menos uno menos. null si bajar un salto ya
+// es más de un 30 % (un disco de 2.5 kg sobre 5 kg): entonces mismo peso.
+function _dlLessKg(w,step){
+  if(!(w>0))return null;step=step>0?step:2.5;
+  let t=Math.round(w*DELOAD_LOAD/step)*step;
+  if(t>=w-1e-9)t=w-step;
+  t=_r2(t);
+  return t>0&&t>=w*0.7-1e-9?t:null;
+}
+// −15 % de segundos o metros, redondeado a su salto (5 s, 10 m…), al menos un salto menos
+function _dlLessTD(v,lt){
+  if(!(v>0))return v;const st=(lt==='t'?_tStep:_dStep)(v);
+  let t=Math.round(v*DELOAD_LOAD/st)*st;if(t>=v)t=v-st;
+  return Math.max(st,t);
 }
 // Devuelve las series originales. Si se termina en la primera hora, cuenta como cancelada (sin historial).
 function _restoreDeload(early){
@@ -8777,21 +8956,170 @@ function _restoreDeload(early){
     const now=Date.now();
     if(!(early&&now-d.startTs<3600000)){
       if(!Array.isArray(S.deloadHistory))S.deloadHistory=[];
-      S.deloadHistory.push({id:d.id||null,kind:d.kind,startTs:d.startTs,endTs:Math.min(now,d.endTs),plannedEndTs:d.endTs,early:!!early,exIds:d.changes.map(c=>c.exId)});
+      // (13 r1) Todo el plan: exIds null = todos los ejercicios (también los de 1 serie y los añadidos durante la
+      // descarga, que fueron ligeros: _lightAt y las franjas de Progreso dicen lo mismo)
+      S.deloadHistory.push({id:d.id||null,kind:d.kind,startTs:d.startTs,endTs:Math.min(now,d.endTs),plannedEndTs:d.endTs,early:!!early,exIds:d.kind==='all'?null:d.changes.map(c=>c.exId)});
       if(S.deloadHistory.length>30)S.deloadHistory=S.deloadHistory.slice(-30);
     }
   }
   S.deload=null;
   return true;
 }
+// (13a) La descarga sigue a tu rutina si la cambias mientras dura. Al cambiar un ejercicio (editor, «Cambiar en la
+// rutina», «Cambiar a …», propuesta de cambio) su cambio pasa al nuevo, con sus series de verdad (from): al terminar, el
+// nuevo vuelve a ellas. Si el nuevo no lleva las series de la descarga (las cambiaste a mano, o es cardio), el cambio se
+// va. Al quitar un ejercicio, su cambio se va. Si no queda ninguno, la descarga termina. Devuelve 'end' si terminó.
+function _deloadDropChange(c){
+  const d=getActiveDeload();if(!d)return false;
+  if(d.changes.length<=1&&d.changes[0]===c){_restoreDeload(true);return'end';}
+  d.changes=d.changes.filter(x=>x!==c);return true;
+}
+function _deloadFollowSwap(oldId,nx,dk){
+  const d=getActiveDeload();if(!d||!nx||oldId===nx.id)return false;
+  const c=d.changes.find(x=>x.exId===oldId);if(!c)return false;
+  d.changes=d.changes.filter(x=>x===c||x.exId!==nx.id); // (nunca debería haber otro con el id nuevo)
+  if(nx.cardio||(parseInt(nx.s)||0)!==c.to)return _deloadDropChange(c);
+  c.exId=nx.id;if(dk)c.day=dk;
+  // (13 r1) «Menos peso» y el nuevo no tiene carga que bajar (peso corporal, bandas) o no puede bajarla con sus saltos:
+  // baja series, como haría la descarga si hubiera empezado con él
+  if(c.m==='load'){const lt=exLT(nx);
+    if(!(lt==='w'||lt==='t'||lt==='d')||_dlNoLoadCut(nx.id)){const to=_dlSetsTo(c.from);delete c.m;if(to<c.from){nx.s=to;c.to=to;}}}
+  return true;
+}
+function _deloadDropEx(exId){
+  const d=getActiveDeload();if(!d)return false;
+  const c=d.changes.find(x=>x.exId===exId);
+  return c?_deloadDropChange(c):false;
+}
+// (13b) Una sola descarga, un solo vocabulario. Todo el plan: «Semana de descarga» (−40 % de series y mismo peso, o
+// mismas series y −15 % de peso: 13d). Un
+// ejercicio (el retroceso de uno solo): «Descarga en X» (una serie menos, mismo peso). Mismo nombre en la propuesta
+// del Coach, en Ajustes, en el aviso (Inicio, Entreno y Coach), en sus toasts y al terminar. Siempre 7 días, vuelve sola.
+const DELOAD_PLAN_TXT={sets:'−40 % de series, mismo peso',weight:'mismas series, −15 % de peso',ex:'una serie menos, mismo peso'};
+DELOAD_PLAN_TXT.all=DELOAD_PLAN_TXT.sets; // (descargas de antes, sin plan)
+// Plan de una descarga en texto («−40 % de series, mismo peso»)
+function deloadPlanTxt(d){return DELOAD_PLAN_TXT[_dlPlanOf(d)]||'';}
+function _capTxt(t){return t?t[0].toUpperCase()+t.slice(1):t;}
+function deloadTitle(d){
+  if(!d)return'';
+  if(d.kind==='all')return'Semana de descarga';
+  const ex=d.changes&&d.changes[0]?findExInPlan(d.changes[0].exId):null;
+  return'Descarga en '+(ex?ex.n:'un ejercicio');
+}
+// Toast al empezarla (propuesta del Coach o Ajustes)
+function deloadStartTxt(d){
+  if(d.kind==='all')return`🧘 Semana de descarga: ${deloadPlanTxt(d)} · ${deloadBackOnTxt(d)}`;
+  const c=d.changes[0];return`🧘 ${deloadTitle(d)}: ${_nSeries(c.to)} · ${deloadBackOnTxt(d)}`;
+}
+// (13e) Fechas de la descarga: un solo formato («dom 8 nov», mes en minúscula) y una sola frase para el final. La
+// descarga acaba a las 00:00 de endTs, así que ese día ya es normal: «tu plan vuelve el dom 8 nov» (nunca «hasta el»).
+const DL_WD=['dom','lun','mar','mié','jue','vie','sáb'];
+function _dlDayTxt(ts){const d=new Date(ts);return DL_WD[d.getDay()]+' '+d.getDate()+' '+MONTHS[d.getMonth()].toLowerCase();}
+function deloadBackOnTxt(d){return'tu plan vuelve el '+deloadEndTxt(d);}
+// (13 r1) Qué vuelve al terminar, según el plan: las series («Menos series», «Descarga en X») o los pesos («Menos peso»;
+// y las series de lo que no tenía peso que bajar). El mismo texto al terminar antes, al caducar, al quitar el último
+// ejercicio en descarga y al empezar un descanso.
+function deloadBackTxt(d){
+  if(_dlPlanOf(d)!=='weight')return'tu plan vuelve a sus series';
+  return(d.changes||[]).some(c=>c&&c.to<c.from)?'vuelves a tus pesos y series de siempre':'vuelves a tus pesos de siempre';
+}
+// (13e) El mismo aviso (con 🧘) al terminarla antes y al caducar
+function deloadEndMsg(d){return'🧘 Descarga terminada · '+deloadBackTxt(d);}
 function endDeload(){
   const d=getActiveDeload();if(!d)return;
+  const ex=d.kind==='ex'?findExInPlan(d.changes[0].exId):null;
+  const back=_dlPlanOf(d)==='weight'?_capTxt(deloadBackTxt(d)).replace(/^Vuelves a/,'Vuelves ahora a'):'Tu plan vuelve ahora a sus series normales';
   confirmModal({
     title:'Terminar descarga',
-    body:'Tu plan vuelve ahora a sus series normales. ¿Seguro que quieres terminar la descarga antes de tiempo?',
+    body:`${ex?`${ex.n} vuelve ahora a ${_nSeries(d.changes[0].from)}`:back}. ¿Seguro que quieres terminar ya la descarga? Si sigues, ${deloadBackOnTxt(d)}.`,
     okText:'Terminar',cancelText:'Seguir en descarga',
-    onOk:()=>{_restoreDeload(true);saveState();render();toast('Descarga terminada · tu plan vuelve a sus series');}
+    onOk:()=>{const msg=deloadEndMsg(d);
+      // (13d) sin volver a recomendarla enseguida; (13 r1) salvo si fue un toque sin querer (menos de 1 h: se cancela
+      // sin historial, como si no hubiera empezado)
+      if(d.kind==='all'&&Date.now()-d.startTs>=3600000)S.dlRecoSnoozeTs=_addDaysLocal(_startOfDay(Date.now()),7);
+      _restoreDeload(true);saveState();render();toast(msg);}
   });
+}
+// (13b) La ÚNICA forma de empezar una semana de descarga de todo el plan (propuesta del Coach y Ajustes): mismas
+// comprobaciones y mismos textos. Devuelve {ok, msg, dlId?, drop?}.
+function beginFullDeload(plan){
+  if(getActiveRest())return{ok:false,msg:'Estás en tu semana de descanso: termínala antes de empezar una descarga'};
+  if(_hasSubs())return{ok:false,msg:'Hoy tienes un ejercicio cambiado «solo hoy»: empieza la descarga cuando guardes el entreno'};
+  // Con un entreno a medias, la sesión se guardaría recortada y marcada como descarga
+  if(getActiveWorkout())return{ok:false,msg:'Termina o descarta el entreno en curso antes de empezar la descarga'};
+  // (13e r1) Una «Descarga en X» en marcha termina (su ejercicio vuelve a sus series) y la semana la sustituye: se dice
+  const prev=getActiveDeload(),prevTxt=prev&&prev.kind==='ex'?_dlReplacesTxt(prev):'';
+  const d=startDeload('all',null,'Semana de descarga',plan==='weight'?'weight':'sets');
+  if(!d)return{ok:false,drop:true,msg:plan==='weight'?'Tu plan no tiene ejercicios de fuerza que descargar':'Tu plan ya está en el mínimo de series'};
+  return{ok:true,dlId:d.id,msg:deloadStartTxt(d)+(prevTxt?' · '+prevTxt:'')};
+}
+// «sustituye a la descarga en Sentadilla» (una «Descarga en X» en marcha)
+function _dlReplacesTxt(d){return'sustituye a la '+deloadTitle(d).replace(/^Descarga/,'descarga');}
+// (13b) Ajustes → «Descarga o descanso»: las dos maneras de recuperarte una semana, explicadas en el mismo sitio.
+// Con una en marcha, la fila la termina (endDeload / endRestWeek) en vez de abrir esto.
+// (13 r1) Plan de la semana de descarga elegido en el selector (no se guarda; empieza en «Menos series»)
+let _rcPlan='sets';
+function _rcDlDesc(plan,end){const e=esc(end).replace(/ /g,NB);
+  return plan==='weight'?`Sigues entrenando con tus series y un 15${NB}% menos de peso; lo que no tiene peso que bajar va con menos series. Esa semana no se sube nada y tu plan vuelve el ${e}.`
+    :`Sigues entrenando, con un 40${NB}% menos de series y el mismo peso. Esa semana no se sube nada y tu plan vuelve el ${e}.`;}
+// (13e) Radios «Menos series / Menos peso» (Coach y Ajustes): un solo radio en el orden de tabulación (el elegido) y
+// las flechas cambian de opción, como un radiogroup de verdad
+function _dlrOptHtml(k,t,dsc,on,fn){
+  return`<button type="button" class="dlr-opt${on?' on':''}" role="radio" aria-checked="${on}" tabindex="${on?0:-1}" data-plan="${k}" onclick="${fn}('${k}')" onkeydown="_dlrKey(event,'${fn}')">
+      <span class="dlr-opt-t">${t}</span><span class="dlr-opt-d">${dsc}</span></button>`;
+}
+function _dlrKey(ev,fn){
+  const k=ev.key,g=ev.currentTarget&&ev.currentTarget.closest('[role=radiogroup]');if(!g)return;
+  const opts=[...g.querySelectorAll('[role=radio]')],i=opts.indexOf(ev.currentTarget);if(i<0)return;
+  let j=-1;
+  if(k==='ArrowRight'||k==='ArrowDown')j=(i+1)%opts.length;
+  else if(k==='ArrowLeft'||k==='ArrowUp')j=(i-1+opts.length)%opts.length;
+  else if(k==='Home')j=0;else if(k==='End')j=opts.length-1;
+  if(j<0)return;
+  ev.preventDefault();
+  const plan=opts[j].dataset.plan;
+  if(fn==='rcPlanPick'){rcPlanPick(plan);try{opts[j].focus();}catch(e){}}
+  else if(fn==='dlRecoPick')dlRecoPick(plan); // repinta y devuelve el foco al elegido
+}
+function rcPlanPick(k){
+  _rcPlan=k==='weight'?'weight':'sets';
+  const root=document.getElementById('cmodal-root');if(!root)return;
+  root.querySelectorAll('.rc-plan .dlr-opt').forEach(b=>{const on=b.dataset.plan===_rcPlan;b.classList.toggle('on',on);b.setAttribute('aria-checked',on);b.tabIndex=on?0:-1;});
+  const dd=root.querySelector('.rc-opt[data-k="deload"] .rc-d');if(dd)dd.innerHTML=_rcDlDesc(_rcPlan,deloadEndTxt({endTs:_deloadEndFrom(Date.now())}));
+}
+// (13e) La semana de descarga se elige como en el Coach: primero el plan (radios) y luego «Empezar descarga». El
+// descanso no tiene nada que elegir: se empieza al tocarlo.
+function openRecoveryChooser(){
+  const root=document.getElementById('cmodal-root');if(!root)return;
+  const end=deloadEndTxt({endTs:_deloadEndFrom(Date.now())}),cd=getActiveDeload(),exDl=cd&&cd.kind==='ex'?cd:null;
+  _rcPlan='sets';
+  root.innerHTML=`<div class="cmov" onclick="if(event.target===this)closeRecoveryChooser()"><div class="cmod" role="dialog" aria-modal="true" aria-labelledby="rc-t">
+    <div class="cmod-hdl"></div>
+    <div class="cmod-t" id="rc-t">Descarga o descanso</div>
+    <div class="cmod-b">Una semana para recuperarte. Tu plan no se pierde: vuelve solo al terminar.</div>
+    <div class="rc-opts">
+      <div class="rc-opt rc-dl" data-k="deload" role="group" aria-labelledby="rc-dl-t"><span class="rc-ic" aria-hidden="true">🧘</span><span class="rc-b">
+        <span class="rc-t" id="rc-dl-t">Semana de descarga</span><span class="rc-d">${_rcDlDesc(_rcPlan,end)}</span>
+        <span class="rc-plan dlr-opts" role="radiogroup" aria-label="Cómo quieres descargar">
+          ${_dlrOptHtml('sets','Menos series',`−40${NB}% de series, mismo peso`,_rcPlan==='sets','rcPlanPick')}
+          ${_dlrOptHtml('weight','Menos peso',`Mismas series, −15${NB}% de peso`,_rcPlan==='weight','rcPlanPick')}
+        </span>
+        ${exDl?`<span class="rc-note">Tu «${esc(deloadTitle(exDl))}» termina al empezarla: la semana la sustituye.</span>`:''}
+        <button type="button" class="btn bp rc-go" onclick="recoveryPick('deload')">Empezar descarga</button></span></div>
+      <button type="button" class="rc-opt" data-k="rest" onclick="recoveryPick('rest')"><span class="rc-ic" aria-hidden="true">🌴</span><span class="rc-b">
+        <span class="rc-t">Semana de descanso</span><span class="rc-d">7 días sin entrenar. El Coach no penaliza tu constancia ni tu racha.</span></span></button>
+    </div>
+    <button type="button" class="btn bs rc-cancel" onclick="closeRecoveryChooser()">Cancelar</button>
+  </div></div>`;
+  const b=root.querySelector('.rc-plan .dlr-opt.on');if(b)try{b.focus({preventScroll:true});}catch(e){}
+}
+function closeRecoveryChooser(){const root=document.getElementById('cmodal-root');if(root&&root.querySelector('.rc-opts'))root.innerHTML='';}
+function recoveryPick(k){
+  closeRecoveryChooser();
+  if(k==='rest'){_beginRestWeek();return;}
+  const r=beginFullDeload(_rcPlan);
+  if(!r.ok){toast(r.msg);return;}
+  S.settingsOpen=false;saveState();render();toast(r.msg,3600);
 }
 // Caducidad: al pasar endTs vuelve sola. No cambia las series en mitad de un entreno (espera a que lo guardes,
 // como mucho 12 h). Devuelve true si cambió algo (el llamador repinta).
@@ -8803,12 +9131,13 @@ function deloadTick(){
   if(now<d.endTs)return false;
   const aw=getActiveWorkout();
   if(aw&&aw.startTs&&now-aw.startTs<12*3600000)return false;
+  const msg=deloadEndMsg(d);
   _restoreDeload(false);saveState();
-  toast('🧘 Descarga terminada · vuelves a tu plan con todas tus series',4000);
+  toast(msg,4000);
   return true;
 }
 // Fecha (texto) en que el plan vuelve a la normalidad
-function deloadEndTxt(d){return fmtDate(new Date(d.endTs));}
+function deloadEndTxt(d){return _dlDayTxt(d.endTs);}
 // Aviso de descarga (Inicio, Entreno, Coach) y de semana de descanso (solo Entreno: Inicio y Coach ya lo muestran)
 function lightBannerHtml(where){
   const d=getActiveDeload();
@@ -8820,23 +9149,25 @@ function lightBannerHtml(where){
       if(where==='workout'){const day=getPlan()[S.day];if(!day||!day.ex.some(e=>d.changes.some(c=>c.exId===e.id)))return'';}
     }
     const over=Date.now()>=d.endTs;
-    const t=d.kind==='all'?'Semana de descarga':`Descarga${name?' en '+name:''}`;
-    const when=over?'Tu plan vuelve al guardar este entreno':`Tu plan vuelve el ${deloadEndTxt(d)}`;
-    const desc=where==='workout'?'Menos series y el mismo peso: esta semana no subas peso.':'Menos series, mismo peso. Después vuelves más fuerte.';
+    const t=deloadTitle(d);
+    // (13e) la fecha no se parte en dos líneas («dom 8 / nov»)
+    const whenH=over?'Tu plan vuelve al guardar este entreno':`Tu plan vuelve el <span class="dl-when">${esc(deloadEndTxt(d))}</span>`;
+    const desc=where==='workout'?`${_capTxt(deloadPlanTxt(d))}: esta semana no subas peso.`:`${_capTxt(deloadPlanTxt(d))}. Después vuelves más fuerte.`;
     // (10) Dentro de la tarjeta «HOY TOCA»: versión compacta (las filas ya dicen «descarga» y su objetivo 🧘), para que «Empezar» quepa
     if(where==='hoy')return`<div class="dl-banner cmp" role="status" title="${esc(desc)}"><span class="dl-banner-ic" aria-hidden="true">🧘</span><div class="dl-banner-b">
-      <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${esc(over?'Acaba al guardar este entreno':'Hasta el '+deloadEndTxt(d))} · menos series</div></div>
-      <button class="dl-banner-btn" onclick="endDeload()">Terminar</button></div>`;
+      <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${whenH} · ${_dlPlanOf(d)==='weight'?'menos peso':'menos series'}</div></div>
+      <button class="dl-banner-btn" onclick="endDeload()" aria-label="Terminar la descarga">Terminar</button></div>`;
     return`<div class="dl-banner" role="status"><span class="dl-banner-ic" aria-hidden="true">🧘</span><div class="dl-banner-b">
-      <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${esc(when)} · ${esc(desc)}</div></div>
-      <button class="dl-banner-btn" onclick="endDeload()">Terminar</button></div>`;
+      <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${whenH} · ${esc(desc)}</div></div>
+      <button class="dl-banner-btn" onclick="endDeload()" aria-label="Terminar la descarga">Terminar</button></div>`;
   }
   const r=where==='workout'?getActiveRest():null;
   if(r){
     const left=restDaysLeft(r);
     return`<div class="dl-banner rest" role="status"><span class="dl-banner-ic" aria-hidden="true">🌴</span><div class="dl-banner-b">
       <div class="dl-banner-t">Semana de descanso · ${left>0?`quedan ${left} día${left!==1?'s':''}`:'termina hoy'}</div>
-      <div class="dl-banner-d">Si entrenas, hazlo suave: mismo peso o menos. Esta semana no se sube peso.</div></div></div>`;
+      <div class="dl-banner-d">Si entrenas, hazlo suave: mismo peso o menos. Esta semana no se sube peso.</div></div>
+      <button class="dl-banner-btn" onclick="endRestWeek()" aria-label="Terminar la semana de descanso">Terminar</button></div>`;
   }
   return'';
 }
@@ -9024,8 +9355,25 @@ function migrateState(data){
     _sanitizePlanSubs(data.currentPlan);
     _sanitizeSessSubs(data.sessions);
   }
+  _unifyDeloadTexts(data); // (13b) idempotente: corre siempre
   data.schema_version=SCHEMA_VERSION;
   return data;
+}
+// (13b) Una sola descarga, un solo vocabulario. Lo que guardaron versiones anteriores (propuestas pendientes y aplicadas,
+// la descarga en curso) pasa a los textos de ahora: «Reducir volumen en X» → «Descarga en X» (🧘 Descarga) y «Tu historial
+// de X se conserva» dice dónde está. Solo textos: no toca series, fechas, ids ni el plan. Idempotente (cada carga e import).
+function _unifyDeloadTexts(data){
+  if(!data||typeof data!=='object')return;
+  const ren=t=>typeof t==='string'?t.replace(/^Reducir volumen en /,'Descarga en '):t;
+  const fix=p=>{
+    if(!_isPlainObj(p))return;
+    if(p.type==='rm_set'){p.title=ren(p.title);if(p.tag==='Recuperación')p.tag='Descarga';if(p.ic==='⚠️')p.ic='🧘';
+      if(typeof p.description==='string')p.description=p.description.replace(/ durante 7 días; después vuelve solo a /,' con el mismo peso durante 7 días; después vuelve sola a ');}
+    if(p.type==='deload'&&p.tag==='Recuperación')p.tag='Descarga';
+    if(p.type==='swap'&&typeof p.description==='string')p.description=p.description.replace(/Tu historial de (.{1,80}?) se conserva\./,'Tu historial de $1 no se pierde: sigue en Progreso, en «Fuera».');
+  };
+  [data.pendingCoachProposals,data.appliedProposals].forEach(L=>{if(Array.isArray(L))L.forEach(fix);});
+  if(_isPlainObj(data.deload)&&typeof data.deload.label==='string')data.deload.label=ren(data.deload.label);
 }
 // v18: datos serie a serie con buena forma (backups editados a mano o corruptos). Nunca borra un registro: solo su
 // lista de series si no vale; cada serie queda {w, r} (números o null) y, en los registros, también rpe 1-3 o null.
@@ -9107,7 +9455,7 @@ function _backfillStrengthNames(data){
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',hRange:'6m',rRange:'6m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true,
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',hRange:'6m',rRange:'6m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],dlRecoSnoozeTs:null,loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true,
   libPlace:'g',libKit:null,libFav:[],libRecent:[]},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
@@ -9142,6 +9490,7 @@ if(typeof S.timerSound!=='boolean')S.timerSound=true;
 // Descarga temporal (v13): forma válida (una corrupta se descarta), historial y propuestas del Coach saneados
 if(S.deload!=null&&!_validDeload(S.deload)){S.deload=null;saveState();}
 S.deloadHistory=_sanitizeDeloadHistory(S.deloadHistory);
+if(S.dlRecoSnoozeTs!=null&&!(typeof S.dlRecoSnoozeTs==='number'&&isFinite(S.dlRecoSnoozeTs)))S.dlRecoSnoozeTs=null; // (13d)
 S.pendingCoachProposals=_sanitizeProposals(S.pendingCoachProposals);
 if(!Array.isArray(S.appliedProposals))S.appliedProposals=[];
 // Saltos de peso (v15): siempre con forma válida
@@ -10215,7 +10564,15 @@ function getSug(id,sets,reps){
   const lt=ex?exLT(ex):'w',nk=lt!=='w'&&lt!=='c';
   if(!w&&(!nk||(lt==='t'&&!(sm&&sm.t>0))||(lt==='d'&&!(sm&&sm.m>0))))return null;
   // Semana ligera: nunca se propone subir
-  if(deloadAppliesTo(id))return{t:'ok',m:w?`Descarga: mantén ${kgTxt(w)} kg con menos series. La subida vuelve cuando termine. 🧘`:'Descarga: lo mismo de hoy con menos series. La subida vuelve cuando termine. 🧘'};
+  // (13 r1) «15 % menos de carga» solo si de verdad baja (el Coach da su cifra); «con menos series» solo si sus series bajaron
+  if(deloadAppliesTo(id)){
+    const p=_dlLoadMode(id)&&lt!=='bw'&&lt!=='r'?coach_prescribe(id):null;
+    if(p&&p.dlFrom!=null){const to=p.weight>0&&p.dlFrom>p.weight?p.weight:p.t>0?p.t:p.m;
+      return{t:'ok',m:`Descarga: tus series con un ${_dlPctTxt(p.dlFrom,to)} menos de carga. La subida vuelve cuando termine. 🧘`};}
+    const fewer=_dlFewerSets(id);
+    return{t:'ok',m:w?`Descarga: mantén ${kgTxt(w)} kg ${fewer?'con menos series':'y hazlo suave'}. La subida vuelve cuando termine. 🧘`
+      :`Descarga: lo mismo de hoy${fewer?' con menos series':', suave'}. La subida vuelve cuando termine. 🧘`};
+  }
   if(getActiveRest())return{t:'ok',m:w?`Semana de descanso: entrena suave y mantén ${kgTxt(w)} kg o menos. 🌴`:'Semana de descanso: entrena suave, con menos reps o menos tiempo. 🌴'};
   if(!ex)return null;
   const today=coach_prescribe(id);
@@ -12230,19 +12587,27 @@ function _reopenSessionConfirmed(sess){
 // ── SEMANA DE DESCANSO — activar / terminar ──
 function startRestWeek(){
   if(getActiveRest()){toast('Ya estás en una semana de descanso');return;}
+  const d=getActiveDeload();
   confirmModal({
     title:'Semana de descanso',
-    body:'Se marcarán los próximos 7 días como descanso planificado. El Coach no penalizará tu constancia y te lo recordará en Inicio. Puedes terminarla antes cuando quieras.',
+    body:`7 días sin entrenar. El Coach no penaliza tu constancia y te lo recuerda en Inicio. Puedes terminarla antes cuando quieras.${d?` Tu ${d.kind==='all'?'semana de descarga':'descarga'} termina ahora: ${deloadBackTxt(d)}.`:''}`,
     okText:'Empezar descanso',cancelText:'Cancelar',
-    onOk:()=>{
-      if(!Array.isArray(S.restWeeks))S.restWeeks=[];
-      const now=Date.now();
-      S.restWeeks.push({startTs:now,endTs:now+REST_WEEK_MS});
-      S.settingsOpen=false;
-      saveState();render();
-      toast('🌴 Semana de descanso activada');
-    }
+    onOk:_beginRestWeek
   });
+}
+// (13b) Empieza la semana de descanso (Ajustes → «Descarga o descanso»). Si había una descarga, termina antes: no se
+// entrena, y al volver el plan ya está con sus series.
+function _beginRestWeek(){
+  if(getActiveRest()){toast('Ya estás en una semana de descanso');return;}
+  if(getActiveWorkout()){toast('Termina o descarta el entreno en curso antes de empezar el descanso');return;}
+  const dl0=getActiveDeload(),hadDl=!!dl0,back=hadDl?deloadBackTxt(dl0):'';
+  if(hadDl)_restoreDeload(true);
+  if(!Array.isArray(S.restWeeks))S.restWeeks=[];
+  const now=Date.now();
+  S.restWeeks.push({startTs:now,endTs:now+REST_WEEK_MS});
+  S.settingsOpen=false;
+  saveState();render();
+  toast(hadDl?'🌴 Semana de descanso · la descarga termina y '+back:'🌴 Semana de descanso activada',hadDl?4000:3000);
 }
 function endRestWeek(){
   if(!getActiveRest())return;
@@ -12381,6 +12746,7 @@ function coach_exerciseProgression(exId,sinceTs){
     a=my+sl*(xs[0]-mx);b=my+sl*(xs[n-1]-mx);
   }
   res.pct=a>0?(b-a)/a*100:0;
+  res.e1From=a;res.e1To=b; // (13b) el 1RM estimado de la tendencia (de donde sale el %), no el peso de trabajo
   res.pctWeek=res.pct/Math.max(1,span);
   const r1=_recReps(data[n-1]),r2=_recReps(data[n-2]);
   res.repsUp=+data[n-1].v===+data[n-2].v&&r1!=null&&r2!=null&&r1>r2;
@@ -12441,6 +12807,7 @@ function _progNoKg(exId,ex,lt,sinceTs){
     a=my+sl*(xs[0]-mx);b=my+sl*(xs[n-1]-mx);
   }
   res.pct=a>0?(b-a)/a*100:0;
+  res.e1From=a;res.e1To=b; // (13b) el 1RM estimado de la tendencia (de donde sale el %), no el peso de trabajo
   res.pctWeek=res.pct/Math.max(1,span);
   if(n>=3){
     const ref=Math.max(...e.slice(0,n-2));
@@ -12459,6 +12826,13 @@ function _progWhat(p){const m=p&&p.metric;return m==='reps'?{su:'tus reps',v:'su
 // «30 → 45 s», pero «30 s → 1:20 min» si las unidades no coinciden
 function _progRange(p){const a=_progVal(p,p.firstV),b=_progVal(p,p.lastV),ua=a.split(' ').pop(),ub=b.split(' ').pop();
   return(ua===ub&&a.includes(' ')?a.slice(0,-ua.length-1):a)+' → '+b+(p.kgTD&&p.kgW?' con '+kgTxt(p.kgW)+' kg':'');}
+// (13b) Cifras de «Progresión excepcional»: con kilos el % es del 1RM estimado (su tendencia), así que van las dos cosas
+// con su nombre: «1RM est. 35 → 41 kg · trabajas con 28.5 → 33.5 kg». Sin kilos, su propia medida («30 → 45 s»).
+function _progExcRange(p){
+  if(!p||p.metric!=='e1rm'||!(p.e1From>0)||!(p.e1To>0))return _progRange(p);
+  const h=v=>kgTxt(Math.round(v*2)/2),w=p.firstV===p.lastV?`${kgTxt(p.lastV)}${NB}kg`:`${kgTxt(p.firstV)} → ${kgTxt(p.lastV)}${NB}kg`;
+  return`1RM est. ${h(p.e1From)} → ${h(p.e1To)}${NB}kg · trabajas con ${w}`;
+}
 function _progVal(p,v){return p&&p.metric==='reps'?plural(v,'rep'):p&&p.metric==='t'?fmtSecs(v):p&&p.metric==='d'?fmtM(v):v+' kg';}
 
 // Medida de una lista de registros (hoja de historial, tarjetas de Progreso): kilos si el último tiene peso (o es de los
@@ -12604,6 +12978,343 @@ function coach_fatigue(an){
     :`Llevas ${Math.floor(weeks)} semanas seguidas entrenando sin descanso ni descarga.`;
   return{lastRecoveryTs:last,weeks,sessionsSince,regress,deloadNeeded,reason};
 }
+// ─── (13c) MEDIDOR DE FATIGA ─────────────────────────────────────
+// Nota de 0 a 100: media ponderada de cinco factores (cada uno de 0 a 1), solo de los que tienen datos (los pesos de
+// los que no tienen datos no cuentan: la nota se reparte entre los demás).
+//   · Al límite (30): % de tus series marcadas «Al límite» en 14 días (≥6 series con esfuerzo). 15 % → 0 · 45 % → 1
+//   · Objetivo sin cumplir (20): % de series fallidas frente al mínimo de su plan (reps, segundos o metros, según el tipo
+//     de registro) o sin hacer, en 14 días y sin las sesiones de descarga o descanso (≥6 series). 5 % → 0 · 30 % → 1
+//   · Bajan de nivel (20): ejercicios en retroceso según el propio Coach (1RM estimado, reps, tiempo o distancia) entre
+//     los que tienen tendencia (≥2). 0 % → 0 · 30 % → 1
+//   · Sin descanso (20): semanas seguidas desde tu última descarga, semana de descanso o pausa (coach_fatigue).
+//     2 → 0 · 6 → 1
+//   · Duración (10): media de tus sesiones de 14 días frente a las 4 semanas anteriores del mismo día de rutina
+//     (≥2 y ≥3 sesiones con duración). +5 % → 0 · +25 % → 1
+// Nivel: baja (<40), moderada (40-69), alta (≥70). Sin nota si no hay esfuerzo ni objetivo que medir en 14 días o hay
+// menos de tres factores con datos. Cardio: fuera (no guarda series de fuerza).
+const FATIGUE_W={rpe:30,miss:20,drop:20,weeks:20,dur:10},FATIGUE_MOD=40,FATIGUE_HIGH=70,FATIGUE_DAYS=14,FATIGUE_MIN_SETS=6;
+function _fatClamp(x){return Math.max(0,Math.min(1,x));}
+function _fatPct(x){return Math.round(x*100)+NB+'%';}
+// Mínimo de un registro según su plan: {k:'r'|'t'|'d', lo} o null (sin objetivo que se pueda medir)
+function _fatTarget(rec,ex,id){
+  const e=ex||{id,s:parseInt(rec.ps)||3,r:rec.pr},lt=_recLT(rec),pl=_recPlan(rec,e);
+  if(lt==='t'){const lo=_tgtSecs({r:pl.r});return lo?{k:'t',lo}:null;}
+  if(lt==='d'){const lo=_tgtMetres({r:pl.r});return lo?{k:'d',lo}:null;}
+  // un registro de kg de antes en un ejercicio por tiempo o distancia (plancha con disco): sus reps no son su objetivo
+  if(lt==='w'&&ex){const xl=exLT(ex);if(xl==='t'||xl==='d'||xl==='c')return null;}
+  const q=Object.assign({},e,{r:pl.r}),rr=lt==='bw'||lt==='r'?_repRangeBW(q):repRange(q);
+  return rr&&rr.lo>0?{k:'r',lo:rr.lo,s:parseInt(pl.s)||0}:null;
+}
+// Series de los registros de fuerza entre [from, to): [{id, rec, ex, list (las de _sumRecSets)}]. Los antiguos sin ts (copias
+// de formato antiguo) cuentan con el día de su fecha escrita, como en el Coach y Progreso (_progSrc).
+function _fatRecs(from,to){
+  const st=_isPlainObj(S.strength)?S.strength:{},out=[];
+  Object.keys(st).forEach(id=>{if(!Array.isArray(st[id]))return;const a=_progSrc(id);
+    a.forEach(rec=>{
+      if(!rec||typeof rec!=='object'||typeof rec.ts!=='number'||!isFinite(rec.ts)||rec.ts<from||rec.ts>=to)return;
+      const ex=findExInPlan(id)||_mmExOf(id);if(ex&&ex.cardio)return;
+      const list=_sumRecSets(rec,ex).list;if(list.length)out.push({id,rec,ex:findExInPlan(id)||null,list});
+    });});
+  return out;
+}
+function coach_fatigueMeter(an){
+  const now=Date.now(),DAY=86400000,from=now-FATIGUE_DAYS*DAY;
+  const recs=_fatRecs(from,now+1),hasSess=(S.sessions||[]).some(s=>s&&+s.ts>0);
+  const F={};
+  // 1. Al límite
+  {let n=0,r3=0;recs.forEach(x=>x.list.forEach(s=>{if(s.rpe>=1&&s.rpe<=3){n++;if(s.rpe===3)r3++;}}));
+    const ok=n>=FATIGUE_MIN_SETS,p=ok?r3/n:0;
+    F.rpe={key:'rpe',label:'Al límite',ok,v:p,n,hit:r3,s:ok?_fatClamp((p-0.15)/0.30):0,
+      txt:ok?`${_fatPct(p)} de tus series en 2 semanas (${r3}${NB}de${NB}${n})`:n?`Solo ${plural(n,'serie')} con esfuerzo marcado en 2 semanas`:'Sin esfuerzo marcado en 2 semanas'};}
+  // 2. Objetivo sin cumplir (reps por debajo del mínimo, segundos o metros por debajo del objetivo, o series sin hacer)
+  {let n=0,m=0;
+    recs.forEach(x=>{
+      if(x.rec.dl||_lightAt(x.id,x.rec.ts))return;
+      const t=_fatTarget(x.rec,x.ex,x.id);if(!t)return;
+      // fallida, como juzga el Coach de carga (_loadFail): 2+ reps por debajo del mínimo (por tiempo o distancia, más
+      // de un 10 % por debajo), o por debajo y «Al límite». Quedarse a una rep del mínimo es parte de progresar.
+      x.list.forEach(s=>{const v=t.k==='t'?s.t:t.k==='d'?s.d:s.r;if(!(v>0))return;n++;
+        if((t.k==='r'?v<t.lo-1:v<t.lo*0.9)||(v<t.lo&&s.rpe===3))m++;});
+      const ps=parseInt(x.rec.ps);
+      if(ps>0&&ps>x.list.length){n+=ps-x.list.length;m+=ps-x.list.length;}
+    });
+    const ok=n>=FATIGUE_MIN_SETS,p=ok?m/n:0;
+    F.miss={key:'miss',label:'Objetivo sin cumplir',ok,v:p,n,hit:m,s:ok?_fatClamp((p-0.05)/0.25):0,
+      txt:ok?(m?`${_fatPct(p)} de tus series (${m}${NB}de${NB}${n}) en 2 semanas`:`Cumples el objetivo en tus ${n}${NB}series de 2 semanas`)
+        :'Pocas series con objetivo en 2 semanas'};}
+  // 3. Bajan de nivel (la progresión del Coach: cada ejercicio con su medida)
+  {an=an||coach_analyze();
+    const base=an.withData.length,dn=an.down,ok=base>=2,p=ok?dn.length/base:0;
+    const avg=dn.length?dn.reduce((a,i)=>a+(+i.p.dropPct||0),0)/dn.length:0;
+    F.drop={key:'drop',label:'Bajan de nivel',ok,v:p,n:base,hit:dn.length,s:ok?_fatClamp(p/0.30):0,
+      txt:!ok?'Aún sin tendencia en tus ejercicios':dn.length?`${dn.length}${NB}de${NB}${plural(base,'ejercicio').replace(' ',NB)}${avg>=0.5?` (−${Math.round(avg)}${NB}%${NB}de${NB}media)`:''}`
+        :`Ninguno de tus ${plural(base,'ejercicio')}`};}
+  // 4. Semanas seguidas sin descanso ni descarga
+  {const f=an.fatigue||coach_fatigue(an),ri=_recoveryInfo(),w=f.weeks,wk=Math.floor(w);
+    const ok=hasSess;
+    F.weeks={key:'weeks',label:'Sin descanso',ok,v:w,s:ok?_fatClamp((w-2)/4):0,
+      txt:!ok?'Aún sin entrenos':ri.now?(ri.src==='deload'?'Estás en tu semana de descarga':ri.src==='rest'?'Estás en tu semana de descanso':'Llevas una semana o más sin entrenar')
+        :wk<1?'Menos de una semana seguida':`${plural(wk,'semana')} seguida${wk===1?'':'s'}${f.lastRecoveryTs>0&&ri.ts>0?' desde tu último descanso':''}`};}
+  // 5. Duración de las sesiones frente a las 4 semanas anteriores (mismo día de rutina si lo hay)
+  {const ss=(S.sessions||[]).filter(s=>s&&isFinite(+s.ts)&&+s.durationMin>0&&+s.durationMin<=MAX_SESSION_MIN);
+    const rec=ss.filter(s=>+s.ts>=from&&+s.ts<=now),old=ss.filter(s=>+s.ts<from&&+s.ts>=from-28*DAY);
+    const avg=a=>a.reduce((t,s)=>t+(+s.durationMin),0)/a.length;
+    const ok=rec.length>=2&&old.length>=3;let R=0,B=0,c=0;
+    if(ok){const all=avg(old);rec.forEach(s=>{const sd=old.filter(o=>o.day===s.day);R+=+s.durationMin;B+=sd.length?avg(sd):all;});R/=rec.length;B/=rec.length;c=B>0?R/B-1:0;}
+    F.dur={key:'dur',label:'Duración',ok,v:c,s:ok?_fatClamp((c-0.05)/0.20):0,
+      txt:ok?`${Math.round(R)}${NB}min de media frente a ${Math.round(B)}${NB}(${c>=0?'+':'−'}${Math.round(Math.abs(c)*100)}${NB}%)`:'Pocas sesiones con duración'};}
+  const factors=['rpe','miss','drop','weeks','dur'].map(k=>Object.assign(F[k],{w:FATIGUE_W[k],pts:F[k].ok?Math.round(FATIGUE_W[k]*F[k].s):0}));
+  const okF=factors.filter(f=>f.ok),wSum=okF.reduce((a,f)=>a+f.w,0);
+  const enough=(F.rpe.ok||F.miss.ok)&&okF.length>=3;
+  const score=enough?Math.round(100*okF.reduce((a,f)=>a+f.w*f.s,0)/wSum):null;
+  const level=score==null?null:score>=FATIGUE_HIGH?'alta':score>=FATIGUE_MOD?'moderada':'baja';
+  const top=enough?okF.slice().sort((a,b)=>b.w*b.s-a.w*a.s)[0]:null;
+  const main=top&&top.s>0.05?top:null;
+  const recent=recs.length>0||(S.sessions||[]).some(s=>s&&+s.ts>=from);
+  const why=score==null?(!hasSess?'Entrena y marca el esfuerzo de tus series: con 2 semanas de datos verás tu fatiga.'
+      :!recent?'No has entrenado en las 2 últimas semanas: no hay fatiga que medir.'
+      :'Aún faltan datos: marca el esfuerzo de tus series (Fácil, Justo o Al límite) un par de semanas más.')
+    :_fatWhyCtx(level,an);
+  // dlGo: con la recomendación pospuesta y la línea pidiendo descarga, el medidor ofrece empezarla (botón)
+  const dlGo=score!=null&&!!_fatDlAsk(level,an)&&_dlSnoozedOffer();
+  return{score,level,factors,main,why,enough,dlGo,days:FATIGUE_DAYS};
+}
+// (13 r1) La línea del medidor no contradice al resto del Coach: en descarga o descanso toca recuperar, y si la semana de
+// descarga se recomienda por semanas sin descanso o por ejercicios que bajan, se dice aunque la nota sea baja.
+// ¿Pide la línea una semana de descarga? 'alta' | 'weeks' | 'regress' | null
+function _fatDlAsk(level,an){
+  const dl=getActiveDeload();
+  if((dl&&dl.kind==='all')||getActiveRest())return null;
+  if(level==='alta')return'alta';
+  const f=an&&(an.fatigue||coach_fatigue(an));
+  if(f&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS){
+    if(f.weeks>=DELOAD_RECO_WEEKS&&f.sessionsSince>=DELOAD_RECO_MIN_SESS)return'weeks';
+    if(f.deloadNeeded&&f.regress>=2)return'regress';
+  }
+  return null;
+}
+function _fatWhyCtx(level,an){
+  const dl=getActiveDeload();
+  if(dl&&dl.kind==='all')return level==='alta'?'Fatiga alta: bien hecho, estás en tu semana de descarga. Toca recuperar, no apretar.'
+    :'Estás en tu semana de descarga: toca recuperar, no apretar.';
+  if(getActiveRest())return'Estás en tu semana de descanso: toca recuperar.';
+  const ask=_fatDlAsk(level,an);
+  if(ask==='alta')return'Fatiga alta: tu cuerpo pide bajar el ritmo una semana.';
+  const f=an&&(an.fatigue||coach_fatigue(an)),lv=level==='moderada'?'Fatiga moderada':'Fatiga baja';
+  if(ask==='weeks')return`${lv}, pero llevas ${plural(Math.floor(f.weeks),'semana')} sin descanso: una semana de descarga ahora te ayuda a seguir progresando.`;
+  if(ask==='regress')return`${lv}, pero ${f.regress} ejercicios bajan de nivel: una semana de descarga te ayuda a recuperarlos.`;
+  return level==='moderada'?'Fatiga moderada: duerme bien y no sumes más series al límite.':'Fatiga baja: vas fresco, puedes seguir apretando.';
+}
+// (13e r1) Con la recomendación pospuesta («Ahora no») la única oferta de descarga es el botón del medidor
+// («Elegir mi semana de descarga», abre Ajustes → «Descarga o descanso»); la propuesta del ciclo queda en espera.
+function _dlSnoozedOffer(){
+  if(!_dlRecoSnoozed()||getActiveRest()||(S.sessions||[]).length<CYCLE_MIN_SESSIONS)return false;
+  const d=getActiveDeload();return!(d&&d.kind==='all');
+}
+// Esfuerzo de las últimas n semanas (lunes a domingo; la última, la actual): series por nivel (1 fácil · 2 justo ·
+// 3 al límite · 0 sin marcar) y si fue semana de descarga o de descanso
+function coach_rpeWeeks(n){
+  n=n||8;const out=[];
+  // (13e r1) La descarga de todo el plan en marcha y la semana de descanso en marcha se juzgan por lo que van a durar
+  // ([inicio, fin], 7 días): con la misma regla de 3 días que las terminadas, las semanas marcadas son desde el primer
+  // día las que quedarán al terminar y no saltan de una semana a otra. Si aún no marcan ninguna semana visible (empezó
+  // el fin de semana: casi toda cae en la semana que viene), se marca la actual mientras dure.
+  const now=Date.now();
+  const dls=(S.deloadHistory||[]).filter(h=>h&&h.kind!=='ex'&&isFinite(h.startTs)&&isFinite(h.endTs)).map(h=>[h.startTs,h.endTs]);
+  const cur=getActiveDeload(),curDl=cur&&cur.kind==='all'&&isFinite(cur.startTs)&&isFinite(cur.endTs)?[cur.startTs,cur.endTs]:null;
+  if(curDl)dls.push(curDl);
+  const rests=(Array.isArray(S.restWeeks)?S.restWeeks:[]).filter(r=>r&&isFinite(r.startTs)&&isFinite(r.endTs)&&r.startTs<=now).map(r=>[r.startTs,r.endTs]);
+  const ar=getActiveRest(),curRest=ar&&isFinite(ar.startTs)&&isFinite(ar.endTs)?[ar.startTs,ar.endTs]:null;
+  // la semana se marca si la descarga o el descanso ocupa en ella 3 días o más (o entero, si fue más corto)
+  const hit=(a,s,e)=>a.some(([x,y])=>{const o=Math.min(y,e+1)-Math.max(x,s);return o>0&&o>=Math.min(3*86400000,y-x)-1;});
+  const all=_fatRecs(coach_weekRange(n-1).start,coach_weekRange(0).end+1);
+  for(let o=n-1;o>=0;o--){
+    const r=coach_weekRange(o),c={0:0,1:0,2:0,3:0};
+    all.forEach(x=>{if(x.rec.ts>=r.start&&x.rec.ts<=r.end)x.list.forEach(s=>{c[[1,2,3].includes(s.rpe)?s.rpe:0]++;});});
+    out.push({start:r.start,end:r.end,c,total:c[0]+c[1]+c[2]+c[3],now:o===0,
+      kind:hit(rests,r.start,r.end)?'rest':hit(dls,r.start,r.end)?'deload':null});
+  }
+  const last=out[out.length-1];
+  if(last){
+    if(curRest&&!out.some(w=>hit([curRest],w.start,w.end)))last.kind='rest';
+    else if(curDl&&!last.kind&&!out.some(w=>hit([curDl],w.start,w.end)))last.kind='deload';
+  }
+  return out;
+}
+const FAT_COL={baja:'var(--green)',moderada:'var(--amber)',alta:'var(--red)'};
+function _fatSevCol(s){return s>=0.67?'var(--red)':s>=0.34?'var(--amber)':'var(--green)';}
+// Medidor semicircular (de menta a ámbar y rojo, con las marcas de 40 y 70)
+function _fatGaugeSvg(m){
+  const R=80,cx=100,cy=100,L=Math.PI*R,sc=m.score==null?0:Math.max(0,Math.min(100,m.score));
+  const pt=v=>{const a=Math.PI*v/100;return[(cx-R*Math.cos(a)).toFixed(1),(cy-R*Math.sin(a)).toFixed(1)];};
+  const tick=v=>{const a=Math.PI*v/100,c=Math.cos(a),s=Math.sin(a);return`<line class="fat-tk" x1="${(cx-(R-11)*c).toFixed(1)}" y1="${(cy-(R-11)*s).toFixed(1)}" x2="${(cx-(R+11)*c).toFixed(1)}" y2="${(cy-(R+11)*s).toFixed(1)}"/>`;};
+  const arc=`M${cx-R},${cy} A${R},${R} 0 0 1 ${cx+R},${cy}`,[kx,ky]=pt(sc);
+  const col=m.level?FAT_COL[m.level]:'var(--text4)';
+  return`<svg class="fat-g" viewBox="0 0 200 116" aria-hidden="true" focusable="false">
+    <defs><linearGradient id="fat-grad" gradientUnits="userSpaceOnUse" x1="${cx-R}" y1="0" x2="${cx+R}" y2="0">
+      <stop offset="0" stop-color="var(--green)"/><stop offset=".5" stop-color="var(--amber)"/><stop offset="1" stop-color="var(--red)"/></linearGradient></defs>
+    <path class="fat-tr" d="${arc}"/>
+    ${m.score==null?'':`<path class="fat-v" d="${arc}" style="stroke-dasharray:${(L*sc/100).toFixed(1)} ${L.toFixed(1)}"/>`}
+    ${tick(FATIGUE_MOD)}${tick(FATIGUE_HIGH)}
+    ${m.score==null?'':`<circle class="fat-k" cx="${kx}" cy="${ky}" r="8" style="stroke:${col}"/>`}
+    <text class="fat-sc" x="${cx}" y="${cy-14}" text-anchor="middle" style="fill:${col}">${m.score==null?'—':m.score}</text>
+    <text class="fat-lv" x="${cx}" y="${cy+8}" text-anchor="middle">${m.level?'fatiga '+m.level:'sin datos'}</text>
+  </svg>`;
+}
+function _fatBarsHtml(wk){
+  if(!wk.some(w=>w.total>0))return`<div class="fat-empty">Tus barras de esfuerzo aparecen al guardar tus primeros entrenos.</div>`;
+  const max=Math.max(...wk.map(w=>w.total)),lbl=w=>{const d=new Date(w.start);return`${d.getDate()} ${MONTHS[d.getMonth()].toLowerCase()}`;};
+  // (13e) La leyenda solo nombra lo que hay en las barras (niveles con series y semanas marcadas)
+  const L=[[1,'Fácil'],[2,'Justo'],[3,'Al límite'],[0,'Sin marcar']].filter(([k])=>wk.some(w=>w.c[k]));
+  const marks=[wk.some(w=>w.kind==='deload')?'🧘 descarga':'',wk.some(w=>w.kind==='rest')?'🌴 descanso':''].filter(Boolean).join(' · ');
+  const kTxt={deload:'semana de descarga',rest:'semana de descanso'};
+  const aria='Esfuerzo por semana, últimas 8 semanas: '+wk.map(w=>`${w.now?'esta semana':'semana del '+lbl(w)}${w.kind?' ('+kTxt[w.kind]+')':''}: ${w.total?L.filter(([k])=>w.c[k]).map(([k,l])=>`${w.c[k]} ${l.toLowerCase()}`).join(', '):'sin series'}`).join('; ');
+  const cols=wk.map(w=>`<div class="fat-col${w.total?'':' empty'}${w.now?' now':''}">
+      <span class="fat-n">${w.total||'—'}</span>
+      ${w.total?`<div class="fat-st" style="height:${Math.max(4,Math.round(w.total/max*100))}%">${[0,3,2,1].filter(k=>w.c[k]).map(k=>`<i class="r${k}" style="flex:${w.c[k]} 1 0"></i>`).join('')}</div>`:'<div class="fat-st none"></div>'}
+    </div>`).join('');
+  const lbls=wk.map(w=>`<span class="${w.now?'now':''}">${w.now?'Esta':esc(lbl(w))}${w.kind?`<i title="${kTxt[w.kind]}">${w.kind==='rest'?'🌴':'🧘'}</i>`:''}</span>`).join('');
+  const sum={1:0,2:0,3:0};wk.forEach(w=>{sum[1]+=w.c[1];sum[2]+=w.c[2];sum[3]+=w.c[3];});
+  return`<div class="fat-bars" id="fat-bars" role="img" aria-label="${esc(aria)}">${cols}</div>
+    <div class="fat-bl" aria-hidden="true">${lbls}</div>
+    <div class="sum-rpe-l fat-lg" aria-hidden="true">${L.map(([k,l])=>`<span><i class="r${k}"></i>${l}</span>`).join('')}${marks?`<span>${marks}</span>`:''}</div>`;
+}
+// Tarjeta «Fatiga» del Coach: medidor, factores y barras de esfuerzo de 8 semanas
+function fatigueCardHtml(an){
+  const m=coach_fatigueMeter(an),wk=coach_rpeWeeks(8);
+  const aria=m.score==null?`Fatiga: sin datos suficientes. ${m.why}`:`Fatiga ${m.score} de 100, ${m.level}. ${m.why}${m.main?` Lo que más pesa: ${m.main.label.toLowerCase()}.`:''}`;
+  const rows=m.factors.map(f=>`<li class="fat-f${f.ok?'':' off'}">
+      <span class="fat-fd" aria-hidden="true" style="background:${f.ok?_fatSevCol(f.s):'var(--text4)'}"></span>
+      <span class="fat-fb"><span class="fat-fl">${esc(f.label)}</span><span class="fat-fv">${esc(f.txt)}</span></span>
+      <span class="fat-fp"><span aria-hidden="true">${f.ok?`${f.pts}<small>/${f.w}</small>`:'—'}</span><span class="sr-only">${f.ok?`${f.pts} de ${f.w} puntos`:'sin datos'}</span></span></li>`).join('');
+  return`<div class="sh">Fatiga y esfuerzo</div>
+  <div class="card fat-card" id="fat-card" data-score="${m.score==null?'':m.score}" data-level="${m.level||''}">
+    <div class="fat-top" role="img" aria-label="${esc(aria)}">${_fatGaugeSvg(m)}</div>
+    <div class="fat-why">${esc(m.why)}${m.main?` <span class="fat-main">Lo que más pesa: ${esc(m.main.label.toLowerCase())}.</span>`:''}</div>
+    ${m.dlGo||(_dlSnoozedOffer()&&_dlPropActive())?`<button type="button" class="fat-go" id="fat-go" onclick="openRecoveryChooser()">Elegir mi semana de descarga <span aria-hidden="true">›</span></button>`:''}
+    <ul class="fat-fs" aria-label="Factores de la fatiga">${rows}</ul>
+    <details class="fat-how"><summary>Cómo se calcula</summary><p>Cada factor suma hasta sus puntos: al límite 30, objetivo sin cumplir 20, bajan de nivel 20, semanas sin descanso 20 y duración 10. Los que aún no tienen datos no cuentan y la nota se reparte entre los demás. Baja hasta 39, moderada de 40 a 69, alta desde 70.</p></details>
+    <div class="fat-sub">Esfuerzo por semana</div>
+    ${_fatBarsHtml(wk)}
+  </div>`;
+}
+// ─── (13d) RECOMENDACIÓN: SEMANA DE DESCARGA ─────────────────────
+// Cuándo: fatiga alta (medidor ≥ FATIGUE_HIGH, sin descanso en las 2 últimas semanas), 5+ semanas seguidas entrenando
+// sin descanso ni descarga (6+ sesiones), o dos ejercicios bajando de nivel (coach_fatigue.deloadNeeded). Nunca durante una
+// descarga de todo el plan o un descanso, ni con menos de CYCLE_MIN_SESSIONS sesiones. «Ahora no» la calla una semana
+// (S.dlRecoSnoozeTs: medianoche local de dentro de 7 días); terminar antes una semana de descarga, también.
+// Se aplica con la misma descarga de siempre (beginFullDeload → S.deload): temporal, con aviso, «Terminar» y vuelta sola.
+const DELOAD_RECO_WEEKS=5,DELOAD_RECO_MIN_SESS=6;
+let _dlRecoPlan='sets'; // plan elegido en la tarjeta (no se guarda)
+function _dlRecoSnoozed(){const t=S.dlRecoSnoozeTs;return typeof t==='number'&&isFinite(t)&&Date.now()<t;}
+// ¿Hay una «Semana de descarga» del cierre de ciclo entre las propuestas activas?
+function _dlPropActive(){return(S.pendingCoachProposals||[]).some(p=>p&&p.type==='deload')&&coach_pendingView().active.some(p=>p&&p.type==='deload');}
+// {src:'fatigue'|'weeks'|'regress', tag, why, score, weeks} o null
+function coach_deloadReco(an,m){
+  if((S.sessions||[]).length<CYCLE_MIN_SESSIONS)return null;
+  const d=getActiveDeload();if(d&&d.kind==='all')return null;
+  if(getActiveRest()||_dlRecoSnoozed())return null;
+  an=an||coach_analyze();
+  const f=an.fatigue;if(!f)return null;
+  m=m||coach_fatigueMeter(an);
+  const wk=Math.floor(f.weeks);
+  const high=m.score!=null&&m.score>=FATIGUE_HIGH&&f.weeks>=2;
+  const long=f.weeks>=DELOAD_RECO_WEEKS&&f.sessionsSince>=DELOAD_RECO_MIN_SESS;
+  const reg=!!f.deloadNeeded&&f.regress>=2;
+  if(!high&&!long&&!reg)return null;
+  const weeksTxt=`${plural(wk,'semana')} seguida${wk===1?'':'s'} entrenando sin descanso ni descarga`;
+  if(high)return{src:'fatigue',tag:'Fatiga alta',score:m.score,weeks:f.weeks,
+    why:`Tu fatiga está alta (${m.score} de 100)${m.main?`; lo que más pesa: ${m.main.label.toLowerCase()}`:''}.${long?` Además llevas ${weeksTxt}.`:''}`};
+  if(long)return{src:'weeks',tag:`${wk} semanas sin descanso`,score:m.score,weeks:f.weeks,
+    why:`Llevas ${weeksTxt}. Una semana suave ahora te deja recuperar y volver a progresar.`};
+  // (13 r1) «es fatiga acumulada» solo si el medidor lo respalda (moderada o alta)
+  const fat=m.level==='moderada'||m.level==='alta';
+  return{src:'regress',tag:'Bajan de nivel',score:m.score,weeks:f.weeks,
+    why:`${f.regress} ejercicios llevan dos sesiones seguidas por debajo de tu nivel${fat?': es fatiga acumulada.':'.'} Una semana suave ahora te ayuda a recuperarlos.`};
+}
+// Lo que cambiaría cada ejercicio con ese plan: [{id, n, txt}]. Las cifras salen del propio Coach (coach_prescribe) con
+// una descarga simulada, así que son las mismas que verás en Entreno.
+function _dlPlanPreview(plan){
+  const P=getPlan(),now=Date.now(),changes=[],rows=[],wp=plan==='weight';
+  Object.keys(P).forEach(dk=>(P[dk]&&Array.isArray(P[dk].ex)?P[dk].ex:[]).forEach(ex=>{
+    if(!ex||ex.cardio||exLT(ex)==='c'||changes.some(c=>c.exId===ex.id))return;
+    const from=Math.max(1,Math.min(10,_baseSets(ex))),lt=exLT(ex),load=wp&&(lt==='w'||lt==='t'||lt==='d');
+    changes.push(Object.assign({exId:ex.id,day:dk,from,to:load?from:_dlSetsTo(from)},load?{m:'load'}:{}));
+  }));
+  if(!changes.length)return rows;
+  const keep=S.deload;
+  try{
+    S.deload={id:'dl_preview',kind:'all',plan:wp?'weight':'sets',startTs:now,endTs:_deloadEndFrom(now),label:'',changes};
+    changes.forEach(c=>{
+      const ex=findExInPlan(c.exId);if(!ex)return;
+      let txt='';
+      if(c.m==='load'){
+        const p=coach_prescribe(ex.id),u=p&&p.unit;
+        if(p&&p.dlFrom!=null)txt=_presIsKg(p)||p.weight>0?`${kgTxt(p.dlFrom)} → ${kgTxt(p.weight)}${NB}kg`
+          :u==='s'?`${fmtSecs(p.dlFrom)} → ${fmtSecs(p.t)}`:`${fmtM(p.dlFrom)} → ${fmtM(p.m)}`;
+        // (13 r1) un salto menos sería demasiado: baja series (lo mismo que hará startDeload)
+        else if(_dlNoLoadCut(ex.id)){const to=_dlSetsTo(c.from);txt=to<c.from?`${c.from} → ${_nSeries(to)}`:`${_nSeries(c.from)}, más suave`;}
+        else if(p&&p.kind==='deload')txt=_presIsKg(p)||p.weight>0?`mismo peso, más suave`:'igual, más suave';
+        else txt=exLT(ex)==='w'?`−15${NB}% de peso`:`−15${NB}%`;
+      }else txt=c.to<c.from?`${c.from} → ${_nSeries(c.to)}`:`${_nSeries(c.from)}, más suave`;
+      rows.push({id:ex.id,n:ex.n,txt:txt.replace(/ → /g,NB+'→ ')});
+    });
+  }finally{S.deload=keep;}
+  return rows;
+}
+// Tarjeta «Semana de descarga» del Coach (rec = coach_deloadReco)
+function deloadRecoHtml(rec){
+  if(!rec)return'';
+  const plan=_dlRecoPlan==='weight'?'weight':'sets',now=Date.now(),end=_deloadEndFrom(now),cd=getActiveDeload(),exDl=cd&&cd.kind==='ex'?cd:null;
+  const rows=_dlPlanPreview(plan),MAX=5;
+  const opt=(k,t,dsc)=>_dlrOptHtml(k,t,dsc,plan===k,'dlRecoPick');
+  const note=plan==='weight'?`Lo que no tiene peso que bajar (peso corporal, bandas) va con menos series; lo de tiempo o distancia sin peso, con un 15${NB}% menos.`
+    :'Mismo peso que ahora: solo bajan las series. Los de 1 serie se quedan igual, más suaves.';
+  return`<div class="card dlr-card" id="dl-reco" role="region" aria-labelledby="dlr-t" data-src="${rec.src}" data-plan="${plan}">
+    <div class="dlr-h"><span class="dlr-ic" aria-hidden="true">🧘</span><div class="dlr-hb">
+      <div class="dlr-tag${rec.src==='fatigue'?' hot':''}">Recomendado · ${esc(rec.tag)}</div>
+      <div class="dlr-t" id="dlr-t">Semana de descarga</div></div></div>
+    <div class="dlr-why">${esc(rec.why)}</div>
+    <div class="dlr-dates"><span>Empieza hoy, <b>${esc(_dlDayTxt(now))}</b></span><span>Tu plan vuelve el <b>${esc(deloadEndTxt({endTs:end}))}</b></span></div>
+    <div class="dlr-opts" role="radiogroup" aria-label="Cómo quieres descargar">
+      ${opt('sets','Menos series',`−40${NB}% de series, mismo peso`)}
+      ${opt('weight','Menos peso',`Mismas series, −15${NB}% de peso`)}
+    </div>
+    ${rows.length?`<ul class="dlr-prev" aria-label="Lo que cambia en tu plan">${rows.slice(0,MAX).map(r=>`<li><span class="dlr-pn">${esc(r.n)}</span><span class="dlr-pv">${esc(r.txt)}</span></li>`).join('')}${rows.length>MAX?`<li class="more">y ${plural(rows.length-MAX,'ejercicio')} más</li>`:''}</ul>`:''}
+    <div class="dlr-note">${note} Esa semana no se sube nada; al terminar, tu plan vuelve solo.${exDl?` Tu «${esc(deloadTitle(exDl))}» termina al empezarla: la semana la sustituye.`:''}</div>
+    <div class="dlr-acts"><button type="button" class="btn bp dlr-go" onclick="dlRecoStart()">Empezar descarga</button><button type="button" class="btn bs dlr-later" onclick="dlRecoLater()">Ahora no</button></div>
+  </div>`;
+}
+// (13e) Solo se repinta la tarjeta (el foco sigue en el radio elegido, también con las flechas)
+function dlRecoPick(k){_dlRecoPlan=k==='weight'?'weight':'sets';
+  const el=document.getElementById('dl-reco'),rec=el?coach_deloadReco():null;
+  if(el&&rec)el.outerHTML=deloadRecoHtml(rec);else render();
+  const b=document.querySelector('#dl-reco .dlr-opt[data-plan="'+_dlRecoPlan+'"]');if(b)try{b.focus({preventScroll:true});}catch(e){}}
+function dlRecoStart(){
+  const r=beginFullDeload(_dlRecoPlan);
+  if(!r.ok){toast(r.msg);render();return;}
+  // La «Semana de descarga» que el Coach propuso al cerrar el ciclo queda hecha con esta
+  const L=S.pendingCoachProposals||[];
+  for(let i=L.length-1;i>=0;i--){const p=L[i];if(p&&p.type==='deload'){L.splice(i,1);
+    if(!Array.isArray(S.appliedProposals))S.appliedProposals=[];S.appliedProposals.push({...p,dayKey:null,appliedAt:Date.now(),dlId:r.dlId});}}
+  if(Array.isArray(S.appliedProposals)&&S.appliedProposals.length>60)S.appliedProposals=S.appliedProposals.slice(-60);
+  S.dlRecoSnoozeTs=null;
+  saveState();render();toast(r.msg,3600);
+}
+function dlRecoLater(){
+  S.dlRecoSnoozeTs=_addDaysLocal(_startOfDay(Date.now()),7);
+  saveState();render();toast(`De acuerdo · te la vuelvo a proponer el ${_dlDayTxt(S.dlRecoSnoozeTs)}`,3600);
+}
+// (13e r1) Al botón del medidor (la oferta mientras la recomendación está pospuesta)
+function goFatGo(){
+  if(S.tab!=='coach')go('coach');
+  requestAnimationFrame(()=>{const b=document.getElementById('fat-go')||document.getElementById('fat-card');if(!b)return;
+    b.scrollIntoView({block:'center'});if(b.id==='fat-go')try{b.focus({preventScroll:true});}catch(e){}});
+}
+function goDeloadReco(){
+  if(S.tab!=='coach')go('coach');
+  requestAnimationFrame(()=>{const el=document.getElementById('dl-reco');if(el)el.scrollIntoView({block:'start'});});
+}
 // Series «de verdad» de un ejercicio: durante una descarga, las de tu plan normal (las que vuelven al terminar).
 // Así lo que propone el Coach (y su diff) es lo que tendrás después de la descarga, no la mitad.
 function _baseSets(ex){
@@ -12612,6 +13323,11 @@ function _baseSets(ex){
   return c&&s===c.to?c.from:s;
 }
 function _nSeries(n){return plural(n,'serie');}
+// (13b) Al cambiar un ejercicio por otro distinto (propuesta del Coach, «Cambiar a …»), su historial se queda con él:
+// Progreso lo sigue mostrando con su nombre, en «Fuera» (fuera de tu rutina). El texto dice dónde, no solo «se conserva».
+function _histStaysTxt(ex){const n=ex&&ex.n||'este ejercicio';
+  return Array.isArray(S.strength&&S.strength[ex&&ex.id])&&S.strength[ex.id].length
+    ?`Tu historial de ${n} no se pierde: sigue en Progreso, en «Fuera».`:`${n} aún no tiene historial.`;}
 // Candidatas, de más a menos prioritaria: fatiga/seguridad (descarga) > retroceso > estancamiento real > progresión > volumen.
 // Los ejercicios «en espera» (it.hold: recién cambiados, en descarga o recuperándose) no están en down/stagnant/flat.
 function coach_buildCandidates(an){
@@ -12619,16 +13335,16 @@ function coach_buildCandidates(an){
   const hot=new Set((coach_rpeByMuscle(6)||[]).filter(z=>z.avg>=2.6&&z.samples>=3).map(z=>z.muscle));
   if(f.deloadNeeded){
     out.push({id:'deload_week',type:'deload',basis:'fatigue',prio:0,sev:f.weeks,ic:'🧘',tag:'Descarga',createdAt:now,
-      title:'Semana de descarga',diff:'Mitad de series · mismo peso · 7 días',short:'una semana de descarga',
-      description:`${f.reason} Durante 7 días haces la mitad de series con el mismo peso. Al terminar, tu plan vuelve solo a sus series.`});
+      title:'Semana de descarga',diff:'−40 % de series · mismo peso · 7 días',short:'una semana de descarga',
+      description:`${f.reason} Durante 7 días haces un 40 % menos de series con el mismo peso. Al terminar, tu plan vuelve solo a sus series.`});
   }
   an.down.forEach(it=>{
     const ex=it.ex,s=_baseSets(ex);
     if(f.deloadNeeded&&an.down.length>=2){it.covered='deload';return;} // la descarga ya lo cubre
     if(s<=1)return;
-    out.push({id:'rm_set_'+ex.id,type:'rm_set',basis:'down',prio:1,sev:it.p.dropPct,ic:'⚠️',tag:'Recuperación',exId:ex.id,dayKey:it.dayKey,createdAt:now,
-      title:`Reducir volumen en ${ex.n}`,diff:`${s}×${_tgtShort(ex)} → ${s-1}×${_tgtShort(ex)} · 7 días`,short:`bajar a ${_nSeries(s-1)} durante una semana`,
-      description:`Dos sesiones seguidas por debajo de tu nivel (−${Math.round(it.p.dropPct)}% ${_progWhat(it.p).de}): suele ser fatiga. Haz ${_nSeries(s-1)} en vez de ${s} durante 7 días; después vuelve solo a ${_nSeries(s)}.`});
+    out.push({id:'rm_set_'+ex.id,type:'rm_set',basis:'down',prio:1,sev:it.p.dropPct,ic:'🧘',tag:'Descarga',exId:ex.id,dayKey:it.dayKey,createdAt:now,
+      title:`Descarga en ${ex.n}`,diff:`${s}×${_tgtShort(ex)} → ${s-1}×${_tgtShort(ex)} · 7 días`,short:`bajar a ${_nSeries(s-1)} durante una semana`,
+      description:`Dos sesiones seguidas por debajo de tu nivel (−${Math.round(it.p.dropPct)}% ${_progWhat(it.p).de}): suele ser fatiga. Haz ${_nSeries(s-1)} en vez de ${s} con el mismo peso durante 7 días; después vuelve sola a ${_nSeries(s)}.`});
   });
   an.stagnant.forEach(it=>{
     // Cambiar el esquema de reps (con más o menos peso) solo tiene sentido con peso × reps
@@ -12647,14 +13363,14 @@ function coach_buildCandidates(an){
     if(upV){
       out.push({...base,id:'swap_'+ex.id,type:'swap',libExId:upV.id,title:`Cambiar ${ex.n} por ${upV.n}`,
         diff:`${ex.n} → ${upV.n}`,short:`cambiar a ${upV.n}`,
-        description:`${why} Prueba ${upV.n}: la versión más difícil: más estímulo con el mismo patrón. Tu historial de ${ex.n} se conserva.`});
+        description:`${why} Prueba ${upV.n}: la versión más difícil: más estímulo con el mismo patrón. ${_histStaysTxt(ex)}`});
       return;
     }
     const alt=coach_suggestAlternative(ex);
     if(alt){
       out.push({...base,id:'swap_'+ex.id,type:'swap',libExId:alt.id,title:`Cambiar ${ex.n} por ${alt.n}`,
         diff:`${ex.n} → ${alt.n}`,short:`cambiar a ${alt.n}`,
-        description:`${why} Prueba ${alt.n}: ${alt.reason}. Tu historial de ${ex.n} se conserva.`});
+        description:`${why} Prueba ${alt.n}: ${alt.reason}. ${_histStaysTxt(ex)}`});
       return;
     }
     if(tr!=null){
@@ -12848,7 +13564,7 @@ function _namesList(arr){
 function _holdTxt(it){
   const h=it&&it.hold,ex=it&&it.ex;
   if(!h)return'';
-  if(h.kind==='deload')return`en descarga hasta el ${fmtDate(new Date(h.until))}`;
+  if(h.kind==='deload')return`en descarga · ${deloadBackOnTxt({endTs:h.until})}`;
   if(h.kind==='recovery'){
     if(h.now&&h.src!=='gap')return`venía por debajo de tu nivel · lo cubre ${h.src==='rest'?'el descanso':'la descarga'}`;
     return`venía por debajo de tu nivel antes de ${h.src==='deload'?'la descarga':h.src==='rest'?'tu descanso':'la pausa'}`;
@@ -12915,7 +13631,7 @@ function coach_generateInsights(an,pend,resIds){
     // (los de lastre, detrás: su % es solo del lastre; si es el único, en kilos de lastre)
     const top=an.strong.slice().sort((a,b)=>(a.p.lastre?1:0)-(b.p.lastre?1:0)||b.p.pct-a.p.pct)[0];
     if(top.p.lastre)insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${top.p.lastV>top.p.firstV?`llevas más lastre: de ${esc(kgTxt(top.p.firstV))} a <strong>${esc(kgTxt(top.p.lastV))} kg</strong>`:`haces más con <strong>${esc(kgTxt(top.p.lastV))} kg</strong> de lastre`} en tus últimas ${top.p.sessions} sesiones. Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
-    else insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${_progWhat(top.p).su} ${_progWhat(top.p).v} un <strong>${pctTxt(top.p.pct)}</strong> en tus últimas ${top.p.sessions} sesiones (${top.p.metric==='e1rm'?top.p.firstV:_progRange(top.p)}). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
+    else insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${_progWhat(top.p).su} ${_progWhat(top.p).v} un <strong>${pctTxt(top.p.pct)}</strong> en tus últimas ${top.p.sessions} sesiones (${esc(_progExcRange(top.p))}). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
   }
 
   if(an.up.length>=2){
@@ -13020,9 +13736,9 @@ function coach_generateInsights(an,pend,resIds){
     const daysSinceLast=coach_daysSinceLastSession();
     if(daysSinceLast!=null){
       if(daysSinceLast>=7&&daysSinceLast<=14){
-        insights.push({type:'warn',ic:'⏳',t:'Llevas días sin entrenar',d:`Última sesión hace <strong>${daysSinceLast} días</strong>. El cuerpo conserva fuerza ~1-2 semanas — empieza suave (75% del último peso) para reincorporarte sin lesionarte.`});
+        insights.push({type:'warn',ic:'⏳',t:'Llevas días sin entrenar',d:`Última sesión hace <strong>${daysSinceLast} días</strong>. El cuerpo conserva fuerza ~1-2 semanas — vuelve con tu peso de siempre y marca bien el esfuerzo: si te cuesta, el Coach no te sube hasta que vuelvas a tu nivel.`});
       }else if(daysSinceLast>14){
-        insights.push({type:'bad',ic:'🔄',t:'Pausa larga',d:`Más de <strong>${daysSinceLast} días</strong> sin entrenar. Considera empezar con un microciclo de readaptación (2 semanas al 60% de pesos) antes de volver al ritmo normal.`});
+        insights.push({type:'bad',ic:'🔄',t:'Pausa larga',d:`Más de <strong>${daysSinceLast} días</strong> sin entrenar. Esta pausa ya cuenta como descanso: no te hace falta una descarga. En tu primera sesión repite tu último peso (el Coach no sube hasta que lo hagas) y, si te cuesta, baja un poco.`});
       }
     }
   }
@@ -13178,12 +13894,17 @@ function coach_applyRecommendationsConfirmed(){
   S.coachStart=Date.now(); // reiniciar ciclo
   saveState();
 
-  const msg=nAct>0
-    ?`🚀 Ciclo cerrado · ${nAct} propuesta${nAct!==1?'s':''} ${nAct!==1?'esperan':'espera'} tu decisión`
+  // (13e r1) La «Semana de descarga» del ciclo no cuenta como propuesta si ya sale como recomendación (o está en espera)
+  const reco=coach_deloadReco(),dlOff=!!reco||_dlSnoozedOffer();
+  const dlP=dlOff&&coach_pendingView().active.some(p=>p.type==='deload');
+  const nP=dlP?coach_pendingView().active.filter(p=>p.type!=='deload').length:nAct;
+  const pTxt=`${nP} propuesta${nP!==1?'s':''} ${nP!==1?'esperan':'espera'} tu decisión`;
+  const msg=dlP&&reco?`🚀 Ciclo cerrado · te recomiendo una semana de descarga${nP?` y ${pTxt}`:''}`
+    :nP>0?`🚀 Ciclo cerrado · ${pTxt}`
     :`🚀 Nuevo ciclo iniciado · ${plural(cycle.sessions.length,'sesión completada','sesiones completadas')}`;
   toast(msg,3500);
   go('coach');
-  if(nAct>0)goCoachProposals();
+  if(dlP&&reco)goDeloadReco();else if(nP>0)goCoachProposals();
 }
 // Abre el Coach con sus propuestas a la vista (desde Inicio o al cerrar el ciclo)
 function goCoachProposals(){
@@ -13430,7 +14151,7 @@ function coach_bodyweightPerformanceInsight(){
       type:'warn',
       ic:'💤',
       title:'Estancamiento general',
-      description:`Tu peso se mantiene y la fuerza baja. Puede ser falta de descanso, técnica o motivación. Una semana de descarga puede ayudar a resetear.`,
+      description:`Tu peso se mantiene y la fuerza baja. Puede ser falta de descanso, técnica o motivación. Una semana de descarga (−40 % de series o −15 % de peso: Ajustes → «Descarga o descanso», o la recomendación del Coach) puede ayudarte a recuperar.`,
       bw:bwTxt
     };
   }
@@ -13492,6 +14213,7 @@ function renderCoach(){
       <div class="coach-hero-sub">Después de <strong style="color:var(--green)">${remaining}</strong> ${remaining===1?'sesión':'sesiones'} más, el coach podrá analizar tu patrón de entrenamiento y darte recomendaciones personalizadas.</div>
     </div>
     ${coachPlanCardHtml()}
+    ${fatigueCardHtml()}
     ${mmCoachCardHtml()}
     <div class="sh">Qué hace el coach</div>
     <div class="insight">
@@ -13555,6 +14277,7 @@ function renderCoach(){
   const blockedAll=!!(dlNow&&dlNow.kind==='all');
   const blockedSome=!blockedAll&&pv.active.some(_proposalBlocked);
   const legacy=coach_legacyDeload();
+  const dlReco=coach_deloadReco(an),dlWait=!dlReco&&_dlSnoozedOffer();
 
   return`
   <div class="topbar">
@@ -13581,6 +14304,8 @@ function renderCoach(){
     <div class="rec-diff" style="margin-bottom:10px">${legacy.fixes.slice(0,6).map(f=>`<div class="rec-diff-row"><span class="sym add">↑</span><span>${esc(f.n)}: ${f.from} → ${f.to} series</span></div>`).join('')}${legacy.fixes.length>6?`<div class="rec-diff-row"><span class="sym add">+</span><span>y ${legacy.fixes.length-6} más</span></div>`:''}</div>
     <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="coach_fixLegacyDeload(true)">Restaurar series</button><button class="btn bs" style="width:120px" onclick="coach_fixLegacyDeload(false)">Dejar así</button></div>
   </div>`:''}
+
+  ${deloadRecoHtml(dlReco)}
 
   ${cycle.readyForReview?`<div class="cta-banner" role="button" tabindex="0" onclick="coach_applyRecommendations()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();coach_applyRecommendations()}">
     <div class="cta-banner-t">${cycle.overdue?`⏰ Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:'✨ Tu análisis de ciclo está listo'}</div>
@@ -13626,6 +14351,8 @@ function renderCoach(){
     </div>
   </div>
 
+  ${fatigueCardHtml(an)}
+
   ${coachPlanCardHtml()}
 
   <div class="sh">Análisis del ciclo</div>
@@ -13635,7 +14362,7 @@ function renderCoach(){
   ${pend.length?`<div class="sh" id="coach-props">💡 El Coach propone — tú decides</div>
   <div class="prop-hint">${blockedAll?'Durante la descarga no se cambia el plan: podrás aplicarlas al terminar.'
     :`Máximo ${PROP_MAX_TOTAL} cambios por ciclo y 1 por día de rutina${pv.appliedCount?` · llevas ${pv.appliedCount}`:''}.${blockedSome?' Lo que afecta a la descarga en curso podrás aplicarlo al terminarla.':''}`}</div>
-  ${pv.active.map(p=>_proposalCardHtml(p,_proposalBlocked(p))).join('')}
+  ${pv.active.map(p=>p.type!=='deload'?_proposalCardHtml(p,_proposalBlocked(p)):dlReco?_propDlLinkHtml():dlWait?_propDlWaitHtml():_proposalCardHtml(p,_proposalBlocked(p))).join('')}
   ${pv.reserve.length?`<button class="prop-res-tg" aria-expanded="${_coachShowReserve}" onclick="_coachShowReserve=!_coachShowReserve;render()">En reserva (${pv.reserve.length}) <span aria-hidden="true">${_coachShowReserve?'▴':'▾'}</span></button>
     ${_coachShowReserve?`<div class="prop-res">${pv.reserve.map(p=>`<div class="prop-res-row"><span class="prop-res-n">${esc(p.title||'')}</span><span class="prop-res-d">${esc(_propWhere(p))}</span></div>`).join('')}
       <div class="prop-res-note">${pv.active.length?'Entran si ignoras alguna de arriba':'Este ciclo ya tiene sus cambios'} (máx. ${PROP_MAX_TOTAL} por ciclo y 1 por día).</div></div>`:''}`:''}`:''}
@@ -13674,6 +14401,22 @@ function _proposalBlocked(p){
   if(!d||!p)return false;
   if(d.kind==='all'||p.type==='deload'||p.type==='rm_set')return true;
   return !!(p.exId&&d.changes.some(c=>c.exId===p.exId));
+}
+// (13e) Una sola oferta de descarga: si la tarjeta «Semana de descarga» (recomendación) está arriba, la propuesta del
+// ciclo con el mismo título queda en un enlace a ella (empezarla desde la tarjeta también resuelve la propuesta)
+function _propDlLinkHtml(){
+  return`<button type="button" class="coach-entry dlr-entry prop-dl-link" onclick="goDeloadReco()">
+      <span class="coach-entry-ic" aria-hidden="true">🧘</span>
+      <span class="coach-entry-t">Semana de descarga<small>Ya la tienes arriba: elige el plan y empiézala allí</small></span>
+      <span class="coach-entry-go">Ver ›</span></button>`;
+}
+// (13e r1) Con la recomendación pospuesta («Ahora no»), la propuesta del ciclo queda en espera (sin «Aplicar»): la única
+// oferta es el botón del medidor, al que lleva este enlace
+function _propDlWaitHtml(){
+  return`<button type="button" class="coach-entry dlr-entry prop-dl-wait" onclick="goFatGo()">
+      <span class="coach-entry-ic" aria-hidden="true">🧘</span>
+      <span class="coach-entry-t">Semana de descarga<small>En espera: te la vuelvo a proponer el ${esc(_dlDayTxt(S.dlRecoSnoozeTs))}. Si cambias de idea, empiézala en «Fatiga y esfuerzo»</small></span>
+      <span class="coach-entry-go">Ver ›</span></button>`;
 }
 function _proposalCardHtml(p,blocked){
   const pid=esc(p.id),where=_propWhere(p),pr=_propPrio(p);
@@ -13809,7 +14552,7 @@ function _hoyChip(ex,p,live){
   if(live){const n=Math.max(0,parseInt(ex.s)||0),c=countSetsDone(ex.id,n);
     if(n&&c>=n)return`<span class="hoy-tg ok">✓ hecho</span>`;
     if(c>0)return`<span class="hoy-tg part" role="img" aria-label="${c} de ${n} series">${c}/${n}</span>`;}
-  if(p)return`<span class="hoy-tg k-${p.kind}" role="img" aria-label="Objetivo: ${_presIsKg(p)&&!p.up?`${esc(kgTxt(p.weight))} kilos por ${p.reps}`:esc(presValTxt(p))}, ${esc(presWord(p))}"><i aria-hidden="true">${PRES_IC[p.kind]}</i><b class="tgl-v">${esc(presShortTxt(p))}</b></span>`;
+  if(p)return`<span class="hoy-tg ${presKCls(p)}" role="img" aria-label="Objetivo: ${_presIsKg(p)&&!p.up?`${esc(kgTxt(p.weight))} kilos por ${p.reps}`:esc(presValTxt(p))}, ${esc(presWord(p))}"><i aria-hidden="true">${presIc(p)}</i><b class="tgl-v">${esc(presShortTxt(p))}</b></span>`;
   // Sin historial: cómo se mide (peso corporal, solo reps, por tiempo, distancia) o «nuevo»
   const lt=exLT(ex);
   return`<span class="hoy-tg new">${lt==='bw'?'peso corporal':lt==='r'?'reps':lt==='t'?'por tiempo':lt==='d'?'distancia':'nuevo'}</span>`;
@@ -14056,8 +14799,16 @@ function renderDash(){
 // (10) El aviso de descarga activa va ahora dentro de la tarjeta «HOY TOCA» (hoyCardHtml).
 function dashCoachHtml(){
   let h='';
+  // (13d) Semana de descarga recomendada: se elige y empieza en el Coach
+  const rec=(S.sessions||[]).length>=CYCLE_MIN_SESSIONS?coach_deloadReco():null;
+  if(rec)h+=`<button class="coach-entry dlr-entry" onclick="goDeloadReco()">
+      <span class="coach-entry-ic" aria-hidden="true">🧘</span>
+      <span class="coach-entry-t">Te toca una semana de descarga<small>${esc(rec.tag)} · elige el plan en el Coach</small></span>
+      <span class="coach-entry-go">Ver ›</span></button>`;
   if((S.pendingCoachProposals||[]).length&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS){
-    const n=coach_pendingView().active.length;
+    // (13e) la semana de descarga del ciclo ya sale arriba (una sola oferta) o está en espera tras «Ahora no»
+    const dlOff=!!rec||_dlSnoozedOffer();
+    const n=coach_pendingView().active.filter(p=>!(dlOff&&p.type==='deload')).length;
     if(n)h+=`<button class="coach-entry" onclick="goCoachProposals()">
       <span class="coach-entry-ic" aria-hidden="true">💡</span>
       <span class="coach-entry-t">El Coach tiene ${n} propuesta${n!==1?'s':''} para tu rutina<small>Tú decides: aplicar o ignorar</small></span>
@@ -14286,7 +15037,11 @@ function _presKg(exId,ex,opts){
   // Semana ligera: descarga de este ejercicio o semana de descanso → nunca sube
   if(!opts.ignoreLight&&isLightNow(exId)){
     const reps=r!=null?Math.min(hi,Math.max(lo,r)):hi;
-    return out('deload',w,reps,deloadAppliesTo(exId)?`mantén ${kgTxt(w)} kg con menos series; la subida vuelve al terminar`:`${kgTxt(w)} kg o menos y entrena suave`);
+    // (13d) descarga con menos peso: tus series con un 15 % menos (al salto de tu equipo)
+    if(exLT(ex)==='w'&&_dlLoadMode(exId)){const wl=_dlLessKg(w,step);
+      if(wl!=null)return Object.assign(out('deload',wl,reps,`−${_dlPctTxt(w,wl)} de peso con tus series: ${kgTxt(wl)} kg en vez de ${kgTxt(w)}; la subida vuelve al terminar`),{dlFrom:w});
+      return out('deload',w,reps,`mantén ${kgTxt(w)} kg (un salto menos sería demasiado) y hazlo suave; la subida vuelve al terminar`);}
+    return out('deload',w,reps,deloadAppliesTo(exId)?`mantén ${kgTxt(w)} kg ${_dlFewerSets(exId)?'con menos series':'y hazlo suave'}; la subida vuelve al terminar`:`${kgTxt(w)} kg o menos y entrena suave`);
   }
   // Reps sin apuntar (registros antiguos): mismo peso hasta saber cuántas haces
   if(r==null)return out('keep',w,Math.min(hi,Math.max(lo,targetRepsNum(ex)||hi)),'apunta tus reps al terminar y ajusto el peso');
@@ -14403,7 +15158,7 @@ function _presBase(exId,ex,lt,last,lo,hi,unit){
 // Motivo de una semana ligera sin kilos
 function _presLightTxt(exId,unit){
   const w=unit==='s'?'mismo tiempo':unit==='m'?'misma distancia':'mismas reps';
-  return deloadAppliesTo(exId)?`${w} con menos series; la subida vuelve al terminar`:`entrena suave: ${unit==='s'?'menos tiempo':unit==='m'?'menos distancia o menos peso':'menos reps'} o menos series`;
+  return deloadAppliesTo(exId)?`${w}${_dlFewerSets(exId)?' con menos series':', más suave'}; la subida vuelve al terminar`:`entrena suave: ${unit==='s'?'menos tiempo':unit==='m'?'menos distancia o menos peso':'menos reps'} o menos series`;
 }
 // Peso corporal sin lastre y «solo reps» (bandas, TRX…): una rep más cada vez hasta el tope del rango en todas las
 // series; entonces lo más difícil que haya (banda más dura → la variante más difícil → lastre, si admite) y vuelta al
@@ -14471,7 +15226,17 @@ function _presTD(exId,ex,lt,all,opts){
       :wt>0?`Mantén ${kgTxt(wt)} kg`:`Mantén ${fmt(v)}`);
     return Object.assign(P,o,xo||{});
   };
-  if(!opts.ignoreLight&&isLightNow(exId))return set('deload',x!=null?Math.min(cap,x):x0,w,_presLightTxt(exId,P.unit));
+  if(!opts.ignoreLight&&isLightNow(exId)){
+    const v0=x!=null?Math.min(cap,x):x0;
+    // (13d) descarga con menos carga: con kilos, un 15 % menos de peso y el mismo tiempo o distancia; sin kilos, un 15 % menos de tiempo o distancia
+    if(_dlLoadMode(exId)){
+      if(w>0){const wl=_dlLessKg(w,P.step);
+        if(wl!=null)return set('deload',v0,wl,`−${_dlPctTxt(w,wl)} de peso con tus series: ${kgTxt(wl)} kg en vez de ${kgTxt(w)}; la subida vuelve al terminar`,null,{dlFrom:w});}
+      else{const vl=_dlLessTD(v0,lt);
+        if(vl<v0)return set('deload',vl,0,`−${_dlPctTxt(v0,vl)} de ${lt==='t'?'tiempo':'distancia'} con tus series: ${fmt(vl)} en vez de ${fmt(v0)}; la subida vuelve al terminar`,null,{dlFrom:v0});}
+    }
+    return set('deload',v0,w,_presLightTxt(exId,P.unit));
+  }
   if(x==null)return set('keep',x0,w,lt==='t'?'apunta tus segundos al terminar y te digo cuánto aguantar':'apunta tus metros al terminar y te digo cuánto recorrer');
   const inc=st(x)*(rc===1?2:1),n=d.length,lim=Math.round(0.8*x0);
   // Sesión floja: por debajo del 80 % del objetivo de ahora y hecha con ese mismo objetivo (si lo subiste después en el
@@ -14585,20 +15350,24 @@ function useSug(exId){
 // ── Coach de carga: piezas de la interfaz ──
 const PRES_WORD={up:'sube',reps:'+ reps',keep:'mantén',down:'baja',deload:'suave',harder:'variante'};
 const PRES_IC={up:'↑',reps:'+',keep:'=',down:'↓',deload:'🧘',harder:'⇧'};
+// (13e) Objetivo «suave» por la semana de descanso (no por una descarga): 🌴 y menta, como su aviso
+function _presRest(p){return!!(p&&p.kind==='deload'&&getActiveRest()&&!(p.exId&&deloadAppliesTo(p.exId)));}
+function presIc(p){return _presRest(p)?'🌴':PRES_IC[p.kind];}
+function presKCls(p){return _presRest(p)?'k-deload k-rest':'k-'+p.kind;}
 const _tgtWhyOpen=new Set(); // «¿Por qué?» abiertos (solo en memoria: no es estado de la app)
 // Bloque «Objetivo de hoy» de la tarjeta abierta: peso × reps, series, motivo y «¿Por qué?» desplegable
 function presTargetHtml(ex,p,compact){
   if(!ex||!p)return'';
   const open=_tgtWhyOpen.has(ex.id);
   // Compacto (durante el ejercicio, debajo de las series): solo el motivo y «¿Por qué?» (las filas ya llevan los valores)
-  if(compact)return`<div class="tgt cmp k-${p.kind}">
+  if(compact)return`<div class="tgt cmp ${presKCls(p)}">
     <div class="tgt-top">
       <div class="tgt-main"><div class="tgt-r">🎯 <b>${esc(p.head)}:</b> ${esc(p.reason)}</div></div>
       <button type="button" class="tgt-why-btn" data-ex="${esc(ex.id)}" aria-expanded="${open}" onclick="toggleTgtWhy(this)">¿Por qué? <span aria-hidden="true">${open?'▴':'▾'}</span></button>
     </div>
     <div class="tgt-why"${open?'':' hidden'}>${presWhyHtml(ex,p)}</div>
   </div>`;
-  return`<div class="tgt k-${p.kind}">
+  return`<div class="tgt ${presKCls(p)}">
     <div class="tgt-top">
       <div class="tgt-main"><div class="tgt-l">🎯 Objetivo de hoy · ${esc(plural(p.sets,'serie'))}</div>
         <div class="tgt-v${p.up||p.dn||p.band?' var':''}">${esc(presValTxt(p))}</div></div>
@@ -14625,7 +15394,7 @@ function _applyVariant(exId,k){
   if(S.sets[exId]&&Object.values(S.sets[exId]).some(Boolean)){toast('Termina primero las series de hoy');return;}
   const ex=routineEx(slot);
   confirmModal({title:`Cambiar a ${L.n}`,
-    body:`${ex.n} pasa a ${L.n} (${_nSeries(_baseSets(ex))} × ${fmtTargetReps(L)}) en tu ${day.label}. Tu historial de ${ex.n} se conserva.`,
+    body:`${ex.n} pasa a ${L.n} (${_nSeries(_baseSets(ex))} × ${fmtTargetReps(L)}) en tu ${day.label}. ${_histStaysTxt(ex)}`,
     okText:'Cambiar',cancelText:'Cancelar',
     onOk:()=>_routineSwapTo(dk,slot,L,{keepToday:false,noHist:true,noCarryR:true})});
 }
@@ -14770,7 +15539,7 @@ function dayTargetsHtml(dk,mode){
   const t=dayTargets(dk);
   if(!t.length)return'';
   const rows=t.map(({ex,p})=>`<div class="tgl-row">
-      <span class="tgl-ic k-${p.kind}" role="img" aria-label="${esc(presWord(p))}">${PRES_IC[p.kind]}</span>
+      <span class="tgl-ic ${presKCls(p)}" role="img" aria-label="${esc(presWord(p))}">${presIc(p)}</span>
       <span class="tgl-n">${esc(ex.n)}${mode==='coach'?`<small>${esc(p.head)}: ${esc(p.reason)}</small>`:''}</span>
       <span class="tgl-v">${esc(presShortTxt(p))}</span></div>`).join('');
   // Con algún objetivo que no es de kilos («13 reps», «45 s»), «Objetivos de hoy»; si todos lo son, «Objetivos de carga»
@@ -14891,7 +15660,8 @@ function _histBands(exId){
   (Array.isArray(S.restWeeks)?S.restWeeks:[]).forEach(r=>{if(r&&ok(+r.startTs,+r.endTs)&&+r.startTs<=now)out.push({a:+r.startTs,b:Math.min(now,+r.endTs),k:'rest'});});
   (Array.isArray(S.deloadHistory)?S.deloadHistory:[]).forEach(h=>{if(h&&ok(+h.startTs,+h.endTs)&&(!Array.isArray(h.exIds)||h.exIds.includes(exId)))out.push({a:+h.startTs,b:Math.min(now,+h.endTs),k:'dl'});});
   const d=getActiveDeload();
-  if(d&&d.startTs<=now&&Array.isArray(d.changes)&&d.changes.some(c=>c&&c.exId===exId))out.push({a:d.startTs,b:Math.min(now,d.endTs),k:'dl'});
+  // (13 r1) la de todo el plan cubre todos los ejercicios (como _lightAt)
+  if(d&&d.startTs<=now&&Array.isArray(d.changes)&&(d.kind==='all'||d.changes.some(c=>c&&c.exId===exId)))out.push({a:d.startTs,b:Math.min(now,d.endTs),k:'dl'});
   return out.filter(x=>x.b>x.a);
 }
 // Puntos de la gráfica: [{t, v, e (1RM est. o null), pr, light, cut, t1, t2}] de los registros de la medida de la ficha
@@ -15183,7 +15953,7 @@ function renderWorkout(){
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}" data-ex="${eid}">
       <div class="exh" role="button" tabindex="0" aria-expanded="${isOpen}" data-ex="${eid}" onclick="toggleCard(this.dataset.ex)" onkeydown="if(event.key==='Enter'){event.preventDefault();toggleCard(this.dataset.ex)}">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${exIconHtml(ex)}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+(pr&&(pr.unit==='kg'||pr.unit==='reps')&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex)))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal k-${pr.kind}" role="img" aria-label="Objetivo de hoy: ${_presIsKg(pr)&&!pr.up?`${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones`:esc(presValTxt(pr))}, ${esc(presWord(pr))}"><span class="ex-goal-v">🎯 ${esc(presShortTxt(pr))}</span><span class="ex-goal-k">${presWord(pr)}</span></div>`:''}${doneSum}</div>
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)} · ${ex.cardio?esc(ex.r):ex.s+'×'+(pr&&(pr.unit==='kg'||pr.unit==='reps')&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex)))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal ${presKCls(pr)}" role="img" aria-label="Objetivo de hoy: ${_presIsKg(pr)&&!pr.up?`${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones`:esc(presValTxt(pr))}, ${esc(presWord(pr))}"><span class="ex-goal-v">🎯 ${esc(presShortTxt(pr))}</span><span class="ex-goal-k">${presWord(pr)}</span></div>`:''}${doneSum}</div>
         ${dots}${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${!ex.cardio?body
@@ -15843,7 +16613,8 @@ function prLive(ex,rows){
     else if(sx&&sx.n){const v=xv(r);if(v>0){const j=prJudgeX(sx,v,lt);if(j)out.flags[r.i]=j;_prPushX(sx,v,{d:'hoy'});}}
   });
   const nx=rr.find(r=>!r.done);
-  if(nx){out.next=nx.i;out.hint=nx.w>0||!sx?(st.n?prHint(st,nx.w,nx.r,ex):null):prHintX(sx,xv(nx),lt,ex);}
+  // (13 r1) En descarga o semana de descanso no se empuja a batir récords (nada de «Haz 13 reps»): toca ir suave
+  if(nx){out.next=nx.i;out.hint=isLightNow(ex.id)?null:nx.w>0||!sx?(st.n?prHint(st,nx.w,nx.r,ex):null):prHintX(sx,xv(nx),lt,ex);}
   return out;
 }
 // ── Celebración al confirmar una serie que bate un récord ──
@@ -16834,8 +17605,9 @@ function removeExercise(dayKey,idx){
     onOk:()=>{
       _stampExName(ex);if(slot!==ex)_stampExName(slot); // (11) y su sustituto de hoy, si lo tiene
       const i=plan[dayKey].ex.indexOf(slot);if(i>=0)plan[dayKey].ex.splice(i,1);
+      const dl0=getActiveDeload(),dl=_deloadDropEx(ex.id); // (13a) su cambio de la descarga se va con él
       saveState();
-      toast('Ejercicio eliminado');
+      toast(dl==='end'?'Ejercicio eliminado · era el último en descarga: '+deloadBackTxt(dl0):'Ejercicio eliminado');
       render(); // repinta la app y el editor, que sigue abierto
     }
   });
@@ -16871,6 +17643,7 @@ function _routineSwapTo(dayKey,slot,libEx,o){
       day.ex[i]=newEx;
       if(S.open===slot.id)S.open=newEx.id;
     }
+    _deloadFollowSwap(ex.id,newEx,dayKey); // (13a) en descarga: al terminar, el nuevo vuelve a tus series de verdad
     return true;
   };
   const done=(newEx,msg)=>{saveState();toast(msg||`Cambiado a ${newEx.n}`);if(o.after)o.after(newEx);render();}; // repinta la app y el editor, que sigue abierto
@@ -18334,7 +19107,7 @@ function ignoreProposal(id){
 }
 
 // Aplica una propuesta guardada. Devuelve {ok, msg, dlId?, dayKey?, drop?}.
-// «Semana de descarga» y «Reducir volumen» son TEMPORALES (S.deload): guardan las series y vuelven solas.
+// «Semana de descarga» y «Descarga en X» (antes «Reducir volumen») son TEMPORALES (S.deload): guardan las series y vuelven solas.
 function _applyProposalByData(p){
   const plan=getPlan();
   // (11) Con un ejercicio cambiado «solo hoy», lo que toca a ese ejercicio (o una descarga de todo el plan) espera a
@@ -18352,7 +19125,7 @@ function _applyProposalByData(p){
     if(S.sets[ex.id]&&Object.values(S.sets[ex.id]).some(Boolean))return{ok:false,msg:'Termina o descarta el entreno en curso antes de reducir este ejercicio'};
     const d=startDeload('ex',[ex.id],p.title);
     if(!d)return{ok:false,drop:true,msg:'Ese ejercicio ya tiene el mínimo de series'};
-    return{ok:true,dlId:d.id,dayKey:_dayOfEx(ex.id),msg:`✓ ${ex.n}: ${_nSeries(d.changes[0].to)} hasta el ${deloadEndTxt(d)} · luego vuelve solo`};
+    return{ok:true,dlId:d.id,dayKey:_dayOfEx(ex.id),msg:deloadStartTxt(d)};
   }else if(p.type==='rep_scheme'){
     if(!ex)return gone;
     // Cambiar el esquema de reps solo vale con peso × reps (una plancha o unas flexiones no pasan a «8»)
@@ -18360,24 +19133,24 @@ function _applyProposalByData(p){
     if(p.to){ex.s=p.to.s;ex.r=p.to.r;}
     else{ex.s=Math.min(6,(parseInt(ex.s)||3)+1);ex.r=8;} // propuestas de la versión anterior
   }else if(p.type==='deload'){
-    // Con un entreno a medias, la sesión se guardaría recortada y marcada como descarga
-    if(getActiveWorkout())return{ok:false,msg:'Termina o descarta el entreno en curso antes de empezar la descarga'};
-    const d=startDeload('all',null,'Semana de descarga');
-    if(!d)return{ok:false,drop:true,msg:'Tu plan ya está en el mínimo de series'};
-    return{ok:true,dlId:d.id,msg:`🧘 Descarga activada · tu plan vuelve solo el ${deloadEndTxt(d)}`};
+    return beginFullDeload(); // (13b) la misma que Ajustes → «Descarga o descanso»
   }else if(p.type==='swap'){
     if(!ex)return gone;
     const lib=LIB_BY_ID.get(p.libExId);
     if(!lib||lib.cardio)return{ok:false,drop:true,msg:'Ese ejercicio ya no está en la biblioteca'};
     if(S.sets[ex.id]&&Object.values(S.sets[ex.id]).some(Boolean))return{ok:false,msg:'Termina o descarta el entreno en curso antes de cambiar este ejercicio'};
     const dk=_dayOfEx(ex.id),day=plan[dk],idx=day.ex.indexOf(ex);
-    const nx=_carryTarget(ex,libExToEx(lib)); // tus series y reps (si se miden igual)
-    _stampExName(ex); // Progreso lo sigue mostrando con su nombre
-    day.ex[idx]=nx; // el historial del anterior se conserva con su id
+    // (13b) como el editor: si el nuevo ya tiene historial propio (estuvo en tu rutina o lo hiciste «solo hoy»), sigue con él
+    const hk=_libHistKey(lib.id),own=!!hk&&!_planIdTaken(hk)&&Array.isArray(S.strength[hk])&&S.strength[hk].length>0;
+    const nx=_carryTarget(ex,own?_libCopy(lib,hk):libExToEx(lib)); // tus series y reps (si se miden igual)
+    const kept=Array.isArray(S.strength[ex.id])&&S.strength[ex.id].length>0;
+    _stampExName(ex); // Progreso lo sigue mostrando con su nombre, en «Fuera»
+    day.ex[idx]=nx; // el historial del anterior se queda con su id
+    _deloadFollowSwap(ex.id,nx,dk); // (13a) en descarga: al terminar, el nuevo vuelve a tus series de verdad
     delete S.sets[ex.id];delete S.logs[ex.id];
     if(S.open===ex.id)S.open=null;
     saveState();
-    return{ok:true,dayKey:dk,msg:`✓ ${day.label}: ${ex.n} → ${nx.n}`};
+    return{ok:true,dayKey:dk,msg:`✓ ${day.label}: ${ex.n} → ${nx.n}${kept?` · el historial de ${ex.n} sigue en Progreso («Fuera»)`:''}`};
   }else if(p.type==='add_ex'){
     const lib=LIB_BY_ID.get(p.libExId);
     if(!lib||!p.dayKey||!plan[p.dayKey])return{ok:false,drop:true,msg:'Esa propuesta ya no se puede aplicar'};
@@ -18546,12 +19319,14 @@ function renderSettings(){
           <span class="set-row-v">${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}</span>
           <span class="set-row-arrow">›</span>
         </div>
-        ${(()=>{const ar=getActiveRest();return`<div class="set-row" onclick="${ar?'endRestWeek()':'startRestWeek()'}">
+        ${(()=>{const ar=getActiveRest(),dl=getActiveDeload(),left=dl?Math.max(0,Math.ceil((dl.endTs-Date.now())/86400000)):ar?restDaysLeft(ar):0;
+          // (13b) descarga y descanso en una sola fila: sin ninguna, elige; con una en marcha, la termina
+          return`<div class="set-row" id="set-recovery" role="button" tabindex="0" onclick="${dl?'endDeload()':ar?'endRestWeek()':'openRecoveryChooser()'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
           <div class="set-row-info">
-            <div class="set-row-t">Semana de descanso</div>
-            <div class="set-row-d">${ar?'En descanso · el Coach no penaliza tu constancia':'Planifica 7 días de descanso sin penalización'}</div>
+            <div class="set-row-t">Descarga o descanso</div>
+            <div class="set-row-d">${dl?`${esc(deloadTitle(dl))} · ${esc(deloadBackOnTxt(dl))} · toca para terminarla`:ar?'Semana de descanso · el Coach no penaliza tu constancia · toca para terminarla':'Una semana más suave (menos series o menos peso) o sin entrenar · vuelve sola'}</div>
           </div>
-          <span class="set-row-v">${ar?`${restDaysLeft(ar)} día${restDaysLeft(ar)!==1?'s':''}`:'—'}</span>
+          <span class="set-row-v">${dl||ar?plural(left,'día'):'—'}</span>
           <span class="set-row-arrow">›</span>
         </div>`;})()}
       </div>
