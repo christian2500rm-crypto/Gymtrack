@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Gymteca"/>
@@ -12,7 +13,7 @@
 <link rel="canonical" href="https://gymteca.app/"/>
 <link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml"/>
 <link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png"/>
-<link rel="apple-touch-icon" href="assets/icons/icono-180.png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/icono-180.png"/>
 <link rel="manifest" href="manifest.webmanifest"/>
 <link rel="preload" href="assets/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin/>
 <style>
@@ -762,6 +763,24 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 /* (13d) Recomendación «Semana de descarga» (Coach) y su entrada en Inicio */
 .dlr-entry{background:color-mix(in srgb,var(--blue) 7%,transparent);border-color:color-mix(in srgb,var(--blue) 32%,transparent)}
 .dlr-entry .coach-entry-go{color:var(--blue-hi)}
+/* (15b) Aviso de copia de seguridad (Inicio) y su línea en Ajustes */
+.bk-card{padding:14px 14px 12px;border-color:color-mix(in srgb,var(--amber) 30%,var(--border))}
+.bk-row{display:flex;align-items:flex-start;gap:12px}
+.bk-ic{flex-shrink:0;width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--amber);background:color-mix(in srgb,var(--amber) 13%,transparent)}
+.bk-ic svg{width:20px;height:20px}
+.bk-txt{flex:1;min-width:0}
+.bk-k{display:block;font-size:10px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--amber)}
+.bk-t{display:block;font-size:15px;font-weight:600;color:var(--text);line-height:1.3;margin-top:2px}
+.bk-d{display:block;font-size:12px;color:var(--text2);line-height:1.45;margin-top:3px}
+.bk-acts{display:flex;gap:8px;margin-top:12px}
+.bk-acts .btn{flex:1 1 0;width:auto;min-width:0;min-height:44px;padding:11px 12px;font-size:14px}
+.bk-acts .bs{flex:0 0 auto;white-space:nowrap}
+@media (max-width:359px){.bk-ic{display:none}.bk-acts .btn{padding:11px 10px}}
+@media (prefers-reduced-motion:reduce){.bk-acts .btn:active{transform:none}}
+.set-bk{display:block;margin-top:2px;color:var(--text2)}
+.set-bk-old{color:var(--amber)}
+.set-row.set-row-static{cursor:default}
+.set-row.set-row-static:active{background:none}
 .dlr-card{padding:14px;border-color:color-mix(in srgb,var(--blue) 32%,transparent);background:color-mix(in srgb,var(--blue) 6%,var(--bg2));scroll-margin-top:12px}
 .dlr-h{display:flex;gap:11px;align-items:center}
 .dlr-ic{font-size:24px;line-height:1;flex-shrink:0}
@@ -927,6 +946,23 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 /* ── TOAST ── */
 #toast{position:fixed;top:calc(var(--st) + 14px);left:50%;transform:translateX(-50%) translateY(-120%);background:color-mix(in srgb,var(--bg2) 96%,transparent);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:calc(100% - 28px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+/* (15) Aviso de versión nueva: abajo, encima de la navegación (no choca con #toast, que va arriba), debajo de las hojas */
+/* (15) Aviso de versión nueva: franja arriba de #app, en el flujo (empuja la pantalla hacia abajo y no tapa nada:
+   antes flotaba sobre la navegación y pisaba «Empezar» en Inicio). Ocupa el hueco de la zona segura de arriba, así que la
+   cabecera de la pantalla no lo repite; el toast baja para no taparlo. */
+#swup{flex:none;display:flex;align-items:center;gap:2px;margin:calc(var(--st) + 8px) 12px 0;box-sizing:border-box;min-height:46px;padding:0 0 0 14px;background:color-mix(in srgb,var(--green) 8%,var(--bg2));color:var(--text);border:1px solid var(--green-b);border-radius:var(--rsm);font-size:13px;font-weight:500}
+#swup[hidden]{display:none}
+body.swup-on #screen .topbar{padding-top:14px}
+body.swup-on #toast{top:calc(var(--st) + 8px + 46px + 8px)}
+#swup.in{animation:swupIn .3s ease-out}
+@keyframes swupIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.swup-t{flex:1;min-width:0;padding:6px 8px 6px 0;line-height:1.3}
+.swup-go{flex:none;min-height:44px;padding:0 14px;border:4px solid transparent;border-left:0;border-right:0;background-clip:padding-box;border-radius:calc(var(--rxs) + 4px);background-color:var(--green);color:var(--accent-ink);font:inherit;font-weight:600;cursor:pointer}
+.swup-go:active{background-color:var(--green-d)}
+.swup-x{flex:none;width:44px;height:44px;border:0;background:transparent;color:var(--text3);font-size:15px;cursor:pointer;border-radius:var(--rsm)}
+.swup-go:focus-visible,.swup-x:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+@media (max-width:359px){#swup{padding-left:10px;font-size:12px}.swup-go{padding:0 10px}}
+@media (prefers-reduced-motion:reduce){#swup.in{animation:none}}
 /* ── CONFIRM MODAL ── */
 .cmov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .2s ease;overscroll-behavior:contain;padding-bottom:var(--kb)}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -1590,6 +1626,8 @@ input[type=number]{-moz-appearance:textfield}
 </div>
 
 <div id="app" style="display:none">
+  <!-- (15) Aviso de versión nueva: arriba y en el flujo (empuja la pantalla, no tapa nada) -->
+  <div id="swup" role="region" aria-label="Actualización" hidden><span class="swup-t">Nueva versión disponible</span><button type="button" class="swup-go" onclick="swUpdateApply()">Actualizar</button><button type="button" class="swup-x" onclick="swUpdateLater()" aria-label="Ahora no (se pondrá al día la próxima vez)">✕</button></div>
   <div id="screen"></div>
   <nav class="botbar coach-enabled">
     <button class="bb on" id="nb-dash" onclick="go('dash')">
@@ -1628,6 +1666,7 @@ input[type=number]{-moz-appearance:textfield}
 </div>
 
 <div id="toast"></div>
+<div id="swup-live" class="sr-only" aria-live="polite"></div>
 <div id="cmodal-root"></div>
 <div id="settings-root"></div>
 <div id="wmodal-root"></div>
@@ -2521,18 +2560,26 @@ function mapTick(n){let more=false;
   return more;}
 function mapStats(){let fr=0;for(const m of maps)fr+=m.frames;return{maps:maps.size,anims:live.size,running:!!raf,frames:fr};}
 
-const TH_VER=1,TH_DB='gymanim',TH_ST='thumbs',BODY_G=/^(torso|head|ua[LR]|fa[LR]|th[LR]|sh[LR])$/;
-const thMem=new Map();       // ck → {v, data, src}
-let thPersist=null,thIdb=null,thIdbState='idle'; // 'idle' | 'pending' | 'ok' | 'none'
-let thIO=null,thT=0,thPutT=0;const thQ=[],thPut=[];
-const thStat={gen:0,ms:0,maxMs:0,idbHit:0,applied:0,slices:0};
-function fnv(s){let h=0x811c9dc5;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);}
+const TH_RVER=2,TH_DB='gymanim',TH_DBV=2,TH_ST='th2',TH_OLD='thumbs',TH_FMT=2,TH_META='#sweep',
+  TH_WAIT=500,TH_OPEN_MAX=8000,TH_SLICE_MS=8,TH_SLICE_N=4,TH_TRIES=3,TH_RETRY=2000,TH_MEM=160,TH_PF=24,TH_PUTMAX=120,
+  TH_DAY=864e5,TH_TOUCH=7*TH_DAY,TH_KEEP=60*TH_DAY,TH_SWEEP=7*TH_DAY,
+  BODY_G=/^(torso|head|ua[LR]|fa[LR]|th[LR]|sh[LR])$/;
+const thMem=new Map();       // ck → {v, data, src}; el orden es el de uso (la última, la más reciente)
+let thDb=null,thIdbState='idle',thTries=0,thRetryT=0,thOpenEp=0,thOpenTo=0,thClearPend=false,thSweepT=0,thIdbF=null; // 'idle' | 'pending' | 'ok' | 'none'
+let thIO=null,thT=0,thPutT=0,thRdSend=0,thPfN=0;const thQ=[],thPut=new Map(),thRd=new Map(); // thPut: ck → valor; thRd: ck → lectura en curso
+const thStat={gen:0,ms:0,maxMs:0,idbHit:0,applied:0,slices:0,reads:0,miss:0,stale:0,late:0,prefetch:0,evict:0,writes:0,opens:0,fails:0,blocked:0,swept:0};
+function fnv(s,h){h=h==null?0x811c9dc5:h>>>0;for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}return(h>>>0).toString(36);}
+const fnv2=s=>fnv(s)+'.'+fnv(s,0x9e3779b1);
 let _thEng=null;
-function thEngHash(){if(!_thEng){const GA=G.GymAnim;_thEng=fnv(TH_VER+'|'+(GA&&GA._&&GA._.buildHash||'')+'|'+
-  [renderTo,drawScene,fillItem,shapePath,drawOver,prepare,bounds,drawBG,drawFloor,Body.prototype.draw,thumbRender,peakC].map(String).join('|')+
-  JSON.stringify([COL,MUS,DIM]));}return _thEng;}
-function thVer(spec){if(!spec._thv){let src='';try{src=String(spec.build);}catch(e){}
-  spec._thv=fnv(thEngHash()+'|'+spec.key+'|'+src+'|'+JSON.stringify([spec.cam,spec.fitBox,spec.muscles,spec.init,spec.timeline,spec.cycle,spec.style,spec.floor]));}
+function thEngFns(){return{thumbRender,peakC,makeCam,proj,pvec,ellipse2,prepare,bounds,drawScene,shapePath,fillItem,
+  drawOver,drawCap,capPasses,ellCut,drawBG,drawFloor,capPath,cylGeom,cylPath,boxFaces,toneOf,shade,shadeHex,rgb,hexA,sstep,clamp};}
+function thEngHash(){if(!_thEng){const F=thEngFns();
+  _thEng=fnv2(TH_RVER+'|'+Object.keys(F).map(k=>k+':'+F[k]).join('|')+'|'+Object.keys(V).map(k=>k+':'+V[k]).join('|')+JSON.stringify([COL,L2]));}
+  return _thEng;}
+const thNum=(k,x)=>k&&k.charCodeAt(0)===95?undefined:typeof x==='number'?Math.round(x*1e5)/1e5:x;
+function thFp(spec){const{sc}=buildFrame(spec,peakC(spec));return JSON.stringify([sc.items,sc.overs,spec.cam,spec.fitBox,spec.floor,spec.style],thNum);}
+function thVer(spec){if(!spec._thv){let fp;try{fp=thFp(spec);}catch(e){const GA=G.GymAnim;let b='';try{b=String(spec.build);}catch(_){}fp='!'+b+'|'+(GA&&GA._&&GA._.buildHash||'');}
+  spec._thv=fnv2(thEngHash()+'|'+spec.key+'|'+fp);}
   return spec._thv;}
 function thOpt(w,h,o){o=o||{};const W=Math.max(16,Math.min(640,Math.round(+w||96))),H=Math.max(16,Math.min(640,Math.round(+h||W)));
   const dpr=Math.min(2,Math.max(1,+o.dpr||G.devicePixelRatio||1));
@@ -2564,91 +2611,179 @@ function thumbRender(spec,o){
 function thSrc(data){try{if(!G.URL||!URL.createObjectURL||typeof Blob==='undefined'||typeof atob!=='function')return data;
   const i=data.indexOf(','),mime=data.slice(5,data.indexOf(';')),bin=atob(data.slice(i+1)),u=new Uint8Array(bin.length);
   for(let k=0;k<bin.length;k++)u[k]=bin.charCodeAt(k);return URL.createObjectURL(new Blob([u],{type:mime}));}catch(e){return data;}}
-function thMemSet(ck,v,data){const o=thMem.get(ck);if(o&&o.v===v)return o;
-  if(o&&o.src!==o.data){try{URL.revokeObjectURL(o.src);}catch(e){}}
-  const e={v,data,src:thSrc(data)};thMem.set(ck,e);return e;}
-function thLookup(spec,ck){const v=thVer(spec),m=thMem.get(ck);if(m&&m.v===v)return m;
-  const p=thPersist&&thPersist.get(ck);if(p&&p.v===v&&typeof p.d==='string'&&p.d.startsWith('data:image/')){thStat.idbHit++;return thMemSet(ck,v,p.d);}
-  return null;}
+function thFree(e){if(e&&e.src&&e.src!==e.data&&/^blob:/.test(e.src)){try{URL.revokeObjectURL(e.src);}catch(_){}}}
+function thMemGet(spec,ck){const m=thMem.get(ck);if(!m)return null;
+  if(m.v!==thVer(spec)){thMem.delete(ck);thFree(m);return null;}
+  thMem.delete(ck);thMem.set(ck,m);return m;}
+function thMemSet(ck,v,data){const o=thMem.get(ck);
+  if(o&&o.v===v){if(!o.data)o.data=data;thMem.delete(ck);thMem.set(ck,o);return o;}
+  if(o){thMem.delete(ck);thFree(o);}
+  const e={v,data,src:thSrc(data)};thMem.set(ck,e);if(thMem.size>TH_MEM)thTrim();return e;}
+function thTrim(){let used=new Set();
+  try{if(typeof document!=='undefined')document.querySelectorAll('img[data-ga-thumb]').forEach(im=>{const s=im.getAttribute('src');if(s)used.add(s);});}catch(e){used=null;}
+  const goal=Math.floor(TH_MEM*.8);let n=thMem.size;
+  for(const[ck,e]of thMem){if(n<=goal)break;
+    if(!used||used.has(e.src)){if(e.src!==e.data&&e.data)e.data=null;continue;}
+    thMem.delete(ck);thFree(e);thStat.evict++;n--;}}
 function thumb(key,w,h,o){
   const spec=getDef(key);if(!spec||typeof document==='undefined')return null;
-  o=thOpt(w,h,o);const ck=thCk(key,o);let e=thLookup(spec,ck);if(e)return e.data;
+  o=thOpt(w,h,o);const ck=thCk(key,o);let e=thMemGet(spec,ck);if(e&&e.data)return e.data;
   const t0=NOW();let d=null;try{d=thumbRender(spec,o);}catch(err){d=null;}
   const ms=NOW()-t0;if(!d)return null;
   thStat.gen++;thStat.ms+=ms;if(ms>thStat.maxMs)thStat.maxMs=ms;
   e=thMemSet(ck,thVer(spec),d);thStore(ck,e.v,d);return d;}
-function thumbCached(key,w,h,o){const spec=getDef(key);if(!spec)return null;o=thOpt(w,h,o);const e=thLookup(spec,thCk(key,o));return e?e.src:null;}
+function thumbCached(key,w,h,o){const spec=getDef(key);if(!spec)return null;o=thOpt(w,h,o);const ck=thCk(key,o),e=thMemGet(spec,ck);if(e)return e.src;
+  if(thIdbState!=='none'&&!thRd.has(ck)&&thPfN<TH_PF&&typeof document!=='undefined'){if(!thPfN)setTimeout(()=>{thPfN=0;},0);thPfN++;thStat.prefetch++;thRead(ck,spec,null);}
+  return null;}
+function thFactory(){if(thIdbF)return thIdbF;try{return G.indexedDB||null;}catch(e){return null;}}
 function thInit(){
   if(thIdbState!=='idle')return;
-  let idb=null;try{idb=G.indexedDB||null;}catch(e){idb=null;}
-  if(!idb){thIdbState='none';return;}
-  thIdbState='pending';
-  let to=0;const done=st=>{if(thIdbState!=='pending')return;thIdbState=st;clearTimeout(to);if(st==='none')thPut.length=0;thKick();if(thPut.length&&!thPutT)thPutT=setTimeout(thFlush,300);};
-  to=setTimeout(()=>done('none'),1500);
-  let rq;try{rq=idb.open(TH_DB,1);}catch(e){done('none');return;}
-  rq.onupgradeneeded=()=>{try{rq.result.createObjectStore(TH_ST);}catch(e){}};
-  rq.onerror=()=>done('none');rq.onblocked=()=>done('none');
-  rq.onsuccess=()=>{const db=rq.result,map=new Map();
-    try{const tx=db.transaction(TH_ST,'readwrite'),cur=tx.objectStore(TH_ST).openCursor();
-      cur.onsuccess=()=>{const c=cur.result;if(!c)return;const k=String(c.key),val=c.value,spec=getDef(k.split('|')[0]);
-        if(!spec||!val||val.v!==thVer(spec)){try{c.delete();}catch(e){}}else map.set(k,val);c.continue();};
-      tx.oncomplete=()=>{thIdb=db;thPersist=map;done('ok');};
-      tx.onerror=tx.onabort=()=>{thIdb=db;thPersist=map;done('ok');};
-    }catch(e){done('none');}};}
-function thStore(ck,v,d){if(thPersist)thPersist.set(ck,{v,d});if(thIdbState==='none')return;
-  thPut.push([ck,{v,d,t:Date.now()}]);if(!thPutT)thPutT=setTimeout(thFlush,300);}
-function thFlush(){thPutT=0;if(thIdbState==='none'){thPut.length=0;return;}
-  if(!thIdb){if(thPut.length)thPutT=setTimeout(thFlush,500);return;}
-  const L=thPut.splice(0);try{const os=thIdb.transaction(TH_ST,'readwrite').objectStore(TH_ST);L.forEach(([k,v])=>os.put(v,k));}catch(e){}}
+  const idb=thFactory();
+  if(!idb||typeof idb.open!=='function'){thIdbState='none';thTries=TH_TRIES;thPut.clear();thRdAll();return;}
+  thIdbState='pending';thStat.opens++;const ep=++thOpenEp;
+  clearTimeout(thOpenTo);thOpenTo=setTimeout(()=>thOpenFail(ep),TH_OPEN_MAX);
+  let rq;try{rq=idb.open(TH_DB,TH_DBV);}catch(e){thOpenFail(ep);return;}
+  rq.onupgradeneeded=()=>{try{const db=rq.result,N=db.objectStoreNames;if(N.contains(TH_OLD))db.deleteObjectStore(TH_OLD);
+    if(!N.contains(TH_ST))db.createObjectStore(TH_ST).createIndex('t','t');}catch(e){}};
+  rq.onblocked=()=>{thStat.blocked++;}; // otra pestaña con la versión vieja abierta: mientras, se dibuja sin IndexedDB
+  rq.onerror=ev=>{try{if(ev&&ev.preventDefault)ev.preventDefault();}catch(e){}thOpenFail(ep);};
+  rq.onsuccess=()=>{let db=null;try{db=rq.result;}catch(e){db=null;}
+    if(ep!==thOpenEp||thIdbState!=='pending'||!db){try{if(db)db.close();}catch(e){}return;}
+    clearTimeout(thOpenTo);thDb=db;thIdbState='ok';thTries=0;
+    db.onversionchange=()=>{try{db.close();}catch(e){}thLost(db);};
+    db.onclose=()=>thLost(db);
+    if(thClearPend){thClearPend=false;thTx('readwrite',os=>{os.clear();});}
+    thRdKick();thPutSoon();thSweepSoon();};}
+function thOpenFail(ep){if(ep!==thOpenEp||thIdbState!=='pending')return;thOpenEp++;clearTimeout(thOpenTo);
+  thIdbState='none';thDb=null;thStat.fails++;thRdAll();thRetry();}
+function thLost(db){if(db&&thDb!==db)return;thDb=null;if(thIdbState==='ok')thIdbState='none';thRdAll();thRetry();}
+function thRetry(){if(thRetryT)return;if(thTries>=TH_TRIES){thPut.clear();return;}thTries++;
+  thRetryT=setTimeout(()=>{thRetryT=0;if(thIdbState==='none'){thIdbState='idle';thInit();}},TH_RETRY*thTries);}
+function thTx(mode,fn,done){const db=thDb;let tx=null;
+  try{tx=db.transaction(TH_ST,mode);fn(tx.objectStore(TH_ST),tx);}
+  catch(e){if(tx){try{tx.abort();}catch(_){}}if(done)done(false);if(!tx)thLost(db);return false;}
+  tx.oncomplete=()=>{if(done)done(true);};
+  tx.onabort=()=>{if(done)done(false);};
+  return true;}
+function thRead(ck,spec,el){let r=thRd.get(ck);
+  if(!r){r={ck,spec,els:[],sent:false,done:false,dead:false,to:0};thRd.set(ck,r);thStat.reads++;
+    r.to=setTimeout(()=>thRdEnd(r,null,'late'),TH_WAIT);}
+  if(el&&r.els.indexOf(el)<0)r.els.push(el);
+  thRdKick();}
+function thRdKick(){if(!thRd.size)return;
+  if(thIdbState==='idle')thInit();
+  if(thIdbState==='none'){thRdAll();return;}
+  if(thIdbState==='ok'&&!thRdSend){thRdSend=1;Promise.resolve().then(thRdGo);}} // las pedidas en la misma tarea, en una transacción
+function thRdGo(){thRdSend=0;if(thIdbState!=='ok')return;
+  const L=[];thRd.forEach(r=>{if(!r.sent){r.sent=true;L.push(r);}});if(!L.length)return;
+  thTx('readonly',os=>{L.forEach(r=>{const q=os.get(r.ck);q.onsuccess=()=>thRdEnd(r,q.result,'got');
+      q.onerror=ev=>{try{if(ev&&ev.preventDefault)ev.preventDefault();}catch(e){}thRdEnd(r,null,'err');};});},
+    fine=>{if(!fine)L.forEach(r=>thRdEnd(r,null,'err'));});}
+function thRdAll(){[...thRd.values()].forEach(r=>thRdEnd(r,null,'none'));}
+function thRdEnd(r,val,why){
+  if(r.dead)return;
+  const first=!r.done;
+  if(first){r.done=true;clearTimeout(r.to);if(thRd.get(r.ck)===r)thRd.delete(r.ck);}
+  if(why==='late'){if(first){thStat.late++;thRdToQ(r);}return;}
+  let e=null;
+  if(why==='got'&&val){const v=thVer(r.spec);
+    if(val.f===TH_FMT&&val.v===v&&typeof val.d==='string'&&val.d.startsWith('data:image/')){
+      thStat.idbHit++;e=thMemSet(r.ck,v,val.d);
+      if(!(val.t>Date.now()-TH_TOUCH&&val.t<=Date.now()+TH_DAY))thStore(r.ck,v,val.d); // marca de uso, como mucho cada 7 días
+    }else thStat.stale++;}
+  else if(why==='got')thStat.miss++;
+  if(e)thFill(r,e);           // también si llegó tarde: las que aún esperan la toman
+  else if(first)thRdToQ(r);}  // no está (o no vale): a dibujar
+function thRdToQ(r){let n=0;for(const el of r.els)if(el.isConnected&&el.getAttribute('data-ga-st')==='w'&&thQ.indexOf(el)<0){thQ.push(el);n++;}if(n)thKick();}
+function thFill(r,e){const key=r.spec.key,done=new Set();
+  const put=el=>{if(done.has(el))return;done.add(el);if(!el.isConnected||el.getAttribute('data-ga-st')!=='w')return;
+    if(thObs.has(el)){thObs.delete(el);if(thIO)thIO.unobserve(el);}thApply(el,e.src);};
+  r.els.forEach(put);
+  try{document.querySelectorAll('img[data-ga-st="w"][data-ga-thumb]').forEach(el=>{if(el.getAttribute('data-ga-thumb')===key&&thCk(key,thOptEl(el))===r.ck)put(el);});}catch(err){}}
+function thStore(ck,v,d){if(thIdbState==='none'&&!thRetryT)return; // sin IndexedDB (ni reintento pendiente): solo memoria
+  thPut.delete(ck);thPut.set(ck,{f:TH_FMT,v,d,t:Date.now()});
+  if(thIdbState==='idle')thInit();
+  if(thIdbState==='ok'&&thPut.size>=32){thFlush();return;}
+  while(thPut.size>TH_PUTMAX)thPut.delete(thPut.keys().next().value);
+  thPutSoon();}
+function thPutSoon(){if(!thPutT&&thPut.size)thPutT=setTimeout(thFlush,300);}
+function thFlush(){clearTimeout(thPutT);thPutT=0;if(!thPut.size)return;
+  if(thIdbState!=='ok'){if(thIdbState==='none'&&!thRetryT)thPut.clear();return;} // al abrir se escriben (thPutSoon)
+  const L=[...thPut];thPut.clear();
+  thTx('readwrite',os=>{L.forEach(([k,v])=>os.put(v,k));},fine=>{if(fine)thStat.writes+=L.length;});}
+function thSweepSoon(){if(!thSweepT)thSweepT=setTimeout(()=>{thIdle(thSweep);},6000);}
+function thSweep(){if(thIdbState!=='ok')return;const now=Date.now();
+  thTx('readonly',os=>{const q=os.get(TH_META);q.onsuccess=()=>{const m=q.result;if(m&&m.t>now-TH_SWEEP&&m.t<=now)return;thSweepRun(now);};});}
+function thSweepRun(now){let n=0;
+  thTx('readwrite',os=>{
+    if(os.openKeyCursor){const c1=os.openKeyCursor();c1.onsuccess=()=>{const c=c1.result;if(!c)return;const k=String(c.key);
+      if(k!==TH_META&&!getDef(k.split('|')[0])){os.delete(c.primaryKey);n++;}c.continue();};}
+    const KR=G.IDBKeyRange;
+    if(KR&&os.indexNames&&os.indexNames.contains('t')){const c2=os.index('t').openKeyCursor(KR.upperBound(now-TH_KEEP));
+      c2.onsuccess=()=>{const c=c2.result;if(!c)return;if(String(c.primaryKey)!==TH_META){os.delete(c.primaryKey);n++;}c.continue();};}
+    os.put({t:now},TH_META);},fine=>{if(fine)thStat.swept+=n;});}
 function thOptEl(el){return thOpt(+el.getAttribute('data-gw'),+el.getAttribute('data-gh'),{fit:el.getAttribute('data-gfit')||'scene',bg:el.getAttribute('data-gbg')||null});}
 function thApply(el,src){if(el.getAttribute('src')!==src){try{el.decoding='async';}catch(e){}el.src=src;}el.setAttribute('data-ga-st','ok');thStat.applied++;
   if(el.complete&&el.naturalWidth)el.classList.add('ga-on');else el.addEventListener('load',()=>el.classList.add('ga-on'),{once:true});}
 const thObs=new Set();
 function thNear(el){if(!el.isConnected)return false;const r=el.getBoundingClientRect();if(!(r.width>0&&r.height>0))return false;
   const H=G.innerHeight||800,Wd=G.innerWidth||400;return r.bottom>-200&&r.top<H+200&&r.right>-50&&r.left<Wd+50;}
-function thPend(el){if(thIO)thIO.unobserve(el);thObs.delete(el);thQ.push(el);}
+function thWant(el){if(thIO)thIO.unobserve(el);thObs.delete(el);
+  if(!el.isConnected||el.getAttribute('data-ga-st')!=='w')return;
+  const key=el.getAttribute('data-ga-thumb'),spec=getDef(key);if(!spec){el.setAttribute('data-ga-st','x');return;}
+  const ck=thCk(key,thOptEl(el)),e=thMemGet(spec,ck);if(e){thApply(el,e.src);return;}
+  thRead(ck,spec,el);}
 let thScT=0;
-function thRecheck(){thScT=0;let any=false;thObs.forEach(el=>{if(!el.isConnected){if(thIO)thIO.unobserve(el);thObs.delete(el);}else if(thNear(el)){thPend(el);any=true;}});if(any)thKick();}
+function thRecheck(){thScT=0;thObs.forEach(el=>{if(!el.isConnected){if(thIO)thIO.unobserve(el);thObs.delete(el);}else if(thNear(el))thWant(el);});}
 function ensureThIO(){if(!thIO&&G.IntersectionObserver){thIO=new IntersectionObserver(es=>{
-    for(const e of es)if(e.isIntersecting&&thObs.has(e.target))thPend(e.target);
-    if(thQ.length)thKick();},{rootMargin:'200px 0px'});
+    for(const e of es)if(e.isIntersecting&&thObs.has(e.target))thWant(e.target);},{rootMargin:'200px 0px'});
     try{document.addEventListener('scroll',()=>{if(thObs.size&&!thScT)thScT=setTimeout(thRecheck,150);},{capture:true,passive:true});}catch(e){}}
   return thIO;}
 function thumbLazy(root){
-  if(typeof document==='undefined')return 0;thInit();let n=0;
+  if(typeof document==='undefined')return 0;let n=0;
   if(thObs.size)thRecheck();
   (root||document).querySelectorAll('img[data-ga-thumb]').forEach(el=>{
     const st=el.getAttribute('data-ga-st');if(st==='ok'||st==='x'||st==='w')return;
     const key=el.getAttribute('data-ga-thumb'),spec=getDef(key);if(!spec){el.setAttribute('data-ga-st','x');return;}
-    const e=thLookup(spec,thCk(key,thOptEl(el)));if(e){thApply(el,e.src);return;}
+    const e=thMemGet(spec,thCk(key,thOptEl(el)));if(e){thApply(el,e.src);return;}
     el.setAttribute('data-ga-st','w');n++;
-    if(thNear(el)||!ensureThIO())thQ.push(el);else{thIO.observe(el);thObs.add(el);}});
-  if(thQ.length)thKick();
+    if(thNear(el)||!ensureThIO())thWant(el);else{thIO.observe(el);thObs.add(el);}});
   return n;}
-const thIdle=f=>{if(G.requestIdleCallback)G.requestIdleCallback(f,{timeout:600});else setTimeout(()=>f({timeRemaining:()=>12,didTimeout:true}),40);};
-function thKick(){if(thT||!thQ.length||thIdbState==='pending'||thIdbState==='idle')return;thT=1;thIdle(thWork);}
-function thWork(dl){thT=0;thStat.slices++;let drew=false;
+const thIdle=f=>{if(G.requestIdleCallback)G.requestIdleCallback(f,{timeout:600});else setTimeout(()=>{const t0=NOW();f({timeRemaining:()=>Math.max(0,12-(NOW()-t0)),didTimeout:true});},40);};
+function thKick(){if(thT||!thQ.length)return;thT=1;thIdle(thWork);}
+function thMore(dl,drew,t0){
+  const rem=dl&&dl.timeRemaining?+dl.timeRemaining()||0:0;
+  if(rem>10)return true;
+  return !!(dl&&(dl.didTimeout||rem<=0))&&drew<TH_SLICE_N&&NOW()-t0<TH_SLICE_MS;}
+function thWork(dl){thT=0;thStat.slices++;let drew=0;const t0=NOW();
   while(thQ.length){
     const el=thQ[0];
     if(!el||!el.isConnected||el.getAttribute('data-ga-st')!=='w'){thQ.shift();if(el&&!el.isConnected&&el.getAttribute('data-ga-st')==='w')el.removeAttribute('data-ga-st');continue;}
-    const key=el.getAttribute('data-ga-thumb'),spec=getDef(key),o=thOptEl(el);
-    let e=spec?thLookup(spec,thCk(key,o)):null;
-    if(!e&&spec){if(drew&&!(dl&&dl.timeRemaining&&dl.timeRemaining()>10))break;
-      drew=true;thumb(key,o.w,o.h,o);e=thLookup(spec,thCk(key,o));}
+    const key=el.getAttribute('data-ga-thumb'),spec=getDef(key),o=thOptEl(el),ck=spec?thCk(key,o):'';
+    let e=spec?thMemGet(spec,ck):null;
+    if(!e&&spec){if(drew&&!thMore(dl,drew,t0))break;
+      drew++;thumb(key,o.w,o.h,o);e=thMemGet(spec,ck);}
     thQ.shift();
     if(e)thApply(el,e.src);else el.setAttribute('data-ga-st','x');}
   if(thQ.length)thKick();}
-function thumbReady(){thInit();return new Promise(r=>{const ck=()=>thIdbState==='pending'?setTimeout(ck,20):r(thIdbState);ck();});}
-function thumbStats(){return Object.assign({mem:thMem.size,persisted:thPersist?thPersist.size:0,queue:thQ.length,idb:thIdbState},thStat);}
-function thumbReset(o){o=o||{};thMem.forEach(e=>{if(e.src!==e.data){try{URL.revokeObjectURL(e.src);}catch(_){}}});thMem.clear();
-  if(o.idb){if(thPersist)thPersist.clear();if(thIdb){try{thIdb.transaction(TH_ST,'readwrite').objectStore(TH_ST).clear();}catch(e){}}}
-  Object.keys(thStat).forEach(k=>{thStat[k]=0;});return true;}
+function thumbReady(){thInit();return new Promise(res=>{let n=0;const ck=()=>{if(thIdbState==='ok'||thIdbState==='none')return res(thIdbState);
+  if(++n*20>=TH_WAIT)return res('pending');setTimeout(ck,20);};ck();});}
+function thumbStats(){return Object.assign({mem:thMem.size,memData:[...thMem.values()].filter(e=>e.data).length,reading:thRd.size,writing:thPut.size,queue:thQ.length,idb:thIdbState,tries:thTries},thStat);}
+function thumbReset(o){o=o||{};thMem.forEach(thFree);thMem.clear();thPfN=0;
+  const wait=[];thRd.forEach(r=>{r.dead=true;clearTimeout(r.to);r.els.forEach(el=>wait.push(el));});thRd.clear();
+  if(o.idb){thPut.clear();if(thDb&&thIdbState==='ok')thTx('readwrite',os=>{os.clear();});else if(thIdbState!=='none')thClearPend=true;}
+  if(o.reopen){if('factory' in o)thIdbF=o.factory||null;
+    thOpenEp++;clearTimeout(thOpenTo);clearTimeout(thRetryT);thRetryT=0;clearTimeout(thSweepT);thSweepT=0;
+    const db=thDb;thDb=null;if(db){try{db.close();}catch(e){}}thIdbState='idle';thTries=0;}
+  Object.keys(thStat).forEach(k=>{thStat[k]=0;});
+  wait.forEach(el=>{if(el.isConnected&&el.getAttribute('data-ga-st')==='w'&&thQ.indexOf(el)<0)thQ.push(el);});thKick();
+  return true;}
 
 G.GymAnim={def,alias,has:k=>!!getDef(k),get:getDef,keys:()=>Object.keys(DEFS).concat(Object.keys(ALIAS)),mount,mountAll,unmount,refresh,swap,muscleMap,
   thumb,thumbCached,thumbLazy,thumbReady,
   muscles:()=>Object.keys(MUS),
   _:{V,Body,Scene,makeE,makeCam,fitCam,evalTL,compileTL,renderTo,buildFrame,DIM,COL,MUS,EASE,solve,ik2,PAD,fpt,fdir,frot,basis,walkOnTreadmill,heatRGB,standPose,mapStats,mapTick,
-    peakC,thumbRender,thumbStats,thumbReset,thVer,thCk,thOpt,buildHash:''}};
+    peakC,thumbRender,thumbStats,thumbReset,thVer,thFp,thEngHash,thEngNames:()=>Object.keys(thEngFns()),thCk,thOpt,thMore,thConf:{wait:TH_WAIT,sliceMs:TH_SLICE_MS,sliceN:TH_SLICE_N,mem:TH_MEM,pf:TH_PF,db:TH_DB,dbv:TH_DBV,store:TH_ST,fmt:TH_FMT,rver:TH_RVER},buildHash:''}};
 })(typeof window!=='undefined'?window:globalThis);
 /* ex/_kit.js */
 /* Kit reutilizable (NO registra ejercicios): equipamiento con medidas reales + posturas genéricas. API en KIT.md.
@@ -8738,7 +8873,7 @@ GA.def('lib_plate_pinch',{title:'Agarre de pinza con discos',cam:{yaw:40,pitch:6
 
 })(window.GymAnim);
 /* build */
-try{GymAnim._.buildHash="1dfa2d3fb279";}catch(e){}
+try{GymAnim._.buildHash="d335d67e031e";}catch(e){}
 </script>
 <!-- GYM-ANIM:END -->
 <script>
@@ -8846,6 +8981,7 @@ let _saveFailedNotified=false;
 function loadState(){try{const r=localStorage.getItem('gymtrack_v3');if(r)return JSON.parse(r);}catch(e){}return null;}
 function saveState(){
   try{
+    try{_bkTrack();}catch(e){} // (15) ¿cambió tu rutina o tu peso desde la última copia?
     const snap={};
     for(const k in S){if(!TRANSIENT_KEYS.includes(k))snap[k]=S[k];}
     localStorage.setItem('gymtrack_v3',JSON.stringify(snap));
@@ -9627,7 +9763,7 @@ function _backfillStrengthNames(data){
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
   pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',hRange:'6m',rRange:'6m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],dlRecoSnoozeTs:null,loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true,
-  libPlace:'g',libKit:null,libFav:[],libRecent:[]},migrateState(loadState())||{});
+  lastBackupTs:null,backupSnoozeTs:null,lastBackupKind:null,lastJsonBackupTs:null,dataEditTs:null,libPlace:'g',libKit:null,libFav:[],libRecent:[]},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -9663,6 +9799,7 @@ if(S.deload!=null&&!_validDeload(S.deload)){S.deload=null;saveState();}
 S.deloadHistory=_sanitizeDeloadHistory(S.deloadHistory);
 if(S.dlRecoSnoozeTs!=null&&!(typeof S.dlRecoSnoozeTs==='number'&&isFinite(S.dlRecoSnoozeTs)))S.dlRecoSnoozeTs=null; // (13d)
 _sanitizeWrapSeen(S); // (14d) ofertas del resumen ya vistas (sin él, los ciclos que ya tenías no se ofrecen)
+_sanitizeBackupMeta(S); // (15b) última copia y «Ahora no» del aviso de copias
 S.pendingCoachProposals=_sanitizeProposals(S.pendingCoachProposals);
 if(!Array.isArray(S.appliedProposals))S.appliedProposals=[];
 // Saltos de peso (v15): siempre con forma válida
@@ -12523,8 +12660,8 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   // Rotación: tras la sesión más reciente (una reabierta antigua no debe saltarse la que vino después)
   S.nextDay=rs?getNextDay(S.sessions[S.sessions.length-1].day):getNextDay(S.day);
   if(!getPlan()[S.nextDay])S.nextDay=getNextDay(S.day);
-  // La sesión reabierta ya está guardada de nuevo
-  if(rs)S.reopenedSession=null;
+  // La sesión reabierta ya está guardada de nuevo (y sus cambios no están en la última copia: su ts es el de antes)
+  if(rs){S.reopenedSession=null;S.dataEditTs=now;}
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
   // (11) La sesión ha terminado: los ejercicios cambiados «solo hoy» vuelven a ser los de tu rutina
   revertDaySubs(S.day);
@@ -12542,6 +12679,8 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   // Disparar análisis semanal si toca
   coach_maybeRunWeeklyAnalysis();
   saveState();
+  // (15b) Con la primera sesión guardada (y en las siguientes, una vez por arranque) pide al navegador que no borre los datos
+  storagePersist();
   toast(doneMsg||(rs?`✅ Sesión del ${today} guardada · Próxima: ${getPlan()[S.nextDay].label}`:`✅ Sesión guardada · Próxima: ${getPlan()[S.nextDay].label}`),doneMsg?4200:undefined);
   go('dash');
   // (09) Resumen de la sesión recién guardada: contadores, frente a la última del mismo día, récords, ejercicios,
@@ -14657,6 +14796,7 @@ function go(tab){
   // (08) El RPE ya no es una ventana: sus chips van en la barra del descanso, que se ve en todas las pantallas
   S.tab=tab;['dash','workout','coach','prog'].forEach(t=>document.getElementById('nb-'+t).classList.toggle('on',t===tab));
   document.getElementById('screen').scrollTop=0;render();saveState();
+  try{if(_sw.pending)swUpdateSync();}catch(e){} // (15) el aviso de versión nueva se esconde al entrar en Entreno
 }
 
 // ═══════════════════════════════════════════════════════════
@@ -14927,6 +15067,7 @@ function renderDash(){
     <div class="wgrid">${weekGrid()}</div>
     <div style="display:flex;gap:12px;margin-top:9px;font-size:10px;color:var(--text3)"><span style="color:var(--green)">■ Completado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span><span>■ Planificado</span></div>
   </div>`}
+  ${backupReminderHtml()}
   <div class="sh" id="dash-w">Peso corporal</div>
   ${renderWeightCard('Registra tu peso en cada sesión para ver la evolución aquí.')}
   ${(()=>{
@@ -20663,6 +20804,8 @@ function renderSettings(){
   const totalSessions=S.sessions.length;
   const dataSize=new Blob([JSON.stringify(S)]).size;
   const dataSizeKb=(dataSize/1024).toFixed(1);
+  // (15b) copia antigua o ninguna con sesiones: la línea de la última copia, en ámbar
+  const bkLast=_bkSafeTs(),bkOld=totalSessions>0&&(bkLast==null||Date.now()-bkLast>=BK_DAYS*DAY_MS);
   root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeSettings()"><div class="hist-sheet" style="max-height:90vh;max-height:90dvh">
     <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
@@ -20748,15 +20891,15 @@ function renderSettings(){
       <div class="set-section">
         <div class="set-row" onclick="exportData()">
           <div class="set-row-info">
-            <div class="set-row-t">Exportar backup</div>
-            <div class="set-row-d">Descarga un archivo JSON con todo tu historial</div>
+            <div class="set-row-t">Guardar copia (JSON)</div>
+            <div class="set-row-d">Descarga un archivo JSON con todo tu historial<span class="set-bk${bkOld?' set-bk-old':''}" id="set-bk">${esc(backupLineTxt())}</span></div>
           </div>
           <span class="set-row-v">${dataSizeKb} KB</span>
           <span class="set-row-arrow">›</span>
         </div>
         <div class="set-row" onclick="importData()">
           <div class="set-row-info">
-            <div class="set-row-t">Importar backup</div>
+            <div class="set-row-t">Restaurar copia</div>
             <div class="set-row-d">Restaura desde un archivo JSON exportado</div>
           </div>
           <span class="set-row-arrow">›</span>
@@ -20774,6 +20917,14 @@ function renderSettings(){
             <div class="set-row-d">Útil para trasladar entre dispositivos</div>
           </div>
           <span class="set-row-arrow">›</span>
+        </div>
+        <div class="set-row" id="set-persist" style="display:none" onclick="storagePersistAsk()" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();storagePersistAsk()}">
+          <div class="set-row-info">
+            <div class="set-row-t">Almacenamiento</div>
+            <div class="set-row-d"></div>
+          </div>
+          <span class="set-row-v"></span>
+          <span class="set-row-arrow" aria-hidden="true">›</span>
         </div>
       </div>
       <div class="sh">Estadísticas</div>
@@ -20820,6 +20971,7 @@ function renderSettings(){
       </div>
     </div>
   </div></div>`;
+  _setPersistFill();
 }
 
 function openEditWeight(which){
@@ -20931,7 +21083,176 @@ function pickWeeklyTarget(n){
   renderSettings();render();
 }
 
+// ═══ (15b) COPIAS DE SEGURIDAD Y ALMACENAMIENTO PERSISTENTE ═══
+// S.lastBackupTs: cuándo guardaste la última copia (exportar el JSON o el CSV, o copiar el JSON); null = nunca. Va dentro
+// de la propia copia (así, al importarla, cuenta como copia de ese momento). S.backupSnoozeTs: «Ahora no» del aviso de
+// Inicio → medianoche local de dentro de 7 días (es de este móvil: importar no lo cambia). Sin subir SCHEMA_VERSION: se
+// sanean al cargar y al importar (_sanitizeBackupMeta; en el arranque, antes de las const de abajo: solo literales).
+// Aviso en Inicio: cada 30 días o tras 10 sesiones nuevas desde la última copia (sin copia: desde tu primera sesión),
+// siempre con alguna sesión sin copiar; nunca sin sesiones ni con un entreno en curso.
+// (15 arreglos) S.lastBackupKind: 'json' (copia que se puede restaurar) o 'csv' (la última fue el CSV, que no se puede
+// importar); null = 'json' (datos de antes). S.lastJsonBackupTs: la última copia JSON (la que vale para restaurar).
+// S.dataEditTs: último cambio que una sesión nueva no delata (tu rutina o tu peso, o una sesión antigua reabierta):
+// con él, el aviso de los 30 días también sale aunque no haya sesiones nuevas.
+const BK_DAYS=30,BK_SESS=10,BK_SNOOZE_DAYS=7;
+function _bkTs(v){return typeof v==='number'&&isFinite(v)&&v>0?Math.min(v,Date.now()):null;}
+function _sanitizeBackupMeta(o){
+  if(!o||typeof o!=='object')return;
+  o.lastBackupTs=_bkTs(o.lastBackupTs);
+  const z=o.backupSnoozeTs;
+  // una espera de más de 8 días (reloj cambiado o dato a mano) no vale: el aviso no puede quedar dormido para siempre
+  o.backupSnoozeTs=typeof z==='number'&&isFinite(z)&&z>0&&z<=Date.now()+8*864e5?z:null;
+  o.lastBackupKind=o.lastBackupKind==='csv'||o.lastBackupKind==='json'?o.lastBackupKind:null;
+  o.lastJsonBackupTs=_bkTs(o.lastJsonBackupTs);
+  o.dataEditTs=_bkTs(o.dataEditTs);
+}
+// La última copia que se puede restaurar (null = ninguna): tras un CSV, la JSON de antes
+function _bkSafeTs(){return S.lastBackupKind==='csv'?_bkTs(S.lastJsonBackupTs):_bkTs(S.lastBackupTs);}
+// «Cambios desde la copia»: huella de tu rutina y tu peso, mirada en cada saveState (unos 10 KB: barato). Lo cargado al
+// abrir es el punto de partida (_bkTrackStart, al final del arranque); antes de eso no se apunta nada.
+var _bkSig,_bkReady=false;
+function _bkDataSig(){
+  const s=JSON.stringify([S.currentPlan||null,S.weights||null]);let h=0x811c9dc5; // FNV-1a de 32 bits + longitud
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
+  return(h>>>0).toString(36)+'.'+s.length;
+}
+function _bkTrackStart(){_bkSig=_bkDataSig();_bkReady=true;}
+function _bkTrack(){
+  if(!_bkReady)return;
+  const s=_bkDataSig();
+  if(s!==_bkSig){_bkSig=s;S.dataEditTs=Date.now();}
+}
+// «hoy», «ayer», «hace 12 días» (días de calendario) o «nunca»
+function backupAgeTxt(ts){
+  ts=_bkTs(ts);if(ts==null)return'nunca';
+  const d=Math.round((_startOfDay(Date.now())-_startOfDay(ts))/DAY_MS);
+  return d<=0?'hoy':d===1?'ayer':`hace ${d} días`;
+}
+// ¿Toca el aviso? null o {never, n (sesiones sin copia), days (días desde la última copia o desde tu primera sesión)}
+function backupReminder(){
+  const ss=Array.isArray(S.sessions)?S.sessions.filter(_isPlainObj):[];
+  if(!ss.length||getActiveWorkout())return null;
+  const now=Date.now(),z=S.backupSnoozeTs;
+  if(typeof z==='number'&&now<z)return null;
+  const last=_bkSafeTs();
+  let n,since,edits=false;
+  if(last==null){
+    // sin copia: todas cuentan (también las de copias antiguas sin ts); el tiempo, desde la primera con fecha
+    n=ss.length;const T=ss.map(s=>+s.ts).filter(t=>isFinite(t)&&t>0);since=T.length?Math.min(...T):null;
+  }else{
+    // con copia: las sesiones posteriores (una sin ts, de una copia antigua, ya estaba en ella)
+    n=ss.filter(s=>+s.ts>last).length;since=last;
+    // sin sesiones nuevas, otros cambios (rutina, peso, una sesión reabierta) también piden copia a los 30 días
+    edits=!n&&_bkTs(S.dataEditTs)!=null&&S.dataEditTs>last;
+  }
+  if(!n&&!edits)return null;
+  const days=since==null?0:Math.floor((now-since)/DAY_MS);
+  if(n<BK_SESS&&days<BK_DAYS)return null;
+  return{never:last==null,n,days,edits,csv:S.lastBackupKind==='csv'};
+}
+const _bkIcSvg='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19h14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function backupReminderHtml(){
+  const o=backupReminder();if(!o)return'';
+  const ses=plural(o.n,'sesión','sesiones');
+  const age=backupAgeTxt(_bkSafeTs());
+  const t=o.never?(o.csv?'Tu CSV no sirve para restaurar':'Aún no tienes ninguna copia')
+    :o.days>=BK_DAYS?`Tu última copia es de ${age}`
+    :`${ses} sin copia`;
+  const d=o.never?`${o.n===1?'Tu sesión solo está':`Tus ${ses} solo están`} en este móvil. ${o.csv?'Guarda una copia (JSON) en un toque.':`${o.n===1?'Guárdala':'Guárdalas'} en un archivo en un toque.`}`
+    :o.days>=BK_DAYS?(o.edits?'Desde entonces hay cambios sin copiar (rutina, peso…). Guarda una copia en un toque.'
+      :`Desde entonces, ${ses} ${o.n===1?'nueva':'nuevas'}. Guarda una copia en un toque.`)
+    :`Tu última copia es de ${age}. Guarda otra en un toque.`;
+  return`<div class="card bk-card" id="bk-card" role="region" aria-labelledby="bk-t">
+    <div class="bk-row"><span class="bk-ic">${_bkIcSvg}</span>
+      <div class="bk-txt"><span class="bk-k">Copia de seguridad</span><span class="bk-t" id="bk-t">${esc(t)}</span><span class="bk-d">${esc(d)}</span></div></div>
+    <div class="bk-acts"><button type="button" class="btn bp" onclick="backupFromCard(this)">Guardar copia</button><button type="button" class="btn bs" onclick="backupSnooze()">Ahora no</button></div>
+  </div>`;
+}
+// Marca la copia (antes de armarla: la copia lleva su propia fecha); devuelve lo de antes para deshacerlo si falla
+// kind 'json' (exportar o copiar el JSON: se puede restaurar) o 'csv' (no se puede importar: no quita la espera del aviso
+// ni cuenta como copia restaurable, aunque lastBackupTs apunte cuándo fue)
+function _bkMark(kind){
+  const p={ts:S.lastBackupTs,z:S.backupSnoozeTs,k:S.lastBackupKind,j:S.lastJsonBackupTs},now=Date.now();
+  if(kind==='csv'){if(S.lastBackupKind!=='csv')S.lastJsonBackupTs=_bkTs(S.lastBackupTs);S.lastBackupKind='csv';}
+  else{S.lastBackupKind='json';S.lastJsonBackupTs=now;S.backupSnoozeTs=null;}
+  S.lastBackupTs=now;
+  return p;
+}
+function _bkUndo(p){S.lastBackupTs=p.ts;S.backupSnoozeTs=p.z;S.lastBackupKind=p.k;S.lastJsonBackupTs=p.j;}
+// Ajustes: «Última copia: hace 3 días» (la que se puede restaurar) y, si después exportaste el CSV, que ese no vale
+function backupLineTxt(){
+  let t=`Última copia: ${backupAgeTxt(_bkSafeTs())}`;
+  // (la nota solo si el CSV es de otro día que la restaurable: el mismo día no hay nada que advertir)
+  if(S.lastBackupKind==='csv'&&_bkTs(S.lastBackupTs)!=null&&backupAgeTxt(S.lastBackupTs)!==backupAgeTxt(_bkSafeTs()))t+=` · CSV ${backupAgeTxt(S.lastBackupTs)}, no sirve para restaurar`;
+  return t;
+}
+// Copia hecha: guardar y repintar (el aviso se va; con Ajustes abierto, sin perder dónde estabas en la hoja)
+function _bkDone(){
+  saveState();
+  const b=document.querySelector('#settings-root .hist-sheet-body'),top=b?b.scrollTop:0,card=!!document.getElementById('bk-card');
+  render();
+  const b2=document.querySelector('#settings-root .hist-sheet-body');if(b2&&top)b2.scrollTop=top;
+  if(card&&!S.settingsOpen)_wrRefocus();
+}
+function backupFromCard(el){
+  try{if(el&&el.focus)el.focus({preventScroll:true});}catch(e){}
+  return exportData();
+}
+function backupSnooze(){
+  S.backupSnoozeTs=_addDaysLocal(_startOfDay(Date.now()),BK_SNOOZE_DAYS);
+  saveState();render();_wrRefocus();
+  toast(`Vale · te lo recuerdo el ${_dlDayTxt(S.backupSnoozeTs)}`,3200);
+}
+// navigator.storage.persist(): pide al navegador que no borre tus datos cuando le falte espacio. Tras guardar una sesión,
+// una vez por arranque (en Chrome y Safari no pregunta nada; Firefox pregunta una vez y lo recuerda). Sin soporte, o si
+// falla, no pasa nada. Devuelve una promesa: true (protegido), false (no) o null (sin soporte / ya se intentó).
+let _persistTried=false;
+function _persistApi(){try{const st=navigator.storage;return st&&typeof st.persist==='function'?st:null;}catch(e){return null;}}
+function _persistReq(st){
+  try{
+    return Promise.resolve(typeof st.persisted==='function'?st.persisted():false)
+      .then(p=>p?true:st.persist()).then(v=>!!v,()=>false);
+  }catch(e){return Promise.resolve(false);}
+}
+function storagePersist(){
+  if(_persistTried||!(Array.isArray(S.sessions)&&S.sessions.length))return Promise.resolve(null);
+  const st=_persistApi();if(!st)return Promise.resolve(null);
+  _persistTried=true;
+  return _persistReq(st);
+}
+// Ajustes: ¿protegido? (solo si el navegador lo sabe decir; si no, la fila no sale). Tocarla, si no lo está, lo pide.
+function storagePersistedState(){
+  try{const st=navigator.storage;if(!st||typeof st.persisted!=='function')return Promise.resolve(null);
+    return Promise.resolve(st.persisted()).then(v=>!!v,()=>null);}catch(e){return Promise.resolve(null);}
+}
+function _setPersistFill(){
+  const r=document.getElementById('set-persist');if(!r)return Promise.resolve(null);
+  return storagePersistedState().then(p=>{
+    const row=document.getElementById('set-persist');if(!row)return p;
+    if(p==null){row.style.display='none';return p;}
+    row.style.display='';
+    row.classList.toggle('set-row-static',p);
+    if(p){row.removeAttribute('role');row.removeAttribute('tabindex');}else{row.setAttribute('role','button');row.tabIndex=0;}
+    row.querySelector('.set-row-d').textContent=p?'Protegido: el navegador no borrará tus datos para hacer sitio'
+      :'Si al móvil le falta espacio, el navegador podría borrar tus datos. Toca para pedir que los proteja';
+    row.querySelector('.set-row-v').textContent=p?'✓ Protegido':'Normal';
+    const ar=row.querySelector('.set-row-arrow');if(ar)ar.hidden=p; // fija una vez protegida: sin flecha
+    return p;
+  });
+}
+function storagePersistAsk(){
+  const row=document.getElementById('set-persist');if(row&&row.classList.contains('set-row-static'))return Promise.resolve(true);
+  const st=_persistApi();if(!st){toast('Este navegador no permite protegerlo');return Promise.resolve(null);}
+  _persistTried=true;
+  return _persistReq(st).then(v=>{
+    _setPersistFill();
+    toast(v?'Listo: el navegador no borrará tus datos':'El navegador no lo permite ahora. Añadir Gymteca a tu pantalla de inicio suele ayudar',3600);
+    return v;
+  });
+}
+
 function exportData(){
+  const prev=_bkMark('json');
   try{
     const payload={...S,_exported:new Date().toISOString(),_version:SCHEMA_VERSION};
     // Excluir claves transitorias del export
@@ -20941,14 +21262,17 @@ function exportData(){
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
-    a.download=`gymtrack-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.download=`gymteca-copia-${new Date().toISOString().slice(0,10)}.json`;
     document.body.appendChild(a);a.click();
     setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
-    toast('Backup descargado');
-  }catch(e){toast('Error al exportar');}
+    _bkDone();
+    toast('Copia descargada · guárdala también fuera del móvil (Drive, correo…)',3600);
+    return true;
+  }catch(e){_bkUndo(prev);toast('Error al exportar');return false;}
 }
 
 function exportCSV(){
+  const prev=_bkMark('csv');
   try{
     // CSV: fecha, día, ejercicio, peso(kg), reps, series, rpe
     // (tipos de registro) Columnas añadidas al final: su ejercicio de la biblioteca, el tipo (w, bw, r, t, d) y los segundos
@@ -20982,27 +21306,34 @@ function exportCSV(){
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;
-    a.download=`gymtrack-${new Date().toISOString().slice(0,10)}.csv`;
+    a.download=`gymteca-${new Date().toISOString().slice(0,10)}.csv`;
     document.body.appendChild(a);a.click();
     setTimeout(()=>{document.body.removeChild(a);URL.revokeObjectURL(url);},100);
-    toast('CSV descargado');
-  }catch(e){toast('Error al exportar CSV');}
+    _bkDone();
+    toast('CSV descargado · para restaurar, usa «Guardar copia»',4200);
+    return true;
+  }catch(e){_bkUndo(prev);toast('Error al exportar CSV');return false;}
 }
 
 function copyDataToClipboard(){
+  // (15b) cuenta como copia si se llega a copiar (el JSON ya lleva su fecha); si falla, todo queda como estaba
+  const prev=_bkMark('json');
   try{
     const txt=JSON.stringify(S,null,2);
     if(navigator.clipboard&&navigator.clipboard.writeText){
-      navigator.clipboard.writeText(txt).then(()=>toast('JSON copiado al portapapeles'),()=>toast('No se pudo copiar'));
+      return navigator.clipboard.writeText(txt).then(()=>{_bkDone();toast('JSON copiado al portapapeles');return true;},
+        ()=>{_bkUndo(prev);toast('No se pudo copiar');return false;});
     }else{
       // Fallback
       const ta=document.createElement('textarea');
       ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
       document.body.appendChild(ta);ta.select();
-      try{document.execCommand('copy');toast('JSON copiado');}catch(e){toast('No se pudo copiar');}
+      let ok=false;try{ok=document.execCommand('copy')!==false;}catch(e){}
       document.body.removeChild(ta);
+      if(ok){_bkDone();toast('JSON copiado');}else{_bkUndo(prev);toast('No se pudo copiar');}
+      return Promise.resolve(ok);
     }
-  }catch(e){toast('Error al copiar');}
+  }catch(e){_bkUndo(prev);toast('Error al copiar');return Promise.resolve(false);}
 }
 
 // Import: id de un ejercicio del plan que no se puede usar tal cual (no es texto, está vacío, pasa de 80 o lleva
@@ -21038,9 +21369,9 @@ function importData(){
           toast('Archivo no válido');return;
         }
         confirmModal({
-          title:'Importar backup',
+          title:'Restaurar copia',
           body:`Se reemplazarán los datos actuales por los del archivo (${plural((data.sessions||[]).length,'sesión','sesiones')}, ${plural((data.weights||[]).length,'peso')}). Esta acción no se puede deshacer.`,
-          okText:'Importar',
+          okText:'Restaurar',
           cancelText:'Cancelar',
           danger:true,
           onOk:()=>{
@@ -21121,6 +21452,16 @@ function importData(){
             // (también si la trae vacía o mal: las copias hechas antes de ver una oferta llevan null)
             if(!(typeof migrated.wrapMonthSeen==='string'&&/^m\d{4}-\d{1,2}$/.test(migrated.wrapMonthSeen)))migrated.wrapMonthSeen=S.wrapMonthSeen;
             _sanitizeWrapSeen(migrated);
+            // (15b) Última copia: la que trae la copia; si no (copias de antes), la fecha en que se exportó (_exported); si
+            // tampoco (JSON hecho a mano), la de este móvil. El «Ahora no» del aviso es de este móvil: no se importa.
+            {const bt=_bkTs(data.lastBackupTs),ex=typeof data._exported==='string'?_bkTs(Date.parse(data._exported)):null;
+              migrated.lastBackupTs=bt!=null?bt:ex!=null?ex:S.lastBackupTs;migrated.backupSnoozeTs=S.backupSnoozeTs;
+              // (15 arreglos) un JSON con fecha es una copia restaurable de ese momento; sin fecha, lo de este móvil.
+              // Sus cambios sin copiar son los de la copia (lo que se importa no es un cambio nuevo)
+              if(bt!=null||ex!=null){migrated.lastBackupKind='json';migrated.lastJsonBackupTs=migrated.lastBackupTs;}
+              else{migrated.lastBackupKind=S.lastBackupKind;migrated.lastJsonBackupTs=S.lastJsonBackupTs;}
+              migrated.dataEditTs=data.dataEditTs;_bkReady=false;setTimeout(()=>{if(!_bkReady)_bkTrackStart();},0);
+              _sanitizeBackupMeta(migrated);}
             Object.keys(S).forEach(k=>{if(!(k in migrated))migrated[k]=S[k];});
             S=Object.assign(S,migrated);
             // Selector (lugar, material de casa, favoritos, recientes): los del backup si los trae; si no, los de este móvil
@@ -21131,7 +21472,9 @@ function importData(){
             // Re-sincronizar el puntero del entreno activo con las series realmente importadas
             syncActiveWorkout();
             S.settingsOpen=true;
+            _bkTrackStart(); // lo importado es el nuevo punto de partida de «cambios desde la copia»
             saveState();render();
+            storagePersist(); // (15b) datos que importan: pide que no se borren (una vez por arranque)
             toast('✓ Datos importados correctamente',3500);
           }
         });
@@ -21188,35 +21531,185 @@ setInterval(()=>{
   }
 },30000);
 
-// ── PWA: registrar manifest dinámico (single-file friendly) ────────
-// Publicada (http/https) usa manifest.webmanifest: Chrome no instala desde un manifest blob:.
+// ── PWA: manifest ────────────────────────────────────────────────
+// Publicada (http/https) usa manifest.webmanifest (Chrome no instala desde un manifest blob:). En file:// —o si quien la
+// aloja solo subió index.html y el manifest no está— se crea uno en memoria con las MISMAS claves y URL absolutas: un
+// blob: no tiene carpeta, así que «./» no valdría. (15) Antes el respaldo usaba start_url './' (relativa al blob:) y un
+// icono de 180 px; ahora va igual que el estático: 192/512 any + maskable, SVG any, atajos y colores de la paleta.
+function pwaManifest(){
+  const base=new URL('./',location.href).href,icon=f=>new URL('assets/icons/'+f,base).href;
+  const bg=typeof paletteHex==='function'?paletteHex('--bg','#0b1514'):'#0b1514';
+  return {
+    name:'Gymteca',short_name:'Gymteca',description:'Tu app de entrenamiento personal',
+    id:base,start_url:base,scope:base,display:'standalone',orientation:'portrait',
+    background_color:bg,theme_color:bg,lang:'es',dir:'ltr',categories:['health','fitness','sports'],
+    icons:[
+      {src:icon('icono-192.png'),sizes:'192x192',type:'image/png',purpose:'any'},
+      {src:icon('icono-512.png'),sizes:'512x512',type:'image/png',purpose:'any'},
+      {src:icon('icono-192.png'),sizes:'192x192',type:'image/png',purpose:'maskable'},
+      {src:icon('icono-512.png'),sizes:'512x512',type:'image/png',purpose:'maskable'},
+      {src:icon('icono.svg'),sizes:'any',type:'image/svg+xml',purpose:'any'}
+    ],
+    shortcuts:PWA_SHORTCUTS.map(s=>({name:s.name,short_name:s.short,description:s.desc,url:base+'?abrir='+s.k,icons:[{src:icon('icono-192.png'),sizes:'192x192',type:'image/png'}]}))
+  };
+}
+// Atajos del icono (mantener pulsado): ?abrir=… al abrir la app (applyLaunchParam). Los mismos en manifest.webmanifest.
+const PWA_SHORTCUTS=[
+  {k:'entreno',name:'Empezar entreno',short:'Entrenar',desc:'Abre el entreno de hoy'},
+  {k:'progreso',name:'Ver mi progreso',short:'Progreso',desc:'Abre Progreso'}
+];
+function _manifestBlob(){
+  document.querySelectorAll('link[rel="manifest"]').forEach(l=>l.remove());
+  const link=document.createElement('link');link.rel='manifest';
+  link.href=URL.createObjectURL(new Blob([JSON.stringify(pwaManifest())],{type:'application/manifest+json'}));
+  document.head.appendChild(link);return link;
+}
 (function setupManifest(){
   try{
-    if(/^https?:$/.test(location.protocol)&&document.querySelector('link[rel="manifest"]'))return;
-    document.querySelectorAll('link[rel="manifest"]').forEach(l=>l.remove());
-    const icon=f=>new URL('assets/icons/'+f,location.href).href;
-    const manifest={
-      name:'Gymteca',
-      short_name:'Gymteca',
-      description:'Tu app de entrenamiento personal',
-      start_url:'./',
-      display:'standalone',
-      orientation:'portrait',
-      background_color:'#0b1514',
-      theme_color:'#0b1514',
-      lang:'es',
-      icons:[
-        {src:icon('icono.svg'),sizes:'any',type:'image/svg+xml',purpose:'any maskable'},
-        {src:icon('icono-512.png'),sizes:'512x512',type:'image/png',purpose:'any maskable'},
-        {src:icon('icono-180.png'),sizes:'180x180',type:'image/png',purpose:'any'}
-      ]
-    };
-    const blob=new Blob([JSON.stringify(manifest)],{type:'application/manifest+json'});
-    const link=document.createElement('link');
-    link.rel='manifest';
-    link.href=URL.createObjectURL(blob);
-    document.head.appendChild(link);
+    const st=document.querySelector('link[rel="manifest"]');
+    if(!/^https?:$/.test(location.protocol)||!st){_manifestBlob();return;}
+    // Publicada: si el estático no está (404), el de memoria (sin instalar en Chrome, pero con nombre, colores e iconos)
+    const href=st.href;
+    setTimeout(()=>{try{fetch(href,{cache:'no-cache'}).then(r=>{if(!r.ok)_manifestBlob();}).catch(()=>{});}catch(e){}},4000);
   }catch(e){}
+})();
+
+// ── Atajos del icono: ?abrir=entreno | progreso ───────────────────
+// Se aplica una vez al abrir (antes del primer pintado) y se quita de la barra de direcciones para que recargar no lo
+// repita. Sin onboarding hecho no hace nada (la bienvenida va primero). «entreno» abre el entreno en curso o, si no
+// hay, el día que toca (igual que «Empezar» de «HOY TOCA»).
+function applyLaunchParam(){
+  let k=null;
+  try{k=new URLSearchParams(location.search).get('abrir');}catch(e){return null;}
+  if(!k)return null;
+  try{const u=new URL(location.href);u.searchParams.delete('abrir');history.replaceState(history.state,'',u.pathname+u.search+u.hash);}catch(e){}
+  if(!S.onboarded||!PWA_SHORTCUTS.some(s=>s.k===k))return null;
+  if(k==='entreno'){
+    const aw=getActiveWorkout(),dk=aw&&getPlan()[aw.day]?aw.day:hoyDayKey();
+    if(getPlan()[dk])S.day=dk;
+    S.tab='workout';
+  }else if(k==='progreso')S.tab='prog';
+  ['dash','workout','coach','prog'].forEach(t=>{const b=document.getElementById('nb-'+t);if(b)b.classList.toggle('on',t===S.tab);});
+  return k;
+}
+
+// ── PWA: service worker (sw.js) ──────────────────────────────────
+// Solo en http(s) y en la ventana principal: nunca en file://, ni dentro de un iframe (el banco de pruebas __seed.html
+// abre la app en uno), ni con ?nosw (que además quita uno ya registrado). Si sw.js no está (quien sube solo index.html),
+// el registro falla en silencio y la app funciona igual, solo que sin modo sin conexión.
+// Aviso de versión nueva (#swup): lo manda sw.js al ver un index.html distinto, o sale cuando hay un sw.js nuevo
+// esperando. Nunca recarga solo: «Actualizar» recarga (y activa el sw.js nuevo con skipWaiting). Con un entreno en
+// curso, un descanso en marcha, una hoja abierta, la bienvenida o escribiendo en un campo, el aviso espera oculto.
+let _sw={reg:null,hash:null,latest:null,ready:false,pending:null,seen:null,dismissed:false,reloading:false,lastCheck:0,poll:null};
+let _swDoReload=()=>location.reload(); // (se sustituye en las pruebas)
+const SW_CHECK_MS=30*60*1000;
+function swAllowed(){
+  try{
+    if(!('serviceWorker' in navigator))return 'nosupport';
+    if(!/^https?:$/.test(location.protocol))return 'protocol';
+    let framed=true;try{framed=window.top!==window.self;}catch(e){}
+    if(framed)return 'framed';
+    if(new URLSearchParams(location.search).has('nosw'))return 'flag';
+    return 'ok';
+  }catch(e){return 'error';}
+}
+function _swBusy(){
+  try{
+    if(!S.onboarded)return true;
+    const ob=document.getElementById('onboarding');if(ob&&getComputedStyle(ob).display!=='none')return true;
+    if(getActiveWorkout())return true;
+    // en Entreno estás a punto de apuntar una serie: el aviso espera a que salgas (no pisa «✓ Hecho»)
+    if(S.tab==='workout')return true;
+    if(S.restTimer&&+S.restTimer.endTs>Date.now())return true;
+    if(_sheetOpen()||_wr||_pickerState||_libDetail||_libKitOpen||_busy||_routineEdOpen||_mmSheet||_sum||S._hist||RF.open)return true;
+    const wr=document.getElementById('wrapped-root');if(wr&&wr.firstElementChild)return true;
+    const a=document.activeElement;if(a&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&!/^(button|checkbox|radio|range)$/i.test(a.type))||a.isContentEditable))return true;
+  }catch(e){return true;}
+  return false;
+}
+// Hay versión nueva ('doc': index.html nuevo ya guardado · 'sw': sw.js nuevo esperando). id = su huella (o 'sw'):
+// la misma versión, una vez quitada con ✕, no vuelve a salir en esta sesión; una más nueva, sí.
+function swUpdateReady(kind,id){
+  if(_sw.pending!=='sw')_sw.pending=kind==='sw'?'sw':'doc';
+  const k=String(id||kind);
+  if(k!==_sw.seen){_sw.seen=k;_sw.dismissed=false;}
+  swUpdateSync();
+  if(!_sw.poll)_sw.poll=setInterval(swUpdateSync,1500);
+}
+// Enseña u oculta el aviso según lo que esté pasando en la app
+function swUpdateSync(){
+  const el=document.getElementById('swup');if(!el)return;
+  const show=!!(_sw.pending&&!_sw.dismissed&&!_sw.reloading&&!_swBusy());
+  document.body.classList.toggle('swup-on',show);
+  if(show===!el.hidden)return;
+  el.hidden=!show;
+  const lv=document.getElementById('swup-live');
+  if(lv)lv.textContent=show?'Nueva versión de Gymteca disponible. Toca «Actualizar» para cargarla.':'';
+  if(show){el.classList.remove('in');void el.offsetWidth;el.classList.add('in');}
+}
+function swUpdateLater(){
+  _sw.dismissed=true;swUpdateSync();
+  clearInterval(_sw.poll);_sw.poll=null;
+  toast('Se pondrá al día la próxima vez que abras Gymteca');
+}
+// «Actualizar»: nunca con algo a medias (se vuelve a mirar al tocar)
+function swUpdateApply(){
+  if(!_sw.pending||_sw.reloading)return false;
+  if(_swBusy()){swUpdateSync();toast('Termina lo que estás haciendo y actualiza después');return false;}
+  _sw.reloading=true;swUpdateSync();
+  const w=_sw.reg&&_sw.reg.waiting;
+  if(w&&navigator.serviceWorker&&navigator.serviceWorker.controller){
+    try{w.postMessage({type:'gt-skip'});}catch(e){_swDoReload();return true;}
+    setTimeout(()=>{if(_sw.reloading)_swDoReload();},4000); // por si controllerchange no llega
+  }else _swDoReload();
+  return true;
+}
+function _swPost(m){try{const c=navigator.serviceWorker&&navigator.serviceWorker.controller;if(c){c.postMessage(m);return true;}}catch(e){}return false;}
+function swCheckNow(force){
+  if(!_sw.reg)return false;
+  const now=Date.now();if(!force&&now-_sw.lastCheck<SW_CHECK_MS)return false;
+  _sw.lastCheck=now;
+  try{_sw.reg.update().catch(()=>{});}catch(e){}
+  return _swPost({type:'gt-check'});
+}
+// Mensajes de sw.js. _sw.hash = versión con la que se abrió esta página (respuesta al saludo) · _sw.latest = la última
+// guardada que se conoce (gt-update / gt-state). El aviso puede llegar antes que la respuesta al saludo: se compara
+// cuando están las dos.
+function _swOnMsg(d){
+  d=d&&typeof d==='object'?d:{};
+  if(d.type==='gt-hello'){if(d.hash&&!_sw.hash)_sw.hash=String(d.hash);}
+  else if((d.type==='gt-update'||d.type==='gt-state')&&d.hash)_sw.latest=String(d.hash);
+  else return false;
+  if(_sw.hash&&_sw.latest&&_sw.latest!==_sw.hash){swUpdateReady('doc',_sw.latest);return true;}
+  return false;
+}
+function _swWatch(reg){
+  _sw.reg=reg;
+  const waitingNew=()=>{if(reg.waiting&&navigator.serviceWorker.controller)swUpdateReady('sw','sw');};
+  waitingNew();
+  reg.addEventListener('updatefound',()=>{
+    const nw=reg.installing;if(!nw)return;
+    nw.addEventListener('statechange',()=>{if(nw.state==='installed')waitingNew();});
+  });
+}
+(function setupSW(){
+  const why=swAllowed();
+  if(why==='flag'){try{navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});}catch(e){}return;}
+  if(why!=='ok')return;
+  const sw=navigator.serviceWorker,fresh=!sw.controller; // sin controlador: esta página vino de la red
+  sw.addEventListener('message',e=>_swOnMsg(e.data));
+  sw.addEventListener('controllerchange',()=>{
+    if(_sw.reloading){_swDoReload();return;}
+    // Otro sw.js tomó el control (primera instalación, u «Actualizar» en otra pestaña): saludar y comparar
+    _swPost({type:'gt-hello',fresh});setTimeout(()=>swCheckNow(true),300);
+  });
+  const reg=()=>sw.register('sw.js').then(r=>{
+    _sw.ready=true;_swWatch(r);
+    _swPost({type:'gt-hello',fresh});
+    _sw.lastCheck=Date.now(); // al abrir ya revisa sw.js (la navegación pasó por él)
+  }).catch(()=>{}); // sin sw.js o sin permiso: la app sigue igual
+  if(document.readyState==='complete')setTimeout(reg,1200);else window.addEventListener('load',()=>setTimeout(reg,1200),{once:true});
+  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){swCheckNow(false);swUpdateSync();}});
 })();
 
 // ── iOS viewport + teclado virtual: actualizar --kb cuando aparece el teclado ─
@@ -21244,7 +21737,9 @@ setInterval(()=>{
   window.addEventListener('orientationchange',()=>setTimeout(update,120));
 })();
 
-if(S.onboarded){document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();}
+try{_bkTrackStart();}catch(e){} // (15) punto de partida de «cambios desde la última copia» (lo que se cargó no es un cambio)
+if(S.onboarded){try{if(applyLaunchParam())saveState();}catch(e){console.warn(e);}document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();}
+else{try{applyLaunchParam();}catch(e){}} // sin onboarding: solo quita ?abrir= de la dirección
 // Temporizador de descanso/cardio guardado: reanudarlo, o terminarlo si acabó con la app cerrada
 try{RT.sync();}catch(e){console.error(e);}
 </script>
