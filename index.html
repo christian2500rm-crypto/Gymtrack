@@ -709,6 +709,40 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .lib-kt-c{display:block;font:500 11px 'DM Mono',monospace;color:var(--text2)} /* el número, bajo el nombre (a 320 px no caben juntos) */
 .lib-kt[aria-pressed="true"] .lib-kt-c{color:inherit}
 .lib-kit-ok{min-height:48px;margin-top:14px}
+/* (E3c) «Mi material»: tipo de sitio y material de tu gimnasio y de tu casa */
+.mat-sbody{padding:12px 14px 16px}
+.mat-kind{margin-bottom:12px}
+.mat-q{font-size:15px;font-weight:600;margin:4px 0 8px}
+.mat-warn{font-size:12.5px;color:var(--amber-hi);margin:-2px 0 10px}
+.mat-presets{display:flex;flex-direction:column;gap:8px}
+.dlr-opt.mat-pre{flex-direction:row;align-items:center;gap:10px;width:100%}
+#mat-t:focus{outline:none} /* el foco entra en el título (para lectores), sin recuadro */
+.mat-pre[aria-checked="true"]{border-color:var(--green);background:var(--green-bg)}
+.mat-pre-ic{font-size:22px;flex:none}
+.mat-pre-i{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.mat-pre-i b{font-size:14px}.mat-pre-i small{font-size:12px;color:var(--text2);line-height:1.35}
+.mat-pre-n{flex:none;font:500 12px 'DM Mono',monospace;color:var(--text2);white-space:nowrap}
+.mat-back{margin-top:10px;min-height:44px}
+.mat-type{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:14px;margin-bottom:2px}
+.mat-link{min-height:44px;padding:0 4px;color:var(--green);font-size:13.5px;font-weight:600;background:none;border:0}
+.mat-link:disabled{color:var(--text3);cursor:default}
+.mat-other{display:block;margin:-6px 0 2px;color:var(--text2);font-weight:500}
+.mat-n{font-size:13.5px;color:var(--text2);margin:2px 0 10px}.mat-n b{color:var(--text);font-family:'DM Mono',monospace}
+.mat-body-ic{font-size:12.5px;color:var(--text3);margin-bottom:10px}
+.mat-sec{margin-bottom:14px}
+.mat-sh{font-size:12px;font-weight:600;letter-spacing:.4px;text-transform:uppercase;color:var(--text2);margin:0 0 8px}
+.mat-more{min-height:44px;color:var(--text2);font-size:13px;font-weight:500;background:none;border:0;padding:0}
+.mat-d{display:block;font-size:11px;font-weight:400;color:var(--text2);line-height:1.3}
+.lib-kt[aria-pressed="true"] .mat-d{color:inherit;opacity:.85}
+.mat-seg{grid-column:1/-1;display:flex;flex-direction:column;gap:6px;padding:4px 2px 6px}
+.mat-seg-t{font-size:12.5px;color:var(--text2)}
+.mat-seg-b{display:flex;flex-wrap:wrap;gap:6px}
+.mat-sb{min-height:40px;padding:0 12px;border-radius:20px;border:1px solid var(--border2);background:var(--bg3);color:var(--text2);font-size:13px;font-weight:500}
+.mat-sb.on{background:var(--green-bg2);border-color:var(--green);color:var(--green-hi);font-weight:600}
+.mat-main{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:4px}
+.mat-rm{color:var(--red-hi)}
+.mat-foot{display:flex;gap:8px;padding:10px 14px calc(10px + var(--sb));border-top:1px solid var(--border);background:var(--bg2)}
+.mat-foot .btn{flex:1;min-height:48px}
 /* «Máquina ocupada» en la tarjeta abierta de Entreno */
 .ex-busy{display:flex;align-items:center;gap:8px;margin:-2px 0 10px;min-height:44px}
 .ex-busy-t{flex:1;min-width:0;font-size:12px;color:var(--text2);line-height:1.4}
@@ -1801,6 +1835,7 @@ input[type=number]{-moz-appearance:textfield}
 <div id="summary-root"></div>
 <div id="restfull-root"></div>
 <div id="wrapped-root"></div>
+<div id="mat-root"></div>
 
 <!-- GYM-ANIM:BEGIN -->
 <script>
@@ -10985,7 +11020,8 @@ function _sanitizePlace(o){
     mats:Array.isArray(o.mats)?[...new Set(o.mats.filter(k=>typeof k==='string'&&k!=='corporal'&&Object.prototype.hasOwnProperty.call(MAT,k)))]:[],
     acc:Array.isArray(o.acc)?[...new Set(o.acc.filter(k=>PLACE_ACC.includes(k)))]:[],
     mach:sub(o.mach,MACH_FAMS),card:sub(o.card,CARD_KINDS),
-    dbMax:_oneOf(o.dbMax,PLACE_DBMAX),kb:_oneOf(o.kb,PLACE_KB),kbMax:_oneOf(o.kbMax,PLACE_KBMAX)};
+    dbMax:_oneOf(o.dbMax,PLACE_DBMAX),kb:_oneOf(o.kb,PLACE_KB),kbMax:_oneOf(o.kbMax,PLACE_KBMAX),
+    recalTs:_num(o.recalTs,0,9e15)}; // (E3c) «Es otro gimnasio»: las máquinas, desde cero (el Coach no propone el peso de antes)
 }
 function _sanitizePlaces(o){
   if(!_isPlainObj(o))return null;
@@ -11349,6 +11385,7 @@ document.addEventListener('keydown',e=>{
   if(_wr){if(e.key==='Escape'){e.preventDefault();if(document.getElementById('wr-shot'))_wrShotClose();else closeWrapped();}return;}
   if(e.key==='Escape'){
     if(_cmodalState){closeCmodal(true);return;}
+    if(_myMat){closeMyMaterial();return;} // (E3c) «Mi material», encima del buscador y de Ajustes
     if(_libKitOpen){closeLibKit();return;} // «Mi material», encima del selector (y de la ficha)
     if(_libDetail){closeLibDetail();return;} // (11) la ficha de un ejercicio, encima del selector
     if(_pickerState){closeExercisePicker();return;}
@@ -14690,7 +14727,7 @@ function coach_buildCandidates(an){
       const lvl=difs.length?difs[difs.length>>1]:2,mats=new Set(libs.map(L=>L.mat));
       const rank=e=>(e.compound?0:8)+(e.dif<=lvl?0:4)+(mats.has(e.mat)?0:2)+(place==='g'&&e.lt!=='w'?1:0);
       let pick=null,pr=99;
-      EXERCISE_DB.forEach(e=>{if(e.muscle!==mainMuscle||e.lt==='c'||!plOk(e,place)||inPlan.has(e.id)||strEx.some(s=>s.n===e.n))return;
+      EXERCISE_DB.forEach(e=>{if(e.muscle!==mainMuscle||e.lt==='c'||!canDoHere(e,dk)||inPlan.has(e.id)||strEx.some(s=>s.n===e.n))return; // (E3c) su sitio
         const r=rank(e);if(r<pr){pr=r;pick=e;}});
       if(!pick)return;
       out.push({id:'add_ex_'+dk+'_'+pick.id,type:'add_ex',basis:'volume',prio:4,sev:-strEx.length,ic:'➕',tag:'Volumen',dayKey:dk,libExId:pick.id,createdAt:now,
@@ -15136,8 +15173,9 @@ function libAlts(L){
 // parecidos o mismo grupo (mejor del mismo grupo y del mismo tipo, compuesto o de aislamiento).
 function coach_suggestAlternative(ex){
   if(!ex||ex.cardio)return null;
-  const src=_libIdOf(ex),L=src?LIB_BY_ID.get(src):null,inPlan=_planLibIds(),place=routinePlace();
-  const ok=id=>{const l=LIB_BY_ID.get(id);return l&&!l.cardio&&id!==src&&!inPlan.has(id)&&plOk(l,place)?l:null;};
+  const src=_libIdOf(ex),L=src?LIB_BY_ID.get(src):null,inPlan=_planLibIds(),dk=_dayOfEx(ex.id)||S.day;
+  // (E3c) con el material del sitio de ese día (canDoHere); sin tus sitios, como siempre
+  const ok=id=>{const l=LIB_BY_ID.get(id);return l&&!l.cardio&&id!==src&&!inPlan.has(id)&&canDoHere(l,dk)?l:null;};
   const muscle=ex.muscle||(L&&L.muscle),p=L&&L.pat;
   const why=l=>p&&l.pat===p?`mismo patrón (${PAT_LBL[p].toLowerCase()}) ${l.mat!==L.mat?'con otro material':'con otra variante'}`:l.muscle===muscle?'mismo grupo muscular con otro estímulo':'trabaja músculos parecidos con otro ejercicio';
   for(const [id,reason] of libAlts(L)){const l=ok(id);if(l)return{id:l.id,n:l.n,reason:reason||why(l),lib:l};}
@@ -16029,7 +16067,7 @@ function hoyAttach(root){
 // pantalla (la vista previa de «HOY TOCA», las de Entreno) se paran: se apartan con un transform, sin mover nada más, y
 // el IntersectionObserver del motor las da por no visibles (se queda su último fotograma). Antes seguían comiéndose el
 // hilo principal (60-97 % en un móvil) y dejaban sin tiempo libre a las miniaturas del selector y a la carga de su caché.
-const _SHEET_ROOTS=['cmodal-root','settings-root','wmodal-root','hist-root','wdetail-root','mmap-root','summary-root','restfull-root'];
+const _SHEET_ROOTS=['cmodal-root','settings-root','wmodal-root','hist-root','wdetail-root','mmap-root','summary-root','restfull-root','mat-root'];
 function _sheetOpen(){return _SHEET_ROOTS.some(id=>{const r=document.getElementById(id);return!!(r&&r.firstElementChild);});}
 function animHoldSync(){
   const sc=document.getElementById('screen');if(!sc)return;const on=_sheetOpen();
@@ -16476,7 +16514,8 @@ function _presVariant(ex,k){
   const L=exLib(ex);if(!L)return null;
   const id=k==='up'?L.up:LIB_DOWN[L.id];if(!id)return null;
   const v=LIB_BY_ID.get(id);
-  return v&&!v.cardio&&!_planLibIds().has(id)?v:null;
+  // (E3c) con tus sitios, solo una variante que puedas hacer ahí (sin ellos, como siempre: no se miraba el sitio)
+  return v&&!v.cardio&&!_planLibIds().has(id)&&(!_isPlainObj(S.places)||canDoHere(v,_dayOfEx(ex.id)||S.day))?v:null;
 }
 // Lo común de una prescripción sin kilos (los mismos campos que la de kg, más su tipo y su unidad)
 function _presBase(exId,ex,lt,last,lo,hi,unit){
@@ -20972,6 +21011,153 @@ function busyOpenLibrary(){
   showExercisePicker({title:`Alternativa a ${orig.n}`,muscle:orig.cardio?'cardio':(orig.muscle||null),mode:'busy',busy:b,currentLib:_libIdOf(orig),onPick:null});
 }
 
+// ══════════════════════════════════════════════════════════
+// (E3c) «MI MATERIAL»: el tipo de sitio y el material de tu gimnasio y de tu casa (P5 + P6 del cuestionario), para todo el
+// mundo, desde Ajustes y desde el buscador. Se edita una copia (borrador) y se guarda con «Guardar»; ✕, fuera o Escape la
+// descartan. La rejilla (matGridHtml) es la misma que usa el cuestionario.
+// ══════════════════════════════════════════════════════════
+const PRESET_INFO={grande:{ic:'🏢',t:'Gimnasio grande',d:'De cadena: máquinas, poleas, barras y mancuernas de sobra.'},
+  barrio:{ic:'🏬',t:'Gimnasio pequeño o de barrio',d:'Pesos libres, poleas y algunas máquinas.'},
+  hotel:{ic:'🏨',t:'Gimnasio de hotel o de comunidad',d:'Mancuernas ligeras, una polea y alguna máquina.'},
+  box:{ic:'🤸',t:'Box o gimnasio funcional',d:'Barras, kettlebells, anillas, cajones y cuerdas.'},
+  nada:{ic:'🧍',t:'Sin material',d:'Tu cuerpo y cosas de casa: silla, pared, mesa, puerta, escalón.'},
+  basico:{ic:'➰',t:'Lo básico',d:'Mancuernas y bandas elásticas.'},mancbanco:{ic:'🛋️',t:'Mancuernas y banco',d:'Mancuernas ajustables y un banco.'},
+  casagym:{ic:'🏗️',t:'Gimnasio en casa',d:'Rack, barra, discos, banco y mancuernas.'},parque:{ic:'🌳',t:'Parque de calistenia',d:'Barras de dominadas, paralelas y bancos.'},
+  propio:{ic:'✏️',t:'Otra cosa',d:'Lo marco yo.'}};
+const PRESETS_OF={g:['grande','barrio','hotel','box'],c:['nada','basico','mancbanco','casagym','parque','propio']};
+// Cosas de la rejilla: m material (MAT) · a accesorio · f familia de máquina · c tipo de cardio. d: la línea que explica lo que no es obvio
+const MAT_SECTIONS=[
+  {k:'libres',t:'Pesas libres',items:[{m:'mancuernas'},{m:'barra',l:'Barra y discos'},{m:'barraz',d:'Barra corta con curvas, para curl y tríceps'},{m:'kettlebell',l:'Kettlebells'},{m:'disco',l:'Discos sueltos'},{m:'balon'}]},
+  {k:'bancos',t:'Bancos y soportes',items:[{a:'banco',ic:'🛋️',l:'Banco'},{a:'banco_inc',ic:'📐',l:'Banco que se inclina'},{a:'rack',ic:'🏗️',l:'Rack o soportes'},{a:'landmine',ic:'📐',l:'Landmine',d:'Barra con un extremo anclado al suelo'},
+    {m:'dominadas'},{a:'paralelas',ic:'🤸',l:'Paralelas para fondos'},{a:'hexbar',ic:'⬡',l:'Barra hexagonal'},{a:'banco_dec',ic:'📉',l:'Banco declinable'},{a:'scott',ic:'💪',l:'Banco Scott'},
+    {a:'ghd',ic:'🦵',l:'GHD'},{a:'hiper',ic:'🔙',l:'Banco de hiperextensiones'}]},
+  {k:'bandas',t:'Bandas y accesorios',items:[{m:'banda',l:'Bandas elásticas'},{a:'anclaje',ic:'🚪',l:'Anclaje de puerta',d:'Una pieza en la puerta para enganchar la banda'},{m:'minibanda'},
+    {m:'trx',d:'Cintas o anillas para colgar de una puerta o un soporte'},{a:'anillas',ic:'⭕',l:'Anillas'},{m:'fitball',d:'Pelota grande de ejercicio'},{m:'rueda'},{m:'comba'},{m:'step'},{m:'otro',l:'Otro material'}]},
+  {k:'casa',t:'Cosas de casa',home:1,items:[{a:'silla',ic:'🪑',l:'Silla o banco bajo'},{a:'pared',ic:'🧱',l:'Pared'},{a:'mesa',ic:'🍽️',l:'Mesa firme',d:'Para el remo bajo una mesa'},
+    {a:'puerta',ic:'🚪',l:'Puerta que cierra bien'},{a:'escalon',ic:'🪜',l:'Escalón'}]},
+  {k:'poleas',t:'Poleas y Smith',gym:1,items:[{m:'polea'},{a:'poleas2',ic:'⚡',l:'Dos poleas enfrentadas'},{m:'smith',d:'Barra guiada en raíles (multipower)'}]},
+  {k:'maq',t:'Máquinas',gym:1,items:MACH_FAMS.map(f=>({f}))},
+  {k:'cardio',t:'Cardio',gym:1,items:CARD_KINDS.map(c=>({c}))},
+  {k:'box',t:'Box',gym:1,items:[{a:'trineo',ic:'🛷',l:'Trineo'},{a:'cuerdas',ic:'〰️',l:'Cuerdas de batida'},{a:'llanta',ic:'🛞',l:'Llanta'},{a:'saco',ic:'🥊',l:'Saco de boxeo'},{a:'kb2',ic:'🔔',l:'Dos kettlebells iguales'}]}];
+const _matItemKey=it=>it.m?'m:'+it.m:it.a?'a:'+it.a:it.f?'f:'+it.f:'c:'+it.c;
+function _matItemLbl(it){const cap=t=>t[0].toUpperCase()+t.slice(1);return it.l||(it.m?MAT[it.m].l:it.f?cap(MACH_FAM_LBL[it.f]):it.c?cap(CARD_KIND_LBL[it.c]):cap(ACC_LBL[it.a]||it.a));}
+function _matItemIc(it){return it.ic||(it.m?MAT[it.m].ic:it.f?'⚙️':it.c?'🏃':'•');}
+function _matHas(P,it){
+  if(it.m)return P.mats.includes(it.m);if(it.a)return(P.acc||[]).includes(it.a);
+  if(it.f)return P.mats.includes('maquina')&&(P.mach==='all'||(P.mach||[]).includes(it.f));
+  return P.mats.includes('cardio')&&(P.card==='all'||(P.card||[]).includes(it.c));
+}
+function _matSet(P,it,on){
+  const tog=(a,x)=>on?[...new Set([...a,x])]:a.filter(y=>y!==x);
+  if(it.m){P.mats=tog(P.mats,it.m);if(it.m==='maquina')P.mach=on?'all':[];if(it.m==='cardio')P.card=on?'all':[];
+    if(it.m==='kettlebell'&&!on){P.kb=null;P.kbMax=null;P.acc=P.acc.filter(a=>a!=='kb2');}if(it.m==='mancuernas'&&!on)P.dbMax=null;return;}
+  if(it.a){P.acc=tog(P.acc||[],it.a);if(it.a==='kb2')P.kb=on?2:(P.mats.includes('kettlebell')?1:null);return;}
+  const fk=it.f?'mach':'card',L=it.f?MACH_FAMS:CARD_KINDS,mk=it.f?'maquina':'cardio',x=it.f||it.c;
+  const cur=P.mats.includes(mk)?(P[fk]==='all'?L.slice():(P[fk]||[]).slice()):[];
+  const nx=tog(cur,x);P[fk]=nx.length===L.length?'all':nx;P.mats=nx.length?[...new Set([...P.mats,mk])]:P.mats.filter(y=>y!==mk);
+}
+function _matCount(P,kind){return P?EXERCISE_DB.filter(e=>placeCan(e,P,kind)).length:0;}
+// La rejilla de material de un sitio (también la del cuestionario): secciones, «+N» que desbloquea cada cosa (contados con
+// placeCan), detalles al marcar (mancuernas hasta cuántos kg; kettlebells cuántas y de cuánto) y lo de gimnasio plegado en casa
+function matGridHtml(P,kind,open){
+  const n=_matCount(P,kind);
+  const plus=it=>{if(_matHas(P,it))return'';const Q=JSON.parse(JSON.stringify(P));_matSet(Q,it,true);const d=_matCount(Q,kind)-n;return d>0?'+'+d:'';};
+  const det=it=>{
+    if(it.m==='mancuernas'&&_matHas(P,it))return _matSegHtml('Hasta cuántos kg cada una','dbMax',[[10,'Hasta 10'],[20,'Hasta 20'],[30,'Hasta 30'],[99,'Más'],[null,'No lo sé']],P.dbMax);
+    if(it.m==='kettlebell'&&_matHas(P,it))return _matSegHtml('¿Cuántas?','kb',[[1,'Una'],[2,'Dos o más']],P.kb)+_matSegHtml('¿De cuántos kg la más pesada?','kbMax',[[8,'8'],[12,'12'],[16,'16'],[24,'24 o más'],[null,'No lo sé']],P.kbMax);
+    return'';};
+  const sec=S0=>{const fold=kind==='c'&&S0.gym&&!(open&&open[S0.k]),hide=kind==='g'&&S0.home;if(hide)return'';
+    const items=S0.items.map(it=>{const on=_matHas(P,it),k=_matItemKey(it),p=plus(it);
+      return`<button type="button" class="lib-kt mat-it" aria-pressed="${on}" data-k="${esc(k)}" onclick="matToggle(this.dataset.k)"><span class="lib-kt-e" aria-hidden="true">${esc(_matItemIc(it))}</span><span class="lib-kt-n">${esc(_matItemLbl(it))}${it.d?`<small class="mat-d">${esc(it.d)}</small>`:''}${p?`<span class="lib-kt-c">${p}</span>`:''}</span></button>${det(it)}`;}).join('');
+    return`<section class="mat-sec" aria-labelledby="mat-s-${S0.k}"><h3 class="mat-sh" id="mat-s-${S0.k}">${esc(S0.t)}</h3>${fold?`<button type="button" class="mat-more" onclick="matOpenSec('${S0.k}')">Mostrar ${esc(S0.t.toLowerCase())} de gimnasio ›</button>`:`<div class="lib-kit mat-kit">${items}</div>`}</section>`;};
+  return`<div class="mat-grid"><div class="mat-body-ic"><span aria-hidden="true">🤸</span> Tu cuerpo siempre cuenta</div>${MAT_SECTIONS.map(sec).join('')}</div>`;
+}
+function _matSegHtml(t,f,opts,cur){
+  return`<div class="mat-seg" role="radiogroup" aria-label="${esc(t)}"><span class="mat-seg-t">${esc(t)}</span><span class="mat-seg-b">${opts.map(([v,l])=>`<button type="button" role="radio" aria-checked="${cur===v}" class="mat-sb${cur===v?' on':''}" onclick="matDetail('${f}',${v===null?'null':v})">${esc(l)}</button>`).join('')}</span></div>`;
+}
+let _myMat=null; // {kind, draft:{v,main,g,c}, open:{sección:true}, choose:true (eligiendo tipo), opener, from}
+function openMyMaterial(kind,o){
+  o=o||{};const op=document.activeElement;
+  const draft=_isPlainObj(S.places)?JSON.parse(JSON.stringify(S.places)):{v:1,main:kind==='c'?'c':routinePlace(),g:null,c:null};
+  if(!draft.c&&Array.isArray(S.libKit)){const c=placeFromPreset('nada');if(c){c.mats=S.libKit.slice();c.preset='propio';draft.c=c;}} // (42 R12) lo que ya marcaste
+  const k=kind==='c'||kind==='g'?kind:draft.main||'g';
+  _myMat={kind:k,draft,open:{},choose:!draft[k],opener:op,from:o.from||'settings'};
+  renderMyMaterial(true);
+}
+function closeMyMaterial(){
+  const m=_myMat;_myMat=null;const r=document.getElementById('mat-root');if(r)r.innerHTML='';
+  if(m&&m.opener&&m.opener.isConnected){try{m.opener.focus({preventScroll:true});}catch(e){}}
+}
+function renderMyMaterial(fresh){
+  const r=document.getElementById('mat-root');if(!r||!_myMat)return;
+  const m=_myMat,k=m.kind,P=m.draft[k],both=!!(m.draft.g&&m.draft.c),sc=r.querySelector('.hist-sheet'),keep=sc&&!fresh?sc.scrollTop:0;
+  const seg=['g','c'].map(x=>`<button type="button" class="lib-pl" role="radio" aria-checked="${k===x}" onclick="matKind('${x}')">${x==='g'?'🏋️ Gimnasio':'🏠 Casa o aire libre'}</button>`).join('');
+  let body;
+  if(m.choose||!P){
+    body=`<p class="mat-q">${P?'¿Qué tipo de sitio es?':k==='g'?'¿Cómo es tu gimnasio?':'¿Qué tienes en casa o al aire libre?'}</p>
+      ${P?'<p class="mat-warn">Cambiar de tipo vuelve a marcar lo típico de ese sitio.</p>':''}
+      <div class="mat-presets" role="radiogroup" aria-label="Tipo de sitio">${PRESETS_OF[k].map(p=>{const I=PRESET_INFO[p],pl=p==='propio'?null:placeFromPreset(p);
+        return`<button type="button" class="dlr-opt mat-pre" role="radio" aria-checked="${!!P&&P.preset===p}" onclick="matPreset('${p}')"><span class="mat-pre-ic" aria-hidden="true">${I.ic}</span><span class="mat-pre-i"><b>${esc(I.t)}</b><small>${esc(I.d)}</small></span>${pl?`<span class="mat-pre-n">${plural(_matCount(pl,k),'ejercicio')}</span>`:''}</button>`;}).join('')}</div>
+      ${P?`<button type="button" class="btn bs mat-back" onclick="matChoose(false)">Mantener ${esc(PRESET_INFO[P.preset]?PRESET_INFO[P.preset].t:'mi material')}</button>`:''}`;
+  }else{
+    const n=_matCount(P,k),I=PRESET_INFO[P.preset]||PRESET_INFO.propio;
+    body=`<div class="mat-type"><span>Tipo: <b>${esc(I.t)}</b></span><button type="button" class="mat-link" onclick="matChoose(true)">Cambiar ›</button></div>
+      ${k==='g'?`<button type="button" class="mat-link mat-other" onclick="matOtherGym()">Es otro gimnasio</button>`:''}
+      <div class="mat-n" aria-live="polite">Con esto: <b>${plural(n,'ejercicio')}</b></div>
+      ${matGridHtml(P,k,m.open)}
+      ${both?`<div class="mat-main"><button type="button" class="mat-link" onclick="matMain()" ${m.draft.main===k?'disabled':''}>${m.draft.main===k?'Es tu sitio principal':'Hacer de este mi sitio principal'}</button>
+        ${m.draft.main!==k?`<button type="button" class="mat-link mat-rm" onclick="matRemove()">Quitar este sitio</button>`:''}</div>`:''}`;
+  }
+  r.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeMyMaterial()" style="z-index:520"><div class="hist-sheet" id="mat-sheet" role="dialog" aria-modal="true" aria-labelledby="mat-t" style="max-height:92vh;max-height:92dvh">
+    <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title" id="mat-t" tabindex="-1">Mi material</div>
+      <div class="hist-sheet-sub">Solo te propongo ejercicios que puedas hacer con esto.</div>
+      <button class="hist-sheet-close" onclick="closeMyMaterial()" aria-label="Cerrar">✕</button></div>
+    <div class="hist-sheet-body mat-sbody"><div class="lib-place mat-kind" role="radiogroup" aria-label="Sitio">${seg}</div>${body}</div>
+    <div class="mat-foot"><button type="button" class="btn bs" onclick="closeMyMaterial()">Cancelar</button><button type="button" class="btn bp" onclick="saveMyMaterial()"${m.draft.g||m.draft.c?'':' disabled'}>Guardar</button></div>
+  </div></div>`;
+  const sh=r.querySelector('.hist-sheet');if(sh&&keep)sh.scrollTop=keep;
+  if(fresh){const t=document.getElementById('mat-t');if(t)try{t.focus({preventScroll:true});}catch(e){}}
+}
+function matKind(k){if(!_myMat||(k!=='g'&&k!=='c'))return;_myMat.kind=k;_myMat.choose=!_myMat.draft[k];renderMyMaterial(true);}
+function matChoose(on){if(!_myMat)return;_myMat.choose=!!on;renderMyMaterial();}
+function matPreset(p){
+  if(!_myMat)return;const k=_myMat.kind,old=_myMat.draft[k],P=p==='propio'?(old?Object.assign(JSON.parse(JSON.stringify(old)),{preset:'propio'}):placeFromPreset('nada')):placeFromPreset(p);
+  if(!P)return;if(p==='propio'&&!old)P.preset='propio';
+  if(_myMat.otherGym&&k==='g'){P.recalTs=Date.now();_myMat.otherGym=false;}
+  _myMat.draft[k]=P;if(!_myMat.draft.main||!_myMat.draft[_myMat.draft.main])_myMat.draft.main=k;_myMat.choose=false;renderMyMaterial();
+}
+function matOtherGym(){if(!_myMat)return;_myMat.otherGym=true;_myMat.choose=true;renderMyMaterial();}
+function matToggle(key){
+  if(!_myMat)return;const P=_myMat.draft[_myMat.kind];if(!P)return;
+  const [t,v]=String(key).split(':'),it=t==='m'?{m:v}:t==='a'?{a:v}:t==='f'?{f:v}:{c:v};
+  if(t==='m'&&!MAT[v])return;
+  _matSet(P,it,!_matHas(P,it));P.preset=P.preset||'propio';renderMyMaterial();
+  const b=document.querySelector(`#mat-sheet .mat-it[data-k="${CSS.escape(key)}"]`);if(b)try{b.focus({preventScroll:true});}catch(e){}
+}
+function matDetail(f,v){
+  if(!_myMat)return;const P=_myMat.draft[_myMat.kind];if(!P)return;
+  if(f==='dbMax')P.dbMax=PLACE_DBMAX.includes(v)?v:null;
+  else if(f==='kbMax')P.kbMax=PLACE_KBMAX.includes(v)?v:null;
+  else if(f==='kb'){P.kb=PLACE_KB.includes(v)?v:null;P.acc=v===2?[...new Set([...(P.acc||[]),'kb2'])]:(P.acc||[]).filter(a=>a!=='kb2');}
+  renderMyMaterial();
+}
+function matOpenSec(k){if(!_myMat)return;_myMat.open[k]=true;renderMyMaterial();}
+function matMain(){if(!_myMat||!_myMat.draft[_myMat.kind])return;_myMat.draft.main=_myMat.kind;renderMyMaterial();}
+function matRemove(){if(!_myMat||_myMat.draft.main===_myMat.kind)return;_myMat.draft[_myMat.kind]=null;_myMat.choose=true;renderMyMaterial();}
+function saveMyMaterial(){
+  if(!_myMat)return;const d=_sanitizePlaces(_myMat.draft);if(!d){toast('Elige al menos un sitio');return;}
+  S.places=d;_syncLibKit();saveState();
+  closeMyMaterial();toast('Guardado: tu material');
+  if(_pickerState){_pickerState.ctx=_libCtx();_pickerRefresh(true);}
+  render();
+}
+// Resumen de una línea para Ajustes: «Gimnasio grande · Casa: Lo básico» (o «Dime dónde entrenas»)
+function placesSummaryTxt(){
+  const p=S.places;if(!_isPlainObj(p))return'Dime dónde entrenas';
+  const t=x=>p[x]?(PRESET_INFO[p[x].preset]||PRESET_INFO.propio).t:'';
+  const a=[p.main==='g'?t('g'):t('c'),p.main==='g'?(p.c?'Casa: '+t('c'):''):(p.g?'Gimnasio: '+t('g'):'')].filter(Boolean);
+  return a.join(' · ');
+}
 // ── PICKER DE EJERCICIOS ──
 // Una sola cabecera fija (título, búsqueda, «Gimnasio | Casa», zonas y contador) y debajo la lista: al abrir, el inicio
 // (recientes, favoritos, las zonas con su número y lo de tu rutina); con una zona, sus ejercicios por familias de
@@ -21710,6 +21896,7 @@ function _libKitHtml(){
     <div class="hist-sheet-body">
       <div class="lib-kit" role="group" aria-label="Tu material">${ks.map(k=>`<button type="button" class="lib-kt" data-k="${k}" aria-pressed="${kit.includes(k)}" aria-label="${esc(MAT[k].l)}: ${plural(N[k],'ejercicio')}" onclick="libKitToggle(this.dataset.k)"><span class="lib-kt-e" aria-hidden="true">${MAT[k].ic}</span><span class="lib-kt-n">${esc(MAT[k].l)}<span class="lib-kt-c" aria-hidden="true">+${N[k]}</span></span></button>`).join('')}</div>
       <button type="button" class="btn bp lib-kit-ok" onclick="closeLibKit(1)">Listo · ver ${plural(_pickerShown(),'ejercicio')}</button>
+      <button type="button" class="mat-link lib-kit-all" onclick="closeLibKit(1);openMyMaterial(_pickerPlace(),{from:'picker'})">Tu gimnasio y el tipo de sitio ›</button>
     </div></div></div>`;
 }
 function openLibKit(){
@@ -22109,6 +22296,13 @@ function renderSettings(){
           <div class="set-row-info">
             <div class="set-row-t">Editar rutina</div>
             <div class="set-row-d">Cambia, añade o elimina ejercicios · Ajusta series y reps</div>
+          </div>
+          <span class="set-row-arrow">›</span>
+        </div>
+        <div class="set-row" role="button" tabindex="0" onclick="openMyMaterial()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openMyMaterial()}">
+          <div class="set-row-info">
+            <div class="set-row-t">Mi material</div>
+            <div class="set-row-d">${esc(placesSummaryTxt())}</div>
           </div>
           <span class="set-row-arrow">›</span>
         </div>
@@ -22846,8 +23040,8 @@ function resetOnboarding(){
     cancelText:'Cancelar',
     onOk:()=>{
       S.onboarded=false;S.settingsOpen=false;
-      // El selector vuelve a empezar en el gimnasio y te volverá a preguntar tu material de casa (favoritos y recientes se quedan)
-      S.libPlace='g';S.libKit=null;
+      // El selector vuelve a empezar en el gimnasio (favoritos, recientes y (E3c) tu material de casa se quedan: es tuyo, §G.7)
+      S.libPlace='g';
       saveState();
       document.getElementById('app').style.display='none';
       document.getElementById('onboarding').style.display='flex';
