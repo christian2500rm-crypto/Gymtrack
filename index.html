@@ -11570,7 +11570,7 @@ return function (K, G) {
       const con = pr.filter(directo), sin = pr.filter(g => !directo(g));
       const peq = con.filter(g => ['biceps', 'triceps'].includes(g)), gran = con.filter(g => !['biceps', 'triceps'].includes(g));
       const lista = gs => { const t = joinY(gs.map(g => GLBL[g].toLowerCase())); return t.charAt(0).toUpperCase() + t.slice(1); };
-      if (peq.length) out.push(`${lista(peq)}, como pediste: trabajo directo cada semana${peq.every(mas) ? ' y un 25 % más de series que sin prioridad' : ''}; ${peq.every(antes) ? 'cada día, antes que los demás ejercicios pequeños' : 'los básicos ya ${peq.length > 1 ? \'los\' : \'lo\'} trabajan'}.`);
+      if (peq.length) out.push(`${lista(peq)}, como pediste: trabajo directo cada semana${peq.every(mas) ? ' y un 25 % más de series que sin prioridad' : ''}; ${peq.every(antes) ? 'cada día, antes que los demás ejercicios pequeños' : `los básicos ya ${peq.length > 1 ? 'los' : 'lo'} trabajan`}.`);   // v12: antes salía «${peq.length…}» tal cual (lo cazó genPure2)
       const van = gran.length === 1 && !['gluteos', 'isquios', 'cuads', 'hombros', 'piernas'].includes(gran[0]) ? 'va' : 'van';
       if (gran.length) out.push(`${lista(gran)}, como pediste: ${gran.every(mas) ? 'un 25 % más de series que sin prioridad' : 'algo más de series'}${gran.every(antes) ? (gran.some(conLift) ? ` y ${van} antes en el día, después del levantamiento de fuerza` : ` y ${van} antes en el día`) : ''}.`);
       if (sin.length) { const cls = G.clsOf(P, inp), MNx = MN_(), ids = sl => { const mm = MNx.MENUS[sl] || { sec: [] }; const o = MNx.tiers(sl, cls).flat(); (mm.sec || []).forEach(s => o.push(...(s.tiers ? s.tiers.flat() : MNx.tiers(s.slot, cls).flat()))); return o; };
@@ -11750,7 +11750,9 @@ return function (K, G) {
     /perder[áa]s \d/i, /\bIMC\b/, /sobrepeso/i, /cuerpo ideal/i, /sin dolor no hay/i, /al fallo siempre/i, /más es mejor/i, /no pares/i, /\bdieta/i, /suplement/i, /prote[ií]na/i,
     /\bkcal\b/i, /calor[ií]as/i, /d[ée]ficit/i, /catabol/i, /[óo]ptim[oa]/i, /perfecta/i, /algoritmo/i, /\bIA\b/, /sin constancia/i, /baja (la )?tensi[óo]n/i, /baja (el )?az[úu]car/i,
     /seguro en el embarazo/i, /seguro para menores/i, /corrige la postura/i, /acelera el metabolismo/i, /24 ?%/, /amable con/i, /como mejor se aprende/i, /es lo recomendado a partir/i, /🥵 en la última/];
-  const prohibidas = frases => { const out = []; for (const s of frases || []) for (const re of PROHIBIDAS) if (re.test(s)) out.push(String(re) + ' → ' + s.slice(0, 80)); return out; };
+  // v12: y las frases rotas (una plantilla sin rellenar, undefined, NaN, un objeto): las caza la matriz en todos los perfiles
+  const ROTAS = [/\$\{/, /\bundefined\b/, /\bNaN\b/, /\[object /];
+  const prohibidas = frases => { const out = []; for (const s of frases || []) for (const re of PROHIBIDAS.concat(ROTAS)) if (re.test(s)) out.push(String(re) + ' → ' + s.slice(0, 80)); return out; };
   return { porque, avisos, GOAL, compra, prohibidas, AVISOS_VISIBLES, rangoDe };
 };
 
@@ -13785,6 +13787,9 @@ function genRowToEx(row){
   e.r=K&&K.lt==='t'?(secs||30)+'s':K&&K.lt==='d'?String(row.r):/^\d+-\d+$/.test(row.reps)?row.reps:String(row.r);
   return e;
 }
+// (E4c) Textos de la rutina generada: el «por qué» y los avisos, las mismas frases que el prototipo (sim/textos.js; la seguridad
+// primero; la app enseña los 3 primeros avisos y el resto en «ver más»). g = genRoutineFrom(…).
+function genTexts(g){const X=g.E.X;return{porque:X.porque(g.res,g.inp),avisos:X.avisos(g.res,g.inp),visibles:X.AVISOS_VISIBLES};}
 {const _v0=JSON.stringify([S.profile,S.places,S.health,S.planMeta,S.planPrev,S.obDraft,S.rotBack,S.bkHealth]);_sanitizeV21(S);
   if(JSON.stringify([S.profile,S.places,S.health,S.planMeta,S.planPrev,S.obDraft,S.rotBack,S.bkHealth])!==_v0)saveState();}
 // Ejercicio de la biblioteca de uno del plan (o null): su lib → el del plan original (PLAN_ANIM, salvo cardio: ese va por
