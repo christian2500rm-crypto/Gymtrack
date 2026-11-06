@@ -9033,7 +9033,14 @@ const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov',
 const DAY_ORDER=['A','B','C']; // orden del plan de fábrica (las rutinas van de 2 a 6 días: DAY_KEYS y dayKeys())
 const DAY_KEYS=['A','B','C','D','E','F']; // (E1a) claves de día posibles, en orden
 const DID_RE=/^d_[a-z0-9]{1,16}$/; // (E1b) id estable de un día de la rutina
-const SCHEMA_VERSION=20;
+const PID_RE=/^p_[a-z0-9]{1,16}$/; // (E2) id de una rutina generada (planMeta.id), también en cada sesión hecha con ella
+const SCHEMA_VERSION=21;
+// (E2) Claves nuevas de primer nivel (esquema 21). Sus valores por defecto viven AQUÍ, en el estado inicial, y nunca en la
+// migración: importData llama a migrateState sobre la copia y una clave puesta ahí a null taparía la del móvil (42 R1).
+// profile: tus respuestas · places: dónde entrenas y tu material · health: molestias (solo con consentimiento) · planMeta: la
+// rutina generada en uso · planPrev: un nivel de deshacer · obDraft: borrador del cuestionario (sin salud) · rotBack: el día al
+// que vuelve la rotación tras «¿Hoy en otro sitio?» · bkHealth: ¿las copias llevan tus molestias?
+const V21_DEFAULTS={profile:null,places:null,health:null,planMeta:null,planPrev:null,obDraft:null,rotBack:null,bkHealth:true};
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
 // (E1b) La botonera de «Días por semana» ofrece de 2 a 6 (como las rutinas). El recorte sigue en 1-7: quien ya tenga 1 o 7
@@ -9791,6 +9798,13 @@ function migrateState(data){
     _sanitizePlanSubs(data.currentPlan);
     _sanitizeSessSubs(data.sessions);
   }
+  if(v<21){
+    // v21: claves nuevas de primer nivel (V21_DEFAULTS: respuestas, sitios, salud, rutina generada…). Nada que migrar:
+    //  · sus valores por defecto viven en el estado inicial, nunca aquí: importData llama a migrateState sobre los datos de la
+    //    copia, y una clave puesta aquí a null taparía la del móvil (42 R1);
+    //  · lbl/focus/did de las sesiones y did de los días se apuntan en el momento justo (stampSessionsLbl), no aquí (42 R2).
+    // Se sube la versión para marcar las copias que pueden traer días D-F y claves nuevas: una app más vieja no las restaura.
+  }
   _unifyDeloadTexts(data); // (13b) idempotente: corre siempre
   data.schema_version=SCHEMA_VERSION;
   return data;
@@ -9892,7 +9906,7 @@ function _backfillStrengthNames(data){
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
   pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',hRange:'6m',rRange:'6m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],dlRecoSnoozeTs:null,loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true,
-  lastBackupTs:null,backupSnoozeTs:null,lastBackupKind:null,lastJsonBackupTs:null,dataEditTs:null,libPlace:'g',libKit:null,libFav:[],libRecent:[]},migrateState(loadState())||{});
+  lastBackupTs:null,backupSnoozeTs:null,lastBackupKind:null,lastJsonBackupTs:null,dataEditTs:null,libPlace:'g',libKit:null,libFav:[],libRecent:[],...V21_DEFAULTS},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
 if(!S.currentPlan){
@@ -9963,6 +9977,9 @@ function sessDayKey(s,plan){
 }
 // ¿La sesión s es del día dk de tu rutina?
 function sessOfDay(s,dk,plan){const p=plan||getPlan();return !!s&&!!dk&&_isPlanDay(p[dk])&&(s.did?p[dk].did===s.did:s.day===dk);}
+// (E2) ¿La sesión es de tu rutina de ahora? Con rutina generada, por su id (pid); sin ella, las que no llevan pid («rutina de antes»
+// son las de otra rutina generada; las de copias antiguas, sin pid, cuentan como de la tuya si tampoco es generada)
+function sessOfRoutine(s){const pid=_isPlainObj(S.planMeta)&&S.planMeta.id?S.planMeta.id:null;return !!s&&(pid?s.pid===pid:!s.pid);}
 // ¿Dos sesiones son del mismo día? Con id, por el id; si a alguna le falta, por la letra (no hubo cambio de estructura
 // entre medias: si lo hubiera, las dos tendrían su id apuntado)
 function sessSameDay(a,b){return !!a&&!!b&&(a.did&&b.did?a.did===b.did:a.day===b.day);}
@@ -10556,6 +10573,168 @@ function _sanitizeLibPrefs(o){
   return o;
 }
 _sanitizeLibPrefs(S);
+
+// ══════════════════════════════════════════════════════════
+// (E2) ESQUEMA 21: TUS RESPUESTAS, TUS SITIOS, TU SALUD, LA RUTINA GENERADA Y EL BORRADOR DEL CUESTIONARIO
+// Listas cerradas y saneado de cada clave nueva, al cargar y al importar (como _sanitizeLibPrefs). Lo que no casa se quita;
+// una forma rota pasa a null. Los textos que vengan de una copia se pintan siempre escapados.
+// ══════════════════════════════════════════════════════════
+const PROF_GOALS=['musculo','fuerza','grasa','salud','aguante'],PROF_EXP=['cero','lt6m','6m2a','gt2a','paron'],PROF_RITMO=['semanas','meses','nose'];
+const PROF_PARON_ANTES=['lt6m','6m2a','gt2a'],PROF_PARON_FUERA=['2a6m','gt6m','gt2a'],PROF_LEVELS=['P0','P','I','A'];
+const PROF_MINS=[15,20,30,45,60,75,90],PROF_AGES=['16','18','40','65','75','nd'],PROF_SPORT=['no','suave','piernas','agua'];
+const PROF_PRIO=['pecho','espalda','hombros','brazos','gluteos','piernas','abdomen'],PROF_STYLE=['maq','libre','igual'];
+const PROF_WARM=['normal','corto'],PROF_CARDIO=['auto','si','no'];
+const PROF_SEX=['m','h','nd'],PROF_ENFOQUE=['gluteo','igual']; // (D10) mujer · hombre · prefiero no decirlo; enfoque de la rutina
+// Sitios: presets (P5), accesorios (§K.1, con las cosas de casa), familias de máquina (13) y tipos de cardio (9)
+const PLACE_PRESETS=['grande','barrio','hotel','box','nada','basico','mancbanco','casagym','parque','propio'];
+const PLACE_ACC=['mesa','puerta','silla','pared','escalon','banco','banco_inc','banco_dec','scott','ghd','hiper','rack','landmine','hexbar','anclaje','paralelas',
+  'agarre_neutro','kb2','anillas','poleas2','trineo','llanta','cuerdas','saco','bici_ext','piscina'];
+const MACH_FAMS=['prensa','extension','curlfem','abdaduct','gemelos','gluteo','lumbares','jalonremo','pecho','contractora','hombro','brazos','abdominales'];
+const CARD_KINDS=['cinta','bici','reclinada','spinning','bici_aire','eliptica','remo','escaladora','esqui'];
+const PLACE_DBMAX=[10,20,30,99],PLACE_KB=[1,2],PLACE_KBMAX=[8,12,16,24];
+// Salud: zonas y tipo de molestia; versión del texto del consentimiento
+const HEALTH_ZONES=['rodilla','hombro','lumbar','muneca','cadera','otra'],HEALTH_KINDS=['ahora','antigua','op','reciente'],HEALTH_OTRA=['cuello','tobillo','otra'];
+const HEALTH_CONSENT_VER=['1'];
+// Pantallas del cuestionario (para retomar el borrador en la suya)
+const OB_STEPS=['ob-hola','ob-meta','ob-sexo','ob-enfoque','ob-exp','ob-ritmo','ob-paron','ob-tiempo','ob-lugar','ob-material','ob-otro','ob-lugar2','ob-material2',
+  'ob-reparto-sitios','ob-edad','ob-menor','ob-salud','ob-medico','ob-supervision','ob-posparto','ob-embarazo','ob-molestias','ob-deporte','ob-consulta','ob-foco','ob-rutina'];
+const _LIBID_RE=/^lib_[a-z0-9_]{2,60}$/;
+const _oneOf=(v,L)=>L.includes(v)?v:null;
+const _num=(v,lo,hi)=>typeof v==='number'&&isFinite(v)&&v>=lo&&v<=hi?v:null;
+const _bool=v=>v===true;
+function _ids(a,n,re){return Array.isArray(a)?[...new Set(a.filter(x=>typeof x==='string'&&re.test(x)))].slice(0,n):[];}
+// Respuestas (sin datos de salud). days fuera de 2-6 → null (se vuelve a preguntar); min, al permitido más cercano.
+function _sanitizeProfile(o){
+  if(!_isPlainObj(o))return null;
+  const p={v:1,ts:_num(o.ts,0,9e15)||Date.now(),mode:_oneOf(o.mode,['gen','own'])||'own'};
+  p.goal=_oneOf(o.goal,PROF_GOALS);p.exp=_oneOf(o.exp,PROF_EXP);
+  p.ritmo=p.exp==='gt2a'?_oneOf(o.ritmo,PROF_RITMO):null;
+  p.paron=p.exp==='paron'&&_isPlainObj(o.paron)&&PROF_PARON_ANTES.includes(o.paron.antes)&&PROF_PARON_FUERA.includes(o.paron.fuera)?{antes:o.paron.antes,fuera:o.paron.fuera}:null;
+  p.levelManual=_oneOf(o.levelManual,PROF_LEVELS);
+  const d=parseInt(o.days);p.days=Number.isInteger(d)&&d>=2&&d<=6?d:null;
+  const m=+o.min;p.min=isFinite(m)&&m>0?PROF_MINS.reduce((b,x)=>Math.abs(x-m)<Math.abs(b-m)?x:b,PROF_MINS[0]):null;
+  p.consec=_bool(o.consec);
+  p.tope=typeof o.tope==='boolean'?o.tope:null; // (D5) «4 de pesas y el resto, cardio suave» (true) o «todos de pesas» (false)
+  const dO=parseInt(o.daysOther);p.daysOther=Number.isInteger(dO)&&dO>=0&&dO<=5&&(p.days==null||dO<p.days)?dO:0;
+  p.age=_oneOf(o.age,PROF_AGES);p.ageTs=p.age?_num(o.ageTs,0,9e15):null;
+  p.sport=_oneOf(o.sport,PROF_SPORT);
+  p.prio=Array.isArray(o.prio)?[...new Set(o.prio.filter(x=>PROF_PRIO.includes(x)))].slice(0,2):[];
+  const pf=_isPlainObj(o.pref)?o.pref:{};p.pref={impact:pf.impact!==false,floor:pf.floor!==false};
+  p.style=_oneOf(o.style,PROF_STYLE)||'igual';p.warm=_oneOf(o.warm,PROF_WARM)||'normal';p.cardioEnd=_oneOf(o.cardioEnd,PROF_CARDIO)||'auto';
+  p.power=_bool(o.power);
+  p.avoid=_ids(o.avoid,100,_LIBID_RE);
+  const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);});
+  p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=p.sex==='m'?_oneOf(o.enfoque,PROF_ENFOQUE):null; // (D10) el enfoque solo se pregunta a las mujeres
+  return p;
+}
+// Un sitio (gimnasio o casa): material de MAT, accesorios, familias de máquina y tipos de cardio de sus listas; preset desconocido → 'propio'
+function _sanitizePlace(o){
+  if(!_isPlainObj(o))return null;
+  const sub=(v,L)=>v==='all'?'all':Array.isArray(v)?[...new Set(v.filter(x=>L.includes(x)))]:[];
+  return{preset:_oneOf(o.preset,PLACE_PRESETS)||'propio',
+    mats:Array.isArray(o.mats)?[...new Set(o.mats.filter(k=>typeof k==='string'&&k!=='corporal'&&Object.prototype.hasOwnProperty.call(MAT,k)))]:[],
+    acc:Array.isArray(o.acc)?[...new Set(o.acc.filter(k=>PLACE_ACC.includes(k)))]:[],
+    mach:sub(o.mach,MACH_FAMS),card:sub(o.card,CARD_KINDS),
+    dbMax:_oneOf(o.dbMax,PLACE_DBMAX),kb:_oneOf(o.kb,PLACE_KB),kbMax:_oneOf(o.kbMax,PLACE_KBMAX)};
+}
+function _sanitizePlaces(o){
+  if(!_isPlainObj(o))return null;
+  const g=_sanitizePlace(o.g),c=_sanitizePlace(o.c);if(!g&&!c)return null;
+  let main=_oneOf(o.main,['g','c'])||(g?'g':'c');if(main==='g'&&!g)main='c';if(main==='c'&&!c)main='g';
+  return{v:1,main,g,c};
+}
+// Salud: SOLO con un consentimiento válido (fecha y versión del texto); sin él, no se guarda nada (§I.2)
+function _sanitizeHealth(o){
+  if(!_isPlainObj(o)||!_isPlainObj(o.consent)||_num(o.consent.ts,1,9e15)==null||!HEALTH_CONSENT_VER.includes(o.consent.ver))return null;
+  const z={};if(_isPlainObj(o.zones))HEALTH_ZONES.forEach(k=>{if(HEALTH_KINDS.includes(o.zones[k]))z[k]=o.zones[k];});
+  return{v:1,ts:_num(o.ts,0,9e15)||o.consent.ts,consent:{ts:o.consent.ts,ver:o.consent.ver},zones:z,otraTxt:z.otra?_oneOf(o.otraTxt,HEALTH_OTRA):null,
+    huesos:_bool(o.huesos),posparto:_bool(o.posparto),prudent:_bool(o.prudent),screenTs:_num(o.screenTs,0,9e15)};
+}
+// Un plan que viene de fuera (rutina anterior, base de la generada, rutina aceptada del borrador): días A…F con sus textos
+// acotados, ejercicios con buena forma y sin las claves del catálogo (como el plan importado)
+function _sanitizePlanCopy(plan,ref){
+  if(!_isPlainObj(plan))return null;
+  const p=JSON.parse(JSON.stringify(plan));
+  Object.keys(p).forEach(k=>{if(!(DAY_KEYS.includes(k)&&_isPlanDay(p[k])))delete p[k];});
+  if(!dayKeys(p).length)return null;
+  dayKeys(p).forEach(k=>{const d=p[k];
+    if(d.label!=null)d.label=String(d.label).slice(0,80);if(d.focus!=null)d.focus=String(d.focus).slice(0,200);
+    if(d.did!=null&&!(typeof d.did==='string'&&DID_RE.test(d.did)))delete d.did;
+    d.ex=d.ex.filter(_isPlainObj);d.ex.forEach(ex=>{['n','eq','tip','ic','r'].forEach(f=>{if(ex[f]!=null)ex[f]=String(ex[f]).slice(0,300);});
+      if(ex.s!=null)ex.s=ex.cardio?1:Math.max(1,Math.min(10,parseInt(ex.s)||3));_slimEx(ex);delete ex.sub;
+      if(ref)_impExId(ex,ref);else if(!(typeof ex.id==='string'&&ex.id&&ex.id.length<=80&&!/['"<>\\]/.test(ex.id)))ex.id='ex_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);});});
+  return p;
+}
+// La rutina generada en uso: listas cerradas, mapas por día solo con ids que existan en su rutina, números acotados
+const PM_REPARTO=['recomendado','dias'],PM_EFFORT=['facil','justo'],PM_SUBIDAS=['lenta','normal'],PM_VUELTA=['recalibrar','menos20','subirNivel'];
+const _CODE_RE=/^[a-z][a-z0-9_]{0,39}$/;
+function _sanitizeCodes(L){ // por qué y avisos: códigos con sus datos (no prosa), ≤ 60
+  return Array.isArray(L)?L.filter(x=>_isPlainObj(x)&&typeof x.c==='string'&&_CODE_RE.test(x.c)).slice(0,60).map(x=>{
+    let p=null;try{p=x.p==null?null:JSON.parse(JSON.stringify(x.p));}catch(e){p=null;}
+    if(p!=null&&JSON.stringify(p).length>800)p=null;return{c:x.c,p};}):[];
+}
+function _sanitizePlanMeta(o,plan){
+  if(!_isPlainObj(o)||typeof o.id!=='string'||!PID_RE.test(o.id))return null;
+  const dids=new Set(dayKeys(_isPlainObj(plan)?plan:{}).map(k=>plan[k].did).filter(Boolean));
+  const byDid=(m,ok)=>{const r={};if(_isPlainObj(m))Object.keys(m).forEach(d=>{if(dids.has(d)&&ok(m[d]))r[d]=m[d];});return r;};
+  const didList=(a,n)=>Array.isArray(a)?a.filter(d=>dids.has(d)).slice(0,n):null;
+  const m={v:1,id:o.id,ts:_num(o.ts,0,9e15)||Date.now(),gen:_num(o.gen,0,999)||0,cat:typeof o.cat==='string'?o.cat.slice(0,40):'',
+    reparto:_oneOf(o.reparto,PM_REPARTO)||'dias',split:typeof o.split==='string'?o.split.slice(0,24):'',K:_num(o.K,1,6),wd:_num(o.wd,1,6),
+    tpl:byDid(o.tpl,v=>typeof v==='string'&&v.length<=8),dayPlace:byDid(o.dayPlace,v=>v==='g'||v==='c'),fd:byDid(o.fd,v=>_num(v,0,7)!=null),
+    alternas:_bool(o.alternas),fz2:null,seq:didList(o.seq,14),cargaLigera:_bool(o.cargaLigera),lifts:_ids(o.lifts,12,_LIBID_RE),
+    vuelta:_oneOf(o.vuelta,PM_VUELTA),rampa:null,effort:null,rest:null,vol:{},zone:{},modes:[],level:_oneOf(o.level,PROF_LEVELS),
+    corto:_bool(o.corto),seed:_num(o.seed,0,4294967295)||0,alt:_num(o.alt,0,99)||0,sig:typeof o.sig==='string'?o.sig.slice(0,40):'',
+    why:_sanitizeCodes(o.why),warn:_sanitizeCodes(o.warn),base:_sanitizePlanCopy(o.base,null),edited:_bool(o.edited)};
+  if(_isPlainObj(o.fz2)){const g=didList(o.fz2.gym,6),c=didList(o.fz2.casa,6);if(g&&c)m.fz2={gym:g,casa:c};}
+  if(_isPlainObj(o.rampa))m.rampa={series:_num(o.rampa.series,1,6)||3,reps:typeof o.rampa.reps==='string'?o.rampa.reps.slice(0,10):'8-12',rir:_num(o.rampa.rir,0,5)};
+  if(_isPlainObj(o.effort))m.effort={obj:_oneOf(o.effort.obj,PM_EFFORT)||'justo',rir:_num(o.effort.rir,0,5),subidas:_oneOf(o.effort.subidas,PM_SUBIDAS)||'normal'};
+  if(_isPlainObj(o.rest)){const r={};['iso','comp','heavy','bw'].forEach(k=>{const v=Math.round(+o.rest[k]);if(v>=REST_MIN_S&&v<=REST_MAX_S)r[k]=v;});m.rest=Object.keys(r).length?r:null;}
+  if(_isPlainObj(o.vol))Object.keys(o.vol).slice(0,20).forEach(g=>{const v=o.vol[g];if(/^[a-z_]{2,20}$/.test(g)&&_isPlainObj(v)){const x={};['v','dir','obj','top','techo'].forEach(f=>{const n=_num(v[f],0,99);if(n!=null)x[f]=n;});m.vol[g]=x;}});
+  if(_isPlainObj(o.zone))Object.keys(o.zone).slice(0,20).forEach(g=>{const z=o.zone[g];if(/^[a-z_]{2,20}$/.test(g)&&Array.isArray(z)&&_num(z[0],1,40)!=null&&_num(z[1],1,40)!=null&&z[0]<z[1])m.zone[g]=[z[0],z[1]];});
+  if(Array.isArray(o.modes))m.modes=[...new Set(o.modes.filter(x=>typeof x==='string'&&/^[a-z0-9]{1,16}$/.test(x)))].slice(0,12);
+  return m;
+}
+// Un nivel de deshacer: la rutina de antes con lo que iba con ella; más de 180 días → nada
+function _sanitizePlanPrev(o,ref){
+  if(!_isPlainObj(o)||_num(o.ts,0,9e15)==null||Date.now()-o.ts>180*86400000)return null;
+  const plan=_sanitizePlanCopy(o.plan,ref);if(!plan)return null;
+  dayKeys(plan).forEach(k=>{if(!plan[k].did)plan[k].did=newDayId(plan);});
+  const inPlan=k=>typeof k==='string'&&_isPlanDay(plan[k])?k:null;
+  const wt=parseInt(o.weeklyTarget);
+  return{ts:o.ts,src:_oneOf(o.src,['aplicar','restaurar','ejemplo'])||'aplicar',plan,weeklyTarget:Number.isInteger(wt)&&wt>=1&&wt<=7?wt:null,
+    nextDay:inPlan(o.nextDay),day:inPlan(o.day),rotBack:inPlan(o.rotBack),meta:_sanitizePlanMeta(o.meta,plan),profile:_sanitizeProfile(o.profile),
+    places:_sanitizePlaces(o.places),pendingCoachProposals:_sanitizeProposals(o.pendingCoachProposals),
+    libPlace:o.libPlace==='c'?'c':'g',libKit:Array.isArray(o.libKit)?[...new Set(o.libKit.filter(k=>typeof k==='string'&&Object.prototype.hasOwnProperty.call(MAT,k)&&MAT[k].home))]:null};
+}
+// Borrador del cuestionario: SIN datos de salud (solo respuestas que no lo son); más de 30 días → empieza de nuevo
+function _sanitizeObDraft(o){
+  if(!_isPlainObj(o)||_num(o.ts,0,9e15)==null||Date.now()-o.ts>30*86400000)return null;
+  const a=_sanitizeProfile(Object.assign({},_isPlainObj(o.a)?o.a:{},{mode:'gen'}));
+  const pins={};if(_isPlainObj(o.pins))Object.keys(o.pins).slice(0,40).forEach(k=>{if(/^[A-Za-z0-9:_-]{1,40}$/.test(k)&&_LIBID_RE.test(o.pins[k]))pins[k]=o.pins[k];});
+  const d={v:1,ts:o.ts,from:_oneOf(o.from,['first','settings'])||'first',step:_oneOf(o.step,OB_STEPS)||'ob-meta',a,alt:_num(o.alt,0,99)||0,pins,
+    places:_sanitizePlaces(o.places),accepted:null};
+  if(_isPlainObj(o.accepted)){const days=_sanitizePlanCopy(o.accepted.days,null);
+    if(days){dayKeys(days).forEach(k=>{if(!days[k].did)days[k].did=newDayId(days);});const meta=_sanitizePlanMeta(o.accepted.meta,days);
+      if(meta){meta.why=meta.why.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));meta.warn=meta.warn.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));}
+      d.accepted={days,meta,weeklyTarget:_num(o.accepted.weeklyTarget,1,7)};}}
+  return d;
+}
+// Sesiones (E1b-E2): nombre, foco, rutina e id del día con que se hizo; lo que no casa, fuera (la sesión se queda)
+function _sanitizeSessionsV21(list){
+  _sanitizeSessDay(list);
+  (Array.isArray(list)?list:[]).forEach(s=>{if(_isPlainObj(s)&&'pid' in s&&!(typeof s.pid==='string'&&PID_RE.test(s.pid)))delete s.pid;});
+}
+// Todas las claves nuevas a la vez (al arrancar y al terminar de importar)
+function _sanitizeV21(o){
+  if(!_isPlainObj(o))return;
+  o.profile=_sanitizeProfile(o.profile);o.places=_sanitizePlaces(o.places);o.health=_sanitizeHealth(o.health);
+  o.planMeta=_sanitizePlanMeta(o.planMeta,o.currentPlan);o.planPrev=_sanitizePlanPrev(o.planPrev,null);o.obDraft=_sanitizeObDraft(o.obDraft);
+  o.rotBack=typeof o.rotBack==='string'&&_isPlainObj(o.currentPlan)&&_isPlanDay(o.currentPlan[o.rotBack])?o.rotBack:null;
+  o.bkHealth=o.bkHealth!==false;
+  _sanitizeSessionsV21(o.sessions);
+}
+{const _v0=JSON.stringify([S.profile,S.places,S.health,S.planMeta,S.planPrev,S.obDraft,S.rotBack,S.bkHealth]);_sanitizeV21(S);
+  if(JSON.stringify([S.profile,S.places,S.health,S.planMeta,S.planPrev,S.obDraft,S.rotBack,S.bkHealth])!==_v0)saveState();}
 // Ejercicio de la biblioteca de uno del plan (o null): su lib → el del plan original (PLAN_ANIM, salvo cardio: ese va por
 // nombre) → su nombre. Nunca lee el tipo ni los campos del catálogo de la copia del plan: siempre del catálogo.
 function _libIdOf(ex){
@@ -12958,6 +13137,7 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   // (E1b) el nombre, el foco y el id del día con que se hizo: el historial no cambia aunque cambie la rutina
   session.lbl=dayLabel(S.day).slice(0,80);session.focus=String(day.focus==null?'':day.focus).slice(0,200);
   if(day.did)session.did=day.did;else delete session.did;
+  if(_isPlainObj(S.planMeta)&&S.planMeta.id)session.pid=S.planMeta.id;else delete session.pid; // (E2) la rutina con que se hizo
   if(rs)_insertByTs(S.sessions,session);else S.sessions.push(session);
   // Guardar reps, series completadas y RPE promedio
   strEx.forEach(ex=>{
@@ -13174,6 +13354,7 @@ function reopenSession(ts){
   if(!sess){toast('No se encontró la sesión');return;}
   const plan=getPlan();
   const dayKey=sessDayKey(sess); // (E1b) su día por su id, aunque haya cambiado de letra
+  if(!sessOfRoutine(sess)){toast('Esa sesión es de otra rutina: puedes verla, pero no reabrirla');return;} // (E2)
   if(!dayKey){toast('Ese día ya no está en tu rutina: no se puede reabrir');return;}
   confirmModal({
     title:'Reabrir sesión',
@@ -15220,7 +15401,7 @@ function hoyDuration(dk){
   const L=Array.isArray(S.sessions)?S.sessions:[],avg=a=>Math.round(a.reduce((t,s)=>t+(+s.durationMin),0)/a.length);
   const own=L.filter(s=>_okDur(s)&&sessOfDay(s,dk)).slice(-6); // (E1b) el mismo día por su id
   if(own.length)return{min:avg(own),src:'day',n:own.length};
-  const all=L.filter(_okDur).slice(-6);
+  const all=L.filter(s=>_okDur(s)&&sessOfRoutine(s)).slice(-6); // (E2) solo las de tu rutina de ahora
   if(all.length)return{min:avg(all),src:'all',n:all.length};
   const info=hoyDayInfo(dk);if(!info)return null;
   let sec=0;
@@ -15518,7 +15699,7 @@ function renderDash(){
         <span class="sess-go" aria-hidden="true">›</span>
       </div>
       ${s.note?`<div style="font-size:12px;color:var(--text2);margin-top:6px;padding:6px 10px;background:color-mix(in srgb,var(--text) 3%,transparent);border-radius:6px;border-left:2px solid var(--border2);line-height:1.5;font-style:italic">«${esc(s.note)}»</div>`:''}
-      ${isLast&&canReopen&&sessDayKey(s)?`<button type="button" class="hist-btn sess-reopen" onclick="event.stopPropagation();reopenSession(${s.ts})">${s.totalEx&&s.doneEx<s.totalEx?'↩ Reabrir para terminar':'↩ Reabrir para corregir'}</button>`:''}
+      ${isLast&&canReopen&&sessDayKey(s)&&sessOfRoutine(s)?`<button type="button" class="hist-btn sess-reopen" onclick="event.stopPropagation();reopenSession(${s.ts})">${s.totalEx&&s.doneEx<s.totalEx?'↩ Reabrir para terminar':'↩ Reabrir para corregir'}</button>`:''}
     </div>`;
   }).join('')}</div>`;
   })():''}
@@ -21777,7 +21958,7 @@ function _bkSafeTs(){return S.lastBackupKind==='csv'?_bkTs(S.lastJsonBackupTs):_
 // abrir es el punto de partida (_bkTrackStart, al final del arranque); antes de eso no se apunta nada.
 var _bkSig,_bkReady=false;
 function _bkDataSig(){
-  const s=JSON.stringify([S.currentPlan||null,S.weights||null]);let h=0x811c9dc5; // FNV-1a de 32 bits + longitud
+  const s=JSON.stringify([S.currentPlan||null,S.weights||null,S.profile||null,S.places||null]);let h=0x811c9dc5; // FNV-1a de 32 bits + longitud (E2: y tus respuestas y sitios)
   for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619);}
   return(h>>>0).toString(36)+'.'+s.length;
 }
@@ -21923,10 +22104,7 @@ function storagePersistAsk(){
 function exportData(){
   const prev=_bkMark('json');
   try{
-    const payload={...S,_exported:new Date().toISOString(),_version:SCHEMA_VERSION};
-    // Excluir claves transitorias del export
-    TRANSIENT_KEYS.forEach(k=>delete payload[k]);
-    delete payload.restTimer; // un temporizador en marcha no tiene sentido en otro dispositivo
+    const payload=_backupPayload(); // (E2) lo mismo que «Copiar datos (JSON)»
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a');
@@ -21988,7 +22166,7 @@ function copyDataToClipboard(){
   // (15b) cuenta como copia si se llega a copiar (el JSON ya lleva su fecha); si falla, todo queda como estaba
   const prev=_bkMark('json');
   try{
-    const txt=JSON.stringify(S,null,2);
+    const txt=JSON.stringify(_backupPayload(),null,2); // (E2, 42 R3) lo mismo que «Guardar copia»: sin claves de pantalla ni, si lo eliges, tus molestias
     if(navigator.clipboard&&navigator.clipboard.writeText){
       return navigator.clipboard.writeText(txt).then(()=>{_bkDone();toast('JSON copiado al portapapeles');return true;},
         ()=>{_bkUndo(prev);toast('No se pudo copiar');return false;});
@@ -22025,6 +22203,44 @@ function _remapExId(d,from,to){
   [d.pendingCoachProposals,d.appliedProposals,_isPlainObj(d.deload)&&d.deload.changes].forEach(L=>{if(Array.isArray(L))L.forEach(p=>{if(_isPlainObj(p)&&p.exId===from)p.exId=to;});});
   (Array.isArray(d.deloadHistory)?d.deloadHistory:[]).forEach(h=>{if(_isPlainObj(h)&&Array.isArray(h.exIds))h.exIds=h.exIds.map(i=>i===from?to:i);});
 }
+// (E2) Claves nuevas al restaurar una copia, una a una (§D.4; 42 R1). m = los datos de la copia ya migrados (lo que no traía,
+// heredado del móvil); had = las claves que traía la copia antes de migrar. Nada de este móvil se pierde por una copia antigua.
+function _importV21(m,had){
+  const own=k=>S[k],fromCopy=k=>had.has(k)&&m[k]!=null;
+  const planFromCopy=had.has('currentPlan');
+  // Sitios y respuestas: los de la copia si los trae; si no (copia antigua o sin ellos), los de este móvil
+  m.places=_sanitizePlaces(fromCopy('places')?m.places:own('places'));
+  m.profile=_sanitizeProfile(fromCopy('profile')?m.profile:own('profile'));
+  // Borrador: manda el de este móvil; si no tiene, el de la copia (sin salud y de menos de 30 días)
+  m.obDraft=_sanitizeObDraft(own('obDraft'))||_sanitizeObDraft(had.has('obDraft')?m.obDraft:null);
+  // Rutina generada: la de la copia describe su rutina; una copia sin ella trae una rutina que no es generada. Sin plan en la
+  // copia, se quedan la rutina de este móvil y su planMeta.
+  const phoneMeta=own('planMeta'),phonePlan=own('currentPlan');
+  if(planFromCopy)m.planMeta=fromCopy('planMeta')?_sanitizePlanMeta(m.planMeta,m.currentPlan):null;
+  else m.planMeta=_sanitizePlanMeta(phoneMeta,phonePlan);
+  // Rutina anterior: la de la copia si trae una; si no, la rutina generada de este móvil (si la copia la sustituye), para
+  // poder volver a ella con «Volver a mi rutina anterior»
+  const copyPrev=fromCopy('planPrev')?_sanitizePlanPrev(m.planPrev,null):null;
+  if(copyPrev)m.planPrev=copyPrev;
+  else if(planFromCopy&&phoneMeta&&phonePlan)m.planPrev=_sanitizePlanPrev({ts:Date.now(),src:'restaurar',plan:phonePlan,weeklyTarget:own('weeklyTarget'),
+    nextDay:own('nextDay'),day:own('day'),rotBack:own('rotBack'),meta:phoneMeta,profile:own('profile'),places:own('places'),
+    pendingCoachProposals:own('pendingCoachProposals'),libPlace:own('libPlace'),libKit:own('libKit')},null);
+  else m.planPrev=planFromCopy?null:_sanitizePlanPrev(own('planPrev'),null);
+  // Salud: la de la copia solo con un consentimiento válido; si no, la de este móvil (el consentimiento es de este móvil)
+  m.health=(had.has('health')&&_sanitizeHealth(m.health))||_sanitizeHealth(own('health'));
+  m.bkHealth=own('bkHealth')!==false; // una preferencia de este móvil: nunca viene de una copia
+  // rotBack: el de la copia si apunta a un día de su rutina; si no, ninguno (apuntaba a un día que ya no está)
+  m.rotBack=had.has('rotBack')&&typeof m.rotBack==='string'&&_isPlainObj(m.currentPlan)&&_isPlanDay(m.currentPlan[m.rotBack])?m.rotBack:null;
+}
+// (E2) Lo que va en una copia, para las dos vías («Guardar copia» y «Copiar datos (JSON)»; 42 R3): sin las claves de pantalla
+// ni el descanso en marcha, con todas las claves nuevas y las molestias solo si las incluyes (S.bkHealth, en «Mis molestias»)
+function _backupPayload(){
+  const p={...S,_exported:new Date().toISOString(),_version:SCHEMA_VERSION};
+  TRANSIENT_KEYS.forEach(k=>delete p[k]);
+  delete p.restTimer; // un temporizador en marcha no tiene sentido en otro dispositivo
+  if(S.bkHealth===false)delete p.health;
+  return p;
+}
 function importData(){
   const inp=document.createElement('input');
   inp.type='file';inp.accept='application/json,.json';
@@ -22037,6 +22253,8 @@ function importData(){
         if(!data||typeof data!=='object'||!('sessions'in data||'weights'in data)){
           toast('Archivo no válido');return;
         }
+        // (E2) Una copia de una versión más nueva de la app (días D-F, claves que esta no conoce): mejor no restaurarla a medias
+        if(Math.max(+data.schema_version||0,+data._version||0)>SCHEMA_VERSION){toast('Actualiza la app antes de restaurar esta copia',4200);return;}
         confirmModal({
           title:'Restaurar copia',
           body:`Se reemplazarán los datos actuales por los del archivo (${plural((data.sessions||[]).length,'sesión','sesiones')}, ${plural((data.weights||[]).length,'peso')}). Esta acción no se puede deshacer.`,
@@ -22053,6 +22271,8 @@ function importData(){
             // Descanso por ejercicio y pantalla encendida (v19): los del backup solo si los trae; si no, los de este móvil
             const _roImp=_sanitizeRestOverrides(_isPlainObj(data.restOverrides)?data.restOverrides:S.restOverrides);
             const _kaImp=typeof data.keepAwake==='boolean'?data.keepAwake:S.keepAwake!==false;
+            // (E2) Foto de las claves que trae la copia ANTES de migrar (después, data ya está cambiado): 42 R1
+            const had=new Set(Object.keys(data));
             // Aplicar migración por si viene de versión antigua
             const migrated=migrateState(data);
             // Registro serie a serie (v18): series de hoy y de los registros, siempre saneadas (también en backups v18+)
@@ -22090,7 +22310,7 @@ function importData(){
             // (11) «Solo hoy»: sustituciones del plan y de las sesiones, siempre saneadas (también en backups v20)
             _sanitizePlanSubs(migrated.currentPlan);
             _sanitizeSessSubs(migrated.sessions);
-            _sanitizeSessDay(migrated.sessions); // (E1b) nombre, foco e id del día de cada sesión
+            _sanitizeSessionsV21(migrated.sessions); // (E1b-E2) nombre, foco, rutina e id del día de cada sesión
             if(_isPlainObj(migrated.reopenedSession))_sanitizeSessDay([migrated.reopenedSession.session]);
             // Normalizar restWeeks siempre (defensa: un backup v10 editado a mano podría traerlo inválido)
             if(!Array.isArray(migrated.restWeeks))migrated.restWeeks=[];
@@ -22138,6 +22358,7 @@ function importData(){
               migrated.dataEditTs=data.dataEditTs;_bkReady=false;setTimeout(()=>{if(!_bkReady)_bkTrackStart();},0);
               _sanitizeBackupMeta(migrated);}
             Object.keys(S).forEach(k=>{if(!(k in migrated))migrated[k]=S[k];});
+            _importV21(migrated,had);
             S=Object.assign(S,migrated);
             // Selector (lugar, material de casa, favoritos, recientes): los del backup si los trae; si no, los de este móvil
             _sanitizeLibPrefs(S);
