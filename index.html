@@ -13594,7 +13594,8 @@ function _sanitizePlanMeta(o,plan){
     alternas:_bool(o.alternas),fz2:null,seq:didList(o.seq,14),cargaLigera:_bool(o.cargaLigera),lifts:_ids(o.lifts,12,_LIBID_RE),
     vuelta:_oneOf(o.vuelta,PM_VUELTA),rampa:null,effort:null,rest:null,vol:{},zone:{},modes:[],level:_oneOf(o.level,PROF_LEVELS),
     corto:_bool(o.corto),seed:_num(o.seed,0,4294967295)||0,alt:_num(o.alt,0,99)||0,sig:typeof o.sig==='string'?o.sig.slice(0,40):'',
-    why:_sanitizeCodes(o.why),warn:_sanitizeCodes(o.warn),base:_sanitizePlanCopy(o.base,null),edited:_bool(o.edited)};
+    why:_sanitizeCodes(o.why),warn:_sanitizeCodes(o.warn),base:_sanitizePlanCopy(o.base,null),edited:_bool(o.edited),
+    balMin:_num(o.balMin,0,15)||0,apx:byDid(o.apx,v=>[0,60,150,240].includes(v)),est:byDid(o.est,v=>_num(v,1,300)!=null)}; // (E5)
   if(_isPlainObj(o.fz2)){const g=didList(o.fz2.gym,6),c=didList(o.fz2.casa,6);if(g&&c)m.fz2={gym:g,casa:c};}
   if(_isPlainObj(o.rampa))m.rampa={series:_num(o.rampa.series,1,6)||3,reps:typeof o.rampa.reps==='string'?o.rampa.reps.slice(0,10):'8-12',rir:_num(o.rampa.rir,0,5)};
   if(_isPlainObj(o.effort))m.effort={obj:_oneOf(o.effort.obj,PM_EFFORT)||'justo',rir:_num(o.effort.rir,0,5),subidas:_oneOf(o.effort.subidas,PM_SUBIDAS)||'normal'};
@@ -13790,6 +13791,193 @@ function genRowToEx(row){
 // (E4c) Textos de la rutina generada: el «por qué» y los avisos, las mismas frases que el prototipo (sim/textos.js; la seguridad
 // primero; la app enseña los 3 primeros avisos y el resto en «ver más»). g = genRoutineFrom(…).
 function genTexts(g){const X=g.E.X;return{porque:X.porque(g.res,g.inp),avisos:X.avisos(g.res,g.inp),visibles:X.AVISOS_VISIBLES};}
+// ══════════════════════════════════════════════════════════
+// (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
+// ══════════════════════════════════════════════════════════
+// Candidata: lo que enseña el resultado y lo que se aplica, con las letras del generador. g = genRoutineFrom(…). Cada ejercicio
+// lleva lib, series, el objetivo como lo guarda la app (rango escrito, «30s» o minutos), la nota y su descanso; por día, la
+// aproximación del primer multiarticular con kilos y los minutos; y los descansos de la rutina por tipo (también el de peso
+// corporal, bandas y TRX: el de la primera fila de ese tipo o, si no hay, la regla del generador).
+const _LVN={P0:0,P:1,I:2,A:3};
+function _genRestCat(g,row,P){ // como restOf del generador
+  const L=LIB_K.BY.get(row.lib);if(!L||L.lt==='c')return null;
+  if(row.role==='potencia')return'heavy';
+  if(!L.c)return'iso';
+  if(['r','t','d'].includes(L.lt)||['banda','minibanda','trx'].includes(L.mat)||L.pat==='carry'||(L.lt==='bw'&&(L.u||P.cauto||_LVN[P.level]<=_LVN.P)))return'bw';
+  const rr=g.E.G.repRange(L,row.r);return rr&&rr.hi<=6?'heavy':'comp';
+}
+function genCandidate(g){
+  const r=g.res,P=g.E.G.effective(g.inp),days={},apx={},est={};let bw=null;
+  r.det.forEach(d=>{
+    const rows=d.rows.filter(x=>x.kind!=='bal'),dex=(r.days[d.letra]&&r.days[d.letra].ex)||[];
+    const fr=rows.find(x=>x.kind==='str'&&x.c&&(LIB_K.BY.get(x.lib)||{}).lt==='w');
+    days[d.letra]={label:r.days[d.letra].label,focus:r.days[d.letra].focus,ex:rows.map((x,i)=>{
+      const e=genRowToEx(x);if(!e)return null;
+      const cat=x.kind==='str'?_genRestCat(g,x,P):null;if(cat==='bw'&&bw==null)bw=x.descanso_s;
+      return{lib:x.lib,s:e.s,r:e.r,cardio:!!e.cardio,note:String((dex[i]&&dex[i].note)||'').trim(),rest:x.kind==='str'?x.descanso_s:null,cat,pot:x.role==='potencia'};
+    }).filter(Boolean)};
+    apx[d.letra]=fr?genApproachSecs(g,fr):150;est[d.letra]=d.minExact;
+  });
+  const R=r.meta.rest||{},ag=g.inp.goal==='aguante';
+  if(bw==null&&R.iso)bw=(ag?Math.max(60,R.iso):Math.min(90,Math.max(75,R.iso)))+(P.prud||P.mayor?15:0);
+  return{v:1,days,weeklyTarget:r.weeklyTarget,meta:r.meta,apx,est,balMin:r.meta.balMin||0,rest:Object.assign({},R,bw!=null?{bw}:{}),
+    reparto:r.meta.reparto==='dias'?'dias':'recomendado',ok:!!r.ok};
+}
+// Sin consentimiento de salud no queda rastro de la zona (§I.2): fuera las notas que la nombran y los porqués y avisos con zona
+const _ZONE_TXT=/rodilla|hombro|lumbar|espalda baja|muñeca|codo|cadera|cuello|tobillo|molestia|otra zona|operación|lesión/i;
+function _stripZoneTrace(c){
+  Object.values(c.days).forEach(d=>d.ex.forEach(x=>{if(x.note&&_ZONE_TXT.test(x.note))x.note='';}));
+  const ok=w=>!(w&&(['reciente','otra_zona','zona','amable','molestia','lim'].includes(w.c)||_ZONE_TXT.test(JSON.stringify(w.p||''))));
+  c.meta=Object.assign({},c.meta,{why:(c.meta.why||[]).filter(ok),warn:(c.meta.warn||[]).filter(ok)});
+  return c;
+}
+// planMeta de una rutina aplicada: lo del generador con los ids de día de la rutina nueva (§D)
+function _genPlanMeta(c,np){
+  const m=c.meta||{},did=k=>np[k]&&np[k].did;
+  const byL=o=>{const r={};if(_isPlainObj(o))Object.keys(o).forEach(k=>{const d=did(k);if(d)r[d]=o[k];});return r;};
+  const vol={};if(_isPlainObj(m.vol))Object.keys(m.vol).forEach(gk=>{const v=m.vol[gk];if(v)vol[gk]={v:v.v,dir:v.dir,obj:v.obj,top:v.tope,techo:v.techo};});
+  const rir=t=>{const x=String(t==null?'':t).match(/\d/);return x?+x[0]:null;};
+  const lifts=[].concat(...Object.values(_isPlainObj(m.lifts)?m.lifts:{}).filter(Array.isArray));
+  const letters=a=>Array.isArray(a)?a.map(did).filter(Boolean):null;
+  const pm={id:'p_'+Date.now().toString(36),ts:Date.now(),gen:(window.GymGen&&GymGen.VERSION)||0,cat:'',reparto:c.reparto,split:m.split,K:m.K,wd:m.wd,
+    tpl:byL(m.tpl),dayPlace:byL(m.dayPlace),fd:byL(m.fd),alternas:!!m.alternas,fz2:m.fz2&&letters(m.fz2.gym)&&letters(m.fz2.casa)?{gym:letters(m.fz2.gym),casa:letters(m.fz2.casa)}:null,
+    seq:null,cargaLigera:!!m.cargaLigera,lifts,vuelta:m.vuelta?(m.vuelta.pesos==='menos20'?'menos20':'recalibrar'):null,
+    rampa:m.rampa?{series:m.rampa.series||3,reps:m.rampa.reps||'8-12',rir:rir(m.rampa.rir)}:null,
+    effort:m.effort?{obj:m.effort.obj,rir:rir(m.effort.rir),subidas:m.effort.subidas}:null,rest:c.rest,vol,zone:_mmZoneOf(np,c.weeklyTarget,vol),
+    modes:m.modes||[],level:m.level,corto:!!m.corto,seed:m.seed,alt:m.alt||0,why:m.why,warn:m.warn,base:JSON.parse(JSON.stringify(np)),edited:false,
+    balMin:c.balMin||0,apx:byL(c.apx),est:byL(c.est)};
+  return _sanitizePlanMeta(pm,np);
+}
+// Id sin historial y único de verdad (42 R21): ni en la rutina nueva ni en S.strength; nunca a1…c7 (los de fábrica)
+function _uniqueExId(taken){
+  const st=_isPlainObj(S.strength)?S.strength:{};let id;
+  do{id='ex_'+Date.now().toString(36)+'_'+Math.random().toString(36).slice(2,7);}while(taken.has(id)||id in st);
+  return id;
+}
+// La rutina de ahora con lo que va con ella, para «Deshacer» y «Volver a mi rutina anterior» (42 R5)
+function _planPrevSnap(src){
+  const c=x=>x==null?null:JSON.parse(JSON.stringify(x));
+  return{ts:Date.now(),src,plan:c(S.currentPlan),weeklyTarget:S.weeklyTarget,nextDay:S.nextDay,day:S.day,rotBack:S.rotBack||null,meta:c(S.planMeta),
+    profile:c(S.profile),places:c(S.places),pendingCoachProposals:c(S.pendingCoachProposals||[]),libPlace:S.libPlace,libKit:c(S.libKit)};
+}
+// El ciclo en curso se cierra en silencio si tiene sesiones (§G.5, 42 R27): queda su resumen, sin propuestas ni avisos
+function _closeCycleQuiet(){
+  let cy;try{cy=coach_cycleData();}catch(e){return false;}
+  if(!cy||!cy.sessions.length)return false;
+  let ins=[];try{ins=coach_generateInsights(coach_analyze(),[]).map(i=>({t:i.t,d:i.d,type:i.type}));}catch(e){}
+  if(!Array.isArray(S.mesocycles))S.mesocycles=[];
+  S.mesocycles.push({num:S.mesocycles.length+1,startTs:cy.start,endTs:Date.now(),appliedAt:Date.now(),sessionCount:cy.sessions.length,
+    summary:`Ciclo cerrado al cambiar de rutina: ${plural(cy.sessions.length,'sesión','sesiones')} en ${plural(Math.max(1,Math.round(cy.weeks)),'semana')}.`,insights:ins});
+  S.coachInsights=null;S.coachInsightsStale=true;S.coachLastAnalyzed=Date.now();S.coachStart=Date.now();
+  return true;
+}
+function _applyGuard(){
+  if(getActiveWorkout())return{ok:false,why:'entreno',msg:'Termina o descarta el entreno de hoy antes de cambiar de rutina.'};
+  if(getReopened())return{ok:false,why:'reabierta',msg:'Guarda primero la sesión que tienes abierta.'};
+  return null;
+}
+// Lo que se hace antes de cambiar la rutina, sea la que sea: nombres apuntados, «solo hoy» devueltos, descanso o cardio parados y
+// la descarga terminada (avisa). Devuelve si había descarga.
+function _beforePlanSwap(){
+  stampSessionsLbl();
+  dayKeys().forEach(dk=>{revertDaySubs(dk);(getPlan()[dk].ex||[]).forEach(e=>_stampExName(routineEx(e)));});
+  if(S.restTimer){try{RT.stop();}catch(e){}}
+  const dl=!!S.deload;if(S.deload)_restoreDeload(true);
+  return dl;
+}
+// Aplica una candidata (genCandidate). o = {answers, places, health|null}. Nunca escribe registros ni borra historial (§G.9).
+function applyGeneratedPlan(c,o){
+  o=o||{};const bl=_applyGuard();if(bl)return bl;
+  if(!c||!_isPlainObj(c.days)||!Object.keys(c.days).length)return{ok:false,why:'vacia'};
+  if(!o.health)c=_stripZoneTrace(JSON.parse(JSON.stringify(c)));
+  const cur=getPlan(),keepById=id=>{for(const k of dayKeys(cur)){const e=(cur[k].ex||[]).find(x=>x&&x.id===id);if(e)return JSON.parse(JSON.stringify(routineEx(e)));}return null;};
+  const pre=_planPrevSnap('aplicar');
+  const dl=_beforePlanSwap();
+  const cyc=_closeCycleQuiet();
+  const hist=_libHistMap(),taken=new Set(),np={};
+  Object.keys(c.days).filter(k=>DAY_KEYS.includes(k)).forEach(k=>{const gd=c.days[k];
+    np[k]={label:String(gd.label||('Día '+k)).slice(0,80),focus:String(gd.focus||'').slice(0,200),did:null,ex:gd.ex.map(x=>{
+      if(x.keep){const e=keepById(x.keep);if(e&&!taken.has(e.id)){taken.add(e.id);return e;}return null;}
+      const L=LIB_BY_ID.get(x.lib);if(!L)return null;
+      const h=hist[x.lib],id=h&&!taken.has(h.key)?h.key:_uniqueExId(taken);taken.add(id);
+      const e=_libCopy(L,id);e.s=x.cardio?1:x.s;e.r=x.r;if(x.cardio)e.cardio=true;
+      if(x.pot)e.rc='heavy';
+      if(x.note)e.tip=((e.tip||'')+' '+x.note).trim().slice(0,300);
+      return e;}).filter(Boolean)};});
+  dayKeys(np).forEach(k=>{np[k].did=newDayId(np);});
+  S.currentPlan=np;S.planPrev=pre;
+  const wt=parseInt(c.weeklyTarget);if(wt>=1&&wt<=7)S.weeklyTarget=wt;
+  S.day=S.nextDay=liveDayKeys(np)[0]||dayKeys(np)[0];S.rotBack=null;S.pendingCoachProposals=[];
+  S.planMeta=_genPlanMeta(c,np);
+  if(o.answers)S.profile=_sanitizeProfile(o.answers);
+  if(o.places){S.places=_sanitizePlaces(o.places);try{_syncLibKit();}catch(e){}}
+  if(o.health)S.health=_sanitizeHealth(o.health);
+  S.onboarded=true;S.obDraft=null;
+  try{_editDay=_editDayOr(_editDay);}catch(e){}
+  saveState();
+  return{ok:true,deload:dl,cycle:cyc};
+}
+// «Deshacer» y «Volver a mi rutina anterior»: la de planPrev vuelve con las mismas guardas y la de ahora pasa a planPrev (se puede
+// rehacer). Lo que no se deshace: la descarga que terminó, el ciclo que se cerró y los «solo hoy» devueltos.
+function restorePlanPrev(){
+  const p=S.planPrev;if(!_isPlainObj(p)||!_isPlainObj(p.plan))return{ok:false,why:'nada'};
+  const bl=_applyGuard();if(bl)return bl;
+  const cur=_planPrevSnap('restaurar');
+  const dl=_beforePlanSwap();
+  const plan=_sanitizePlanKeys(JSON.parse(JSON.stringify(p.plan)));
+  S.currentPlan=plan;
+  const wt=parseInt(p.weeklyTarget);if(wt>=1&&wt<=7)S.weeklyTarget=wt;
+  S.nextDay=p.nextDay&&_dayLive(plan[p.nextDay])?p.nextDay:getNextDay(null);
+  S.day=p.day&&_isPlanDay(plan[p.day])?p.day:S.nextDay;
+  S.rotBack=p.rotBack&&_isPlanDay(plan[p.rotBack])?p.rotBack:null;
+  S.planMeta=p.meta?_sanitizePlanMeta(p.meta,plan):null;
+  S.profile=p.profile?_sanitizeProfile(p.profile):null;
+  S.places=p.places?_sanitizePlaces(p.places):null;
+  S.pendingCoachProposals=_sanitizeProposals(p.pendingCoachProposals||[]);
+  if(p.libPlace)S.libPlace=p.libPlace;if(p.libKit!==undefined)S.libKit=p.libKit;
+  S.planPrev=cur;
+  try{_editDay=_editDayOr(_editDay);}catch(e){}
+  saveState();
+  return{ok:true,deload:dl};
+}
+// Descanso automático con rutina generada (30-algoritmo.md §7.4, §G.4): por la carga de cada serie, con los descansos de tu rutina
+// (planMeta.rest). null sin rutina generada (y la app sigue con los de siempre).
+function _genRestSecs(ex){
+  const pm=S&&S.planMeta;if(!_isPlainObj(pm)||!_isPlainObj(pm.rest)||!ex||ex.cardio)return null;
+  let cat=['iso','comp','heavy','bw'].includes(ex.rc)?ex.rc:null;
+  if(!cat){
+    const L=exLib(ex),K=L&&LIB_K?LIB_K.BY.get(L.id):null;if(!K||K.lt==='c')return null;
+    const md=pm.modes||[],cauto=['inicio','prudente','mayor','mayor75'].some(x=>md.includes(x)),lvP=(_LVN[pm.level]!=null?_LVN[pm.level]:2)<=_LVN.P;
+    if(!K.c)cat='iso';
+    else if(['r','t','d'].includes(K.lt)||['banda','minibanda','trx'].includes(K.mat)||K.pat==='carry'||(K.lt==='bw'&&(K.u||cauto||lvP)))cat='bw';
+    else{const rr=repRange(ex);cat=rr&&rr.hi<=6?'heavy':'comp';}
+  }
+  const v=pm.rest[cat];return typeof v==='number'?{s:v,cat}:null;
+}
+const _GEN_REST_WHY={iso:'aislamiento',comp:'multiarticular',heavy:'series de 6 o menos repeticiones',bw:'peso corporal, bandas o TRX'};
+// Minutos estimados de un día con la fórmula del generador y lo de tu rutina (equilibrio, aproximación, si empiezas de cero)
+function _hoyEstMin(dk){
+  const d=getPlan()[dk];if(!_isPlanDay(d))return 0;
+  const pm=_isPlainObj(S.planMeta)?S.planMeta:null,did=d.did;
+  return _planDayMinutes(dk,{bal:pm?pm.balMin||0:0,apx:pm&&pm.apx&&pm.apx[did]!=null?pm.apx[did]:undefined,inicio:!!(pm&&(pm.modes||[]).includes('inicio'))});
+}
+// (E5, §G.6) Zona del mapa muscular por grupo. Con rutina generada, la suya: lo ≈ objetivo − 0,75 (mín. 2; 4 en los grandes) y hi =
+// el mayor entre el techo y lo que la propia rutina da al grupo contado como el mapa × 1,2 (los hombros, por la rutina: sin falsos
+// «por encima» por el trabajo de rebote). Sin ella, 8-16 como siempre.
+const _MM_BIG=['pecho','espalda','hombros','cuads','isquios','gluteos'];
+function _mmZoneOf(plan,wt,vol){
+  const z={};let st;try{st=mmPlanStats(plan,wt);}catch(e){return z;}
+  st.groups.forEach(g=>{
+    const ids=g.id==='hombros'?['hombro_lat','hombro_post']:[g.id],vs=ids.map(k=>vol&&vol[k]).filter(Boolean);if(!vs.length)return;
+    const obj=vs.reduce((a,v)=>a+(+v.obj||0),0)/vs.length,techo=Math.max(...vs.map(v=>+v.techo||0));
+    const lo=Math.max(_MM_BIG.includes(g.id)?4:2,Math.round(obj-0.75));
+    const hi=Math.max(Math.round(techo),Math.round(g.v*1.2),lo+2);
+    z[g.id]=[Math.min(lo,38),Math.min(hi,40)];
+  });
+  return z;
+}
+function mmZone(gid){const z=S&&_isPlainObj(S.planMeta)&&_isPlainObj(S.planMeta.zone)?S.planMeta.zone[gid]:null;return Array.isArray(z)?{lo:z[0],hi:z[1],own:true}:MM_ZONE;}
+function mmOwnZones(){return!!(S&&_isPlainObj(S.planMeta)&&_isPlainObj(S.planMeta.zone)&&Object.keys(S.planMeta.zone).length);}
 {const _v0=JSON.stringify([S.profile,S.places,S.health,S.planMeta,S.planPrev,S.obDraft,S.rotBack,S.bkHealth]);_sanitizeV21(S);
   if(JSON.stringify([S.profile,S.places,S.health,S.planMeta,S.planPrev,S.obDraft,S.rotBack,S.bkHealth])!==_v0)saveState();}
 // Ejercicio de la biblioteca de uno del plan (o null): su lib → el del plan original (PLAN_ANIM, salvo cardio: ese va por
@@ -14838,11 +15026,13 @@ function toggleKeepAwake(){
 // Lo que elijas para un ejercicio (tarjeta «⏱ Descanso entre series» o el modo descanso) se guarda en S.restOverrides.
 const REST_DEF={iso:60,comp:90,heavy:120};
 function restDefaultSecs(ex){
+  {const g=_genRestSecs(ex);if(g)return g.s;} // (E5) con rutina generada, los de tu rutina por la carga de cada serie
   if(!isCompoundEx(ex))return REST_DEF.iso;
   const rr=repRange(ex);
   return rr&&rr.hi<=8?REST_DEF.heavy:REST_DEF.comp;
 }
 function restDefaultWhy(ex){
+  {const g=_genRestSecs(ex);if(g)return`${_GEN_REST_WHY[g.cat]}: ${fmtClock(g.s)} en tu rutina`;}
   if(!isCompoundEx(ex))return`aislamiento: ${fmtClock(REST_DEF.iso)} por defecto`;
   const rr=repRange(ex);
   return rr&&rr.hi<=8?`multiarticular con 8 reps o menos: ${fmtClock(REST_DEF.heavy)} por defecto`:`multiarticular: ${fmtClock(REST_DEF.comp)} por defecto (${fmtClock(REST_DEF.heavy)} con 8 reps o menos)`;
@@ -16558,10 +16748,12 @@ function coach_daysSince(ts){
 
 function coach_cycleStart(){
   // Último informe o inicio del coach
-  if(S.mesocycles&&S.mesocycles.length>0){
-    return S.mesocycles[S.mesocycles.length-1].appliedAt||S.coachStart;
-  }
-  return S.coachStart||(S.sessions[0]?.ts)||Date.now();
+  let t;
+  if(S.mesocycles&&S.mesocycles.length>0)t=S.mesocycles[S.mesocycles.length-1].appliedAt||S.coachStart;
+  else t=S.coachStart||(S.sessions[0]?.ts)||Date.now();
+  // (E5, §G.5) con una rutina generada, el ciclo empieza como pronto con ella
+  const pt=_isPlainObj(S.planMeta)?+S.planMeta.ts:0;
+  return pt>0&&!(pt<=t)?pt:t;
 }
 
 // Ciclo actual. La semana mostrada nunca pasa de CYCLE_WEEKS: un ciclo que se alarga queda «vencido»
@@ -18457,24 +18649,25 @@ function _hoyCount(info){return info.str.length?'<span class="nw">'+plural(info.
 // descanso entre series + los minutos del cardio), redondeada a 5 min.
 const _okDur=s=>!!s&&s.durationMin!=null&&isFinite(+s.durationMin)&&+s.durationMin>=5&&+s.durationMin<=MAX_SESSION_MIN;
 function _cardioMin(ex){const m=String(ex&&ex.r!=null?ex.r:'').match(/(\d+(?:[.,]\d+)?)\s*min/i);return m?parseFloat(m[1].replace(',','.')):0;}
+// (E5, §G.12) La estimación del plan con la fórmula del generador (_hoyEstMin: lo que promete el resultado del cuestionario) y,
+// con sesiones de ese día en tu rutina, × durK = mediana de lo que duraron sus 6 últimas ÷ estimado, entre 0,8 y 1,4. Sin sesiones
+// de ese día pero sí de otros días de tu rutina, la misma corrección con ellas (cada una frente a la estimación de su día).
+const _DURK_MIN=0.8,_DURK_MAX=1.4;
+function _median(a){const v=a.slice().sort((x,y)=>x-y),n=v.length;return!n?NaN:n%2?v[(n-1)/2]:(v[n/2-1]+v[n/2])/2;}
 function hoyDuration(dk){
-  const L=Array.isArray(S.sessions)?S.sessions:[],avg=a=>Math.round(a.reduce((t,s)=>t+(+s.durationMin),0)/a.length);
+  const est=_hoyEstMin(dk);if(!(est>0))return null;
+  const L=Array.isArray(S.sessions)?S.sessions:[],cl=r=>Math.min(_DURK_MAX,Math.max(_DURK_MIN,r));
   const own=L.filter(s=>_okDur(s)&&sessOfDay(s,dk)).slice(-6); // (E1b) el mismo día por su id
-  if(own.length)return{min:avg(own),src:'day',n:own.length};
-  const all=L.filter(s=>_okDur(s)&&sessOfRoutine(s)).slice(-6); // (E2) solo las de tu rutina de ahora
-  if(all.length)return{min:avg(all),src:'all',n:all.length};
-  const info=hoyDayInfo(dk);if(!info)return null;
-  let sec=0;
-  info.str.forEach(e=>{const n=Math.max(0,Math.min(SET_MAX_N,parseInt(e.s)||0));if(!n)return;
-    // Por tiempo: lo que dura cada serie (al menos 40 s); por distancia, ~0.6 s por metro
-    const lt=exLT(e),per=lt==='t'?Math.max(40,_tgtSecs(e)||0):lt==='d'?Math.max(40,(_tgtMetres(e)||0)*0.6):40;
-    sec+=60+n*per+(n-1)*getRestSecs(e.id);});
-  info.car.forEach(e=>{sec+=(_cardioMin(e)||10)*60;});
-  return sec>0?{min:Math.max(5,Math.round(sec/300)*5),src:'plan',n:0}:null;
+  if(own.length){const k=cl(_median(own.map(s=>+s.durationMin))/est);return{min:Math.max(5,Math.round(est*k)),src:'day',n:own.length,est,k};}
+  const p=getPlan(),estOf={};
+  const all=L.filter(s=>_okDur(s)&&sessOfRoutine(s)).map(s=>{const d=dayKeys(p).find(x=>sessOfDay(s,x));if(!d)return null;
+    if(!(d in estOf))estOf[d]=_hoyEstMin(d);return estOf[d]>0?(+s.durationMin)/estOf[d]:null;}).filter(r=>r!=null).slice(-6); // (E2) solo las de tu rutina
+  if(all.length){const k=cl(_median(all));return{min:Math.max(5,Math.round(est*k)),src:'all',n:all.length,est,k};}
+  return{min:Math.max(5,Math.round(est)),src:'plan',n:0,est,k:1};
 }
 function _hoyDurHtml(d,dk){
   if(!d)return'';
-  const why=d.src==='day'?(d.n===1?'Lo que duró tu última sesión de este día':`Media de tus ${d.n} últimas sesiones de este día`):d.src==='all'?'Media de tus últimas sesiones':'Estimado con las series, los descansos y el cardio del plan';
+  const why=d.src==='day'?(d.n===1?'Estimado con tu plan y lo que duró tu última sesión de este día':`Estimado con tu plan y tus ${d.n} últimas sesiones de este día`):d.src==='all'?'Estimado con tu plan y tus últimas sesiones':'Estimado con las series, los descansos y el cardio del plan';
   return`<b title="${esc(why)}">~${d.min} min</b>${d.src==='plan'?' estimado':''}`;
 }
 // Vista previa: la elegida a mano (si es de ese día), si no `def` (en curso: el siguiente ejercicio), si no el primer
@@ -20083,8 +20276,8 @@ const MM_GROUPS=[
 const _MM_MUS2G={adductors:'cuads',forearms:'biceps'};MM_GROUPS.forEach(g=>g.mus.forEach(m=>{_MM_MUS2G[m]=g.id;}));
 function mmRangeKey(){return MM_RANGES.some(r=>r[0]===S.mmRange)?S.mmRange:'4w';}
 function mmFmt(v){return !(v>=.05)?'0':String(Math.round(v*10)/10);}
-function mmCls(v){return !(v>=.05)?'z0':v<MM_ZONE.lo?'lo':v<=MM_ZONE.hi?'ok':'hi';}
-function mmZoneTxt(v){return !(v>=.05)?'Sin trabajo':v<MM_ZONE.lo?'Por debajo de la zona':v<=MM_ZONE.hi?'En la zona productiva':'Por encima de la zona';}
+function mmCls(v,gid){const Z=mmZone(gid);return !(v>=.05)?'z0':v<Z.lo?'lo':v<=Z.hi?'ok':'hi';}
+function mmZoneTxt(v,gid){const Z=mmZone(gid),o=Z.own;return !(v>=.05)?'Sin trabajo':v<Z.lo?(o?'Por debajo de su zona':'Por debajo de la zona'):v<=Z.hi?(o?'En su zona':'En la zona productiva'):(o?'Por encima de su zona':'Por encima de la zona');}
 function _mmList(a){return a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' y '+a[a.length-1];}
 // Músculos de un ejercicio {músculo: peso 0-1} sin sufijo de lado (los unilaterales se hacen con los dos brazos/piernas):
 // los de su ejercicio de la biblioteca (mus); si no es de la biblioteca, los de su animación. null si es cardio o no hay.
@@ -20191,9 +20384,9 @@ function mmStats(k){
 }
 // Volumen PLANIFICADO de la rutina por semana: series de cada día (las de verdad, sin la descarga) × veces por semana
 // que toca ese día (objetivo semanal / nº de días de la rutina)
-function mmPlanStats(){
-  const plan=routinePlan(),days=liveDayKeys(plan); // (E1b) los días vacíos no rotan: no reparten las sesiones de la semana
-  const per=days.length?getWeeklyTarget()/days.length:0,items=[];
+function mmPlanStats(plan,wt){ // (E5) plan y objetivo semanal de una rutina candidata; por defecto, los tuyos
+  plan=plan||routinePlan();const days=liveDayKeys(plan); // (E1b) los días vacíos no rotan: no reparten las sesiones de la semana
+  const per=days.length?(wt||getWeeklyTarget())/days.length:0,items=[];
   days.forEach(dk=>plan[dk].ex.forEach(ex=>{
     if(!ex||ex.cardio)return;
     const mus=mmExMuscles(ex);if(!mus)return;
@@ -20246,22 +20439,23 @@ function mmInsight(st,plan){
     return`Sin trabajo directo${plan?' en tu rutina':''}: ${_mmList((plan?off:zero).map(g=>g.n.toLowerCase()))}.`;
   }
   const mx=Math.max(...st.groups.map(g=>g.v));
-  if(mx<MM_ZONE.lo)return`Ningún grupo llega aún a ${MM_ZONE.lo} series/semana. Empezando es normal: si te recuperas bien, suma series poco a poco.`;
-  const big=st.groups.filter(g=>g.v>MM_ZONE.hi*1.25);
-  if(big.length)return`${_mmList(big.map(g=>g.n))} ${big.length>1||big[0].pl?'pasan':'pasa'} de ${MM_ZONE.hi*1.25} series/semana: si notas fatiga, ahí hay margen para recortar.`;
-  const inZ=st.groups.filter(g=>g.v>=MM_ZONE.lo&&g.v<=MM_ZONE.hi).length;
-  return`Buen reparto: ${inZ} de ${st.groups.length} grupos en la zona de ${MM_ZONE.lo}–${MM_ZONE.hi} series/semana.`;
+  const own=mmOwnZones(); // (E5) con rutina generada, la zona de cada grupo
+  if(own?st.groups.every(g=>g.v<mmZone(g.id).lo):mx<MM_ZONE.lo)return own?'Ningún grupo llega aún a su zona. Empezando es normal: si te recuperas bien, suma series poco a poco.':`Ningún grupo llega aún a ${MM_ZONE.lo} series/semana. Empezando es normal: si te recuperas bien, suma series poco a poco.`;
+  const big=st.groups.filter(g=>g.v>mmZone(g.id).hi*1.25);
+  if(big.length)return own?`${_mmList(big.map(g=>g.n))} ${big.length>1||big[0].pl?'pasan':'pasa'} bastante de su zona: si notas fatiga, ahí hay margen para recortar.`:`${_mmList(big.map(g=>g.n))} ${big.length>1||big[0].pl?'pasan':'pasa'} de ${MM_ZONE.hi*1.25} series/semana: si notas fatiga, ahí hay margen para recortar.`;
+  const inZ=st.groups.filter(g=>{const Z=mmZone(g.id);return g.v>=Z.lo&&g.v<=Z.hi;}).length;
+  return own?`Buen reparto: ${inZ} de ${st.groups.length} grupos en su zona.`:`Buen reparto: ${inZ} de ${st.groups.length} grupos en la zona de ${MM_ZONE.lo}–${MM_ZONE.hi} series/semana.`;
 }
 // Barras por grupo con la franja de la zona productiva. tap: filas de 44 px que abren la hoja del grupo
 function mmBarsHtml(st,o){
   o=o||{};
-  const mx=Math.max(20,...st.groups.map(g=>g.v))*1.04;
-  const zl=(MM_ZONE.lo/mx*100).toFixed(1),zw=((MM_ZONE.hi-MM_ZONE.lo)/mx*100).toFixed(1);
+  const mx=Math.max(20,...st.groups.map(g=>Math.max(g.v,mmZone(g.id).hi)))*1.04;
   return st.groups.map(g=>{
-    const cls=mmCls(g.v),val=mmFmt(g.v),w=Math.min(100,g.v/mx*100).toFixed(1);
+    const Z=mmZone(g.id),zl=(Z.lo/mx*100).toFixed(1),zw=((Z.hi-Z.lo)/mx*100).toFixed(1); // (E5) la franja de cada grupo
+    const cls=mmCls(g.v,g.id),val=mmFmt(g.v),w=Math.min(100,g.v/mx*100).toFixed(1);
     const inner=`<span class="mm-n">${g.n}</span><span class="mm-track"><i class="mm-zone" style="left:${zl}%;width:${zw}%"></i><i class="mm-fill ${cls}" style="width:${w}%"></i></span><span class="mm-v ${cls}">${val}</span>`;
     return o.tap
-      ?`<button class="mm-row" data-g="${g.id}" onclick="openMuscleSheet('${g.id}','${o.src||'prog'}')" aria-label="${g.n}: ${val} series por semana, ${mmZoneTxt(g.v).toLowerCase()}. Ver ejercicios">${inner}<span class="mm-chev" aria-hidden="true">›</span></button>`
+      ?`<button class="mm-row" data-g="${g.id}" onclick="openMuscleSheet('${g.id}','${o.src||'prog'}')" aria-label="${g.n}: ${val} series por semana, ${mmZoneTxt(g.v,g.id).toLowerCase()}. Ver ejercicios">${inner}<span class="mm-chev" aria-hidden="true">›</span></button>`
       :`<div class="mm-row sm" data-g="${g.id}">${inner}</div>`;
   }).join('');
 }
@@ -20269,7 +20463,7 @@ function mmAria(st,src){
   const on=st.groups.filter(g=>g.v>=.05).sort((a,b)=>b.v-a.v);
   const head=src==='plan'?'Mapa muscular de tu rutina planificada, de frente y de espalda':'Mapa muscular de frente y de espalda';
   if(!on.length)return`${head}: sin series todavía.`;
-  const low=st.groups.filter(g=>g.v<MM_ZONE.lo).sort((a,b)=>a.v-b.v).slice(0,3);
+  const low=st.groups.filter(g=>g.v<mmZone(g.id).lo).sort((a,b)=>a.v-b.v).slice(0,3);
   return`${head}. Más series por semana: ${on.slice(0,3).map(g=>`${g.n} ${mmFmt(g.v)}`).join(', ')}.${low.length?` Menos: ${low.map(g=>`${g.n} ${mmFmt(g.v)}`).join(', ')}.`:''} Toca un músculo para ver sus ejercicios.`;
 }
 // Maniquí: se pinta un hueco data-mm y mmMountAll lo monta (o reutiliza el canvas anterior con setWeights)
@@ -20314,7 +20508,7 @@ function mmProgBodyHtml(st){
   return`${ins?`<div class="mm-ins" id="mm-ins-prog">💡 ${_nwUnits(esc(ins))}</div>`:''}
     <div class="mm-sub">Series efectivas por semana · ${_nwUnits(esc(st.R.lbl))}</div>
     <div class="mm-bars">${mmBarsHtml(st,{tap:true,src:'prog'})}</div>
-    <div class="mm-foot"><i aria-hidden="true"></i><span>Zona productiva: <span class="nw">${MM_ZONE.lo}–${MM_ZONE.hi} series</span> por semana y grupo. Es una guía orientativa, no una regla. Toca un grupo para ver sus ejercicios.</span></div>`;
+    <div class="mm-foot"><i aria-hidden="true"></i><span>${mmOwnZones()?'La franja de cada grupo es su zona, según tu rutina y tu objetivo. Es una guía orientativa, no una regla.':`Zona productiva: <span class="nw">${MM_ZONE.lo}–${MM_ZONE.hi} series</span> por semana y grupo. Es una guía orientativa, no una regla.`} Toca un grupo para ver sus ejercicios.</span></div>`;
 }
 function mmProgCardHtml(){
   const k=mmRangeKey(),st=mmStats(k);
@@ -20343,13 +20537,13 @@ function mmCoachCardHtml(){
   const k=mmRangeKey(),st=mmStats(k);
   if(!st.sets)return'';
   const ins=mmInsight(st,mmPlanStats());
-  const low=st.groups.filter(g=>g.v<MM_ZONE.lo).sort((a,b)=>a.v-b.v).slice(0,3);
+  const low=st.groups.filter(g=>g.v<mmZone(g.id).lo).sort((a,b)=>a.v-b.v).slice(0,3);
   return`<div class="sh">Tus músculos · ${k==='7d'?'últimos 7 días':k==='cycle'?'este ciclo':'4 semanas'}</div>
   <div class="card mm-card mm-mini" id="mm-coach">
     ${mmFigHtml('coach',st,'coach',190)}
     ${ins?`<div class="mm-ins">💡 ${_nwUnits(esc(ins))}</div>`:''}
-    ${low.length?`<div class="mm-mini-l">Por debajo de <span class="nw">${MM_ZONE.lo} series/semana</span></div>
-    <div class="mm-chips">${low.map(g=>`<button class="mm-chip ${mmCls(g.v)}" onclick="openMuscleSheet('${g.id}','coach')" aria-label="${g.n}: ${mmFmt(g.v)} series por semana. Ver ejercicios">${g.n} <b>${mmFmt(g.v)}</b></button>`).join('')}</div>`:''}
+    ${low.length?`<div class="mm-mini-l">${mmOwnZones()?'Por debajo de su zona':`Por debajo de <span class="nw">${MM_ZONE.lo} series/semana</span>`}</div>
+    <div class="mm-chips">${low.map(g=>`<button class="mm-chip ${mmCls(g.v,g.id)}" onclick="openMuscleSheet('${g.id}','coach')" aria-label="${g.n}: ${mmFmt(g.v)} series por semana. Ver ejercicios">${g.n} <b>${mmFmt(g.v)}</b></button>`).join('')}</div>`:''}
     <button class="mm-link" onclick="goMuscleMap()">Ver el mapa completo en Progreso ›</button>
   </div>`;
 }
@@ -20402,7 +20596,7 @@ function renderMuscleSheet(){
   const g=st.groups.find(x=>x.id===_mmSheet.g);
   if(!g){_mmSheet=null;root.innerHTML='';return;}
   const prevSheet=root.querySelector('.hist-sheet'),keepScroll=prevSheet?prevSheet.scrollTop:0;
-  const cls=mmCls(g.v),mx=Math.max(20,g.v)*1.04,pct=v=>(Math.min(100,v/mx*100)).toFixed(1);
+  const Z=mmZone(g.id),cls=mmCls(g.v,g.id),mx=Math.max(20,g.v,Z.hi)*1.04,pct=v=>(Math.min(100,v/mx*100)).toFixed(1);
   const pg=plan?null:mmPlanStats().groups.find(x=>x.id===g.id);
   const dayLbl=dk=>{const d=getPlan()[dk];return d&&d.label?d.label:'';};
   const rows=g.ex.map(e=>{
@@ -20413,7 +20607,7 @@ function renderMuscleSheet(){
   const where=plan?'en tu rutina':'en este periodo';
   const act=plan
     ?`<button class="btn bs" onclick="mmAddFor('${g.id}')">＋ Añadir ejercicio de ${g.n.toLowerCase()} al ${esc(dayLbl(_editDay)||'día').replace(/ (?=\S+$)/,' ')}</button>`
-    :`<button class="btn bs" onclick="closeMuscleSheet();openRoutineEditor()">${g.v<MM_ZONE.lo?'Añadir volumen en tu rutina':'Ver tu rutina'}</button>`;
+    :`<button class="btn bs" onclick="closeMuscleSheet();openRoutineEditor()">${g.v<Z.lo?'Añadir volumen en tu rutina':'Ver tu rutina'}</button>`;
   root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeMuscleSheet()"><div class="hist-sheet" id="mm-sheet" role="dialog" aria-label="${g.n}: ejercicios">
     <div class="hist-sheet-head">
       <div class="hist-sheet-hdl"></div>
@@ -20422,13 +20616,13 @@ function renderMuscleSheet(){
       <button class="hist-sheet-close" onclick="closeMuscleSheet()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
-      <div class="mm-sh-top"><div class="mm-sh-v ${cls}">${mmFmt(g.v)}<small> series/semana</small></div><div class="mm-sh-z ${cls}">${mmZoneTxt(g.v)}</div></div>
-      <div class="mm-track"><i class="mm-zone" style="left:${pct(MM_ZONE.lo)}%;width:${(pct(MM_ZONE.hi)-pct(MM_ZONE.lo)).toFixed(1)}%"></i><i class="mm-fill ${cls}" style="width:${pct(g.v)}%"></i></div>
-      <div class="mm-scale" aria-hidden="true"><span style="left:0;transform:none">0</span><span style="left:${pct(MM_ZONE.lo)}%">${MM_ZONE.lo}</span><span style="left:${pct(MM_ZONE.hi)}%">${MM_ZONE.hi}</span></div>
+      <div class="mm-sh-top"><div class="mm-sh-v ${cls}">${mmFmt(g.v)}<small> series/semana</small></div><div class="mm-sh-z ${cls}">${mmZoneTxt(g.v,g.id)}</div></div>
+      <div class="mm-track"><i class="mm-zone" style="left:${pct(Z.lo)}%;width:${(pct(Z.hi)-pct(Z.lo)).toFixed(1)}%"></i><i class="mm-fill ${cls}" style="width:${pct(g.v)}%"></i></div>
+      <div class="mm-scale" aria-hidden="true"><span style="left:0;transform:none">0</span><span style="left:${pct(Z.lo)}%">${Z.lo}</span><span style="left:${pct(Z.hi)}%">${Z.hi}</span></div>
       ${pg?`<div class="mm-sh-plan">Tu rutina tiene planificadas <b>${mmFmt(pg.v)}</b>${NB}series/semana de ${g.n.toLowerCase()}.</div>`:''}
       <div class="hist-list-h" style="margin-top:16px">Ejercicios que lo trabajan ${where}</div>
       ${rows||`<div class="mm-empty" style="padding-top:4px">Ningún ejercicio ${where} trabaja ${g.n.toLowerCase()} directamente.</div>`}
-      <div class="mm-note">Cada serie cuenta según cuánto trabaja este grupo el ejercicio: en el remo, los hombros cuentan un 50 %. La zona de <span class="nw">${MM_ZONE.lo}-${MM_ZONE.hi} series</span> por semana es una guía orientativa: empezando, menos también funciona.</div>
+      <div class="mm-note">Cada serie cuenta según cuánto trabaja este grupo el ejercicio: en el remo, los hombros cuentan un 50 %. ${Z.own?`Su zona, <span class="nw">${Z.lo}-${Z.hi} series</span> por semana, sale de tu rutina y tu objetivo: es una guía orientativa.`:`La zona de <span class="nw">${MM_ZONE.lo}-${MM_ZONE.hi} series</span> por semana es una guía orientativa: empezando, menos también funciona.`}</div>
       ${act}
     </div>
   </div></div>`;
@@ -22959,7 +23153,8 @@ function resetPlanToDefault(){
     okText:'Volver a la de ejemplo',cancelText:'Cancelar',danger:true,
     onOk:()=>{
       if(_dayEditBlocked())return;
-      _replacePlan(JSON.parse(JSON.stringify(PLAN)));
+      const pre=_planPrevSnap('ejemplo');_closeCycleQuiet(); // (E5) se puede volver a la de antes; el ciclo se cierra en silencio
+      _replacePlan(JSON.parse(JSON.stringify(PLAN)));S.planPrev=pre;
       saveState();
       toast('Tu rutina es ahora la de ejemplo');
       render(); // repinta la app y el editor, que sigue abierto
