@@ -738,6 +738,7 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .busy-acts{display:flex;gap:8px}
 .busy-acts .btn{flex:1;min-height:48px;padding:12px 8px;font-size:14px}
 .busy-more{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:8px;font-size:13px;font-weight:600;color:var(--text2)}
+.busy-none{margin-top:0;font-weight:500;color:var(--text3)} /* (E3b) «No hay esta máquina en mi gimnasio» */
 .busy-empty{font-size:13px;color:var(--text2);line-height:1.55;padding:10px 2px}
 /* Propuestas del coach */
 .proposal-card{background:var(--bg2);border:1px solid var(--border2);border-radius:var(--r);margin:0 14px 10px;overflow:hidden}
@@ -11117,6 +11118,36 @@ function ensurePlaces(){
   _syncLibKit();
   return S.places;
 }
+// (E3b) Nombres para decir qué falta: familias de máquina, tipos de cardio y accesorios
+const MACH_FAM_LBL={prensa:'prensa de piernas',extension:'máquina de extensión de cuádriceps',curlfem:'máquina de curl femoral',abdaduct:'máquina de abductores',
+  gemelos:'máquina de gemelos',gluteo:'máquina de glúteo',lumbares:'banco de lumbares',jalonremo:'máquina de jalón y remo',pecho:'máquina de pecho',
+  contractora:'máquina de aperturas',hombro:'máquina de hombro',brazos:'máquina de brazos',abdominales:'máquina de abdominales'};
+const CARD_KIND_LBL={cinta:'cinta de correr',bici:'bici estática',reclinada:'bici reclinada',spinning:'bici de spinning',bici_aire:'bici de aire',eliptica:'elíptica',
+  remo:'máquina de remo',escaladora:'escaladora',esqui:'máquina de esquí'};
+const ACC_LBL={mesa:'una mesa firme',puerta:'una puerta que cierre bien',silla:'una silla',pared:'una pared',escalon:'un escalón',banco:'un banco',banco_inc:'un banco inclinable',
+  banco_dec:'un banco declinable',scott:'un banco Scott',ghd:'un GHD',hiper:'un banco de hiperextensiones',rack:'un rack',landmine:'un landmine',hexbar:'una barra hexagonal',
+  anclaje:'un anclaje de puerta',paralelas:'paralelas',agarre_neutro:'un agarre neutro',kb2:'dos kettlebells',anillas:'anillas',poleas2:'dos poleas',trineo:'un trineo',
+  llanta:'una llanta',cuerdas:'cuerdas de batida',saco:'un saco de boxeo',bici_ext:'una bici',piscina:'una piscina',banda:'una banda elástica'};
+// Lo primero que falta en el sitio P para hacer L (para el «¿por qué no?» del selector)
+function placeWhyNot(L,P,kind){
+  if(!L||!P)return'';
+  if(kind==='g'&&L.pl==='c')return'Solo en casa';
+  const mats=new Set(P.mats);mats.add('corporal');const T=LIB_K&&LIB_K.TAGS;
+  if(!mats.has(L.mat)&&!((T&&T.also[L.id])||[]).some(m=>mats.has(m)))return'Necesita '+_matLow(L.mat);
+  if(L.mat==='maquina'&&P.mach!=='all'){const f=T&&T.mfam[L.id];if(f&&!P.mach.includes(f))return'No hay '+(MACH_FAM_LBL[f]||'esa máquina');}
+  if(L.mat==='cardio'&&P.card!=='all'){const c=T&&T.ckind[L.id];if(c&&!P.card.includes(c))return'No hay '+(CARD_KIND_LBL[c]||'esa máquina');}
+  const r=((T&&T.req[L.id])||[]).find(x=>x==='banda'?!mats.has('banda'):!(P.acc||[]).includes(x));
+  return r?'Necesita '+(ACC_LBL[r]||r):'';
+}
+// «No hay esta máquina en mi gimnasio» / «No tengo este material»: quita del sitio P la familia de máquina, el tipo de cardio o
+// el material de L. Devuelve el nombre de lo quitado (o null si L no necesita nada que quitar)
+function placeDrop(P,L){
+  if(!P||!L||L.mat==='corporal')return null;const T=LIB_K&&LIB_K.TAGS;
+  if(L.mat==='maquina'){const f=T&&T.mfam[L.id];if(!f)return null;P.mach=(P.mach==='all'?MACH_FAMS.slice():P.mach).filter(x=>x!==f);return MACH_FAM_LBL[f]||'esa máquina';}
+  if(L.mat==='cardio'){const c=T&&T.ckind[L.id];if(!c)return null;P.card=(P.card==='all'?CARD_KINDS.slice():P.card).filter(x=>x!==c);return CARD_KIND_LBL[c]||'esa máquina';}
+  if(!P.mats.includes(L.mat))return null;
+  P.mats=P.mats.filter(m=>m!==L.mat);return _matLow(L.mat);
+}
 // S.libKit (el material de casa del selector) es siempre el de places.c: una sola fuente de verdad
 function _syncLibKit(){
   const c=_isPlainObj(S.places)&&S.places.c;if(!c)return;
@@ -20624,14 +20655,15 @@ function _libHistKey(libId){
 // no es una o si va en la misma estación, que está ocupada); después, de más a menos parecida. Fuera las poco parecidas
 // (ni su patrón ni un 35 %). Cardio de máquina en el gimnasio: otra máquina de cardio. lm: el tuyo va en kg y este no
 // (banda, peso corporal…): va detrás de los que llevan carga aunque trabaje los mismos músculos.
-function busyAlternatives(ex,n){
+// (E3b) dk: el día del ejercicio (su sitio y su material, canDoHere); sin tus sitios, como siempre
+function busyAlternatives(ex,n,dk){
   if(!ex)return[];
   // Sin biblioteca (personalizado): el ejercicio de la animación de su grupo hace de referencia, como siempre
   const orig=routineEx(ex),own=exLib(orig),oLib=own?own.id:(exAnimKey(orig)||null),L=oLib?LIB_BY_ID.get(oLib)||null:null;
   const v=_libVec(oLib),p=L?L.pat:null,st=_stationOf(orig.eq||(L&&L.eq)||'',own),grp=orig.muscle||(L&&L.muscle)||null;
-  const inPlan=_planLibIds(),hm=_libHistMap(),cur=ex!==orig?ex.lib:null,place=routinePlace(),fam=_tgtFam(exLT(orig)),alt=libAlts(own).map(a=>a[0]);
+  const inPlan=_planLibIds(),hm=_libHistMap(),cur=ex!==orig?ex.lib:null,place=placeOfDay(dk!=null?dk:S.day)||routinePlace(),fam=_tgtFam(exLT(orig)),alt=libAlts(own).map(a=>a[0]);
   const cm=!!orig.cardio&&!!own&&own.mat==='cardio'&&place==='g',kgO=exLT(orig)==='w';
-  return EXERCISE_DB.filter(l=>l.id!==oLib&&l.id!==cur&&!!l.cardio===!!orig.cardio&&!inPlan.has(l.id)&&plOk(l,place)&&(!cm||l.mat==='cardio'))
+  return EXERCISE_DB.filter(l=>l.id!==oLib&&l.id!==cur&&!!l.cardio===!!orig.cardio&&!inPlan.has(l.id)&&canDoHere(l,dk!=null?dk:S.day)&&(!cm||l.mat==='cardio'))
     .map(l=>{
       const c=_cosSim(v,_libVec(l.id)),q=l.pat||null,same=!!p&&q===p,near=!!p&&!!q&&(PAT_NEAR[p]||[]).includes(q);
       const sameSt=!!st&&_stationOf(l.eq,l)===st,ai=sameSt?-1:alt.indexOf(l.id),lm=kgO&&l.lt!=='w';
@@ -20790,7 +20822,7 @@ function openBusy(exId){
   if(_slotMarks(ex)){toast(`Ya llevas series de ${ex.n}: se quedan con él`);return;}
   if(RT.cardioRunning(ex.id)){toast('Para primero el cardio en marcha');return;}
   const op=_busy&&_busy.opener||document.activeElement;closeBusy(1);
-  const alts=busyAlternatives(ex,3);
+  const alts=busyAlternatives(ex,3,dk);
   _busy={dk,exId,alts,sel:alts.length?alts[0].lib.id:null,opener:op};
   renderBusy();
   // el foco entra en la hoja: en la alternativa elegida (o en ✕ si no hay ninguna); al cerrarla vuelve a quien la abrió
@@ -20849,6 +20881,7 @@ function renderBusy(){
       :`<div class="busy-empty">No encuentro alternativas parecidas a ${esc(orig.n)} fuera de tu rutina. Busca otra en la biblioteca.</div>`}
       ${isSub?`<button type="button" class="btn bs" style="margin-top:10px;min-height:48px" data-ex="${esc(ex.id)}" onclick="busyRevertEx(this.dataset.ex)">↩ Volver a ${esc(orig.n)}</button>`:''}
       <button type="button" class="busy-more" onclick="busyOpenLibrary()">Ver toda la biblioteca ›</button>
+      ${_busyNoneHtml(orig)}
     </div></div></div>`;
   if(typeof GymAnim!=='undefined'){try{GymAnim.mountAll(root);}catch(e){}}
   if(sel&&!GymAnim.has(sel.lib.id))_busyPv(document.getElementById('busy-pv'),sel.lib);
@@ -20901,6 +20934,31 @@ function busyRoutine(libId){
   closeBusy();_libTouch(lib.id);
   _routineSwapTo(b.dk,slot,lib,{keepToday:false,after:nx=>{S.open=nx.id;}});
 }
+// (E3b) «No hay esta máquina en mi gimnasio» (o «No tengo este material» en casa): una fila al final de la hoja si el
+// ejercicio necesita algo que se pueda quitar de tu sitio
+function _busyNoneHtml(orig){
+  const L=orig&&exLib(orig);if(!L||L.mat==='corporal'||!_busy)return'';
+  const k=placeOfDay(_busy.dk)||routinePlace(),P=_isPlainObj(S.places)?S.places[k]:placeFromPreset('grande');
+  if(!placeDrop(P?JSON.parse(JSON.stringify(P)):null,L))return'';
+  const t=k==='c'?'No tengo este material en casa':L.mat==='maquina'||L.mat==='cardio'||L.mat==='smith'||L.mat==='polea'?'No hay esta máquina en mi gimnasio':'No hay este material en mi gimnasio';
+  return`<button type="button" class="busy-more busy-none" onclick="busyNotHere()">${t}</button>`;
+}
+// Apunta que tu sitio no tiene esa máquina (su familia) o ese material, con «Deshacer», y vuelve a enseñar las alternativas
+// (que ya no lo usan) para cambiarlo en tu rutina. Sin tus sitios, los crea con un gimnasio grande (42 R24, 43 I-1): así
+// solo falta lo que dices, no se da por hecho nada más.
+function busyNotHere(){
+  if(!_busy)return;const exId=_busy.exId,dk=_busy.dk,slot=_busySlot(),orig=routineEx(slot),L=orig&&exLib(orig);if(!L)return;
+  const prev=_isPlainObj(S.places)?JSON.parse(JSON.stringify(S.places)):null,prevKit=Array.isArray(S.libKit)?S.libKit.slice():S.libKit;
+  ensurePlaces();
+  const k=placeOfDay(dk)||S.places.main;if(!S.places[k])S.places[k]=placeFromPreset(k==='c'?'nada':'grande');
+  const what=placeDrop(S.places[k],L);
+  if(!what){S.places=prev;S.libKit=prevKit;toast('Ese ejercicio no necesita material');return;}
+  _syncLibKit();saveState();
+  openBusy(exId); // las alternativas, ya sin eso
+  const sitio=k==='c'?'tu casa':'tu gimnasio';
+  showUndoToast(prev?`Apuntado: ${sitio} no tiene ${what}`:`He apuntado que ${sitio} no tiene ${what}. Revisa tu material en Ajustes.`,()=>{
+    S.places=prev;S.libKit=prevKit;saveState();if(_busy&&_busy.exId===exId)openBusy(exId);else render();toast('Deshecho');});
+}
 function busyRevertEx(exId){
   const s=_subSlot(exId);if(!s){render();return;}
   if(_slotMarks(s.ex)){toast(`Ya llevas series de ${s.ex.n}: se quedan con él`);return;}
@@ -20941,8 +20999,8 @@ function showExercisePicker({title,muscle,sub,onPick,currentLib,mode,dayKey,busy
   const L=st.currentLib?LIB_BY_ID.get(st.currentLib):null,zone=z=>MUSCLE_GROUPS.some(m=>m.id===z)?z:null;
   if(mode==='busy'&&st.busy){
     const d=getPlan()[st.busy.dk],sl=d&&Array.isArray(d.ex)?d.ex.find(e=>e&&e.id===st.busy.exId):null,o=routineEx(sl);
-    const seen=new Set(Array.isArray(st.busy.seen)?st.busy.seen:[]),alts=o?busyAlternatives(o,8).filter(a=>!seen.has(a.lib.id)):[];
-    Object.assign(st,{place:routinePlace(),cardio:!!(o&&o.cardio),excl:st.currentLib,pct:{},station:L?_stationOf(L.eq,L):'',
+    const seen=new Set(Array.isArray(st.busy.seen)?st.busy.seen:[]),alts=o?busyAlternatives(o,8,st.busy.dk).filter(a=>!seen.has(a.lib.id)):[];
+    Object.assign(st,{place:placeOfDay(st.busy.dk)||routinePlace(),cardio:!!(o&&o.cardio),excl:st.currentLib,pct:{},station:L?_stationOf(L.eq,L):'',
       pin:[...alts.filter(a=>!a.lm),...alts.filter(a=>a.lm)].slice(0,5).sort((a,b)=>b.pct-a.pct).map(a=>a.lib.id)});
     alts.forEach(a=>{st.pct[a.lib.id]=a.pct;});
     st.filterMuscle=L?_grp(L):o&&o.cardio?'cardio':zone(muscle)||'all';
@@ -21084,10 +21142,14 @@ function _libRank(Q,pool,mine){
 }
 // Lugar: ¿se hace en ese sitio? ¿Y con tu material de casa? (sin decirlo aún, vale todo lo de casa) Y si no, por qué
 function libAtPlace(e,place){return plOk(e,place);}
-function libDoable(e,place,kit){const m=_mat(e);return libAtPlace(e,place)&&(place!=='c'||!Array.isArray(kit)||m==='corporal'||kit.includes(m));}
-function libWhyNot(e,place,kit){
-  if(libDoable(e,place,kit))return'';
+// (E3b) Con tu sitio guardado (places), su material: en el gimnasio deja de valer todo. Sin él, como siempre (en casa, tu kit)
+function libDoable(e,place,kit,places){
+  const k=place==='c'?'c':'g',P=_isPlainObj(places)?places[k]:null;if(P)return placeCan(e,P,k);
+  const m=_mat(e);return libAtPlace(e,place)&&(place!=='c'||!Array.isArray(kit)||m==='corporal'||kit.includes(m));}
+function libWhyNot(e,place,kit,places){
+  if(libDoable(e,place,kit,places))return'';
   if(!libAtPlace(e,place))return place==='c'?'Solo en gimnasio':'Solo en casa';
+  {const k=place==='c'?'c':'g',P=_isPlainObj(places)?places[k]:null;if(P)return placeWhyNot(e,P,k)||'No se puede hacer aquí';} // (E3b)
   return'Necesita '+_matLow(_mat(e));
 }
 // Contexto del selector (al abrirlo y al cambiar favoritos o tu material): en qué días de tu rutina está cada uno, tu
@@ -21095,7 +21157,7 @@ function libWhyNot(e,place,kit){
 function _libCtx(){
   const inPlan=_libInPlan(),hist=_libHistMap();
   return{inPlan,hist,mine:new Set([...Object.keys(inPlan),...Object.keys(hist)]),fav:(S.libFav||[]).slice(),rec:(S.libRecent||[]).slice(),
-    kit:Array.isArray(S.libKit)?S.libKit.slice():null,place:S.libPlace==='c'?'c':'g'};
+    kit:Array.isArray(S.libKit)?S.libKit.slice():null,place:S.libPlace==='c'?'c':'g',places:_isPlainObj(S.places)?JSON.parse(JSON.stringify(S.places)):null}; // (E3b) tus sitios
 }
 // Lo último que eliges (añadir, cambiar, «Solo hoy») va primero en «Recientes»
 function _libTouch(id){
@@ -21121,10 +21183,11 @@ function libQuery(st){
   const zone=st.filterMuscle||null,sd=zone&&zone!=='all'&&SUB_BY_ID[st.filterSub]&&SUB_BY_ID[st.filterSub].z===zone?SUB_BY_ID[st.filterSub]:null;
   const mat=st.mat||'all',Q=_libQ(st.search),cardio=st.cardio==null?null:!!st.cardio,excl=st.excl||null,mode=st.mode||'pick';
   const cur=mode==='swap'&&st.currentLib||null,pin=mode==='busy'&&Array.isArray(st.pin)?st.pin:[],dk=mode==='add'&&st.dayKey||null;
-  const key=[Q.qn,zone,sd&&sd.id,mat,place,Array.isArray(kit)?kit.join(','):'-',cardio,excl,cur,pin.join(','),mode,dk].join('|');
+  const pls=_isPlainObj(ctx.places)?ctx.places:null,psig=pls&&pls[place]?JSON.stringify(pls[place]):'-'; // (E3b) tu sitio, si lo has dicho
+  const key=[Q.qn,zone,sd&&sd.id,mat,place,Array.isArray(kit)?kit.join(','):'-',psig,cardio,excl,cur,pin.join(','),mode,dk].join('|');
   const hit=_lqMemo.m.get(key);if(hit)return hit;
   const X=_libIdx(),mine=ctx.mine instanceof Set?ctx.mine:new Set();
-  const okB=x=>(cardio==null||!!x.e.cardio===cardio)&&x.e.id!==excl,okK=x=>libDoable(x.e,place,kit);
+  const okB=x=>(cardio==null||!!x.e.cardio===cardio)&&x.e.id!==excl,okK=x=>libDoable(x.e,place,kit,pls);
   const okM=x=>mat==='all'||(mat==='free'?!(MAT[x.m]||{}).mach:x.m===mat),okZ=x=>!zone||zone==='all'||_grp(x.e)===zone;
   const so=(a,b)=>(mine.has(b.e.id)?1:0)-(mine.has(a.e.id)?1:0)||a.e.dif-b.e.dif||(b.a3?1:0)-(a.a3?1:0)||a.i-b.i;
   const counts={zone:{all:0},sub:{},mat:{}},matCount=a=>{counts.mat.all=a.length;counts.mat.free=0;a.forEach(x=>{counts.mat[x.m]=(counts.mat[x.m]||0)+1;if(!(MAT[x.m]||{}).mach)counts.mat.free++;});};
@@ -21138,7 +21201,7 @@ function libQuery(st){
     const rows=ok.filter(y=>okM(y.x));
     rows.forEach(y=>{if(y.al>=0)hints[y.x.e.id]=y.x.e.al[y.al];});
     groups=[{k:'q',h:'',items:rows.map(y=>y.x.e)}];
-    tail=r.filter(y=>!okK(y.x)&&okM(y.x)).map(y=>({e:y.x.e,why:libWhyNot(y.x.e,place,kit)}));
+    tail=r.filter(y=>!okK(y.x)&&okM(y.x)).map(y=>({e:y.x.e,why:libWhyNot(y.x.e,place,kit,pls)}));
   }else if(!zone){
     view='idle';
     const sec=(k,h,ids)=>{const a=[];ids.forEach(id=>{const x=_libIdxMap.get(id);if(x&&okB(x)&&okK(x)&&!a.includes(x.e))a.push(x.e);});if(a.length)groups.push({k,h,items:a});};
@@ -21146,7 +21209,7 @@ function libQuery(st){
     sec('fav','Favoritos',Array.isArray(ctx.fav)?ctx.fav:[]);
     // (añadir: sin los que ya están en ese día)
     if(mode==='add'||mode==='pick')sec('plan','En tu rutina',Object.keys(ctx.inPlan||{}).filter(id=>!dk||!(ctx.inPlan[id]||[]).includes(dk)));
-    if(place==='c'&&Array.isArray(kit))more=X.filter(x=>okB(x)&&libAtPlace(x.e,place)&&!okK(x)).length;
+    if(place==='c'&&(Array.isArray(kit)||(pls&&pls.c)))more=X.filter(x=>okB(x)&&libAtPlace(x.e,place)&&!okK(x)).length;
   }else{
     view='list';
     const inZ=avail.filter(okZ);
@@ -21319,7 +21382,7 @@ function _pickerSeq(R){
       const top=g.k==='cur'||g.k==='sim';
       if(!top&&!strips){H(_pickerStripsHtml(R,true));strips=true;}
       H(head(g.h,top?0:g.items.length));
-      rows(g.k,g.items,g.k==='sim'?e=>({pct:st.pct&&st.pct[e.id],today:1}):g.k==='cur'&&R.off?e=>({why:libWhyNot(e,_pickerPlace(),st.ctx.kit)}):null);
+      rows(g.k,g.items,g.k==='sim'?e=>({pct:st.pct&&st.pct[e.id],today:1}):g.k==='cur'&&R.off?e=>({why:libWhyNot(e,_pickerPlace(),st.ctx.kit,st.ctx.places)}):null);
     });
     if(!strips)H(_pickerStripsHtml(R,true));
     if(!R.n)H(_pickerEmptyHtml());
@@ -21534,7 +21597,7 @@ const LIB_DIF=['','Principiante','Intermedio','Avanzado'];
 function _libDetailHtml(e){
   const st=_pickerState,sp=typeof GymAnim!=='undefined'&&GymAnim.get?GymAnim.get(e.id):null,id=esc(e.id);
   const plan=getPlan(),days=_libInPlan()[e.id]||[],cur=st.currentLib===e.id,hist=_libHistMap()[e.id]||null,fav=(S.libFav||[]).includes(e.id);
-  const pl=_pickerPlace(),m=_mat(e),why=libWhyNot(e,pl,st.ctx.kit),g=MUSCLE_GROUPS.find(x=>x.id===_grp(e));
+  const pl=_pickerPlace(),m=_mat(e),why=libWhyNot(e,pl,st.ctx.kit,st.ctx.places),g=MUSCLE_GROUPS.find(x=>x.id===_grp(e));
   const sub=[e.eq||matLabel(m),g?_zoneLbl(g):'',LIB_DIF[e.dif]||''].filter(Boolean).join(' · ');
   const mus=_libMusLbl(e,3),pat=!e.cardio&&PAT_LBL[e.pat]||'',low=x=>String(x).toLowerCase(); // el patrón, si no repite un músculo («Antebrazo»)
   const tags=[...mus.map(l=>`<span class="mchip">${esc(l)}</span>`),
@@ -21683,6 +21746,8 @@ function libKitHave(k){
 }
 // Tu material cambió: la lista (sin volver arriba), la hoja abierta y su «Listo · ver N»
 function _libKitChanged(){
+  // (E3b) tu material de casa del selector es el de places.c: lo que no es de casa (barra, máquinas…) se queda
+  if(_isPlainObj(S.places)&&S.places.c&&Array.isArray(S.libKit)){const c=S.places.c;c.mats=[...new Set([...c.mats.filter(k=>!(MAT[k]&&MAT[k].home)),...S.libKit])];saveState();}
   const st=_pickerState;if(!st)return;
   st.ctx=_libCtx();_pickerRefresh(true);
   const w=document.getElementById('lib-kit');if(!w)return;
