@@ -13736,6 +13736,55 @@ function genRoutineFrom(a,ctx,o){
   const inp=E.G.desdeRespuestas(a),res=E.G.genRoutine(inp,ctx||{});
   return{inp,res,E};
 }
+// (E4b) Minutos de un día con la fórmula del generador (30-algoritmo.md §8.1): calentamiento + equilibrio + Σ ejercicios + cardio
+// final. Ejercicio = transición (120 s con barra o rack; 60 s si no) + aproximación (solo el primer multiarticular con kilos, o.apx:
+// 150 s por defecto; nada con o.inicio) + series × trabajo × (2 si es a una pierna o un brazo) + (series − 1) × descanso; trabajo =
+// media del rango × 3,5 s + 12 s (por tiempo: los segundos + 12; distancia: 45 s). Las filas de minutos (calentamiento y cardio)
+// cuentan sus minutos y o.bal, los del equilibrio. o.rest(e) da el descanso (por defecto, el de la app: el tuyo o el automático).
+// Es lo que promete el resultado del cuestionario y lo que enseñará Inicio (E5).
+const _GEN_BARM=['barra','disco','barraz'];
+function _planExSecs(e,o,first){
+  const L=exLib(e),K=LIB_K&&L?LIB_K.BY.get(L.id):null;
+  const s=Math.max(0,Math.min(SET_MAX_N,parseInt(e.s)||0));if(!s)return 0;
+  const mat=K?K.mat:L?L.mat:null,req=K&&LIB_K.TAGS.req[K.id]||[];
+  const tr=_GEN_BARM.includes(mat)||req.includes('rack')?120:60;
+  const lt=exLT(e),rr=lt==='t'||lt==='d'?null:repRange(e);
+  const work=lt==='t'?(_tgtSecs(e)||30)+12:lt==='d'?45:(rr?(rr.lo+rr.hi)/2:10)*3.5+12;
+  const uni=!!(L&&LIB_UNI.has(L.id));
+  const rest=o.rest?o.rest(e):getRestSecs(e.id);
+  return tr+(first?(o.apx!=null?o.apx:150):0)+s*work*(uni?2:1)+(s-1)*(+rest||0);
+}
+function _planDayMinutesOf(ex,o){
+  o=o||{};let sec=(+o.bal||0)*60,firstDone=!!o.inicio;
+  for(const e of Array.isArray(ex)?ex:[]){
+    if(!e||typeof e!=='object')continue;
+    if(e.cardio||exLT(e)==='c'){sec+=(_cardioMin(e)||0)*60;continue;}
+    const first=!firstDone&&isCompoundEx(e)&&exLT(e)==='w';if(first)firstDone=true;
+    sec+=_planExSecs(e,o,first);
+  }
+  return sec/60;
+}
+function _planDayMinutes(dk,o){const d=getPlan()[dk];return d&&Array.isArray(d.ex)?_planDayMinutesOf(d.ex,o):0;}
+// Aproximación del primer multiarticular con kilos de un día generado, como el generador (C-32): nada con 65 o más ni prudente; 60 s
+// en el exprés, el modo corto o con 15 min; 4 min en el primer básico pesado de «Ganar fuerza» (6 repeticiones o menos); si no, 150 s
+function genApproachSecs(g,row){
+  const G=g.E.G,P=G.effective(g.inp),why=(g.res.meta&&g.res.meta.why)||[];
+  if(P.mayor||P.prud)return 0;
+  if(P.corto||g.inp.min===15||why.some(w=>w&&(w.c==='expres'||w.c==='corto')))return 60;
+  const L=LIB_K.BY.get(row&&row.lib),rr=L?G.repRange(L,row.r):null;
+  return g.inp.goal==='fuerza'&&row.prio===1&&L&&G.heavyOk(L)&&rr&&rr.hi<=6?240:150;
+}
+// Fila del detalle del generador → ejercicio del plan (el que guarda la app): rango estándar escrito («10-12», que repRange respeta),
+// por tiempo «30s», cardio y calentamiento en minutos. (E5 añade el id, las notas y lo que conserva de tu rutina.)
+function genRowToEx(row){
+  const L=LIB_BY_ID.get(row.lib);if(!L)return null;
+  const e=_libCopy(L,'g_'+row.lib.replace(/^lib_/,''));
+  if(row.kind==='warm'||row.kind==='cardio'){e.cardio=true;e.s=1;e.r=row.reps;return e;}
+  e.s=row.series;
+  const K=LIB_K.BY.get(row.lib),secs=typeof row.r==='string'&&/s$/.test(row.r)?parseInt(row.r):null;
+  e.r=K&&K.lt==='t'?(secs||30)+'s':K&&K.lt==='d'?String(row.r):/^\d+-\d+$/.test(row.reps)?row.reps:String(row.r);
+  return e;
+}
 {const _v0=JSON.stringify([S.profile,S.places,S.health,S.planMeta,S.planPrev,S.obDraft,S.rotBack,S.bkHealth]);_sanitizeV21(S);
   if(JSON.stringify([S.profile,S.places,S.health,S.planMeta,S.planPrev,S.obDraft,S.rotBack,S.bkHealth])!==_v0)saveState();}
 // Ejercicio de la biblioteca de uno del plan (o null): su lib → el del plan original (PLAN_ANIM, salvo cardio: ese va por
