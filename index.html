@@ -31,6 +31,7 @@
   --accent-ink:#062320; /* texto sobre el acento */
   --pr:#ff8a65;--pr-ink:#2b0f06; /* récords (coral) y su texto encima */
   --red:#ff6b6b;--blue:#7aa7ff;--amber:#ffb547;--pink:#f283d8;
+  --violet:#bc8cff;--lime:#b8dc5a; /* (E1a) colores de los días E y F: lejos del azul (A), el rosa (B), la menta (C) y el ámbar (D) */
   --border:color-mix(in srgb,var(--text) 8%,transparent);--border2:color-mix(in srgb,var(--text) 14%,transparent);
   --green-bg:color-mix(in srgb,var(--green) 10%,transparent);--green-bg2:color-mix(in srgb,var(--green) 18%,transparent);--green-b:color-mix(in srgb,var(--green) 30%,transparent);
   /* Tonos de apoyo: claros para texto sobre fondos tintados, oscuro para pulsado */
@@ -41,6 +42,7 @@
   --blue-hi:color-mix(in srgb,var(--blue) 70%,#fff);--blue-hi2:color-mix(in srgb,var(--blue) 45%,#fff);
   --red-hi:color-mix(in srgb,var(--red) 70%,#fff);--red-hi2:color-mix(in srgb,var(--red) 45%,#fff);
   --pink-hi:color-mix(in srgb,var(--pink) 70%,#fff);
+  --violet-hi:color-mix(in srgb,var(--violet) 70%,#fff);--lime-hi:color-mix(in srgb,var(--lime) 70%,#fff);
   --inset:color-mix(in srgb,var(--bg) 50%,var(--bg2));--stage:color-mix(in srgb,var(--bg) 60%,var(--bg2)); /* paneles hundidos y fondo de animaciones */
   --r:14px;--rsm:9px;--rxs:6px;
   --st:env(safe-area-inset-top,0px);--sb:env(safe-area-inset-bottom,0px);
@@ -133,6 +135,9 @@ input{font-family:inherit}
 .pa{background:color-mix(in srgb,var(--blue) 15%,transparent);color:var(--blue-hi)}
 .pb{background:color-mix(in srgb,var(--pink) 15%,transparent);color:var(--pink-hi)}
 .pc{background:color-mix(in srgb,var(--green) 15%,transparent);color:var(--green-hi)}
+.pd{background:color-mix(in srgb,var(--amber) 15%,transparent);color:var(--amber-hi)}
+.pe{background:color-mix(in srgb,var(--violet) 15%,transparent);color:var(--violet-hi)}
+.pf{background:color-mix(in srgb,var(--lime) 15%,transparent);color:var(--lime-hi)}
 .carea{height:100px;margin-top:8px}
 .carea svg{width:100%;height:100%}
 /* PESO CORPORAL */
@@ -179,11 +184,14 @@ input{font-family:inherit}
 .wd-bar{flex:1;height:6px;background:color-mix(in srgb,var(--text) 5%,transparent);border-radius:3px;overflow:hidden}
 .wd-bar i{display:block;height:100%;background:linear-gradient(90deg,color-mix(in srgb,var(--green) 25%,transparent),color-mix(in srgb,var(--green) 70%,transparent));border-radius:3px}
 .tabs{display:flex;background:var(--bg3);border-radius:var(--rsm);margin:10px 14px;padding:3px;gap:3px}
-.tab{flex:1;padding:9px 4px;border-radius:var(--rxs);font-size:13px;font-weight:600;color:var(--text2);transition:all .15s}
+.tab{flex:1;min-width:0;padding:9px 4px;border-radius:var(--rxs);font-size:13px;font-weight:600;color:var(--text2);transition:all .15s}
+/* (E1a) nombres largos de día con puntos suspensivos (en un span: la zona de toque de 44 px de .tab::before no se recorta) */
+.tab-t{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tab.on{background:var(--bg2);color:var(--text);border:1px solid var(--border2)}
 .empty{text-align:center;padding:28px 16px}
 .empty .eic{font-size:36px;margin-bottom:10px}
 .empty p{font-size:13px;color:var(--text2);line-height:1.6}
+.wo-empty{padding:4px 16px 16px}.wo-empty .empty{padding:20px 8px 14px}.wo-empty .btn{width:100%} /* (E1a) día sin ejercicios en Entreno */
 .fbanner{background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--rsm);padding:12px 14px;margin:0 14px 8px;font-size:13px;color:var(--green-hi);line-height:1.5}
 /* ONBOARDING */
 #onboarding{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;overflow-y:auto;padding:calc(var(--st) + 44px) 24px calc(var(--sb) + 40px);max-width:480px;margin:0 auto}
@@ -205,6 +213,8 @@ input{font-family:inherit}
 .ob-day .df{font-size:11px;margin-top:3px;font-weight:400;color:var(--text3);line-height:1.3}
 .ob-day.sel .dn{color:var(--green)}
 .ob-day.sel .df{color:color-mix(in srgb,var(--green) 60%,transparent)}
+button.ob-day{min-width:0;min-height:44px;overflow-wrap:anywhere} /* (E1a) «Próxima sesión»: botones reales, de 2 a 6 días */
+.ob-day:disabled{opacity:.55;cursor:default;transform:none}
 .ob-dots{display:flex;gap:6px;margin-bottom:4px}
 .ob-dot{width:6px;height:6px;border-radius:50%;background:var(--bg3)}
 .ob-dot.on{background:var(--green);width:18px;border-radius:3px}
@@ -536,7 +546,7 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ls-note{padding:12px 16px;font-size:11.5px;color:var(--text3);line-height:1.5}
 /* ── EDITOR DE RUTINA ── */
 .edit-day-tab{display:flex;gap:6px;padding:0 14px 12px}
-.edit-day-btn{flex:1;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:9px 6px;font-size:13px;font-weight:500;color:var(--text2);text-align:center;cursor:pointer;transition:all .15s}
+.edit-day-btn{flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:9px 6px;font-size:13px;font-weight:500;color:var(--text2);text-align:center;cursor:pointer;transition:all .15s}
 .edit-day-btn.on{background:var(--green-bg);border-color:var(--green-b);color:var(--green)}
 .edit-ex-item{background:var(--bg2);border:1px solid var(--border);border-radius:var(--rsm);padding:11px 12px;margin:0 14px 8px;display:flex;align-items:center;gap:10px}
 .edit-ex-item.dragging{opacity:.4}
@@ -1197,6 +1207,10 @@ button.mm-row:active{background:color-mix(in srgb,var(--text) 3%,transparent)}
 .pl-card{padding:12px 14px 4px}
 .pl-f{margin-bottom:8px}
 .pl-f .wc-rg{min-height:44px;min-width:0;padding:6px 2px;white-space:nowrap}
+/* (E1a) con 4 días o más el filtro (Todos + días + Fuera) se desliza en horizontal si no cabe */
+.pl-f.pl-fx{overflow-x:auto;scrollbar-width:none;overscroll-behavior-x:contain}
+.pl-f.pl-fx::-webkit-scrollbar{display:none}
+.pl-f.pl-fx .wc-rg{flex:1 0 auto;padding:6px 10px}
 .pl-f .wc-rg.on[style]{color:var(--dc)}
 .pl-bar{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-bottom:2px}
 .pl-sum{font-size:12px;color:var(--text2);min-width:0;line-height:1.4}
@@ -8994,7 +9008,8 @@ const PLAN={
 };
 
 const MONTHS=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
-const DAY_ORDER=['A','B','C'];
+const DAY_ORDER=['A','B','C']; // orden del plan de fábrica (las rutinas van de 2 a 6 días: DAY_KEYS y dayKeys())
+const DAY_KEYS=['A','B','C','D','E','F']; // (E1a) claves de día posibles, en orden
 const SCHEMA_VERSION=20;
 // Rango permitido del objetivo de días por semana
 const WEEKLY_TARGET_MIN=1, WEEKLY_TARGET_MAX=7, WEEKLY_TARGET_DEFAULT=3;
@@ -9858,9 +9873,31 @@ if(!S.currentPlan){
   S.currentPlan=JSON.parse(JSON.stringify(PLAN));
   saveState();
 }
+// (E1a) Claves de día válidas: lo que no es un día (otra clave, sin lista de ejercicios) se quita; sin ningún día, el plan de fábrica
+{const _k0=_isPlainObj(S.currentPlan)?Object.keys(S.currentPlan).join():'';S.currentPlan=_sanitizePlanKeys(S.currentPlan);
+  if(Object.keys(S.currentPlan).join()!==_k0)saveState();}
 
 // Helper: plan activo (mutable) — SIEMPRE usar getPlan() en vez de PLAN directamente
 function getPlan(){return S.currentPlan||PLAN;}
+
+// ── (E1a) DÍAS DE LA RUTINA: de 2 a 6, con claves A…F ──
+// Claves de una letra de la A a la F, consecutivas desde la A e insertadas en orden (nunca R, V ni W: chocan con las clases
+// .pr/.pv/.pw de las pastillas p<letra>). La app TOLERA de 1 a 6 días (copias antiguas o editadas a mano), pero no crea
+// rutinas de 1 día. dayKeys() es la única fuente del orden; liveDayKeys(), los días con algún ejercicio: un día vacío no
+// entra en la rotación ni se puede guardar como sesión. DAY_ORDER queda solo para el plan de fábrica.
+function _isPlanDay(d){return _isPlainObj(d)&&Array.isArray(d.ex);}
+function dayKeys(plan){const p=plan||getPlan();return _isPlainObj(p)?DAY_KEYS.filter(k=>Object.prototype.hasOwnProperty.call(p,k)&&_isPlanDay(p[k])):[];}
+function _dayLive(d){return _isPlanDay(d)&&d.ex.some(_isPlainObj);}
+function liveDayKeys(plan){const p=plan||getPlan();return dayKeys(p).filter(k=>_dayLive(p[k]));}
+// Nombre del día para pintar (sin escapar: escápalo con esc() al meterlo en HTML)
+function dayLabel(k,plan){const d=(plan||getPlan())[k];return _isPlanDay(d)&&d.label!=null&&String(d.label).trim()?String(d.label):'Día '+k;}
+// Al cargar y al importar: fuera lo que no sea un día A…F con su lista de ejercicios; si no queda ninguno, el plan de fábrica.
+// (El re-letrado A, B, D → A, B, C llega con el editor de días, después de apuntar los nombres en las sesiones.)
+function _sanitizePlanKeys(plan){
+  if(!_isPlainObj(plan))return JSON.parse(JSON.stringify(PLAN));
+  Object.keys(plan).forEach(k=>{if(!(DAY_KEYS.includes(k)&&_isPlanDay(plan[k])))delete plan[k];});
+  return dayKeys(plan).length?plan:JSON.parse(JSON.stringify(PLAN));
+}
 
 // Initialize coach start if not set
 if(!S.coachStart&&S.sessions.length>0){
@@ -10640,7 +10677,9 @@ function obFinish(){
   if(!v||v<30||v>300)return;
   const now=Date.now();
   S.weights.push({d:fmtDate(new Date()),v,ts:now});
-  S.startDay=obSelDay;S.nextDay=obSelDay;S.day=obSelDay;S.onboarded=true;
+  // (E1a) el día elegido, si existe en tu rutina y tiene ejercicios; si no, el primero que los tenga
+  const _sd=_dayLive(getPlan()[obSelDay])?obSelDay:getNextDay(null);
+  S.startDay=_sd;S.nextDay=_sd;S.day=_sd;S.onboarded=true;
   // Preservar coachStart si ya hay historial — solo inicializar en primera vez
   if(!S.coachStart){
     S.coachStart=S.sessions.length>0?(S.sessions[0].ts||now):now;
@@ -10649,7 +10688,14 @@ function obFinish(){
 }
 
 function fmtDate(d){return d.getDate()+' '+MONTHS[d.getMonth()];}
-function getNextDay(c){return DAY_ORDER[(DAY_ORDER.indexOf(c)+1)%3];}
+// (E1a) Rotación: el día siguiente a c en el orden de la rutina, saltando los días vacíos (no entran en la rotación hasta
+// tener ejercicios). Clave desconocida → el primer día con ejercicios. Con un solo día con ejercicios, ese mismo.
+// Siempre devuelve un día que existe (con todos vacíos, el primero; sin días, 'A').
+function getNextDay(c,plan){
+  const p=plan||getPlan(),K=dayKeys(p),i=K.indexOf(c);
+  if(i>=0)for(let j=1;j<=K.length;j++){const k=K[(i+j)%K.length];if(_dayLive(p[k]))return k;}
+  return liveDayKeys(p)[0]||K[0]||'A';
+}
 // Cuenta series completadas de forma defensiva (sólo índices 0..maxSets-1)
 function countSetsDone(exId,maxSets){
   const c=S.sets[exId]||{};let n=0;
@@ -11757,7 +11803,7 @@ function getRestSecs(id){
 // Cronómetro de cardio: mismo temporizador (con hora de fin) en modo «cardio»; al acabar marca el ejercicio
 // como hecho, también si terminó con la app en segundo plano o cerrada (se hace al volver).
 function startCardioTimer(exId,mins){
-  const ex=getPlan()[S.day].ex.find(e=>e.id===exId);
+  const ex=_dayEx(exId); // (E1a) con guarda: el día abierto puede haber cambiado
   if(!ex)return;
   mins=+mins;
   if(!(mins>0))return;
@@ -11830,7 +11876,7 @@ function toggleWarmupSet(exId,wIdx){
   saveState();render();
   // Tras calentar, descanso corto (45s)
   if(wasOff){
-    const ex=getPlan()[S.day].ex.find(e=>e.id===exId);
+    const ex=_dayEx(exId);
     if(ex)RT.start(45,ex.n+' · calentamiento',{exId});
   }
 }
@@ -12342,7 +12388,7 @@ function _ensureSetsVisible(exId,first){
 }
 // Abrir / cerrar una tarjeta y cambiar de día (cuentan como «el usuario ha hecho algo»: cancelan el avance pendiente)
 function toggleCard(id){_uiGen++;_scrollReq++;_scrollTo=null;S.open=S.open===id?null:id;render();if(S.open===id)_revealOpenCard(id);}
-function setWorkoutDay(k){if(!getPlan()[k])return;_uiGen++;_scrollReq++;_scrollTo=null;S.day=k;S.open=null;render();}
+function setWorkoutDay(k){if(!_isPlanDay(getPlan()[k]))return;_uiGen++;_scrollReq++;_scrollTo=null;S.day=k;S.open=null;render();}
 
 // ── Animación compacta: tras la primera serie se encoge (toca para ampliarla) ──
 const _animBig=new Set(); // ejercicios con la animación ampliada a mano (solo en memoria)
@@ -12445,7 +12491,7 @@ function toggleSet(id,i,evt){
   const restoredRs=(rsBefore&&!getReopened())?rsBefore:null;
   saveState();render();
   _lastSetAction={id,i,prevSet,prevRpe};
-  const ex=getPlan()[S.day].ex.find(e=>e.id===id);
+  const ex=_dayEx(id);
   // (09) ¿Esta serie bate un récord? (el mismo cálculo que pinta su ✓ dorado): aviso «🏆 Récord: …» con Deshacer
   let prj=null;
   if(wasOff&&strS){try{prj=prLive(exS).flags[i]||null;}catch(e){console.error(e);}}
@@ -12597,7 +12643,10 @@ function logW(){
   toast(`Peso guardado: ${v} kg`);
 }
 function finishSession(){
-  const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
+  const day=getPlan()[S.day];
+  // (E1a) un día sin ejercicios no se guarda como sesión (contaría en la semana, el Coach y el calendario)
+  if(!_dayLive(day)){toast('Este día aún no tiene ejercicios: añade alguno antes de guardar');return;}
+  const strEx=day.ex.filter(e=>!e.cardio);
   const doneEx=strEx.filter(e=>countSetsDone(e.id,e.s)>=e.s).length;
   // Bug fix: evitar doble sesión el mismo día — comparar por timestamp (resistente a colisiones de año)
   // Una sesión reabierta se guarda con su fecha original: se compara con ESE día.
@@ -12767,7 +12816,9 @@ function finishSessionConfirmedWithNote(doneEx,totalEx,doneMsg){
   setTimeout(()=>{_finishInFlight=false;},800);
 }
 function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
-  const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
+  const day=getPlan()[S.day];
+  if(!_dayLive(day)){toast('Este día aún no tiene ejercicios: añade alguno antes de guardar');return;} // (E1a)
+  const strEx=day.ex.filter(e=>!e.cardio);
   const now=Date.now();
   // Sesión reabierta de este día: se guarda con su fecha/ts originales (misma semana) y acumula la duración
   const rs=reopenedFor(S.day);
@@ -12842,8 +12893,8 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   const subs=_sessSubsOf(day,session.snapshot.sets,sessTs);
   if(subs.length)session.subs=subs;else delete session.subs;
   // Rotación: tras la sesión más reciente (una reabierta antigua no debe saltarse la que vino después)
+  // (E1a) getNextDay salta los días vacíos y siempre da un día que existe (antes, un «arreglo» repetía la misma llamada)
   S.nextDay=rs?getNextDay(S.sessions[S.sessions.length-1].day):getNextDay(S.day);
-  if(!getPlan()[S.nextDay])S.nextDay=getNextDay(S.day);
   // La sesión reabierta ya está guardada de nuevo (y sus cambios no están en la última copia: su ts es el de antes)
   if(rs){S.reopenedSession=null;S.dataEditTs=now;}
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
@@ -12865,7 +12916,7 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   saveState();
   // (15b) Con la primera sesión guardada (y en las siguientes, una vez por arranque) pide al navegador que no borre los datos
   storagePersist();
-  toast(doneMsg||(rs?`✅ Sesión del ${today} guardada · Próxima: ${getPlan()[S.nextDay].label}`:`✅ Sesión guardada · Próxima: ${getPlan()[S.nextDay].label}`),doneMsg?4200:undefined);
+  toast(doneMsg||(rs?`✅ Sesión del ${today} guardada · Próxima: ${dayLabel(S.nextDay)}`:`✅ Sesión guardada · Próxima: ${dayLabel(S.nextDay)}`),doneMsg?4200:undefined);
   go('dash');
   // (09) Resumen de la sesión recién guardada: contadores, frente a la última del mismo día, récords, ejercicios,
   // esfuerzo y mapa muscular
@@ -12879,7 +12930,7 @@ function resumeWorkout(){
   S.day=aw.day;
   S.open=null;
   go('workout');
-  toast(`Reanudando ${getPlan()[aw.day].label}`);
+  toast(`Reanudando ${dayLabel(aw.day)}`);
 }
 function discardWorkout(){
   const aw=getActiveWorkout();
@@ -13377,14 +13428,14 @@ function coach_weightTrend(){
 }
 
 function coach_balance(){
-  // Sesiones A/B/C en el último ciclo
-  const start=coach_cycleStart();
-  const cnt={A:0,B:0,C:0};
+  // Sesiones de cada día de tu rutina en el último ciclo. (E1a) Sobre los días con ejercicios (2-6): los vacíos no rotan
+  const start=coach_cycleStart(),keys=liveDayKeys();
+  const cnt={};keys.forEach(k=>{cnt[k]=0;});
   S.sessions.filter(s=>s.ts>=start).forEach(s=>{if(cnt[s.day]!==undefined)cnt[s.day]++;});
-  const total=cnt.A+cnt.B+cnt.C||1;
-  const ideal=total/3;
-  const maxDev=Math.max(...['A','B','C'].map(d=>Math.abs(cnt[d]-ideal)));
-  return{cnt,total,balanced:maxDev<=1.5};
+  const total=keys.reduce((t,k)=>t+cnt[k],0)||1;
+  const ideal=total/Math.max(1,keys.length);
+  const maxDev=keys.length?Math.max(...keys.map(d=>Math.abs(cnt[d]-ideal))):0;
+  return{cnt,total,keys,balanced:keys.length<2||maxDev<=1.5};
 }
 
 // RPE acumulado por zona muscular en las últimas N sesiones
@@ -13904,7 +13955,10 @@ function coach_buildCandidates(an){
       const strEx=day.ex.filter(e=>!e.cardio);
       if(strEx.length>=3)return;
       const cnt={};strEx.forEach(e=>{if(e.muscle)cnt[e.muscle]=(cnt[e.muscle]||0)+1;});
-      const mainMuscle=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0]||({A:'piernas',B:'pecho',C:'espalda'})[dk]||'piernas';
+      // (E1a) el grupo principal del propio día; sin ejercicios de fuerza no se adivina por su letra (un «A» puede ser de
+      // torso): un día vacío lo rellenas tú desde el editor, y uno solo de cardio se queda como lo hiciste
+      const mainMuscle=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a])[0];
+      if(!mainMuscle)return;
       // Del lugar de la rutina (casa: nada de máquinas); primero multiarticulares, de tu nivel (dificultad mediana del día),
       // con un material que ya usas y, en el gimnasio, con peso; a igualdad, el orden de la biblioteca
       const libs=strEx.map(exLib).filter(Boolean),difs=libs.map(L=>L.dif).sort((a,b)=>a-b);
@@ -14129,7 +14183,8 @@ function coach_generateInsights(an,pend,resIds){
   // ═ C) BALANCE DE SESIONES ═
   if(balance.total>=6&&!balance.balanced){
     const worst=Object.entries(balance.cnt).sort((a,b)=>a[1]-b[1])[0];
-    insights.push({type:'warn',ic:'⚖️',t:'Desbalance de días',d:`Has hecho <strong>${plural(balance.cnt.A,'día')} A, ${plural(balance.cnt.B,'día')} B, ${plural(balance.cnt.C,'día')} C</strong>. El día ${worst[0]} quedó relegado — la rotación A→B→C mantiene equilibrio.`});
+    // (E1a) todos los días de tu rutina (2-6), sin dar por hecho A, B y C
+    insights.push({type:'warn',ic:'⚖️',t:'Desbalance de días',d:`Has hecho <strong>${_joinY(balance.keys.map(k=>plural(balance.cnt[k],'día')+' '+k))}</strong>. El día ${worst[0]} quedó relegado: seguir la rotación de tus días mantiene el equilibrio.`});
   }
 
   // ═ D) PROGRESIÓN POR EJERCICIO ═ (mismo diagnóstico que el análisis detallado y las propuestas)
@@ -14446,15 +14501,16 @@ function coach_weekStats(offsetWeeks){
   // Volumen total: suma de (peso × series completadas) en esa semana
   // Match preciso: registro de fuerza cuyo ts cae dentro de ±2h de la sesión (evita colisiones del mismo día con otra rutina)
   let totalVolume=0,avgRpe=0,rpeCount=0;
+  // (E1a) Los registros de cada sesión se buscan en todo tu historial, no en los ejercicios de la rutina de ahora: al
+  // cambiar de rutina o de días, las semanas pasadas no cambian (y cuentan también los ejercicios «solo hoy»)
+  const ids=Object.keys(S.strength||{}).filter(id=>Array.isArray(S.strength[id])&&S.strength[id].length);
   sessions.forEach(sess=>{
-    const dayPlan=getPlan()[sess.day];
-    if(!dayPlan)return;
-    const strEx=dayPlan.ex.filter(e=>!e.cardio);
-    strEx.forEach(ex=>{
-      const recs=(S.strength[ex.id]||[]);
+    ids.forEach(id=>{
+      const recs=S.strength[id];
       // El registro vinculado a esta sesión: el más cercano dentro de ±2h
       let best=null,bestDiff=Infinity;
       for(const rec of recs){
+        if(!rec||!rec.ts)continue;
         const diff=Math.abs(rec.ts-sess.ts);
         if(diff<7200000&&diff<bestDiff){best=rec;bestDiff=diff;}
       }
@@ -14531,7 +14587,7 @@ function coach_weeklyInsight(){
     }else{
       // Domingo
       if(prev.sessions>=3)description=`Semana de descanso completo. La pasada hiciste ${prev.sessions} sesiones — ahora a recargar y volver fuerte el lunes.`;
-      else description=`Semana sin entrenar. No pasa nada — mañana es lunes, perfecta oportunidad para reiniciar con el ${getPlan()[S.nextDay].label}.`;
+      else description=`Semana sin entrenar. No pasa nada — mañana es lunes, perfecta oportunidad para reiniciar con el ${esc(dayLabel(hoyDayKey()))}.`;
     }
     return{title,description,tag,stats};
   }
@@ -15011,8 +15067,14 @@ let _hoyKeep=null;  // elemento #hoy-pv montado: se reutiliza entre repintados (
 const HOY_MUS={piernas:'piernas',pecho:'pecho',espalda:'espalda',hombros:'hombros',biceps:'bíceps',triceps:'tríceps',core:'abdomen'};
 const HOY_WD=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
 function _joinY(a){return a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' y '+a[a.length-1];}
-// Día que toca: el siguiente de la rotación (si el plan no lo tiene, el primero que exista)
-function hoyDayKey(){const p=getPlan();return p[S.nextDay]?S.nextDay:(DAY_ORDER.find(k=>p[k])||Object.keys(p)[0]||'A');}
+// Día que toca: el siguiente de la rotación. (E1a) Si ese día no existe o se ha quedado vacío, el siguiente con ejercicios
+// (los vacíos no entran en la rotación); si ningún día tiene ejercicios, el que tocaba (o el primero) y Inicio lo dice.
+function hoyDayKey(){
+  const p=getPlan();
+  if(_dayLive(p[S.nextDay]))return S.nextDay;
+  if(liveDayKeys(p).length)return getNextDay(S.nextDay,p);
+  return _isPlanDay(p[S.nextDay])?S.nextDay:(dayKeys(p)[0]||'A');
+}
 // Nombre corto («Jale» de «Jale — espalda y bíceps») y músculos sacados de sus ejercicios (siguen a la rutina editada;
 // se omiten si el nombre ya los dice, como «Piernas + abdomen»)
 function hoyDayInfo(dk){
@@ -16437,9 +16499,20 @@ function renderHist(){
   else if(fSel){const f=root.querySelector(fSel)||root.querySelector('.hist-sheet-close');if(f)try{f.focus({preventScroll:true});}catch(e){}}
 }
 
+// (E1a) Pestañas de los días de tu rutina (2-6), con su nombre escapado. Con 5 o 6 días, las que no están abiertas
+// enseñan solo la letra (el nombre completo va en su etiqueta para lectores de pantalla y al pasar el ratón).
+function dayTabsHtml(plan,cur,cls,fn){
+  const K=dayKeys(plan),many=K.length>=5;
+  return K.map(k=>{const on=cur===k,lb=dayLabel(k,plan),short=many&&!on;
+    return`<button type="button" class="${cls}${on?' on':''}" aria-pressed="${on}"${short?` aria-label="${esc(lb)}" title="${esc(lb)}"`:''} onclick="${fn}('${k}')"><span class="tab-t">${esc(short?k:lb)}</span></button>`;}).join('');
+}
 function renderWorkout(){
-  const tabs=['A','B','C'].map(k=>`<button class="tab ${S.day===k?'on':''}" onclick="setWorkoutDay('${k}')">${getPlan()[k].label}</button>`).join('');
-  const day=getPlan()[S.day],strEx=day.ex.filter(e=>!e.cardio);
+  const plan=getPlan();
+  if(!_isPlanDay(plan[S.day]))S.day=hoyDayKey(); // (E1a) un día que ya no existe → el que toca
+  const tabs=dayTabsHtml(plan,S.day,'tab','setWorkoutDay');
+  const day=plan[S.day];
+  if(!_isPlanDay(day))return`<div class="topbar"><div class="topbar-row"><div><h1>Entreno</h1></div></div></div>`; // sin días (no debería pasar: el plan se sanea)
+  const strEx=day.ex.filter(e=>!e.cardio),live=_dayLive(day);
   const doneEx=strEx.filter(e=>countSetsDone(e.id,e.s)>=e.s).length;
   const pct=strEx.length?Math.round(doneEx/strEx.length*100):0,allDone=doneEx===strEx.length&&strEx.length>0;
   const exHtml=day.ex.map(ex=>{
@@ -16528,12 +16601,15 @@ function renderWorkout(){
   ${lightBannerHtml('workout')}
   ${allDone?`<div class="fbanner">🎉 ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
   ${exHtml}
-  <div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?'✅ Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>
+  ${live?`<div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?'✅ Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`
+    :`<div class="card wo-empty"><div class="empty"><div class="eic" aria-hidden="true">📝</div><p>Este día aún no tiene ejercicios. Mientras esté vacío, no entra en tu rotación.</p></div>
+      <button type="button" class="btn bp" data-dk="${esc(S.day)}" onclick="addExerciseUI(this.dataset.dk)">Añadir ejercicio</button></div>`}
   `;
 }
 
 // ── NOMBRE, DÍA Y COLOR DE UN EJERCICIO CON HISTORIAL (también si ya no está en la rutina) ──
-const DAY_COLORS={A:'var(--blue)',B:'var(--pink)',C:'var(--green)'};
+// (E1a) un color por día (A…F): D ámbar, E violeta y F lima, que no se confunden con A (azul), B (rosa) ni C (menta)
+const DAY_COLORS={A:'var(--blue)',B:'var(--pink)',C:'var(--green)',D:'var(--amber)',E:'var(--violet)',F:'var(--lime)'};
 function _origPlanEx(id){
   for(const dk of Object.keys(PLAN)){const e=PLAN[dk].ex.find(x=>x.id===id);if(e)return{ex:e,day:dk};}
   return null;
@@ -16586,7 +16662,7 @@ function progStrengthList(){
   const plan=getPlan(),order={};
   // (11) el de tu rutina sustituido hoy «solo hoy» sigue en su sitio
   Object.keys(plan).forEach(dk=>(plan[dk]&&Array.isArray(plan[dk].ex)?plan[dk].ex:[]).forEach((e,i)=>{if(order[e.id]==null)order[e.id]=i;const o=e&&e.sub&&e.sub.orig;if(o&&order[o.id]==null)order[o.id]=i;}));
-  const di=d=>{const k=DAY_ORDER.indexOf(d);return k<0?9:k;};
+  const di=d=>{const k=DAY_KEYS.indexOf(d);return k<0?9:k;}; // (E1a) A…F
   return Object.entries(S.strength||{}).filter(([,d])=>Array.isArray(d)&&d.length>0).map(([id,data])=>{
     const day=exDayOf(id),inPlan=order[id]!=null;
     const lastTs=(data[data.length-1]&&data[data.length-1].ts)||0;
@@ -16927,7 +17003,7 @@ function openMuscleSheet(gid,src){
 function closeMuscleSheet(){_mmSheet=null;renderMuscleSheet();}
 function mmAddFor(gid){
   const g=MM_GROUPS.find(x=>x.id===gid);if(!g)return;
-  const dk=getPlan()[_editDay]?_editDay:'A';
+  const dk=_editDayOr(_editDay); // (E1a)
   closeMuscleSheet();
   const [z,sub]=MM2SUB[gid]||[g.lib,null];
   addExerciseUI(dk,z,sub);
@@ -18864,7 +18940,8 @@ function progStrengthHtml(){
   if(!list.length)return`<div class="card" id="prog-str"><div class="empty"><div class="eic">🏋️</div><p>Completa entrenamientos y registra pesos para ver tu progreso de fuerza.</p></div></div>`;
   const st=progStatusMap(list),hasOut=list.some(x=>!x.inPlan),plan=getPlan();
   if(_plF==='out'&&!hasOut)_plF='all';
-  if(_plF!=='all'&&_plF!=='out'&&!DAY_COLORS[_plF])_plF='all';
+  const dks=dayKeys(plan); // (E1a) los días de tu rutina (2-6)
+  if(_plF!=='all'&&_plF!=='out'&&!dks.includes(_plF))_plF='all';
   const f=_plF;
   let rows=list.filter(x=>f==='all'||(f==='out'?!x.inPlan:x.inPlan&&x.day===f));
   if(_plStag){const r={stag:0,down:1},_r=o=>{const v=r[st[o.x.id].k];return v==null?2:v;};rows=rows.map((x,i)=>({x,i})).sort((a,b)=>(_r(a)-_r(b))||a.i-b.i).map(o=>o.x);}
@@ -18878,7 +18955,7 @@ function progStrengthHtml(){
   const dl=d=>{const l=plan[d]&&plan[d].label;return l&&l!=='Día '+d?`Día ${d}: ${l}`:'';};
   const fName=f==='all'?'':f==='out'?' fuera de tu rutina':' en el Día '+f;
   return`<div class="card pl-card" id="prog-str">
-    <div class="wc-ranges pl-f" role="group" aria-label="Filtrar ejercicios por día">${fb('all','Todos')}${['A','B','C'].map(d=>fb(d,'Día '+d,dl(d))).join('')}${hasOut?fb('out','Fuera','Fuera de tu rutina'):''}</div>
+    <div class="wc-ranges pl-f${dks.length>=4?' pl-fx':''}" role="group" aria-label="Filtrar ejercicios por día">${fb('all','Todos')}${dks.map(d=>fb(d,'Día '+d,dl(d))).join('')}${hasOut?fb('out','Fuera','Fuera de tu rutina'):''}</div>
     <div class="pl-bar"><span class="pl-sum" aria-live="polite">${parts.length?parts.join(' · '):plural(rows.length,'ejercicio')}</span>
       <button type="button" class="pl-stag" aria-pressed="${_plStag}" onclick="plToggleStag()"><span class="pl-sw" aria-hidden="true"></span>Estancados primero</button></div>
     <div class="pl-list">${rows.length?rows.map(x=>plRowHtml(x,st[x.id])).join(''):`<p class="pl-empty">Sin ejercicios con registros${fName}.</p>`}</div>
@@ -18890,7 +18967,7 @@ function _plRefresh(focusSel){
   el.outerHTML=progStrengthHtml();
   if(focusSel){const b=document.querySelector('#prog-str '+focusSel);if(b)try{b.focus({preventScroll:true});}catch(e){}}
 }
-function plSetF(k){if(k!=='all'&&k!=='out'&&!DAY_COLORS[k])return;_plF=k;_plRefresh(`[data-f="${k}"]`);}
+function plSetF(k){if(k!=='all'&&k!=='out'&&!dayKeys().includes(k))return;_plF=k;_plRefresh(`[data-f="${k}"]`);}
 function plToggleStag(){_plStag=!_plStag;_plRefresh('.pl-stag');}
 // Peso corporal en Progreso: la gráfica está en Inicio (donde se registra); aquí, el último y su cambio con un enlace
 function progWeightLinkHtml(){
@@ -19119,7 +19196,9 @@ function constancyCardHtml(){
   const ss=_calSessions().slice().sort((a,b)=>a.ts-b.ts);
   ss.forEach(s=>{if(s.ts>=start&&s.ts<end)(byDay[_calKey(s.ts)]=byDay[_calKey(s.ts)]||[]).push(s);});
   const inWin=ss.filter(s=>s.ts>=start&&s.ts<end),cnt={},wkSt={};
-  inWin.forEach(s=>{const k=DAY_COLORS[s.day]?s.day:'x';cnt[k]=(cnt[k]||0)+1;});
+  // (E1a) cada sesión con el color de su día si ese día está en tu rutina (A…F); si no, neutra y en «Otra»
+  const dc=k=>plan[k]&&DAY_COLORS[k]?DAY_COLORS[k]:null;
+  inWin.forEach(s=>{const k=dc(s.day)?s.day:'x';cnt[k]=(cnt[k]||0)+1;});
   st.weeks.forEach(w=>{wkSt[w.mon]=w;});
   const tapW=inWin.filter(s=>!s.old),lastTs=tapW.length?tapW[tapW.length-1].ts:null;
   let cells=`<span class="cal-m" aria-hidden="true"></span>`+['L','','X','','V','',''].map(l=>`<span class="cal-wd" aria-hidden="true">${l}</span>`).join('')+`<span aria-hidden="true"></span>`;
@@ -19140,7 +19219,7 @@ function constancyCardHtml(){
       const cls='cal-c'+(isT?' today':'')+(fut?' fut':'');
       if(list.length){
         // las antiguas fechadas por su fecha escrita (old) se pintan, pero no tienen resumen: sin botón si solo hay de esas
-        const tap=list.filter(s=>!s.old),cols=[...new Set(list.map(s=>DAY_COLORS[s.day]||'var(--text3)'))];
+        const tap=list.filter(s=>!s.old),cols=[...new Set(list.map(s=>dc(s.day)||'var(--text3)'))];
         const bg=cols.length>1?`background:linear-gradient(135deg,${cols[0]} 50%,${cols[1]} 50%)`:`--dc:${cols[0]}`;
         const what=list.length>1?`${_joinY(list.map(_calDayLbl))} (${list.length} sesiones)`:_calDayLbl(list[0]);
         const last=tap[tap.length-1],oldTxt=list.length>tap.length?(tap.length?`, ${list.length-tap.length===1?'una antigua':(list.length-tap.length)+' antiguas'} sin resumen`:', sesión antigua sin resumen'):'';
@@ -19167,7 +19246,7 @@ function constancyCardHtml(){
   }
   if(noTs)sum+=` ${noTs===1?'Una sesión antigua sin fecha no sale':plural(noTs,'sesión antigua','sesiones antiguas')+' sin fecha no salen'} en el calendario ni ${noTs===1?'cuenta':'cuentan'} para las rachas.`;
   const kp=(v,l,on)=>`<div class="cal-kp${on?' on':''}"><b>${v}<small>${v===1?'semana':'semanas'}</small></b><span>${l}</span></div>`;
-  const lg=['A','B','C'].filter(d=>plan[d]).map(d=>`<span><i style="background:${DAY_COLORS[d]}"></i>${esc(plan[d].label||d)} <b>${cnt[d]||0}</b></span>`).join('')
+  const lg=dayKeys(plan).map(d=>`<span><i style="background:${DAY_COLORS[d]}"></i>${esc(dayLabel(d,plan))} <b>${cnt[d]||0}</b></span>`).join('')
     +(cnt.x?`<span><i style="background:var(--text3)"></i>Otra <b>${cnt.x}</b></span>`:'')
     +(anyRest?`<span><i class="rest"></i>Descanso</span>`:'')
     +`<span><i class="today"></i>Hoy</span><span><i class="wk"></i>Cumplida</span><span><i class="wk cur"></i>Racha</span>`;
@@ -19186,7 +19265,7 @@ function _calPickHtml(byDay){
   const hm=ts=>{const d=new Date(ts);return String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');};
   const dl=_calDate(list[0].ts,new Date(list[0].ts).getFullYear()!==new Date().getFullYear());
   return`<div class="cal-pick-t">${esc(dl[0].toUpperCase()+dl.slice(1))}: ${list.length} sesiones. ¿Cuál quieres ver?</div>
-    <div class="cal-pick-b">${list.map(s=>`<button type="button" class="btn bs" style="--dc:${DAY_COLORS[s.day]||'var(--text3)'}" onclick="openSessionSummary(${s.ts})"><i aria-hidden="true"></i>${esc(_calDayLbl(s))} · ${hm(s.ts)}</button>`).join('')}</div>`;
+    <div class="cal-pick-b">${list.map(s=>`<button type="button" class="btn bs" style="--dc:${getPlan()[s.day]&&DAY_COLORS[s.day]||'var(--text3)'}" onclick="openSessionSummary(${s.ts})"><i aria-hidden="true"></i>${esc(_calDayLbl(s))} · ${hm(s.ts)}</button>`).join('')}</div>`;
 }
 // Toque en un día: una sesión → su resumen; varias → elegir cuál (debajo del calendario)
 function calTap(b){
@@ -19266,8 +19345,10 @@ let _editDay='A'; // día activo en el editor
 let _routineEdOpen=false;
 let _edDragging=false; // arrastre en curso: no repintar el editor a mitad del gesto
 
+// (E1a) Día con el que abre el editor: el que se pide si existe; si no, el que toca; si no, el primero de la rutina
+function _editDayOr(d){const p=getPlan();return _isPlanDay(p[d])?d:_isPlanDay(p[S.nextDay])?S.nextDay:(dayKeys(p)[0]||'A');}
 function openRoutineEditor(){
-  _editDay=S.nextDay||'A';
+  _editDay=_editDayOr(S.nextDay);
   S.settingsOpen=false;
   _routineEdOpen=true;
   document.getElementById('settings-root').innerHTML='';
@@ -19283,7 +19364,7 @@ function closeRoutineEditor(){
 }
 // Cambiar de día en el editor: la lista nueva empieza arriba
 function editorSetDay(d){
-  if(!getPlan()[d])return;
+  if(!_isPlanDay(getPlan()[d]))return;
   _editDay=d;
   renderRoutineEditor({top:true});
 }
@@ -19450,8 +19531,9 @@ function _routineSwapTo(dayKey,slot,libEx,o){
 }
 
 function addExerciseUI(dayKey,muscle,sub){
+  if(!_isPlanDay(getPlan()[dayKey]))return; // (E1a) ese día ya no existe
   showExercisePicker({
-    title:`Añadir al ${getPlan()[dayKey].label}`,
+    title:`Añadir al ${dayLabel(dayKey)}`,
     muscle:MUSCLE_GROUPS.some(m=>m.id===muscle)?muscle:null,sub, // desde el mapa muscular: en esa zona y subzona
     mode:'add',dayKey,
     refocus:()=>document.querySelector('#routine-ed .edit-add-btn')||document.querySelector('#routine-ed .hist-sheet-close'), // el editor ya repintado
@@ -19460,6 +19542,7 @@ function addExerciseUI(dayKey,muscle,sub){
       const hk=_libHistKey(libEx.id),own=!!hk&&!_planIdTaken(hk)&&Array.isArray(S.strength[hk])&&S.strength[hk].length>0;
       const newEx=own?_libCopy(libEx,hk):libExToEx(libEx);
       const plan=getPlan();
+      if(!_isPlanDay(plan[dayKey])){toast('Ese día ya no está en tu rutina');render();return;} // (E1a)
       // Si el último es cardio, insertar antes del cardio final
       const ex=plan[dayKey].ex;
       if(ex.length>0&&ex[ex.length-1].cardio){
@@ -20932,7 +21015,7 @@ function renderRoutineEditor(opts){
   const prevSheet=root.querySelector('.hist-sheet');
   const keepScroll=prevSheet&&!(opts&&opts.top)?prevSheet.scrollTop:0;
   const plan=getPlan();
-  if(!plan[_editDay])_editDay='A';
+  _editDay=_editDayOr(_editDay); // (E1a)
   const day=plan[_editDay];
   // El maniquí del volumen planificado se conserva entre repintados (solo cambian sus pesos)
   const keepMM=mmDetach(root);
@@ -20966,7 +21049,7 @@ function renderRoutineEditor(opts){
     <div class="hist-sheet-body" style="padding:12px 0 24px">
       ${mmPlanBlockHtml()}
       <div class="edit-day-tab">
-        ${['A','B','C'].map(d=>`<button class="edit-day-btn${_editDay===d?' on':''}" onclick="editorSetDay('${d}')">${plan[d].label}</button>`).join('')}
+        ${dayTabsHtml(plan,_editDay,'edit-day-btn','editorSetDay')}
       </div>
       ${exItems}
       <button class="edit-add-btn" onclick="addExerciseUI('${_editDay}')">
@@ -21133,7 +21216,7 @@ function renderSettings(){
             <div class="set-row-t">Próxima sesión</div>
             <div class="set-row-d">Cambiar si te has saltado un día</div>
           </div>
-          <span class="set-row-v">${getPlan()[S.nextDay].label}</span>
+          <span class="set-row-v">${esc(dayLabel(hoyDayKey()))}</span>
           <span class="set-row-arrow">›</span>
         </div>
       </div>
@@ -21284,22 +21367,32 @@ function settingsChangeStartDay(){
     <div class="cmod-hdl"></div>
     <div class="cmod-t">Próxima sesión</div>
     <div class="cmod-b">Elige el día con el que quieres entrenar la próxima vez.</div>
-    <div class="ob-days" style="margin-bottom:14px">
-      ${['A','B','C'].map(d=>`<div class="ob-day ${S.nextDay===d?'sel':''}" onclick="pickNextDay('${d}')">
-        <div class="di">${d==='A'?'🦵':d==='B'?'🏋️':'🚣'}</div>
-        <div class="dn">Día ${d}</div>
-        <div class="df">${getPlan()[d].focus.split('—')[0].trim()}</div>
-      </div>`).join('')}
+    <div class="ob-days" role="group" aria-label="Días de tu rutina" style="margin-bottom:14px">
+      ${(()=>{const p=getPlan(),cur=hoyDayKey();return dayKeys(p).map(d=>{const live=_dayLive(p[d]),f=String(p[d].focus||'').split(/\s*[—–]\s*/)[0].trim();
+        return`<button type="button" class="ob-day ${cur===d?'sel':''}" aria-pressed="${cur===d}"${live?` onclick="pickNextDay('${d}')"`:' disabled'}>
+        <div class="di" aria-hidden="true">${dayEmoji(p[d])}</div>
+        <div class="dn">${esc(dayLabel(d,p))}</div>
+        <div class="df">${live?esc(f):'Sin ejercicios'}</div>
+      </button>`;}).join('');})()}
     </div>
     <div class="cmod-btns">
       <button class="btn bs" onclick="document.getElementById('cmodal-root').innerHTML=''">Cerrar</button>
     </div>
   </div></div>`;
 }
+// (E1a) Emoji de un día según su grupo principal (el que más ejercicios de fuerza tiene; a igualdad, el primero), no
+// según su letra: con el plan de fábrica sale lo de siempre (A 🦵, B 🏋️, C 🚣)
+const DAY_EMOJI={piernas:'🦵',pecho:'🏋️',espalda:'🚣',hombros:'🏋️',biceps:'💪',triceps:'💪',core:'⚡'};
+function dayEmoji(day){
+  const str=_isPlanDay(day)?day.ex.filter(e=>_isPlainObj(e)&&!e.cardio):[],cnt={};let best=null;
+  str.forEach(e=>{const m=e.muscle;if(!m)return;cnt[m]=(cnt[m]||0)+1;if(!best||cnt[m]>cnt[best])best=m;});
+  return DAY_EMOJI[best]||(str.length?'🏋️':_isPlanDay(day)&&day.ex.length?'🏃':'📝');
+}
 function pickNextDay(d){
+  if(!_dayLive(getPlan()[d]))return; // (E1a) un día vacío no entra en la rotación
   S.nextDay=d;saveState();
   document.getElementById('cmodal-root').innerHTML='';
-  toast(`Próxima sesión: ${getPlan()[d].label}`);
+  toast(`Próxima sesión: ${dayLabel(d)}`);
   renderSettings();render();
 }
 
@@ -21315,7 +21408,7 @@ function settingsChangeWeeklyTarget(){
   root.innerHTML=`<div class="cmov" onclick="if(event.target===this){document.getElementById('cmodal-root').innerHTML=''}"><div class="cmod">
     <div class="cmod-hdl"></div>
     <div class="cmod-t">Días por semana</div>
-    <div class="cmod-b">¿Cuántas sesiones quieres hacer cada semana? La pantalla de Inicio y el Coach se ajustarán a tu objetivo. Tu rotación (A→B→C) y tu historial no cambian.</div>
+    <div class="cmod-b">¿Cuántas sesiones quieres hacer cada semana? La pantalla de Inicio y el Coach se ajustarán a tu objetivo. La rotación de tus días y tu historial no cambian.</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:16px">
       ${opts.join('')}
     </div>
@@ -21652,6 +21745,8 @@ function importData(){
             // Sanear nombres y campos de texto del plan personalizado (defensa XSS). Sin las claves del catálogo (se leen
             // por su lib) y con un id que se pueda usar (uno con comillas o < > pasa a ser nuevo, con sus datos). Lo que no
             // es un ejercicio (null, un texto, un número) se quita: la app no lo sabría pintar.
+            // (E1a) Antes, las claves: solo días A…F con su lista de ejercicios; sin ninguno (o sin plan), el de fábrica
+            if('currentPlan' in migrated)migrated.currentPlan=_sanitizePlanKeys(migrated.currentPlan);
             if(migrated.currentPlan){
               Object.values(migrated.currentPlan).forEach(day=>{
                 if(day&&day.label)day.label=String(day.label).slice(0,80);
