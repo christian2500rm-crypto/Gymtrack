@@ -7564,6 +7564,239 @@ GA.def('lib_chair_stand_fast',{title:'Levantarse de la silla rápido',cam:{yaw:3
 });
 
 })(window.GymAnim);
+/* ex/n_new_floor_bar.js */
+/* En el suelo sin banco (esterilla): aperturas y pullover con mancuernas, press francés y pullover con barra recta, press de
+   suelo con kettlebell. Boca arriba con la cabeza hacia -X, rodillas flexionadas y pies planos; abajo los codos (o la carga)
+   llegan al suelo y eso limita el recorrido */
+(function(GA){
+const K=GA._.kit,V=GA._.V,DM=GA._.DIM,SS=K.SS,mix=K.mix,sst=K.sst,D=K.D,Z=[0,0,1],AL=DM.fa+DM.grip;
+const PE='Pectoral',DO='Dorsales',TR='Tríceps';
+const TL=(a,la,b,lb,c,lc,d,ld)=>[{p:1,dur:a,label:la,act:.8},{dur:b,label:lb,act:.9},{p:0,dur:c,label:lc,act:1},{dur:d,label:ld,act:.5}];
+const EY=.04,CAM={yaw:-30,pitch:24};
+const lie=(b,E,o)=>{const Y=K.mat(E,[-.1,0,0],[1.75,.62]).top;
+  K.supine(b,Object.assign({y:Y,x:-.42,at:'sho',hd:'rest',sp:[-2],sc:[-.01,-.025]},o));
+  for(const[s,k]of SS){b.footFlat(s,[b.hip(s)[0]+.42,Y,k*.18],-k*6);b.leg(s,null,[0,1,k*.25]);}
+  E.shadow([-.1,0,0],.95,.4,.45);return Y;};
+const BAR={len:1.5,inner:.45,plates:[.12]},PR=.12;
+const once=(spec,key,b,f,lo,hi)=>K.memo(spec,key,()=>{const e0=b.ikErr,r=K.root(f,lo,hi);b.ikErr=e0;return r;});
+
+const slerp=(a,b,t)=>{const w=Math.acos(K.clamp(V.dot(a,b),-1,1));if(w<1e-4)return a;const s=Math.sin(w);return V.add(V.mul(a,Math.sin((1-t)*w)/s),V.mul(b,Math.sin(t*w)/s));};
+const ray=(c,P0,F,R)=>{const q=V.sub(P0,c),bq=V.dot(F,q);return V.madd(P0,F,-bq+Math.sqrt(Math.max(0,bq*bq-V.dot(q,q)+R*R)));};
+const FR=K.armD(24);
+const fly=(b,p,v)=>SS.map(([s,k])=>{const sh=b.sho(s),A=V.norm(V.sub(ray(sh,b.tpt(k*.085,-.17,0),b.tf.F,FR),sh)),B=V.norm(b.tdir(k*Math.cos(v*D),-.18,-Math.sin(v*D))),
+  d=slerp(A,B,p),T=V.norm(V.cross(V.norm(V.cross(A,B)),d));b.arm(s,V.madd(sh,d,FR),V.add(T,[0,-.35,0]),b.tdir(0,1,0));return b.j(s,'grip');});
+GA.def('lib_fly_floor_db',{title:'Aperturas en el suelo con mancuernas',cam:CAM,muscles:{pecs:1,frontdelts:.4},labels:[PE,'Deltoides anterior'],
+  timeline:TL(2.2,'Abre en arco · codos suaves',.4,'Codos al suelo · sin rebote',1.4,'Junta en arco sobre el pecho',.5,'Arriba · sin chocar'),
+  build(c,b,E){lie(b,E);const v=once(this,'v',b,x=>{fly(b,1,x);return b.j('R','elb')[1]-EY;},-25,45);
+    fly(b,c.p,v).forEach((g,i)=>{E.dumbbell(g,b.tdir(0,1,0),{r:.05});if(!i)E.trace('mancuerna',g);});}});
+
+const pull=(b,p,ph1,o)=>{b.scap('both',.02*sst(.25,1,p),-.02);const ph=mix(-4,ph1,p)*D,a=b.tdir(0,Math.sin(ph),Math.cos(ph)),pl=b.tdir(0,-Math.cos(ph),Math.sin(ph)),
+  Rr=b.tdir(1,0,0),sm=V.lerp(b.sho('R'),b.sho('L'),.5),dz=V.dot(V.sub(b.sho('R'),sm),Rr)-o.hw,hm=V.madd(sm,a,Math.sqrt(K.armD(o.el)**2-dz*dz));
+  for(const[s,k]of SS)b.arm(s,V.madd(hm,Rr,k*o.hw),V.add(pl,V.mul(Rr,k*o.fl)),Rr);return{hm,a,Rr};};
+const PTL=(l2,l3)=>TL(2.6,'Baja tras la cabeza en arco',.4,l2,1.4,l3,.5,'Arriba · codos suaves'),PCAM={yaw:-20,pitch:22};
+const DBP={el:20,hw:.055,fl:1},dbC=P=>V.madd(P.hm,P.a,-.04);
+const dbLow=P=>{const a=P.a,c=dbC(P),sy=Math.sqrt(Math.max(0,1-a[1]*a[1]));return Math.min(...[.1075,-.1075].map(t=>c[1]+a[1]*t-.075*sy-.0375*Math.abs(a[1])));};
+GA.def('lib_pullover_floor_db',{title:'Pullover en el suelo con mancuerna',cam:PCAM,muscles:{lats:1,pecs:.6,triceps:.4},labels:[DO,PE],
+  timeline:PTL('Estira · costillas abajo','Sube sobre el pecho'),
+  build(c,b,E){const Y=lie(b,E,{sc:[0,-.02]}),ph=once(this,'ph',b,x=>dbLow(pull(b,1,x,DBP))-Y-.012,50,115),P=pull(b,c.p,ph,DBP);
+    E.dumbbell(dbC(P),P.a,{r:.075,hl:.075,len:.14});E.trace('mancuerna',V.madd(P.hm,P.a,.1));}});
+const BBP={el:16,hw:.21,fl:.25};
+GA.def('lib_pullover_bb',{title:'Pullover con barra',cam:PCAM,muscles:{lats:1,pecs:.6,triceps:.4},labels:[DO,PE],
+  timeline:PTL('Estira · discos sin tocar','Tira hasta sobre el pecho'),
+  build(c,b,E){const Y=lie(b,E,{sc:[0,-.02]}),ph=once(this,'ph',b,x=>pull(b,1,x,BBP).hm[1]-PR-Y-.012,50,115),P=pull(b,c.p,ph,BBP);
+    K.barbell(E,P.hm,P.Rr,BAR);E.trace('barra',V.madd(P.hm,P.Rr,.75));}});
+
+const arm=(b,s,a,ab,fl,zt)=>{const k=K.sd(s),u=V.norm([Math.sin(a*D),-Math.cos(a*D),k*ab]),el=V.madd(b.sho(s),u,DM.ua),
+  fz=K.clamp((k*zt-el[2])/AL,-.8,.8),q=Math.sqrt(1-fz*fz),ph=(a+fl)*D;b.armDir(s,u,[q*Math.sin(ph),-q*Math.cos(ph),fz],Z);return b.j(s,'grip');};
+GA.def('lib_skull_crusher_bb',{title:'Press francés con barra recta',cam:{yaw:22,pitch:20},fitBox:[[-.95,0,-.3],[.78,.78,.3]],muscles:{triceps:1},labels:[TR],
+  timeline:TL(2.4,'Baja a la frente en 2,4 s',.3,'Codos al techo · quietos',1.2,'Extiende completo',.5,'Arriba · húmeros fijos'),
+  build(c,b,E){lie(b,E);const G=SS.map(([s])=>arm(b,s,190,-.06,mix(3,110,c.p),.14)),m=V.lerp(G[0],G[1],.5);
+    K.barbell(E,m,Z,BAR);E.trace('barra',V.madd(m,Z,.75));}});
+
+const KG=16;
+const kbPress=(b,p)=>{const sh=b.sho('R'),dn=Math.asin((sh[1]-EY)/DM.ua),hd=V.norm(V.perp(b.tdir(Math.SQRT1_2,-Math.SQRT1_2,0),[0,1,0])),
+  hb=V.add(V.mul(hd,Math.cos(dn)),[0,-Math.sin(dn),0]),bot=V.add(V.madd(sh,hb,DM.ua),[0,AL,0]),R=K.armD(8),w=1-p,
+  top=[sh[0]+.03,sh[1]+Math.sqrt(R*R-.0013),sh[2]-.02],g=[mix(bot[0],top[0],w),mix(bot[1],top[1],w),mix(bot[2],top[2],Math.pow(w,1.5))];
+  b.arm('R',g,hb,Z);const S=b.S.R,fd=V.norm(V.sub(S.grip,S.elb)),wv=V.norm(V.perp(V.lerp(Z,b.tdir(0,1,0),.55*w),fd));
+  S.gripAx=V.norm(V.cross(fd,wv));return{g:S.grip,ax:S.gripAx,bd:V.norm(V.add(V.mul(fd,-Math.cos(50*D)),V.mul(wv,Math.sin(50*D))))};};
+GA.def('lib_kb_floor_press',{title:'Press de suelo con kettlebell',cam:CAM,muscles:{pecs_R:1,triceps_R:.7,frontdelts_R:.4},labels:[PE,TR],
+  timeline:TL(2.2,'Baja hasta apoyar el codo',.6,'Codo en el suelo · pausa',1.2,'Empuja al techo',.6,'Arriba · muñeca recta'),
+  build(c,b,E){lie(b,E);K.armsFloor(b,E,{y:0,spread:40,sides:['L']});const q=kbPress(b,c.p);
+    K.kettlebell(E,q.g,{kg:KG,up:V.neg(q.bd),ax:q.ax});E.trace('pesa',q.g);}});
+
+})(window.GymAnim);
+/* ex/n_new_home_load.js */
+/* En casa con carga improvisada: mochila cargada y garrafas de agua en lugar de pesas. Sentadilla abrazando la mochila,
+   peso muerto rumano con la mochila colgando del asa, y press de hombros, curl y elevación lateral con garrafas */
+(function(GA){
+const K=GA._.kit,V=GA._.V,C=GA._.COL,DM=GA._.DIM,SS=K.SS,mix=K.mix,sst=K.sst,D=K.D,UP=[0,1,0],X=[1,0,0],Z=[0,0,1];
+const sh=(E,x)=>E.shadow([x||0,0,0],.5,.38,.55);
+const rest=(ok,st,mx)=>{let a=0;while(a<mx&&!ok(a))a+=st;if(a>0){let lo=a-st;for(let i=0;i<6;i++){const m=(lo+a)/2;if(ok(m))a=m;else lo=m;}}return a;};
+const front=(b,y,z0,zr)=>{let x=-9;for(const[s]of SS){const S=b.S[s];for(const[a,z,r0,r1]of[[S.hip,S.kne,.09,.06],[S.kne,S.ank,.058,.04]])
+  if(y<=a[1]&&y>=z[1]){const t=(a[1]-y)/(a[1]-z[1]),d=V.norm(V.sub(z,a)),r=mix(r0,r1,t);
+    if(zr==null||Math.abs(mix(a[2],z[2],t)-z0)<zr+r)x=Math.max(x,mix(a[0],z[0],t)+r*Math.sqrt(1+(d[0]/Math.min(-.3,d[1]))**2));}
+  else if(r0>.08&&y>a[1]&&y<a[1]+r0&&(zr==null||Math.abs(a[2]-z0)<zr+r0))x=Math.max(x,a[0]+Math.sqrt(r0*r0-(y-a[1])**2));}return x;};
+
+const BC='#6b5b4b',BS='#2b2622';
+const pack=(E,c,U,O)=>{const R=V.norm(V.cross(O,U)),P=(r,u,f)=>V.add(c,V.add(V.mul(R,r),V.add(V.mul(U,u),V.mul(O,f)))),ax=(a,u,f)=>[V.mul(R,a),V.mul(U,u),V.mul(O,f)];
+  E.box(P(0,-.03,0),ax(.15,.18,.09),BC,{grp:'bp',round:7});E.ell(P(0,.13,0),ax(.15,.08,.09),BC,{grp:'bp'});
+  for(const k of[-1,1]){const q=[P(k*.05,.19,.07),P(k*.075,.12,.112),P(k*.1,-.03,.118),P(k*.115,-.15,.104),P(k*.12,-.2,.08)];
+    for(let i=1;i<q.length;i++)E.cap(q[i-1],q[i],.012,.012,BS,{grp:'bps'+k});}
+  const h=[P(-.075,.195,0),P(-.06,.235,0),P(.06,.235,0),P(.075,.195,0)];for(let i=1;i<4;i++)E.cap(h[i-1],h[i],.009,.009,BS,{grp:'bph'});};
+
+const J5={w:.17,d:.12,h:.26,sh:.035,nk:.018,cp:.02,hd:.05,r:.024,hw:.062},J2={w:.12,d:.088,h:.15,sh:.024,nk:.012,cp:.016,hd:.032,r:.019,hw:.056};
+for(const J of[J5,J2])J.t=J.hd+J.cp+J.nk+J.sh;
+const JC='#bcd7e6',JL='#3a7cc0',JK='#2c5f9e',JH='#e4eaef';
+const hangJ=(b,s,W,n,J)=>{const S=b.S[s],h=S.grip,fd=V.norm(V.sub(S.wri,S.elb)),P=[];   // puntos de los ejes de las cápsulas (desde el puño) + radio
+  for(const[A,B,ra,rb]of[[S.sho,S.elb,.056,.045],[S.elb,S.wri,.042,.03],[S.wri,V.madd(S.wri,fd,.1),.038,.034]])
+    for(let i=0;i<=10;i++){const q=V.sub(V.lerp(A,B,i/10),h);q.push(mix(ra,rb,i/10));P.push(q);}
+  W=V.norm(W);const g0=V.norm(V.perp([0,-1,0],W)),Wp=V.dot(V.cross(W,g0),n)<0?V.neg(W):W,
+    BX=[[-J.t-J.h/2,J.w/2,J.h/2,J.d/2],[-J.t+J.sh*.25,J.w*.4,J.sh*.25,J.d*.4]];   // cuerpo y hombro: [u del centro, semiejes W,U,F]
+  const fr=a=>{const U=V.neg(V.rot(g0,Wp,a));return{h,W,U,F:V.norm(V.cross(U,W))};},
+    ok=a=>{const{U,F}=fr(a);for(const q of P){const w=Math.abs(V.dot(q,W)),u=V.dot(q,U),f=Math.abs(V.dot(q,F)),r2=q[3]*q[3];
+      for(const[c,ea,eu,ed]of BX){const x=Math.max(0,w-ea),y=Math.max(0,Math.abs(u-c)-eu),z=Math.max(0,f-ed);if(x*x+y*y+z*z<r2)return false;}}return true;};
+  const a=rest(ok,.1,1.5),f=fr(a);f.c=V.madd(h,f.U,-J.t-J.h/2);f.a=a;return f;};
+const jug=(E,J,f,g)=>{const{h,W,U,F}=f,P=u=>V.madd(h,U,u),ax=(a,u,d)=>[V.mul(W,a),V.mul(U,u),V.mul(F,d)],o={grp:g};
+  E.box(P(-J.t-J.h/2),ax(J.w/2,J.h/2,J.d/2),JC,{grp:g,round:5});E.ell(P(-J.t),ax(J.w/2,J.sh,J.d/2),JC,o);
+  E.box(P(-J.t-J.h*.44),ax(J.w/2+.002,J.h*.17,J.d/2+.002),JL,o);                                   // etiqueta
+  E.cyl(P(-J.t+J.sh*.6),P(-J.hd-J.cp),J.r*.78,JC,o);E.cyl(P(-J.hd-J.cp),P(-J.hd),J.r,JK,o);          // cuello y tapón
+  E.cap(V.madd(h,W,-J.hw),V.madd(h,W,J.hw),.0085,.0085,JH,{bias:.04});
+  for(const k of[-1,1])E.cap(V.madd(h,W,k*J.hw),V.madd(P(-J.hd-J.cp-.006),W,k*J.r*.9),.0065,.0065,JH,{bias:.04});};
+
+const hug=b=>{const U=V.norm(V.lerp(b.tdir(0,1,0),UP,.45)),O=V.norm(V.perp(b.tdir(0,0,1),U)),R=V.norm(V.cross(O,U)),e=K.ells(b);
+  let c=V.madd(b.tpt(0,-.19,0),O,.3);const o=V.madd(c,O,-.09),n=V.neg(O);c=V.madd(c,O,.003-Math.min(K.gap(e.tho,o,n),K.gap(e.lum,o,n)));
+  for(const[s,k]of SS)b.arm(s,V.add(c,V.add(V.mul(R,k*.163),V.add(V.mul(U,-.05),V.mul(O,.072)))),b.tdir(k*.55,-1,-.3),U);
+  return{c,U,O};};
+const SQ=(ctx,b,p,o)=>{const st=(kf,tl)=>K.stand(b,{fz:o.fz,toe:o.toe,kf,tilt:tl,sp:o.sp||[-3],hd:-tl*.4,sc:o.sc,balance:true,arms:o.arms,xm:o.xm});
+  const kB=K.memo(ctx,'kB',()=>K.root(kf=>{st(kf,o.t[1]);return b.hip('R')[1]-b.j('R','kne')[1]+(o.dep||0);},60,150));
+  b.ikErr=0;return st(mix(5,kB,p),mix(o.t[0],o.t[1],p));};
+GA.def('lib_squat_backpack',{title:'Sentadilla con mochila',cam:{yaw:34,pitch:9},
+  muscles:{quads:1,glutes:.8,adductors:.4,abs:.2},labels:['Cuádriceps','Glúteos'],init:{p:0,act:.45},
+  timeline:[{p:1,dur:2.2,label:'Baja · pecho arriba',act:.85},{dur:.35,label:'Abajo · muslos paralelos',act:.95},
+    {p:0,dur:1.3,label:'Sube empujando con los talones',act:1},{dur:.6,label:'Arriba · mochila pegada',act:.45}],
+  build(c,b,E){let bp=null;
+    SQ(this,b,c.p,{fz:.17,toe:16,t:[3,22],dep:0,sc:[-.005,-.005],arms:b=>{bp=hug(b);},xm:()=>bp?[[bp.c,10/75]]:null});
+    pack(E,bp.c,bp.U,bp.O);sh(E);}});
+
+const carry=b=>{const S=b.sho('R'),L=K.armD(4),dz=.045-S[2];let x=S[0],y=S[1]-L;
+  for(let i=0;i<4;i++){x=Math.max(S[0]-.03,front(b,y-.05,0,.16)+.096);y=S[1]-Math.sqrt(Math.max(.01,L*L-dz*dz-(x-S[0])**2));}
+  for(const[s,k]of SS)b.arm(s,[x,y,k*.045],[-.3,0,k],Z);
+  const h=[x,y,0],dn=a=>[Math.sin(a),-Math.cos(a),0],Of=a=>[Math.cos(a),Math.sin(a),0],
+    a=rest(a=>{for(let d=.05;d<.47;d+=.04){const q=V.madd(V.madd(h,dn(a),d),Of(a),-.094);if(q[0]<front(b,q[1],0,.16)+.003)return false;}return true;},.03,1);
+  return{h,U:V.neg(dn(a)),O:Of(a),c:V.madd(h,dn(a),.235),a};};
+const rdl=(b,p,T1)=>{let bp=null;K.stand(b,{fz:.12,toe:6,kf:mix(10,20,sst(0,.45,p)),tilt:mix(2,T1,p),sp:[-2],hd:-mix(2,T1,p)*.3,sc:[-.008,-.006],
+  balance:true,arms:b=>{bp=carry(b);},xm:()=>bp?[[bp.c,10/75]]:null});return bp;};
+const low=bp=>bp.c[1]-.21*bp.U[1]-.09*Math.abs(bp.O[1]);
+GA.def('lib_rdl_backpack',{title:'Peso muerto rumano con mochila',cam:{yaw:30,pitch:10},
+  muscles:{hams:1,glutes:.9,lowback:.5},labels:['Isquiotibiales','Glúteos','Lumbares'],init:{p:0,act:.6},
+  timeline:[{p:1,dur:3,label:'Baja · cadera atrás',act:.8},{dur:.3,label:'Estira isquios',act:.9},
+    {p:0,dur:1.5,label:'Sube · empuja la cadera',act:1},{dur:.6,label:'Arriba · aprieta glúteos',act:.6}],
+  build(c,b,E){const T1=K.memo(this,'T1',()=>K.root(t=>low(rdl(b,1,t))-.085,40,88));b.ikErr=0;   // el fondo pasa sobre las punteras
+    const bp=rdl(b,c.p,T1);pack(E,bp.c,bp.U,bp.O);E.trace('mochila',V.add(bp.h,[0,0,.08]));sh(E,.05);}});
+
+GA.def('lib_shoulder_press_jugs',{title:'Press de hombros con garrafas',cam:{yaw:66,pitch:10},
+  muscles:{frontdelts:1,sidedelts:.6,triceps:.6},labels:['Deltoides anterior','Tríceps'],init:{p:0,act:.65},
+  timeline:[{p:1,dur:1.3,label:'Empuja arriba · sin arquear',act:1},{dur:.4,label:'Arriba · brazos estirados',act:.9},
+    {p:0,dur:2.4,label:'Baja lento a los hombros',act:.75},{dur:.4,label:'Abajo · abdomen firme',act:.65}],
+  build(c,b,E){const p=c.p,SP=30*D,AG=12*D,ph=mix(-32,84,p)*D,G={},W=(b,k)=>b.tdir(k*Math.cos(AG),0,Math.sin(AG));
+    K.stand(b,{fz:.15,toe:8,kf:4,sp:[-1],hd:-3,sc:[.016*sst(.4,1,p),0],balance:true,xm:()=>G.R?[[G.R,5/75],[G.L,5/75]]:null,arms:b=>{
+      for(const[s,k]of SS){b.armDir(s,b.tdir(k*Math.cos(SP)*Math.cos(ph),Math.sin(ph),Math.sin(SP)*Math.cos(ph)),b.tdir(0,1,0),W(b,k));G[s]=b.j(s,'grip');}}});
+    for(const[s,k]of SS)jug(E,J5,hangJ(b,s,W(b,k),b.tdir(k*Math.sin(AG),0,-Math.cos(AG)),J5),'jg'+s);
+    E.trace('garrafa',b.j('R','grip'));sh(E);}});
+
+const AL=DM.fa+DM.grip;
+const carm=(b,s,a,ab,fl,zt,r)=>{const k=K.sd(s),u=V.norm([Math.sin(a*D),-Math.cos(a*D),k*ab]),el=V.madd(b.sho(s),u,DM.ua),
+  fz=K.clamp((k*zt-el[2])/AL,-.8,.8),q=Math.sqrt(1-fz*fz),ph=(a+fl)*D,f=[q*Math.sin(ph),-q*Math.cos(ph),fz];
+  b.armDir(s,u,f,V.rot(V.norm(V.cross(Z,f)),f,k*(r||0)*D));return b.j(s,'grip');};
+GA.def('lib_curl_jugs',{title:'Curl con garrafas',cam:{yaw:36,pitch:8},
+  muscles:{biceps:1,forearms:.5},labels:['Bíceps','Antebrazo'],init:{p:0,act:.5},
+  timeline:[{p:1,dur:1.2,label:'Sube · codos pegados',act:1},{dur:.6,label:'Aprieta arriba',act:1},
+    {p:0,dur:2.6,label:'Baja lento sin balanceo',act:.75},{dur:.4,label:'Abajo · brazos estirados',act:.5}],
+  build(c,b,E){const p=c.p;K.stand(b,{fz:.12,toe:8,kf:5,tilt:1,sp:[-2],hd:4,sc:[-.012,-.015]});
+    for(const[s]of SS){carm(b,s,mix(3,10,p*p),.16,mix(14,135,p),mix(.3,.25,p),90);jug(E,J5,hangJ(b,s,b.S[s].gripAx,X,J5),'jg'+s);}
+    E.trace('garrafa',b.j('R','grip'));sh(E);}});
+
+GA.def('lib_lateral_raise_jugs',{title:'Elevación lateral con garrafas',cam:{yaw:60,pitch:8},
+  muscles:{sidedelts:1,frontdelts:.3,traps:.25},labels:['Deltoides lateral','Trapecio'],init:{p:0,act:.5},
+  timeline:[{p:1,dur:1.3,label:'Sube · lidera con el codo',act:1},{dur:.5,label:'Altura del hombro',act:1},
+    {p:0,dur:2.4,label:'Baja lento sin encoger',act:.75},{dur:.4,label:'Abajo · sin descansar',act:.5}],
+  build(c,b,E){const p=c.p;K.stand(b,{fz:.12,toe:8,kf:6,tilt:6,sp:[-2],hd:-5,sc:[-.006,0]});
+    for(const[s,k]of SS){const o={abd:mix(14,90,p),hz:mix(14,24,p),elbow:mix(12,15,p),rot:mix(-5,8,p)};b.armFK(s,o);
+      o.grip=V.norm(V.perp(b.tdir(0,0,1),V.norm(V.sub(b.j(s,'wri'),b.j(s,'elb')))));b.armFK(s,o);
+      jug(E,J2,hangJ(b,s,o.grip,b.tdir(k,0,0),J2),'jg'+s);}
+    E.trace('garrafa',b.j('R','grip'));sh(E);}});
+
+})(window.GymAnim);
+/* ex/n_new_misc_load.js */
+/* Cargas variadas: elevación lateral con disco, paseo del granjero con discos, curl con kettlebell por los cuernos
+   y jalón con banda por encima de la cabeza (banda sin anclaje) */
+(function(GA){
+const K=GA._.kit,V=GA._.V,C=GA._.COL,DM=GA._.DIM,SS=K.SS,mix=K.mix,sst=K.sst,D=K.D,PI=Math.PI,TAU=2*PI,sin=Math.sin,cos=Math.cos,UP=[0,1,0],Z=[0,0,1];
+const TL=(u,lu,t,lt,d,ld,r,lr)=>[{p:1,dur:u,label:lu,act:1},{dur:t,label:lt,act:1},{p:0,dur:d,label:ld,act:.75},{dur:r,label:lr,act:.5}];
+const sh=(E,x)=>E.shadow([x||0,0,0],.45,.33,.55);
+const PLATE=(E,g,ax,r,th)=>{const a=V.norm(V.perp(ax,UP)),c=V.madd(g,UP,-(r-.012));E.plate(c,V.cross(a,UP),r,{th,bias:.05});return c;};
+
+GA.def('lib_plate_lateral_raise',{
+  title:'Elevación lateral con disco',cam:{yaw:62,pitch:8},
+  muscles:{sidedelts:1,frontdelts:.3,forearms:.3},labels:['Deltoides lateral','Antebrazo'],init:{p:0,act:.5},
+  timeline:TL(1.4,'Sube · lidera con el codo',.5,'Pausa a la altura del hombro',2.6,'Baja lento · sin encoger',.4,'Abajo · pinza firme'),
+  build(c,b,E){const p=c.p,r=.15;K.stand(b,{fx:-.06,fz:.13,toe:8,kf:6,tilt:7,sp:[-2],hd:-6,sc:[-.008,0]});
+    for(const[s,k]of SS){const o={abd:mix(10,92,p),hz:mix(14,26,p),elbow:mix(12,16,p),rot:mix(-5,8,p)};b.armFK(s,o);
+      o.grip=V.norm(V.perp(b.tdir(0,0,1),V.norm(V.sub(b.j(s,'wri'),b.j(s,'elb')))));b.armFK(s,o);
+      const g=b.j(s,'grip');PLATE(E,g,o.grip,r,.03);if(k>0)E.trace('disco',g);}
+    sh(E);}
+});
+
+const FLOOR=(E,x,S)=>{const o=((x%S)+S)%S;for(let i=-5;i<=6;i++){const X=i*S-o;E.line([X,.002,-.45],[X,.002,.45],.006,'#cfd8e0',{alpha:.25*Math.max(0,1-Math.abs(X-.3)/2),layer:-1});}};
+const GAIT=(b,E,cy,o)=>{const T=o.T,v=o.v,d=o.d||.62,L=v*T*d,xh=(o.x||0)+L*.5+.03,fz=o.fz||.1,M=GA._.EASE.mj;
+ const pose=(s,k,u)=>{const t=u*T,hx=xh-v*t,z=k*fz,a=u<.1?-15*(1-u/.1)**2:u<.4?0:40*Math.pow((u-.4)/(d-.4),1.6);   // a + = talón arriba, - = punta arriba
+  const r=a*D,f=[cos(r),-sin(r),0],n=[sin(r),cos(r),0],ax=a>=0?hx+.2-.145*cos(r)+.075*sin(r):hx+.055*cos(r)+.075*sin(r);
+  return K.footOn(b,s,[ax,0,z],f,n);};
+ for(const[s,k,of]of[['R',1,0],['L',-1,.5]]){const u=(cy+of)%1;
+  if(u<d)pose(s,k,u);else{const w=(u-d)/(1-d),e=M(w),A0=pose(s,k,d),A1=pose(s,k,0),a=(w<.5?mix(40,-4,M(w/.5)):mix(-4,-15,M((w-.5)/.5)))*D;
+   b.foot(s,V.add(V.lerp(A0,A1,e),[0,.075*Math.pow(sin(PI*Math.min(1,w*1.08)),1.3)*(1-.35*w),0]),[cos(a),-sin(a),0],[sin(a),cos(a),0]);}}
+ const reach=s=>{const a=b.j(s,'ank'),dz=a[2]-K.sd(s)*DM.hipW;return a[1]+Math.sqrt(Math.max(.01,K.legD(3)**2-(a[0]-(o.x||0))**2-dz*dz));};
+ const W=TAU*cy;b.pelvis([o.x||0,Math.min(o.H+.014*cos(2*W-2.6),reach('R'),reach('L')),.012*sin(W)],{tilt:o.tl||3,yaw:o.yw*cos(W),roll:1.5*sin(W)});
+ K.trunk(b,{sp:[0,0,-o.tw*cos(W)],hd:o.hd,sc:o.sc});K.legs(b,{up:.1});FLOOR(E,v*T*cy,v*T/2);return W;};
+GA.def('lib_farmer_walk_plates',{
+  title:'Paseo del granjero con discos',cam:{yaw:30,pitch:8},fitBox:[[-.5,0,-.42],[.55,1.85,.42]],cycle:{period:1.05},note:'pasos cortos',
+  muscles:{forearms:1,traps:1,abs:.5,glutes:.3,quads:.3},labels:['Antebrazo','Trapecio','Abdomen'],init:{act:.7},
+  timeline:[{dur:1.05,label:'Pinza firme · hombros atrás',act:.7}],
+  build(c,b,E){GAIT(b,E,c.cyc,{T:1.05,v:.95,d:.62,H:.92,tl:2,tw:4,yw:3,sc:[-.014,-.012],hd:-2});const R=K.armD(4),r=.19,HZ=.27;
+    for(const[s,k]of SS){const S=b.sho(s),dz=k*HZ-S[2],g=[S[0]+.01,S[1]-Math.sqrt(R*R-dz*dz),k*HZ];b.arm(s,g,[-1,0,k*.3],[1,0,0]);PLATE(E,g,[1,0,0],r,.035);}
+    E.shadow([0,0,0],.45,.35,.5);}
+});
+
+const AL=DM.fa+DM.grip;
+const CARM=(b,s,a,ab,fl,zt)=>{const k=K.sd(s),u=V.norm([sin(a*D),-cos(a*D),k*ab]),el=V.madd(b.sho(s),u,DM.ua),
+  fz=K.clamp((k*zt-el[2])/AL,-.8,.8),q=Math.sqrt(1-fz*fz),ph=(a+fl)*D;b.armDir(s,u,[q*sin(ph),-q*cos(ph),fz],Z);return b.j(s,'grip');};
+GA.def('lib_kb_curl',{
+  title:'Curl con kettlebell',cam:{yaw:38,pitch:8},
+  muscles:{biceps:1,forearms:.5},labels:['Bíceps','Antebrazo'],init:{p:0,act:.5},
+  timeline:TL(1.2,'Sube · codos pegados',.5,'Aprieta arriba',2.6,'Baja lento · sin balanceo',.4,'Abajo · brazos estirados'),
+  build(c,b,E){const p=c.p,kg=12,r=K.kbR(kg),hw=r*.62+.018,dc=r+.068,ou=-.0238+.3*(r*.74-dc),oa=.7*(hw+.01)+.168*r;   // cuernos: h + up·ou ± ax·oa
+    K.stand(b,{fz:.12,toe:8,kf:5,tilt:1,sp:[-2],hd:4,sc:[-.012,-.015]});
+    const G=SS.map(([s])=>CARM(b,s,mix(3,9,p*p),.06,mix(31,135,p),oa)),up=V.rot(UP,Z,mix(10,38,sst(0,1,p))*D);
+    const kb=K.kettlebell(E,V.madd(V.lerp(G[0],G[1],.5),up,-ou),{kg,up,ax:Z});
+    SS.forEach(([s,k])=>{b.S[s].gripAx=V.norm(V.add(V.mul(up,r*.74+.034-dc),V.mul(Z,k*(r*.56-hw-.01))));});
+    E.trace('kettlebell',kb.c);sh(E);}
+});
+
+const clearHead=(b,P,g)=>{const e=K.ells(b),f=x=>Math.min(...K.HEAD.map(n=>K.sgap(e[n],[x,P[1],e[n][0][2]],.012)))-g;
+  return f(P[0])>=0?P:[K.root(f,P[0],P[0]+.4),P[1],P[2]];};
+GA.def('lib_band_overhead_pulldown',{
+  title:'Jalón con banda por encima de la cabeza',cam:{yaw:-45,pitch:8},
+  muscles:{lats:1,midback:.6,reardelts:.4,biceps:.3},labels:['Dorsales','Romboides'],init:{p:0,act:.5},
+  timeline:TL(1.2,'Abre y baja · codos abajo',.6,'Aprieta · escápulas abajo',2.4,'Sube lento con tensión',.5,'Arriba · brazos estirados'),
+  build(c,b,E){const p=c.p,pose=q=>K.stand(b,{fx:-.06,fz:.14,toe:8,kf:6,tilt:1,sp:[mix(-2,-5,q)],hd:mix(-3,-1,q),sc:[mix(.035,-.018,q),mix(.012,-.03,q)]});
+    const tb=K.memo(this,'tb',()=>{const R=K.armD(5),T=[0,0,.3],B=[0,0,.44];pose(0);let S=b.sho('R');T[0]=S[0]+.06;T[1]=S[1]+Math.sqrt(R*R-(.3-S[2])**2-.0036);
+      pose(1);S=b.sho('R');B[0]=S[0]+.17;B[1]=S[1]+.04;return[T,B];});
+    pose(p);let h=V.lerp(tb[0],tb[1],p);h[0]+=.03*sin(PI*p);h=clearHead(b,h,.03);
+    const G=SS.map(([s,k])=>{const g=[h[0],h[1],k*h[2]];b.arm(s,g,[-.25,-1,k*.9],Z);return g;});
+    K.band(E,V.add(G[0],[0,0,-.03]),V.add(G[1],[0,0,.03]),{loop:1,flat:UP,col:K.BAND.green,w:.012,L0:.42});sh(E);}
+});
+
+})(window.GymAnim);
 /* ex/n_new_towel.js */
 /* En casa con toalla, puerta y pared: remo con toalla en la manilla de una puerta, jalón boca abajo con toalla, curl
    isométrico con toalla, elevación lateral isométrica contra la pared y flexiones pike de rodillas */
@@ -9378,7 +9611,7 @@ GA.def('lib_plate_pinch',{title:'Agarre de pinza con discos',cam:{yaw:40,pitch:6
 
 })(window.GymAnim);
 /* build */
-try{GymAnim._.buildHash="2a4b3c0db103";}catch(e){}
+try{GymAnim._.buildHash="8dfdfb2e5a5f";}catch(e){}
 </script>
 <!-- GYM-ANIM:END -->
 <!-- GYM-GEN:START -->
@@ -9545,7 +9778,8 @@ return function (C0, opts) {
       if (e.pat === 'push_v' || e.pat === 'fly' || e.pat === 'raise' || e.pat === 'raise_f' || has(e, ['pullover_db', 'pullover_machine', 'pullup', 'chinup', 'pullup_neutral', 'pullup_band',
         'pullup_negative', 'thruster_bb', 'thruster_db', 'kb_thruster', 'kb_turkish_getup', 'kb_windmill', 'clean_press_db', 'kb_clean_press', 'bench_press', 'incline_bench_bb', 'decline_bench_bb',
         'close_grip_bench', 'assisted_dip', 'dip_machine', 'pushup_archer', 'mb_wall_ball', 'battle_rope_slams', 'skull_crusher_ez', 'overhead_ext_ez', 'tricep_overhead_cable', 'overhead_ext_db',
-        'band_tricep_overhead', 'trx_y_raise', 'ab_wheel_standing', 'dead_hang', 'towel_pulldown_floor'])) return 1;
+        'band_tricep_overhead', 'trx_y_raise', 'ab_wheel_standing', 'dead_hang', 'towel_pulldown_floor', 'pullover_floor_db', 'pullover_bb', 'skull_crusher_bb',
+        'band_overhead_pulldown'])) return 1;
       // v6 del catálogo (paso 6, J-02): la barra en la espalda o en posición frontal y colgarse también cargan el hombro (rotación externa y
       // abducción para sujetar la barra; tracción con el peso del cuerpo). Propuesta de revisión humana para §K.2
       if (has(e, ['back_squat', 'front_squat', 'squat_smith', 'lunge_bb', 'bulgarian_bb', 'calf_raise_bb', 'lunge_smith', 'bulgarian_smith', 'hanging_knee_raise', 'leg_raise', 'l_sit'])) return 1;
@@ -9556,7 +9790,7 @@ return function (C0, opts) {
       if (has(e, ['deadlift', 'sumo_deadlift', 'stiff_leg_deadlift', 'rdl_bb', 'good_morning', 'rack_pull', 'bb_row', 'pendlay_row', 'yates_row', 'power_clean', 'power_snatch',
         'tire_flip', 'back_squat', 'front_squat', 'situp', 'v_up', 'toes_to_bar', 'dragon_flag', 'russian_twist_db', 'plate_russian_twist', 'mb_russian_twist', 'ab_wheel_standing', 'decline_situp',
         'jump_squat', 'tuck_jump', 'box_jump', 'superman', 'kb_windmill'])) return 2;
-      if (lw(e) >= 0.4 || e.pat === 'hinge' || has(e, ['lunge_bb', 'bulgarian_bb', 'ohp_bb', 'push_press', 'thruster_bb', 'calf_raise_bb', 'shrug_bb', 'farmer_walk_db', 'kb_farmer_carry',
+      if (lw(e) >= 0.4 || e.pat === 'hinge' || has(e, ['lunge_bb', 'bulgarian_bb', 'ohp_bb', 'push_press', 'thruster_bb', 'calf_raise_bb', 'shrug_bb', 'farmer_walk_db', 'kb_farmer_carry', 'farmer_walk_plates',
         'russian_twist_bw', 'bicycle_crunch', 'flutter_kick', 'lying_leg_raise', 'leg_raise', 'hanging_knee_raise', 'reverse_crunch', 'crunch_cable', 'woodchop_high_cable', 'woodchop_low_cable',
         'woodchop_db', 'mb_rot_throw', 'mb_slam', 'landmine_rotation', 'burpee', 'renegade_row_db', 'ab_wheel_knees', 'ball_pike', 'trx_pike', 'hyperextension', 'back_ext_machine', 'ball_back_ext',
         'towel_pulldown_floor'])) return 1;
@@ -9573,7 +9807,7 @@ return function (C0, opts) {
         'wrist_curl_db', 'reverse_wrist_curl_db'])) return 2;
       if (has(e, ['curl_bb', 'reverse_curl_bb', 'reverse_curl_db', 'zottman_curl_db', 'skull_crusher_ez', 'skull_crusher_db', 'bench_press', 'close_grip_bench', 'incline_bench_bb',
         'decline_bench_bb', 'thruster_bb', 'push_press', 'ohp_bb', 'kb_press', 'kb_turkish_getup', 'kb_windmill', 'kb_rack_carry', 'ab_wheel_knees', 'ab_wheel_standing', 'plate_pinch',
-        'assisted_dip', 'dip_machine', 'pushup_incline', 'pushup_knee', 'trx_chest_press', 'band_chest_press', 'mb_wall_ball', 'incline_plank_table'])) return 1;
+        'assisted_dip', 'dip_machine', 'pushup_incline', 'pushup_knee', 'trx_chest_press', 'band_chest_press', 'mb_wall_ball', 'incline_plank_table', 'skull_crusher_bb'])) return 1;
       return 0;
     },
     impacto: e => {
@@ -9595,7 +9829,9 @@ return function (C0, opts) {
     // v5 del catálogo (paso 4, I-11): los que piden bajar al suelo aunque `eq` no lo diga (manos o espalda en el suelo; bajo una mesa)
     'pushup', 'pushup_wide', 'pushup_archer', 'pushup_diamond', 'pushup_decline', 'pushup_plyo', 'pike_pushup', 'hspu_wall', 'mountain_climber', 'plank_shoulder_tap', 'bear_crawl',
     'trx_pike', 'trx_knee_tuck', 'trx_plank', 'ball_pike', 'ball_knee_tuck', 'ball_plank', 'slider_leg_curl', 'trx_leg_curl', 'ball_leg_curl', 'glute_bridge_bb', 'ball_bridge',
-    'inverted_row_table', 'copenhagen', 'plate_crunch', 'ab_wheel_standing'];
+    'inverted_row_table', 'copenhagen', 'plate_crunch', 'ab_wheel_standing',
+    // E14b (§K.3): con barra en casa, tumbado en un banco o en el suelo
+    'skull_crusher_bb', 'pullover_bb'];
 
   const TAGS = { req: {}, mfam: {}, ckind: {}, also: {}, alsoAcc: { lib_inverted_row: [{ mats: ['dominadas'], acc: ['paralelas'] }, { mats: ['barra'], acc: ['rack'] }] }, nogen: new Set(NOGEN.map(L)), lim: {}, suelo: new Set(), spine: new Set(SPINE.map(L)), spineFlex: new Set(SPINE_FLEX.map(L)), amable: {}, basic: new Set((opts.basic === 'ciencia' ? BASIC_CIENCIA : BASIC).map(L)),
     long: new Set(LONG.map(L)), apoyo: new Set(APOYO.map(L)), poleas2: new Set(POLEAS2.map(L)) };
@@ -9628,12 +9864,14 @@ return function (C0, opts) {
   TAGS.excentrico = new Set(['pullup_negative', 'nordic_curl', 'pistol_squat'].map(L).filter(i => BY.has(i)));
   // carga en las manos que comprime la columna (sentadillas, zancadas y paseos con mancuernas o kettlebell): con la espalda baja operada o
   // con lesión reciente, mejor prensa, máquinas y unilaterales sin carga (J-04)
-  TAGS.axialManos = new Set(C.filter(e => ['squat', 'lunge', 'carry'].includes(e.pat) && ['mancuernas', 'kettlebell'].includes(e.mat)).map(e => e.id));
+  TAGS.axialManos = new Set(C.filter(e => ['squat', 'lunge', 'carry'].includes(e.pat) && ['mancuernas', 'kettlebell'].includes(e.mat)).map(e => e.id)
+    .concat(['lib_squat_backpack', 'lib_farmer_walk_plates'].filter(i => BY.has(i))));   // E14b: la mochila abrazada y los discos en las manos
   // extensores de la espalda sin flexión (huesos frágiles, Sinaki 2002): J-07
   TAGS.extensores = new Set(['back_ext_machine', 'hyperextension', 'ytw_prone', 'bird_dog', 'ball_back_ext'].map(L).filter(i => BY.has(i)));
   for (const [f, ids] of Object.entries(MFAM)) ids.forEach(i => { TAGS.mfam[L(i)] = f; });
   for (const [k, ids] of Object.entries(CKIND)) ids.forEach(i => { TAGS.ckind[L(i)] = k; });
   ALSO_KB.forEach(i => { TAGS.also[L(i)] = ['kettlebell']; });
+  if (BY.has('lib_backpack_row')) TAGS.also.lib_backpack_row = ['mochila'];   // E14b (§K.3): el remo con mochila, también con ese material
   for (const [z, ids] of Object.entries(AMABLE)) TAGS.amable[z] = new Set(ids.map(L));
   // comprobaciones: todos los ids de las listas existen
   const faltan = [];
@@ -9648,7 +9886,8 @@ return function (C0, opts) {
   const LIB_DOWN = {}; C.forEach(e => { if (e.up && !LIB_DOWN[e.up]) LIB_DOWN[e.up] = e.id; });
 
   // ── Presets de material (§C P5-P6; cifras y contenido de 02 §6.2 = presets.js), en el formato Place de §D.1 ──
-  const ALL_MATS = ['barra', 'barraz', 'smith', 'mancuernas', 'kettlebell', 'disco', 'balon', 'otro', 'maquina', 'polea', 'dominadas', 'banda', 'minibanda', 'trx', 'fitball', 'rueda', 'comba', 'step', 'cardio'];
+  const ALL_MATS = ['barra', 'barraz', 'smith', 'mancuernas', 'kettlebell', 'disco', 'balon', 'otro', 'maquina', 'polea', 'dominadas', 'banda', 'minibanda', 'trx', 'fitball', 'rueda', 'comba', 'step', 'cardio',
+    'mochila'];   // E14b (§K.3): «Mochila, garrafas o chaleco» (sus ejercicios son solo de casa: pl 'c')
   const ALL_ACC = ['mesa', 'puerta', 'banco', 'banco_inc', 'banco_dec', 'scott', 'ghd', 'hiper', 'rack', 'landmine', 'hexbar', 'anclaje', 'paralelas', 'agarre_neutro', 'kb2', 'anillas', 'poleas2',
     'trineo', 'llanta', 'cuerdas', 'saco', 'bici_ext', 'piscina'];
   const PRESETS = {
@@ -9746,10 +9985,10 @@ const _menus = (function () {
 
 const MENUS = {
   SQ: {
-    IA: 'back_squat | hack_squat leg_press | front_squat squat_smith pendulum_squat belt_squat | goblet_squat squat_db kb_goblet_squat | landmine_squat | bulgarian_bw | pistol_squat | trx_squat air_squat band_squat | sumo_squat_db kb_sumo_squat vsquat squat_cable sumo_squat_bw miniband_squat wall_sit',
-    F: 'back_squat | front_squat | hack_squat squat_smith | leg_press belt_squat pendulum_squat | goblet_squat squat_db kb_goblet_squat | landmine_squat | bulgarian_bw | pistol_squat | trx_squat air_squat band_squat | sumo_squat_db kb_sumo_squat vsquat squat_cable sumo_squat_bw miniband_squat wall_sit',
-    P: 'goblet_squat leg_press | squat_smith squat_db kb_goblet_squat | hack_squat back_squat | landmine_squat pendulum_squat belt_squat | air_squat | trx_squat band_squat chair_squat | bulgarian_bw | sumo_squat_db kb_sumo_squat vsquat squat_cable sumo_squat_bw miniband_squat wall_sit',
-    C: 'leg_press | goblet_squat squat_smith | squat_db kb_goblet_squat | hack_squat back_squat | chair_squat | trx_squat | air_squat band_squat | wall_sit | sumo_squat_db kb_sumo_squat vsquat squat_cable sumo_squat_bw miniband_squat landmine_squat pendulum_squat belt_squat',
+    IA: 'back_squat | hack_squat leg_press | front_squat squat_smith pendulum_squat belt_squat | goblet_squat squat_db kb_goblet_squat | squat_backpack | landmine_squat | bulgarian_bw | pistol_squat | trx_squat air_squat band_squat | sumo_squat_db kb_sumo_squat vsquat squat_cable sumo_squat_bw miniband_squat wall_sit',
+    F: 'back_squat | front_squat | hack_squat squat_smith | leg_press belt_squat pendulum_squat | goblet_squat squat_db kb_goblet_squat | squat_backpack | landmine_squat | bulgarian_bw | pistol_squat | trx_squat air_squat band_squat | sumo_squat_db kb_sumo_squat vsquat squat_cable sumo_squat_bw miniband_squat wall_sit',
+    P: 'goblet_squat leg_press | squat_smith squat_db kb_goblet_squat | hack_squat back_squat | landmine_squat pendulum_squat belt_squat | squat_backpack | air_squat | trx_squat band_squat chair_squat | bulgarian_bw | sumo_squat_db kb_sumo_squat vsquat squat_cable sumo_squat_bw miniband_squat wall_sit',
+    C: 'leg_press | goblet_squat squat_smith | squat_db kb_goblet_squat | squat_backpack | hack_squat back_squat | chair_squat | trx_squat | air_squat band_squat | wall_sit | sumo_squat_db kb_sumo_squat vsquat squat_cable sumo_squat_bw miniband_squat landmine_squat pendulum_squat belt_squat',
     sec: ['LU'],
   },
   LU: {
@@ -9760,10 +9999,10 @@ const MENUS = {
     sec: ['SQ'],
   },
   HI: {
-    IA: 'rdl_bb | rdl_db deadlift trap_bar_deadlift | rdl_smith stiff_leg_deadlift single_leg_rdl_db sumo_deadlift | pull_through_cable kb_deadlift deadlift_db kb_swing | sl_rdl_bw good_morning_bw band_deadlift band_good_morning | kb_sl_rdl db_swing kb_swing_american',
-    F: 'deadlift | rdl_bb trap_bar_deadlift | sumo_deadlift stiff_leg_deadlift rdl_db rdl_smith | single_leg_rdl_db pull_through_cable kb_deadlift deadlift_db kb_swing | sl_rdl_bw good_morning_bw band_deadlift band_good_morning | kb_sl_rdl db_swing kb_swing_american',
-    P: 'rdl_db | trap_bar_deadlift kb_deadlift deadlift_db | rdl_bb deadlift rdl_smith | good_morning_bw band_deadlift band_good_morning | pull_through_cable single_leg_rdl_db sl_rdl_bw kb_swing | stiff_leg_deadlift sumo_deadlift kb_sl_rdl db_swing kb_swing_american',
-    C: 'rdl_db | trap_bar_deadlift kb_deadlift | deadlift_db | good_morning_bw band_deadlift | band_good_morning | pull_through_cable rdl_bb rdl_smith deadlift',
+    IA: 'rdl_bb | rdl_db deadlift trap_bar_deadlift | rdl_smith stiff_leg_deadlift single_leg_rdl_db sumo_deadlift | pull_through_cable kb_deadlift deadlift_db kb_swing | rdl_backpack | sl_rdl_bw good_morning_bw band_deadlift band_good_morning | kb_sl_rdl db_swing kb_swing_american',
+    F: 'deadlift | rdl_bb trap_bar_deadlift | sumo_deadlift stiff_leg_deadlift rdl_db rdl_smith | single_leg_rdl_db pull_through_cable kb_deadlift deadlift_db kb_swing | rdl_backpack | sl_rdl_bw good_morning_bw band_deadlift band_good_morning | kb_sl_rdl db_swing kb_swing_american',
+    P: 'rdl_db | trap_bar_deadlift kb_deadlift deadlift_db | rdl_bb deadlift rdl_smith | rdl_backpack | good_morning_bw band_deadlift band_good_morning | pull_through_cable single_leg_rdl_db sl_rdl_bw kb_swing | stiff_leg_deadlift sumo_deadlift kb_sl_rdl db_swing kb_swing_american',
+    C: 'rdl_db | trap_bar_deadlift kb_deadlift | deadlift_db | rdl_backpack | good_morning_bw band_deadlift | band_good_morning | pull_through_cable rdl_bb rdl_smith deadlift',
     sec: ['HE'],
   },
   HE: {
@@ -9787,11 +10026,11 @@ const MENUS = {
     C: 'calf_machine calf_seated | calf_leg_press calf_raise_db calf_smith | calf_raise_bw | calf_raise_single calf_raise_bb calf_raise_single_db | calf_seated_db',
   },
   PH: {
-    IA: 'bench_press press_flat_db | chest_press_machine bench_smith | floor_press_db | pushup | dip_bars | pushup_wide | pushup_archer | trx_chest_press band_chest_press | decline_bench_bb press_decline_db cable_chest_press',
-    F: 'bench_press | press_flat_db bench_smith | chest_press_machine floor_press_db | pushup | dip_bars | pushup_wide | pushup_archer | trx_chest_press band_chest_press | decline_bench_bb press_decline_db cable_chest_press',
-    P: 'chest_press_machine press_flat_db bench_press | bench_smith floor_press_db | pushup | pushup_incline pushup_knee | trx_chest_press band_chest_press | pushup_wide | cable_chest_press press_decline_db decline_bench_bb',
+    IA: 'bench_press press_flat_db | chest_press_machine bench_smith | floor_press_db kb_floor_press | pushup | dip_bars | pushup_wide | pushup_archer | trx_chest_press band_chest_press | decline_bench_bb press_decline_db cable_chest_press',
+    F: 'bench_press | press_flat_db bench_smith | chest_press_machine floor_press_db kb_floor_press | pushup | dip_bars | pushup_wide | pushup_archer | trx_chest_press band_chest_press | decline_bench_bb press_decline_db cable_chest_press',
+    P: 'chest_press_machine press_flat_db bench_press | bench_smith floor_press_db kb_floor_press | pushup | pushup_incline pushup_knee | trx_chest_press band_chest_press | pushup_wide | cable_chest_press press_decline_db decline_bench_bb',
     // v10 (45: Carmen): a quien empieza, sin bajar al suelo si hay otra opción: flexiones inclinadas o press con banda de pie antes que el press en el suelo
-    C: 'chest_press_machine | press_flat_db bench_smith | bench_press | pushup_incline band_chest_press | floor_press_db | pushup_knee | trx_chest_press | pushup | pushup_wide | cable_chest_press press_decline_db decline_bench_bb',
+    C: 'chest_press_machine | press_flat_db bench_smith | bench_press | pushup_incline band_chest_press | floor_press_db kb_floor_press | pushup_knee | trx_chest_press | pushup | pushup_wide | cable_chest_press press_decline_db decline_bench_bb',
   },
   PI: {   // press inclinado (push_h:inc); patrón secundario push_v (§E.6 «PI1 (o PV)»); respaldo: press plano
     IA: 'press_incline_db incline_bench_bb | chest_press_incline_machine press_incline_smith | landmine_press | pushup_decline',
@@ -9801,19 +10040,19 @@ const MENUS = {
     sec: ['PV'], resp: ['PH'],
   },
   PV: {
-    IA: 'ohp_bb shoulder_press_db | shoulder_press_machine ohp_smith arnold_press_db | landmine_press kb_press | pike_pushup band_shoulder_press | pike_pushup_knee | hspu_wall handstand_hold',
-    F: 'ohp_bb | shoulder_press_db ohp_smith | shoulder_press_machine arnold_press_db landmine_press kb_press | pike_pushup band_shoulder_press | pike_pushup_knee | hspu_wall handstand_hold',
-    P: 'shoulder_press_machine shoulder_press_db | ohp_smith | ohp_bb arnold_press_db landmine_press kb_press | band_shoulder_press | pike_pushup_knee pike_pushup',
-    C: 'shoulder_press_machine | shoulder_press_db ohp_smith | band_shoulder_press | landmine_press ohp_bb | pike_pushup_knee',
+    IA: 'ohp_bb shoulder_press_db | shoulder_press_machine ohp_smith arnold_press_db | landmine_press kb_press | shoulder_press_jugs | pike_pushup band_shoulder_press | pike_pushup_knee | hspu_wall handstand_hold',
+    F: 'ohp_bb | shoulder_press_db ohp_smith | shoulder_press_machine arnold_press_db landmine_press kb_press | shoulder_press_jugs | pike_pushup band_shoulder_press | pike_pushup_knee | hspu_wall handstand_hold',
+    P: 'shoulder_press_machine shoulder_press_db | ohp_smith | ohp_bb arnold_press_db landmine_press kb_press | shoulder_press_jugs | band_shoulder_press | pike_pushup_knee pike_pushup',
+    C: 'shoulder_press_machine | shoulder_press_db ohp_smith | band_shoulder_press | shoulder_press_jugs | landmine_press ohp_bb | pike_pushup_knee',
   },
-  FL: { IA: 'fly_machine cable_fly_mid cable_fly_low fly_db | cable_fly_high fly_incline_db | band_fly' },
+  FL: { IA: 'fly_machine cable_fly_mid cable_fly_low fly_db | cable_fly_high fly_incline_db | fly_floor_db | band_fly' },
   TV: {
-    IA: 'pullup lat_pulldown | chinup pullup_neutral pulldown_close pulldown_supine | assisted_pullup pullup_band pullup_negative | band_pulldown | pulldown_one_arm pulldown_machine_uni | towel_pulldown_floor',
-    P: 'lat_pulldown assisted_pullup | pulldown_close pulldown_supine pullup_band | pullup_negative band_pulldown | pullup chinup pullup_neutral | pulldown_one_arm pulldown_machine_uni | towel_pulldown_floor',
+    IA: 'pullup lat_pulldown | chinup pullup_neutral pulldown_close pulldown_supine | assisted_pullup pullup_band pullup_negative | band_pulldown | band_overhead_pulldown | pulldown_one_arm pulldown_machine_uni | pullover_floor_db pullover_bb | towel_pulldown_floor',
+    P: 'lat_pulldown assisted_pullup | pulldown_close pulldown_supine pullup_band | pullup_negative band_pulldown | band_overhead_pulldown | pullup chinup pullup_neutral | pulldown_one_arm pulldown_machine_uni | pullover_floor_db pullover_bb | towel_pulldown_floor',
     // v8 (paso 6, J-03): inicio, prudente y 65+ sin dominadas negativas ni con banda (8 bajadas lentas del propio peso son la dosis excéntrica
     // que más agujetas y daño muscular produce; con 65+, además, colgarse es riesgo de caída): si no hay jalón, el respaldo es un remo (TH)
-    C: 'lat_pulldown | assisted_pullup pulldown_close pulldown_supine | band_pulldown | towel_pulldown_floor',
-    M: 'lat_pulldown | pulldown_close pulldown_supine | band_pulldown',
+    C: 'lat_pulldown | assisted_pullup pulldown_close pulldown_supine | band_pulldown band_overhead_pulldown | towel_pulldown_floor',
+    M: 'lat_pulldown | pulldown_close pulldown_supine | band_pulldown band_overhead_pulldown',
     sec: ['TH'],
   },
   TH: {
@@ -9826,26 +10065,26 @@ const MENUS = {
     sec: ['TV'],
   },
   RA: {
-    IA: 'lat_raise_db lat_raise_cable lat_raise_machine | band_lateral_raise | y_raise_cable | wall_lateral_raise_iso',
-    C: 'lat_raise_machine lat_raise_db lat_raise_cable | band_lateral_raise | wall_lateral_raise_iso',
+    IA: 'lat_raise_db lat_raise_cable lat_raise_machine | plate_lateral_raise lateral_raise_jugs band_lateral_raise | y_raise_cable | wall_lateral_raise_iso',
+    C: 'lat_raise_machine lat_raise_db lat_raise_cable | plate_lateral_raise lateral_raise_jugs band_lateral_raise | wall_lateral_raise_iso',
   },
   RE: { IA: 'face_pull rev_fly_machine rear_fly_db | band_face_pull band_pull_apart rear_fly_cable | trx_rev_fly ext_rotation_cable band_ext_rotation | ytw_prone | trx_y_raise' },
   CU: {
-    IA: 'curl_db curl_cable curl_ez curl_bb hammer_curl | curl_incline_db preacher_curl_ez curl_machine hammer_curl_cable curl_cable_one_arm bayesian_curl_cable | curl_db_concentrated preacher_curl_db band_curl trx_curl | spider_curl_db zottman_curl_db curl_cable_high | towel_curl_iso',
-    C: 'curl_machine curl_db curl_cable | hammer_curl curl_ez curl_bb | band_curl trx_curl | curl_db_concentrated preacher_curl_db preacher_curl_ez hammer_curl_cable curl_cable_one_arm | towel_curl_iso',
+    IA: 'curl_db curl_cable curl_ez curl_bb hammer_curl | curl_incline_db preacher_curl_ez curl_machine hammer_curl_cable curl_cable_one_arm bayesian_curl_cable | curl_db_concentrated preacher_curl_db band_curl trx_curl kb_curl curl_jugs | spider_curl_db zottman_curl_db curl_cable_high | towel_curl_iso',
+    C: 'curl_machine curl_db curl_cable | hammer_curl curl_ez curl_bb | kb_curl curl_jugs band_curl trx_curl | curl_db_concentrated preacher_curl_db preacher_curl_ez hammer_curl_cable curl_cable_one_arm | towel_curl_iso',
     sec: ['chinup pulldown_supine'],
   },
   TR: {
-    IA: 'tricep_pushdown tricep_overhead_cable overhead_ext_db skull_crusher_ez | tricep_pushdown_bar tricep_machine skull_crusher_db overhead_ext_ez close_grip_bench dip_bars | tricep_pushdown_one_arm kickback_db close_press_db assisted_dip dip_machine | band_tricep_pushdown band_tricep_overhead | pushup_diamond | bench_dip | trx_tricep_ext tricep_pushdown_rev tricep_kickback_cable ring_dip',
-    P: 'tricep_pushdown overhead_ext_db tricep_overhead_cable tricep_machine | tricep_pushdown_bar kickback_db assisted_dip dip_machine close_press_db | band_tricep_pushdown band_tricep_overhead | skull_crusher_ez skull_crusher_db overhead_ext_ez close_grip_bench tricep_pushdown_one_arm | pushup_diamond | bench_dip | trx_tricep_ext tricep_pushdown_rev tricep_kickback_cable',
+    IA: 'tricep_pushdown tricep_overhead_cable overhead_ext_db skull_crusher_ez | tricep_pushdown_bar tricep_machine skull_crusher_db overhead_ext_ez close_grip_bench dip_bars skull_crusher_bb | tricep_pushdown_one_arm kickback_db close_press_db assisted_dip dip_machine | band_tricep_pushdown band_tricep_overhead | pushup_diamond | bench_dip | trx_tricep_ext tricep_pushdown_rev tricep_kickback_cable ring_dip',
+    P: 'tricep_pushdown overhead_ext_db tricep_overhead_cable tricep_machine | tricep_pushdown_bar kickback_db assisted_dip dip_machine close_press_db | band_tricep_pushdown band_tricep_overhead | skull_crusher_ez skull_crusher_db overhead_ext_ez close_grip_bench tricep_pushdown_one_arm skull_crusher_bb | pushup_diamond | bench_dip | trx_tricep_ext tricep_pushdown_rev tricep_kickback_cable',
     // inicio, prudente y 65+: sin fondos en banco ni flexión diamante (C-29; Kolber 2010: fondos profundos y hombro)
     C: 'tricep_machine tricep_pushdown | overhead_ext_db tricep_overhead_cable kickback_db | band_tricep_pushdown band_tricep_overhead | assisted_dip dip_machine tricep_pushdown_bar close_press_db',
   },
   CO: {
-    IA: 'plank pallof_press_cable hanging_knee_raise crunch_cable | side_plank ab_wheel_knees dead_bug crunch_machine band_pallof | leg_raise hollow_hold reverse_crunch lying_leg_raise crunch suitcase_carry_db kb_rack_carry woodchop_high_cable woodchop_low_cable crunch_db plate_crunch | ab_wheel_standing toes_to_bar dragon_flag l_sit trx_plank trx_knee_tuck ball_plank ball_crunch bicycle_crunch russian_twist_bw side_bend_db landmine_rotation torso_rotation_machine band_woodchop woodchop_db | flutter_kick heel_touch plank_shoulder_tap ball_pass ball_knee_tuck mb_russian_twist russian_twist_db plate_russian_twist mountain_climber situp v_up mb_rot_throw ball_pike trx_pike | incline_plank_table standing_knee_elbow',
-    F: 'plank hanging_knee_raise ab_wheel_knees pallof_press_cable | suitcase_carry_db kb_rack_carry side_plank crunch_cable | dead_bug crunch_machine band_pallof leg_raise hollow_hold reverse_crunch lying_leg_raise crunch woodchop_high_cable woodchop_low_cable crunch_db plate_crunch | ab_wheel_standing toes_to_bar dragon_flag l_sit trx_plank trx_knee_tuck ball_plank ball_crunch bicycle_crunch russian_twist_bw side_bend_db landmine_rotation torso_rotation_machine band_woodchop woodchop_db | incline_plank_table standing_knee_elbow',
-    P: 'plank dead_bug pallof_press_cable | side_plank crunch_cable crunch_machine band_pallof hanging_knee_raise | crunch reverse_crunch lying_leg_raise ball_plank ball_crunch suitcase_carry_db | ab_wheel_knees hollow_hold bicycle_crunch trx_plank woodchop_high_cable woodchop_low_cable band_woodchop crunch_db plate_crunch | leg_raise kb_rack_carry russian_twist_bw side_bend_db torso_rotation_machine landmine_rotation woodchop_db | flutter_kick heel_touch plank_shoulder_tap ball_pass ball_knee_tuck mb_russian_twist russian_twist_db plate_russian_twist mountain_climber situp v_up | incline_plank_table standing_knee_elbow',
-    C: 'dead_bug plank pallof_press_cable | side_plank band_pallof crunch_machine crunch_cable | ball_plank crunch reverse_crunch lying_leg_raise | suitcase_carry_db ball_crunch | incline_plank_table standing_knee_elbow',
+    IA: 'plank pallof_press_cable hanging_knee_raise crunch_cable | side_plank ab_wheel_knees dead_bug crunch_machine band_pallof | leg_raise hollow_hold reverse_crunch lying_leg_raise crunch suitcase_carry_db kb_rack_carry farmer_walk_plates woodchop_high_cable woodchop_low_cable crunch_db plate_crunch | ab_wheel_standing toes_to_bar dragon_flag l_sit trx_plank trx_knee_tuck ball_plank ball_crunch bicycle_crunch russian_twist_bw side_bend_db landmine_rotation torso_rotation_machine band_woodchop woodchop_db | flutter_kick heel_touch plank_shoulder_tap ball_pass ball_knee_tuck mb_russian_twist russian_twist_db plate_russian_twist mountain_climber situp v_up mb_rot_throw ball_pike trx_pike | incline_plank_table standing_knee_elbow',
+    F: 'plank hanging_knee_raise ab_wheel_knees pallof_press_cable | suitcase_carry_db kb_rack_carry farmer_walk_plates side_plank crunch_cable | dead_bug crunch_machine band_pallof leg_raise hollow_hold reverse_crunch lying_leg_raise crunch woodchop_high_cable woodchop_low_cable crunch_db plate_crunch | ab_wheel_standing toes_to_bar dragon_flag l_sit trx_plank trx_knee_tuck ball_plank ball_crunch bicycle_crunch russian_twist_bw side_bend_db landmine_rotation torso_rotation_machine band_woodchop woodchop_db | incline_plank_table standing_knee_elbow',
+    P: 'plank dead_bug pallof_press_cable | side_plank crunch_cable crunch_machine band_pallof hanging_knee_raise | crunch reverse_crunch lying_leg_raise ball_plank ball_crunch suitcase_carry_db farmer_walk_plates | ab_wheel_knees hollow_hold bicycle_crunch trx_plank woodchop_high_cable woodchop_low_cable band_woodchop crunch_db plate_crunch | leg_raise kb_rack_carry russian_twist_bw side_bend_db torso_rotation_machine landmine_rotation woodchop_db | flutter_kick heel_touch plank_shoulder_tap ball_pass ball_knee_tuck mb_russian_twist russian_twist_db plate_russian_twist mountain_climber situp v_up | incline_plank_table standing_knee_elbow',
+    C: 'dead_bug plank pallof_press_cable | side_plank band_pallof crunch_machine crunch_cable | ball_plank crunch reverse_crunch lying_leg_raise | suitcase_carry_db ball_crunch farmer_walk_plates | incline_plank_table standing_knee_elbow',
     // 65+: anti-rotación y anti-extensión; nada de flexión ni rotación de columna con carga (§E.5; 05 §7.4; D-01)
     M: 'pallof_press_cable band_pallof | suitcase_carry_db | incline_plank_table | dead_bug plank side_plank | ball_plank',
   },
@@ -12269,7 +12508,7 @@ return function (K, G, X) {
 };
 
 })();
-window.GymGen = {catalogo: _catalogo, menus: _menus, generador: _generador, textos: _textos, seguridad: _seguridad, UNI: ["lib_row_db","lib_lat_raise_cable","lib_curl_db_concentrated","lib_lunge_bb","lib_bulgarian_bb","lib_lunge_smith","lib_bulgarian_smith","lib_leg_press_single","lib_leg_curl_standing","lib_glute_kickback_machine","lib_leg_curl_cable","lib_glute_kickback_cable","lib_hip_abd_cable","lib_hip_add_cable","lib_bulgarian_squat_db","lib_split_squat_db","lib_lunge_db","lib_reverse_lunge_db","lib_walking_lunge_db","lib_lateral_lunge_db","lib_curtsy_lunge_db","lib_step_up_db","lib_single_leg_rdl_db","lib_calf_raise_single_db","lib_snatch_db","lib_kb_lunge","lib_kb_sl_rdl","lib_kb_thruster","lib_kb_clean","lib_kb_snatch","lib_pistol_squat","lib_bulgarian_bw","lib_cossack_squat","lib_reverse_lunge_bw","lib_forward_lunge_bw","lib_side_lunge_bw","lib_walking_lunge_bw","lib_curtsy_lunge_bw","lib_step_up_bw","lib_sl_rdl_bw","lib_glute_bridge_single","lib_hip_thrust_single","lib_donkey_kick","lib_fire_hydrant","lib_side_lying_abd","lib_copenhagen","lib_side_lying_add","lib_calf_raise_single","lib_jump_lunge","lib_skater_jump","lib_band_lunge","lib_band_glute_kickback","lib_miniband_kickback","lib_miniband_clamshell","lib_miniband_side_abduction","lib_miniband_fire_hydrant","lib_trx_pistol","lib_trx_lunge","lib_box_lateral_step_down","lib_pushup_archer","lib_meadows_row","lib_pulldown_machine_uni","lib_pulldown_one_arm","lib_row_cable_one_arm","lib_renegade_row_db","lib_kb_row","lib_landmine_press","lib_ext_rotation_cable","lib_kb_press","lib_kb_clean_press","lib_band_ext_rotation","lib_curl_cable_one_arm","lib_bayesian_curl_cable","lib_preacher_curl_db","lib_tricep_pushdown_one_arm","lib_tricep_kickback_cable","lib_kickback_db","lib_torso_rotation_machine","lib_woodchop_high_cable","lib_woodchop_low_cable","lib_pallof_press_cable","lib_side_bend_db","lib_woodchop_db","lib_suitcase_carry_db","lib_kb_windmill","lib_kb_turkish_getup","lib_dead_bug","lib_bird_dog","lib_side_plank","lib_band_pallof","lib_band_woodchop","lib_band_leg_ext","lib_mb_rot_throw","lib_clamshell","lib_wall_lateral_raise_iso","lib_balance_single_leg","lib_balance_head_turns"], VERSION: 11, REVISADO: false};
+window.GymGen = {catalogo: _catalogo, menus: _menus, generador: _generador, textos: _textos, seguridad: _seguridad, UNI: ["lib_row_db","lib_lat_raise_cable","lib_curl_db_concentrated","lib_lunge_bb","lib_bulgarian_bb","lib_lunge_smith","lib_bulgarian_smith","lib_leg_press_single","lib_leg_curl_standing","lib_glute_kickback_machine","lib_leg_curl_cable","lib_glute_kickback_cable","lib_hip_abd_cable","lib_hip_add_cable","lib_bulgarian_squat_db","lib_split_squat_db","lib_lunge_db","lib_reverse_lunge_db","lib_walking_lunge_db","lib_lateral_lunge_db","lib_curtsy_lunge_db","lib_step_up_db","lib_single_leg_rdl_db","lib_calf_raise_single_db","lib_snatch_db","lib_kb_lunge","lib_kb_sl_rdl","lib_kb_thruster","lib_kb_clean","lib_kb_snatch","lib_pistol_squat","lib_bulgarian_bw","lib_cossack_squat","lib_reverse_lunge_bw","lib_forward_lunge_bw","lib_side_lunge_bw","lib_walking_lunge_bw","lib_curtsy_lunge_bw","lib_step_up_bw","lib_sl_rdl_bw","lib_glute_bridge_single","lib_hip_thrust_single","lib_donkey_kick","lib_fire_hydrant","lib_side_lying_abd","lib_copenhagen","lib_side_lying_add","lib_calf_raise_single","lib_jump_lunge","lib_skater_jump","lib_band_lunge","lib_band_glute_kickback","lib_miniband_kickback","lib_miniband_clamshell","lib_miniband_side_abduction","lib_miniband_fire_hydrant","lib_trx_pistol","lib_trx_lunge","lib_box_lateral_step_down","lib_pushup_archer","lib_meadows_row","lib_pulldown_machine_uni","lib_pulldown_one_arm","lib_row_cable_one_arm","lib_renegade_row_db","lib_kb_row","lib_landmine_press","lib_ext_rotation_cable","lib_kb_press","lib_kb_clean_press","lib_band_ext_rotation","lib_curl_cable_one_arm","lib_bayesian_curl_cable","lib_preacher_curl_db","lib_tricep_pushdown_one_arm","lib_tricep_kickback_cable","lib_kickback_db","lib_torso_rotation_machine","lib_woodchop_high_cable","lib_woodchop_low_cable","lib_pallof_press_cable","lib_side_bend_db","lib_woodchop_db","lib_suitcase_carry_db","lib_kb_windmill","lib_kb_turkish_getup","lib_dead_bug","lib_bird_dog","lib_side_plank","lib_band_pallof","lib_band_woodchop","lib_band_leg_ext","lib_mb_rot_throw","lib_clamshell","lib_wall_lateral_raise_iso","lib_balance_single_leg","lib_balance_head_turns","lib_kb_floor_press"], VERSION: 11, REVISADO: false};
 })();
 </script>
 <!-- GYM-GEN:END -->
@@ -13369,6 +13608,7 @@ const MAT={
   barra:{l:'Barra',ic:'🏋️',cls:'barra'},barraz:{l:'Barra Z',ic:'🏋️',cls:'barra',free:1},smith:{l:'Smith',ic:'🏗️',cls:'barra',mach:1},
   mancuernas:{l:'Mancuernas',ic:'💪',cls:'manc',free:1,home:1},kettlebell:{l:'Kettlebell',ic:'🔔',cls:'kb',free:1,home:1},
   disco:{l:'Disco',ic:'💿',cls:'disco',free:1},balon:{l:'Balón medicinal',ic:'🏐',cls:'disco',free:1,home:1},otro:{l:'Otro material',ic:'🧰',cls:'disco',home:1},
+  mochila:{l:'Mochila, garrafas o chaleco',ic:'🎒',cls:'disco',free:1,home:1}, // (E14b, §K.3) carga en casa sin comprar nada
   maquina:{l:'Máquina',ic:'⚙️',cls:'maq',mach:1},polea:{l:'Polea',ic:'⚡',cls:'polea',mach:1},
   corporal:{l:'Sin material',ic:'🤸',eq:'Peso corporal',cls:'bw',free:1},dominadas:{l:'Barra de dominadas',ic:'🧗',cls:'bw',home:1},
   banda:{l:'Banda elástica',ic:'➰',cls:'banda',free:1,home:1},minibanda:{l:'Minibanda',ic:'⭕',cls:'banda',free:1,home:1},
@@ -13799,6 +14039,20 @@ lib_balance_tandem_walk|Pasos en línea talón-punta junto a la pared|⚖️|Par
 lib_balance_head_turns|Apoyo a una pierna girando la cabeza|⚖️|Pared o silla|piernas|2|20s|t|corporal|a|1|U|bal|abductors:.4,glutes:.3,calves:.3|balance_single_leg,balance_tandem_walk|sin girar la cabeza: más fácil~pasos en línea: en movimiento||equilibrio girando la cabeza,pata coja con giros de cabeza,single leg stance head turns|Junto a una pared, aguanta sobre una pierna y gira la cabeza despacio a un lado y al otro sin perder el equilibrio. Toca la pared si lo necesitas.
 lib_balance_heel_toe|Talones y puntas con apoyo|⚖️|Silla o pared|piernas|2|12|r|corporal|a|1||bal|calves:.4|calf_raise_bw,balance_single_leg|elevación de talones: más gemelo~a una pierna: más equilibrio|balance_single_leg|puntillas y talones,balanceo talón punta,heel toe raises,tobillos con apoyo|De pie, con las manos en el respaldo de una silla. Sube despacio de puntillas, baja y luego levanta las puntas apoyándote en los talones. Sin prisa y sin soltar el apoyo.
 lib_chair_stand_fast|Levantarse de la silla rápido|⚡|Silla|piernas|3|8|r|corporal|a|1|C|squat|quads:1,glutes:.7,adductors:.3|chair_squat,air_squat|despacio: fuerza sin prisa~sin silla: sentadilla completa||sentarse y levantarse rápido,sit to stand,levantarse de la silla,potencia en la silla|Sentado en el borde de una silla firme, con los pies apoyados y los brazos cruzados. Levántate lo más rápido que puedas y siéntate despacio, controlando la bajada.
+lib_squat_backpack|Sentadilla con mochila|🎒|Mochila con peso|piernas|3|12|w|mochila|c|1|C|squat|quads:1,glutes:.8,adductors:.4,abs:.2|goblet_squat,squat_db,air_squat,chair_squat|mancuerna al pecho: carga que puedes medir~mancuernas: más carga||sentadilla con mochila cargada,backpack squat,sentadilla con peso en casa|Abraza contra el pecho una mochila cargada con libros o botellas. Baja con el pecho alto hasta que los muslos queden paralelos al suelo y sube empujando con los talones.
+lib_rdl_backpack|Peso muerto rumano con mochila|🎒|Mochila con peso|piernas|3|12|w|mochila|c|1|C|hinge|hams:1,glutes:.9,lowback:.5|rdl_db,good_morning_bw,kb_deadlift,sl_rdl_bw|mancuernas: carga que puedes medir~sin peso: mismo gesto||peso muerto con mochila,rumano con mochila,backpack rdl|Sujeta la mochila cargada por las asas delante de los muslos. Lleva la cadera atrás con la espalda recta y las rodillas algo dobladas, con la mochila pegada a las piernas, hasta notar los isquios. Sube apretando glúteos.
+lib_shoulder_press_jugs|Press de hombros con garrafas|🫙|Garrafas con agua|hombros|3|12|w|mochila|c|1|C|push_v|frontdelts:1,sidedelts:.6,triceps:.6|shoulder_press_db,band_shoulder_press,pike_pushup_knee,kb_press|mancuernas: carga que puedes medir~banda: press de hombros de pie||press con garrafas,press de hombros con botellas,press militar en casa|Una garrafa llena en cada mano, agarrada por el asa, a la altura de los hombros. Aprieta abdomen y glúteos y sube los brazos por encima de la cabeza sin arquear la espalda. Baja despacio.
+lib_curl_jugs|Curl con garrafas|🫙|Garrafas con agua|biceps|3|12|w|mochila|c|1||curl|biceps:1,forearms:.5|curl_db,band_curl,hammer_curl,towel_curl_iso|mancuernas: carga que puedes medir~banda: curl con resistencia||curl con botellas,curl de bíceps con garrafas,curl en casa|Una garrafa en cada mano, agarrada por el asa, con los brazos estirados. Sube doblando los codos sin separarlos del costado y baja despacio.
+lib_lateral_raise_jugs|Elevación lateral con garrafas|🫙|Garrafas con agua|hombros|3|15|w|mochila|c|1||raise|sidedelts:1,frontdelts:.3,traps:.25|lat_raise_db,band_lateral_raise,wall_lateral_raise_iso,lat_raise_cable|mancuernas: carga que puedes medir~banda: elevación con resistencia||laterales con garrafas,elevaciones laterales con botellas|Una garrafa pequeña en cada mano. Sube los brazos hacia los lados hasta la altura de los hombros, con los codos algo doblados y sin encoger los hombros. Baja despacio.
+lib_fly_floor_db|Aperturas en el suelo con mancuernas|🏋️|Mancuernas (suelo)|pecho|3|12|w|mancuernas|a|1||fly|pecs:1,frontdelts:.4|fly_db,floor_press_db,band_fly,fly_machine|con banco: más recorrido~press en el suelo: más carga||aperturas en el suelo,floor fly,aperturas sin banco|Boca arriba en el suelo, rodillas dobladas y mancuernas sobre el pecho con los codos algo doblados. Abre los brazos hasta que los codos toquen el suelo y vuelve a juntar arriba sin chocar las mancuernas.
+lib_pullover_floor_db|Pullover en el suelo con mancuerna|🏋️|Mancuerna (suelo)|espalda|3|12|w|mancuernas|a|1||pull_v|lats:1,pecs:.6,triceps:.4|pullover_db,band_pulldown,lat_pulldown,towel_pulldown_floor|con banco: más recorrido~banda: jalón con resistencia|pullover_db|pullover sin banco,pullover tumbado en el suelo,floor pullover|Boca arriba en el suelo, rodillas dobladas. Sujeta una mancuerna con las dos manos sobre el pecho y llévala por detrás de la cabeza con los codos algo doblados, hasta rozar el suelo. Vuelve tirando con los dorsales.
+lib_skull_crusher_bb|Press francés con barra recta|🏋️||triceps|3|10|w|barra|a|2||tri|triceps:1|skull_crusher_ez,skull_crusher_db,close_grip_bench,overhead_ext_db|barra Z: más cómoda para las muñecas~mancuernas: mismo gesto||press francés con barra,rompecráneos con barra,skull crusher con barra|Tumbado en un banco o en el suelo, barra sobre la frente con agarre estrecho y codos apuntando al techo. Baja la barra hacia la frente moviendo solo los antebrazos y extiende del todo.
+lib_plate_lateral_raise|Elevación lateral con disco|💿|Discos|hombros|3|12|w|disco|a|1||raise|sidedelts:1,frontdelts:.3,forearms:.3|lat_raise_db,band_lateral_raise,lat_raise_cable,lateral_raise_jugs|mancuernas: más cómodas de agarrar~banda: elevación con resistencia||laterales con disco,elevación lateral con discos,plate lateral raise|Un disco en cada mano, agarrado por el borde. Sube los brazos hacia los lados hasta la altura de los hombros, con los codos algo doblados y sin encoger los hombros. Baja despacio.
+lib_farmer_walk_plates|Paseo del granjero con discos|🚶|Discos|espalda|3|30m|d|disco|a|1|C|carry|forearms:1,traps:1,abs:.5,glutes:.3,quads:.3|farmer_walk_db,suitcase_carry_db,kb_farmer_carry|mancuernas: más carga~una sola mancuerna: más core||paseo con discos,acarreo con discos,plate farmer walk|Un disco en cada mano, agarrado por el borde con los dedos. Camina con pasos cortos, hombros atrás y abdomen firme, sin dejar que los discos se balanceen.
+lib_pullover_bb|Pullover con barra|🏋️||espalda|3|12|w|barra|a|2||pull_v|lats:1,pecs:.6,triceps:.4|pullover_db,lat_pulldown,pullover_floor_db|mancuerna: mismo arco~jalón: más carga para el dorsal||pullover con barra recta,barbell pullover|Tumbado en un banco o en el suelo, barra sobre el pecho con agarre a la anchura de los hombros. Llévala por detrás de la cabeza con los codos algo doblados y vuelve tirando con los dorsales.
+lib_kb_curl|Curl con kettlebell|🔔||biceps|3|12|w|kettlebell|a|1||curl|biceps:1,forearms:.5|curl_db,hammer_curl,band_curl|mancuernas: un brazo cada vez~martillo: suma braquial||curl con pesa rusa,kettlebell curl,curl con kettlebell por los cuernos|Sujeta la kettlebell por los cuernos con las dos manos y los brazos estirados. Sube doblando los codos sin separarlos del cuerpo y baja despacio.
+lib_kb_floor_press|Press de suelo con kettlebell|🔔|Kettlebell (suelo)|pecho|3|10|w|kettlebell|a|1|CU|push_h|pecs:1,triceps:.7,frontdelts:.4|floor_press_db,press_flat_db,pushup|mancuernas: los dos brazos a la vez~con banco: más recorrido||press en el suelo con kettlebell,kettlebell floor press,press de pecho con pesa rusa|Boca arriba en el suelo con las rodillas dobladas y la kettlebell en una mano, con el antebrazo vertical. Empuja hacia el techo y baja hasta que el codo toque el suelo. Cambia de lado.
+lib_band_overhead_pulldown|Jalón con banda por encima de la cabeza|➰||espalda|3|15|r|banda|a|1|C|pull_v|lats:1,midback:.6,reardelts:.4,biceps:.3|band_pulldown,lat_pulldown,towel_pulldown_floor|con anclaje: más carga~en máquina: carga que puedes medir||jalón con banda sin anclaje,band overhead pulldown,jalón con banda de pie|De pie, brazos estirados por encima de la cabeza con la banda tensa entre las manos. Abre la banda y baja los codos hacia los costados hasta que quede por delante del pecho. Sube despacio.
 `;
 // LIB-ROWS:END
 // Objetivo de cada tipo: reps «12» o «8-12» · tiempo «30s» · distancia «20m» · cardio «10 min»
@@ -25262,7 +25516,8 @@ const MAT_SECTIONS=[
   {k:'bandas',t:'Bandas y accesorios',items:[{m:'banda',l:'Bandas elásticas'},{a:'anclaje',ic:'🚪',l:'Anclaje de puerta',d:'Una pieza en la puerta para enganchar la banda'},{m:'minibanda'},
     {m:'trx',d:'Cintas o anillas para colgar de una puerta o un soporte'},{a:'anillas',ic:'⭕',l:'Anillas'},{m:'fitball',d:'Pelota grande de ejercicio'},{m:'rueda'},{m:'comba'},{m:'step'},{m:'otro',l:'Otro material'}]},
   {k:'casa',t:'Cosas de casa',home:1,items:[{a:'silla',ic:'🪑',l:'Silla o banco bajo'},{a:'pared',ic:'🧱',l:'Pared'},{a:'mesa',ic:'🍽️',l:'Mesa firme',d:'Para el remo bajo una mesa'},
-    {a:'puerta',ic:'🚪',l:'Puerta que cierra bien',d:'Para el remo con toalla'},{a:'escalon',ic:'🪜',l:'Escalón'}]},
+    {a:'puerta',ic:'🚪',l:'Puerta que cierra bien',d:'Para el remo con toalla'},{a:'escalon',ic:'🪜',l:'Escalón'},
+    {m:'mochila',d:'Para hacer con peso sentadilla, peso muerto, press y curl'}]},
   {k:'poleas',t:'Poleas y Smith',gym:1,items:[{m:'polea'},{a:'poleas2',ic:'⚡',l:'Dos poleas enfrentadas'},{m:'smith',d:'Barra guiada en raíles (multipower)'}]},
   {k:'maq',t:'Máquinas',gym:1,items:MACH_FAMS.map(f=>({f}))},
   {k:'cardio',t:'Cardio',gym:1,items:CARD_KINDS.map(c=>({c}))},
