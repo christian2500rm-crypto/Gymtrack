@@ -7432,14 +7432,14 @@ const SLS=(b,E,p,o)=>{const sh=sst(0,.45,p),e=sst(.6,1,p),sw=o.sw||[0,0],mR=foot
     arms:b=>{K.palm(b,null,'R',HAND,{fd:HFD,n:WN,pole:HPO});b.armFK('L',{abd:mix(12,24,sst(0,.6,p))+(o.la||0),flex:4,elbow:mix(14,20,sst(0,.6,p))});}});
   K.palm(b,E,'R',HAND,{fd:HFD,n:WN,pole:HPO});wall(E,-.75,.8);E.shadow([.02,0,.05],.42,.32,.5);};
 
-GA.def('lib_balance_single_leg',{title:'Apoyo a una pierna junto a la pared',cam:{yaw:128,pitch:8},fitBox:[[-.4,0,-.3],[.4,1.85,.56]],
+GA.def('lib_balance_single_leg',{title:'Apoyo a una pierna junto a la pared',cam:{yaw:-140,pitch:10},fitBox:[[-.4,0,-.3],[.4,1.85,.56]],
   muscles:{abductors:.4,glutes_R:.3,calves_R:.3},labels:['Glúteo medio','Gemelos'],init:{p:0,w:0},note:'20 s por lado',
   timeline:[{p:1,dur:1.4,label:'Levanta un pie',act:.8,ease:'lin'},{w:1,dur:2.5,label:'Aguanta · mirada al frente',act:.9,ease:'lin'},
     {p:0,dur:1.2,label:'Apoya despacio',act:.6,ease:'lin'},{w:0,dur:.6,label:'Cambia de pierna',act:.5}],
   build(c,b,E){const w=c.w,g=sst(.6,1,c.p)*Math.sin(Math.PI*w);
     SLS(b,E,c.p,{sw:[.005*g*Math.sin(2*Math.PI*w),.009*g*Math.sin(3*Math.PI*w)],la:4*g*Math.sin(3*Math.PI*w)});}});
 
-GA.def('lib_balance_head_turns',{title:'Apoyo a una pierna girando la cabeza',cam:{yaw:118,pitch:8},fitBox:[[-.4,0,-.3],[.4,1.85,.56]],
+GA.def('lib_balance_head_turns',{title:'Apoyo a una pierna girando la cabeza',cam:{yaw:-150,pitch:10},fitBox:[[-.4,0,-.3],[.4,1.85,.56]],
   muscles:{abductors:.4,glutes_R:.3,calves_R:.3},labels:['Glúteo medio','Gemelos'],init:{p:0,h:0},note:'20 s por lado',
   timeline:[{p:1,dur:1.4,label:'Levanta un pie',act:.8,ease:'lin'},{h:1,dur:1.6,label:'Gira la cabeza despacio',act:.9},
     {h:-1,dur:2.6,label:'Al otro lado sin prisa',act:.9},{h:0,dur:1.4,label:'Vuelve al centro',act:.9},
@@ -7451,7 +7451,7 @@ const tandemL=(b,p)=>{if(p<=.32){K.footBallOn(b,'L',[.2-TX,0,0],0,TA*sst(.02,.32
   if(p>=.74){heelOn(b,'L',[TX,0,0],0,TH*(1-sst(.74,.82,p)));return 0;}
   const t=(p-.32)/.42,A0=K.footBallOn(b,'L',[.2-TX,0,0],0,TA).slice(),A1=heelOn(b,'L',[TX,0,0],0,TH).slice(),a=mix(TA,-TH,sst(.1,1,t))*D,A=V.lerp(A0,A1,sst(.25,.78,t));
   b.foot('L',[A[0],A[1]+.04*Math.sin(Math.PI*t)**2,TZ*(sst(0,.22,t)-sst(.75,1,t))],[Math.cos(a),-Math.sin(a),0],[Math.sin(a),Math.cos(a),0]);return 1;};
-GA.def('lib_balance_tandem_walk',{title:'Pasos en línea talón-punta junto a la pared',cam:{yaw:150,pitch:12},fitBox:[[-.45,0,-.25],[.65,1.85,.56]],
+GA.def('lib_balance_tandem_walk',{title:'Pasos en línea talón-punta junto a la pared',cam:{yaw:-145,pitch:12},fitBox:[[-.45,0,-.25],[.65,1.85,.56]],
   muscles:{abductors:.3,calves:.3},labels:['Glúteo medio','Gemelos'],init:{p:0},
   timeline:[{p:1,dur:2,label:'Talón delante de la punta',act:.85,ease:'lin'},{dur:.6,label:'Equilibrio · mirada al frente',act:.9},
     {p:0,dur:2,label:'Vuelve atrás despacio',act:.8,ease:'lin'},{dur:.6,label:'Pies en línea',act:.6}],
@@ -7552,10 +7552,10 @@ GA.def('lib_standing_knee_elbow',{title:'Rodilla al codo de pie',cam:{yaw:50,pit
 
 const PC=.8,TB=50,TS=8,BX=-.04,SO={fz:.15,toe:10};
 GA.def('lib_chair_stand_fast',{title:'Levantarse de la silla rápido',cam:{yaw:34,pitch:9},
-  muscles:{quads:1,glutes:.7,adductors:.3},labels:['Cuádriceps','Glúteos'],init:{p:1},
-  timeline:[{p:0,dur:.6,label:'Levántate rápido',act:1},{dur:.5,label:'De pie · cadera estirada',act:.5},
-    {p:1,dur:2.6,label:'Siéntate despacio',act:.8},{dur:.6,label:'Sentado · pies firmes',act:.5}],
-  build(c,b,E){const p=c.p,up=(kf,tl,bx)=>K.stand(b,Object.assign({kf,tilt:tl,sp:[-3],hd:-tl*.4,balance:true,arms:cross,bx},SO));
+  muscles:{quads:1,glutes:.7,adductors:.3},labels:['Cuádriceps','Glúteos'],init:{p:0},
+  timeline:[{p:1,dur:.6,label:'Levántate rápido',act:1},{dur:.5,label:'De pie · cadera estirada',act:.5},
+    {p:0,dur:2.6,label:'Siéntate despacio',act:.8},{dur:.6,label:'Sentado · pies firmes',act:.5}],
+  build(c,b,E){const p=1-c.p,up=(kf,tl,bx)=>K.stand(b,Object.assign({kf,tilt:tl,sp:[-3],hd:-tl*.4,balance:true,arms:cross,bx},SO));
     const G=K.memo(this,'g',()=>{const kB=K.root(kf=>{up(kf,TB,BX);return K.low(b,['gluR','gluL','pel'],[0,SH,0]);},60,130);
       const h=up(kB,TB,BX);b.ikErr=0;return{kB,h};});
     if(p<=PC){const s=p/PC;up(mix(4,G.kB,s),mix(2,TB,s),mix(.05,BX,s));}
@@ -9612,7 +9612,7 @@ GA.def('lib_plate_pinch',{title:'Agarre de pinza con discos',cam:{yaw:40,pitch:6
 
 })(window.GymAnim);
 /* build */
-try{GymAnim._.buildHash="8dfdfb2e5a5f";}catch(e){}
+try{GymAnim._.buildHash="abb946997c27";}catch(e){}
 </script>
 <!-- GYM-ANIM:END -->
 <!-- GYM-GEN:START -->
@@ -14991,7 +14991,7 @@ function _obChips(){
   const a=_ob.a,pl=_ob.places||{},out=[];
   if(a.goal)out.push([OB_GOAL_LBL[a.goal],'ob-meta']);
   out.push([plural(a.days||3,'día'),'ob-tiempo'],[(a.min||60)+NB+'min','ob-tiempo']);
-  ['g','c'].forEach(k=>{const P=pl[k];if(P)out.push([(PRESET_INFO[P.preset]||PRESET_INFO.propio).ic+' '+(PRESET_INFO[P.preset]||PRESET_INFO.propio).t,k===pl.main?'ob-lugar':'ob-lugar2']);});
+  ['g','c'].forEach(k=>{const P=pl[k];if(P)out.push([(PRESET_INFO[P.preset]||PRESET_INFO.propio).ic+' '+_placeLbl(P),k===pl.main?'ob-lugar':'ob-lugar2']);});
   if(a.exp)out.push([OB_EXP_LBL[a.exp],'ob-exp']);
   if(a.enfoque==='gluteo')out.push(['🍑 Más glúteo','ob-enfoque']);
   Object.keys(_ob.h.zones||{}).forEach(z=>{const t=(OB_ZONES.find(x=>x[0]===z)||[])[2];if(t)out.push([t,'ob-molestias']);});
@@ -15274,7 +15274,7 @@ function _obRespRows(){
   const rows=[['ob-meta','Objetivo',(OB_GOAL_LBL[a.goal]||'—')],['ob-sexo','Mujer u hombre',({m:'Mujer',h:'Hombre',nd:'Prefiero no decirlo'})[a.sex]||'—']];
   if(a.sex==='m')rows.push(['ob-enfoque','Enfoque',({gluteo:'Más glúteo y pierna',igual:'Equilibrada'})[a.enfoque]||'—']);
   rows.push(['ob-exp','Experiencia',OB_EXP_LBL[a.exp]||'—'],['ob-tiempo','Tu tiempo',a.days?`${plural(a.days,'día')} · ${a.min||60}${NB}min`:'—'],
-    ['ob-lugar','Dónde entrenas',['g','c'].filter(k=>pl[k]).map(k=>(PRESET_INFO[pl[k].preset]||PRESET_INFO.propio).t).join(' + ')||'—'],
+    ['ob-lugar','Dónde entrenas',['g','c'].filter(k=>pl[k]).map(k=>_placeLbl(pl[k])).join(' · ')||'—'],
     ['ob-edad','Edad',OB_AGE_LBL[a.age]||'—'],['ob-molestias','Molestias',S.health?Object.keys(S.health.zones||{}).map(z=>(OB_ZONES.find(x=>x[0]===z)||['',z])[2]).join(', ')||'Ninguna':'No guardadas'],
     ['ob-deporte','Otro deporte',OB_SPORT_LBL[a.sport]||'—'],['ob-foco','Prioridades',(a.enfoque==='gluteo'?['Glúteos']:[]).concat(pr.map(k=>(OB_PRIO.find(x=>x[0]===k)||['',k])[1])).join(' y ')||'Todo por igual']);
   return rows;
@@ -25543,6 +25543,13 @@ const PRESET_INFO={grande:{ic:'🏢',t:'Gimnasio grande',d:'De cadena: máquinas
   casagym:{ic:'🏗️',t:'Gimnasio en casa',d:'Rack, barra, discos, banco y mancuernas.'},parque:{ic:'🌳',t:'Parque de calistenia',d:'Barras de dominadas, paralelas y bancos.'},
   propio:{ic:'✏️',t:'Otra cosa',d:'Lo marco yo.'}};
 const PRESETS_OF={g:['grande','barrio','hotel','box'],c:['nada','basico','mancbanco','casagym','parque','propio']};
+// (E15b) Nombre de un sitio: el de su tipo y, si has marcado material que el tipo no trae, «+ ese material» o «+ N materiales»
+// (al marcar en la rejilla el tipo no cambia: «Sin material» con una mochila es «Sin material + mochila»)
+function _placeLbl(P){
+  const I=PRESET_INFO[P&&P.preset]||PRESET_INFO.propio,T=typeof LIB_K!=='undefined'&&LIB_K&&P&&LIB_K.PRESETS[P.preset];if(!T)return I.t;
+  const base=Array.isArray(T.mats)?T.mats:[],ex=(P.mats||[]).filter(m=>MAT[m]&&!base.includes(m));
+  return ex.length?I.t+' + '+(ex.length===1?MAT[ex[0]].l.split(',')[0].toLowerCase():plural(ex.length,'material','materiales')):I.t;
+}
 // Cosas de la rejilla: m material (MAT) · a accesorio · f familia de máquina · c tipo de cardio. d: la línea que explica lo que no es obvio
 const MAT_SECTIONS=[
   {k:'libres',t:'Pesas libres',items:[{m:'mancuernas'},{m:'barra',l:'Barra y discos'},{m:'barraz',d:'Barra corta con curvas, para curl y tríceps'},{m:'kettlebell',l:'Kettlebells'},{m:'disco',l:'Discos sueltos'},{m:'balon'}]},
