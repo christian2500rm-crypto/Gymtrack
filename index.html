@@ -13714,6 +13714,8 @@ function _sanitizeObDraft(o){
     if(days){dayKeys(days).forEach(k=>{if(!days[k].did)days[k].did=newDayId(days);});const meta=_sanitizePlanMeta(o.accepted.meta,days);
       if(meta){meta.why=meta.why.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));meta.warn=meta.warn.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));}
       d.accepted={days,meta,weeklyTarget:_num(o.accepted.weeklyTarget,1,7)};}}
+  if(_isPlainObj(o.accepted)&&_isPlainObj(o.accepted.cand)){const cand=_sanitizeCand(o.accepted.cand); // (E10b) la rutina aceptada tal cual (42 R31)
+    if(cand)d.accepted={cand,answers:_sanitizeProfile(o.accepted.answers),places:_sanitizePlaces(o.accepted.places),ts:_num(o.accepted.ts,0,9e15)||Date.now()};}
   return d;
 }
 // Sesiones (E1b-E2): nombre, foco, rutina e id del día con que se hizo; lo que no casa, fuera (la sesión se queda)
@@ -14539,6 +14541,94 @@ function _obChangedTxt(){
   if(b.places!==JSON.stringify(_ob.places))out.push('tu material');if(b.h!==JSON.stringify(_ob.h.zones||{}))out.push('tus molestias');
   return out.length?out.join(', '):'nada';
 }
+// ── (E10b) Aceptar la rutina: «Qué cambia» y «Deshacer» (§F.5, §H.3) ──
+function _obAcceptBtn(){
+  const w=getActiveWorkout(),ro=getReopened();
+  if(w||ro){_obSaveAccepted();return`<button type="button" class="btn bp" id="ob-accept" disabled>Termina antes el entreno de hoy</button>
+    <p class="ob-foot" role="status">${w?'Tienes un entreno a medias: termínalo o descártalo.':'Tienes una sesión reabierta: guárdala antes.'} He guardado esta rutina tal cual: la aplicas desde Ajustes cuando quieras.</p>
+    <button type="button" class="btn bs" onclick="obGoWorkout()">Ir al entreno</button>`;}
+  const own=_ob.from==='settings'&&S.profile&&S.profile.mode==='own';
+  return`<button type="button" class="btn bp" id="ob-accept" onclick="obAccept()">${_ob.from==='settings'?'Usar esta rutina':'Empezar con esta rutina →'}</button>${own?'<button type="button" class="btn bs" onclick="obKeepMine()">Guardar mis respuestas y seguir con mi rutina</button>':''}`;
+}
+function obGoWorkout(){if(!_ob)return;hideOnboarding();go('workout');render();}
+// Lo que se guarda de las respuestas (sin salud)
+function _obProfileToSave(mode){const a=JSON.parse(JSON.stringify(_ob.a));['screen','zones','huesos','posparto','otraTxt','pp','preset','preset2','otro'].forEach(k=>delete a[k]);
+  a.pref=_obPref();a.mode=mode||'gen';return _sanitizeProfile(a);}
+// La rutina aceptada, tal cual, en el borrador (sin salud) para aplicarla después exactamente (42 R31)
+function _obAcceptedPlan(c){const p={};Object.keys(c.days).forEach(k=>{p[k]={label:c.days[k].label,focus:c.days[k].focus,ex:c.days[k].ex.map((x,i)=>{const e=_libCopy(LIB_BY_ID.get(x.lib),'acc_'+k+i);e.s=x.s;e.r=x.r;if(x.cardio)e.cardio=true;return e;})};});return p;}
+function _obSaveAccepted(){
+  if(!_ob||!_ob.c)return;const c=_stripZoneTrace(JSON.parse(JSON.stringify(_ob.c)));
+  _obSaveDraft();if(!S.obDraft)return;
+  S.obDraft.accepted={cand:c,answers:_obProfileToSave('gen'),places:JSON.parse(JSON.stringify(_ob.places||null)),ts:Date.now()};
+  S.obDraft=_sanitizeObDraft(S.obDraft);saveState();
+}
+// La rutina aceptada pendiente (si la hay) y aplicarla tal cual (desde Ajustes: «Tienes una rutina nueva sin aplicar»)
+function acceptedPending(){const a=S.obDraft&&S.obDraft.accepted;return a&&a.cand&&a.cand.days?a:null;}
+function applyAcceptedPending(){
+  const o=acceptedPending();if(!o)return{ok:false,why:'nada'};
+  return applyGeneratedPlan(JSON.parse(JSON.stringify(o.cand)),{answers:o.answers,places:o.places,health:null});
+}
+// (E10b) Saneado de la candidata guardada: lo que necesita applyGeneratedPlan, sin salud
+function _sanitizeCand(c){
+  if(!_isPlainObj(c)||!_isPlainObj(c.days))return null;
+  const days={};
+  Object.keys(c.days).filter(k=>DAY_KEYS.includes(k)).forEach(k=>{const d=c.days[k];if(!_isPlainObj(d)||!Array.isArray(d.ex))return;
+    const ex=d.ex.filter(x=>_isPlainObj(x)&&typeof x.lib==='string'&&_LIBID_RE.test(x.lib)&&LIB_BY_ID.has(x.lib)).slice(0,16).map(x=>({lib:x.lib,
+      s:x.cardio?1:Math.max(1,Math.min(10,parseInt(x.s)||2)),r:String(x.r==null?'':x.r).slice(0,20),cardio:x.cardio===true,
+      note:typeof x.note==='string'?x.note.slice(0,300):'',rest:_num(x.rest,0,900),cat:_oneOf(x.cat,['iso','comp','heavy','bw']),pot:x.pot===true}));
+    if(ex.length)days[k]={label:String(d.label||('Día '+k)).slice(0,80),focus:String(d.focus||'').slice(0,200),ex};});
+  if(!Object.keys(days).length)return null;
+  const m=_isPlainObj(c.meta)?c.meta:{},L=o=>{const r={};if(_isPlainObj(o))Object.keys(o).forEach(k=>{if(days[k])r[k]=o[k];});return r;};
+  const num=(o,ks,lo,hi)=>{const r={};if(_isPlainObj(o))ks.forEach(k=>{const v=_num(o[k],lo,hi);if(v!=null)r[k]=v;});return r;};
+  const vol={};if(_isPlainObj(m.vol))Object.keys(m.vol).slice(0,20).forEach(g=>{if(/^[a-z_]{2,20}$/.test(g))vol[g]=num(m.vol[g],['v','dir','obj','tope','techo'],0,99);});
+  const meta={split:typeof m.split==='string'?m.split.slice(0,24):'',K:_num(m.K,1,6),wd:_num(m.wd,1,7),tpl:L(m.tpl),dayPlace:L(m.dayPlace),fd:L(m.fd),
+    alternas:m.alternas===true,fz2:null,cargaLigera:m.cargaLigera===true,lifts:L(m.lifts),vuelta:_isPlainObj(m.vuelta)?{pesos:_oneOf(m.vuelta.pesos,['menos20','recalibrar'])}:null,
+    rampa:_isPlainObj(m.rampa)?{series:_num(m.rampa.series,1,6)||3,reps:typeof m.rampa.reps==='string'?m.rampa.reps.slice(0,10):'8-12',rir:typeof m.rampa.rir==='string'?m.rampa.rir.slice(0,12):m.rampa.rir}:null,
+    effort:_isPlainObj(m.effort)?{obj:_oneOf(m.effort.obj,PM_EFFORT)||'justo',rir:typeof m.effort.rir==='string'?m.effort.rir.slice(0,12):m.effort.rir,subidas:_oneOf(m.effort.subidas,PM_SUBIDAS)||'normal'}:null,
+    vol,modes:Array.isArray(m.modes)?m.modes.filter(x=>typeof x==='string'&&/^[a-z0-9]{1,16}$/.test(x)).slice(0,12):[],level:_oneOf(m.level,PROF_LEVELS),
+    corto:m.corto===true||m.corto===1,seed:_num(m.seed,0,4294967295)||0,alt:_num(m.alt,0,99)||0,why:_sanitizeCodes(m.why),warn:_sanitizeCodes(m.warn)};
+  return{v:1,days,weeklyTarget:_num(c.weeklyTarget,1,7)||Object.keys(days).length,meta,apx:L(c.apx),est:L(c.est),balMin:_num(c.balMin,0,15)||0,
+    rest:num(c.rest,['iso','comp','heavy','bw'],REST_MIN_S,REST_MAX_S),reparto:_oneOf(c.reparto,PM_REPARTO)||'dias',ok:true};
+}
+function obAccept(){
+  if(!_ob||!_ob.c)return;
+  const hist=(Array.isArray(S.sessions)&&S.sessions.length>0)||Object.keys(_isPlainObj(S.strength)?S.strength:{}).length>0;
+  if(_ob.from==='first'&&!hist){_obDoApply();return;}
+  obWhatChanges();
+}
+// «Qué cambia en tu rutina»: se quedan · cambian · nuevos · salen, el historial que no se toca y el ciclo que se cierra
+function _obDiff(c){
+  const cur=getPlan(),now=new Map();dayKeys(cur).forEach(k=>(cur[k].ex||[]).forEach(e=>{const x=routineEx(e),l=x&&!x.cardio?_libIdOf(x):null;if(l)now.set(l,x);}));
+  const nw=new Map();Object.values(c.days).forEach(d=>d.ex.forEach(x=>{if(!x.cardio)nw.set(x.lib,x);}));
+  let keep=0,chg=0,add=0,out=0;
+  nw.forEach((x,l)=>{const o=now.get(l);if(!o)add++;else if(+o.s===+x.s&&String(o.r)===String(x.r))keep++;else chg++;});
+  now.forEach((x,l)=>{if(!nw.has(l))out++;});
+  return{keep,chg,add,out};
+}
+function obWhatChanges(){
+  if(!_ob||!_ob.c)return;const d=_obDiff(_ob.c);let cy=0;try{cy=coach_cycleData().sessions.length;}catch(e){}
+  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Qué cambia en tu rutina</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+  <div class="hist-sheet-body ob-qc"><p class="ob-qc-n">Se quedan <b>${d.keep}</b> · cambian <b>${d.chg}</b> · nuevos <b>${d.add}</b> · salen <b>${d.out}</b></p>
+    <p>Tu historial no se toca: lo que sale sigue en Progreso › Fuera de tu rutina y, si vuelve, retoma su historial.</p>
+    <p>Guardo tu rutina actual por si quieres volver.</p>
+    ${cy?`<p>Cierro tu ciclo actual (${plural(cy,'sesión','sesiones')}): lo verás en tu resumen.</p>`:''}
+    ${S.deload?'<p>Tu descarga termina: la rutina nueva empieza con sus series normales.</p>':''}
+    <button type="button" class="btn bp" onclick="obSheetClose();_obDoApply()">Usar esta rutina</button>
+    <button type="button" class="btn bs" onclick="obSheetClose()">Seguir mirando</button></div>`,'Qué cambia en tu rutina');
+}
+function _obDoApply(){
+  if(!_ob||!_ob.c)return;
+  const first=_ob.from==='first',hadHist=(S.sessions||[]).length>0;
+  const r=applyGeneratedPlan(_ob.c,{answers:_obProfileToSave('gen'),places:_ob.places,health:_obHealthObj()});
+  if(!r.ok){toast(r.msg||'No se ha podido aplicar la rutina',3600);obRender();return;}
+  const dk=S.nextDay;hideOnboarding();go('dash');render();
+  if(first&&!hadHist)toast(`Rutina lista · Hoy toca el Día ${dk}`,3200);
+  else showUndoToast(`Rutina nueva aplicada${r.deload?' · tu descarga terminó':''}`,()=>{const u=restorePlanPrev();render();
+    if(u.ok)toast('Has vuelto a tu rutina anterior'+(r.deload?'. Tu descarga terminó al cambiar de rutina':'')+(r.cycle?'. El ciclo que se cerró sigue en tu resumen':''),3800);},null,10000);
+}
+// «Guardar mis respuestas y seguir con mi rutina» (quien tiene su propia rutina, desde Ajustes)
+function obKeepMine(){if(!_ob)return;S.profile=Object.assign(_obProfileToSave('own'),{dismiss:(S.profile&&S.profile.dismiss)||{}});S.profile=_sanitizeProfile(S.profile);
+  S.obDraft=null;saveState();hideOnboarding();openSettings();toast('Guardé tus respuestas; tu rutina no cambia',3000);}
 // ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
