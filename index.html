@@ -14995,9 +14995,9 @@ function _obPinKey(d,row,i){const n=d.rows.slice(0,i).filter(x=>x.slot===row.slo
 function _obApplyPins(c,g){
   const P=_ob.pins||{};if(!Object.keys(P).length)return;
   g.res.det.forEach(d=>{const rows=d.rows.filter(x=>x.kind!=='bal');rows.forEach((row,i)=>{if(row.kind!=='str')return;const k=_obPinKey({rows,letra:d.letra},row,i),lib=P[k];
-    if(!lib||lib===row.lib||!LIB_BY_ID.has(lib))return;const x=c.days[d.letra].ex[i];if(!x)return;
+    if(!lib||lib===row.lib||!LIB_BY_ID.has(lib))return;const ci=d.rows.indexOf(row),x=c.days[d.letra].ex[ci];if(!x)return; // (E16b) índice de la candidata
     const L=LIB_BY_ID.get(lib),e=_carryTarget({s:x.s,r:x.r,cardio:false,lib:x.lib},_libCopy(L,'pin'));
-    c.days[d.letra].ex[i]=Object.assign({},x,{lib,s:e.s,r:e.r,note:'',pin:1});});
+    c.days[d.letra].ex[ci]=Object.assign({},x,{lib,s:e.s,r:e.r,note:'',pin:1});});
     c.est[d.letra]=_planDayMinutesOf(c.days[d.letra].ex.map(x=>Object.assign(_libCopy(LIB_BY_ID.get(x.lib),'t'),{s:x.s,r:x.r,cardio:x.cardio})),{bal:d.rows.filter(x=>x.kind==='bal').reduce((t,x)=>t+(+x.min||0),0),apx:c.apx[d.letra],
       rest:e=>{const j=c.days[d.letra].ex.findIndex(y=>y.lib===e.lib);const y=c.days[d.letra].ex[j];return y&&y.rest||90;}});});
 }
@@ -15215,12 +15215,14 @@ function _obAlts(letra,i){
   return out;
 }
 function obSwap(letra,i){
-  if(!_ob||!_ob.c)return;const ex=_ob.c.days[letra]&&_ob.c.days[letra].ex[i];if(!ex)return;const L=LIB_BY_ID.get(ex.lib),alts=_obAlts(letra,i);
+  if(!_ob||!_ob.c||!_ob.g)return;const dd=_ob.g.res.det.find(x=>x.letra===letra),rw=dd&&dd.rows.filter(x=>x.kind!=='bal')[i]; // (E16b) índice sin equilibrio → candidata
+  const ex=rw&&_ob.c.days[letra]&&_ob.c.days[letra].ex[dd.rows.indexOf(rw)];if(!ex)return;const L=LIB_BY_ID.get(ex.lib),alts=_obAlts(letra,i);
   _ob.sw={letra,i};
   obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Cambiar «${esc(L.n)}»</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
   <div class="hist-sheet-body"><p class="ob-p">Trabaja lo mismo: ${esc(_libMusLbl?(_libMusLbl(L)||[]).join(', ').toLowerCase():'')}</p>
     <div class="ob-lbl">Otras opciones que te encajan</div>
     <div class="ob-acts">${alts.length?alts.map(id=>{const A=LIB_BY_ID.get(id);return`<button type="button" class="ob-card" onclick="obPinPick('${id}')"><span class="ob-ci" aria-hidden="true">${exIconHtml(A)}</span><span class="ob-ct"><b>${esc(A.n)}</b><span>${esc(A.eq||'')}</span></span></button>`;}).join(''):'<p class="ob-foot">Con tu material y lo que me contaste no hay otra parecida.</p>'}</div>
+    <button type="button" class="ob-link" onclick="obSwapSearch()">Buscar otro ejercicio ›</button>
     <button type="button" class="ob-chk" role="checkbox" aria-checked="false" id="ob-avoid" onclick="this.setAttribute('aria-checked',this.getAttribute('aria-checked')!=='true');this.classList.toggle('ok')"><span class="ob-cb" aria-hidden="true"></span><span class="ob-ct"><span>No me lo vuelvas a proponer</span></span></button>
     <button type="button" class="btn bs" onclick="obSwapAvoidOnly()">Quitar y elegir otro</button></div>`,'Cambiar '+L.n);
 }
@@ -15231,6 +15233,16 @@ function obPinPick(lib){
   _ob.pins=Object.assign({},_ob.pins||{});_ob.pins[_obPinKey({rows,letra},row,i)]=lib;_ob.sw=null;
   const c=_ob.c;_obApplyPins(c,_ob.g);_obSaveDraft();obSheetClose();obRender({keepFocus:true,keepScroll:true});
   toast(`Cambiado. El Día ${letra} dura ahora ≈ ${Math.round(c.est[letra])}${NB}min`,2800);
+}
+// (E16b) «Buscar otro ejercicio ›»: el selector, en la zona del ejercicio y con el material del sitio de ese día; lo elegido queda fijado
+// («Otra propuesta» no lo toca). Si no encaja con lo que me contaste, se queda (lo has elegido tú) con un aviso.
+function obSwapSearch(){
+  if(!_ob||!_ob.sw||!_ob.g)return;const {letra,i}=_ob.sw,d=_ob.g.res.det.find(x=>x.letra===letra),row=d&&d.rows.filter(x=>x.kind!=='bal')[i];if(!row)return;
+  const L=LIB_BY_ID.get(row.lib),g=_ob.g;
+  showExercisePicker({title:'Buscar otro ejercicio',mode:'swap',currentLib:row.lib,muscle:L?_grp(L):null,place:d.place,
+    ctx:{places:JSON.parse(JSON.stringify(_ob.places||{})),inPlan:{}},
+    onPick:E=>{if(!E||E.cardio||!_ob||!_ob.sw)return;const K=LIB_K.BY.get(E.id),ok=!K||g.E.G.safeL(K,g.inp);obPinPick(E.id);
+      if(!ok)toast('Lo dejo porque lo has elegido tú, pero no encaja del todo con lo que me contaste',3600);}});
 }
 function obSwapAvoidOnly(){if(!_ob||!_ob.sw)return;const {letra,i}=_ob.sw,d=_ob.g.res.det.find(x=>x.letra===letra),row=d.rows.filter(x=>x.kind!=='bal')[i];
   _ob.a.avoid=[...new Set([...(_ob.a.avoid||[]),row.lib])];_ob.sw=null;_ob.dirty=true;_obSaveDraft();obSheetClose();obRender({keepFocus:true,keepScroll:true});toast('No te lo vuelvo a proponer',2400);}
@@ -25721,11 +25733,12 @@ function libEqClass(e){if(!e)return'maquina';if(e.cardio)return'cardio';const m=
 // rutina, solo los del mismo tipo (fuerza o cardio) y sin el original, en su zona y subzona, con «Parecidos» primero
 // (las alternativas que la hoja aún no te enseñó, busy.seen, de más a menos parecidas). refocus: dónde volver a poner el foco
 // tras elegir si onPick repinta (y se lleva) el botón que lo abrió
-function showExercisePicker({title,muscle,sub,onPick,currentLib,mode,dayKey,busy,refocus}){
+function showExercisePicker({title,muscle,sub,onPick,currentLib,mode,dayKey,busy,refocus,ctx,place}){ // (E16b) ctx y place: los del cuestionario
   closeLibDetail();_pickerStop();
   mode=['add','swap','busy'].includes(mode)?mode:'pick';
   const st={title,muscle,onPick,currentLib:currentLib||null,mode,dayKey:dayKey||null,busy:busy||null,search:'',filterMuscle:null,filterSub:null,
-    mat:'all',more:{},tail:false,ctx:_libCtx(),gen:0,count:0,opener:document.activeElement,refocus:typeof refocus==='function'?refocus:null};
+    mat:'all',more:{},tail:false,ctx:Object.assign(_libCtx(),_isPlainObj(ctx)?ctx:{}),gen:0,count:0,opener:document.activeElement,refocus:typeof refocus==='function'?refocus:null};
+  if(place==='g'||place==='c')st.place=place;
   const L=st.currentLib?LIB_BY_ID.get(st.currentLib):null,zone=z=>MUSCLE_GROUPS.some(m=>m.id===z)?z:null;
   if(mode==='busy'&&st.busy){
     const d=getPlan()[st.busy.dk],sl=d&&Array.isArray(d.ex)?d.ex.find(e=>e&&e.id===st.busy.exId):null,o=routineEx(sl);
