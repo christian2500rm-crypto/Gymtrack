@@ -242,6 +242,9 @@ input{font-family:inherit}
 .ob-sw{border:1px solid var(--border);border-radius:var(--r);background:var(--bg2)}
 .ob-seg .lib-pl{white-space:normal;line-height:1.25;padding:6px 8px;font-size:13px}
 .ob-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ob-matn{position:sticky;top:56px;z-index:2;padding:8px 0;background:var(--bg);font-size:14px;color:var(--text2)}
+.ob-matn b{color:var(--green);font-family:'DM Mono',monospace}
+.ob-mat .mat-grid{margin:0}
 .ob-step{display:none;flex-direction:column;gap:22px}
 .ob-step.active{display:flex;animation:fu .35s ease}
 @keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
@@ -14097,6 +14100,67 @@ OB_SCR['ob-tiempo']={block:2,html:()=>{const a=_ob.a;
   ${_obWhy('Con los días decido cómo repartir el cuerpo; con los minutos, cuántos ejercicios y series caben, contando calentamiento y descansos.')}
   ${_obNextBtn("obTimeNext()")}`;}};
 function obTimeNext(){if(!_ob)return;_obSaveDraft();if(OB_SCR['ob-lugar'])obGo('ob-lugar');}
+// ── (E8b) Bloque 2: dónde entrenas y tu material (§C P5, P6, P6b, P5', P6', P6c; D8: dos sitios desde la primera versión) ──
+// El sitio que se está marcando: el principal (P5-P6) o el segundo (P5'-P6')
+function _obKindOf(step){const pl=_ob.places||{};return step==='ob-lugar2'||step==='ob-material2'?(pl.main==='g'?'c':'g'):(_ob.plKind||pl.main||'g');}
+function obPlKind(k){if(!_ob||(k!=='g'&&k!=='c'))return;_ob.plKind=k;obRender({keepFocus:true,keepScroll:true});}
+// P5 y P5': tipo de sitio con la cifra en vivo (placeCan sobre la biblioteca)
+function _obLugarHtml(second){
+  const kind=second?_obKindOf('ob-lugar2'):_obKindOf('ob-lugar'),pl=_ob.places||{},cur=pl[kind]&&pl[kind].preset;
+  const seg=second?'':`<div class="lib-place ob-seg" role="radiogroup" aria-label="Tipo de sitio">${[['g','🏋️ Gimnasio'],['c','🏠 Casa o aire libre']].map(([k,t])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${kind===k}" onclick="obPlKind('${k}')">${t}</button>`).join('')}</div>`;
+  const opts=PRESETS_OF[kind].map(p=>{const I=PRESET_INFO[p],n=p==='propio'?null:_matCount(placeFromPreset(p),kind);
+    return[p,I.ic,I.t,p==='propio'?'Lo marco yo en el paso siguiente.':I.d,n!=null?plural(n,'ejercicio'):''];});
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">${second?'¿Y el otro sitio?':'¿Dónde vas a entrenar?'}</h1>
+    <p class="ob-sub">${second?`Elige el que más se parezca a ${kind==='c'?'tu casa o tu sitio al aire libre':'tu gimnasio'}.`:'Elige el sitio que más se parezca. Luego puedes ajustar el material.'}</p>
+    ${seg}${_obOpts(second?'preset2':'preset',opts,cur)}
+    ${_obWhy('Solo te propondré ejercicios que puedas hacer ahí.')}`;
+}
+OB_SCR['ob-lugar']={block:2,auto:true,html:()=>_obLugarHtml(false)};
+OB_SCR['ob-lugar2']={block:2,auto:true,html:()=>_obLugarHtml(true)};
+// Elegir un tipo de sitio: copia del preset (o «Otra cosa», que se marca en P6)
+function _obSetPreset(kind,p){
+  const pl=_ob.places=_ob.places||{v:1,main:kind,g:null,c:null};
+  const old=pl[kind],P=p==='propio'?(old?Object.assign(JSON.parse(JSON.stringify(old)),{preset:'propio'}):Object.assign(placeFromPreset('nada'),{preset:'propio'})):placeFromPreset(p);
+  pl[kind]=P;if(!pl.main||!pl[pl.main])pl.main=kind;
+}
+OB_AUTO.preset=v=>{const k=_obKindOf('ob-lugar');_ob.places=_ob.places||{v:1,main:k,g:null,c:null};_ob.places.main=k;_ob.places[k==='g'?'c':'g']=_ob.places[k==='g'?'c':'g']||null;_obSetPreset(k,v);_ob.matKind=null;return v==='grande'?'ob-otro':'ob-material';};
+OB_AUTO.preset2=v=>{const k=_obKindOf('ob-lugar2');_obSetPreset(k,v);return v==='grande'?'ob-reparto-sitios':'ob-material2';};
+// P6 y P6': la rejilla de «Mi material» (la misma de Ajustes), con la cifra en vivo
+function _obMatHtml(second){
+  const kind=_obKindOf(second?'ob-material2':'ob-material');_ob.matKind=kind;const P=_ob.places&&_ob.places[kind];
+  if(!P)return`<h1 class="ob-title" id="ob-h" tabindex="-1">Elige antes el tipo de sitio</h1>${_obNextBtn("obBack()",'‹ Atrás')}`;
+  const gym=kind==='g',empty=['nada','parque'].includes(P.preset);
+  const t=gym?'Esto es lo que suele haber':empty?'Con tu cuerpo basta':'¿Qué tienes?';
+  const sub=gym?'Desmarca lo que no haya en el tuyo. Si no lo sabes, déjalo: al entrenar podrás decir «No hay esta máquina».':empty?'¿Tienes alguna de estas cosas? Cada una abre más ejercicios.':'Marca todo lo que tengas. Tu cuerpo, una silla y la pared ya cuentan.';
+  const n=_matCount(P,kind);
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">${esc(t)}</h1><p class="ob-sub">${esc(sub)}</p>
+    <div class="ob-matn" aria-live="polite">Con esto: <b class="nw">${plural(n,'ejercicio')}</b></div>
+    <div id="mat-sheet" class="ob-mat">${matGridHtml(P,kind,_ob.matOpen||{})}</div>
+    ${_obWhy('Así no te propongo un press de banca si no tienes banco, ni una máquina que tu gimnasio no tiene. Lo de casa también aparece en «Mi material» del buscador de ejercicios.')}
+    ${_obNextBtn(second?"obGo('ob-reparto-sitios')":"obGo('ob-otro')",empty&&n<=_matCount(placeFromPreset('nada'),'c')?'Seguir sin nada →':'Está bien así →')}`;
+}
+OB_SCR['ob-material']={block:2,html:()=>_obMatHtml(false)};
+OB_SCR['ob-material2']={block:2,html:()=>_obMatHtml(true)};
+// La rejilla trabaja sobre el sitio de «Mi material» o sobre el del cuestionario
+function _matTgt(){
+  if(_myMat)return{P:_myMat.draft[_myMat.kind],open:_myMat.open,re:()=>renderMyMaterial(),sel:'#mat-root'};
+  if(_ob&&_ob.matKind&&_ob.places)return{P:_ob.places[_ob.matKind],open:(_ob.matOpen=_ob.matOpen||{}),re:()=>{_obSaveDraft();obRender({keepFocus:true,keepScroll:true});},sel:'#ob-root'};
+  return null;
+}
+// P6b: ¿otro sitio?
+OB_SCR['ob-otro']={block:2,auto:true,html:()=>{const m=(_ob.places&&_ob.places.main)||'g',cur=_ob.a.otro;
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Entrenas también en otro sitio?</h1>
+    <p class="ob-sub">Por ejemplo, gimnasio entre semana y casa el fin de semana.</p>
+    ${_obOpts('otro',[['no','','No, solo aquí'],['si','',m==='g'?'Sí, también en casa o al aire libre':'Sí, también en un gimnasio']],cur)}
+    ${_obWhy('Preparo cada día con el material del sitio donde lo harás.')}`;}};
+OB_AUTO.otro=v=>{const pl=_ob.places;if(v==='no'&&pl){pl[pl.main==='g'?'c':'g']=null;_ob.a.daysOther=0;}return v==='si'?'ob-lugar2':(OB_SCR['ob-edad']?'ob-edad':'ob-otro');};
+// P6c: cuántos de tus días en el otro sitio
+OB_SCR['ob-reparto-sitios']={block:2,html:()=>{const d=_ob.a.days||3,pl=_ob.places||{},o=pl.main==='g'?'c':'g',sitio=o==='c'?'en casa o al aire libre':'en el gimnasio';
+  const cur=_ob.a.daysOther>=1&&_ob.a.daysOther<d?_ob.a.daysOther:null;
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cuántos de tus ${d} días entrenas ${sitio}?</h1>
+    <div class="ob-days" role="radiogroup" aria-labelledby="ob-h" style="grid-template-columns:repeat(${Math.max(1,d-1)},1fr)">${Array.from({length:Math.max(1,d-1)},(_,i)=>i+1).map(n=>`<button type="button" class="ob-dn${cur===n?' on':''}" role="radio" aria-checked="${cur===n}" data-v="${n}" onclick="obPick('daysOther',${n})">${n}</button>`).join('')}</div>
+    ${_obWhy('Preparo esos días con el material de '+(o==='c'?'casa':'gimnasio')+' y el resto con el del otro sitio. Si un día cambias de sitio, en Inicio tienes «¿Hoy en otro sitio?».')}`;}};
+OB_AUTO.daysOther=()=>OB_SCR['ob-edad']?'ob-edad':'ob-reparto-sitios';
 // ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
@@ -24281,20 +24345,20 @@ function matPreset(p){
 }
 function matOtherGym(){if(!_myMat)return;_myMat.otherGym=true;_myMat.choose=true;renderMyMaterial();}
 function matToggle(key){
-  if(!_myMat)return;const P=_myMat.draft[_myMat.kind];if(!P)return;
+  const T=_matTgt();if(!T||!T.P)return;const P=T.P; // (E8b) también el sitio del cuestionario
   const [t,v]=String(key).split(':'),it=t==='m'?{m:v}:t==='a'?{a:v}:t==='f'?{f:v}:{c:v};
   if(t==='m'&&!MAT[v])return;
-  _matSet(P,it,!_matHas(P,it));P.preset=P.preset||'propio';renderMyMaterial();
-  const b=document.querySelector(`#mat-sheet .mat-it[data-k="${CSS.escape(key)}"]`);if(b)try{b.focus({preventScroll:true});}catch(e){}
+  _matSet(P,it,!_matHas(P,it));P.preset=P.preset||'propio';T.re();
+  const b=document.querySelector(`${T.sel} .mat-it[data-k="${CSS.escape(key)}"]`);if(b)try{b.focus({preventScroll:true});}catch(e){}
 }
 function matDetail(f,v){
-  if(!_myMat)return;const P=_myMat.draft[_myMat.kind];if(!P)return;
+  const T=_matTgt();if(!T||!T.P)return;const P=T.P;
   if(f==='dbMax')P.dbMax=PLACE_DBMAX.includes(v)?v:null;
   else if(f==='kbMax')P.kbMax=PLACE_KBMAX.includes(v)?v:null;
   else if(f==='kb'){P.kb=PLACE_KB.includes(v)?v:null;P.acc=v===2?[...new Set([...(P.acc||[]),'kb2'])]:(P.acc||[]).filter(a=>a!=='kb2');}
-  renderMyMaterial();
+  T.re();
 }
-function matOpenSec(k){if(!_myMat)return;_myMat.open[k]=true;renderMyMaterial();}
+function matOpenSec(k){const T=_matTgt();if(!T)return;T.open[k]=true;T.re();}
 function matMain(){if(!_myMat||!_myMat.draft[_myMat.kind])return;_myMat.draft.main=_myMat.kind;renderMyMaterial();}
 function matRemove(){if(!_myMat||_myMat.draft.main===_myMat.kind)return;_myMat.draft[_myMat.kind]=null;_myMat.choose=true;renderMyMaterial();}
 function saveMyMaterial(){
