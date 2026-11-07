@@ -295,6 +295,11 @@ input{font-family:inherit}
 .ob-qc .btn{margin-top:6px}
 .ob-tune .lib-place{margin-bottom:10px}
 .ob-av1{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:14px}
+.ob-resp{border:1px solid var(--border);border-radius:var(--r);background:var(--bg2)}
+.ob-rr{width:100%;border:0;border-bottom:1px solid var(--border);background:none;color:var(--text);font:inherit;text-align:left;min-height:56px}
+.ob-rr .set-row-info{display:flex;flex-direction:column;gap:2px}
+.ob-rr .set-row-t{font-size:14px;font-weight:500}
+.ob-rr .set-row-d{font-size:12px;color:var(--text2)}
 .ob-matn{position:sticky;top:56px;z-index:2;padding:8px 0;background:var(--bg);font-size:14px;color:var(--text2)}
 .ob-matn b{color:var(--green);font-family:'DM Mono',monospace}
 .ob-mat .mat-grid{margin:0}
@@ -14346,9 +14351,9 @@ function obPainNext(){
     if(!z[k]){h.err=`Dime cómo es la molestia de la ${t}.`;obRender({keepFocus:true,keepScroll:true});return;}
     if((z[k]==='ahora'||z[k]==='reciente')&&!(h.zrec||{})[k]){h.err='Dime si es de las últimas semanas.';obRender({keepFocus:true,keepScroll:true});return;}}
   Object.keys(z).forEach(k=>{if(z[k]==='ahora'||z[k]==='reciente')z[k]=(h.zrec||{})[k]==='si'?'reciente':'ahora';});
-  h.err=null;obGo('ob-deporte');
+  h.err=null;if(_ob.healthFlow){_ob.healthAsked=true;obGo('ob-resp-qc');return;}obGo('ob-deporte'); // (E11a)
 }
-function obPainSkip(){if(!_ob)return;_ob.h.zones={};_ob.h.huesos=false;_ob.h.err=null;obGo('ob-deporte');}
+function obPainSkip(){if(!_ob)return;_ob.h.zones={};_ob.h.huesos=false;_ob.h.err=null;if(_ob.healthFlow){_ob.healthAsked=true;obGo('ob-resp-qc');return;}obGo('ob-deporte');}
 // P10 · Otro deporte o cardio (opcional)
 OB_SCR['ob-deporte']={block:3,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Haces otro deporte o cardio?</h1>
   <p class="ob-sub">Para no pasarme con las piernas y decidir si añado cardio a tu rutina.</p>
@@ -14385,6 +14390,7 @@ function _obAnswers(){
   a.pref=_obPref();a.places=JSON.parse(JSON.stringify(_ob.places||{}));a.sport=a.sport||'no';a.prio=(a.prio||[]).filter(x=>!(a.enfoque==='gluteo'&&x==='gluteos'));
   a.style=a.style||'igual';a.power=!!a.power;a.cardioEnd=a.cardioEnd||'auto';a.daysOther=a.daysOther||0;a.consec=!!a.consec;
   if(a.enfoque!=='gluteo')delete a.enfoque;
+  if(_ob.from==='settings'&&!a.levelManual){const ef=_obEfectiva();if(ef)a.efectiva=ef;} // (E11a) el nivel sube solo con lo entrenado
   return a;
 }
 function _obHealthObj(){
@@ -14447,6 +14453,7 @@ function obEditFromResult(step){
   _ob.hist.push(_ob.step);_ob.step=step;_ob.single=true;_ob.ret='ob-rutina';_obSaveDraft();obRender(); // (sin obGo: su desvío de pantalla suelta volvería al momento)
 }
 function obSingleSave(){if(!_ob)return;const r=_ob.ret||'ob-rutina';_ob.single=false;_ob.ret=null;_ob.dirty=true;_ob.hist.push(_ob.step);_ob.step=r;_obSaveDraft();
+  if(r==='ob-resp')_ob.respChanged=true; // (E11a)
   if(r==='ob-rutina'){const b=_ob.before;_obGenerate();const t=_obChangedTxt();_ob.changed=b&&b.split&&_ob.g&&_ob.g.res.meta.split!==b.split?t+' → '+_obWeekLine(_ob.g).replace(/^Tu semana: |^Esta semana: /,'').replace(/\.$/,''):t;_ob.before=null;}
   obRender();}
 // La semana con todos los días (43 B-1): «Tu semana: A · B · C · A»; con 2 entrenos que se alternan en 3 días, esta y la siguiente
@@ -14693,6 +14700,71 @@ function obTune(){
 function obTuneSet(k,v){if(!_ob)return;if(k==='power')_ob.a.power=v==='1';else if(k==='levelManual'){if(v)_ob.a.levelManual=v;else delete _ob.a.levelManual;}else _ob.a[k]=v;_ob.dirty=true;_obSaveDraft();obTune();}
 function obUnavoid(id){if(!_ob)return;_ob.a.avoid=(_ob.a.avoid||[]).filter(x=>x!==id);_ob.dirty=true;_obSaveDraft();obTune();}
 function obTuneClose(){obSheetClose();if(_ob&&_ob.dirty)obRender({keepFocus:true});}
+// ── (E11a) Ajustes › Tu entrenamiento: «Tus respuestas» y «Qué cambia» (§H.1-§H.3) ──
+// Respuestas guardadas → cuestionario (con lo de salud solo si hay consentimiento)
+function _obPrefill(){
+  if(!_ob)return;const p=S.profile;
+  if(p){const a=JSON.parse(JSON.stringify(p));['v','ts','dismiss','nr'].forEach(k=>delete a[k]);Object.keys(a).forEach(k=>{if(a[k]==null)delete a[k];});_ob.a=Object.assign({},a,{mode:'gen'});}
+  _ob.places=S.places?JSON.parse(JSON.stringify(S.places)):_ob.places;
+  const h=S.health;_ob.h={nada:!(h&&h.prudent)};
+  if(h){_ob.h.zones=JSON.parse(JSON.stringify(h.zones||{}));_ob.h.zrec={};Object.keys(_ob.h.zones).forEach(z=>{if(_ob.h.zones[z]==='reciente'||_ob.h.zones[z]==='ahora')_ob.h.zrec[z]=_ob.h.zones[z]==='reciente'?'si':'no';});
+    _ob.h.huesos=!!h.huesos;if(h.posparto)_ob.h.posparto='alta';if(h.otraTxt)_ob.h.otraTxt=h.otraTxt;_ob.h.consent=true;if(h.prudent)_ob.h.visto=true;}
+  if(p&&p.pref){_ob.h.prefU={floor:p.pref.floor,impact:p.pref.impact};}
+}
+// Nivel efectivo al regenerar (43 I-3): con lo que has entrenado, sube solo
+function _obEfectiva(){const L=(S.sessions||[]).filter(s=>s&&s.ts);if(!L.length)return null;return{sesiones:L.length,semanas:Math.max(0,Math.floor((Date.now()-L[0].ts)/(7*864e5)))};}
+const OB_AGE_LBL={'16':'16 o 17','18':'18-39','40':'40-64','65':'65-74','75':'75 o más',nd:'Prefiero no decirlo'};
+const OB_SPORT_LBL={no:'No, por ahora no',suave:'Camino o voy en bici',piernas:'Corro o hago deporte de piernas',agua:'Nado, remo o algo parecido'};
+function _obRespRows(){
+  const a=_ob.a,pl=_ob.places||{},pr=(a.prio||[]).filter(x=>!(a.enfoque==='gluteo'&&x==='gluteos'));
+  const rows=[['ob-meta','Objetivo',(OB_GOAL_LBL[a.goal]||'—')],['ob-sexo','Mujer u hombre',({m:'Mujer',h:'Hombre',nd:'Prefiero no decirlo'})[a.sex]||'—']];
+  if(a.sex==='m')rows.push(['ob-enfoque','Enfoque',({gluteo:'Más glúteo y pierna',igual:'Equilibrada'})[a.enfoque]||'—']);
+  rows.push(['ob-exp','Experiencia',OB_EXP_LBL[a.exp]||'—'],['ob-tiempo','Tu tiempo',a.days?`${plural(a.days,'día')} · ${a.min||60}${NB}min`:'—'],
+    ['ob-lugar','Dónde entrenas',['g','c'].filter(k=>pl[k]).map(k=>(PRESET_INFO[pl[k].preset]||PRESET_INFO.propio).t).join(' + ')||'—'],
+    ['ob-edad','Edad',OB_AGE_LBL[a.age]||'—'],['ob-molestias','Molestias',S.health?Object.keys(S.health.zones||{}).map(z=>(OB_ZONES.find(x=>x[0]===z)||['',z])[2]).join(', ')||'Ninguna':'No guardadas'],
+    ['ob-deporte','Otro deporte',OB_SPORT_LBL[a.sport]||'—'],['ob-foco','Prioridades',(a.enfoque==='gluteo'?['Glúteos']:[]).concat(pr.map(k=>(OB_PRIO.find(x=>x[0]===k)||['',k])[1])).join(' y ')||'Todo por igual']);
+  return rows;
+}
+OB_SCR['ob-resp']={block:0,html:()=>{const ef=_obEfectiva();
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">Tus respuestas</h1>
+  <p class="ob-sub">Cambia la que quieras: antes de tocar tu rutina, te enseño qué cambia.</p>
+  <div class="set-section ob-resp">${_obRespRows().map(([st,t,v])=>`<button type="button" class="set-row ob-rr" onclick="obRespEdit('${st}')"><span class="set-row-info"><span class="set-row-t">${esc(t)}</span><span class="set-row-d">${esc(v)}</span></span><span class="set-row-arrow" aria-hidden="true">›</span></button>`).join('')}</div>
+  ${ef&&ef.sesiones>=12?`<p class="ob-foot">Tu nivel sube solo con lo que entrenas: llevas ${plural(ef.sesiones,'sesión','sesiones')} en ${plural(ef.semanas,'semana')}.</p>`:''}
+  ${_ob.respChanged?_obNextBtn('obRespReview()','Ver qué cambia en tu rutina →'):''}`;}};
+function obRespEdit(st){if(!_ob||!OB_SCR[st])return;_ob.before={a:JSON.stringify(_ob.a),places:JSON.stringify(_ob.places),h:JSON.stringify(_ob.h.zones||{})};
+  _ob.hist.push(_ob.step);_ob.step=st;_ob.single=true;_ob.ret='ob-resp';obRender();}
+// Sin consentimiento de salud guardado, antes de regenerar se repasan P8 y P9 (43 I-9)
+function obRespReview(){if(!_ob)return;if(!S.health&&!_ob.healthAsked){_ob.healthFlow='resp';_ob.h.scr=new Set();_ob.h.nada=false;obGo('ob-salud');return;}obGo('ob-resp-qc');}
+// «Qué cambia en tu rutina»: con la rutina regenerada; aplicar, solo guardar la respuesta o cancelar
+OB_SCR['ob-resp-qc']={block:0,html:()=>{
+  _ob.dirty=true;_obGenerate();const c=_ob.c;if(!c)return`<h1 class="ob-title" id="ob-h" tabindex="-1">No he podido preparar tu rutina</h1>`;
+  const d=_obDiff(c);let cy=0;try{cy=coach_cycleData().sessions.length;}catch(e){}
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">Qué cambia en tu rutina</h1>
+  <div class="ob-qc"><p class="ob-qc-n">Se quedan <b>${d.keep}</b> · cambian <b>${d.chg}</b> · nuevos <b>${d.add}</b> · salen <b>${d.out}</b></p>
+  <p>${esc(_obWeekLine(_ob.g))}</p>
+  <p>Tu historial no se toca: lo que sale sigue en Progreso › Fuera de tu rutina y, si vuelve, retoma su historial. Guardo tu rutina actual por si quieres volver.</p>
+  ${cy?`<p>Cierro tu ciclo actual (${plural(cy,'sesión','sesiones')}): lo verás en tu resumen.</p>`:''}</div>
+  <div class="ob-next ob-res"><button type="button" class="btn bp" id="ob-go" onclick="obRespApply()">Aplicar cambios</button>
+  <button type="button" class="btn bs" onclick="obRespSaveOnly()">Solo guardar la respuesta</button><button type="button" class="ob-link" onclick="obRespCancel()">Cancelar</button></div>`;}};
+function obRespApply(){if(!_ob||!_ob.c)return;const bl=_applyGuard();if(bl){toast(bl.msg,3600);return;}_obDoApply();}
+function obRespSaveOnly(){if(!_ob)return;S.profile=Object.assign(_obProfileToSave(S.profile&&S.profile.mode||'gen'),{dismiss:(S.profile&&S.profile.dismiss)||{}});S.profile=_sanitizeProfile(S.profile);
+  if(_ob.places){S.places=_sanitizePlaces(_ob.places);try{_syncLibKit();}catch(e){}}const h=_obHealthObj();if(h)S.health=h;
+  saveState();hideOnboarding();openSettings();toast('Guardé tu respuesta; tu rutina no cambia',3000);}
+function obRespCancel(){if(!_ob)return;hideOnboarding();openSettings();}
+function openAnswers(){closeSettings();showOnboarding({from:'settings',step:'ob-resp'});_obPrefill();_ob.hist=[];obRender();}
+// La sección de Ajustes
+function trainSectionHtml(){
+  const p=S.profile,d=S.obDraft,acc=acceptedPending(),rows=[];
+  if(acc)rows.push(['Tienes una rutina nueva sin aplicar','La que aceptaste mientras entrenabas: la aplico tal cual.','applyAcceptedUI()']);
+  else if(d&&d.step&&!['ob-hola','ob-resp','ob-resp-qc'].includes(d.step)&&!(p&&p.mode==='gen'))rows.push(['Seguir creando mi rutina','Seguimos donde lo dejaste.',"closeSettings();showOnboarding({from:'settings',step:S.obDraft.step})"]);
+  if(p&&p.mode==='gen')rows.push(['Tus respuestas','Cambia una y te enseño qué cambia en tu rutina.','openAnswers()']);
+  if(typeof repeatQuestionnaire==='function')rows.push(['Repetir el cuestionario',p&&p.mode==='gen'?'Con tus respuestas puestas: cambia solo lo que quieras.':'Te preparo una rutina a medida en 2-3 minutos.','repeatQuestionnaire()']);
+  if(typeof restorePlanPrevUI==='function'&&S.planPrev)rows.push(['Volver a mi rutina anterior','La de antes del último cambio, con su objetivo y su día.','restorePlanPrevUI()']);
+  if(typeof openMyHealth==='function')rows.push(['Mis molestias',S.health?'Guardadas en este móvil · Ver o borrar':'No guardo ninguna','openMyHealth()']);
+  return rows.map(([t,dsc,fn])=>`<div class="set-row" role="button" tabindex="0" onclick="${fn}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();${fn.replace(/"/g,'&quot;')}}"><div class="set-row-info"><div class="set-row-t">${esc(t)}</div><div class="set-row-d">${esc(dsc)}</div></div><span class="set-row-arrow">›</span></div>`).join('');
+}
+function applyAcceptedUI(){const r=applyAcceptedPending();if(!r.ok){toast(r.msg||'No se ha podido aplicar',3600);return;}closeSettings();go('dash');render();
+  showUndoToast('Rutina nueva aplicada',()=>{const u=restorePlanPrev();render();if(u.ok)toast('Has vuelto a tu rutina anterior',3000);},null,10000);}
 // ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
@@ -26039,7 +26111,9 @@ function renderSettings(){
       <button class="hist-sheet-close" onclick="closeSettings()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
-      <div class="sh" style="margin-top:2px">Rutina</div>
+      <div class="sh" style="margin-top:2px">Tu entrenamiento</div>
+      <div class="set-section" id="set-train">${trainSectionHtml()}</div>
+      <div class="sh">Rutina</div>
       <div class="set-section">
         <div class="set-row" onclick="closeSettings();openRoutineEditor()">
           <div class="set-row-info">
@@ -26055,7 +26129,7 @@ function renderSettings(){
           </div>
           <span class="set-row-arrow">›</span>
         </div>
-        <div class="set-row" onclick="settingsChangeWeeklyTarget()">
+        ${S.profile&&S.profile.mode==='gen'?'':`        <div class="set-row" onclick="settingsChangeWeeklyTarget()">
           <div class="set-row-info">
             <div class="set-row-t">Días de entrenamiento por semana</div>
             <div class="set-row-d">Tu objetivo semanal · Inicio y Coach se ajustan a este número</div>
@@ -26063,6 +26137,7 @@ function renderSettings(){
           <span class="set-row-v">${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}</span>
           <span class="set-row-arrow">›</span>
         </div>
+        `}
         ${(()=>{const ar=getActiveRest(),dl=getActiveDeload(),left=dl?Math.max(0,Math.ceil((dl.endTs-Date.now())/86400000)):ar?restDaysLeft(ar):0;
           // (13b) descarga y descanso en una sola fila: sin ninguna, elige; con una en marcha, la termina
           return`<div class="set-row" id="set-recovery" role="button" tabindex="0" onclick="${dl?'endDeload()':ar?'endRestWeek()':'openRecoveryChooser()'}" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}">
@@ -26182,13 +26257,6 @@ function renderSettings(){
       </div>
       <div class="sh">Zona de peligro</div>
       <div class="set-section">
-        <div class="set-row danger" onclick="resetOnboarding()">
-          <div class="set-row-info">
-            <div class="set-row-t">Rehacer onboarding</div>
-            <div class="set-row-d">Vuelve a la pantalla inicial (conserva datos)</div>
-          </div>
-          <span class="set-row-arrow">›</span>
-        </div>
         <div class="set-row danger" onclick="resetAllData()">
           <div class="set-row-info">
             <div class="set-row-t">Borrar todos los datos</div>
