@@ -275,6 +275,7 @@ input{font-family:inherit}
 .ob-dh{display:flex;flex-direction:column;gap:2px;padding-bottom:6px;border-bottom:1px solid var(--border);font-size:14px}
 .ob-dh span{font-size:12px;color:var(--text2)}
 .ob-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.cyc-next-t{font-weight:700;font-size:15px}.cyc-next-d{color:var(--text2);font-size:13px;margin:4px 0 10px}.cyc-next-b{display:flex;flex-direction:column;gap:8px}
 .ob-bal-h{font-size:12px;font-weight:700;color:var(--text2);margin:12px 0 0}
 .ob-row:last-child{border-bottom:0}
 .ob-ri{flex:none;width:40px;min-height:40px;display:grid;place-items:center;font-size:20px;position:relative}
@@ -13143,7 +13144,7 @@ function _sanitizeProposals(list){
     if(typeof p.short==='string'&&p.short)q.short=p.short.slice(0,120);
     if(typeof p.prio==='number'&&isFinite(p.prio))q.prio=p.prio;
     if(typeof p.sev==='number'&&isFinite(p.sev))q.sev=p.sev;
-    if(['fatigue','down','stagnant','flat','volume','legacy_up','power'].includes(p.basis))q.basis=p.basis;
+    if(['fatigue','down','stagnant','flat','volume','legacy_up','power','cycle'].includes(p.basis))q.basis=p.basis;
     if(typeof p.createdAt==='number'&&isFinite(p.createdAt))q.createdAt=p.createdAt;
     if(_isPlainObj(p.to)&&Number.isInteger(p.to.s)&&p.to.s>=1&&p.to.s<=10&&Number.isInteger(p.to.r)&&p.to.r>=1&&p.to.r<=30)q.to={s:p.to.s,r:p.to.r};
     out.push(q);
@@ -14163,7 +14164,7 @@ function _sanitizeProfile(o){
   p.style=_oneOf(o.style,PROF_STYLE)||'igual';p.warm=_oneOf(o.warm,PROF_WARM)||'normal';p.cardioEnd=_oneOf(o.cardioEnd,PROF_CARDIO)||'auto';
   p.power=_bool(o.power);
   p.avoid=_ids(o.avoid,100,_LIBID_RE);
-  const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);});
+  const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight','cycle'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);}); // (E15) cycle: «¿Cómo seguimos?» contestado
   p.nr=_oneOf(o.nr,['ent','pro','med']);
   p.warn=_oneOf(o.warn,['consulta','matrona']); // (E11b) aviso fijo de salud (§H.2): solo cuál, no el motivo // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
   p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=p.sex==='m'?_oneOf(o.enfoque,PROF_ENFOQUE):null; // (D10) el enfoque solo se pregunta a las mujeres
@@ -15298,12 +15299,12 @@ OB_SCR['ob-resp-qc']={block:0,html:()=>{
   <p>Tu historial no se toca: lo que sale sigue en Progreso › Fuera de tu rutina y, si vuelve, retoma su historial. Guardo tu rutina actual por si quieres volver.</p>
   ${cy?`<p>Cierro tu ciclo actual (${plural(cy,'sesión','sesiones')}): lo verás en tu resumen.</p>`:''}</div>
   <div class="ob-next ob-res"><button type="button" class="btn bp" id="ob-go" onclick="obRespApply()">Aplicar cambios</button>
-  <button type="button" class="btn bs" onclick="obRespSaveOnly()">Solo guardar la respuesta</button><button type="button" class="ob-link" onclick="obRespCancel()">Cancelar</button></div>`;}};
+  ${_ob.fromCycle?'':'<button type="button" class="btn bs" onclick="obRespSaveOnly()">Solo guardar la respuesta</button>'}<button type="button" class="ob-link" onclick="obRespCancel()">Cancelar</button></div>`;}};
 function obRespApply(){if(!_ob||!_ob.c)return;const bl=_applyGuard();if(bl){toast(bl.msg,3600);return;}_obDoApply();}
 function obRespSaveOnly(){if(!_ob)return;S.profile=Object.assign(_obProfileToSave(S.profile&&S.profile.mode||'gen'),{dismiss:(S.profile&&S.profile.dismiss)||{}});S.profile=_sanitizeProfile(S.profile);
   if(_ob.places){S.places=_sanitizePlaces(_ob.places);try{_syncLibKit();}catch(e){}}const h=_obHealthObj();if(h)S.health=h;
   saveState();hideOnboarding();openSettings();toast('Guardé tu respuesta; tu rutina no cambia',3000);}
-function obRespCancel(){if(!_ob)return;hideOnboarding();openSettings();}
+function obRespCancel(){if(!_ob)return;const fc=!!_ob.fromCycle;hideOnboarding();if(fc)go('coach');else openSettings();}
 function openAnswers(){closeSettings();showOnboarding({from:'settings',step:'ob-resp'});_obPrefill();_ob.hist=[];obRender();}
 // La sección de Ajustes
 function trainSectionHtml(){
@@ -19666,6 +19667,39 @@ function coach_applyRecommendationsConfirmed(){
   if(wrapCycleOffer())return;
   if(dlP&&reco)goDeloadReco();else if(nP>0)goCoachProposals();
 }
+// (E15, §G.5 · 43 I-5) Tras cerrar un ciclo (dos semanas como mucho), en el Coach: «Seguir igual» · «Subir un poco (más series o
+// variantes)» · con rutina generada, «Rutina nueva con mis respuestas» (regenera con tus respuestas y el nivel que ya has entrenado,
+// pasando por «Qué cambia en tu rutina»). Una vez por ciclo (profile.dismiss.cycle).
+function _cycleLast(){const ms=(S.mesocycles||[]).filter(m=>_isPlainObj(m)&&+m.appliedAt>0);return ms.length?ms[ms.length-1]:null;}
+function cycleNextCardHtml(){
+  const p=S.profile,m=_cycleLast();if(!p||!m||Date.now()-m.appliedAt>14*864e5||(p.dismiss&&+p.dismiss.cycle>=+m.appliedAt))return'';
+  const gen=p.mode==='gen';
+  return`<div class="card cyc-next" id="cyc-next"><div class="cyc-next-t">Ciclo cerrado: ¿cómo seguimos?</div>
+    <div class="cyc-next-d">Tu rutina sigue como está hasta que elijas.</div>
+    <div class="cyc-next-b"><button type="button" class="btn bs" onclick="cycleNext('igual')">Seguir igual</button>
+    <button type="button" class="btn bs" onclick="cycleNext('subir')">Subir un poco</button>
+    ${gen?`<button type="button" class="btn bp" onclick="cycleNext('nueva')">Rutina nueva con mis respuestas</button>`:''}</div></div>`;
+}
+function _cycleUpProposals(){
+  const p=getPlan(),now=Date.now(),out=[],inPlan=_planLibIds();
+  dayKeys(p).forEach(k=>(p[k].ex||[]).forEach(e=>{const ex=routineEx(e);if(!ex||ex.cardio||out.length>=6||out.some(o=>o.exId===ex.id))return;
+    const L=exLib(ex);if(L&&L.pat==='bal')return;
+    const base={basis:'cycle',prio:1,ic:'📈',tag:'Subir un poco',exId:ex.id,dayKey:k,createdAt:now},s=_baseSets(ex);
+    if(isCompoundEx(ex)&&s<4){out.push(Object.assign({},base,{id:'up_'+ex.id,type:'add_set',sev:-s,title:`${ex.n}: pasa a ${s+1} series`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,
+      short:`pasar a ${s+1} series`,description:`Has elegido subir un poco: una serie más en «${ex.n}», sin llegar al límite.`}));return;}
+    const up=L&&L.up?LIB_BY_ID.get(L.up):null;
+    if(up&&['bw','r','t'].includes(L.lt)&&!inPlan.has(up.id)&&canDoHere(up,k))out.push(Object.assign({},base,{id:'upv_'+ex.id,type:'swap',sev:0,libExId:up.id,
+      title:`Cambiar ${ex.n} por ${up.n}`,diff:`${ex.n} → ${up.n}`,short:`cambiar a ${up.n}`,description:`Has elegido subir un poco: la variante siguiente de «${ex.n}». ${_histStaysTxt(ex)}`}));
+  }));
+  return out;
+}
+function cycleNext(k){
+  const p=S.profile;if(!p)return;p.dismiss=Object.assign({},p.dismiss,{cycle:Date.now()});S.profile=_sanitizeProfile(p);
+  if(k==='subir'){const add=_cycleUpProposals();S.pendingCoachProposals=_sanitizeProposals(add.concat(S.pendingCoachProposals||[]));saveState();render();
+    if(add.length){goCoachProposals();toast(`${plural(add.length,'propuesta','propuestas')} para subir un poco: tú decides`,3000);}else toast('Tu rutina ya está en lo alto: sigue así',2800);return;}
+  if(k==='nueva'&&p.mode==='gen'){saveState();showOnboarding({from:'settings',step:'ob-resp'});_obPrefill();_ob.hist=[];_ob.fromCycle=true;obRespReview();return;}
+  saveState();render();toast('Seguimos igual: el Coach sigue ajustando tus pesos',2600);
+}
 // Abre el Coach con sus propuestas a la vista (desde Inicio o al cerrar el ciclo)
 function goCoachProposals(){
   if(S.tab!=='coach')go('coach');
@@ -19973,6 +20007,7 @@ function renderCoach(){
       <div class="coach-hero-title">Analizando tu progreso</div>
       <div class="coach-hero-sub">Después de <strong style="color:var(--green)">${remaining}</strong> ${remaining===1?'sesión':'sesiones'} más, el coach podrá analizar tu patrón de entrenamiento y darte recomendaciones personalizadas.</div>
     </div>
+    ${cycleNextCardHtml()}
     ${coachPlanCardHtml()}
     ${fatigueCardHtml()}
     ${mmCoachCardHtml()}
@@ -20069,6 +20104,7 @@ function renderCoach(){
   </div>`:''}
 
   ${wrapCycleOfferHtml(pv.active.filter(p=>!(p.type==='deload'&&(dlReco||dlWait))).length)}
+  ${cycleNextCardHtml()}
 
   ${deloadRecoHtml(dlReco)}
 
