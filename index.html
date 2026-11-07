@@ -242,6 +242,13 @@ input{font-family:inherit}
 .ob-sw{border:1px solid var(--border);border-radius:var(--r);background:var(--bg2)}
 .ob-seg .lib-pl{white-space:normal;line-height:1.25;padding:6px 8px;font-size:13px}
 .ob-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ob-chk{display:flex;gap:12px;align-items:flex-start;width:100%;min-height:56px;padding:14px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font:inherit;text-align:left;cursor:pointer}
+.ob-chk.on{border-color:var(--amber);background:color-mix(in srgb,var(--amber) 9%,var(--bg2))}
+.ob-chk .ob-ct span{font-size:14px;color:var(--text);line-height:1.45}
+.ob-cb{flex:none;width:24px;height:24px;border-radius:7px;border:2px solid var(--border2);display:grid;place-items:center;font-size:14px;font-weight:700;color:var(--accent-ink)}
+.ob-chk.on .ob-cb{background:var(--amber);border-color:var(--amber)}
+.ob-chk:focus-visible,.ob-none:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.ob-none{margin-top:4px}
 .ob-matn{position:sticky;top:56px;z-index:2;padding:8px 0;background:var(--bg);font-size:14px;color:var(--text2)}
 .ob-matn b{color:var(--green);font-family:'DM Mono',monospace}
 .ob-mat .mat-grid{margin:0}
@@ -13565,6 +13572,7 @@ function _sanitizeProfile(o){
   p.power=_bool(o.power);
   p.avoid=_ids(o.avoid,100,_LIBID_RE);
   const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);});
+  p.nr=_oneOf(o.nr,['ent','pro','med']); // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
   p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=p.sex==='m'?_oneOf(o.enfoque,PROF_ENFOQUE):null; // (D10) el enfoque solo se pregunta a las mujeres
   return p;
 }
@@ -14161,6 +14169,89 @@ OB_SCR['ob-reparto-sitios']={block:2,html:()=>{const d=_ob.a.days||3,pl=_ob.plac
     <div class="ob-days" role="radiogroup" aria-labelledby="ob-h" style="grid-template-columns:repeat(${Math.max(1,d-1)},1fr)">${Array.from({length:Math.max(1,d-1)},(_,i)=>i+1).map(n=>`<button type="button" class="ob-dn${cur===n?' on':''}" role="radio" aria-checked="${cur===n}" data-v="${n}" onclick="obPick('daysOther',${n})">${n}</button>`).join('')}</div>
     ${_obWhy('Preparo esos días con el material de '+(o==='c'?'casa':'gimnasio')+' y el resto con el del otro sitio. Si un día cambias de sitio, en Inicio tienes «¿Hoy en otro sitio?».')}`;}};
 OB_AUTO.daysOther=()=>OB_SCR['ob-edad']?'ob-edad':'ob-reparto-sitios';
+// ── (E9a) Bloque 3: edad y seguridad (§C P7, P7x, P8, P8x, P8s, P8p, P8y; §B.3) ──
+// Lo de salud vive en _ob.h (memoria) hasta el consentimiento de P9; la edad «Menos de 16», el embarazo y el posparto sin el alta no
+// se guardan nunca.
+OB_SCR['ob-edad']={block:3,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cuántos años tienes?</h1>
+  <p class="ob-sub">Solo el tramo. Cambia la prudencia y algún ejercicio, nada más.</p>
+  ${_obOpts('age',[['lt16','','Menos de 16'],['16','','16 o 17'],['18','','18-39'],['40','','40-64'],['65','','65-74'],['75','','75 o más'],['nd','','Prefiero no decirlo']],_ob.h.menor?'lt16':_ob.a.age,{grid:true})}
+  ${_obWhy('A partir de 65 añado equilibrio, más calentamiento y voy más despacio. Con menos de 18, cuido más la técnica. Si prefieres no decirlo, te preparo una rutina prudente.')}`};
+OB_AUTO.age=v=>{if(v==='lt16'){delete _ob.a.age;delete _ob.a.ageTs;_ob.h.menor=true;_obSaveDraft();return'ob-menor';}
+  _ob.h.menor=false;_ob.a.ageTs=Date.now();_obSaveDraft();return'ob-salud';};
+// Entrar en la app sin rutina automática (§B.3): primer arranque → rutina vacía (2 días sin ejercicios), sin «Hoy toca» y con su
+// tarjeta (nr: 'ent' entrenador · 'pro' quien te la ponga · 'med' visto bueno del médico); desde Ajustes, tu rutina no cambia
+function _obNoRoutine(nr){
+  if(!_ob)return;const from=_ob.from;
+  if(from==='first'){
+    const keep=nr==='med'?JSON.parse(JSON.stringify(_ob.a)):null;
+    startFromScratch(2);S.weeklyTarget=Math.max(2,Math.min(6,parseInt(_ob.a.days)||2));
+    S.profile=_sanitizeProfile({mode:'own',nr});S.onboarded=true;
+    if(!S.coachStart)S.coachStart=S.sessions.length>0?(S.sessions[0].ts||Date.now()):Date.now();
+    S.obDraft=keep?_sanitizeObDraft({v:1,ts:Date.now(),from:'first',step:'ob-salud',a:keep,alt:0,pins:{},places:_ob.places}):null;
+    saveState();hideOnboarding();go('dash');render();
+  }else{hideOnboarding();openSettings();toast('Tu rutina no cambia',2600);}
+}
+OB_SCR['ob-menor']={block:3,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">Mejor con un adulto que sepa de esto</h1>
+  <p class="ob-sub">Entrenar fuerza a tu edad es buena idea, pero con alguien que te enseñe la técnica: un entrenador o tu profe de Educación Física. No te preparo una rutina automática; puedes usar Gymteca para apuntar lo que hagas con esa persona.</p>
+  <div class="ob-acts"><button type="button" class="btn bp" onclick="_obNoRoutine('ent')">Entrar en la app</button><button type="button" class="btn bs" onclick="obBack()">‹ Atrás</button></div>`};
+// P8 · Antes de empezar, tu seguridad. Redacción propia; los conceptos vienen del criterio ACSM 2015 (no copia el PAR-Q+, 41 C-30).
+const OB_SCREEN=[['sint','🫀','En reposo o con un esfuerzo ligero (subir un piso, caminar deprisa) noto dolor u opresión en el pecho, me falta el aire mucho más que a otras personas, me mareo o noto el corazón muy acelerado o irregular'],
+  ['desm','💫','Me he desmayado o he perdido el conocimiento en el último año sin una causa clara (no cuentes al sacarte sangre)'],
+  ['enf','🩺','Un médico me ha dicho que tengo algo de corazón, tensión alta, diabetes o riñón'],
+  ['med','💊','Tomo medicación a diario para el corazón, la tensión o el azúcar'],
+  ['superv','🧑‍⚕️','Me han indicado que haga ejercicio solo con un profesional delante o que evite ciertos esfuerzos'],
+  ['emb','🤰','Estoy embarazada'],['post','👶','He dado a luz hace menos de un año']];
+function _obScr(){if(!(_ob.h.scr instanceof Set))_ob.h.scr=new Set(Array.isArray(_ob.h.scr)?_ob.h.scr:[]);return _ob.h.scr;}
+function obScreen(k){
+  if(!_ob)return;const s=_obScr();
+  if(k==='nada'){s.clear();_ob.h.nada=true;_ob.h.visto=false;_ob.h.superv=false;_ob.h.posparto=null;obRender({keepFocus:true,keepScroll:true});
+    clearTimeout(_obAdvT);const st=_ob.step;_obAdvT=setTimeout(()=>{if(_ob&&_ob.step===st&&!_ob.single)obGo('ob-molestias');},400);return;}
+  _ob.h.nada=false;if(s.has(k))s.delete(k);else s.add(k);
+  obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root [data-scr="${k}"]`);if(b)try{b.focus();}catch(e){}
+}
+OB_SCR['ob-salud']={block:3,html:()=>{const s=_obScr(),man=_ob.a.sex==='h';
+  const rows=OB_SCREEN.filter(r=>!(man&&(r[0]==='emb'||r[0]==='post'))).map(([k,ic,t])=>{const on=s.has(k);
+    return`<button type="button" class="ob-chk${on?' on':''}" role="checkbox" aria-checked="${on}" data-scr="${k}" onclick="obScreen('${k}')"><span class="ob-cb" aria-hidden="true">${on?'✓':''}</span><span class="ob-ci" aria-hidden="true">${ic}</span><span class="ob-ct"><span>${esc(t)}</span></span></button>`;}).join('');
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">Antes de empezar, tu seguridad</h1>
+  <p class="ob-sub">Marca lo que te pase. No guardo qué marcas: como mucho, que conviene ir con calma, y solo si me dejas.</p>
+  <div class="ob-acts">${rows}
+    <button type="button" class="ob-card ob-none${_ob.h.nada?' on':''}" role="checkbox" aria-checked="${!!_ob.h.nada}" data-scr="nada" onclick="obScreen('nada')"><span class="ob-ci" aria-hidden="true">✅</span><span class="ob-ct"><b>Nada de esto</b></span></button></div>
+  <p class="ob-foot">No es un diagnóstico. Gymteca no sustituye a un profesional sanitario.</p>
+  ${_obWhy('Entrenar fuerza es seguro para casi todo el mundo, pero con algunas condiciones conviene ir con más calma o consultarlo antes.')}
+  ${s.size?_obNextBtn('obScreenNext()'):''}`;}};
+// La primera rama que aplique: embarazo → P8y · posparto → P8p · síntomas o desmayo → P8x · supervisión → P8s · enfermedad o
+// medicación → prudente y P9 · nada → P9
+function obScreenNext(){
+  if(!_ob)return;const s=_obScr();_ob.h.visto=false;_ob.h.superv=false;
+  if(s.has('emb')){_ob.h.embTxt='emb';obGo('ob-embarazo');return;}
+  if(s.has('post')){obGo('ob-posparto');return;}
+  if(s.has('sint')||s.has('desm')){obGo('ob-medico');return;}
+  if(s.has('superv')){obGo('ob-supervision');return;}
+  obGo('ob-molestias');
+}
+OB_SCR['ob-medico']={block:3,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">Habla primero con tu médico</h1>
+  <p class="ob-sub">El dolor en el pecho, las palpitaciones, los mareos o los desmayos hay que consultarlos antes de entrenar con esfuerzo. Cuando tengas su visto bueno, te preparo una rutina suave.</p>
+  <div class="ob-acts"><button type="button" class="btn bp" onclick="_ob.h.visto=true;obGo('ob-molestias')">Ya tengo su visto bueno</button>
+  <button type="button" class="btn bs" onclick="_obNoRoutine('med')">Entrar en la app sin rutina</button><button type="button" class="btn bs" onclick="obBack()">‹ Atrás</button></div>`};
+OB_SCR['ob-supervision']={block:3,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">Sigue lo que te diga quien te supervisa</h1>
+  <p class="ob-sub">Puedo prepararte una rutina suave para que esa persona la revise antes de empezar.</p>
+  <div class="ob-acts"><button type="button" class="btn bp" onclick="_ob.h.superv=true;obGo('ob-molestias')">Prepárala</button>
+  <button type="button" class="btn bs" onclick="_obNoRoutine('med')">Entrar en la app sin rutina</button><button type="button" class="btn bs" onclick="obBack()">‹ Atrás</button></div>`};
+OB_SCR['ob-posparto']={block:3,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Te han dado el alta para hacer ejercicio en la revisión posparto?</h1>
+  ${_obOpts('pp',[['si','','Sí'],['no','','No'],['nose','','No lo sé']],_ob.h.pp)}`};
+OB_AUTO.pp=v=>{delete _ob.a.pp;_ob.h.pp=v;_obSaveDraft();
+  if(v==='si'){_ob.h.posparto='alta';return'ob-molestias';}_ob.h.posparto=null;_ob.h.embTxt='post';return'ob-embarazo';};
+OB_SCR['ob-embarazo']={block:3,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">En esta etapa, mejor con tu matrona o tu médico</h1>
+  <p class="ob-sub">${_ob.h.embTxt==='post'?'Cuando te den el alta en la revisión posparto, vuelve aquí y te preparo una rutina suave.':'En el embarazo el ejercicio suele venir bien, pero hay cosas que debe valorar un profesional y no tengo una rutina adaptada. Puedes usar Gymteca para apuntar la rutina que te pongan.'}</p>
+  <div class="ob-acts"><button type="button" class="btn bp" onclick="_obNoRoutine('pro')">Entrar en la app</button><button type="button" class="btn bs" onclick="obBack()">‹ Atrás</button></div>`};
+// Inicio sin rutina automática: su tarjeta (sin «Hoy toca» ni «Termina tu rutina»)
+function noRoutineCardHtml(){
+  const p=S.profile;if(!p||!p.nr||liveDayKeys().length)return'';
+  const t=p.nr==='ent'?'Apunta lo que hagas con tu entrenador':p.nr==='pro'?'Apunta la rutina que te pongan':'Cuando tengas el visto bueno de tu médico, te preparo una rutina suave';
+  const d=p.nr==='med'?'':'<p class="ob-own-p">Añade sus ejercicios en «Editar rutina» y apunta cada sesión: el Coach te ayudará con los pesos.</p>';
+  return`<div class="card ob-own" id="ob-nr"><div class="ob-own-t">${esc(t)}</div>${d}
+    ${p.nr==='med'?`<button type="button" class="btn bp" onclick="showOnboarding({from:'first',step:'ob-salud'})">Ya tengo su visto bueno ›</button>`:`<button type="button" class="btn bs" onclick="openRoutineEditor('A')">Editar rutina</button>`}</div>`;
+}
 // ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
@@ -19272,7 +19363,7 @@ function renderDash(){
     <button class="settings-btn" aria-label="Ajustes" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
   </div></div>
-  ${hoyCardHtml()}
+  ${S.profile&&S.profile.nr&&!liveDayKeys().length?noRoutineCardHtml():hoyCardHtml()}
   ${ownCardHtml()}${safetyCardHtml()}
   ${dashCoachHtml()}
   ${rest0?'':`<div class="sh">Esta semana</div>
