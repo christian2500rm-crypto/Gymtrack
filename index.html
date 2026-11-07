@@ -226,6 +226,22 @@ input{font-family:inherit}
 .ob-dn{min-height:48px;border:1px solid var(--border2);border-radius:12px;background:var(--bg2);color:var(--text);font:inherit;font-family:'DM Mono',monospace;font-size:18px;font-weight:600;cursor:pointer}
 .ob-dn.on{border-color:var(--green);background:var(--green-bg2);color:var(--green)}
 #ob-sheet-root .ob-over{z-index:395}
+/* (E8a) preguntas */
+.ob-hint{font-size:12px;color:var(--text3);margin:-6px 0 0}
+.ob-why{margin-top:4px}
+.ob-warn{border-color:color-mix(in srgb,var(--amber) 45%,transparent);background:color-mix(in srgb,var(--amber) 9%,transparent)}
+.ob-next{position:sticky;bottom:calc(-1*(var(--sb) + 28px));z-index:2;margin:4px -20px calc(-1*(var(--sb) + 28px));padding:12px 20px calc(var(--sb) + 16px);background:linear-gradient(to bottom,transparent,var(--bg) 30%)}
+.ob-next .btn[disabled]{opacity:.45;cursor:not-allowed}
+.ob-days-t .ob-dn{position:relative;min-height:56px}
+.ob-rec{position:absolute;left:50%;top:-9px;transform:translateX(-50%);padding:1px 6px;border-radius:8px;background:var(--green);color:var(--accent-ink);font:600 9px 'DM Sans',sans-serif;font-style:normal;white-space:nowrap;letter-spacing:.1px}
+.ob-mins{display:flex;flex-wrap:wrap;gap:8px;padding-top:8px}
+.ob-min{position:relative}
+.ob-min[aria-checked="true"]{background:var(--green);border-color:var(--green);color:var(--accent-ink);font-weight:600}
+.ob-min .ob-rec{top:-10px}
+.ob-week{font-size:14px;line-height:1.55;color:var(--text);padding:12px 14px;border-radius:var(--r);background:var(--bg2);border:1px solid var(--border)}
+.ob-sw{border:1px solid var(--border);border-radius:var(--r);background:var(--bg2)}
+.ob-seg .lib-pl{white-space:normal;line-height:1.25;padding:6px 8px;font-size:13px}
+.ob-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .ob-step{display:none;flex-direction:column;gap:22px}
 .ob-step.active{display:flex;animation:fu .35s ease}
 @keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
@@ -13956,6 +13972,131 @@ function safetyCardHtml(){
     <button type="button" class="btn bs" onclick="safetyOk()">Entendido</button></div>`;
 }
 function safetyOk(){if(!S.profile)return;S.profile.dismiss.safety=Date.now();S.profile=_sanitizeProfile(S.profile);saveState();render();}
+// ── (E8a) Bloque 1 «Tu objetivo» y P4 «Tu tiempo» (§C P2-P4; D10: P2b y P2c; D5: control 4 de P4) ──
+// Tarjetas de una respuesta: botones reales con role=radio; tocar, clic, Intro o Espacio eligen y, unos 400 ms después (con la marca a
+// la vista), pasan a la siguiente; las flechas solo mueven el foco y marcan, sin avanzar. Desde Ajustes (una pantalla suelta) no avanzan.
+function _obOpts(name,opts,cur,o){
+  o=o||{};const ci=opts.findIndex(x=>String(x[0])===String(cur));
+  return`<div class="ob-acts${o.grid?' ob-grid':''}" role="radiogroup" aria-labelledby="ob-h">${opts.map(([v,ic,t,d,tag],i)=>{const on=String(cur)===String(v);
+    return`<button type="button" class="ob-card${on?' on':''}" role="radio" aria-checked="${on}" tabindex="${on||(ci<0&&i===0)?0:-1}" data-v="${esc(String(v))}" onclick="obPick('${name}',this.dataset.v)" onkeydown="_obKey(event)">${ic?`<span class="ob-ci" aria-hidden="true">${ic}</span>`:''}<span class="ob-ct"><b>${esc(t)}</b>${d?`<span>${esc(d)}</span>`:''}${tag?`<em class="ob-tag">${esc(tag)}</em>`:''}</span></button>`;}).join('')}</div>${o.noAuto||(_ob&&_ob.single)?'':'<p class="ob-hint">Al tocar, pasas a la siguiente.</p>'}`;
+}
+function _obKey(ev){
+  const k=ev.key,g=ev.currentTarget.closest('[role=radiogroup]');if(!g)return;
+  const opts=[...g.querySelectorAll('[role=radio]')],i=opts.indexOf(ev.currentTarget);let j=-1;
+  if(k==='ArrowRight'||k==='ArrowDown')j=(i+1)%opts.length;else if(k==='ArrowLeft'||k==='ArrowUp')j=(i-1+opts.length)%opts.length;else if(k==='Home')j=0;else if(k==='End')j=opts.length-1;
+  if(j<0)return;ev.preventDefault();
+  opts.forEach((b,x)=>{const on=x===j;b.setAttribute('aria-checked',on);b.classList.toggle('on',on);b.tabIndex=on?0:-1;});
+  try{opts[j].focus();}catch(e){}
+}
+const _obWhy=t=>`<div class="tip ob-why"><b>Para qué lo pregunto.</b> ${t}</div>`;
+const _obNextBtn=(fn,txt,dis)=>`<div class="ob-next"><button type="button" class="btn bp" id="ob-go" onclick="${fn}"${dis?' disabled':''}>${txt||'Seguir →'}</button></div>`;
+// Elegir una respuesta de un toque: se guarda, se marca y (salvo en una pantalla suelta) se avanza
+let _obAdvT=null;
+function obPick(name,v){
+  if(!_ob)return;const a=_ob.a;
+  if(name==='days'||name==='min'||name==='daysOther')v=+v;
+  if(name==='tope')v=v==='si';
+  if(name==='exp'&&a.exp!==v){delete a.ritmo;delete a.paron;}
+  if(name==='sex'&&v!=='m')delete a.enfoque;
+  a[name]=v;_obSaveDraft();
+  const auto=OB_AUTO[name];
+  if(!auto||_ob.single){obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root [data-v="${CSS.escape(String(name==='tope'?(v?'si':'no'):v))}"]`);if(b)try{b.focus();}catch(e){}return;}
+  document.querySelectorAll('#ob-root [role=radio]').forEach(b=>{const on=b.dataset.v===String(v);b.classList.toggle('on',on);b.setAttribute('aria-checked',on);});
+  clearTimeout(_obAdvT);const st=_ob.step;
+  _obAdvT=setTimeout(()=>{if(_ob&&_ob.step===st)obGo(auto(v));},400);
+}
+// A dónde lleva cada respuesta de un toque
+const OB_AUTO={
+  goal:()=>'ob-sexo',
+  sex:v=>v==='m'?'ob-enfoque':'ob-exp',
+  enfoque:()=>'ob-exp',
+  exp:v=>v==='gt2a'?'ob-ritmo':v==='paron'?'ob-paron':'ob-tiempo',
+  ritmo:()=>'ob-tiempo'
+};
+// P2 · Objetivo
+OB_SCR['ob-meta']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Qué quieres conseguir?</h1>
+  <p class="ob-sub">Elige lo que más te importa ahora. Podrás cambiarlo cuando quieras.</p>
+  ${_obOpts('goal',[['musculo','💪','Ganar músculo','Más músculo, con pesas y descansos medios.'],['fuerza','🏋️','Ganar fuerza','Mover más peso en los básicos, como la sentadilla o el press. Pocas repeticiones y más descanso.'],
+    ['grasa','🔥','Perder grasa','Pesas para conservar el músculo y algo de cardio. Lo que comes manda; yo me ocupo del entreno.'],['salud','❤️','Salud y forma','Moverte mejor y sentirte bien, sin complicarte.'],
+    ['aguante','🔋','Aguantar más','Resistencia muscular: más repeticiones y descansos cortos.']],_ob.a.goal)}
+  <p class="ob-foot">¿Dudas? Elige «Salud y forma».</p>
+  ${_obWhy('Decide cuántas repeticiones haces, cuánto descansas y si añado cardio.')}`};
+// P2b · Mujer u hombre (D10): solo sirve para ofrecer el enfoque y para no preguntar por el embarazo a un hombre
+OB_SCR['ob-sexo']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Eres mujer u hombre?</h1>
+  ${_obOpts('sex',[['m','','Mujer'],['h','','Hombre'],['nd','','Prefiero no decirlo']],_ob.a.sex)}
+  ${_obWhy('Para ofrecerte cómo enfocar tu rutina. No cambia los pesos ni la seguridad.')}`};
+// P2c · Enfoque (D10, solo «Mujer»)
+OB_SCR['ob-enfoque']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cómo quieres enfocar tu rutina?</h1>
+  <p class="ob-sub">Las dos valen: depende de lo que te apetezca trabajar.</p>
+  ${_obOpts('enfoque',[['gluteo','🍑','Más glúteo y pierna','Más trabajo de glúteo y pierna, y el torso, lo justo para mantenerlo.'],['igual','⚖️','Equilibrada','Todo el cuerpo por igual.']],_ob.a.enfoque)}
+  ${_obWhy('Con «Más glúteo y pierna» el glúteo cuenta como una de tus dos prioridades y le doy más series; el torso se queda en lo justo.')}`};
+// P3 · Experiencia
+OB_SCR['ob-exp']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cuánta experiencia tienes con las pesas?</h1>
+  <p class="ob-sub">Cuenta solo el tiempo entrenando con constancia, al menos dos días por semana. Si dudas, elige la más baja: subir es fácil.</p>
+  ${_obOpts('exp',[['cero','🌱','Empiezo de cero','Nunca he entrenado con pesas, o casi nada.'],['lt6m','🌿','Menos de 6 meses','Conozco algunos ejercicios, pero aún estoy aprendiendo.'],
+    ['6m2a','📈','De 6 meses a 2 años','Entreno con constancia y hago bien los básicos.'],['gt2a','🏆','Más de 2 años','Entreno con constancia desde hace tiempo.'],
+    ['paron','🔄','Vuelvo tras un parón','Entrenaba, pero llevo más de 2 meses sin hacerlo.']],_ob.a.exp)}
+  ${_obWhy('Con esto elijo ejercicios de tu nivel, cuántas series haces y cómo reparto los días.')}`};
+// P3a · Ritmo (solo «Más de 2 años»)
+OB_SCR['ob-ritmo']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cada cuánto consigues subir de peso en los básicos?</h1>
+  <p class="ob-sub">En sentadilla, press o remo, por ejemplo.</p>
+  ${_obOpts('ritmo',[['semanas','📈','Casi cada semana'],['meses','🐢','Me cuesta semanas o meses'],['nose','🤷','No lo sé']],_ob.a.ritmo)}
+  ${_obWhy('Separa a quien aún progresa rápido de quien necesita más volumen y variedad.')}`};
+// P3b · El parón (dos segmentados; «Seguir» con los dos)
+function _obSeg(name,opts,cur,lbl){
+  return`<div class="ob-lbl" id="ob-l-${name}">${esc(lbl)}</div><div class="lib-place ob-seg" role="radiogroup" aria-labelledby="ob-l-${name}">${opts.map(([v,t])=>{const on=cur===v;
+    return`<button type="button" class="lib-pl${on?' on':''}" role="radio" aria-checked="${on}" data-v="${esc(v)}" onclick="obSeg('${name}',this.dataset.v)">${esc(t)}</button>`;}).join('')}</div>`;
+}
+function obSeg(name,v){if(!_ob)return;const a=_ob.a;
+  if(name==='antes'||name==='fuera'){a.paron=Object.assign({},a.paron||{});a.paron[name]=v;}else a[name]=v;
+  _obSaveDraft();obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root [onclick*="'${name}'"][data-v="${CSS.escape(v)}"]`);if(b)try{b.focus();}catch(e){}}
+OB_SCR['ob-paron']={block:1,html:()=>{const p=_ob.a.paron||{};return`<h1 class="ob-title" id="ob-h" tabindex="-1">Cuéntame un poco más del parón</h1>
+  ${_obSeg('antes',[['lt6m','Menos de 6 meses'],['6m2a','De 6 meses a 2 años'],['gt2a','Más de 2 años']],p.antes,'Antes del parón entrenaba…')}
+  ${_obSeg('fuera',[['2a6m','De 2 a 6 meses'],['gt6m','Más de 6 meses'],['gt2a','Más de 2 años']],p.fuera,'Llevo sin entrenar…')}
+  ${_obWhy('Volver suele costar menos que la primera vez. Empiezo algo más suave, y la primera sesión de cada ejercicio sirve para encontrar tu peso de ahora.')}
+  ${_obNextBtn("obGo('ob-tiempo')",'',!(p.antes&&p.fuera))}`;}};
+// P4 · Tu tiempo
+function _obBeginner(a){return a.exp==='cero'||a.exp==='lt6m'||(a.exp==='paron'&&!(a.paron&&a.paron.antes==='gt2a'&&a.paron.fuera==='2a6m'));}
+function _obRecDays(a){return a.exp==='cero'||a.exp==='lt6m'||a.exp==='paron'?3:4;}
+function _obRecMin(a){return _obBeginner(a)?45:60;}
+function _obWeekTxt(a){
+  const d=a.days,L=n=>DAY_KEYS.slice(0,n).join(' · '),beg=_obBeginner(a);
+  if(beg&&d>=5&&a.tope!==false)return`Tu semana: 4 días de pesas (${L(4)}) y ${d-4} de cardio suave.`;
+  return d===2?`Tu semana: ${L(2)}. Todo el cuerpo, con ejercicios distintos cada día. Si puedes, deja un día de descanso en medio.`
+    :d===3?(a.consec?`Tu semana: ${L(3)}. Torso, pierna y todo el cuerpo, para que ningún músculo repita dos días seguidos.`:`Tu semana: ${L(3)}. Todo el cuerpo, con ejercicios distintos cada día.`)
+    :d===4?`Tu semana: ${L(4)}. Torso y pierna: cada músculo, 2 veces.`
+    :d===5?(beg?`Tu semana: ${L(5)}. Torso y pierna dos veces y un día de todo el cuerpo.`:`Tu semana: ${L(5)}. Torso, pierna, empuje, tirón y pierna.`)
+    :(beg?`Tu semana: ${L(6)}. Torso y pierna, tres veces.`:`Tu semana: ${L(6)}. Empuje, tirón y pierna, dos veces, con ejercicios distintos cada vez.`);
+}
+function obTimeSet(k,v){if(!_ob)return;const a=_ob.a;
+  if(k==='consec')a.consec=!a.consec;else a[k]=k==='tope'?v==='si':+v;
+  if(k==='days'&&!(a.days>=5&&_obBeginner(a)))delete a.tope;
+  if(k==='days'&&a.days>=5&&_obBeginner(a)&&a.tope==null)a.tope=true;
+  _obSaveDraft();obRender({keepFocus:true,keepScroll:true});
+  const b=document.querySelector(`#ob-root [data-k="${k}"][data-v="${CSS.escape(String(k==='consec'?'x':v))}"]`)||document.querySelector(`#ob-root [data-k="${k}"]`);if(b)try{b.focus();}catch(e){}}
+OB_SCR['ob-tiempo']={block:2,html:()=>{const a=_ob.a;
+  if(!(a.days>=2&&a.days<=6))a.days=_obRecDays(a);if(!PROF_MINS.includes(a.min))a.min=_obRecMin(a);
+  if(a.days>=5&&_obBeginner(a)&&a.tope==null)a.tope=true;
+  const rd=_obRecDays(a),rm=_obRecMin(a);
+  const dBtn=n=>`<button type="button" class="ob-dn${a.days===n?' on':''}" role="radio" aria-checked="${a.days===n}" data-k="days" data-v="${n}" onclick="obTimeSet('days',${n})" aria-label="${plural(n,'día')}${n===rd?', recomendado':''}">${n}${n===rd?'<i class="ob-rec">Recomendado</i>':''}</button>`;
+  const mBtn=m=>`<button type="button" class="lib-chip ob-min${a.min===m?' on':''}" role="radio" aria-checked="${a.min===m}" data-k="min" data-v="${m}" onclick="obTimeSet('min',${m})"><span class="nw">${m}${NB}min</span>${m===rm?'<i class="ob-rec">Recomendado</i>':''}</button>`;
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cuánto tiempo tienes?</h1>
+  <p class="ob-sub">Cuenta solo los días que de verdad puedes. Si un día no puedes, no pasa nada: sigues por donde lo dejaste.</p>
+  <div class="ob-lbl" id="ob-l-days">Días por semana</div>
+  <div class="ob-days ob-days-t" role="radiogroup" aria-labelledby="ob-l-days">${[2,3,4,5,6].map(dBtn).join('')}</div>
+  ${a.days>=5&&_obBeginner(a)?`<div class="ob-lbl" id="ob-l-tope">¿Cómo quieres esos ${a.days} días?</div>
+  <div class="ob-acts" role="radiogroup" aria-labelledby="ob-l-tope">${[['si','4 de pesas y el resto, cardio suave','Al empezar, 4 días de pesas rinden casi igual y recuperas mejor. Los otros días, camina o haz cardio suave.','Recomendado'],
+    ['no',`Los ${a.days} de pesas`,'Más días con menos trabajo en cada uno. Si te notas cansado, el Coach te propone descargar.','']].map(([v,t,d,tag])=>{const on=(a.tope!==false)===(v==='si');
+    return`<button type="button" class="ob-card${on?' on':''}" role="radio" aria-checked="${on}" data-k="tope" data-v="${v}" onclick="obTimeSet('tope','${v}')"><span class="ob-ct"><b>${esc(t)}</b><span>${esc(d)}</span>${tag?`<em class="ob-tag">${tag}</em>`:''}</span></button>`;}).join('')}</div>`:''}
+  <div class="ob-lbl" id="ob-l-min">Minutos por sesión</div>
+  <div class="ob-mins" role="radiogroup" aria-labelledby="ob-l-min">${PROF_MINS.map(mBtn).join('')}</div>
+  ${a.days===3?`<div class="set-row ob-sw" role="switch" aria-checked="${!!a.consec}" tabindex="0" data-k="consec" onclick="obTimeSet('consec')" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();obTimeSet('consec');}">
+    <div class="set-row-info"><div class="set-row-t">Suelo entrenar días seguidos</div><div class="set-row-d">Así reparto los músculos para que no repitan dos días seguidos.</div></div><div class="sw${a.consec?' on':''}" aria-hidden="true"><div class="sw-k"></div></div></div>`:''}
+  <div class="ob-week" aria-live="polite">${esc(_obWeekTxt(a))} <span class="ob-foot">Lo confirmo al final, con tu edad, tu salud y tu material.</span></div>
+  ${a.min<=20?'<div class="tip ob-warn">Con tan poco tiempo haré lo esencial: 2 o 3 ejercicios bien elegidos. Con 30 minutos cabe una rutina completa.</div>':''}
+  ${_obWhy('Con los días decido cómo repartir el cuerpo; con los minutos, cuántos ejercicios y series caben, contando calentamiento y descansos.')}
+  ${_obNextBtn("obTimeNext()")}`;}};
+function obTimeNext(){if(!_ob)return;_obSaveDraft();if(OB_SCR['ob-lugar'])obGo('ob-lugar');}
 // ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
