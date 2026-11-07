@@ -13954,7 +13954,8 @@ function _genRestSecs(ex){
   }
   const v=pm.rest[cat];return typeof v==='number'?{s:v,cat}:null;
 }
-const _GEN_REST_WHY={iso:'aislamiento',comp:'multiarticular',heavy:'series de 6 o menos repeticiones',bw:'peso corporal, bandas o TRX'};
+const _GEN_REST_WHY={iso:'los ejercicios de un solo músculo',comp:'los ejercicios grandes (sentadilla, press, remo)',heavy:'las series pesadas (6 repeticiones o menos)',bw:'los de peso corporal, bandas o TRX'};
+const _GOAL_LBL={musculo:'Ganar músculo',fuerza:'Ganar fuerza',grasa:'Perder grasa',salud:'Salud y forma',aguante:'Aguantar más'};
 // Minutos estimados de un día con la fórmula del generador y lo de tu rutina (equilibrio, aproximación, si empiezas de cero)
 function _hoyEstMin(dk){
   const d=getPlan()[dk];if(!_isPlanDay(d))return 0;
@@ -15032,7 +15033,7 @@ function restDefaultSecs(ex){
   return rr&&rr.hi<=8?REST_DEF.heavy:REST_DEF.comp;
 }
 function restDefaultWhy(ex){
-  {const g=_genRestSecs(ex);if(g)return`${_GEN_REST_WHY[g.cat]}: ${fmtClock(g.s)} en tu rutina`;}
+  {const g=_genRestSecs(ex);if(g)return`${(S.profile&&_GOAL_LBL[S.profile.goal])||'Tu rutina'}: ${fmtClock(g.s)} en ${_GEN_REST_WHY[g.cat]}`;}
   if(!isCompoundEx(ex))return`aislamiento: ${fmtClock(REST_DEF.iso)} por defecto`;
   const rr=repRange(ex);
   return rr&&rr.hi<=8?`multiarticular con 8 reps o menos: ${fmtClock(REST_DEF.heavy)} por defecto`:`multiarticular: ${fmtClock(REST_DEF.comp)} por defecto (${fmtClock(REST_DEF.heavy)} con 8 reps o menos)`;
@@ -15378,10 +15379,15 @@ function getWarmupSets(ex){
   if(!ex||ex.cardio)return null;
   if(exLT(ex)!=='w')return null;
   if(!isCompoundEx(ex))return null;
+  // (E6, §G.4, C-32) con rutina generada: nada si empiezas de cero, vas con cuidado o tienes 65 o más; en el primer básico pesado de
+  // «Ganar fuerza» (6 repeticiones o menos), sube en 3 pasos hasta tu peso
+  const pm=_isPlainObj(S.planMeta)?S.planMeta:null;
+  if(pm&&(pm.modes||[]).some(m=>['inicio','prudente','mayor','mayor75'].includes(m)))return null;
   const target=getWarmupTarget(ex);
   if(!target||target<20)return null; // peso muy bajo no necesita warmup
   const st=loadStepOf(ex)||2.5,rd=v=>_r2(Math.round(v/st)*st);
-  const out=[
+  const L=exLib(ex),rr=repRange(ex),lift=!!(pm&&L&&S.profile&&S.profile.goal==='fuerza'&&(pm.lifts||[]).includes(L.id)&&rr&&rr.hi<=6);
+  const out=lift?[{pct:40,w:rd(target*0.4),reps:5},{pct:60,w:rd(target*0.6),reps:3},{pct:80,w:rd(target*0.8),reps:2}]:[
     {pct:50,w:rd(target*0.5),reps:8},
     {pct:75,w:rd(target*0.75),reps:5}
   ];
@@ -15461,7 +15467,7 @@ function _setBase(ex,p){
   const k=_rowKind(ex);
   let w=_setNumW(l.w);
   if(w==null&&p&&p.weight>0)w=_r2(p.weight);
-  if(w==null){const lw=getLastW(ex.id);if(lw)w=_setNumW(lw.v);}
+  if(w==null&&!_presRetake(ex.id)){const lw=getLastW(ex.id);if(lw)w=_setNumW(lw.v);} // (E6) tras un parón largo, sin el peso de entonces
   if(k.noKg)w=null;
   if(k.td){
     let t=null,d=null;
@@ -17036,7 +17042,13 @@ function coach_daysSinceLastSession(){
 // Una sola fuente de verdad: el análisis, las tarjetas de insights, el «Análisis detallado» y las propuestas
 // salen de coach_analyze(), así que nunca se contradicen.
 const PROP_MAX_TOTAL=3;        // máx. cambios de plan por ciclo (y 1 por día de rutina)
-const DELOAD_AFTER_WEEKS=6;    // semanas seguidas entrenando sin descanso/descarga → proponer descarga
+const DELOAD_AFTER_WEEKS=6;
+// (E6, §G.5) Con rutina generada, por nivel: principiante 8 semanas, intermedio 6, avanzado 5 (recomendación) y 8 · 6 · 6 (propuesta);
+// empezar de cero y prudente, solo por fatiga (nunca por semanas). Sin rutina generada, los de siempre.
+function _dlLevel(){return _isPlainObj(S.planMeta)&&S.planMeta.level?S.planMeta.level:null;}
+function _dlProactive(){const pm=_isPlainObj(S.planMeta)?S.planMeta:null;return!(pm&&(pm.modes||[]).some(m=>m==='inicio'||m==='prudente'));}
+function _dlRecoWeeks(){const l=_dlLevel();return l==='P0'||l==='P'?8:l==='I'?6:l==='A'?5:DELOAD_RECO_WEEKS;}
+function _dlAfterWeeks(){const l=_dlLevel();return l==='P0'||l==='P'?8:l==='I'||l==='A'?6:DELOAD_AFTER_WEEKS;}    // semanas seguidas entrenando sin descanso/descarga → proponer descarga
 function _dayOfEx(exId){
   if(!exId)return null;
   const plan=getPlan();
@@ -17075,7 +17087,7 @@ function coach_fatigue(an){
   // Retrocesos que cuentan para la fatiga: los del 1RM estimado (dos sesiones flojas de flexiones no piden descarga)
   const regress=an.down.filter(i=>!i.p.metric||i.p.metric==='e1rm'||i.p.kgTD).length;
   // Con «Reducir volumen» de un ejercicio en marcha la descarga se sigue proponiendo (se aplica al terminar)
-  const deloadNeeded=!_fullDeloadNow()&&!getActiveRest()&&sessionsSince>=6&&(regress>=2||weeks>=DELOAD_AFTER_WEEKS);
+  const deloadNeeded=!_fullDeloadNow()&&!getActiveRest()&&sessionsSince>=6&&(regress>=2||(_dlProactive()&&weeks>=_dlAfterWeeks()));
   const reason=regress>=2
     ?`${regress} ejercicios llevan dos sesiones seguidas por debajo de tu nivel: es fatiga acumulada.`
     :`Llevas ${Math.floor(weeks)} semanas seguidas entrenando sin descanso ni descarga.`;
@@ -17193,7 +17205,7 @@ function _fatDlAsk(level,an){
   const f=an&&(an.fatigue||coach_fatigue(an));
   if(f&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS){
     if(level==='alta'&&f.weeks>=2)return'alta';
-    if(f.weeks>=DELOAD_RECO_WEEKS&&f.sessionsSince>=DELOAD_RECO_MIN_SESS)return'weeks';
+    if(_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS)return'weeks';
     if(f.deloadNeeded&&f.regress>=2)return'regress';
   }
   return null;
@@ -17334,7 +17346,7 @@ function coach_deloadReco(an,m){
   m=m||coach_fatigueMeter(an);
   const wk=Math.floor(f.weeks);
   const high=m.score!=null&&m.score>=FATIGUE_HIGH&&f.weeks>=2;
-  const long=f.weeks>=DELOAD_RECO_WEEKS&&f.sessionsSince>=DELOAD_RECO_MIN_SESS;
+  const long=_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS;
   const reg=!!f.deloadNeeded&&f.regress>=2;
   if(!high&&!long&&!reg)return null;
   const weeksTxt=`${plural(wk,'semana')} seguida${wk===1?'':'s'} entrenando sin descanso ni descarga`;
@@ -17993,13 +18005,26 @@ function coach_applyRecommendations(){
     onOk:coach_applyRecommendationsConfirmed
   });
 }
+// (E6, §G.5) Al cerrar el primer ciclo con la rutina generada, la rampa (planMeta.rampa: 65 o más y empezar de cero): pasar a 3 series
+// en los multiarticulares que van con 2. Propone, no aplica; las 3 primeras activas, el resto en reserva.
+function _rampProposals(){
+  const pm=_isPlainObj(S.planMeta)?S.planMeta:null;if(!pm||!pm.rampa)return[];
+  if((S.mesocycles||[]).some(m=>m&&+m.appliedAt>=pm.ts))return[]; // solo el primer ciclo
+  const n=pm.rampa.series||3,now=Date.now(),out=[],p=getPlan();
+  dayKeys(p).forEach(k=>(p[k].ex||[]).forEach(e=>{const ex=routineEx(e);if(!ex||ex.cardio||out.length>=6||out.some(o=>o.exId===ex.id))return;
+    const s=_baseSets(ex);if(s>=n||!isCompoundEx(ex))return;
+    out.push({id:'ramp_'+ex.id,type:'add_set',basis:'ramp',prio:1,sev:-s,ic:'📈',tag:'Primer ciclo',exId:ex.id,dayKey:k,createdAt:now,reserve:out.length>=3,
+      title:`${ex.n}: pasa a ${s+1} series`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,short:`pasar a ${s+1} series`,
+      description:`Has cerrado tu primer ciclo con esta rutina: ya puedes pasar a ${s+1} series${pm.rampa.reps?` de ${pm.rampa.reps} repeticiones`:''}${pm.rampa.rir!=null?`, dejando unas ${pm.rampa.rir} en la recámara`:''}. Nunca al límite.`});}));
+  return out;
+}
 function coach_applyRecommendationsConfirmed(){
   const cycle=coach_cycleData();
   const an=coach_analyze();
   const insights=coach_generateInsights(an,[]);
 
   // Propuestas reales (todas, ordenadas por prioridad): las 3 primeras activas, el resto en reserva
-  const proposals=coach_generateProposals(cycle,an);
+  const proposals=_rampProposals().concat(coach_generateProposals(cycle,an)); // (E6) la rampa del primer ciclo, delante
   S.pendingCoachProposals=_sanitizeProposals(proposals);
   const nAct=proposals.filter(p=>!p.reserve).length,nRes=proposals.length-nAct;
 
@@ -18774,7 +18799,8 @@ function _hoyTrainHtml(st){
     if(last){const bits=[esc(last.date||fmtDate(new Date(last.ts)))];if(_okDur(last))bits.push(Math.round(+last.durationMin)+' min');
       if(last.totalEx)bits.push(`${+last.doneEx||0}/${plural(+last.totalEx,'ejercicio')}`);
       foot=`<button class="hoy-last" data-ts="${+last.ts}" onclick="openSessionSummary(+this.dataset.ts)">Última vez: ${bits.join(' · ')} <em aria-hidden="true">›</em></button>`;}
-    else foot=`<div class="hoy-tip">${tot?'Primera vez con este día: elige un peso cómodo y apunta lo que hagas.':'Empieza ligero y céntrate en la técnica: desde la 2.ª sesión te digo qué peso poner.'}</div>`;
+    else{const kg=info.str.some(e=>exLT(e)==='w'),m3=_effortObj()==='facil'?'unas 3':'2-3'; // (E6, §G.4) «Primera vez»
+      foot=`<div class="hoy-tip">Primera vez${tot?' con este día':''}: elige ${kg?'un peso':'la variante'} con ${kg?'el':'la'} que te sobren ${m3} repeticiones y apunta lo que hagas; desde la próxima vez te digo ${kg?'qué peso poner':'cuántas buscar'}.</div>`;}
   }
   const meta=[info.mus?esc(info.mus):'',_hoyDurHtml(hoyDuration(st.dk),st.dk),_hoyCount(info)].filter(Boolean).join(' · ');
   const rows=info.str.map(e=>_hoyRowHtml(e,pres.get(e.id),pv&&pv.id===e.id,live)).join('');
@@ -19156,6 +19182,30 @@ function _kbReps(w,r,step,lo,loE){
   const e=w*(1+Math.min(r,30)/30);
   return Math.max(loE,Math.min(lo,Math.round(30*(e/(w+step)-1))));
 }
+// ── (E6, §G.4-§G.5) EL COACH CON LA RUTINA NUEVA ──
+// Esfuerzo objetivo de tu rutina (planMeta.effort): 'facil' (empezar de cero, prudente, 65 o más) o 'justo'; null sin rutina
+// generada (como siempre). Las caritas se juzgan respecto de él: con 'facil', «😌 Fácil» es el objetivo (+1 repetición o un salto
+// simple, como mucho una subida de peso por semana), «💪 Justo» ya es más de lo previsto (se mantiene) y «🥵 Al límite», un salto menos.
+function _effortObj(){const e=_isPlainObj(S.planMeta)&&S.planMeta.effort;return e&&(e.obj==='facil'||e.obj==='justo')?e.obj:null;}
+// ¿Subió el peso en los últimos 7 días? (la última subida entre dos registros seguidos)
+function _upThisWeek(d){for(let i=d.length-1;i>0;i--){if(+d[i].v>+d[i-1].v+1e-9)return!!d[i].ts&&Date.now()-d[i].ts<7*86400000;}return false;}
+// Vuelta tras un parón (§G.4), para todo el mundo, por el tiempo desde el último registro de ESTE ejercicio: 3-8 semanas → −10 %;
+// 8-26 → −20 % (y desde ahí se juzga contra los registros nuevos); más de 26 → sin peso propuesto («Primera vez tras el parón»).
+// La rutina generada lo adelanta a quien dijo que volvía de un parón (planMeta.vuelta), con los registros de antes de ella.
+function _presGap(exId){
+  const a=(_isPlainObj(S.strength)&&Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&typeof r==='object'&&!r.dl&&+r.ts>0);
+  const last=a[a.length-1];if(!last)return null;
+  const days=(Date.now()-last.ts)/86400000,pm=_isPlainObj(S.planMeta)?S.planMeta:null,pv=pm&&pm.vuelta&&last.ts<pm.ts?pm.vuelta:null;
+  return{days,pv,retake:days>182||pv==='recalibrar',cut:days>182?0:(days>56||pv==='menos20')?0.2:days>=LOAD_GAP_DAYS?0.1:0};
+}
+function _presRetake(exId){const ex=findExInPlan(exId);if(!ex||ex.cardio||exLT(ex)!=='w')return false;const g=_presGap(exId);return!!(g&&g.retake);}
+// Mancuernas más pesadas que tienes en el sitio del día de este ejercicio («Mi material»); null sin tope
+function _maxLoadOf(ex){
+  const L=exLib(ex);if(!L||L.mat!=='mancuernas'||!_isPlainObj(S.places))return null;
+  const p=getPlan(),dk=dayKeys(p).find(k=>(p[k].ex||[]).some(e=>e&&(e.id===ex.id||routineEx(e).id===ex.id)));
+  const P=S.places[dk?placeOfDay(dk):(S.places.main||'g')];
+  return P&&+P.dbMax>0&&+P.dbMax<99?+P.dbMax:null;
+}
 function _presKg(exId,ex,opts){
   const rr=repRange(ex);
   if(!rr)return null;
@@ -19207,6 +19257,11 @@ function _presKg(exId,ex,opts){
       return out('deload',w,reps,`mantén ${kgTxt(w)} kg (un salto menos sería demasiado) y hazlo suave; la subida vuelve al terminar`);}
     return out('deload',w,reps,deloadAppliesTo(exId)?`mantén ${kgTxt(w)} kg ${_dlFewerSets(exId)?'con menos series':'y hazlo suave'}; la subida vuelve al terminar`:`${kgTxt(w)} kg o menos y entrena suave`);
   }
+  // (E6) Vuelta tras un parón: sin peso propuesto (más de 6 meses) o un 10-20 % menos, y desde ahí a subir
+  if(!today){const g=_presGap(exId);
+    if(g&&g.retake)return null;
+    if(g&&g.cut){const w2=Math.max(step,Math.round(w*(1-g.cut)/step)*step);
+      if(w2<w-1e-9)return out('down',w2,lo,`${g.days>=LOAD_GAP_DAYS?`hace ${plural(Math.max(1,Math.floor(g.days/7)),'semana')} que no lo haces`:'vuelves tras un parón'}: un ${Math.round(g.cut*100)} % menos para volver y desde ahí, a subir`);}}
   // Reps sin apuntar (registros antiguos): mismo peso hasta saber cuántas haces
   if(r==null)return out('keep',w,Math.min(hi,Math.max(lo,targetRepsNum(ex)||hi)),'apunta tus reps al terminar y ajusto el peso');
   // Esquema nuevo (las reps del plan cambiaron después de esa sesión) y lo que hiciste queda fuera del rango nuevo:
@@ -19267,12 +19322,16 @@ function _presKg(exId,ex,opts){
     // Serie nueva en el plan (Añadir serie / editor): primero todas las series con este peso, luego se sube
     if(setsUp)return out('keep',w,hi,`ahora son ${baseSets} series; complétalas con este peso y luego subes`);
     const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}`;
+    const eo=_effortObj();
+    if(rc===3&&eo==='facil'&&w-step>0)return out('down',w-step,lo,`${today?'hoy ':''}${did} al límite: un salto menos, tu rutina va con margen`);
     if(rc===3)return out('keep',w,hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+    if(eo==='facil'&&rc===2)return out('keep',w,hi,`${repsTxt}: tu objetivo es que salga «fácil»; repite con este peso`);
+    if(eo==='facil'&&_upThisWeek(d))return out('keep',w,hi,`${repsTxt}; ya subiste esta semana: como mucho una subida por semana`);
     // Pausa larga: repetir antes de subir
     const gapD=last.ts?Math.floor((Date.now()-last.ts)/86400000):0;
     if(gapD>=LOAD_GAP_DAYS)return out('keep',w,hi,`hace ${plural(Math.floor(gapD/7),'semana')} que no lo haces: repite antes de subir`);
     // Salto: doble si fue fácil (o te sobraron 3+ reps), sin pasar del 10 %
-    let k=rc===1||r>=hi+3?2:1;
+    let k=eo!=='facil'&&(rc===1||r>=hi+3)?2:1; // (E6) con «fácil» de objetivo, nunca el salto doble
     while(k>1&&k*step>w*LOAD_CAP+1e-9)k--;
     // Lastre de peso corporal (chaleco, mochila, un disco): el % sobre el lastre no dice nada (de 2.5 a 5 kg es un 100 %
     // más de lastre y muy poco más de carga total): un salto siempre que no pase del lastre que ya llevas (2.5 → 5 → 7.5)
@@ -19284,10 +19343,17 @@ function _presKg(exId,ex,opts){
       if(r<hi+2)return out('reps',w,r+1,`${repsTxt}; +${kgTxt(step)} kg sería un ${pct} % más, así que antes llega a ${hi+2} reps`);
       if(step>w*LOAD_MAX+1e-9)return out('keep',w,hi+2,`+${kgTxt(step)} kg sería un ${pct} % más; sigue con ${hi+2} reps o ${bwL?'usa un lastre intermedio':'elige un salto menor en Ajustes'}`);
     }
+    // (E6) Pesos que no existen: con mancuernas de hasta N kg, nunca «sube a N+2»; la versión más difícil o más repeticiones
+    {const mx=_maxLoadOf(ex);if(mx&&w+step>mx+1e-9){const up=_presVariant(ex,'up');
+      if(up){const o=out('harder',w,hi,`${repsTxt}; tus mancuernas llegan a ${kgTxt(mx)} kg: la versión más difícil`);return Object.assign(o,{up:up.id,head:`Pasa a ${up.n}`});}
+      return out('keep',w,hi+2,`tus mancuernas llegan a ${kgTxt(mx)} kg: sube hasta ${hi+2} repeticiones o haz la bajada más lenta`);}
+      while(mx&&k>1&&w+k*step>mx+1e-9)k--;}
     return out('up',w+k*step,lo,`${repsTxt}${k>1?', salto doble':''}`);
   }
   if(r>=lo){
-    const nx=Math.min(hi,r+(rc===1?2:1));
+    const eo=_effortObj();
+    if(eo==='facil'&&rc===3&&w-step>0)return out('down',w-step,lo,`${when} ${did} al límite: un salto menos, tu rutina va con margen`);
+    const nx=Math.min(hi,eo==='facil'?(rc===2||rc===3?r:r+1):r+(rc===1?2:1)); // (E6) con «fácil» de objetivo, +1 como mucho
     return out('reps',w,nx,`${when} ${did}${rpeT}`);
   }
   // Por debajo del rango (aún sin dos fallos seguidos): mismo peso, una rep más
@@ -19344,6 +19410,10 @@ function _presReps(exId,ex,lt,all,opts){
   if(!opts.ignoreLight&&isLightNow(exId))return out('deload',r!=null?Math.min(hi,Math.max(lo,r)):hi,_presLightTxt(exId,'reps'));
   if(r==null)return out('keep',Math.min(hi,Math.max(lo,targetRepsNum(ex)||lo)),'apunta tus reps al terminar y te digo cuántas buscar');
   const n=d.length;
+  // (E6, §G.4) Dominadas: si en la primera sesión no llegas a 8, las asistidas (máquina o banda) o solo la bajada, lenta
+  {const L=exLib(ex);if(n===1&&r<8&&L&&L.pat==='pull_v'&&L.lt==='bw'){const dn=_presVariant(ex,'dn');
+    if(dn)return out('down',lo,`en la primera sesión hiciste ${r}: mejor asistidas o solo la bajada, lenta, de 3 a 5`,`Prueba ${dn.n}`,{dn:dn.id});
+    return out('keep',Math.min(lo,r+1),`en la primera sesión hiciste ${r}: entre series, haz solo la bajada, lenta (3-5 s), hasta llegar a 8`);}}
   // Dos sesiones flojas con el objetivo de ahora: si lo subiste después (editor), aquellas se hicieron con otro y no
   // cuentan (como en el Coach de kg con un esquema nuevo)
   const sameT=k=>{const q=_repRangeBW({r:_recPlan(d[k],ex).r});return !!q&&q.lo===lo&&q.hi===hi;};
@@ -19365,7 +19435,7 @@ function _presReps(exId,ex,lt,all,opts){
     if(lt==='bw'&&P.eq==='bw'&&L&&L.x.includes('L'))return out('harder',lo,`${done}: prueba +${kgTxt(P.step)} kg (chaleco, mochila o un disco) y vuelve a ${lo} reps`,'Añade lastre',{lastre:true,weight:P.step});
     return out('keep',hi,`${done}: suma una serie o cambia de variante`);
   }
-  if(r>=lo)return out('reps',Math.min(hi,r+(rc===1?2:1)),`${when} ${did}${rpeT}`);
+  if(r>=lo){const eo=_effortObj();return out('reps',Math.min(hi,eo==='facil'?(rc===2||rc===3?r:r+1):r+(rc===1?2:1)),`${when} ${did}${rpeT}`);}
   return out('keep',Math.min(lo,r+1),`${when} ${did}${rpeT}; rango ${lo}-${hi}`,`Busca ${Math.min(lo,r+1)} reps`);
 }
 // Por tiempo o por distancia. Sin peso: +5 s (o el salto de metros) por sesión hasta el tope (tiempo: el doble del plan,
@@ -19522,6 +19592,7 @@ function presKCls(p){return _presRest(p)?'k-deload k-rest':'k-'+p.kind;}
 const _tgtWhyOpen=new Set(); // «¿Por qué?» abiertos (solo en memoria: no es estado de la app)
 // Bloque «Objetivo de hoy» de la tarjeta abierta: peso × reps, series, motivo y «¿Por qué?» desplegable
 function presTargetHtml(ex,p,compact){
+  if(ex&&!p&&_presRetake(ex.id))return`<div class="tgt k-keep"><div class="tgt-top"><div class="tgt-main"><div class="tgt-r">🎯 <b>Primera vez tras el parón:</b> elige un peso con el que te sobren unas 3 repeticiones. Lo de antes sigue en tu gráfico.</div></div></div></div>`; // (E6)
   if(!ex||!p)return'';
   const open=_tgtWhyOpen.has(ex.id);
   // Compacto (durante el ejercicio, debajo de las series): solo el motivo y «¿Por qué?» (las filas ya llevan los valores)
