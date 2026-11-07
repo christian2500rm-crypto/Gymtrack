@@ -275,6 +275,7 @@ input{font-family:inherit}
 .ob-dh{display:flex;flex-direction:column;gap:2px;padding-bottom:6px;border-bottom:1px solid var(--border);font-size:14px}
 .ob-dh span{font-size:12px;color:var(--text2)}
 .ob-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.rep-t{font-weight:700;font-size:15px}.rep-d{color:var(--text2);font-size:13px;margin:4px 0 10px}.rep-b{display:flex;gap:8px}.rep-b .btn{flex:1}
 .ob-gen{position:fixed;inset:0;z-index:391;background:var(--bg);display:flex;flex-direction:column;justify-content:center;gap:12px;padding:24px 32px;transition:opacity .25s}
 .ob-gen.out{opacity:0;pointer-events:none}.ob-gen-t{font-size:22px;font-weight:700;margin-bottom:6px}
 .ob-gen-l{color:var(--text2);font-size:15px;opacity:0;animation:obGenIn .25s ease forwards}
@@ -14169,7 +14170,7 @@ function _sanitizeProfile(o){
   p.style=_oneOf(o.style,PROF_STYLE)||'igual';p.warm=_oneOf(o.warm,PROF_WARM)||'normal';p.cardioEnd=_oneOf(o.cardioEnd,PROF_CARDIO)||'auto';
   p.power=_bool(o.power);
   p.avoid=_ids(o.avoid,100,_LIBID_RE);
-  const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight','cycle'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);}); // (E15) cycle: «¿Cómo seguimos?» contestado
+  const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight','cycle','repaso'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);}); // (E15) cycle: «¿Cómo seguimos?» contestado · (E16c) repaso anual
   p.nr=_oneOf(o.nr,['ent','pro','med']);
   p.warn=_oneOf(o.warn,['consulta','matrona']); // (E11b) aviso fijo de salud (§H.2): solo cuál, no el motivo // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
   p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=p.sex==='m'?_oneOf(o.enfoque,PROF_ENFOQUE):null; // (D10) el enfoque solo se pregunta a las mujeres
@@ -14779,8 +14780,8 @@ OB_AUTO.daysOther=()=>OB_SCR['ob-edad']?'ob-edad':'ob-reparto-sitios';
 // ── (E9a) Bloque 3: edad y seguridad (§C P7, P7x, P8, P8x, P8s, P8p, P8y; §B.3) ──
 // Lo de salud vive en _ob.h (memoria) hasta el consentimiento de P9; la edad «Menos de 16», el embarazo y el posparto sin el alta no
 // se guardan nunca.
-OB_SCR['ob-edad']={block:3,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cuántos años tienes?</h1>
-  <p class="ob-sub">Solo el tramo. Cambia la prudencia y algún ejercicio, nada más.</p>
+OB_SCR['ob-edad']={block:3,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">${_ob.repaso&&_ob.a.age!=='nd'&&OB_AGE_LBL[_ob.a.age]?`¿Sigue siendo ${OB_AGE_LBL[_ob.a.age]}?`:'¿Cuántos años tienes?'}</h1>
+  <p class="ob-sub">${_ob.repaso?'Un toque si sigue igual; si has cambiado de tramo, elige el nuevo. Luego, tu seguridad.':'Solo el tramo. Cambia la prudencia y algún ejercicio, nada más.'}</p>
   ${_obOpts('age',[['lt16','','Menos de 16'],['16','','16 o 17'],['18','','18-39'],['40','','40-64'],['65','','65-74'],['75','','75 o más'],['nd','','Prefiero no decirlo']],_ob.h.menor?'lt16':_ob.a.age,{grid:true})}
   ${_obWhy('A partir de 65 añado equilibrio, más calentamiento y voy más despacio. Con menos de 18, cuido más la técnica. Si prefieres no decirlo, te preparo una rutina prudente.')}`};
 OB_AUTO.age=v=>{if(v==='lt16'){delete _ob.a.age;delete _ob.a.ageTs;_ob.h.menor=true;_obSaveDraft();return'ob-menor';}
@@ -15332,8 +15333,8 @@ OB_SCR['ob-resp-qc']={block:0,html:()=>{
 function obRespApply(){if(!_ob||!_ob.c)return;const bl=_applyGuard();if(bl){toast(bl.msg,3600);return;}_obDoApply();}
 function obRespSaveOnly(){if(!_ob)return;S.profile=Object.assign(_obProfileToSave(S.profile&&S.profile.mode||'gen'),{dismiss:(S.profile&&S.profile.dismiss)||{}});S.profile=_sanitizeProfile(S.profile);
   if(_ob.places){S.places=_sanitizePlaces(_ob.places);try{_syncLibKit();}catch(e){}}const h=_obHealthObj();if(h)S.health=h;
-  saveState();hideOnboarding();openSettings();toast('Guardé tu respuesta; tu rutina no cambia',3000);}
-function obRespCancel(){if(!_ob)return;const fc=!!_ob.fromCycle;hideOnboarding();if(fc)go('coach');else openSettings();}
+  const rp=!!_ob.repaso;saveState();hideOnboarding();if(rp){go('dash');toast('Repaso hecho: tu rutina no cambia',3000);}else{openSettings();toast('Guardé tu respuesta; tu rutina no cambia',3000);}}
+function obRespCancel(){if(!_ob)return;const fc=!!_ob.fromCycle,rp=!!_ob.repaso;hideOnboarding();if(fc)go('coach');else if(rp)go('dash');else openSettings();}
 function openAnswers(){closeSettings();showOnboarding({from:'settings',step:'ob-resp'});_obPrefill();_ob.hist=[];obRender();}
 // La sección de Ajustes
 function trainSectionHtml(){
@@ -15422,6 +15423,23 @@ function weekLineHtml(){
   return`<div class="ob-wkl">Esta semana: ${seq.join(' · ')}</div>`;
 }
 // Equilibrio en casa (65 o más con menos de 3 días de pesas; 41 C-09): los días sin pesas
+// (E16c, §H.2 · 41 C-18) Repaso anual de la seguridad y la edad: al año de tu rutina (planMeta.ts) o de tu respuesta de edad
+// (profile.ageTs), Inicio lo ofrece; «Ahora no» lo aplaza un mes. Las fechas son de la rutina y de la respuesta, no datos de salud.
+function repasoDue(){
+  const p=S.profile;if(!p||!p.age)return false;const pm=_isPlainObj(S.planMeta)?S.planMeta:null;
+  const ref=Math.max(+(pm&&pm.ts)||0,+p.ageTs||0,+((p.dismiss||{}).repaso)||0);return ref>0&&Date.now()-ref>=365*864e5;
+}
+function repasoCardHtml(){
+  if(!repasoDue())return'';
+  return`<div class="card rep-card" id="rep-card"><div class="rep-t">Repasa tu seguridad y tu edad (1${NB}minuto)</div>
+    <div class="rep-d">Hace un año que me lo contaste: ¿sigues en el mismo tramo de edad? ¿Hay algo nuevo de salud?</div>
+    <div class="rep-b"><button type="button" class="btn bp" onclick="repasoStart()">Repasar</button><button type="button" class="btn bs" onclick="repasoLater()">Ahora no</button></div></div>`;
+}
+function repasoLater(){const p=S.profile;if(!p)return;p.dismiss=Object.assign({},p.dismiss,{repaso:Date.now()-335*864e5});S.profile=_sanitizeProfile(p);saveState();render();toast('Te lo vuelvo a proponer en un mes',2400);}
+function repasoStart(){
+  try{closeSettings();}catch(e){}
+  showOnboarding({from:'settings',step:'ob-edad'});_obPrefill();_ob.hist=[];_ob.repaso=true;_ob.healthFlow='repaso';_ob.h.scr=new Set();_ob.h.nada=false;obRender();
+}
 function balanceCardHtml(){
   const pm=S.planMeta;if(!pm||!(pm.modes||[]).some(m=>m==='mayor'||m==='mayor75'||m==='segmayor')||getWeeklyTarget()>=3)return'';
   if((S.sessions||[]).some(s=>s&&s.ts&&sameDayTs(s.ts,Date.now())))return'';
@@ -20601,7 +20619,7 @@ function renderDash(){
   </div></div>
   ${healthWarnHtml()}${S.profile&&S.profile.nr&&!liveDayKeys().length?noRoutineCardHtml():hoyCardHtml()}
   ${_twoPlaces()&&otherPlaceDays().length&&!getActiveWorkout()&&!(S.profile&&S.profile.nr&&!liveDayKeys().length)?'<button type="button" class="ob-link ob-other" onclick="otherPlaceSheet()">¿Hoy en otro sitio? ›</button>':''}
-  ${ownCardHtml()}${safetyCardHtml()}${balanceCardHtml()}${weightTodayCardHtml()}
+  ${repasoCardHtml()}${ownCardHtml()}${safetyCardHtml()}${balanceCardHtml()}${weightTodayCardHtml()}
   ${dashCoachHtml()}
   ${rest0?'':`<div class="sh">Esta semana</div>
   <div class="card">
