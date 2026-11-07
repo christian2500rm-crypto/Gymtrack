@@ -275,6 +275,7 @@ input{font-family:inherit}
 .ob-dh{display:flex;flex-direction:column;gap:2px;padding-bottom:6px;border-bottom:1px solid var(--border);font-size:14px}
 .ob-dh span{font-size:12px;color:var(--text2)}
 .ob-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.ob-bal-h{font-size:12px;font-weight:700;color:var(--text2);margin:12px 0 0}
 .ob-row:last-child{border-bottom:0}
 .ob-ri{flex:none;width:40px;min-height:40px;display:grid;place-items:center;font-size:20px;position:relative}
 .ob-ri .exic-e{font-size:20px}
@@ -7402,6 +7403,262 @@ GA.def('lib_trx_lunge',{
 });
 
 })(window.GymAnim);
+/* ex/n_new_balance.js */
+/* Equilibrio para mayores, siempre con apoyo (pared a la derecha o silla delante): apoyo a una pierna, pasos en línea
+   talón-punta, apoyo a una pierna girando la cabeza, y talones y puntas con las manos en el respaldo de una silla. */
+(function(GA){
+const K=GA._.kit,V=GA._.V,C=GA._.COL,DM=GA._.DIM,SS=K.SS,mix=K.mix,sst=K.sst,D=Math.PI/180,UP=[0,1,0];
+const WZ=.56,WN=[0,0,-1];   // cara de la pared a la derecha (z=WZ) y su normal (hacia la persona)
+const wall=(E,x0,x1)=>E.boxA([(x0+x1)/2,1.2,WZ+.05],[x1-x0,2.4,.1],'#26303a',{layer:-2});
+const heelOn=(b,s,H,yaw,a)=>{const f0=V.yaw(yaw||0),sv=V.norm(V.cross(UP,f0)),r=-a*D,f=V.rot(f0,sv,r),u=V.rot(UP,sv,r),
+  an=V.add(H,V.add(V.mul(f,DM.heel),V.mul(u,DM.ankH)));return K.footOn(b,s,[an[0],H[1],an[2]],f,u);};
+const upright=(b,o)=>{const A=Object.keys(o.sup).map(s=>{const f=b.S[s].ffwd,k=K.sd(s);return[s,k,b.j(s,'ank').slice(),K.legD(o.sup[s]),V.add(V.norm([f[0],0,f[2]]),[0,.15,k*(o.out||0)])];}),sk=o.soft;
+  const pose=(x,z)=>{const Y=A.map(([,k,a,d])=>a[1]+Math.sqrt(Math.max(.01,d*d-(x-a[0])**2-(z+k*DM.hipW-a[2])**2))),m=Math.min(...Y);
+    b.pelvis([x,sk?m-sk*Math.log(Y.reduce((s,y)=>s+Math.exp((m-y)/sk),0)):m,z],{tilt:o.tilt||0});K.trunk(b,o);for(const[s,,,,pl]of A)b.leg(s,null,pl);if(o.free)o.free(b);o.arms(b);};
+  const e0=b.ikErr,cm=()=>K.com(b);let x=o.bx,z=o.bz||0;
+  for(let i=0;i<(o.bz==null?1:2);i++){x=K.root(t=>{pose(t,z);return cm()[0]-o.bx;},o.bx-.4,o.bx+.4);
+    if(o.bz!=null)z=K.root(t=>{pose(x,t);return cm()[2]-o.bz;},o.bz-.3,o.bz+.3);}
+  b.ikErr=e0;pose(x,z);};
+
+const FX=-.06,FZ=.095,TO=5,HAND=[.17,1.0,WZ],HFD=V.norm([1,.15,0]),HPO=[-.45,-1,.4];
+const foot=(s,t)=>{const k=K.sd(s);return V.madd([FX,0,k*FZ],V.yaw(-k*TO),t);};   // punto del pie a t m del talón
+const SLS=(b,E,p,o)=>{const sh=sst(0,.45,p),e=sst(.6,1,p),sw=o.sw||[0,0],mR=foot('R',.11);
+  K.footBallOn(b,'R',foot('R',.2),-TO,0);K.footBallOn(b,'L',foot('L',.2),TO,22*sst(.3,.75,p)**2);
+  const L0=[b.j('L','ank').slice(),b.S.L.ffwd.slice(),b.S.L.fup.slice()];
+  upright(b,{sup:e>0?{R:6}:{R:6,L:4},tilt:2,sp:[-1],hd:o.hd||-2,sc:[0,-.005],bx:mix(.045,mR[0],sh)+sw[0],bz:mR[2]*sh+sw[1],
+    free:e>0&&(b=>{b.legFK('L',{flex:26,abd:5,knee:67});b.footRelax('L',-14);const S=b.S.L;
+      b.foot('L',V.lerp(L0[0],S.ank,e),V.lerp(L0[1],S.ffwd,e),V.lerp(L0[2],S.fup,e));b.leg('L',null,V.add(V.norm([L0[1][0],0,L0[1][2]]),[0,.15,0]));}),
+    arms:b=>{K.palm(b,null,'R',HAND,{fd:HFD,n:WN,pole:HPO});b.armFK('L',{abd:mix(12,24,sst(0,.6,p))+(o.la||0),flex:4,elbow:mix(14,20,sst(0,.6,p))});}});
+  K.palm(b,E,'R',HAND,{fd:HFD,n:WN,pole:HPO});wall(E,-.75,.8);E.shadow([.02,0,.05],.42,.32,.5);};
+
+GA.def('lib_balance_single_leg',{title:'Apoyo a una pierna junto a la pared',cam:{yaw:128,pitch:8},fitBox:[[-.4,0,-.3],[.4,1.85,.56]],
+  muscles:{abductors:.4,glutes_R:.3,calves_R:.3},labels:['Glúteo medio','Gemelos'],init:{p:0,w:0},note:'20 s por lado',
+  timeline:[{p:1,dur:1.4,label:'Levanta un pie',act:.8,ease:'lin'},{w:1,dur:2.5,label:'Aguanta · mirada al frente',act:.9,ease:'lin'},
+    {p:0,dur:1.2,label:'Apoya despacio',act:.6,ease:'lin'},{w:0,dur:.6,label:'Cambia de pierna',act:.5}],
+  build(c,b,E){const w=c.w,g=sst(.6,1,c.p)*Math.sin(Math.PI*w);
+    SLS(b,E,c.p,{sw:[.005*g*Math.sin(2*Math.PI*w),.009*g*Math.sin(3*Math.PI*w)],la:4*g*Math.sin(3*Math.PI*w)});}});
+
+GA.def('lib_balance_head_turns',{title:'Apoyo a una pierna girando la cabeza',cam:{yaw:118,pitch:8},fitBox:[[-.4,0,-.3],[.4,1.85,.56]],
+  muscles:{abductors:.4,glutes_R:.3,calves_R:.3},labels:['Glúteo medio','Gemelos'],init:{p:0,h:0},note:'20 s por lado',
+  timeline:[{p:1,dur:1.4,label:'Levanta un pie',act:.8,ease:'lin'},{h:1,dur:1.6,label:'Gira la cabeza despacio',act:.9},
+    {h:-1,dur:2.6,label:'Al otro lado sin prisa',act:.9},{h:0,dur:1.4,label:'Vuelve al centro',act:.9},
+    {p:0,dur:1.2,label:'Apoya despacio',act:.6,ease:'lin'},{dur:.6,label:'Cambia de pierna',act:.5}],
+  build(c,b,E){SLS(b,E,c.p,{hd:[-2,55*c.h,0]});}});
+
+const TX=.305,TZ=-.125,TA=32,TH=12;
+const tandemL=(b,p)=>{if(p<=.32){K.footBallOn(b,'L',[.2-TX,0,0],0,TA*sst(.02,.32,p));return 0;}
+  if(p>=.74){heelOn(b,'L',[TX,0,0],0,TH*(1-sst(.74,.82,p)));return 0;}
+  const t=(p-.32)/.42,A0=K.footBallOn(b,'L',[.2-TX,0,0],0,TA).slice(),A1=heelOn(b,'L',[TX,0,0],0,TH).slice(),a=mix(TA,-TH,sst(.1,1,t))*D,A=V.lerp(A0,A1,sst(.25,.78,t));
+  b.foot('L',[A[0],A[1]+.04*Math.sin(Math.PI*t)**2,TZ*(sst(0,.22,t)-sst(.75,1,t))],[Math.cos(a),-Math.sin(a),0],[Math.sin(a),Math.cos(a),0]);return 1;};
+GA.def('lib_balance_tandem_walk',{title:'Pasos en línea talón-punta junto a la pared',cam:{yaw:150,pitch:12},fitBox:[[-.45,0,-.25],[.65,1.85,.56]],
+  muscles:{abductors:.3,calves:.3},labels:['Glúteo medio','Gemelos'],init:{p:0},
+  timeline:[{p:1,dur:2,label:'Talón delante de la punta',act:.85,ease:'lin'},{dur:.6,label:'Equilibrio · mirada al frente',act:.9},
+    {p:0,dur:2,label:'Vuelve atrás despacio',act:.8,ease:'lin'},{dur:.6,label:'Pies en línea',act:.6}],
+  build(c,b,E){const p=c.p;K.footBallOn(b,'R',[.2,0,0],0,0);const fl=tandemL(b,p);
+    upright(b,{sup:{R:5,L:fl?2:5},soft:.02,out:.3,tilt:2,sp:[-1],hd:0,sc:[0,-.005],bx:-.03+.15*sst(0,.3,p)+.155*sst(.7,1,p),bz:0,
+      arms:b=>{K.palm(b,null,'R',[b.sho('R')[0]+.13,1.0,WZ],{fd:HFD,n:WN,pole:HPO});b.armFK('L',{abd:22,flex:4,elbow:18});}});
+    K.palm(b,E,'R',[b.sho('R')[0]+.13,1.0,WZ],{fd:HFD,n:WN,pole:HPO});wall(E,-.95,1.05);
+    E.poly([[-.75,.001,-.012],[.95,.001,-.012],[.95,.001,.012],[-.75,.001,.012]],'#c9d1d9',{layer:-1,outline:false});
+    E.shadow([b.pf.o[0],0,0],.5,.25,.5);}});
+
+const CX=.56,SH=.46,RX=CX-.225,RY=SH+.47;
+const chair=(E,x,h)=>{const w=K.COL.wood,d=K.COL.woodD;E.boxA([x,h-.02,0],[.42,.04,.42],w,{layer:-1});
+  for(const a of[-1,1])for(const z of[-1,1])E.beam([x+a*.18,0,z*.18],[x+a*.18,h-.04,z*.18],.035,d,{layer:-2});
+  for(const z of[-1,1])E.beam([x-.19,h,z*.18],[x-.225,h+.47,z*.18],.035,d,{layer:-2});
+  E.boxA([x-.212,h+.3,0],[.03,.14,.4],w,{layer:-2,pitch:-4});E.beam([x-.225,h+.47,-.21],[x-.225,h+.47,.21],.045,w,{layer:-1});};
+GA.def('lib_balance_heel_toe',{title:'Talones y puntas con apoyo',cam:{yaw:-24,pitch:8},fitBox:[[-.3,0,-.3],[.78,1.82,.3]],
+  muscles:{calves:.4},labels:['Gemelos','Tobillos'],init:{p:0},
+  timeline:[{p:1,dur:1.4,label:'Sube de puntillas',act:.9},{dur:.4,label:'Arriba',act:.95},{p:0,dur:1.4,label:'Baja despacio',act:.7},
+    {p:-1,dur:1.2,label:'Levanta las puntas',act:.85},{p:0,dur:1,label:'Pies planos',act:.5}],
+  build(c,b,E){const p=c.p,up=Math.max(p,0),dn=Math.max(-p,0),kf=mix(4,8,dn);
+    for(const[s,k]of SS){const h=[-.05,0,k*.11],y=-k*6;if(p>=0)K.footBallOn(b,s,V.madd(h,V.yaw(y),.2),y,19*up);else heelOn(b,s,h,y,18*dn);}
+    upright(b,{sup:{R:kf,L:kf},tilt:2+5*dn,sp:[-1],hd:2,sc:[0,.01],bx:p>=0?mix(.05,.13,up):mix(.05,-.01,dn),
+      arms:b=>{for(const[s,k]of SS)b.arm(s,[RX,RY,k*.16],[-.3,-1,k*.5],[0,0,1]);}});
+    chair(E,CX,SH);E.shadow([.02,0,0],.4,.32,.5);}});
+
+})(window.GymAnim);
+/* ex/n_new_chair_core.js */
+/* Silla, mesa y core sin material: puente con talones en una silla, plancha inclinada en una mesa,
+   rodilla al codo de pie y levantarse de la silla rápido */
+(function(GA){
+const K=GA._.kit,V=GA._.V,C=GA._.COL,DM=GA._.DIM,SS=K.SS,mix=K.mix,sst=K.sst,D=K.D,M=Math,UP=[0,1,0];
+const chair=(E,x,h,bk)=>{bk=bk||-1;const w=K.COL.wood,d=K.COL.woodD;E.boxA([x,h-.02,0],[.42,.04,.42],w,{layer:-1});
+  for(const a of[-1,1])for(const z of[-1,1])E.beam([x+a*.18,0,z*.18],[x+a*.18,h-.04,z*.18],.035,d,{layer:-2});
+  for(const z of[-1,1])E.beam([x+bk*.19,h,z*.18],[x+bk*.22,h+.42,z*.18],.035,d,{layer:-2});
+  E.boxA([x+bk*.215,h+.33,0],[.03,.14,.42],w,{layer:-2,pitch:-bk*4});};
+const cross=b=>{for(const[s,k]of SS)b.arm(s,b.tpt(-k*.11,-.06-(k+1)*.012,.15+(k+1)*.012),b.tdir(k*.55,-.75,.4),b.tdir(0,1,0));};
+const nape=(b,s,a)=>{const k=K.sd(s);b.arm(s,b.hpt(k*mix(.045,.08,a),mix(-.02,-.03,a),mix(-.15,-.1,a)),b.tdir(k,.1-2.34*a,.25+.63*a),b.tdir(0,1,0));};
+const low=(f,u,n)=>{let m=1e9,r;for(const e of K.shoe([0,0,0],f,u)){const x=M.sqrt(e[1].reduce((s,a)=>s+V.dot(a,n)**2,0)),v=V.dot(e[0],n)-x;
+  if(v<m){m=v;r=V.sub(e[0],V.mul(e[1].reduce((s,a)=>V.madd(s,a,V.dot(a,n)),[0,0,0]),1/x));}}return r;};
+const mid=(b,j)=>V.lerp(j==='sho'?b.sho('R'):j==='hip'?b.hip('R'):b.j('R',j),j==='sho'?b.sho('L'):j==='hip'?b.hip('L'):b.j('L',j),.5);
+
+const SH=.45,YM=.008,XS=-.62,FZ=.12,FA=95;
+const hb=(b,i,cx)=>{K.supine(b,{y:YM,x:XS,at:'sho',incl:-i,sp:[0],sc:[0,-.01],hd:'rest'});
+  const f=V.xy(FA),u=V.xy(FA+90);for(const[s,k]of SS){const F=[f[0],f[1],k*.1],lo=low(V.norm(F),V.norm(V.perp(u,V.norm(F))),UP);
+    K.footOn(b,s,[cx-lo[0],SH,k*FZ-lo[2]],F,u);b.leg(s,null,[0,1,k*.15]);}};
+GA.def('lib_heel_bridge_chair',{title:'Puente con talones en una silla',cam:{yaw:-30,pitch:17},
+  muscles:{hams:1,glutes:.7,lowback:.2},labels:['Isquiotibiales','Glúteos'],
+  timeline:[{p:1,dur:1.4,label:'Sube con los talones',act:1},{dur:.8,label:'Arriba · aprieta',act:1},
+    {p:0,dur:2.2,label:'Baja despacio',act:.75},{dur:.5,label:'Abajo',act:.5}],
+  build(c,b,E){const p=c.p,G=K.memo(this,'g',()=>{
+      const hipA=()=>{const S=mid(b,'sho'),H=mid(b,'hip'),N=mid(b,'kne');return M.atan2(N[1]-H[1],N[0]-H[0])-M.atan2(H[1]-S[1],H[0]-S[0]);};
+      const knA=()=>{const S=b.S.R;return M.acos(V.dot(V.norm(V.sub(S.kne,S.hip)),V.norm(V.sub(S.ank,S.kne))))/D;};
+      const top=cx=>K.root(i=>{hb(b,i,cx);return hipA();},4,50),cx=K.root(x=>{hb(b,top(x),x);return knA()-42;},XS+.9,XS+1.8);
+      const i0=K.root(i=>{K.supine(b,{y:YM,x:XS,at:'sho',incl:-i,sp:[0],sc:[0,-.01],hd:'rest'});
+        return K.low(b,['pel','gluR','gluL'],[0,YM,0])-K.low(b,['shd','tho'],[0,YM,0]);},-8,12),i1=top(cx);
+      b.ikErr=0;return{i0,i1,cx};});
+    hb(b,mix(G.i0,G.i1,p),G.cx);K.armsFloor(b,E,{y:YM,spread:16});
+    K.mat(E,[XS+.3,0,0],[1.45,.6]);chair(E,G.cx+.17,SH,1);E.shadow([XS+.6,0,0],1.1,.35,.5);}
+});
+
+const TH=.75,table=(E,x0)=>{const L=.8,W=1.2;E.boxA([x0+L/2,TH-.015,0],[L,.03,W],K.COL.wood,{layer:-1});
+  for(const x of[x0+.06,x0+L-.06])for(const k of[-1,1])E.beam([x,0,k*(W/2-.06)],[x,TH-.03,k*(W/2-.06)],.05,K.COL.woodD,{layer:-1});};
+GA.def('lib_incline_plank_table',{title:'Plancha inclinada en una mesa',cam:{yaw:28,pitch:12},fitBox:[[-1.45,0,-.5],[.42,1.4,.5]],
+  muscles:{abs:1,obliques:.5,frontdelts:.3,glutes:.3},labels:['Abdomen','Oblicuos'],note:'Aguanta 30 s',
+  timeline:[{p:1,dur:2.2,label:'Aguanta · inhala',act:.9,ease:'sin'},{p:0,dur:2.2,label:'Abdomen firme · exhala',act:1,ease:'sin'}],
+  build(c,b,E){const p=c.p,HX=0,o=q=>({hy:TH,hx:HX,sp:[mix(1,0,q)],hd:-8,pr:[.03+.005*q,-.02]});
+    const xT=K.memo(this,'xT',()=>{const r=K.root(x=>K.plank(b,null,Object.assign(o(0),{xT:x,k:{}})).th-45,-1.55,-.6);b.ikErr=0;return r;});
+    const pl=K.plank(b,E,Object.assign(o(p),{xT,k:K.memo(this,'pl',()=>({}))}));
+    table(E,pl.hands.R[0]-.03);E.shadow([xT+.75,0,0],.9,.35,.5);}
+});
+
+const KX=-.05,KZ=.11,KT=8,HF=118,KN=100,HZ=15,TW=30,SB=20,PY=8;
+const kePose=(b,s,q,sf,hx,hz)=>{const k=K.sd(s),o=s==='R'?'L':'R',ko=-k,lq=sst(.1,1,q),w=sst(0,.4,q),Pp=pt=>[KX,0,pt*KZ];
+  b.footFlat(o,Pp(ko),-ko*KT);const A=b.j(o,'ank').slice(),po={tilt:mix(2,-4,lq),yaw:k*PY*lq,roll:-k*2*lq};
+  b.pelvis([hx,1,hz],po);const hp=b.hip(o),d=K.legD(mix(4,8,w));b.pelvis([hx,1+A[1]-hp[1]+M.sqrt(d*d-(hp[0]-A[0])**2-(hp[2]-A[2])**2),hz],po);
+  K.trunk(b,{sp:[sf*lq,-k*SB*lq,-k*TW*lq],hd:[mix(2,10,lq),k*6*lq]});b.scap(o,-.02*lq,0);
+  nape(b,s,0);nape(b,o,lq);b.leg(o,null,[1,.15,ko*.1]);
+  const P=b.pf,f0=V.yaw(-k*KT),ball=V.madd(Pp(k),f0,DM.heel+DM.toe-.06),pit=34*sst(0,.32,q),v=sst(.3,.62,q);
+  b.footBall(s,ball,-k*KT,pit);const S=b.S[s],A0=S.ank.slice(),fa=S.ffwd.slice(),ua=S.fup.slice(),pole0=V.add(fa,[0,.15,0]);
+  if(v<=0){b.leg(s,null,pole0);return;}
+  const a=HF*lq*D,kn=mix(4,KN,lq)*D,dir=x=>V.rot(V.add(V.mul(P.U,-M.cos(x)),V.mul(P.F,M.sin(x))),P.U,k*HZ*lq*D),td=dir(a),sd=dir(a-kn);
+  b.legDir(s,td,sd);b.footRelax(s,18);const A1=S.ank.slice(),An=V.lerp(A0,A1,v),f=V.norm(V.lerp(fa,S.ffwd,v)),u=V.norm(V.lerp(ua,S.fup,v));
+  const g=M.min(...K.shoe(An,f,u).map(e=>K.gap(e,[0,-.008,0],UP)));if(g<0)An[1]-=g;
+  b.foot(s,An,f,u);b.leg(s,null,V.lerp(pole0,td,v));};
+const gapEK=(b,s,o)=>{const e=b.j(o,'elb'),h=b.hip(s),d=V.sub(b.j(s,'kne'),h),t=M.max(0,M.min(1,V.dot(V.sub(e,h),d)/V.dot(d,d)));
+  return V.dist(e,V.madd(h,d,t))-mix(.084,.056,t)-.04;};
+const ke=(ctx,b,s,q)=>{const k=K.sd(s),w=sst(0,.4,q),bx=KX+.1,bz=-k*mix(0,KZ-.01,w),e0=b.ikErr;
+  const sf=K.memo(ctx,'sf',()=>K.root(f=>{kePose(b,'R',1,f,0,0);return gapEK(b,'R','L')-.008;},20,55));
+  let hx=0,hz=0;for(let i=0;i<2;i++){hx=K.root(x=>{kePose(b,s,q,sf,x,hz);return K.com(b)[0]-bx;},bx-.5,bx+.4);
+    hz=K.root(z=>{kePose(b,s,q,sf,hx,z);return K.com(b)[2]-bz;},-.2,.2);}
+  b.ikErr=e0;kePose(b,s,q,sf,hx,hz);};
+GA.def('lib_standing_knee_elbow',{title:'Rodilla al codo de pie',cam:{yaw:50,pitch:8},
+  muscles:{obliques:1,abs:.7},labels:['Oblicuos','Abdomen'],init:{R:0,L:0,p:0,act:.5},
+  timeline:[{R:1,p:1,dur:1,label:'Rodilla derecha al otro codo',act:1},{dur:.3,label:'Gira y aprieta · exhala',act:1},{R:0,p:0,dur:1.2,label:'Vuelve al centro',act:.6},
+    {L:1,dur:1,label:'Rodilla izquierda al otro codo',act:1},{dur:.3,label:'Gira y aprieta · exhala',act:1},{L:0,dur:1.2,label:'Vuelve al centro',act:.5}],
+  build(c,b,E){const R=c.R||0,L=c.L||0;ke(this,b,R>=L?'R':'L',M.max(R,L));E.shadow([0,0,0],.45,.35,.55);}
+});
+
+const PC=.8,TB=50,TS=8,BX=-.04,SO={fz:.15,toe:10};
+GA.def('lib_chair_stand_fast',{title:'Levantarse de la silla rápido',cam:{yaw:34,pitch:9},
+  muscles:{quads:1,glutes:.7,adductors:.3},labels:['Cuádriceps','Glúteos'],init:{p:1},
+  timeline:[{p:0,dur:.6,label:'Levántate rápido',act:1},{dur:.5,label:'De pie · cadera estirada',act:.5},
+    {p:1,dur:2.6,label:'Siéntate despacio',act:.8},{dur:.6,label:'Sentado · pies firmes',act:.5}],
+  build(c,b,E){const p=c.p,up=(kf,tl,bx)=>K.stand(b,Object.assign({kf,tilt:tl,sp:[-3],hd:-tl*.4,balance:true,arms:cross,bx},SO));
+    const G=K.memo(this,'g',()=>{const kB=K.root(kf=>{up(kf,TB,BX);return K.low(b,['gluR','gluL','pel'],[0,SH,0]);},60,130);
+      const h=up(kB,TB,BX);b.ikErr=0;return{kB,h};});
+    if(p<=PC){const s=p/PC;up(mix(4,G.kB,s),mix(2,TB,s),mix(.05,BX,s));}
+    else{const s=sst(0,1,(p-PC)/(1-PC)),tl=mix(TB,TS,s);b.pelvis([G.h.x-.03*s,G.h.y,0],{tilt:tl});K.trunk(b,{sp:[-3],hd:-tl*.4});
+      K.rest(b,['gluR','gluL','pel'],[0,SH,0]);for(const[s2,k]of SS)b.footFlat(s2,[-.05,0,k*SO.fz],-k*SO.toe);K.legs(b);cross(b);}
+    chair(E,G.h.x-.09,SH,-1);E.shadow([-.05,0,0],.55,.4,.55);}
+});
+
+})(window.GymAnim);
+/* ex/n_new_towel.js */
+/* En casa con toalla, puerta y pared: remo con toalla en la manilla de una puerta, jalón boca abajo con toalla, curl
+   isométrico con toalla, elevación lateral isométrica contra la pared y flexiones pike de rodillas */
+(function(GA){
+const K=GA._.kit,V=GA._.V,C=GA._.COL,DM=GA._.DIM,SS=K.SS,mix=K.mix,sst=K.sst,M=Math,RD=K.D,UP=[0,1,0],Z=[0,0,1],X=[1,0,0];
+const T=(u,a,h,b,d,c,r,e)=>[{p:1,dur:u,label:a,act:1},{dur:h,label:b,act:1},{p:0,dur:d,label:c,act:.75},{dur:r,label:e,act:.5}];
+const ISO=(a,b)=>[{p:1,dur:2.2,label:a,act:.95,ease:'sin'},{p:0,dur:2.2,label:b,act:1,ease:'sin'}];
+const TW='#d9cfc0',TR=.022;
+const towel=(E,pts,g)=>{const o=g?{grp:g}:undefined;for(let i=1;i<pts.length;i++)E.cap(pts[i-1],pts[i],TR,TR,TW,o);};
+const fist=(b,s)=>{const S=b.S[s],fd=V.norm(V.sub(S.wri,S.elb)),ga=V.norm(V.perp(S.gripAx||Z,fd));return{g:S.grip,fd,ga,pn:V.norm(V.cross(fd,ga)),fc:V.madd(S.wri,fd,.052)};};
+const tail=(E,p,d,l,g)=>towel(E,[p,V.add(p,V.add(V.mul(d,.012),[0,-l*.45,0])),V.add(p,V.add(V.mul(d,.02),[0,-l,0]))],g);
+
+const XD=.42,HY=1.0,AN=[XD-.035,HY,0],LR=.03,DA=33;   // cara de la puerta, altura de la manilla, lazo (centro y radio), inclinación
+const dlean=(b,th,q)=>{const r=th*RD,u=[-M.sin(r),M.cos(r),0];
+  for(const[s,k]of SS)K.footOn(b,s,[XD-.45,0,k*.1],X,UP);
+  const am=V.lerp(b.j('R','ank'),b.j('L','ank'),.5),LL=M.sqrt(K.legD(3)**2-(.1-DM.hipW)**2);
+  b.pelvis(V.madd(am,u,LL),{tilt:-th});K.trunk(b,{sp:[-2],hd:4,sc:[-.008*q,mix(.025,-.035,q)]});K.legs(b,{up:0});};
+const dch=b=>SS.map(([s,k])=>b.tpt(k*.12,-.27,.168));
+const door=E=>{const W=K.COL.wood,WD=K.COL.woodD,z0=.075,z1=z0-.8,DH=2.03,zc=(z0+z1)/2,L2={layer:-2};
+  E.boxA([XD+.02,DH/2+.005,zc],[.04,DH-.01,z0-z1],W,L2);
+  for(const[y,h]of[[.25,.62],[1.42,.92]])E.boxA([XD-.002,y+h/2,zc],[.006,h,.56],'#86664a',{layer:-1,outline:false});
+  for(const z of[z0+.04,z1-.04])E.beam([XD+.03,0,z],[XD+.03,DH+.07,z],.07,WD,{h:.12,layer:-2});
+  E.beam([XD+.03,DH+.035,z1-.075],[XD+.03,DH+.035,z0+.075],.12,WD,{h:.07,layer:-2});
+  for(const y of[.3,1.75])E.boxA([XD-.004,y,z1+.012],[.012,.1,.024],C.frameD,{layer:-1});
+  E.disc([XD-.004,HY,0],X,.028,.008,C.chrome,{hub:0});E.cyl([XD,HY,0],[XD-.062,HY,0],.009,C.chrome);
+  E.cyl([XD-.062,HY,.012],[XD-.062,HY,-.125],.011,C.chrome);E.sph([XD-.062,HY,.012],.012,C.chrome);};
+GA.def('lib_towel_door_row',{title:'Remo con toalla en el marco de una puerta',cam:{yaw:-38,pitch:8},fitBox:[[-1.0,0,-.45],[XD+.05,1.7,.45]],
+  muscles:{midback:1,lats:.7,biceps:.5,reardelts:.4},labels:['Romboides','Dorsales','Bíceps'],
+  timeline:T(1.3,'Pecho hacia la puerta',.8,'Junta escápulas',2.4,'Baja controlado',.4,'Brazos estirados'),
+  build(c,b,E){const p=c.p,R=K.armD(4),
+    G=K.memo(this,'g',()=>{dlean(b,DA,0);const LT=V.dist(AN,b.sho('R'))-R,t1=K.root(t=>{dlean(b,t,1);return V.dist(AN,dch(b)[0])-LT;},0,DA);b.ikErr=0;return{LT,t1};});
+    dlean(b,mix(DA,G.t1,p),p);const h1=dch(b),up=b.tdir(0,1,0);
+    SS.forEach(([s,k],i)=>{const sh=b.sho(s),g0=V.madd(sh,V.norm(V.sub(AN,sh)),R-.002),g=V.madd(AN,V.norm(V.sub(V.lerp(g0,h1[i],p),AN)),G.LT);
+      b.arm(s,g,b.tdir(k*.3,-.5,-.8),up);const F=fist(b,s),top=V.madd(F.g,F.ga,.03),d=V.norm(V.sub(top,AN));
+      towel(E,[V.madd(AN,V.norm(V.perp(d,X)),LR),top]);tail(E,V.madd(F.g,F.ga,-.03),V.neg(X),.13,'tt'+s);});
+    const ring=[];for(let i=0;i<=10;i++){const a=i*M.PI/5;ring.push(V.add(AN,[0,LR*M.cos(a),LR*M.sin(a)]));}towel(E,ring,'tring');
+    door(E);E.shadow([XD-.6,0,0],.6,.35,.5);}
+});
+
+const ZH=.26,htop=b=>{const L=K.ells(b);return M.max(...K.HEAD.map(k=>-K.gap(L[k],[0,0,0],[0,-1,0])));};   // y máxima de la cabeza
+const drape=(E,p,o,Y,g)=>{const e=V.add(V.madd(p,o,.045),[0,-.09,0]);e[1]=M.max(e[1],Y+TR);towel(E,[p,V.add(V.madd(p,o,.03),[0,-.035,0]),e],g);};
+const prone=(b,Y,q)=>K.prone(b,{y:Y,x:-.2,sp:[-mix(10,12,q)],hd:-2,sc:[-.006*q,mix(.02,-.03,q)]});
+GA.def('lib_towel_pulldown_floor',{title:'Jalón en el suelo con toalla',cam:{yaw:30,pitch:14},
+  muscles:{lats:1,midback:.6,reardelts:.4,biceps:.3,lowback:.3},labels:['Dorsales','Romboides','Deltoides post.'],
+  timeline:T(1.3,'Codos a las costillas',.8,'Aprieta la espalda',2.4,'Estira lento',.4,'Brazos largos'),
+  build(c,b,E){const p=c.p,mt=K.mat(E,[-.3,0,0],[1.95,.66]),Y=mt.top,R=K.armD(6),e=sst(0,1,p);
+    const G=K.memo(this,'g',()=>{prone(b,Y,0);const S0=b.sho('R'),dy=.06,dz=ZH-S0[2];prone(b,Y,1);
+      return{h0:[S0[0]+M.sqrt(R*R-dy*dy-dz*dz),S0[1]+dy,ZH],h1:[b.headC[0]-.06,htop(b)+TR+.012,ZH]};});
+    prone(b,Y,p);
+    for(const[s,k]of SS){const h=V.lerp(G.h0,G.h1,e);h[1]+=.04*M.sin(M.PI*e);b.arm(s,[h[0],h[1],k*ZH],V.lerp([-.2,1,k*.5],[-.7,0,k*.7],e),Z);
+      const hp=b.hip(s),ly=Y+.075,lx=-M.sqrt(K.legD(3)**2-(ly-hp[1])**2-.0001);b.leg(s,[hp[0]+lx,ly,k*.1],[0,-1,0]);b.footRelax(s,62);}
+    const FR=fist(b,'R'),FL=fist(b,'L');towel(E,[V.madd(FR.g,Z,-.03),V.madd(FL.g,Z,.03)]);
+    drape(E,V.madd(FR.g,Z,.03),Z,Y,'ttR');drape(E,V.madd(FL.g,Z,-.03),V.neg(Z),Y,'ttL');
+    E.trace('toalla',V.lerp(FR.g,FL.g,.5));E.shadow([0,0,0],1,.3,.5);}
+});
+
+const FX=.16,FZ=.06;
+GA.def('lib_towel_curl_iso',{title:'Curl de bíceps con toalla',cam:{yaw:50,pitch:8},fitBox:[[-.3,0,-.42],[.5,1.85,.42]],
+  muscles:{biceps:1,forearms:.4},labels:['Bíceps','Antebrazo'],note:'Aguanta 30 s',
+  timeline:ISO('Tira hacia arriba · aguanta','Codos pegados · respira'),
+  build(c,b,E){const p=c.p,ea=mix(88,91,p)*RD,mx=FX+DM.heel+.07;
+    K.stand(b,{feet:{R:[FX,FZ,.012],L:[-.08,-.12]},toe:8,kf:6,tilt:1,sp:[-1-1.2*p],hd:2,sc:[.004*p,-.012]});
+    E.boxA([mx,.008,FZ],[.075,.014,.15],TW,{layer:-1});   // centro de la toalla, aplastado bajo el arco del pie
+    for(const[s,k]of SS){const u=b.tdir(k*.06,-1,.06),a=V.norm(V.perp(b.tdir(-k*.15,0,1),u));b.armDir(s,u,V.add(V.mul(u,M.cos(ea)),V.mul(a,M.sin(ea))),Z);
+      const F=fist(b,s),A=[mx,.016,FZ+k*.052],B=[mx+.006,.05,FZ+k*.06],g={grp:'tw'+s};E.cap(A,B,.03,.028,TW,g);E.cap(B,V.madd(F.g,F.pn,.015),.028,.018,TW,g);}
+    E.shadow([.05,0,0],.45,.35,.55);}
+});
+
+const WZ=.34;
+const fmax=(b,s)=>{const F=fist(b,s);return F.fc[2]+M.hypot(.05*F.fd[2],.044*F.ga[2],.03*F.pn[2]);};
+GA.def('lib_wall_lateral_raise_iso',{title:'Elevación lateral isométrica en la pared',cam:{yaw:72,pitch:10},fitBox:[[-.35,0,-.42],[.35,1.85,.42]],
+  muscles:{sidedelts_R:1,traps_R:.3,frontdelts_R:.2},labels:['Deltoides lateral','Trapecio'],note:'Aguanta 30 s por lado',
+  timeline:ISO('Empuja la pared · aguanta','Hombro abajo · respira'),
+  build(c,b,E){const p=c.p;K.stand(b,{fz:.12,toe:8,kf:4,tilt:1,sp:[-1-1.2*p],hd:[0,4],sc:[0,0]});b.scap('R',-.006-.004*p,0);
+    const ar=a=>{b.armFK('R',{abd:a,flex:3,elbow:4,grip:X});return fmax(b,'R')-WZ+.001;};ar(K.root(ar,0,30));
+    b.arm('L',b.ppt(-.19,.1,-.01),[-.35,0,-1],UP);
+    E.boxA([-1.47,1.1,WZ+.05],[3.06,2.2,.1],'#26303a',{layer:-2});E.boxA([-1.47,.04,WZ-.006],[3.06,.08,.012],'#323d49',{layer:-1});
+    E.shadow([0,0,0],.4,.3,.55);}
+});
+
+const XK=-.45,HZ=.23,TH0=3,TL0=112,TH1=42;
+const kn=(b,Y,th,tl,q)=>K.kneel(b,{x:XK,y:Y,thigh:th,tilt:tl,sp:[2],hd:mix(-6,-14,q),sc:[mix(.03,.012,q),.005],toes:'tuck'});
+GA.def('lib_pike_pushup_knee',{title:'Flexiones pike de rodillas',cam:{yaw:28,pitch:12},
+  muscles:{frontdelts:1,triceps:.6,sidedelts:.35,upperpecs:.35},labels:['Deltoides anterior','Tríceps'],
+  timeline:[{p:1,dur:2,label:'Baja la cabeza al suelo',act:.85},{dur:.3,label:'Abajo · codos a 45°',act:.95},
+    {p:0,dur:1.3,label:'Empuja arriba',act:1},{dur:.6,label:'Cadera alta',act:.5}],
+  build(c,b,E){const p=c.p,mt=K.mat(E,[-.11,0,0],[1.8,.62]),Y=mt.top;
+    const G=K.memo(this,'g',()=>{const e0=b.ikErr;kn(b,Y,TH0,TL0,0);const S=b.sho('R'),R=K.armD(5),dy=S[1]-Y-.029,dz=HZ-S[2],XH=S[0]+.05+M.sqrt(R*R-dy*dy-dz*dz);
+      const tl1=K.root(t=>{kn(b,Y,TH1,t,1);return K.low(b,K.HEAD,[0,Y,0])-.02;},TL0,170);b.ikErr=e0;return{XH,tl1};});
+    kn(b,Y,mix(TH0,TH1,p),mix(TL0,G.tl1,p),p);
+    for(const[s,k]of SS)K.palm(b,E,s,[G.XH,Y,k*HZ],{pole:[0,1,k*.85]});
+    E.shadow([-.05,0,0],.8,.35,.5);}
+});
+
+})(window.GymAnim);
 /* ex/n_plyo_carry.js */
 /* Pliometría, comba, slam, cuerdas de batalla, trineo y paseos con carga */
 (function(GA){
@@ -9121,7 +9378,7 @@ GA.def('lib_plate_pinch',{title:'Agarre de pinza con discos',cam:{yaw:40,pitch:6
 
 })(window.GymAnim);
 /* build */
-try{GymAnim._.buildHash="8c1dd4f9999b";}catch(e){}
+try{GymAnim._.buildHash="2a4b3c0db103";}catch(e){}
 </script>
 <!-- GYM-ANIM:END -->
 <!-- GYM-GEN:START -->
@@ -9138,7 +9395,7 @@ const _catalogo = (function () {
 // ── PAT_NEAR de la app (index.html:9941) ──
 const PAT_NEAR = { squat: ['knee_ext', 'lunge'], knee_ext: ['squat'], knee_flex: ['hinge'], hinge: ['knee_flex', 'hip_ext'], push_h: ['fly'], fly: ['push_h'], push_v: ['raise', 'push_h'],
   raise: ['push_v', 'raise_f'], raise_f: ['raise', 'push_v'], rear: ['pull_h', 'raise'], pull_v: ['pull_h'], pull_h: ['pull_v', 'rear'], core: ['core_iso'], core_iso: ['core', 'carry'],
-  lunge: ['squat', 'hinge'], hip_ext: ['hinge'], shrug: ['pull_h'], forearm: ['curl'], core_rot: ['core', 'core_iso'], carry: ['core_iso'], plyo: ['squat', 'lunge'], full: ['squat', 'hinge'] };
+  lunge: ['squat', 'hinge'], hip_ext: ['hinge'], shrug: ['pull_h'], forearm: ['curl'], core_rot: ['core', 'core_iso'], carry: ['core_iso'], plyo: ['squat', 'lunge'], full: ['squat', 'hinge'], bal: [] };
 
 // ── MM_GROUPS (index.html:16608) y grupos de planificación (§E.3: espalda sin lumbares) ──
 const GROUPS = ['pecho', 'espalda', 'hombros', 'biceps', 'triceps', 'abdomen', 'cuads', 'isquios', 'gluteos', 'gemelos'];
@@ -9151,7 +9408,8 @@ const SMALL = ['biceps', 'triceps', 'gemelos', 'abdomen'];
 
 // ── Etiquetas (§K.1). Las que la propuesta da con cifras se derivan con la heurística de 02 (sim.js/lesion.js) ──
 const NOGEN = ['lat_pulldown_behind', 'upright_row_bb', 'upright_row_cable', 'upright_row_db', 'good_morning', 'decline_situp', 'kb_windmill', 'sissy_squat',
-  'rack_pull', 'power_clean', 'power_snatch', 'push_press', 'kb_snatch', 'snatch_db', 'thruster_bb', 'tire_flip', 'muscle_up'];
+  'rack_pull', 'power_clean', 'power_snatch', 'push_press', 'kb_snatch', 'snatch_db', 'thruster_bb', 'tire_flip', 'muscle_up',
+  'chair_stand_fast'];   // E14a (§K.3): potencia para 65 o más, solo por propuesta del Coach (§G.5)
 const ALSO_KB = ['overhead_ext_db', 'suitcase_carry_db', 'single_leg_rdl_db', 'db_swing', 'woodchop_db', 'crunch_db', 'side_bend_db', 'russian_twist_db', 'glute_bridge_db',
   'hip_thrust_db', 'sumo_squat_db', 'calf_raise_single_db', 'snatch_db', 'kickback_db', 'leg_curl_db', 'calf_seated_db', 'preacher_curl_db'];
 const POLEAS2 = ['cable_fly_low', 'cable_fly_high', 'cable_fly_mid', 'cable_chest_press', 'rear_fly_cable', 'y_raise_cable', 'curl_cable_high'];
@@ -9171,7 +9429,7 @@ const SPINE = ['situp', 'v_up', 'russian_twist_db', 'plate_russian_twist', 'mb_r
   'plate_crunch', 'side_bend_db', 'woodchop_db', 'woodchop_high_cable', 'woodchop_low_cable', 'landmine_rotation', 'torso_rotation_machine', 'mb_rot_throw'];
 // v5 (paso 4, C-13): flexión o giro de columna repetidos SIN carga externa; fuera también con huesos frágiles (Giangregorio 2014, «Too Fit To
 // Fracture»: evitar abdominales en flexión y giros; 05 §7.4). Con 65 o más no hace falta: su menú de core es antiextensión y antirrotación.
-const SPINE_FLEX = ['crunch', 'bicycle_crunch', 'russian_twist_bw', 'ball_crunch', 'reverse_crunch', 'heel_touch', 'ball_pass', 'hanging_knee_raise', 'leg_raise'];
+const SPINE_FLEX = ['crunch', 'bicycle_crunch', 'russian_twist_bw', 'ball_crunch', 'reverse_crunch', 'heel_touch', 'ball_pass', 'hanging_knee_raise', 'leg_raise', 'standing_knee_elbow'];
 // Básicos (§K.1: «≈ 40: sentadillas, prensa, hack; pesos muertos y rumanos; presses de banca, inclinado y militar; dominadas y jalón; remos»).
 // Derivado de esa descripción: solo con carga o dominadas (el prototipo de ciencia incluía air_squat, pushup, inverted_row_table, band_row y trx_row: ver issue)
 const BASIC = ['back_squat', 'front_squat', 'squat_smith', 'goblet_squat', 'squat_db', 'kb_goblet_squat', 'leg_press', 'hack_squat',
@@ -9230,6 +9488,7 @@ const VOLPAT = {
   curl: { d: ['biceps'], i: [] }, tri: { d: ['triceps'], i: [] },
   core: { d: ['abdomen'], i: [] }, core_iso: { d: ['abdomen'], i: [] }, core_rot: { d: ['abdomen'], i: [] }, carry: { d: ['abdomen'], i: [] },
   hip_abd: { d: ['gluteos'], i: [] }, hip_add: { d: [], i: [] }, shrug: { d: ['espalda'], i: [] }, forearm: { d: [], i: [] },
+  bal: { d: [], i: [] },   // E14a (§K.3): el equilibrio no cuenta volumen
 };
 
 return function (C0, opts) {
@@ -9264,6 +9523,8 @@ return function (C0, opts) {
       cardio_boxing_bag: 'saco', cardio_cycling_outdoor: 'bici_ext', cardio_swim: 'piscina' }[sid(e)]; if (o) r.add(o); }
     if (POLEAS2.includes(sid(e))) r.add('poleas2');
     if (sid(e) === 'inverted_row_table') r.add('mesa');   // v3: en un parque no hay mesa (D-13); las casas la tienen por defecto
+    if (sid(e) === 'incline_plank_table') r.add('mesa');   // E14a (§K.3): plancha con las manos en una mesa o encimera
+    if (sid(e) === 'towel_door_row') r.add('puerta');      // E14a (§K.3, J-26): «con la puerta cerrada y bien sujeta»
     return [...r];
   }
   // lim (heurística de 02 §4.2 = lesion.js; cadera = heurística de la propuesta de UX, ux10/counts.js) · 2 evitar · 1 con cuidado
@@ -9284,7 +9545,7 @@ return function (C0, opts) {
       if (e.pat === 'push_v' || e.pat === 'fly' || e.pat === 'raise' || e.pat === 'raise_f' || has(e, ['pullover_db', 'pullover_machine', 'pullup', 'chinup', 'pullup_neutral', 'pullup_band',
         'pullup_negative', 'thruster_bb', 'thruster_db', 'kb_thruster', 'kb_turkish_getup', 'kb_windmill', 'clean_press_db', 'kb_clean_press', 'bench_press', 'incline_bench_bb', 'decline_bench_bb',
         'close_grip_bench', 'assisted_dip', 'dip_machine', 'pushup_archer', 'mb_wall_ball', 'battle_rope_slams', 'skull_crusher_ez', 'overhead_ext_ez', 'tricep_overhead_cable', 'overhead_ext_db',
-        'band_tricep_overhead', 'trx_y_raise', 'ab_wheel_standing', 'dead_hang'])) return 1;
+        'band_tricep_overhead', 'trx_y_raise', 'ab_wheel_standing', 'dead_hang', 'towel_pulldown_floor'])) return 1;
       // v6 del catálogo (paso 6, J-02): la barra en la espalda o en posición frontal y colgarse también cargan el hombro (rotación externa y
       // abducción para sujetar la barra; tracción con el peso del cuerpo). Propuesta de revisión humana para §K.2
       if (has(e, ['back_squat', 'front_squat', 'squat_smith', 'lunge_bb', 'bulgarian_bb', 'calf_raise_bb', 'lunge_smith', 'bulgarian_smith', 'hanging_knee_raise', 'leg_raise', 'l_sit'])) return 1;
@@ -9297,7 +9558,8 @@ return function (C0, opts) {
         'jump_squat', 'tuck_jump', 'box_jump', 'superman', 'kb_windmill'])) return 2;
       if (lw(e) >= 0.4 || e.pat === 'hinge' || has(e, ['lunge_bb', 'bulgarian_bb', 'ohp_bb', 'push_press', 'thruster_bb', 'calf_raise_bb', 'shrug_bb', 'farmer_walk_db', 'kb_farmer_carry',
         'russian_twist_bw', 'bicycle_crunch', 'flutter_kick', 'lying_leg_raise', 'leg_raise', 'hanging_knee_raise', 'reverse_crunch', 'crunch_cable', 'woodchop_high_cable', 'woodchop_low_cable',
-        'woodchop_db', 'mb_rot_throw', 'mb_slam', 'landmine_rotation', 'burpee', 'renegade_row_db', 'ab_wheel_knees', 'ball_pike', 'trx_pike', 'hyperextension', 'back_ext_machine', 'ball_back_ext'])) return 1;
+        'woodchop_db', 'mb_rot_throw', 'mb_slam', 'landmine_rotation', 'burpee', 'renegade_row_db', 'ab_wheel_knees', 'ball_pike', 'trx_pike', 'hyperextension', 'back_ext_machine', 'ball_back_ext',
+        'towel_pulldown_floor'])) return 1;
       // v6 del catálogo (paso 6, J-01 y J-04): la columna también se carga por COMPRESIÓN, no solo por activación de los lumbares: la almohadilla
       // de la hack y del péndulo, la barra del Smith y del hip thrust con barra, y el aterrizaje de cualquier salto. Propuesta para §K.2
       if (has(e, LOWER_PLYO) || has(e, ['hack_squat', 'squat_smith', 'pendulum_squat', 'ohp_smith', 'hip_thrust_bb', 'glute_bridge_bb', 'hip_thrust_smith', 'bulgarian_smith', 'lunge_smith', 'calf_smith'])) return 1;
@@ -9306,12 +9568,12 @@ return function (C0, opts) {
     muneca: e => {
       if (e.lt === 'c') return has(e, ['cardio_boxing_bag']) ? 1 : 0;
       const handsFloor = (e.mat === 'corporal' && e.pat === 'push_h' && !has(e, ['bench_dip', 'pushup_incline', 'pushup_knee'])) || has(e, ['mountain_climber', 'plank_shoulder_tap', 'bear_crawl', 'burpee', 'pike_pushup',
-        'hspu_wall', 'handstand_hold', 'renegade_row_db', 'ball_pike', 'ball_knee_tuck', 'trx_pike', 'trx_knee_tuck', 'pushup_plyo']);
+        'hspu_wall', 'handstand_hold', 'renegade_row_db', 'ball_pike', 'ball_knee_tuck', 'trx_pike', 'trx_knee_tuck', 'pushup_plyo', 'pike_pushup_knee']);
       if (handsFloor || has(e, ['front_squat', 'power_clean', 'power_snatch', 'kb_clean', 'kb_snatch', 'kb_clean_press', 'dip_bars', 'ring_dip', 'bench_dip', 'muscle_up', 'wrist_curl_bb',
         'wrist_curl_db', 'reverse_wrist_curl_db'])) return 2;
       if (has(e, ['curl_bb', 'reverse_curl_bb', 'reverse_curl_db', 'zottman_curl_db', 'skull_crusher_ez', 'skull_crusher_db', 'bench_press', 'close_grip_bench', 'incline_bench_bb',
         'decline_bench_bb', 'thruster_bb', 'push_press', 'ohp_bb', 'kb_press', 'kb_turkish_getup', 'kb_windmill', 'kb_rack_carry', 'ab_wheel_knees', 'ab_wheel_standing', 'plate_pinch',
-        'assisted_dip', 'dip_machine', 'pushup_incline', 'pushup_knee', 'trx_chest_press', 'band_chest_press', 'mb_wall_ball'])) return 1;
+        'assisted_dip', 'dip_machine', 'pushup_incline', 'pushup_knee', 'trx_chest_press', 'band_chest_press', 'mb_wall_ball', 'incline_plank_table'])) return 1;
       return 0;
     },
     impacto: e => {
@@ -9387,7 +9649,7 @@ return function (C0, opts) {
 
   // ── Presets de material (§C P5-P6; cifras y contenido de 02 §6.2 = presets.js), en el formato Place de §D.1 ──
   const ALL_MATS = ['barra', 'barraz', 'smith', 'mancuernas', 'kettlebell', 'disco', 'balon', 'otro', 'maquina', 'polea', 'dominadas', 'banda', 'minibanda', 'trx', 'fitball', 'rueda', 'comba', 'step', 'cardio'];
-  const ALL_ACC = ['mesa', 'banco', 'banco_inc', 'banco_dec', 'scott', 'ghd', 'hiper', 'rack', 'landmine', 'hexbar', 'anclaje', 'paralelas', 'agarre_neutro', 'kb2', 'anillas', 'poleas2',
+  const ALL_ACC = ['mesa', 'puerta', 'banco', 'banco_inc', 'banco_dec', 'scott', 'ghd', 'hiper', 'rack', 'landmine', 'hexbar', 'anclaje', 'paralelas', 'agarre_neutro', 'kb2', 'anillas', 'poleas2',
     'trineo', 'llanta', 'cuerdas', 'saco', 'bici_ext', 'piscina'];
   const PRESETS = {
     grande: { kind: 'g', t: 'Gimnasio grande', mats: ALL_MATS, acc: ALL_ACC.filter(a => a !== 'bici_ext' && a !== 'piscina'), mach: 'all', card: 'all', dbMax: 99, kb: 2, cifra: 384 },
@@ -9398,10 +9660,10 @@ return function (C0, opts) {
       mach: ['jalonremo', 'pecho', 'extension', 'curlfem'], card: ['cinta', 'bici', 'eliptica'], dbMax: 20, kb: null, cifra: 193 },
     box: { kind: 'g', t: 'Box o gimnasio funcional', mats: ['barra', 'disco', 'kettlebell', 'mancuernas', 'dominadas', 'trx', 'comba', 'step', 'balon', 'banda', 'minibanda', 'otro', 'cardio', 'rueda'],
       acc: ['banco', 'rack', 'landmine', 'paralelas', 'kb2', 'anillas', 'trineo', 'cuerdas', 'llanta'], mach: [], card: ['remo', 'bici_aire', 'esqui'], dbMax: 30, kb: 2, cifra: 249 },
-    nada: { kind: 'c', t: 'Sin material', mats: [], acc: ['mesa'], mach: [], card: [], dbMax: null, kb: null, cifra: 78 },
-    basico: { kind: 'c', t: 'Lo básico', mats: ['mancuernas', 'banda', 'minibanda'], acc: ['anclaje', 'mesa'], mach: [], card: [], dbMax: 20, kb: null, cifra: 156 },
-    mancbanco: { kind: 'c', t: 'Mancuernas y banco', mats: ['mancuernas'], acc: ['banco', 'banco_inc', 'mesa'], mach: [], card: [], dbMax: 20, kb: null, cifra: 139 },
-    casagym: { kind: 'c', t: 'Gimnasio en casa', mats: ['barra', 'disco', 'dominadas', 'mancuernas'], acc: ['rack', 'banco', 'banco_inc', 'mesa'], mach: [], card: [], dbMax: 30, kb: null, cifra: 183 },
+    nada: { kind: 'c', t: 'Sin material', mats: [], acc: ['mesa', 'puerta'], mach: [], card: [], dbMax: null, kb: null, cifra: 78 },
+    basico: { kind: 'c', t: 'Lo básico', mats: ['mancuernas', 'banda', 'minibanda'], acc: ['anclaje', 'mesa', 'puerta'], mach: [], card: [], dbMax: 20, kb: null, cifra: 156 },
+    mancbanco: { kind: 'c', t: 'Mancuernas y banco', mats: ['mancuernas'], acc: ['banco', 'banco_inc', 'mesa', 'puerta'], mach: [], card: [], dbMax: 20, kb: null, cifra: 139 },
+    casagym: { kind: 'c', t: 'Gimnasio en casa', mats: ['barra', 'disco', 'dominadas', 'mancuernas'], acc: ['rack', 'banco', 'banco_inc', 'mesa', 'puerta'], mach: [], card: [], dbMax: 30, kb: null, cifra: 183 },
     parque: { kind: 'c', t: 'Parque de calistenia', mats: ['dominadas'], acc: ['paralelas'], mach: [], card: [], dbMax: null, kb: null, cifra: 89 },
   };
   const place = (k, over) => { const p = PRESETS[k]; return Object.assign({ preset: k, mats: p.mats.slice(), acc: p.acc.slice(), mach: p.mach === 'all' ? 'all' : p.mach.slice(),
@@ -9512,7 +9774,7 @@ const MENUS = {
     sec: ['HI'],
   },
   KF: {
-    IA: 'leg_curl_seated leg_curl | leg_curl_standing leg_curl_cable | slider_leg_curl ball_leg_curl trx_leg_curl | nordic_curl ghr | leg_curl_db',
+    IA: 'leg_curl_seated leg_curl | leg_curl_standing leg_curl_cable | slider_leg_curl ball_leg_curl trx_leg_curl | heel_bridge_chair | nordic_curl ghr | leg_curl_db',
     // v7 (paso 4): 65+ y «Prefiero no decirlo»: solo máquinas o polea; sin máquina, la bisagra del patrón secundario o el hueco vacío (nada de
     // tumbarse en el suelo ni boca abajo en un banco con una mancuerna entre los pies: la bisagra del día ya trabaja los isquios)
     M: 'leg_curl_seated leg_curl | leg_curl_standing leg_curl_cable',
@@ -9539,38 +9801,38 @@ const MENUS = {
     sec: ['PV'], resp: ['PH'],
   },
   PV: {
-    IA: 'ohp_bb shoulder_press_db | shoulder_press_machine ohp_smith arnold_press_db | landmine_press kb_press | pike_pushup band_shoulder_press | hspu_wall handstand_hold',
-    F: 'ohp_bb | shoulder_press_db ohp_smith | shoulder_press_machine arnold_press_db landmine_press kb_press | pike_pushup band_shoulder_press | hspu_wall handstand_hold',
-    P: 'shoulder_press_machine shoulder_press_db | ohp_smith | ohp_bb arnold_press_db landmine_press kb_press | band_shoulder_press | pike_pushup',
-    C: 'shoulder_press_machine | shoulder_press_db ohp_smith | band_shoulder_press | landmine_press ohp_bb',
+    IA: 'ohp_bb shoulder_press_db | shoulder_press_machine ohp_smith arnold_press_db | landmine_press kb_press | pike_pushup band_shoulder_press | pike_pushup_knee | hspu_wall handstand_hold',
+    F: 'ohp_bb | shoulder_press_db ohp_smith | shoulder_press_machine arnold_press_db landmine_press kb_press | pike_pushup band_shoulder_press | pike_pushup_knee | hspu_wall handstand_hold',
+    P: 'shoulder_press_machine shoulder_press_db | ohp_smith | ohp_bb arnold_press_db landmine_press kb_press | band_shoulder_press | pike_pushup_knee pike_pushup',
+    C: 'shoulder_press_machine | shoulder_press_db ohp_smith | band_shoulder_press | landmine_press ohp_bb | pike_pushup_knee',
   },
   FL: { IA: 'fly_machine cable_fly_mid cable_fly_low fly_db | cable_fly_high fly_incline_db | band_fly' },
   TV: {
-    IA: 'pullup lat_pulldown | chinup pullup_neutral pulldown_close pulldown_supine | assisted_pullup pullup_band pullup_negative | band_pulldown | pulldown_one_arm pulldown_machine_uni',
-    P: 'lat_pulldown assisted_pullup | pulldown_close pulldown_supine pullup_band | pullup_negative band_pulldown | pullup chinup pullup_neutral | pulldown_one_arm pulldown_machine_uni',
+    IA: 'pullup lat_pulldown | chinup pullup_neutral pulldown_close pulldown_supine | assisted_pullup pullup_band pullup_negative | band_pulldown | pulldown_one_arm pulldown_machine_uni | towel_pulldown_floor',
+    P: 'lat_pulldown assisted_pullup | pulldown_close pulldown_supine pullup_band | pullup_negative band_pulldown | pullup chinup pullup_neutral | pulldown_one_arm pulldown_machine_uni | towel_pulldown_floor',
     // v8 (paso 6, J-03): inicio, prudente y 65+ sin dominadas negativas ni con banda (8 bajadas lentas del propio peso son la dosis excéntrica
     // que más agujetas y daño muscular produce; con 65+, además, colgarse es riesgo de caída): si no hay jalón, el respaldo es un remo (TH)
-    C: 'lat_pulldown | assisted_pullup pulldown_close pulldown_supine | band_pulldown',
+    C: 'lat_pulldown | assisted_pullup pulldown_close pulldown_supine | band_pulldown | towel_pulldown_floor',
     M: 'lat_pulldown | pulldown_close pulldown_supine | band_pulldown',
     sec: ['TH'],
   },
   TH: {
-    IA: 'row_cable bb_row row_db | row_machine tbar_row_supported row_incline_db tbar_row_landmine row_cable_one_arm row_bent_db | row_machine_high yates_row pendlay_row row_cable_wide kb_row | inverted_row trx_row | band_row | inverted_row_table | meadows_row row_smith row_cable_standing renegade_row_db backpack_row',
-    F: 'bb_row | pendlay_row row_cable row_db tbar_row_landmine | row_machine tbar_row_supported row_incline_db row_cable_one_arm row_bent_db yates_row | row_machine_high row_cable_wide kb_row | inverted_row trx_row | band_row | inverted_row_table | meadows_row row_smith row_cable_standing renegade_row_db backpack_row',
-    P: 'row_cable row_machine row_db | tbar_row_supported row_incline_db row_cable_one_arm row_machine_high | kb_row bb_row row_bent_db | inverted_row trx_row band_row | inverted_row_table | row_cable_wide yates_row tbar_row_landmine meadows_row row_smith row_cable_standing renegade_row_db backpack_row',
-    C: 'row_cable row_machine | row_incline_db tbar_row_supported row_db | row_cable_one_arm row_machine_high kb_row | band_row trx_row inverted_row | inverted_row_table',
+    IA: 'row_cable bb_row row_db | row_machine tbar_row_supported row_incline_db tbar_row_landmine row_cable_one_arm row_bent_db | row_machine_high yates_row pendlay_row row_cable_wide kb_row | inverted_row trx_row | band_row | towel_door_row | inverted_row_table | meadows_row row_smith row_cable_standing renegade_row_db backpack_row',
+    F: 'bb_row | pendlay_row row_cable row_db tbar_row_landmine | row_machine tbar_row_supported row_incline_db row_cable_one_arm row_bent_db yates_row | row_machine_high row_cable_wide kb_row | inverted_row trx_row | band_row | towel_door_row | inverted_row_table | meadows_row row_smith row_cable_standing renegade_row_db backpack_row',
+    P: 'row_cable row_machine row_db | tbar_row_supported row_incline_db row_cable_one_arm row_machine_high | kb_row bb_row row_bent_db | inverted_row trx_row band_row | towel_door_row | inverted_row_table | row_cable_wide yates_row tbar_row_landmine meadows_row row_smith row_cable_standing renegade_row_db backpack_row',
+    C: 'row_cable row_machine | row_incline_db tbar_row_supported row_db | row_cable_one_arm row_machine_high kb_row | band_row trx_row inverted_row | towel_door_row | inverted_row_table',
     // v8 (J-03): 65+, el remo con apoyo (mancuerna con la mano en el banco, pecho apoyado) antes que meterse bajo una barra
-    M: 'row_cable row_machine | row_incline_db tbar_row_supported row_db | row_cable_one_arm row_machine_high kb_row | band_row | trx_row | inverted_row | inverted_row_table',
+    M: 'row_cable row_machine | row_incline_db tbar_row_supported row_db | row_cable_one_arm row_machine_high kb_row | band_row | towel_door_row | trx_row | inverted_row | inverted_row_table',
     sec: ['TV'],
   },
   RA: {
-    IA: 'lat_raise_db lat_raise_cable lat_raise_machine | band_lateral_raise | y_raise_cable',
-    C: 'lat_raise_machine lat_raise_db lat_raise_cable | band_lateral_raise',
+    IA: 'lat_raise_db lat_raise_cable lat_raise_machine | band_lateral_raise | y_raise_cable | wall_lateral_raise_iso',
+    C: 'lat_raise_machine lat_raise_db lat_raise_cable | band_lateral_raise | wall_lateral_raise_iso',
   },
   RE: { IA: 'face_pull rev_fly_machine rear_fly_db | band_face_pull band_pull_apart rear_fly_cable | trx_rev_fly ext_rotation_cable band_ext_rotation | ytw_prone | trx_y_raise' },
   CU: {
-    IA: 'curl_db curl_cable curl_ez curl_bb hammer_curl | curl_incline_db preacher_curl_ez curl_machine hammer_curl_cable curl_cable_one_arm bayesian_curl_cable | curl_db_concentrated preacher_curl_db band_curl trx_curl | spider_curl_db zottman_curl_db curl_cable_high',
-    C: 'curl_machine curl_db curl_cable | hammer_curl curl_ez curl_bb | band_curl trx_curl | curl_db_concentrated preacher_curl_db preacher_curl_ez hammer_curl_cable curl_cable_one_arm',
+    IA: 'curl_db curl_cable curl_ez curl_bb hammer_curl | curl_incline_db preacher_curl_ez curl_machine hammer_curl_cable curl_cable_one_arm bayesian_curl_cable | curl_db_concentrated preacher_curl_db band_curl trx_curl | spider_curl_db zottman_curl_db curl_cable_high | towel_curl_iso',
+    C: 'curl_machine curl_db curl_cable | hammer_curl curl_ez curl_bb | band_curl trx_curl | curl_db_concentrated preacher_curl_db preacher_curl_ez hammer_curl_cable curl_cable_one_arm | towel_curl_iso',
     sec: ['chinup pulldown_supine'],
   },
   TR: {
@@ -9580,12 +9842,12 @@ const MENUS = {
     C: 'tricep_machine tricep_pushdown | overhead_ext_db tricep_overhead_cable kickback_db | band_tricep_pushdown band_tricep_overhead | assisted_dip dip_machine tricep_pushdown_bar close_press_db',
   },
   CO: {
-    IA: 'plank pallof_press_cable hanging_knee_raise crunch_cable | side_plank ab_wheel_knees dead_bug crunch_machine band_pallof | leg_raise hollow_hold reverse_crunch lying_leg_raise crunch suitcase_carry_db kb_rack_carry woodchop_high_cable woodchop_low_cable crunch_db plate_crunch | ab_wheel_standing toes_to_bar dragon_flag l_sit trx_plank trx_knee_tuck ball_plank ball_crunch bicycle_crunch russian_twist_bw side_bend_db landmine_rotation torso_rotation_machine band_woodchop woodchop_db | flutter_kick heel_touch plank_shoulder_tap ball_pass ball_knee_tuck mb_russian_twist russian_twist_db plate_russian_twist mountain_climber situp v_up mb_rot_throw ball_pike trx_pike',
-    F: 'plank hanging_knee_raise ab_wheel_knees pallof_press_cable | suitcase_carry_db kb_rack_carry side_plank crunch_cable | dead_bug crunch_machine band_pallof leg_raise hollow_hold reverse_crunch lying_leg_raise crunch woodchop_high_cable woodchop_low_cable crunch_db plate_crunch | ab_wheel_standing toes_to_bar dragon_flag l_sit trx_plank trx_knee_tuck ball_plank ball_crunch bicycle_crunch russian_twist_bw side_bend_db landmine_rotation torso_rotation_machine band_woodchop woodchop_db',
-    P: 'plank dead_bug pallof_press_cable | side_plank crunch_cable crunch_machine band_pallof hanging_knee_raise | crunch reverse_crunch lying_leg_raise ball_plank ball_crunch suitcase_carry_db | ab_wheel_knees hollow_hold bicycle_crunch trx_plank woodchop_high_cable woodchop_low_cable band_woodchop crunch_db plate_crunch | leg_raise kb_rack_carry russian_twist_bw side_bend_db torso_rotation_machine landmine_rotation woodchop_db | flutter_kick heel_touch plank_shoulder_tap ball_pass ball_knee_tuck mb_russian_twist russian_twist_db plate_russian_twist mountain_climber situp v_up',
-    C: 'dead_bug plank pallof_press_cable | side_plank band_pallof crunch_machine crunch_cable | ball_plank crunch reverse_crunch lying_leg_raise | suitcase_carry_db ball_crunch',
+    IA: 'plank pallof_press_cable hanging_knee_raise crunch_cable | side_plank ab_wheel_knees dead_bug crunch_machine band_pallof | leg_raise hollow_hold reverse_crunch lying_leg_raise crunch suitcase_carry_db kb_rack_carry woodchop_high_cable woodchop_low_cable crunch_db plate_crunch | ab_wheel_standing toes_to_bar dragon_flag l_sit trx_plank trx_knee_tuck ball_plank ball_crunch bicycle_crunch russian_twist_bw side_bend_db landmine_rotation torso_rotation_machine band_woodchop woodchop_db | flutter_kick heel_touch plank_shoulder_tap ball_pass ball_knee_tuck mb_russian_twist russian_twist_db plate_russian_twist mountain_climber situp v_up mb_rot_throw ball_pike trx_pike | incline_plank_table standing_knee_elbow',
+    F: 'plank hanging_knee_raise ab_wheel_knees pallof_press_cable | suitcase_carry_db kb_rack_carry side_plank crunch_cable | dead_bug crunch_machine band_pallof leg_raise hollow_hold reverse_crunch lying_leg_raise crunch woodchop_high_cable woodchop_low_cable crunch_db plate_crunch | ab_wheel_standing toes_to_bar dragon_flag l_sit trx_plank trx_knee_tuck ball_plank ball_crunch bicycle_crunch russian_twist_bw side_bend_db landmine_rotation torso_rotation_machine band_woodchop woodchop_db | incline_plank_table standing_knee_elbow',
+    P: 'plank dead_bug pallof_press_cable | side_plank crunch_cable crunch_machine band_pallof hanging_knee_raise | crunch reverse_crunch lying_leg_raise ball_plank ball_crunch suitcase_carry_db | ab_wheel_knees hollow_hold bicycle_crunch trx_plank woodchop_high_cable woodchop_low_cable band_woodchop crunch_db plate_crunch | leg_raise kb_rack_carry russian_twist_bw side_bend_db torso_rotation_machine landmine_rotation woodchop_db | flutter_kick heel_touch plank_shoulder_tap ball_pass ball_knee_tuck mb_russian_twist russian_twist_db plate_russian_twist mountain_climber situp v_up | incline_plank_table standing_knee_elbow',
+    C: 'dead_bug plank pallof_press_cable | side_plank band_pallof crunch_machine crunch_cable | ball_plank crunch reverse_crunch lying_leg_raise | suitcase_carry_db ball_crunch | incline_plank_table standing_knee_elbow',
     // 65+: anti-rotación y anti-extensión; nada de flexión ni rotación de columna con carga (§E.5; 05 §7.4; D-01)
-    M: 'pallof_press_cable band_pallof | suitcase_carry_db | dead_bug plank side_plank | ball_plank',
+    M: 'pallof_press_cable band_pallof | suitcase_carry_db | incline_plank_table | dead_bug plank side_plank | ball_plank',
   },
   // Potencia (solo con «explosivos», I/A): saltos sin carga axial, 3-5 repeticiones rápidas (05 §3.2; D-14). Nunca wall ball, thruster ni burpee.
   PW: { IA: 'box_jump jump_squat | skater_jump jump_lunge tuck_jump' },
@@ -9667,7 +9929,7 @@ const _generador = (function () {
 // mucho (J-23) · nota de dominadas (J-21)
 // v10 (paso 6, textos): el «En lugar de…» con su motivo real (J-19) y los días ligeros marcados para el texto de repeticiones (J-17)
 
-const GEN_VERSION = 10;   // (v11 y v12 no la suben: la semilla de los perfiles de siempre no cambia; v12 = D10, enfoque «más glúteo»)
+const GEN_VERSION = 11;   // (v11 y v12 no la subieron: la semilla de los perfiles de siempre no cambiaba; v12 = D10, enfoque «más glúteo»). 11 = E14a: catálogo con §K.3 y equilibrio con ejercicios
 const CARGA_MANOS = ['mancuernas', 'kettlebell', 'barra', 'barraz', 'disco'];   // v7 (D-02): sin mano libre para apoyarse
 const LV = { P0: 0, P: 1, I: 2, A: 3 };
 
@@ -11440,15 +11702,27 @@ return function (K, OPT) {
     return nm + ' — ' + joinY(gs);
   }
   const joinY = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1];
+  // E14a (§K.3): el bloque de equilibrio con ejercicios del catálogo. 3 min: a una pierna y talones y puntas; 5: a una pierna, pasos en
+  // línea y girando la cabeza; 8: los cuatro (talones y puntas para empezar). min = su parte del bloque (suman los minutos del bloque).
+  const BAL_SEQ = { 3: [['balance_single_leg', 2, '20s', 1.5], ['balance_heel_toe', 2, 12, 1.5]],
+    5: [['balance_single_leg', 2, '20s', 2], ['balance_tandem_walk', 2, 10, 1.5], ['balance_head_turns', 2, '20s', 1.5]],
+    8: [['balance_heel_toe', 2, 12, 1.5], ['balance_single_leg', 2, '30s', 2.5], ['balance_tandem_walk', 3, 10, 2], ['balance_head_turns', 2, '20s', 2]] };
+  function balanceRows(t) {
+    const m = t.balance.min, seq = BAL_SEQ[m] || BAL_SEQ[m >= 8 ? 8 : m >= 5 ? 5 : 3];
+    return seq.filter(([id]) => BY.has('lib_' + id)).map(([id, s, r], i, arr) => {
+      const L = BY.get('lib_' + id), share = arr[i][3];
+      const nota = [i === 0 ? 'equilibrio · junto a una pared o una silla' : null, L.u ? 'por lado' : null, i === arr.length - 1 ? 'Cuando te salgan fáciles, toca la pared solo con un dedo.' : null].filter(Boolean).join(' · ');
+      return { lib: L.id, n: L.n, series: s, reps: typeof r === 'string' ? parseInt(r) + ' s' : String(r), r, descanso_s: 15, kind: 'bal', min: share, pat: L.pat, mat: L.mat, u: !!L.u, nota };
+    });
+  }
   function finish(st, tried) {
     const { T, P, inp } = st, letters = 'ABCDEF', days = {}, det = [];
     T.forEach((t, i) => {
       const k = letters[i], ex = [], rows = [];
       if (t.warm) { ex.push({ lib: t.warm.lib, s: 1, r: t.warm.min + ' min', note: t.warm.nota }); rows.push({ lib: t.warm.lib, n: BY.get(t.warm.lib).n, series: 1, reps: t.warm.min + ' min', descanso_s: null, nota: 'calentamiento' + (t.warm.nota ? ' · ' + t.warm.nota : ''), kind: 'warm', min: t.warm.min }); }
-      // v7 (C-09): bloque de equilibrio de 5-8 min con 3 ejercicios que progresan, siempre junto a una pared o una silla (texto hasta que
-      // existan en el catálogo, §K.3)
-      if (t.balance) rows.push({ lib: null, n: 'Equilibrio', series: null, reps: t.balance.min + ' min', descanso_s: null, kind: 'bal', min: t.balance.min,
-        nota: `${t.balance.min} min de equilibrio, junto a una pared o una silla: 1) de pie sobre una pierna, ${t.balance.min >= 8 ? '30' : '20'} s por lado; 2) pasos en línea, talón con punta, ${t.balance.min >= 8 ? '3' : '2'} idas y vueltas; 3) sobre una pierna girando la cabeza despacio, 20 s por lado. Cuando te salgan fáciles, toca la pared solo con un dedo.` });
+      // v7 (C-09): bloque de equilibrio de 5-8 min con ejercicios que progresan, siempre junto a una pared o una silla. E14a (§K.3): con los
+      // del catálogo (patrón «bal»: no cuentan volumen y el Coach los registra); antes era una fila de texto
+      if (t.balance) for (const x of balanceRows(t)) { ex.push({ lib: x.lib, s: x.series, r: x.r, note: x.nota }); rows.push(x); }
       for (const h of (t.seq || sessionSeq(t, st))) {
         const L = BY.get(h.x.lib), x = h.x; ex.push({ lib: L.id, s: x.s, r: x.r, note: x.notes.filter(n => !/^sin rango/.test(n)).join(' ') || undefined });
         const rr = repRange(L, x.r);
@@ -11851,6 +12125,8 @@ const _seguridad = (function () {
 // no usan nada interno del generador. Uso: const S = require('./seguridad.js')(K, G, X); S(res, inp) → { clave: detalle } (vacío = bien)
 // Fuentes de cada regla: 41-revision-ciencia.md (C-xx), 43-revision-requisitos-ux.md (I-xx) y 44-diagnostico-algoritmo.md (D-xx).
 return function (K, G, X) {
+  // E14a: el bloque de equilibrio son varias filas («bal», cada una con su parte de minutos)
+  const balMinOf = d => d.rows.filter(r => r.kind === 'bal').reduce((t, r) => t + (+r.min || 0), 0);
   const SPINE = K.TAGS.spine, FLEX = K.TAGS.spineFlex;
   const CARGA = ['mancuernas', 'kettlebell', 'barra', 'barraz', 'disco'];          // en las manos: no queda una libre para apoyarse
   const APOYO_MAT = ['corporal', 'maquina', 'smith', 'trx', 'step', 'banda'];      // «con apoyo»: sin carga en las manos o guiado
@@ -11887,8 +12163,8 @@ return function (K, G, X) {
       // C-09: bloque de equilibrio de 5 min o más tras el calentamiento; en el modo corto (15-20 min), «en casa» con su aviso
       if (m.corto) { if (!m.warn.some(w => w.c === 'equilibrio_casa')) bump('equilibrio', 'modo corto sin aviso'); }
       // (65+: 5 min o más; «Prefiero no decirlo» con 30 min: 3, porque C-14 pide el bloque sin fijar los minutos)
-      else { const minB = P.mayor || inp.min >= 45 ? 5 : 3; days.forEach(d => { const iw = d.rows.findIndex(r => r.kind === 'warm'), ib = d.rows.findIndex(r => r.kind === 'bal'), b = d.rows[ib];
-        if (!b || b.min < minB || (iw >= 0 && ib < iw)) bump('equilibrio', d.letra + ':' + (b ? b.min : 0) + ' min'); }); }
+      else { const minB = P.mayor || inp.min >= 45 ? 5 : 3; days.forEach(d => { const iw = d.rows.findIndex(r => r.kind === 'warm'), ib = d.rows.findIndex(r => r.kind === 'bal'), bm = balMinOf(d);
+        if (ib < 0 || bm < minB - 1e-9 || (iw >= 0 && ib < iw)) bump('equilibrio', d.letra + ':' + bm + ' min'); }); }
     }
     // C-07: 65+ sin barra libre en el hueco 1 los primeros ciclos
     if (P.mayor) for (const { d, r, L } of str) if (r.prio === 1 && ['barra', 'barraz'].includes(L.mat)) bump('mayor_barra_principal', d.letra + ':' + L.id);
@@ -11944,7 +12220,7 @@ return function (K, G, X) {
     if (zs.muneca === 'ahora') for (const { d, r, L } of str) if (L.pat === 'push_h' && L.mat === 'corporal' && !/puños/.test(r.nota || '')) bump('muneca_ahora_palma', d.letra + ':' + L.id);
     // J-07: huesos frágiles: equilibrio (5 min tras el calentamiento con 30 min o más; con menos, el aviso «en casa»), extensores y remos con apoyo
     if (P.huesos) {
-      if (inp.min >= 30 && !P.corto) days.forEach(d => { const iw = d.rows.findIndex(r => r.kind === 'warm'), ib = d.rows.findIndex(r => r.kind === 'bal'), b = d.rows[ib]; if (!b || b.min < (inp.min >= 45 ? 5 : 3) || (iw >= 0 && ib < iw)) bump('huesos_equilibrio', d.letra + ':' + (b ? b.min : 0)); });
+      if (inp.min >= 30 && !P.corto) days.forEach(d => { const iw = d.rows.findIndex(r => r.kind === 'warm'), ib = d.rows.findIndex(r => r.kind === 'bal'), bm = balMinOf(d); if (ib < 0 || bm < (inp.min >= 45 ? 5 : 3) - 1e-9 || (iw >= 0 && ib < iw)) bump('huesos_equilibrio', d.letra + ':' + bm); });
       else if (!m.warn.some(w => w.c === 'equilibrio_casa')) bump('huesos_equilibrio', 'sin aviso');
       for (const { d, L } of str) if (K.TAGS.remoSinApoyo.has(L.id)) bump('huesos_remo_sin_apoyo', d.letra + ':' + L.id);
       if (inp.min > 20 && !str.some(({ L }) => K.TAGS.extensores.has(L.id))) bump('huesos_extensores', 'ninguno');
@@ -11993,7 +12269,7 @@ return function (K, G, X) {
 };
 
 })();
-window.GymGen = {catalogo: _catalogo, menus: _menus, generador: _generador, textos: _textos, seguridad: _seguridad, UNI: ["lib_row_db","lib_lat_raise_cable","lib_curl_db_concentrated","lib_lunge_bb","lib_bulgarian_bb","lib_lunge_smith","lib_bulgarian_smith","lib_leg_press_single","lib_leg_curl_standing","lib_glute_kickback_machine","lib_leg_curl_cable","lib_glute_kickback_cable","lib_hip_abd_cable","lib_hip_add_cable","lib_bulgarian_squat_db","lib_split_squat_db","lib_lunge_db","lib_reverse_lunge_db","lib_walking_lunge_db","lib_lateral_lunge_db","lib_curtsy_lunge_db","lib_step_up_db","lib_single_leg_rdl_db","lib_calf_raise_single_db","lib_snatch_db","lib_kb_lunge","lib_kb_sl_rdl","lib_kb_thruster","lib_kb_clean","lib_kb_snatch","lib_pistol_squat","lib_bulgarian_bw","lib_cossack_squat","lib_reverse_lunge_bw","lib_forward_lunge_bw","lib_side_lunge_bw","lib_walking_lunge_bw","lib_curtsy_lunge_bw","lib_step_up_bw","lib_sl_rdl_bw","lib_glute_bridge_single","lib_hip_thrust_single","lib_donkey_kick","lib_fire_hydrant","lib_side_lying_abd","lib_copenhagen","lib_side_lying_add","lib_calf_raise_single","lib_jump_lunge","lib_skater_jump","lib_band_lunge","lib_band_glute_kickback","lib_miniband_kickback","lib_miniband_clamshell","lib_miniband_side_abduction","lib_miniband_fire_hydrant","lib_trx_pistol","lib_trx_lunge","lib_box_lateral_step_down","lib_pushup_archer","lib_meadows_row","lib_pulldown_machine_uni","lib_pulldown_one_arm","lib_row_cable_one_arm","lib_renegade_row_db","lib_kb_row","lib_landmine_press","lib_ext_rotation_cable","lib_kb_press","lib_kb_clean_press","lib_band_ext_rotation","lib_curl_cable_one_arm","lib_bayesian_curl_cable","lib_preacher_curl_db","lib_tricep_pushdown_one_arm","lib_tricep_kickback_cable","lib_kickback_db","lib_torso_rotation_machine","lib_woodchop_high_cable","lib_woodchop_low_cable","lib_pallof_press_cable","lib_side_bend_db","lib_woodchop_db","lib_suitcase_carry_db","lib_kb_windmill","lib_kb_turkish_getup","lib_dead_bug","lib_bird_dog","lib_side_plank","lib_band_pallof","lib_band_woodchop","lib_band_leg_ext","lib_mb_rot_throw","lib_clamshell"], VERSION: 10, REVISADO: false};
+window.GymGen = {catalogo: _catalogo, menus: _menus, generador: _generador, textos: _textos, seguridad: _seguridad, UNI: ["lib_row_db","lib_lat_raise_cable","lib_curl_db_concentrated","lib_lunge_bb","lib_bulgarian_bb","lib_lunge_smith","lib_bulgarian_smith","lib_leg_press_single","lib_leg_curl_standing","lib_glute_kickback_machine","lib_leg_curl_cable","lib_glute_kickback_cable","lib_hip_abd_cable","lib_hip_add_cable","lib_bulgarian_squat_db","lib_split_squat_db","lib_lunge_db","lib_reverse_lunge_db","lib_walking_lunge_db","lib_lateral_lunge_db","lib_curtsy_lunge_db","lib_step_up_db","lib_single_leg_rdl_db","lib_calf_raise_single_db","lib_snatch_db","lib_kb_lunge","lib_kb_sl_rdl","lib_kb_thruster","lib_kb_clean","lib_kb_snatch","lib_pistol_squat","lib_bulgarian_bw","lib_cossack_squat","lib_reverse_lunge_bw","lib_forward_lunge_bw","lib_side_lunge_bw","lib_walking_lunge_bw","lib_curtsy_lunge_bw","lib_step_up_bw","lib_sl_rdl_bw","lib_glute_bridge_single","lib_hip_thrust_single","lib_donkey_kick","lib_fire_hydrant","lib_side_lying_abd","lib_copenhagen","lib_side_lying_add","lib_calf_raise_single","lib_jump_lunge","lib_skater_jump","lib_band_lunge","lib_band_glute_kickback","lib_miniband_kickback","lib_miniband_clamshell","lib_miniband_side_abduction","lib_miniband_fire_hydrant","lib_trx_pistol","lib_trx_lunge","lib_box_lateral_step_down","lib_pushup_archer","lib_meadows_row","lib_pulldown_machine_uni","lib_pulldown_one_arm","lib_row_cable_one_arm","lib_renegade_row_db","lib_kb_row","lib_landmine_press","lib_ext_rotation_cable","lib_kb_press","lib_kb_clean_press","lib_band_ext_rotation","lib_curl_cable_one_arm","lib_bayesian_curl_cable","lib_preacher_curl_db","lib_tricep_pushdown_one_arm","lib_tricep_kickback_cable","lib_kickback_db","lib_torso_rotation_machine","lib_woodchop_high_cable","lib_woodchop_low_cable","lib_pallof_press_cable","lib_side_bend_db","lib_woodchop_db","lib_suitcase_carry_db","lib_kb_windmill","lib_kb_turkish_getup","lib_dead_bug","lib_bird_dog","lib_side_plank","lib_band_pallof","lib_band_woodchop","lib_band_leg_ext","lib_mb_rot_throw","lib_clamshell","lib_wall_lateral_raise_iso","lib_balance_single_leg","lib_balance_head_turns"], VERSION: 11, REVISADO: false};
 })();
 </script>
 <!-- GYM-GEN:END -->
@@ -12628,7 +12904,7 @@ function _sanitizeProposals(list){
     if(typeof p.short==='string'&&p.short)q.short=p.short.slice(0,120);
     if(typeof p.prio==='number'&&isFinite(p.prio))q.prio=p.prio;
     if(typeof p.sev==='number'&&isFinite(p.sev))q.sev=p.sev;
-    if(['fatigue','down','stagnant','flat','volume','legacy_up'].includes(p.basis))q.basis=p.basis;
+    if(['fatigue','down','stagnant','flat','volume','legacy_up','power'].includes(p.basis))q.basis=p.basis;
     if(typeof p.createdAt==='number'&&isFinite(p.createdAt))q.createdAt=p.createdAt;
     if(_isPlainObj(p.to)&&Number.isInteger(p.to.s)&&p.to.s>=1&&p.to.s<=10&&Number.isInteger(p.to.r)&&p.to.r>=1&&p.to.r<=30)q.to={s:p.to.s,r:p.to.r};
     out.push(q);
@@ -13103,10 +13379,10 @@ const PAT_LBL={squat:'Sentadilla',lunge:'Zancada',knee_ext:'Extensión de rodill
   hip_ext:'Extensión de cadera',hip_abd:'Abducción',hip_add:'Aducción',calf:'Gemelo',push_h:'Empuje horizontal',fly:'Aperturas',pull_v:'Jalón vertical',
   pull_h:'Remo',rear:'Hombro posterior',raise:'Elevación lateral',raise_f:'Elevación frontal',push_v:'Empuje vertical',shrug:'Encogimiento',
   curl:'Curl de bíceps',tri:'Extensión de tríceps',forearm:'Antebrazo',core:'Flexión de tronco',core_iso:'Estabilidad',core_rot:'Rotación de tronco',
-  carry:'Acarreo',plyo:'Pliometría',full:'Cuerpo completo',cardio:'Cardio'};
+  carry:'Acarreo',plyo:'Pliometría',full:'Cuerpo completo',bal:'Equilibrio',cardio:'Cardio'};
 const PAT_NEAR={squat:['knee_ext','lunge'],knee_ext:['squat'],knee_flex:['hinge'],hinge:['knee_flex','hip_ext'],push_h:['fly'],fly:['push_h'],push_v:['raise','push_h'],
   raise:['push_v','raise_f'],raise_f:['raise','push_v'],rear:['pull_h','raise'],pull_v:['pull_h'],pull_h:['pull_v','rear'],core:['core_iso'],core_iso:['core','carry'],
-  lunge:['squat','hinge'],hip_ext:['hinge'],shrug:['pull_h'],forearm:['curl'],core_rot:['core','core_iso'],carry:['core_iso'],plyo:['squat','lunge'],full:['squat','hinge']};
+  lunge:['squat','hinge'],hip_ext:['hinge'],shrug:['pull_h'],forearm:['curl'],core_rot:['core','core_iso'],carry:['core_iso'],plyo:['squat','lunge'],full:['squat','hinge'],bal:[]};
 // Músculos (las 21 claves del motor GymAnim, sin lado) y su nombre (fichas y búsqueda de los que no tienen animación)
 const MUS_LBL={quads:'Cuádriceps',hams:'Isquiotibiales',adductors:'Aductores',calves:'Gemelos',biceps:'Bíceps',triceps:'Tríceps',
   frontdelts:'Deltoides ant.',sidedelts:'Deltoides lateral',reardelts:'Deltoides post.',forearms:'Antebrazo',glutes:'Glúteos',abductors:'Glúteo medio',
@@ -13510,6 +13786,19 @@ lib_cardio_air_bike|Cardio — bicicleta de aire|🚴|Bicicleta de aire|cardio|1
 lib_cardio_rower|Cardio — máquina de remo|🚣|Máquina de remo|cardio|1|15 min|c|cardio|g|1||cardio|quads:1,glutes:.7,lats:.7,midback:.6,hams:.4|cardio_ski_erg,cardio_air_bike,cardio_elliptical,cardio_bike|también tira con los dorsales y core~cuerpo completo sin impacto||remo ergómetro,remoergómetro,ergómetro de remo,remo indoor,rower,rowing|Empuja primero con piernas, luego cadera y al final brazos. Regresa en orden inverso. Espalda recta, no jales solo con los brazos.
 lib_cardio_stair_machine|Cardio — escaladora|🦶|Escaladora|cardio|1|15 min|c|cardio|g|2||cardio|quads:1,glutes:1,calves:.6,hams:.4|cardio_run,cardio_step,cardio_elliptical,cardio_spinning|caminata inclinada: glúteo en subida~step aeróbico: misma subida de escalón||stairmaster,simulador de escaleras,stepmill,escaleras|Paso completo, apoyando todo el pie. Torso erguido, sin colgarte de los pasamanos. Ritmo constante que puedas sostener.
 lib_cardio_ski_erg|Cardio — ergómetro de esquí|🔥|Ergómetro de esquí|cardio|1|10 min|c|cardio|g|2||cardio|lats:1,triceps:.6,abs:.6,glutes:.4,hams:.3|cardio_rower,cardio_air_bike,cardio_elliptical,cardio_shadow_boxing|tirón con dorsales, más pierna~intervalos duros con brazos y piernas||ski erg,skierg,máquina de esquí,simulador de esquí|Brazos arriba y tira hacia abajo con dorsales y abdomen. Flexiona cadera y rodillas al bajar. Vuelve arriba estirándote.
+lib_towel_door_row|Remo con toalla en el marco de una puerta|🚣|Puerta y toalla|espalda|3|12|r|corporal|c|1|C|pull_h|midback:1,lats:.7,biceps:.5,reardelts:.4|inverted_row_table,band_row,backpack_row,trx_row|bajo una mesa: más carga de tu peso~banda: mismo remo con resistencia|inverted_row_table|remo con toalla en la puerta,remo en la puerta,door row,remo con toalla|Con la puerta cerrada y bien sujeta, pasa una toalla resistente por el pomo y agarra un extremo con cada mano. Pies cerca de la puerta, échate atrás con los brazos estirados y el cuerpo recto. Lleva el pecho hacia la puerta juntando las escápulas.
+lib_towel_pulldown_floor|Jalón en el suelo con toalla|⬇️|Toalla (suelo)|espalda|3|12|r|corporal|a|1|C|pull_v|lats:1,midback:.6,reardelts:.4,biceps:.3,lowback:.3|band_pulldown,lat_pulldown,pullup_negative,towel_door_row|banda: jalón con resistencia~en máquina: carga que puedes medir|pullup_negative|jalón tumbado con toalla,jalón boca abajo,towel pulldown,jalón sin material|Boca abajo, brazos estirados por delante de la cabeza y una toalla tensa entre las manos. Despega un poco los brazos y el pecho y baja los codos hacia las costillas, tirando de la toalla hacia fuera. Vuelve despacio.
+lib_towel_curl_iso|Curl de bíceps con toalla|💪|Toalla|biceps|3|30s|t|corporal|a|1||curl|biceps:1,forearms:.4|band_curl,curl_db,hammer_curl,trx_curl|banda: curl con recorrido~mancuernas: carga que puedes medir||curl con toalla,curl isométrico con toalla,towel curl,bíceps sin material|De pie, pisa el centro de una toalla con un pie y agarra un extremo con cada mano. Codos pegados y doblados a 90°: tira hacia arriba con fuerza mientras el pie la sujeta, sin moverte. Aguanta respirando.
+lib_wall_lateral_raise_iso|Elevación lateral isométrica en la pared|💪|Pared|hombros|3|30s|t|corporal|a|1|U|raise|sidedelts:1,traps:.3,frontdelts:.2|band_lateral_raise,lat_raise_db,lat_raise_cable,lat_raise_machine|banda: elevación con recorrido~mancuernas: carga que puedes medir||elevación lateral en la pared,isométrico de hombro en la pared,wall lateral raise,abducción contra la pared|De pie y de lado junto a una pared, con el brazo estirado pegado al cuerpo. Empuja la pared con el dorso de la muñeca como si quisieras subir el brazo hacia fuera, sin encoger el hombro. Aguanta y cambia de lado.
+lib_pike_pushup_knee|Flexiones pike de rodillas|🤸|Peso corporal (suelo)|hombros|3|10|r|corporal|a|1|C|push_v|frontdelts:1,triceps:.6,sidedelts:.35,upperpecs:.35|pike_pushup,band_shoulder_press,shoulder_press_db,shoulder_press_machine|de puntillas: más difícil~banda: press de hombros de pie|pike_pushup|pike de rodillas,flexiones de hombro de rodillas,kneeling pike push-up,pike push-up fácil|De rodillas, con las manos en el suelo algo por delante y la cadera alta. Dobla los codos y baja la cabeza hacia el suelo entre las manos. Empuja para volver.
+lib_heel_bridge_chair|Puente con talones en una silla|⬆️|Silla o banco (suelo)|piernas|3|12|bw|corporal|a|1|L|knee_flex|hams:1,glutes:.7,lowback:.2|glute_bridge,slider_leg_curl,ball_leg_curl,leg_curl|en el suelo: más glúteo y menos isquio~deslizando los talones: más isquio|slider_leg_curl|puente con pies en la silla,puente de isquios en silla,puente con talones elevados,elevated glute bridge|Boca arriba, con los talones sobre el asiento de una silla y las rodillas algo dobladas. Empuja con los talones y sube la cadera hasta alinear hombros, cadera y rodillas. Baja despacio.
+lib_incline_plank_table|Plancha inclinada en una mesa|💪|Mesa firme o encimera|core|3|30s|t|corporal|c|1||core_iso|abs:1,obliques:.5,frontdelts:.3,glutes:.3|plank,dead_bug,band_pallof,bird_dog|en el suelo: más difícil~boca arriba: abdomen sin cargar los hombros|plank|plancha en la encimera,plancha de pie,plancha inclinada,plancha con manos elevadas|Manos en el borde de una mesa firme o una encimera, brazos estirados y pies atrás hasta que el cuerpo quede recto. Aprieta abdomen y glúteos sin hundir la cadera. Aguanta respirando.
+lib_standing_knee_elbow|Rodilla al codo de pie|💪||core|3|16|r|corporal|a|1||core_rot|obliques:1,abs:.7|bicycle_crunch,band_pallof,dead_bug,plank|en el suelo: mismo giro con más recorrido~banda: antirrotación de pie||rodilla al codo,crunch de pie,standing knee to elbow,abdominales de pie|De pie, con las manos detrás de la cabeza sin tirar del cuello. Sube una rodilla y llévala hacia el codo contrario girando el tronco. Alterna los lados con control.
+lib_balance_single_leg|Apoyo a una pierna junto a la pared|⚖️|Pared o silla|piernas|2|20s|t|corporal|a|1|U|bal|abductors:.4,glutes:.3,calves:.3|balance_tandem_walk,balance_heel_toe,balance_head_turns|pasos en línea: equilibrio en movimiento~talones y puntas: tobillos con apoyo|balance_head_turns|equilibrio a una pierna,pata coja,single leg stance,de pie sobre una pierna|De lado junto a una pared, con la punta de los dedos en ella. Levanta un pie y aguanta sobre la otra pierna con la rodilla suave y la mirada al frente. Cuando te salga fácil, toca la pared solo con un dedo.
+lib_balance_tandem_walk|Pasos en línea talón-punta junto a la pared|⚖️|Pared|piernas|2|10|r|corporal|a|1||bal|abductors:.3,calves:.3|balance_single_leg,balance_heel_toe|a una pierna: equilibrio quieto~talones y puntas: tobillos con apoyo||caminar en línea,tandem walk,talón con punta,paso de funambulista|Junto a una pared, camina poniendo el talón justo delante de la punta del otro pie. Mirada al frente y una mano cerca de la pared por si la necesitas. Da 10 pasos, gira y vuelve.
+lib_balance_head_turns|Apoyo a una pierna girando la cabeza|⚖️|Pared o silla|piernas|2|20s|t|corporal|a|1|U|bal|abductors:.4,glutes:.3,calves:.3|balance_single_leg,balance_tandem_walk|sin girar la cabeza: más fácil~pasos en línea: en movimiento||equilibrio girando la cabeza,pata coja con giros de cabeza,single leg stance head turns|Junto a una pared, aguanta sobre una pierna y gira la cabeza despacio a un lado y al otro sin perder el equilibrio. Toca la pared si lo necesitas.
+lib_balance_heel_toe|Talones y puntas con apoyo|⚖️|Silla o pared|piernas|2|12|r|corporal|a|1||bal|calves:.4|calf_raise_bw,balance_single_leg|elevación de talones: más gemelo~a una pierna: más equilibrio|balance_single_leg|puntillas y talones,balanceo talón punta,heel toe raises,tobillos con apoyo|De pie, con las manos en el respaldo de una silla. Sube despacio de puntillas, baja y luego levanta las puntas apoyándote en los talones. Sin prisa y sin soltar el apoyo.
+lib_chair_stand_fast|Levantarse de la silla rápido|⚡|Silla|piernas|3|8|r|corporal|a|1|C|squat|quads:1,glutes:.7,adductors:.3|chair_squat,air_squat|despacio: fuerza sin prisa~sin silla: sentadilla completa||sentarse y levantarse rápido,sit to stand,levantarse de la silla,potencia en la silla|Sentado en el borde de una silla firme, con los pies apoyados y los brazos cruzados. Levántate lo más rápido que puedas y siéntate despacio, controlando la bajada.
 `;
 // LIB-ROWS:END
 // Objetivo de cada tipo: reps «12» o «8-12» · tiempo «30s» · distancia «20m» · cardio «10 min»
@@ -13685,7 +13974,8 @@ function _sanitizePlanMeta(o,plan){
     vuelta:_oneOf(o.vuelta,PM_VUELTA),rampa:null,effort:null,rest:null,vol:{},zone:{},modes:[],level:_oneOf(o.level,PROF_LEVELS),
     corto:_bool(o.corto),seed:_num(o.seed,0,4294967295)||0,alt:_num(o.alt,0,99)||0,sig:typeof o.sig==='string'?o.sig.slice(0,40):'',
     why:_sanitizeCodes(o.why),warn:_sanitizeCodes(o.warn),base:_sanitizePlanCopy(o.base,null),edited:_bool(o.edited),
-    balMin:_num(o.balMin,0,15)||0,apx:byDid(o.apx,v=>[0,60,150,240].includes(v)),est:byDid(o.est,v=>_num(v,1,300)!=null)}; // (E5)
+    balMin:_num(o.balMin,0,15)||0,apx:byDid(o.apx,v=>[0,60,150,240].includes(v)),est:byDid(o.est,v=>_num(v,1,300)!=null), // (E5)
+    pot:_bool(o.pot)}; // (E14a) potencia para 65 o más (§G.5)
   if(_isPlainObj(o.fz2)){const g=didList(o.fz2.gym,6),c=didList(o.fz2.casa,6);if(g&&c)m.fz2={gym:g,casa:c};}
   if(_isPlainObj(o.rampa))m.rampa={series:_num(o.rampa.series,1,6)||3,reps:typeof o.rampa.reps==='string'?o.rampa.reps.slice(0,10):'8-12',rir:_num(o.rampa.rir,0,5)};
   if(_isPlainObj(o.effort))m.effort={obj:_oneOf(o.effort.obj,PM_EFFORT)||'justo',rir:_num(o.effort.rir,0,5),subidas:_oneOf(o.effort.subidas,PM_SUBIDAS)||'normal'};
@@ -13854,6 +14144,7 @@ function _planDayMinutesOf(ex,o){
   for(const e of Array.isArray(ex)?ex:[]){
     if(!e||typeof e!=='object')continue;
     if(e.cardio||exLT(e)==='c'){sec+=(_cardioMin(e)||0)*60;continue;}
+    if(o.bal){const L=exLib(e);if(L&&L.pat==='bal')continue;} // (E14a) sus minutos son los del bloque de equilibrio
     const first=!firstDone&&isCompoundEx(e)&&exLT(e)==='w';if(first)firstDone=true;
     sec+=_planExSecs(e,o,first);
   }
@@ -14474,7 +14765,9 @@ function _obWeekLine(g){
 function _obRowHtml(d,row,i){
   const L=LIB_BY_ID.get(row.lib);
   if(row.kind==='warm'||row.kind==='cardio')return`<div class="ob-row ob-row-c"><span class="ob-ri" aria-hidden="true">${row.kind==='warm'?'🚶':'🏃'}</span><span class="ob-rt"><b>${(n=>row.kind==='warm'?(/^calentamiento/i.test(n)?n:'Calentamiento — '+n):(/^cardio/i.test(n)?n.replace(/^Cardio\b/,'Cardio final'):'Cardio final — '+n))(esc(L?L.n:row.n))}</b><span class="nw">${esc(row.reps)}</span></span></div>`;
-  if(row.kind==='bal')return`<div class="ob-row ob-row-c"><span class="ob-ri" aria-hidden="true">⚖️</span><span class="ob-rt"><b>Equilibrio · <span class="nw">${esc(row.reps)}</span></b><span>${esc(row.nota||'')}</span></span></div>`;
+  if(row.kind==='bal'){ // (E14a) ejercicios del catálogo: el primero lleva la cabecera del bloque y el último, cómo progresar
+    const bs=d.rows.filter(x=>x.kind==='bal'),first=bs[0]===row,last=bs[bs.length-1]===row,min=bs.reduce((t,x)=>t+(+x.min||0),0),u=!!(L&&/U/.test(L.x||''));
+    return`${first?`<div class="ob-bal-h"><span aria-hidden="true">⚖️</span> Equilibrio · ${_nwX(plural(Math.round(min),'minuto'))}, junto a una pared o una silla</div>`:''}<div class="ob-row ob-row-c ob-row-bal" data-lib="${esc(row.lib||'')}"><span class="ob-ri" aria-hidden="true">${L?exIconHtml(L):'⚖️'}</span><span class="ob-rt"><b>${esc(L?L.n:row.n)}</b><span>${_nwX(`${row.series} × ${esc(row.reps)}`)}${u?' por lado':''}</span>${last?'<span class="ob-rwhy">Cuando te salgan fáciles, toca la pared solo con un dedo.</span>':''}</span></div>`;}
   const rest=row.descanso_s?fmtClock(row.descanso_s):'',k=d.letra+':'+i,open=_ob.why===k;
   const cuid=row.cuidado?'<em class="ob-cuid">Con cuidado</em>':'';
   return`<div class="ob-row" data-lib="${esc(row.lib)}"><span class="ob-ri" aria-hidden="true">${L?exIconHtml(L):''}</span><span class="ob-rt"><b>${esc(L?L.n:row.n)}</b>
@@ -14878,18 +15171,20 @@ function _genRestCat(g,row,P){ // como restOf del generador
 function genCandidate(g){
   const r=g.res,P=g.E.G.effective(g.inp),days={},apx={},est={};let bw=null;
   r.det.forEach(d=>{
-    const rows=d.rows.filter(x=>x.kind!=='bal'),dex=(r.days[d.letra]&&r.days[d.letra].ex)||[];
+    const rows=d.rows,dex=(r.days[d.letra]&&r.days[d.letra].ex)||[]; // (E14a) el equilibrio, con sus ejercicios (antes, una fila de texto)
     const fr=rows.find(x=>x.kind==='str'&&x.c&&(LIB_K.BY.get(x.lib)||{}).lt==='w');
     days[d.letra]={label:r.days[d.letra].label,focus:r.days[d.letra].focus,ex:rows.map((x,i)=>{
       const e=genRowToEx(x);if(!e)return null;
       const cat=x.kind==='str'?_genRestCat(g,x,P):null;if(cat==='bw'&&bw==null)bw=x.descanso_s;
-      return{lib:x.lib,s:e.s,r:e.r,cardio:!!e.cardio,note:String((dex[i]&&dex[i].note)||'').trim(),rest:x.kind==='str'?x.descanso_s:null,cat,pot:x.role==='potencia'};
+      return{lib:x.lib,s:e.s,r:e.r,cardio:!!e.cardio,note:String((dex[i]&&dex[i].note)||'').trim(),rest:x.kind==='str'||x.kind==='bal'?x.descanso_s:null,cat,pot:x.role==='potencia'};
     }).filter(Boolean)};
     apx[d.letra]=fr?genApproachSecs(g,fr):150;est[d.letra]=d.minExact;
   });
   const R=r.meta.rest||{},ag=g.inp.goal==='aguante';
   if(bw==null&&R.iso)bw=(ag?Math.max(60,R.iso):Math.min(90,Math.max(75,R.iso)))+(P.prud||P.mayor?15:0);
-  return{v:1,days,weeklyTarget:r.weeklyTarget,daysOther:g.inp.daysOther||0,meta:r.meta,apx,est,balMin:r.meta.balMin||0,rest:Object.assign({},R,bw!=null?{bw}:{}),
+  // (E14a, §G.5) 65 o más sin rodilla, cadera ni «Otra zona»: al cerrar el primer ciclo, el Coach propone un ejercicio de potencia
+  const pot=!!(P.mayor&&!['rodilla','cadera','otra'].some(z=>g.inp.zones&&g.inp.zones[z]));
+  return{v:1,days,weeklyTarget:r.weeklyTarget,daysOther:g.inp.daysOther||0,meta:r.meta,apx,est,balMin:r.meta.balMin||0,pot,rest:Object.assign({},R,bw!=null?{bw}:{}),
     reparto:r.meta.reparto==='dias'?'dias':'recomendado',ok:!!r.ok};
 }
 // Sin consentimiento de salud no queda rastro de la zona (§I.2): fuera las notas que la nombran y los porqués y avisos con zona
@@ -14914,7 +15209,7 @@ function _genPlanMeta(c,np){
     rampa:m.rampa?{series:m.rampa.series||3,reps:m.rampa.reps||'8-12',rir:rir(m.rampa.rir)}:null,
     effort:m.effort?{obj:m.effort.obj,rir:rir(m.effort.rir),subidas:m.effort.subidas}:null,rest:c.rest,vol,zone:_mmZoneOf(np,c.weeklyTarget,vol),
     modes:m.modes||[],level:m.level,corto:!!m.corto,seed:m.seed,alt:m.alt||0,why:m.why,warn:m.warn,base:JSON.parse(JSON.stringify(np)),edited:false,
-    balMin:c.balMin||0,apx:byL(c.apx),est:byL(c.est)};
+    balMin:c.balMin||0,apx:byL(c.apx),est:byL(c.est),pot:!!c.pot};
   return _sanitizePlanMeta(pm,np);
 }
 // Id sin historial y único de verdad (42 R21): ni en la rutina nueva ni en S.strength; nunca a1…c7 (los de fábrica)
@@ -19069,13 +19364,24 @@ function _rampProposals(){
       description:`Has cerrado tu primer ciclo con esta rutina: ya puedes pasar a ${s+1} series${pm.rampa.reps?` de ${pm.rampa.reps} repeticiones`:''}${pm.rampa.rir!=null?`, dejando unas ${pm.rampa.rir} en la recámara`:''}. Nunca al límite.`});}));
   return out;
 }
+// (E14a, §G.5) Con 65 o más y sin rodilla, cadera ni «Otra zona» (planMeta.pot): al cerrar el primer ciclo con la rutina,
+// «Levantarse de la silla rápido» en el primer día donde se pueda (una sola vez; nunca lo pone el generador)
+function _powerProposals(){
+  const pm=_isPlainObj(S.planMeta)?S.planMeta:null;if(!pm||!pm.pot)return[];
+  if((S.mesocycles||[]).some(m=>m&&+m.appliedAt>=pm.ts))return[]; // solo el primer ciclo
+  const L=LIB_BY_ID.get('lib_chair_stand_fast'),p=getPlan();if(!L||_planLibIds().has(L.id))return[];
+  const dk=liveDayKeys(p).find(k=>canDoHere(L,k));if(!dk)return[];
+  return[{id:'power_'+dk,type:'add_ex',basis:'power',prio:1,sev:0,ic:'⚡',tag:'Primer ciclo',dayKey:dk,libExId:L.id,createdAt:Date.now(),
+    title:'¿Añadimos un ejercicio de potencia?',diff:`+ ${L.n} · ${L.s}×${_tgtShort(L)}`,short:`añadir ${L.n}`,
+    description:`Has cerrado tu primer ciclo. A partir de los 65, ganar rapidez ayuda a levantarte, subir escaleras o reaccionar a un tropiezo: «${L.n}» al empezar el ${p[dk].label}, ${L.s} series de ${L.r}, rápido al subir y despacio al bajar.`}];
+}
 function coach_applyRecommendationsConfirmed(){
   const cycle=coach_cycleData();
   const an=coach_analyze();
   const insights=coach_generateInsights(an,[]);
 
   // Propuestas reales (todas, ordenadas por prioridad): las 3 primeras activas, el resto en reserva
-  const proposals=_rampProposals().concat(coach_generateProposals(cycle,an)); // (E6) la rampa del primer ciclo, delante
+  const proposals=_rampProposals().concat(_powerProposals(),coach_generateProposals(cycle,an)); // (E6) la rampa del primer ciclo, delante; (E14a) la potencia
   S.pendingCoachProposals=_sanitizeProposals(proposals);
   const nAct=proposals.filter(p=>!p.reserve).length,nRes=proposals.length-nAct;
 
@@ -21410,6 +21716,7 @@ const _mmMusCache=new Map();
 function mmExMuscles(ex){
   if(!ex||ex.cardio||exLT(ex)==='c')return null;
   const L=exLib(ex),key=L?'L:'+L.id:'A:'+exAnimKey(ex);
+  if(L&&L.pat==='bal')return null; // (E14a) el equilibrio no cuenta volumen
   if(_mmMusCache.has(key))return _mmMusCache.get(key);
   let src=L?L.mus:null;
   if(!L){const k=key.slice(2),A=LIB_BY_ID.get(k);if(k&&!(A&&A.cardio)&&typeof GymAnim!=='undefined'){const sp=GymAnim.get(k);src=sp&&sp.muscles;}}
@@ -24955,7 +25262,7 @@ const MAT_SECTIONS=[
   {k:'bandas',t:'Bandas y accesorios',items:[{m:'banda',l:'Bandas elásticas'},{a:'anclaje',ic:'🚪',l:'Anclaje de puerta',d:'Una pieza en la puerta para enganchar la banda'},{m:'minibanda'},
     {m:'trx',d:'Cintas o anillas para colgar de una puerta o un soporte'},{a:'anillas',ic:'⭕',l:'Anillas'},{m:'fitball',d:'Pelota grande de ejercicio'},{m:'rueda'},{m:'comba'},{m:'step'},{m:'otro',l:'Otro material'}]},
   {k:'casa',t:'Cosas de casa',home:1,items:[{a:'silla',ic:'🪑',l:'Silla o banco bajo'},{a:'pared',ic:'🧱',l:'Pared'},{a:'mesa',ic:'🍽️',l:'Mesa firme',d:'Para el remo bajo una mesa'},
-    {a:'puerta',ic:'🚪',l:'Puerta que cierra bien'},{a:'escalon',ic:'🪜',l:'Escalón'}]},
+    {a:'puerta',ic:'🚪',l:'Puerta que cierra bien',d:'Para el remo con toalla'},{a:'escalon',ic:'🪜',l:'Escalón'}]},
   {k:'poleas',t:'Poleas y Smith',gym:1,items:[{m:'polea'},{a:'poleas2',ic:'⚡',l:'Dos poleas enfrentadas'},{m:'smith',d:'Barra guiada en raíles (multipower)'}]},
   {k:'maq',t:'Máquinas',gym:1,items:MACH_FAMS.map(f=>({f}))},
   {k:'cardio',t:'Cardio',gym:1,items:CARD_KINDS.map(c=>({c}))},
@@ -25135,7 +25442,7 @@ const SUB_BY_ID={};Object.keys(ZONE_SUBS).forEach(z=>ZONE_SUBS[z].forEach(s=>{s.
 const MM2SUB={};MM_GROUPS.forEach(g=>{const s=SUB_BY_ID[g.id];MM2SUB[g.id]=[g.lib,s&&s.z===g.lib?g.id:null];});
 // Familias (encabezados de la lista de una zona), por patrón de movimiento y en este orden. «Otros» debe quedar vacía.
 const LIB_FAM=[['squat','Sentadillas y prensa'],['lunge','Zancadas y subidas'],['hinge hip_ext','Peso muerto y puentes'],['knee_ext','Extensión de rodilla'],
-  ['knee_flex','Curl femoral'],['hip_abd hip_add','Abducción y aducción'],['calf','Pantorrillas'],['push_h','Press de pecho y flexiones'],['fly','Aperturas'],
+  ['knee_flex','Curl femoral'],['hip_abd hip_add','Abducción y aducción'],['calf','Pantorrillas'],['bal','Equilibrio'],['push_h','Press de pecho y flexiones'],['fly','Aperturas'],
   ['push_v','Press de hombro'],['raise raise_f rear','Elevaciones y pájaros'],['pull_v','Jalones y dominadas'],['pull_h shrug','Remos'],['curl forearm','Curl y antebrazo'],
   ['tri','Tríceps'],['core','Crunch'],['core_iso','Planchas'],['core_rot','Rotaciones'],['full plyo carry','Cuerpo completo y saltos'],['cardio','Cardio']]
   .map(([p,h])=>({k:p.split(' ')[0],h,pats:p.split(' ')}));
@@ -26048,8 +26355,9 @@ function _applyProposalByData(p){
     const lib=LIB_BY_ID.get(p.libExId);
     if(!lib||!p.dayKey||!plan[p.dayKey])return{ok:false,drop:true,msg:'Esa propuesta ya no se puede aplicar'};
     if(_planLibIds().has(lib.id))return{ok:false,drop:true,msg:`${lib.n} ya está en tu rutina`};
-    const arr=plan[p.dayKey].ex;
-    if(arr.length&&arr[arr.length-1].cardio)arr.splice(arr.length-1,0,libExToEx(lib));else arr.push(libExToEx(lib));
+    const arr=plan[p.dayKey].ex,nx=libExToEx(lib);
+    if(p.basis==='power'){let i=0;while(i<arr.length&&arr[i]&&(arr[i].cardio||(exLib(arr[i])||{}).pat==='bal'))i++;arr.splice(i,0,nx);} // (E14a) al empezar, tras el calentamiento y el equilibrio
+    else if(arr.length&&arr[arr.length-1].cardio)arr.splice(arr.length-1,0,nx);else arr.push(nx);
   }else{
     return{ok:false,drop:true,msg:'Propuesta desconocida'};
   }
