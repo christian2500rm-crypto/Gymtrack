@@ -175,7 +175,7 @@ input{font-family:inherit}
 .wc-ld{width:6px;height:6px;border-radius:50%;background:color-mix(in srgb,var(--green) 55%,transparent);display:inline-block}
 .wc-ll{width:14px;height:2.5px;border-radius:2px;background:var(--green);display:inline-block}
 .wc-rate{margin-left:auto;font-family:'DM Mono',monospace;font-weight:600;font-size:11px}
-.wc-rate.dn{color:var(--green)}.wc-rate.up{color:var(--red)}
+.wc-rate.dn{color:var(--green)}.wc-rate.up{color:var(--red)}.wc-rate.nt{color:var(--text2)}
 .wc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
 .wc-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
 .wc-actions .btn{padding:12px 6px;font-size:14px}
@@ -301,6 +301,8 @@ input{font-family:inherit}
 .ob-rr .set-row-t{font-size:14px;font-weight:500}
 .ob-rr .set-row-d{font-size:12px;color:var(--text2)}
 .ob-hw{border-color:color-mix(in srgb,var(--amber) 45%,transparent);background:color-mix(in srgb,var(--amber) 9%,var(--bg2))}
+.ob-other{margin:-4px 16px 6px}
+.ob-wkl{margin-top:8px;font-size:12px;color:var(--text2);font-family:'DM Mono',monospace}
 .ob-matn{position:sticky;top:56px;z-index:2;padding:8px 0;background:var(--bg);font-size:14px;color:var(--text2)}
 .ob-matn b{color:var(--green);font-family:'DM Mono',monospace}
 .ob-mat .mat-grid{margin:0}
@@ -14586,7 +14588,7 @@ function _sanitizeCand(c){
   const num=(o,ks,lo,hi)=>{const r={};if(_isPlainObj(o))ks.forEach(k=>{const v=_num(o[k],lo,hi);if(v!=null)r[k]=v;});return r;};
   const vol={};if(_isPlainObj(m.vol))Object.keys(m.vol).slice(0,20).forEach(g=>{if(/^[a-z_]{2,20}$/.test(g))vol[g]=num(m.vol[g],['v','dir','obj','tope','techo'],0,99);});
   const meta={split:typeof m.split==='string'?m.split.slice(0,24):'',K:_num(m.K,1,6),wd:_num(m.wd,1,7),tpl:L(m.tpl),dayPlace:L(m.dayPlace),fd:L(m.fd),
-    alternas:m.alternas===true,fz2:null,cargaLigera:m.cargaLigera===true,lifts:L(m.lifts),vuelta:_isPlainObj(m.vuelta)?{pesos:_oneOf(m.vuelta.pesos,['menos20','recalibrar'])}:null,
+    alternas:m.alternas===true,fz2:_isPlainObj(m.fz2)?{gym:_num(m.fz2.gym,0,7),casa:_num(m.fz2.casa,0,7)}:null,cargaLigera:m.cargaLigera===true,lifts:L(m.lifts),vuelta:_isPlainObj(m.vuelta)?{pesos:_oneOf(m.vuelta.pesos,['menos20','recalibrar'])}:null,
     rampa:_isPlainObj(m.rampa)?{series:_num(m.rampa.series,1,6)||3,reps:typeof m.rampa.reps==='string'?m.rampa.reps.slice(0,10):'8-12',rir:typeof m.rampa.rir==='string'?m.rampa.rir.slice(0,12):m.rampa.rir}:null,
     effort:_isPlainObj(m.effort)?{obj:_oneOf(m.effort.obj,PM_EFFORT)||'justo',rir:typeof m.effort.rir==='string'?m.effort.rir.slice(0,12):m.effort.rir,subidas:_oneOf(m.effort.subidas,PM_SUBIDAS)||'normal'}:null,
     vol,modes:Array.isArray(m.modes)?m.modes.filter(x=>typeof x==='string'&&/^[a-z0-9]{1,16}$/.test(x)).slice(0,12):[],level:_oneOf(m.level,PROF_LEVELS),
@@ -14806,6 +14808,56 @@ function healthWarnHtml(){
   return`<div class="card ob-own ob-hw" role="status"><div class="ob-own-t">⚠️ ${esc(t)}</div><button type="button" class="btn bs" onclick="healthWarnOk()">${w==='consulta'?'Ya lo he consultado':'Ya la he revisado'}</button></div>`;
 }
 function healthWarnOk(){if(!S.profile)return;S.profile.warn=null;S.profile=_sanitizeProfile(S.profile);saveState();render();}
+// ── (E12) Lugar por día y semana en Inicio (§G.8, §G.12; D8: dos sitios desde la primera versión) ──
+function _twoPlaces(){return!!(S.places&&S.places.g&&S.places.c);}
+// «¿Hoy en otro sitio?»: hoy haces un día del otro sitio; el que tocaba vuelve justo después (S.rotBack)
+function otherPlaceDays(){const dk=S.nextDay,here=placeOfDay(dk);return liveDayKeys().filter(k=>k!==dk&&placeOfDay(k)!==here);}
+function otherPlaceSheet(){
+  const dk=S.nextDay,here=placeOfDay(dk),ks=otherPlaceDays(),P=getPlan(),nm=k=>`${dayLabel(k)}${P[k]&&P[k].focus?' · '+String(P[k].focus).split(/\s+[—–]\s+/)[0]:''}`;
+  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">¿Hoy en otro sitio?</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+  <div class="hist-sheet-body"><p class="ob-p">Te tocaba el ${esc(nm(dk))} (${here==='c'?'casa':'gimnasio'}). Elige el que haces hoy ${here==='c'?'en el gimnasio':'en casa'}; el ${esc(dayLabel(dk))} vuelve justo después.</p>
+    <div class="ob-acts">${ks.map(k=>`<button type="button" class="ob-card" onclick="otherPlacePick('${k}')"><span class="ob-ci" aria-hidden="true">${placeOfDay(k)==='c'?'🏠':'🏋️'}</span><span class="ob-ct"><b>${esc(nm(k))}</b></span></button>`).join('')}</div></div>`,'¿Hoy en otro sitio?');
+}
+function otherPlacePick(k){if(!_dayLive(getPlan()[k]))return;if(getActiveWorkout()){toast('Termina o descarta el entreno de hoy antes',3000);return;}
+  S.rotBack=S.nextDay;S.nextDay=k;S.day=k;saveState();obSheetClose();render();toast(`Hoy: ${dayLabel(k)}. Después vuelve el ${dayLabel(S.rotBack)}`,3000);}
+// Secuencia de la semana con «Ganar fuerza» y dos sitios (planMeta.seq): los días de gimnasio alternan sus entrenos y los de casa
+// van en su sitio; dos semanas: A·B·A·C y luego B·A·B·C
+function _seqOf(np,m){
+  if(!m||m.split!=='fz2'||!m.fz2)return null;
+  const L=Object.keys(np).sort(),dp=m.dayPlace||{},G=L.filter(k=>dp[k]==='g').map(k=>np[k].did),C=L.filter(k=>dp[k]==='c').map(k=>np[k].did);
+  const nG=+m.fz2.gym||G.length,nC=+m.fz2.casa||0;if(!G.length)return null;
+  const seq=[];for(let w=0;w<2;w++){for(let i=0;i<nG;i++)seq.push(G[(w+i)%G.length]);for(let i=0;i<nC;i++)if(C.length)seq.push(C[(w*nC+i)%C.length]);}
+  return seq.slice(0,14);
+}
+// El día que toca según la secuencia: tantas sesiones de esta rutina como posiciones avanzadas
+function seqNextDay(){
+  const pm=S.planMeta;if(!pm||!Array.isArray(pm.seq)||!pm.seq.length)return null;
+  const n=(S.sessions||[]).filter(s=>s&&sessOfRoutine(s)&&s.ts>=pm.ts).length,did=pm.seq[n%pm.seq.length],p=getPlan();
+  return dayKeys(p).find(k=>p[k].did===did)||null;
+}
+// La semana: «N de M» y, con 2 entrenos en 3 días, cuál toca esta semana
+function weekLineHtml(){
+  const pm=S.planMeta;if(!pm||!pm.alternas)return'';
+  const ks=liveDayKeys(),wd=getWeeklyTarget();if(ks.length!==2||wd!==3)return'';
+  const wk=Math.floor((Date.now()-pm.ts)/(7*864e5))%2,seq=wk?[ks[1],ks[0],ks[1]]:[ks[0],ks[1],ks[0]];
+  return`<div class="ob-wkl">Esta semana: ${seq.join(' · ')}</div>`;
+}
+// Equilibrio en casa (65 o más con menos de 3 días de pesas; 41 C-09): los días sin pesas
+function balanceCardHtml(){
+  const pm=S.planMeta;if(!pm||!(pm.modes||[]).some(m=>m==='mayor'||m==='mayor75'||m==='segmayor')||getWeeklyTarget()>=3)return'';
+  if((S.sessions||[]).some(s=>s&&s.ts&&sameDayTs(s.ts,Date.now())))return'';
+  return`<div class="card ob-own"><div class="ob-own-t">Hoy: 5-10 min de equilibrio</div><p class="ob-own-p">Junto a una pared o una silla: de pie sobre una pierna, 20-30 s por lado; pasos en línea, talón con punta; y sobre una pierna, mirando a un lado y a otro.</p></div>`;
+}
+// «Peso de hoy» (opcional, tras la primera sesión; 43 m-10): corrige el de hoy si ya está, nunca lo duplica
+function weightTodayCardHtml(){
+  if(!(S.sessions||[]).length||!S.profile||S.profile.mode!=='gen'||(S.profile.dismiss&&S.profile.dismiss.weight&&Date.now()-S.profile.dismiss.weight<7*864e5))return'';
+  if((S.weights||[]).some(w=>w&&w.ts&&sameDayTs(w.ts,Date.now())))return'';
+  return`<div class="card ob-own"><div class="ob-own-t">Peso de hoy (opcional)</div><p class="ob-own-p">Si quieres seguir tu peso, apúntalo cuando te pese: una vez por semana basta.</p>
+    <button type="button" class="btn bs" onclick="S.wmodal=true;renderWmodal()">Apuntar mi peso</button><button type="button" class="ob-link" onclick="weightTodayLater()">Ahora no</button></div>`;
+}
+function weightTodayLater(){if(!S.profile)return;S.profile.dismiss.weight=Date.now();S.profile=_sanitizeProfile(S.profile);saveState();render();}
+// Color de la tendencia del peso según tu objetivo: bajar es «bueno» (verde) solo con «Perder grasa» (41 C-19)
+function wRateCls(rate){const g=S.profile&&S.profile.goal;if(g&&g!=='grasa')return'nt';return rate<=0?'dn':'up';}
 // ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
@@ -14835,7 +14887,7 @@ function genCandidate(g){
   });
   const R=r.meta.rest||{},ag=g.inp.goal==='aguante';
   if(bw==null&&R.iso)bw=(ag?Math.max(60,R.iso):Math.min(90,Math.max(75,R.iso)))+(P.prud||P.mayor?15:0);
-  return{v:1,days,weeklyTarget:r.weeklyTarget,meta:r.meta,apx,est,balMin:r.meta.balMin||0,rest:Object.assign({},R,bw!=null?{bw}:{}),
+  return{v:1,days,weeklyTarget:r.weeklyTarget,daysOther:g.inp.daysOther||0,meta:r.meta,apx,est,balMin:r.meta.balMin||0,rest:Object.assign({},R,bw!=null?{bw}:{}),
     reparto:r.meta.reparto==='dias'?'dias':'recomendado',ok:!!r.ok};
 }
 // Sin consentimiento de salud no queda rastro de la zona (§I.2): fuera las notas que la nombran y los porqués y avisos con zona
@@ -14855,8 +14907,8 @@ function _genPlanMeta(c,np){
   const lifts=[].concat(...Object.values(_isPlainObj(m.lifts)?m.lifts:{}).filter(Array.isArray));
   const letters=a=>Array.isArray(a)?a.map(did).filter(Boolean):null;
   const pm={id:'p_'+Date.now().toString(36),ts:Date.now(),gen:(window.GymGen&&GymGen.VERSION)||0,cat:'',reparto:c.reparto,split:m.split,K:m.K,wd:m.wd,
-    tpl:byL(m.tpl),dayPlace:byL(m.dayPlace),fd:byL(m.fd),alternas:!!m.alternas,fz2:m.fz2&&letters(m.fz2.gym)&&letters(m.fz2.casa)?{gym:letters(m.fz2.gym),casa:letters(m.fz2.casa)}:null,
-    seq:null,cargaLigera:!!m.cargaLigera,lifts,vuelta:m.vuelta?(m.vuelta.pesos==='menos20'?'menos20':'recalibrar'):null,
+    tpl:byL(m.tpl),dayPlace:byL(m.dayPlace),fd:byL(m.fd),alternas:!!m.alternas,fz2:m.split==='fz2'?{gym:Object.keys(np).filter(k=>(m.dayPlace||{})[k]==='g').map(did),casa:Object.keys(np).filter(k=>(m.dayPlace||{})[k]==='c').map(did)}:null,
+    seq:_seqOf(np,m),cargaLigera:!!m.cargaLigera,lifts,vuelta:m.vuelta?(m.vuelta.pesos==='menos20'?'menos20':'recalibrar'):null,
     rampa:m.rampa?{series:m.rampa.series||3,reps:m.rampa.reps||'8-12',rir:rir(m.rampa.rir)}:null,
     effort:m.effort?{obj:m.effort.obj,rir:rir(m.effort.rir),subidas:m.effort.subidas}:null,rest:c.rest,vol,zone:_mmZoneOf(np,c.weeklyTarget,vol),
     modes:m.modes||[],level:m.level,corto:!!m.corto,seed:m.seed,alt:m.alt||0,why:m.why,warn:m.warn,base:JSON.parse(JSON.stringify(np)),edited:false,
@@ -14924,6 +14976,7 @@ function applyGeneratedPlan(c,o){
   const wt=parseInt(c.weeklyTarget);if(wt>=1&&wt<=7)S.weeklyTarget=wt;
   S.day=S.nextDay=liveDayKeys(np)[0]||dayKeys(np)[0];S.rotBack=null;S.pendingCoachProposals=[];
   S.planMeta=_genPlanMeta(c,np);
+  {const sq=seqNextDay();if(sq)S.day=S.nextDay=sq;} // (E12) con secuencia, su primer día
   if(o.answers)S.profile=_sanitizeProfile(o.answers);
   if(o.places){S.places=_sanitizePlaces(o.places);try{_syncLibKit();}catch(e){}}
   if(o.health)S.health=_sanitizeHealth(o.health);
@@ -15253,9 +15306,9 @@ function weekGrid(){
     const isT=d.toDateString()===t.toDateString(),we=i>=5;
     // Comparar por timestamp del mismo día (resistente a colisión de año)
     const done=S.sessions.some(s=>s.ts&&sameDayTs(s.ts,d.getTime()));
-    const cls=done?'done':isT?'today':we?'rest':'plan';
+    const cls=done?'done':isT?'today':''; // (E12) los días sin sesión, neutros
     // (16e) Cada día con su nombre para lectores: «sábado, descanso», «lunes, entrenado», «jueves, hoy»
-    const al=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'][i]+(done?', entrenado':isT?', hoy':we?', descanso':d>t?', pendiente':', sin entrenar');
+    const al=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'][i]+(done?', entrenado':isT?', hoy':d>t?', pendiente':', sin entrenar');
     return`<div class="dd ${cls}" role="img" aria-label="${al}">${l}${done?'<span style="font-size:7px" aria-hidden="true">✓</span>':''}</div>`;
   }).join('');
 }
@@ -15449,7 +15502,7 @@ function _wcPlace(specs,polys,marks,o){
 }
 function _wcLastV(g,hide){const sv=g&&g.ownerSVGElement;if(sv)sv.querySelectorAll('.wc-lastv,.rc-lv').forEach(el=>{el.style.opacity=hide(el)?'0':'';});}
 function wcLeave(ev,id){if(ev.pointerType!=='mouse')return;const g=document.getElementById(id+'-h');if(g){g.style.display='none';_wcLastV(g,()=>false);}}
-function wLegend(rate){return`<div class="wc-legend"><span><i class="wc-ld"></i>Registro</span><span><i class="wc-ll"></i>Tendencia 7 días</span>${rate!=null?`<span class="wc-rate ${rate<=0?'dn':'up'}">${wSign(rate,2)} kg/sem</span>`:''}</div>`;}
+function wLegend(rate){return`<div class="wc-legend"><span><i class="wc-ld"></i>Registro</span><span><i class="wc-ll"></i>Tendencia 7 días</span>${rate!=null?`<span class="wc-rate ${wRateCls(rate)}">${wSign(rate,2)} kg/sem</span>`:''}</div>`;}
 // Día de la última pesada: «Hoy» / «Ayer» solo si lo es de verdad (con su fecha guardada); si no, «Vie 23 Oct».
 // (10) Sustituye a la etiqueta «kg hoy / kg ayer» de la fila de métricas de Inicio, que se quitó por repetir datos.
 function wWhen(t){
@@ -17441,7 +17494,8 @@ function finishSessionConfirmed(doneEx,totalEx,note,doneMsg){
   if(subs.length)session.subs=subs;else delete session.subs;
   // Rotación: tras la sesión más reciente (una reabierta antigua no debe saltarse la que vino después)
   // (E1a) getNextDay salta los días vacíos y siempre da un día que existe (antes, un «arreglo» repetía la misma llamada)
-  S.nextDay=rs?getNextDay((l=>sessDayKey(l)||l.day)(S.sessions[S.sessions.length-1])):getNextDay(S.day);
+  S.nextDay=rs?getNextDay((l=>sessDayKey(l)||l.day)(S.sessions[S.sessions.length-1])):(S.rotBack&&_dayLive(getPlan()[S.rotBack])?S.rotBack:(seqNextDay()||getNextDay(S.day)));
+  if(!rs)S.rotBack=null; // (E12) «¿Hoy en otro sitio?»: el día que tocaba vuelve justo después; con planMeta.seq, su orden
   // La sesión reabierta ya está guardada de nuevo (y sus cambios no están en la última copia: su ts es el de antes)
   if(rs){S.reopenedSession=null;S.dataEditTs=now;}
   day.ex.forEach(ex=>{S.sets[ex.id]={};S.logs[ex.id]={};});
@@ -18803,8 +18857,8 @@ function coach_generateInsights(an,pend,resIds){
     const last=data[data.length-1]?.v||0;
     return{ex,last};
   }).filter(x=>x.last>0);
-  const bwKg=S.weights[S.weights.length-1]?.v||105;
-  const overBw=weightEx.filter(x=>x.last>=bwKg);
+  const bwKg=S.weights[S.weights.length-1]?.v||0; // (E12) sin suponer un peso (antes 105 kg)
+  const overBw=bwKg?weightEx.filter(x=>x.last>=bwKg):[];
   if(overBw.length>0&&!S.coachInsights?.shownBodyweight){
     const top=overBw.sort((a,b)=>b.last-a.last)[0];
     insights.push({type:'good',ic:'🚀',t:'Superas tu peso corporal',d:`En <strong>${esc(top.ex.n)}</strong> mueves ${top.last} kg — más que tu propio peso (${bwKg} kg). Bienvenido al club.`});
@@ -19919,7 +19973,8 @@ function renderDash(){
   </div>
   </div></div>
   ${healthWarnHtml()}${S.profile&&S.profile.nr&&!liveDayKeys().length?noRoutineCardHtml():hoyCardHtml()}
-  ${ownCardHtml()}${safetyCardHtml()}
+  ${_twoPlaces()&&otherPlaceDays().length&&!getActiveWorkout()&&!(S.profile&&S.profile.nr&&!liveDayKeys().length)?'<button type="button" class="ob-link ob-other" onclick="otherPlaceSheet()">¿Hoy en otro sitio? ›</button>':''}
+  ${ownCardHtml()}${safetyCardHtml()}${balanceCardHtml()}${weightTodayCardHtml()}
   ${dashCoachHtml()}
   ${rest0?'':`<div class="sh">Esta semana</div>
   <div class="card">
@@ -19929,7 +19984,7 @@ function renderDash(){
     </div>
     <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(wk/target*100))}%"></div></div>
     <div class="wgrid" role="group" aria-label="Días de esta semana">${weekGrid()}</div>
-    <div style="display:flex;gap:12px;margin-top:9px;font-size:10px;color:var(--text3)"><span style="color:var(--green)">■ Completado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span><span>■ Planificado</span></div>
+    <div style="display:flex;gap:12px;margin-top:9px;font-size:10px;color:var(--text3)"><span style="color:var(--green)">■ Entrenado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span></div>${weekLineHtml()}
   </div>`}
   ${backupReminderHtml()}
   <div class="sh" id="dash-w">Peso corporal</div>
