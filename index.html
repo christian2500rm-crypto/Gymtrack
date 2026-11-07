@@ -275,6 +275,11 @@ input{font-family:inherit}
 .ob-dh{display:flex;flex-direction:column;gap:2px;padding-bottom:6px;border-bottom:1px solid var(--border);font-size:14px}
 .ob-dh span{font-size:12px;color:var(--text2)}
 .ob-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.ob-gen{position:fixed;inset:0;z-index:391;background:var(--bg);display:flex;flex-direction:column;justify-content:center;gap:12px;padding:24px 32px;transition:opacity .25s}
+.ob-gen.out{opacity:0;pointer-events:none}.ob-gen-t{font-size:22px;font-weight:700;margin-bottom:6px}
+.ob-gen-l{color:var(--text2);font-size:15px;opacity:0;animation:obGenIn .25s ease forwards}
+@keyframes obGenIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.ob-gen-l{animation:none;opacity:1}.ob-gen{transition:none}}
 .cyc-next-t{font-weight:700;font-size:15px}.cyc-next-d{color:var(--text2);font-size:13px;margin:4px 0 10px}.cyc-next-b{display:flex;flex-direction:column;gap:8px}
 .ob-bal-h{font-size:12px;font-weight:700;color:var(--text2);margin:12px 0 0}
 .ob-row:last-child{border-bottom:0}
@@ -14950,7 +14955,19 @@ function _obHealthObj(){
   return _sanitizeHealth({v:1,ts:Date.now(),consent:{ts:Date.now(),ver:'1'},zones:h.zones||{},otraTxt:h.otraTxt,huesos:!!h.huesos,posparto:h.posparto==='alta',prudent:_obPrudent(),screenTs:Date.now()});
 }
 // Fin de las preguntas: al resultado (E10a)
-function obFinishQs(){if(!_ob)return;_obSaveDraft();if(OB_SCR['ob-rutina'])obGo('ob-rutina');}
+function obFinishQs(){if(!_ob)return;_obSaveDraft();if(OB_SCR['ob-rutina']){obGo('ob-rutina');_obGenAnimShow();}} // (E16a) con «Preparando tu rutina»
+// (E16a, §F.1) Transición «generando», real y corta: lo que acabo de calcular, una línea cada 200 ms (en 1 s; con «reducir movimiento»,
+// de golpe), encima del resultado ya generado y que se quita sola. Solo al llegar desde las preguntas; nada de barras ni esperas falsas.
+function _obGenAnimShow(){
+  const g=_ob&&_ob.g,host=document.getElementById('onboarding');if(!g||!host)return;
+  const pl=_ob.places||{},P=pl[pl.main],n=P?_matCount(P,pl.main):0;
+  let vol=null;try{vol=((genTexts(g).porque||[]).join(' ').match(/Unas \d+ series por semana para cada músculo grande/)||[])[0]||null;}catch(e){}
+  const L=[n?`${n} ejercicios posibles con tu material`:null,_obWeekLine(g).replace(/[;.].*$/,'').replace(/^Esta semana/,'Tu semana'),vol,`Cada día cabe en ${g.inp.min}${NB}min`].filter(Boolean);
+  const red=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),old=document.getElementById('ob-gen');if(old)old.remove();
+  const el=document.createElement('div');el.className='ob-gen';el.id='ob-gen';el.setAttribute('role','status');el.setAttribute('aria-live','polite');
+  el.innerHTML=`<div class="ob-gen-t">Preparando tu rutina</div>${L.map((x,i)=>`<div class="ob-gen-l" style="animation-delay:${i*200}ms">✓ ${esc(x)}</div>`).join('')}`;
+  host.appendChild(el);setTimeout(()=>{el.classList.add('out');setTimeout(()=>{if(el.parentNode)el.remove();},250);},red?600:1000);
+}
 // «Qué guardo y cómo borrarlo» (la hoja completa llega en E13)
 function obPrivacy(){obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Qué guardo y cómo borrarlo</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
   <div class="hist-sheet-body ob-priv">${_privacyTxtHtml()}</div>`,'Qué guardo y cómo borrarlo');}
