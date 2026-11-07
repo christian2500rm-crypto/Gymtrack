@@ -13138,7 +13138,7 @@ function lightBannerHtml(where){
 // Sirve igual para las de versiones anteriores (sin prio/basis) y para backups importados.
 function _sanitizeProposals(list){
   if(!Array.isArray(list))return[];
-  const TYPES=['add_set','rm_set','rep_scheme','deload','add_ex','swap'],seen=new Set(),out=[];
+  const TYPES=['add_set','rm_set','rep_scheme','deload','add_ex','swap','cardio_min'],seen=new Set(),out=[]; // (E16d) cardio_min
   const str=(v,n)=>typeof v==='string'?v.slice(0,n):'';
   const idOrNull=v=>typeof v==='string'&&v&&v.length<=80?v:null;
   list.forEach(p=>{
@@ -13150,9 +13150,10 @@ function _sanitizeProposals(list){
     if(typeof p.short==='string'&&p.short)q.short=p.short.slice(0,120);
     if(typeof p.prio==='number'&&isFinite(p.prio))q.prio=p.prio;
     if(typeof p.sev==='number'&&isFinite(p.sev))q.sev=p.sev;
-    if(['fatigue','down','stagnant','flat','volume','legacy_up','power','cycle'].includes(p.basis))q.basis=p.basis;
+    if(['fatigue','down','stagnant','flat','volume','legacy_up','power','cycle','cardio'].includes(p.basis))q.basis=p.basis;
+    if(p.type==='cardio_min'&&_isPlainObj(p.to)&&Number.isInteger(p.to.min)&&p.to.min>=5&&p.to.min<=60)q.to={min:p.to.min}; // (E16d)
     if(typeof p.createdAt==='number'&&isFinite(p.createdAt))q.createdAt=p.createdAt;
-    if(_isPlainObj(p.to)&&Number.isInteger(p.to.s)&&p.to.s>=1&&p.to.s<=10&&Number.isInteger(p.to.r)&&p.to.r>=1&&p.to.r<=30)q.to={s:p.to.s,r:p.to.r};
+    if(_isPlainObj(p.to)&&Number.isInteger(p.to.s)&&p.to.s>=1&&p.to.s<=10&&(Number.isInteger(p.to.r)&&p.to.r>=1&&p.to.r<=30||typeof p.to.r==='string'&&/^\d{1,2}-\d{1,2}$/.test(p.to.r)))q.to={s:p.to.s,r:p.to.r}; // (E16d) o un rango
     out.push(q);
   });
   return out.slice(0,30);
@@ -19105,8 +19106,28 @@ function _histStaysTxt(ex){const n=ex&&ex.n||'este ejercicio';
     ?`Tu historial de ${n} no se pierde: sigue en Progreso, en «Fuera».`:`${n} aún no tiene historial.`;}
 // Candidatas, de más a menos prioritaria: fatiga/seguridad (descarga) > retroceso > estancamiento real > progresión > volumen.
 // Los ejercicios «en espera» (it.hold: recién cambiados, en descarga o recuperándose) no están en down/stagnant/flat.
+// (E16d, §G.4) Propuestas según tu objetivo (con rutina generada): «Ganar fuerza» sube la carga en los básicos a 4-6 (3-5 en avanzados)
+// y nunca propone «×12 con menos peso»; «Aguantar más», más repeticiones; «Perder grasa» y «Salud y forma» mantienen las cargas y suben
+// antes los minutos de cardio (hasta 150 a la semana, OMS); «Ganar músculo», una serie más solo si el grupo está por debajo de lo alto de
+// su rango y de su techo (planMeta.vol); con 16-17 años, nunca por debajo de 6 repeticiones. Sin rutina generada, como siempre.
+function _coachGoal(){const p=S.profile;return p&&p.mode==='gen'&&_isPlainObj(S.planMeta)?p.goal||null:null;}
+// Series por semana de cada grupo de planificación con la rutina de ahora (la cuenta del generador: volV × veces por semana)
+function _planVolNow(){
+  const p=getPlan(),ks=liveDayKeys(p),per=ks.length?getWeeklyTarget()/ks.length:0,v={};if(!LIB_K||!LIB_K.volV)return v;
+  ks.forEach(k=>(p[k].ex||[]).forEach(e=>{const ex=routineEx(e);if(!ex||ex.cardio)return;const L0=exLib(ex),L=L0&&LIB_K.BY.get(L0.id);if(!L)return;
+    const o=LIB_K.volV(L),n=_baseSets(ex);for(const g in o)v[g]=(v[g]||0)+n*o[g]*per;}));
+  return v;
+}
+// Minutos de cardio por semana (calentamiento y cardio final de tus días)
+function _cardioWeekMin(){
+  const p=getPlan(),ks=liveDayKeys(p),per=ks.length?getWeeklyTarget()/ks.length:0;let m=0;
+  ks.forEach(k=>(p[k].ex||[]).forEach(e=>{const ex=routineEx(e);if(ex&&(ex.cardio||exLT(ex)==='c'))m+=(_cardioMin(ex)||0)*per;}));
+  return m;
+}
 function coach_buildCandidates(an){
   const out=[],now=Date.now(),plan=routinePlan(),f=an.fatigue;
+  const goal=_coachGoal(),pm=_isPlainObj(S.planMeta)?S.planMeta:{},lifts=new Set(Array.isArray(pm.lifts)?pm.lifts:[]),minor=!!(S.profile&&S.profile.age==='16'); // (E16d)
+  const noScheme=goal==='fuerza'||goal==='aguante'||goal==='grasa'||goal==='salud';let volNow=null; // (E16d) sin «×8 con más peso» ni «×12 con menos»
   const hot=new Set((coach_rpeByMuscle(6)||[]).filter(z=>z.avg>=2.6&&z.samples>=3).map(z=>z.muscle));
   if(f.deloadNeeded){
     out.push({id:'deload_week',type:'deload',basis:'fatigue',prio:0,sev:f.weeks,ic:'🧘',tag:'Descarga',createdAt:now,
@@ -19126,7 +19147,18 @@ function coach_buildCandidates(an){
     const ex=it.ex,s=_baseSets(ex),kg=exLT(ex)==='w',tr=kg?targetRepsNum(ex):null;
     const why=`${it.p.stagSessions}+ sesiones (${Math.max(3,Math.round(it.p.stagWeeks))}+ semanas) sin mejorar ${(kg&&!it.p.kgTD)||it.p.metric==='e1rm'?'peso ni reps':_progWhat(it.p).su} con ${s}×${fmtTargetReps(ex).replace(/ reps$/,'')}.`;
     const base={basis:'stagnant',prio:2,sev:it.p.stagSessions,ic:'🔄',tag:'Variación',exId:ex.id,dayKey:it.dayKey,createdAt:now};
-    if(tr!=null&&tr>=10){
+    const rr=kg?repRange(ex):null; // (E16d) con rutina generada el objetivo es un rango («8-10»): targetRepsNum no lo lee
+    if(goal==='fuerza'&&rr){ // (E16d) en los básicos, a 4-6 (3-5 en avanzados; 6-8 con 16-17 años, nunca por debajo de 6) con más peso
+      const R=minor?'6-8':pm.level==='A'?'3-5':'4-6',lo=+R.split('-')[0],L0=exLib(ex);
+      if((L0&&lifts.has(L0.id)||isCompoundEx(ex))&&rr.lo>lo+1){out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s,r:R},title:`Más carga en ${ex.n}`,
+        diff:`${s}×${_tgtShort(ex)} → ${s}×${R}`,short:`pasar a ${s}×${R} con más peso`,description:`${why} Para «Ganar fuerza», en los básicos: ${s}×${R} con más peso.`});return;}
+    }
+    const RA=goal==='aguante'&&rr?(rr.hi<12?'12-15':rr.hi<=15?'15-20':null):null;
+    if(RA){ // (E16d) más repeticiones
+      out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s,r:RA},title:`Más repeticiones en ${ex.n}`,diff:`${s}×${_tgtShort(ex)} → ${s}×${RA}`,
+        short:`pasar a ${s}×${RA} con algo menos de peso`,description:`${why} Para «Aguantar más»: ${s}×${RA} con algo menos de peso.`});return;
+    }
+    if(!noScheme&&tr!=null&&tr>=10){
       const ns=Math.min(6,s+1);
       out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s:ns,r:8},title:`Cambiar esquema en ${ex.n}`,
         diff:`${s}×${tr} → ${ns}×8`,short:`pasar a ${ns}×8 con algo más de peso`,
@@ -19148,7 +19180,7 @@ function coach_buildCandidates(an){
         description:`${why} Prueba ${alt.n}: ${alt.reason}. ${_histStaysTxt(ex)}`});
       return;
     }
-    if(tr!=null){
+    if(tr!=null&&!noScheme){ // (E16d) «×12 con menos peso»: nunca para fuerza, aguante, grasa ni salud
       out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s,r:12},title:`Cambiar esquema en ${ex.n}`,
         diff:`${s}×${tr} → ${s}×12`,short:`pasar a ${s}×12 con algo menos de peso`,
         description:`${why} Pasa a ${s}×12 con algo menos de peso para retomar el progreso.`});
@@ -19158,10 +19190,21 @@ function coach_buildCandidates(an){
     const ex=it.ex,s=_baseSets(ex);
     // Solo si está estable de verdad (no bajando), con datos y sin zona muscular ya «al límite»
     if(s>=5||it.p.sessions<3||it.p.pctWeek<-0.4||hot.has(ex.muscle))return;
+    if(goal==='musculo'&&_isPlainObj(pm.vol)){const L0=exLib(ex),L=L0&&LIB_K&&LIB_K.BY.get(L0.id),g=L&&LIB_K.mainGroupV(L),vz=g&&pm.vol[g]; // (E16d)
+      if(vz){if(!volNow)volNow=_planVolNow();const cap=Math.min(vz.top||99,vz.techo||99);if((volNow[g]||0)+1>cap+1e-9)return;}}
     out.push({id:'add_set_'+ex.id,type:'add_set',basis:'flat',prio:3,sev:-s,ic:'💪',tag:'Progresión',exId:ex.id,dayKey:it.dayKey,createdAt:now,
       title:`Añadir serie a ${ex.n}`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,short:`añadir una serie (${s}→${s+1})`,
       description:`${(w=>w.su[0].toUpperCase()+w.su.slice(1)+' '+w.es)(_progWhat(it.p))} en tus últimas ${it.p.sessions} sesiones. Una serie más (${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}) le da el empujón que necesita.`});
   });
+  if(goal==='grasa'||goal==='salud'){ // (E16d)
+    const wk=_cardioWeekMin();let best=null;
+    if(wk<150)liveDayKeys(plan).forEach(k=>{const arr=plan[k].ex||[],j=arr.length-1,ex=j>0?routineEx(arr[j]):null;if(!ex||!(ex.cardio||exLT(ex)==='c'))return;
+      const m=Math.round(_cardioMin(ex)||0);if(m>0&&m<30&&(!best||m<best.m))best={ex,k,m};});
+    if(best){const to=Math.min(30,best.m+5),G=goal==='grasa'?'Perder grasa':'Salud y forma';
+      out.push({id:'cardio_min_'+best.ex.id,type:'cardio_min',basis:'cardio',prio:1,sev:-best.m,ic:'🚴',tag:'Cardio',exId:best.ex.id,dayKey:best.k,createdAt:now,to:{min:to},
+        title:'Más minutos de cardio',diff:`${best.ex.n}: ${best.m} → ${to} min`,short:`pasar a ${to} min de cardio`,
+        description:`Para «${G}», antes que más peso: ${to-best.m} minutos más de cardio al final del ${plan[best.k].label}. Ahora sumas unos ${Math.round(wk)} minutos a la semana; lo recomendado son 150-300.`});}
+  }
   // Volumen: días con menos de 3 ejercicios de fuerza
   if((S.sessions||[]).length>=4){
     const inPlan=_planLibIds(),place=routinePlace();
@@ -26678,6 +26721,10 @@ function _applyProposalByData(p){
     if(exLT(ex)!=='w')return{ok:false,drop:true,msg:'Esa propuesta ya no aplica a este ejercicio'};
     if(p.to){ex.s=p.to.s;ex.r=p.to.r;}
     else{ex.s=Math.min(6,(parseInt(ex.s)||3)+1);ex.r=8;} // propuestas de la versión anterior
+  }else if(p.type==='cardio_min'){ // (E16d) minutos del cardio final
+    if(!ex)return gone;
+    if(!(ex.cardio||exLT(ex)==='c')||!p.to||!p.to.min)return{ok:false,drop:true,msg:'Esa propuesta ya no aplica a este ejercicio'};
+    ex.r=p.to.min+' min';
   }else if(p.type==='deload'){
     return beginFullDeload(); // (13b) la misma que Ajustes → «Descarga o descanso»
   }else if(p.type==='swap'){
