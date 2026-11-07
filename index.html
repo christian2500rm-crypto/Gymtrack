@@ -262,7 +262,7 @@ input{font-family:inherit}
 .ob-ch{white-space:normal;text-align:left;line-height:1.25;padding:6px 12px}
 .ob-changed{font-size:13px;color:var(--green);min-height:0}
 .ob-changed:empty{display:none}
-.ob-split{display:flex;flex-direction:column;gap:6px}
+.card.ob-split{display:flex;flex-direction:column;gap:6px;margin-left:0;margin-right:0}
 .ob-wk{font-family:'DM Mono',monospace;font-size:14px;font-weight:600;color:var(--text)}
 .ob-p{font-size:14px;color:var(--text2);line-height:1.55;margin:0}
 .ob-sec{display:flex;flex-direction:column;gap:6px}
@@ -271,7 +271,7 @@ input{font-family:inherit}
 .ob-av li{color:var(--text)}
 .ob-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none}
 .ob-tab{flex:none;min-height:44px}
-.ob-day{display:flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);padding:10px 12px}
+.ob-dpanel{display:flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);padding:10px 12px;text-align:left}
 .ob-dh{display:flex;flex-direction:column;gap:2px;padding-bottom:6px;border-bottom:1px solid var(--border);font-size:14px}
 .ob-dh span{font-size:12px;color:var(--text2)}
 .ob-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
@@ -298,16 +298,13 @@ input{font-family:inherit}
 .ob-matn{position:sticky;top:56px;z-index:2;padding:8px 0;background:var(--bg);font-size:14px;color:var(--text2)}
 .ob-matn b{color:var(--green);font-family:'DM Mono',monospace}
 .ob-mat .mat-grid{margin:0}
-.ob-step{display:none;flex-direction:column;gap:22px}
-.ob-step.active{display:flex;animation:fu .35s ease}
 @keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
 .ob-teca{display:block;width:44px;height:auto;margin-bottom:14px}
 .ob-title{font-size:30px;font-weight:600;letter-spacing:-.6px;line-height:1.15}
 .ob-sub{font-size:15px;color:var(--text2);line-height:1.65}
 .ob-lbl{font-size:13px;font-weight:500;color:var(--text2);margin-bottom:8px}
-.ob-inp{width:100%;padding:16px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font-size:36px;font-family:'DM Mono',monospace;font-weight:600;outline:none;text-align:center;transition:border-color .2s;-webkit-appearance:none;letter-spacing:-1px}
-.ob-inp:focus{border-color:var(--green)}
-.ob-days{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+/* «Próxima sesión» de Ajustes (E1a): botones de día */
+.ob-days3{grid-template-columns:1fr 1fr 1fr}
 .ob-day{padding:16px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);cursor:pointer;text-align:center;transition:all .2s}
 .ob-day:active{transform:scale(.97)}
 .ob-day.sel{border-color:var(--green);background:var(--green-bg2)}
@@ -318,9 +315,6 @@ input{font-family:inherit}
 .ob-day.sel .df{color:color-mix(in srgb,var(--green) 60%,transparent)}
 button.ob-day{min-width:0;min-height:44px;overflow-wrap:anywhere} /* (E1a) «Próxima sesión»: botones reales, de 2 a 6 días */
 .ob-day:disabled{opacity:.55;cursor:default;transform:none}
-.ob-dots{display:flex;gap:6px;margin-bottom:4px}
-.ob-dot{width:6px;height:6px;border-radius:50%;background:var(--bg3)}
-.ob-dot.on{background:var(--green);width:18px;border-radius:3px}
 /* MODAL */
 .mover{position:fixed;inset:0;background:rgba(0,0,0,.75);display:flex;align-items:flex-end;z-index:200;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overscroll-behavior:contain;padding-bottom:var(--kb)}
 .modal{background:var(--bg2);border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));width:100%;max-height:calc(85vh - var(--kb));max-height:calc(85dvh - var(--kb));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-top:1px solid var(--border2)}
@@ -14466,7 +14460,7 @@ function _obWeekLine(g){
 }
 function _obRowHtml(d,row,i){
   const L=LIB_BY_ID.get(row.lib);
-  if(row.kind==='warm'||row.kind==='cardio')return`<div class="ob-row ob-row-c"><span class="ob-ri" aria-hidden="true">${row.kind==='warm'?'🚶':'🏃'}</span><span class="ob-rt"><b>${row.kind==='warm'?'Calentamiento':'Cardio final'} — ${esc(L?L.n:row.n)}</b><span class="nw">${esc(row.reps)}</span></span></div>`;
+  if(row.kind==='warm'||row.kind==='cardio')return`<div class="ob-row ob-row-c"><span class="ob-ri" aria-hidden="true">${row.kind==='warm'?'🚶':'🏃'}</span><span class="ob-rt"><b>${(n=>row.kind==='warm'?(/^calentamiento/i.test(n)?n:'Calentamiento — '+n):(/^cardio/i.test(n)?n.replace(/^Cardio\b/,'Cardio final'):'Cardio final — '+n))(esc(L?L.n:row.n))}</b><span class="nw">${esc(row.reps)}</span></span></div>`;
   if(row.kind==='bal')return`<div class="ob-row ob-row-c"><span class="ob-ri" aria-hidden="true">⚖️</span><span class="ob-rt"><b>Equilibrio · <span class="nw">${esc(row.reps)}</span></b><span>${esc(row.nota||'')}</span></span></div>`;
   const rest=row.descanso_s?fmtClock(row.descanso_s):'',k=d.letra+':'+i,open=_ob.why===k;
   const cuid=row.cuidado?'<em class="ob-cuid">Con cuidado</em>':'';
@@ -14499,7 +14493,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   ${av.length?`<section class="ob-sec"><h2 class="ob-h2">A tener en cuenta</h2><ul class="ob-ul ob-av">${av.slice(0,more.av?99:t.visibles).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
     ${av.length>t.visibles?`<button type="button" class="ob-link" onclick="obMore('av')">${more.av?'Ver menos':'Ver más ('+(av.length-t.visibles)+')'}</button>`:''}</section>`:''}
   <div class="tabs ob-tabs" role="tablist" aria-label="Días de tu rutina">${ks.map(k=>{const on=k===tab,dd=r.det.find(x=>x.letra===k);return`<button type="button" class="tab ob-tab${on?' on':''}" role="tab" aria-selected="${on}" tabindex="${on?0:-1}" data-k="${k}" onclick="obTab('${k}')"><span class="pill p${k.toLowerCase()}">${k}</span>${on?' · '+esc(String(r.days[k].focus).split(/\s+[—–-]\s+/)[0]):''}</button>`;}).join('')}</div>
-  <section class="ob-day" role="tabpanel" aria-label="Día ${tab}">
+  <section class="ob-dpanel" role="tabpanel" aria-label="Día ${tab}">
     <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?(d.place==='c'?'🏠 ':'🏋️ '):''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
     ${rows.map((x,i)=>_obRowHtml(d,x,rows.filter(y=>y.kind!=='bal').indexOf(x))).join('')}
     ${P.inicio||cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
@@ -14629,6 +14623,76 @@ function _obDoApply(){
 // «Guardar mis respuestas y seguir con mi rutina» (quien tiene su propia rutina, desde Ajustes)
 function obKeepMine(){if(!_ob)return;S.profile=Object.assign(_obProfileToSave('own'),{dismiss:(S.profile&&S.profile.dismiss)||{}});S.profile=_sanitizeProfile(S.profile);
   S.obDraft=null;saveState();hideOnboarding();openSettings();toast('Guardé tus respuestas; tu rutina no cambia',3000);}
+// ── (E10c) Ajustar antes de aceptar (§F.4): ⇄, otra propuesta, cambiar reparto y afinar. Todo en el borrador ──
+let _obMN=null;function _obMenus(){if(!_obMN)_obMN=GymGen.menus(LIB_K);return _obMN;}
+// ⇄: las siguientes del menú de ese hueco que pasan los mismos filtros (material del sitio del día, seguridad) y no están ya
+function _obAlts(letra,i){
+  const g=_ob.g,d=g.res.det.find(x=>x.letra===letra);if(!d)return[];const rows=d.rows.filter(x=>x.kind!=='bal'),row=rows[i];if(!row||row.kind!=='str')return[];
+  const MN=_obMenus(),P=g.E.G.effective(g.inp),cls=g.E.G.clsOf(P,g.inp),Pl=(_ob.places||{})[d.place];
+  const used=new Set();Object.values(_ob.c.days).forEach(dd=>dd.ex.forEach(x=>used.add(x.lib)));
+  const ids=[...MN.tiers(row.slot,cls).flat(),...((MN.MENUS[row.slot]&&MN.MENUS[row.slot].sec)||[]).flatMap(s=>s.tiers?s.tiers.flat():MN.tiers(s.slot,cls).flat())];
+  const avoid=new Set(_ob.a.avoid||[]),out=[];
+  for(const id of ids){if(out.length>=4)break;const L=LIB_K.BY.get(id);if(!L||used.has(id)||avoid.has(id)||out.includes(id)||!LIB_BY_ID.has(id))continue;
+    if(Pl&&!LIB_K.placeCan(L,Pl,d.place))continue;if(!g.E.G.safeL(L,g.inp))continue;out.push(id);}
+  return out;
+}
+function obSwap(letra,i){
+  if(!_ob||!_ob.c)return;const ex=_ob.c.days[letra]&&_ob.c.days[letra].ex[i];if(!ex)return;const L=LIB_BY_ID.get(ex.lib),alts=_obAlts(letra,i);
+  _ob.sw={letra,i};
+  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Cambiar «${esc(L.n)}»</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+  <div class="hist-sheet-body"><p class="ob-p">Trabaja lo mismo: ${esc(_libMusLbl?(_libMusLbl(L)||[]).join(', ').toLowerCase():'')}</p>
+    <div class="ob-lbl">Otras opciones que te encajan</div>
+    <div class="ob-acts">${alts.length?alts.map(id=>{const A=LIB_BY_ID.get(id);return`<button type="button" class="ob-card" onclick="obPinPick('${id}')"><span class="ob-ci" aria-hidden="true">${exIconHtml(A)}</span><span class="ob-ct"><b>${esc(A.n)}</b><span>${esc(A.eq||'')}</span></span></button>`;}).join(''):'<p class="ob-foot">Con tu material y lo que me contaste no hay otra parecida.</p>'}</div>
+    <button type="button" class="ob-chk" role="checkbox" aria-checked="false" id="ob-avoid" onclick="this.setAttribute('aria-checked',this.getAttribute('aria-checked')!=='true');this.classList.toggle('ok')"><span class="ob-cb" aria-hidden="true"></span><span class="ob-ct"><span>No me lo vuelvas a proponer</span></span></button>
+    <button type="button" class="btn bs" onclick="obSwapAvoidOnly()">Quitar y elegir otro</button></div>`,'Cambiar '+L.n);
+}
+// Elegir una: queda fijada (pins) y la rutina se recalcula; «No me lo vuelvas a proponer» va a avoid
+function obPinPick(lib){
+  if(!_ob||!_ob.sw)return;const {letra,i}=_ob.sw,d=_ob.g.res.det.find(x=>x.letra===letra),rows=d.rows.filter(x=>x.kind!=='bal'),row=rows[i];
+  const av=document.getElementById('ob-avoid');if(av&&av.getAttribute('aria-checked')==='true'){_ob.a.avoid=[...new Set([...(_ob.a.avoid||[]),row.lib])];}
+  _ob.pins=Object.assign({},_ob.pins||{});_ob.pins[_obPinKey({rows,letra},row,i)]=lib;_ob.sw=null;
+  const c=_ob.c;_obApplyPins(c,_ob.g);_obSaveDraft();obSheetClose();obRender({keepFocus:true,keepScroll:true});
+  toast(`Cambiado. El Día ${letra} dura ahora ≈ ${Math.round(c.est[letra])}${NB}min`,2800);
+}
+function obSwapAvoidOnly(){if(!_ob||!_ob.sw)return;const {letra,i}=_ob.sw,d=_ob.g.res.det.find(x=>x.letra===letra),row=d.rows.filter(x=>x.kind!=='bal')[i];
+  _ob.a.avoid=[...new Set([...(_ob.a.avoid||[]),row.lib])];_ob.sw=null;_ob.dirty=true;_obSaveDraft();obSheetClose();obRender({keepFocus:true,keepScroll:true});toast('No te lo vuelvo a proponer',2400);}
+// «Otra propuesta» y «‹ Anterior»: otra semilla con el mismo reparto, series y rangos; lo fijado se queda
+function obOther(dir){
+  if(!_ob)return;const n=Math.max(0,(_ob.alt||0)+dir);
+  if(dir>0&&n>5){toast('Ya te he enseñado las mejores opciones con estas respuestas. Si quieres algo distinto, cambia alguna.',4200);return;}
+  _ob.alt=n;_ob.dirty=true;_obSaveDraft();obRender({keepFocus:true});
+  if(dir>0&&Object.keys(_ob.pins||{}).length)toast(`Mantengo ${plural(Object.keys(_ob.pins).length,'ejercicio que elegiste','ejercicios que elegiste')}`,2600);
+}
+// «Cambiar reparto»: la otra forma de D1 y, con un tope de días, quitarlo; solo opciones que pasan las reglas duras
+function obSplitSheet(){
+  if(!_ob||!_ob.g)return;const a=_obAnswers(),cur=_ob.reparto||'dias',tope=a.tope!==false,opts=[];
+  const test=(rep,tp)=>{const g=genRoutineFrom(JSON.parse(JSON.stringify(Object.assign({},a,{tope:tp}))),_obHistCtx(),{reparto:rep,tope:tp});return g&&g.res.ok?g:null;};
+  const alt=cur==='dias'?'recomendado':'dias',ga=test(alt,tope);
+  if(ga)opts.push(['rep',alt,alt==='recomendado'?'2-4 entrenos que se repiten':'Un entreno distinto cada día',alt==='recomendado'?'Repites cada ejercicio más a menudo y aprendes antes.':'Más variedad: cada ejercicio, una vez por semana.',ga.res.meta.split]);
+  const beg=_obBeginner(_ob.a);
+  if(beg&&a.days>=5&&tope){const gt=test(cur,false);if(gt)opts.push(['tope','no',`Quiero pesas los ${a.days} días`,'Más días con menos trabajo en cada uno. Si te notas cansado, el Coach te propone descargar.',gt.res.meta.split]);}
+  if(beg&&a.days>=5&&!tope){const gt=test(cur,true);if(gt)opts.push(['tope','si','4 de pesas y el resto, cardio suave','Al empezar, 4 días de pesas rinden casi igual y recuperas mejor.',gt.res.meta.split]);}
+  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Cambiar reparto</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+  <div class="hist-sheet-body"><p class="ob-p">Ahora: ${esc(_obWeekLine(_ob.g))}</p><div class="ob-acts">${opts.length?opts.map(([k,v,t,d])=>`<button type="button" class="ob-card" onclick="obSplitPick('${k}','${v}')"><span class="ob-ct"><b>${esc(t)}</b><span>${esc(d)}</span></span></button>`).join(''):'<p class="ob-foot">Con lo que me has contado, no hay otro reparto que cumpla todas las reglas.</p>'}</div></div>`,'Cambiar reparto');
+}
+function obSplitPick(k,v){if(!_ob)return;const b=_obWeekLine(_ob.g);if(k==='rep')_ob.reparto=v;else _ob.a.tope=v==='si';_ob.dirty=true;_obSaveDraft();obSheetClose();_obGenerate();_ob.changed=`${b.replace(/\.$/,'')} → ${_obWeekLine(_ob.g).replace(/^Tu semana: |^Esta semana: /,'')}`;obRender({keepFocus:true});}
+// «Afinar mi rutina»: estilo, calentamiento, cardio al terminar, explosivos, nivel y los ejercicios que no quieres
+function obTune(){
+  if(!_ob)return;const a=_ob.a,P=_ob.g?_ob.g.E.G.effective(_ob.g.inp):{},noPow=!!(P.prud||P.mayor||P.segM||P.huesos||P.inicio||Object.values(_ob.h.zones||{}).some(v=>['ahora','op','reciente'].includes(v)));
+  const seg=(k,opts,cur)=>`<div class="lib-place ob-seg" role="radiogroup">${opts.map(([v,t])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${String(cur)===String(v)}" onclick="obTuneSet('${k}','${v}')">${esc(t)}</button>`).join('')}</div>`;
+  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Afinar mi rutina</div><button class="hist-sheet-close" onclick="obTuneClose()" aria-label="Cerrar">✕</button></div>
+  <div class="hist-sheet-body ob-tune">
+    <div class="ob-lbl">¿Cómo prefieres entrenar?</div>${seg('style',[['maq','Máquinas y poleas'],['libre','Peso libre'],['igual','Me da igual']],a.style||'igual')}
+    <div class="ob-lbl">Calentamiento</div>${seg('warm',[['normal','Normal (5 min)'],['corto','Corto (3 min)']],a.warm||'normal')}
+    <div class="ob-lbl">Cardio al terminar</div>${seg('cardioEnd',[['auto','Según mi objetivo'],['si','Siempre'],['no','Nunca']],a.cardioEnd||'auto')}
+    ${noPow?'':`<div class="ob-lbl">Explosivos</div>${seg('power',[['1','Incluir saltos'],['0','Sin explosivos']],a.power?'1':'0')}`}
+    <div class="ob-lbl">Nivel</div>${seg('levelManual',[['','Automático'],['P','Principiante'],['I','Intermedio'],['A','Avanzado']],a.levelManual||'')}
+    ${(a.avoid||[]).length?`<div class="ob-lbl">Ejercicios que no quieres</div>${a.avoid.map(id=>`<div class="ob-av1"><span>${esc((LIB_BY_ID.get(id)||{}).n||id)}</span><button type="button" class="ob-link" onclick="obUnavoid('${id}')">Volver a permitir</button></div>`).join('')}`:''}
+    <button type="button" class="btn bp" onclick="obTuneClose()">Listo</button></div>`,'Afinar mi rutina');
+}
+function obTuneSet(k,v){if(!_ob)return;if(k==='power')_ob.a.power=v==='1';else if(k==='levelManual'){if(v)_ob.a.levelManual=v;else delete _ob.a.levelManual;}else _ob.a[k]=v;_ob.dirty=true;_obSaveDraft();obTune();}
+function obUnavoid(id){if(!_ob)return;_ob.a.avoid=(_ob.a.avoid||[]).filter(x=>x!==id);_ob.dirty=true;_obSaveDraft();obTune();}
+function obTuneClose(){obSheetClose();if(_ob&&_ob.dirty)obRender({keepFocus:true});}
 // ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
@@ -26202,7 +26266,7 @@ function settingsChangeStartDay(){
     <div class="cmod-hdl"></div>
     <div class="cmod-t">Próxima sesión</div>
     <div class="cmod-b">Elige el día con el que quieres entrenar la próxima vez.</div>
-    <div class="ob-days" role="group" aria-label="Días de tu rutina" style="margin-bottom:14px">
+    <div class="ob-days ob-days3" role="group" aria-label="Días de tu rutina" style="margin-bottom:14px">
       ${(()=>{const p=getPlan(),cur=hoyDayKey();return dayKeys(p).map(d=>{const live=_dayLive(p[d]),f=String(p[d].focus||'').split(/\s*[—–]\s*/)[0].trim();
         return`<button type="button" class="ob-day ${cur===d?'sel':''}" aria-pressed="${cur===d}"${live?` onclick="pickNextDay('${d}')"`:' disabled'}>
         <div class="di" aria-hidden="true">${dayEmoji(p[d])}</div>
