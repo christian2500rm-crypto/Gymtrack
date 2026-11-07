@@ -10286,6 +10286,8 @@ const SPLITS = {
   tp4cc: ['T1', 'P1', 'T2', 'P2', 'CCA'], ppl6: ['E1', 'Ti1', 'Pi1', 'E2', 'Ti2', 'Pi2'],
   // v3: reparto 'dias' (D-09; 05 §2.2): torso/pierna/cuerpo completo (3 días seguidos), «ULPPL» (5), torso/pierna ×3 (6, principiantes sin C-21)
   tpc3: ['T1', 'P1', 'CCB'], ulppl: ['T1', 'P1', 'E', 'Ti', 'P2'], tp6: ['T1', 'P1', 'T2', 'P2', 'T3', 'P3'],
+  // v13 (D10, E16e): «más glúteo y pierna» con un entreno por día: más días de pierna que de torso
+  pgp3: ['P1', 'T1', 'P2'], p3t1: ['P1', 'T1', 'P2', 'P3'], tp5g: ['P1', 'T1', 'P2', 'T2', 'P3'], tp6g: ['P1', 'T1', 'P2', 'T2', 'P3', 'Pi2'],
 };
 const CHAIN = ['ppl3', 'tp4', 'tp2', 'cc3', 'cc2'];
 const TWINS = [['CCA', 'CCB'], ['T1', 'T2'], ['P1', 'P2'], ['E1', 'E2'], ['Ti1', 'Ti2'], ['Pi1', 'Pi2']];
@@ -10600,6 +10602,13 @@ return function (K, OPT) {
       else id = beginner ? 'tp6' : 'ppl6';
       chain = { cc2: ['cc2'], cc3: ['cc3', 'cc2'], tp2: ['tp2', 'cc3', 'cc2'], tpc3: ['tpc3', 'tp2'], tp4: ['tp4', 'tp2', 'cc3', 'cc2'], tp4cc: ['tp4cc', 'tp4', 'tp2', 'cc3', 'cc2'],
         ulppl: ['ulppl', 'tp4', 'tp2', 'cc3', 'cc2'], tp6: ['tp6', 'tp4', 'tp2', 'cc3', 'cc2'], ppl6: ['ppl6', 'ppl3', 'tp4', 'tp2', 'cc3', 'cc2'] }[id];
+      // v13 (D10, E16e): con «más glúteo y pierna», más días de pierna que de torso (65+ y prudentes siguen con los suyos); el torso, lo justo
+      // para mantenerlo. Si el material no da para tantos entrenos distintos, la cadena vuelve a los repartos de siempre
+      if (inp.enfoque === 'gluteo' && !col65 && wd >= 3) {
+        const g = { 3: 'pgp3', 4: 'p3t1', 5: 'tp5g', 6: 'tp6g' }[wd];
+        if (g) { id = g; chain = { pgp3: ['pgp3', 'cc3', 'cc2'], p3t1: ['p3t1', 'tp4', 'tp2', 'cc3', 'cc2'], tp5g: ['tp5g', 'ulppl', 'tp4', 'tp2', 'cc3', 'cc2'],
+          tp6g: ['tp6g', 'ppl6', 'tp6', 'tp4', 'tp2', 'cc3', 'cc2'] }[g]; }
+      }
     } else {
       if (col65) {
         if (wd <= 2) id = 'cc2';
@@ -10721,7 +10730,7 @@ return function (K, OPT) {
       if (P.segM) slots.forEach(h => { if (h.id === 'LU') { h.prio = Math.min(h.prio, 2); h.obl = 1; h.uni = 1; } });   // LU obligatorio con apoyo (65+; v7: y «Prefiero no decirlo», C-14)
       slots.forEach(h => { if (h.id === 'EX') h.fijo = 1; if (P.enfoque && h.id === 'HE') h.glu = 1; if (P.prioG.has('biceps') && ['CU', 'TR'].includes(h.id) && h.prio === 2) h.brazo = 1; });   // v8: no lo quitan los topes ni los recortes (salvo el exprés) · v9 (J-08)
       // v9 (J-10): veces por semana que se hace ESTE entreno (con un solo sitio, días de pesas ÷ K en todos)
-      return { n, role, rb, place: pk, P: Pl, slots, lift, gluZ: gluZ ? 1 : 0, f: opt.freq ? opt.freq[ri] : P.wd / opt.roles.length, light: ['tp4', 'tp4cc', 'ulppl', 'ppl6', 'tp6'].includes(opt.id) && LV[P.level] >= LV.I && ['T2', 'P2', 'E2', 'Ti2', 'Pi2'].includes(rb) };
+      return { n, role, rb, place: pk, P: Pl, slots, lift, gluZ: gluZ ? 1 : 0, f: opt.freq ? opt.freq[ri] : P.wd / opt.roles.length, light: ['tp4', 'tp4cc', 'ulppl', 'ppl6', 'tp6', 'pgp3', 'p3t1', 'tp5g', 'tp6g'].includes(opt.id) && LV[P.level] >= LV.I && ['T2', 'P2', 'E2', 'Ti2', 'Pi2'].includes(rb) };
     });
     const st = Object.assign({}, st0, { T, used: new Set(inp.avoid || []), opt, tgt, warn: [], why: [], avoided: new Set(), rest: restTable(inp, P), f: P.wd / T.length, log: [] });
     // E.8 orden de llenado: huecos 1 de todas, luego 2
@@ -12113,8 +12122,8 @@ return function (K, G) {
   function porque(res, inp) {
     // v3: veces por semana que trabaja cada músculo con cada reparto (con K entrenos que rotan por turnos)
     const m = res.meta, out = [], P = G.effective(inp), d = inp.days, fr = x => Math.round(x * 10) / 10;
-    const f = fr({ cc2: m.wd, cc3: m.wd, tp2: m.wd / 2, tp4: m.wd / 2, ppl3: m.wd / 3, tp4cc: 3 * m.wd / 5, ppl6: 2 * m.wd / 6, tpc3: 2 * m.wd / 3, ulppl: 2 * m.wd / 5, tp6: m.wd / 2, fz2: m.wd }[m.split]);
-    const NOMBRE = { tp4: 'torso y pierna en 4 entrenos', tp2: 'torso y pierna en 2 entrenos', cc3: 'cuerpo completo en 3 entrenos', cc2: 'cuerpo completo en 2 entrenos', ppl3: 'empuje, tirón y pierna en 3 entrenos', tpc3: 'torso, pierna y cuerpo completo' };
+    const f = fr({ cc2: m.wd, cc3: m.wd, tp2: m.wd / 2, tp4: m.wd / 2, ppl3: m.wd / 3, tp4cc: 3 * m.wd / 5, ppl6: 2 * m.wd / 6, tpc3: 2 * m.wd / 3, ulppl: 2 * m.wd / 5, tp6: m.wd / 2, fz2: m.wd, pgp3: 2 * m.wd / 3, p3t1: 3 * m.wd / 4, tp5g: 3 * m.wd / 5, tp6g: 4 * m.wd / 6 }[m.split]);
+    const NOMBRE = { tp4: 'torso y pierna en 4 entrenos', tp2: 'torso y pierna en 2 entrenos', cc3: 'cuerpo completo en 3 entrenos', cc2: 'cuerpo completo en 2 entrenos', ppl3: 'empuje, tirón y pierna en 3 entrenos', tpc3: 'torso, pierna y cuerpo completo', pgp3: 'pierna, torso y pierna', p3t1: 'tres días de pierna y uno de torso', tp5g: 'tres días de pierna y dos de torso', tp6g: 'cuatro días de pierna y dos de torso' };
     // reparto
     if (m.split !== m.table && m.split !== 'fz2' && !(m.table === 'cc2' && m.split === 'cc3' && inp.daysOther) && !(inp.daysOther && m.K === m.wd)) {
       if (m.reparto === 'dias' && m.K < m.wd) out.push(`Con tu material no salen ${m.wd} entrenos distintos sin repetir ejercicios ni usar variantes raras: te propongo ${NOMBRE[m.split] || m.K + ' entrenos'} que se repiten.`);   // k_material
@@ -12133,6 +12142,10 @@ return function (K, G) {
     else if (m.split === 'tp6') out.push('Torso y pierna tres veces, con ejercicios distintos cada vez: 6 entrenos, uno por día; cada músculo trabaja 3 veces por semana.');
     else if (m.split === 'tpc3') out.push('Torso, pierna y cuerpo completo: 3 entrenos distintos, uno por día; cada músculo trabaja 2 veces por semana.');
     else if (m.split === 'tp4cc') out.push(`${m.K} entrenos distintos, uno por día: torso y pierna dos veces y uno de cuerpo completo.`);
+    else if (m.split === 'pgp3') out.push('Más glúteo y pierna: dos días de pierna y glúteo y uno de torso (pierna, torso, pierna); el torso, lo justo para mantenerlo.');   // v13 (E16e)
+    else if (m.split === 'p3t1') out.push('Más glúteo y pierna: tres días de pierna y glúteo y uno de torso; el torso, lo justo para mantenerlo.');
+    else if (m.split === 'tp5g') out.push('Más glúteo y pierna: tres días de pierna y glúteo y dos de torso, alternando.');
+    else if (m.split === 'tp6g') out.push('Más glúteo y pierna: cuatro días de pierna y glúteo y dos de torso.');
     else out.push(`${m.K} entrenos distintos, uno por día, para que los días de cada sitio salgan exactos.`);
     // v3 (D-22): «separo torso y pierna» solo si la rutina final tiene días de torso y de pierna
     if (m.why.some(w => w.c === 'consec') && Object.values(m.tpl).some(r => /^T\d/.test(r)) && Object.values(m.tpl).some(r => /^P\d/.test(r))) out.push('Como entrenas días seguidos, separo torso y pierna para que cada zona descanse.');
