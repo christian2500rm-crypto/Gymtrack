@@ -300,6 +300,7 @@ input{font-family:inherit}
 .ob-rr .set-row-info{display:flex;flex-direction:column;gap:2px}
 .ob-rr .set-row-t{font-size:14px;font-weight:500}
 .ob-rr .set-row-d{font-size:12px;color:var(--text2)}
+.ob-hw{border-color:color-mix(in srgb,var(--amber) 45%,transparent);background:color-mix(in srgb,var(--amber) 9%,var(--bg2))}
 .ob-matn{position:sticky;top:56px;z-index:2;padding:8px 0;background:var(--bg);font-size:14px;color:var(--text2)}
 .ob-matn b{color:var(--green);font-family:'DM Mono',monospace}
 .ob-mat .mat-grid{margin:0}
@@ -13617,7 +13618,8 @@ function _sanitizeProfile(o){
   p.power=_bool(o.power);
   p.avoid=_ids(o.avoid,100,_LIBID_RE);
   const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);});
-  p.nr=_oneOf(o.nr,['ent','pro','med']); // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
+  p.nr=_oneOf(o.nr,['ent','pro','med']);
+  p.warn=_oneOf(o.warn,['consulta','matrona']); // (E11b) aviso fijo de salud (§H.2): solo cuál, no el motivo // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
   p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=p.sex==='m'?_oneOf(o.enfoque,PROF_ENFOQUE):null; // (D10) el enfoque solo se pregunta a las mujeres
   return p;
 }
@@ -14077,7 +14079,7 @@ const OB_AUTO={
 };
 // P2 · Objetivo
 OB_SCR['ob-meta']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Qué quieres conseguir?</h1>
-  <p class="ob-sub">Elige lo que más te importa ahora. Podrás cambiarlo cuando quieras.</p>
+  <p class="ob-sub">${_ob.repeat?'Tus respuestas ya están puestas: cambia solo lo que quieras. Tu historial se conserva y, antes de cambiar nada, te enseño qué cambia.':'Elige lo que más te importa ahora. Podrás cambiarlo cuando quieras.'}</p>
   ${_obOpts('goal',[['musculo','💪','Ganar músculo','Más músculo, con pesas y descansos medios.'],['fuerza','🏋️','Ganar fuerza','Mover más peso en los básicos, como la sentadilla o el press. Pocas repeticiones y más descanso.'],
     ['grasa','🔥','Perder grasa','Pesas para conservar el músculo y algo de cardio. Lo que comes manda; yo me ocupo del entreno.'],['salud','❤️','Salud y forma','Moverte mejor y sentirte bien, sin complicarte.'],
     ['aguante','🔋','Aguantar más','Resistencia muscular: más repeticiones y descansos cortos.']],_ob.a.goal)}
@@ -14240,7 +14242,8 @@ function _obNoRoutine(nr){
     if(!S.coachStart)S.coachStart=S.sessions.length>0?(S.sessions[0].ts||Date.now()):Date.now();
     S.obDraft=keep?_sanitizeObDraft({v:1,ts:Date.now(),from:'first',step:'ob-salud',a:keep,alt:0,pins:{},places:_ob.places}):null;
     saveState();hideOnboarding();go('dash');render();
-  }else{hideOnboarding();openSettings();toast('Tu rutina no cambia',2600);}
+  }else{if(S.profile){const w=nr==='med'?'consulta':_ob.h.embTxt==='emb'?'matrona':null;if(w){S.profile.warn=w;S.profile=_sanitizeProfile(S.profile);saveState();}} // (E11b)
+    hideOnboarding();openSettings();toast('Tu rutina no cambia',2600);}
 }
 OB_SCR['ob-menor']={block:3,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">Mejor con un adulto que sepa de esto</h1>
   <p class="ob-sub">Entrenar fuerza a tu edad es buena idea, pero con alguien que te enseñe la técnica: un entrenador o tu profe de Educación Física. No te preparo una rutina automática; puedes usar Gymteca para apuntar lo que hagas con esa persona.</p>
@@ -14765,6 +14768,44 @@ function trainSectionHtml(){
 }
 function applyAcceptedUI(){const r=applyAcceptedPending();if(!r.ok){toast(r.msg||'No se ha podido aplicar',3600);return;}closeSettings();go('dash');render();
   showUndoToast('Rutina nueva aplicada',()=>{const u=restorePlanPrev();render();if(u.ok)toast('Has vuelto a tu rutina anterior',3000);},null,10000);}
+// ── (E11b) Repetir, material, molestias y volver (§H.1, §H.2, §G.12) ──
+// «Repetir el cuestionario»: desde P2 con tus respuestas puestas; al final, «Qué cambia» (o «Guardar mis respuestas y seguir con
+// mi rutina» si la tuya es propia). «✕» mantiene la tuya.
+function repeatQuestionnaire(){closeSettings();showOnboarding({from:'settings',step:'ob-meta'});_obPrefill();_ob.hist=[];_ob.repeat=true;obRender();}
+// «Volver a mi rutina anterior»
+function restorePlanPrevUI(){
+  if(!S.planPrev)return;
+  confirmModal({title:'¿Volver a tu rutina anterior?',body:'Vuelve la de antes del último cambio, con su objetivo semanal, su día y tus respuestas de entonces. La de ahora queda guardada por si quieres volver.',
+    okText:'Volver a la anterior',cancelText:'Cancelar',onOk:()=>{const r=restorePlanPrev();if(!r.ok){toast(r.msg||'No hay rutina anterior',3600);return;}
+      saveState();render();renderSettings();toast('Has vuelto a tu rutina anterior'+(r.deload?'. Tu descarga terminó al cambiar de rutina':''),3200);}});
+}
+// «Mis molestias»: lo guardado (con consentimiento), borrarlo y si va en las copias de seguridad
+function openMyHealth(){
+  const h=S.health,z=h?Object.keys(h.zones||{}):[],K={ahora:'me duele ahora',antigua:'lesión antigua',op:'operada hace menos de un año',reciente:'lesión reciente'};
+  const items=h?z.map(k=>`${(OB_ZONES.find(x=>x[0]===k)||['',k])[2]}: ${K[h.zones[k]]||''}`).concat(h.huesos?['Huesos frágiles']:[],h.posparto?['Posparto con el alta']:[],h.prudent?['Ir con calma (sin el motivo)']:[]):[];
+  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Mis molestias</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+  <div class="hist-sheet-body ob-qc">${h?`<p>Guardado en este móvil desde el ${esc(fmtDate(new Date(h.consent.ts)))}:</p><ul class="ob-ul">${(items.length?items:['Nada marcado']).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`:'<p>No guardo ninguna molestia ni nada de tu salud. Cuando cambies tu rutina, te lo vuelvo a preguntar.</p>'}
+    <div class="set-row ob-sw" role="switch" aria-checked="${S.bkHealth!==false}" tabindex="0" onclick="myHealthBk()" onkeydown="if(event.key===' '||event.key==='Enter'){event.preventDefault();myHealthBk();}">
+      <div class="set-row-info"><div class="set-row-t">Incluir en las copias de seguridad</div><div class="set-row-d">Si lo apagas, «Exportar» y «Copiar datos» no llevan tus molestias.</div></div><div class="sw${S.bkHealth!==false?' on':''}" aria-hidden="true"><div class="sw-k"></div></div></div>
+    ${h?'<button type="button" class="btn bs" onclick="myHealthDelete()">Borrar mis molestias</button>':''}
+    <button type="button" class="ob-link" onclick="obPrivacy()">Qué guardo y cómo borrarlo</button></div>`,'Mis molestias');
+}
+function myHealthBk(){S.bkHealth=S.bkHealth===false;saveState();openMyHealth();}
+function myHealthDelete(){confirmModal({title:'¿Borrar tus molestias?',body:'Se borran de este móvil. Tu rutina no cambia; si la regeneras, te las vuelvo a preguntar.',okText:'Borrar',cancelText:'Cancelar',danger:true,
+  onOk:()=>{S.health=null;saveState();openMyHealth();renderSettings();toast('Borrado',2000);}});}
+// Tras guardar «Mi material» con rutina generada: «¿Adapto tu rutina a tu material?» → «Qué cambia» → aplicar
+function myMatAdapt(){
+  if(!S.profile||S.profile.mode!=='gen')return;
+  confirmModal({title:'¿Adapto tu rutina a tu material?',body:'Con tu material de ahora te preparo la rutina otra vez; antes de cambiar nada te enseño qué cambia.',okText:'Ver qué cambia',cancelText:'Ahora no',
+    onOk:()=>{closeSettings();showOnboarding({from:'settings',step:'ob-resp'});_obPrefill();_ob.hist=[];_ob.healthAsked=!S.health?true:true;_ob.step='ob-resp-qc';obRender();}});
+}
+// Avisos fijos de salud (§H.2): si desde Ajustes marcas síntomas o embarazo, la rutina se queda y el aviso, hasta que lo quites
+function healthWarnHtml(){
+  const w=S.profile&&S.profile.warn;if(!w)return'';
+  const t=w==='consulta'?'Consulta antes de seguir entrenando con esfuerzo':'Tu rutina no está adaptada al embarazo: revísala con tu matrona';
+  return`<div class="card ob-own ob-hw" role="status"><div class="ob-own-t">⚠️ ${esc(t)}</div><button type="button" class="btn bs" onclick="healthWarnOk()">${w==='consulta'?'Ya lo he consultado':'Ya la he revisado'}</button></div>`;
+}
+function healthWarnOk(){if(!S.profile)return;S.profile.warn=null;S.profile=_sanitizeProfile(S.profile);saveState();render();}
 // ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
@@ -15153,6 +15194,7 @@ document.addEventListener('keydown',e=>{
     if(_libKitOpen){closeLibKit();return;} // «Mi material», encima del selector (y de la ficha)
     if(_libDetail){closeLibDetail();return;} // (11) la ficha de un ejercicio, encima del selector
     if(_pickerState){closeExercisePicker();return;}
+    if(!_obOpen()&&(document.getElementById('ob-sheet-root')||{}).innerHTML){obSheetClose();return;} // (E11b) «Mis molestias» encima de Ajustes
     if(_obOpen()){obEsc();return;} // (E7) el cuestionario (z 390): debajo del selector, encima de Ajustes
     if(_busy){closeBusy();return;} // (11) hoja «¿Máquina ocupada?»
     // Otros modales propios de #cmodal-root (trasladar historial, editar peso, próxima sesión…)
@@ -19876,7 +19918,7 @@ function renderDash(){
     <button class="settings-btn" aria-label="Ajustes" onclick="openSettings()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
   </div>
   </div></div>
-  ${S.profile&&S.profile.nr&&!liveDayKeys().length?noRoutineCardHtml():hoyCardHtml()}
+  ${healthWarnHtml()}${S.profile&&S.profile.nr&&!liveDayKeys().length?noRoutineCardHtml():hoyCardHtml()}
   ${ownCardHtml()}${safetyCardHtml()}
   ${dashCoachHtml()}
   ${rest0?'':`<div class="sh">Esta semana</div>
@@ -21189,7 +21231,8 @@ function renderWorkout(){
       </div>`:''}
     </div>`;
   }).join('');
-  return`
+  const _hw=healthWarnHtml(); // (E11b) aviso fijo de salud, arriba
+  return`${_hw}
   <div class="topbar"><div class="topbar-row"><div><h1>${esc(day.label)}</h1><div class="sub">${esc(day.focus)}${(()=>{
     const rs=reopenedFor(S.day);
     return rs?` · <span style="color:var(--amber)">↩ reabierta (${esc(rs.session.date||'')})</span>`:'';
@@ -24969,6 +25012,7 @@ function saveMyMaterial(){
   if(!_myMat)return;const d=_sanitizePlaces(_myMat.draft);if(!d){toast('Elige al menos un sitio');return;}
   S.places=d;_syncLibKit();saveState();
   closeMyMaterial();toast('Guardado: tu material');
+  if(S.profile&&S.profile.mode==='gen'&&typeof myMatAdapt==='function')setTimeout(myMatAdapt,0); // (E11b)
   if(_pickerState){_pickerState.ctx=_libCtx();_pickerRefresh(true);}
   render();
 }
