@@ -249,6 +249,15 @@ input{font-family:inherit}
 .ob-chk.on .ob-cb{background:var(--amber);border-color:var(--amber)}
 .ob-chk:focus-visible,.ob-none:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ob-none{margin-top:4px}
+.ob-zones{display:flex;flex-wrap:wrap;gap:8px}
+.ob-zc[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--accent-ink);font-weight:600}
+.ob-zd{display:flex;flex-direction:column;gap:6px;padding:12px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2)}
+.ob-zd .lib-place{margin:0}
+.ob-err{color:var(--red);font-size:14px;margin:0}
+.ob-chk.ok{border-color:var(--green);background:var(--green-bg2)}
+.ob-chk.ok .ob-cb{background:var(--green);border-color:var(--green)}
+.ob-chk-d{font-size:12px;color:var(--text2)}
+.ob-priv p{font-size:14px;line-height:1.6;color:var(--text2);margin:0 0 10px}
 .ob-matn{position:sticky;top:56px;z-index:2;padding:8px 0;background:var(--bg);font-size:14px;color:var(--text2)}
 .ob-matn b{color:var(--green);font-family:'DM Mono',monospace}
 .ob-mat .mat-grid{margin:0}
@@ -14252,6 +14261,108 @@ function noRoutineCardHtml(){
   return`<div class="card ob-own" id="ob-nr"><div class="ob-own-t">${esc(t)}</div>${d}
     ${p.nr==='med'?`<button type="button" class="btn bp" onclick="showOnboarding({from:'first',step:'ob-salud'})">Ya tengo su visto bueno ›</button>`:`<button type="button" class="btn bs" onclick="openRoutineEditor('A')">Editar rutina</button>`}</div>`;
 }
+// ── (E9b) Molestias, deporte y prioridades (§C P9, P10, P10m, P11; §I.2) ──
+const OB_ZONES=[['rodilla','🦵','Rodilla'],['hombro','💪','Hombro'],['lumbar','🔙','Espalda baja'],['muneca','✋','Muñeca o codo'],['cadera','🦴','Cadera'],['otra','➕','Otra zona']];
+const OB_ZKIND=[['ahora','Me duele ahora'],['antigua','Lesión antigua'],['op','Me operaron hace menos de un año']];
+// ¿Hay que pedir el consentimiento? (zonas, huesos frágiles, «ir con calma» de P8 o el posparto con el alta)
+function _obNeedConsent(){const h=_ob.h;return Object.keys(h.zones||{}).length>0||!!h.huesos||_obPrudent()||h.posparto==='alta';}
+function _obPrudent(){const s=_obScr();return s.has('enf')||s.has('med')||!!_ob.h.visto||!!_ob.h.superv||_ob.h.posparto==='alta';}
+// Preferencias con su defecto a la vista y desmarcable: «sin suelo» con 65 o más; «sin saltos» con huesos frágiles, posparto o una
+// zona que duele ahora, operada o con lesión reciente (se marca en vivo)
+function _obPrefDef(){const h=_ob.h,z=h.zones||{};return{floor:!['65','75'].includes(_ob.a.age),impact:!(h.huesos||h.posparto==='alta'||Object.values(z).some(v=>['ahora','op','reciente'].includes(v)))};}
+function _obPref(){const d=_obPrefDef(),u=_ob.h.prefU||{};return{floor:'floor' in u?u.floor:d.floor,impact:'impact' in u?u.impact:d.impact};}
+function obZone(z){if(!_ob)return;const h=_ob.h;h.zones=Object.assign({},h.zones||{});h.zrec=Object.assign({},h.zrec||{});
+  if(z in h.zones){delete h.zones[z];delete h.zrec[z];}else h.zones[z]=null;_ob.h.err=null;obRender({keepFocus:true,keepScroll:true});
+  const b=document.querySelector(`#ob-root [data-z="${z}"]`);if(b)try{b.focus();}catch(e){}}
+function obZoneKind(z,k){if(!_ob)return;const h=_ob.h;h.zones[z]=k;if(k!=='ahora')delete (h.zrec||{})[z];_ob.h.err=null;obRender({keepFocus:true,keepScroll:true});}
+function obZoneRec(z,v){if(!_ob)return;const h=_ob.h;h.zrec=Object.assign({},h.zrec||{});h.zrec[z]=v;_ob.h.err=null;obRender({keepFocus:true,keepScroll:true});}
+function obZoneOtra(v){if(!_ob)return;_ob.h.otraTxt=v;obRender({keepFocus:true,keepScroll:true});}
+function obHuesos(){if(!_ob)return;_ob.h.huesos=!_ob.h.huesos;obRender({keepFocus:true,keepScroll:true});}
+function obPrefT(k){if(!_ob)return;const p=_obPref();_ob.h.prefU=Object.assign({},_ob.h.prefU||{});_ob.h.prefU[k]=!p[k];obRender({keepFocus:true,keepScroll:true});}
+function obConsent(){if(!_ob)return;_ob.h.consent=!_ob.h.consent;obRender({keepFocus:true,keepScroll:true});}
+const _obChk=(on,attr,fn,ic,t,d)=>`<button type="button" class="ob-chk${on?' on ok':''}" role="checkbox" aria-checked="${on}" ${attr} onclick="${fn}"><span class="ob-cb" aria-hidden="true">${on?'✓':''}</span>${ic?`<span class="ob-ci" aria-hidden="true">${ic}</span>`:''}<span class="ob-ct"><span>${esc(t)}</span>${d?`<span class="ob-chk-d">${esc(d)}</span>`:''}</span></button>`;
+OB_SCR['ob-molestias']={block:3,html:()=>{const h=_ob.h,z=h.zones||{},p=_obPref(),any=Object.keys(z).length||h.huesos,need=_obNeedConsent();
+  const zone=([k,ic,t])=>{const on=k in z;return`<button type="button" class="lib-chip ob-zc" aria-pressed="${on}" data-z="${k}" onclick="obZone('${k}')"><span aria-hidden="true">${ic}</span> ${esc(t)}</button>`;};
+  const det=Object.keys(z).map(k=>{const t=(OB_ZONES.find(x=>x[0]===k)||[])[2]||k,kind=z[k]==='reciente'?'ahora':z[k];
+    return`<div class="ob-zd"><div class="ob-lbl">${esc(t)}: ¿cómo es?</div><div class="lib-place ob-seg" role="radiogroup" aria-label="${esc(t)}: ¿cómo es?">${OB_ZKIND.map(([v,l])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${kind===v}" data-zk="${k}:${v}" onclick="obZoneKind('${k}','${v}')">${esc(l)}</button>`).join('')}</div>
+      ${kind==='ahora'?`<div class="ob-lbl">¿Es por un golpe, una caída o un tirón de las últimas 6 semanas, o la zona está hinchada?</div><div class="lib-place ob-seg" role="radiogroup">${[['si','Sí'],['no','No']].map(([v,l])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${(h.zrec||{})[k]===v}" data-zr="${k}:${v}" onclick="obZoneRec('${k}','${v}')">${l}</button>`).join('')}</div>`:''}
+      ${k==='otra'?`<div class="lib-place ob-seg" role="radiogroup" aria-label="Qué zona">${[['cuello','Cuello'],['tobillo','Tobillo o pie'],['otra','Otra']].map(([v,l])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${h.otraTxt===v}" onclick="obZoneOtra('${v}')">${l}</button>`).join('')}</div>`:''}</div>`;}).join('');
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">${_ob.from==='settings'&&!S.health?'No guardé tus molestias: ¿tienes alguna ahora?':'¿Te molesta alguna zona al entrenar?'}</h1>
+  <p class="ob-sub">Elegiré ejercicios que no la carguen. No es un diagnóstico.</p>
+  <div class="ob-zones">${OB_ZONES.map(zone).join('')}</div>${det}
+  ${h.err?`<p class="ob-err" role="alert">${esc(h.err)}</p>`:''}
+  <div class="ob-lbl">Tus huesos</div>
+  ${_obChk(!!h.huesos,'data-k="huesos"','obHuesos()','🦴','Huesos frágiles (osteoporosis o una fractura por un golpe leve)')}
+  <div class="ob-lbl">Y para que estés a gusto</div>
+  ${_obChk(!p.impact,'data-k="impact"',"obPrefT('impact')",'🔇','Prefiero sin saltos ni impacto')}
+  ${_obChk(!p.floor,'data-k="floor"',"obPrefT('floor')",'🧘','Mejor sin tumbarme en el suelo')}
+  ${need?`${_obChk(!!h.consent,'data-k="consent"','obConsent()','','Guardar en este móvil mis molestias y lo que marqué de mi salud (sin el detalle), para tenerlo en cuenta cuando cambie mi rutina. Puedo borrarlo cuando quiera.')}
+    <button type="button" class="ob-link" onclick="obPrivacy()">Qué guardo y cómo borrarlo</button>
+    ${h.consent?'':'<p class="ob-foot">Las usaré solo para esta rutina y no las guardo.</p>'}`:''}
+  ${_obWhy('Por ejemplo, con la rodilla que duele quito saltos y zancadas largas y uso prensa y sentadilla a un cajón. Si algo duele de verdad, para y consulta.')}
+  <div class="ob-next">${any?`<button type="button" class="btn bp" id="ob-go" onclick="obPainNext()">Seguir →</button>`:`<button type="button" class="btn bp" id="ob-go" onclick="obPainNext()">Ninguna</button>`}
+  <button type="button" class="ob-link" onclick="obPainSkip()">Prefiero no decirlo</button></div>`;}};
+// Validación con texto: cada zona con su tipo y, si duele ahora, si es reciente
+function obPainNext(){
+  if(!_ob)return;const h=_ob.h,z=h.zones||{};
+  for(const k of Object.keys(z)){const t=((OB_ZONES.find(x=>x[0]===k)||[])[2]||k).toLowerCase();
+    if(!z[k]){h.err=`Dime cómo es la molestia de la ${t}.`;obRender({keepFocus:true,keepScroll:true});return;}
+    if((z[k]==='ahora'||z[k]==='reciente')&&!(h.zrec||{})[k]){h.err='Dime si es de las últimas semanas.';obRender({keepFocus:true,keepScroll:true});return;}}
+  Object.keys(z).forEach(k=>{if(z[k]==='ahora'||z[k]==='reciente')z[k]=(h.zrec||{})[k]==='si'?'reciente':'ahora';});
+  h.err=null;obGo('ob-deporte');
+}
+function obPainSkip(){if(!_ob)return;_ob.h.zones={};_ob.h.huesos=false;_ob.h.err=null;obGo('ob-deporte');}
+// P10 · Otro deporte o cardio (opcional)
+OB_SCR['ob-deporte']={block:3,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Haces otro deporte o cardio?</h1>
+  <p class="ob-sub">Para no pasarme con las piernas y decidir si añado cardio a tu rutina.</p>
+  ${_obOpts('sport',[['no','🛋️','No, por ahora no'],['suave','🚶','Camino o voy en bici, tranquilo'],['piernas','🏃','Corro o hago deporte de piernas','Fútbol, pádel, baloncesto…'],['agua','🏊','Nado, remo o algo parecido']],_ob.a.sport)}
+  <button type="button" class="ob-link" onclick="obPick('sport','no')">Saltar</button>
+  ${_obWhy('Si ya haces cardio, no lo repito; si corres o juegas, te pongo algo menos de pierna.')}`};
+// P10m solo si P8 dijo enfermedad o medicación y ahora no hace ejercicio
+OB_AUTO.sport=v=>{const s=_obScr(),inact=(_ob.a.exp==='cero'||_ob.a.exp==='paron')&&v==='no';return(s.has('enf')||s.has('med'))&&inact?'ob-consulta':'ob-foco';};
+OB_SCR['ob-consulta']={block:3,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">Antes de empezar, coméntalo con tu médico</h1>
+  <p class="ob-sub">Con lo que marcaste, y como ahora no haces ejercicio, lo recomendable es comentarlo con tu médico antes de empezar, aunque sea suave.</p>
+  <div class="ob-acts"><button type="button" class="btn bp" onclick="_ob.h.consulta='hablado';obGo('ob-foco')">Ya lo he hablado</button>
+  <button type="button" class="btn bs" onclick="_ob.h.consulta='igual';obGo('ob-foco')">Empezar suave igualmente</button><button type="button" class="btn bs" onclick="obBack()">‹ Atrás</button></div>`};
+// P11 · Prioridades (hasta 2; con «más glúteo» de D10, el glúteo ya ocupa una)
+const OB_PRIO=[['pecho','Pecho'],['espalda','Espalda'],['hombros','Hombros'],['brazos','Brazos'],['gluteos','Glúteos'],['piernas','Piernas'],['abdomen','Abdomen']];
+function obPrio(k){
+  if(!_ob)return;const glu=_ob.a.enfoque==='gluteo',max=glu?1:2;let p=(_ob.a.prio||[]).filter(x=>!(glu&&x==='gluteos'));
+  if(glu&&k==='gluteos')return;
+  if(p.includes(k))p=p.filter(x=>x!==k);else if(p.length>=max){_ob.h.prioMsg=glu?'Como mucho 2: el glúteo ya cuenta como una.':'Como mucho 2.';obRender({keepFocus:true,keepScroll:true});return;}else p.push(k);
+  _ob.a.prio=p;_ob.h.prioMsg=null;_obSaveDraft();obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root [data-p="${k}"]`);if(b)try{b.focus();}catch(e){}
+}
+OB_SCR['ob-foco']={block:3,html:()=>{const glu=_ob.a.enfoque==='gluteo',p=(_ob.a.prio||[]).filter(x=>!(glu&&x==='gluteos')),none=!p.length;
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Quieres dar prioridad a alguna zona?</h1>
+  <p class="ob-sub">${glu?'Con «Más glúteo y pierna», el glúteo ya es una de tus dos prioridades: elige otra si quieres.':'Elige hasta 2. Les doy algo más de trabajo, sin descuidar el resto.'}</p>
+  <div class="ob-zones" role="group" aria-label="Prioridades">${OB_PRIO.map(([k,t])=>{const on=p.includes(k)||(glu&&k==='gluteos');
+    return`<button type="button" class="lib-chip ob-zc" aria-pressed="${on}" data-p="${k}" ${glu&&k==='gluteos'?'aria-disabled="true"':''} onclick="obPrio('${k}')">${esc(t)}${glu&&k==='gluteos'?' ✓':''}</button>`;}).join('')}</div>
+  <p class="ob-foot" aria-live="polite">${esc(_ob.h.prioMsg||(p.length?'Prioridad: '+p.map(k=>OB_PRIO.find(x=>x[0]===k)[1].toLowerCase()).join(' y ')+'.':''))}</p>
+  ${_obWhy('Si priorizas todo, no priorizas nada: con 2 basta.')}
+  ${_obNextBtn('obFinishQs()',none?'Todo por igual →':'Seguir →')}`;}};
+// Respuestas para el generador (con lo de salud en memoria) y lo que se guarda (sin ello, salvo con consentimiento)
+function _obAnswers(){
+  const a=JSON.parse(JSON.stringify(_ob.a)),h=_ob.h||{},s=_obScr();
+  const scr=[];['enf','med'].forEach(k=>{if(s.has(k))scr.push(k);});if(h.visto)scr.push('visto');if(h.superv)scr.push('superv');
+  a.screen=scr.length?scr:'nada';a.zones=JSON.parse(JSON.stringify(h.zones||{}));a.huesos=!!h.huesos;if(h.posparto==='alta')a.posparto='alta';
+  a.pref=_obPref();a.places=JSON.parse(JSON.stringify(_ob.places||{}));a.sport=a.sport||'no';a.prio=(a.prio||[]).filter(x=>!(a.enfoque==='gluteo'&&x==='gluteos'));
+  a.style=a.style||'igual';a.power=!!a.power;a.cardioEnd=a.cardioEnd||'auto';a.daysOther=a.daysOther||0;a.consec=!!a.consec;
+  if(a.enfoque!=='gluteo')delete a.enfoque;
+  return a;
+}
+function _obHealthObj(){
+  const h=_ob.h||{};if(!h.consent||!_obNeedConsent())return null;
+  return _sanitizeHealth({v:1,ts:Date.now(),consent:{ts:Date.now(),ver:'1'},zones:h.zones||{},otraTxt:h.otraTxt,huesos:!!h.huesos,posparto:h.posparto==='alta',prudent:_obPrudent(),screenTs:Date.now()});
+}
+// Fin de las preguntas: al resultado (E10a)
+function obFinishQs(){if(!_ob)return;_obSaveDraft();if(OB_SCR['ob-rutina'])obGo('ob-rutina');}
+// «Qué guardo y cómo borrarlo» (la hoja completa llega en E13)
+function obPrivacy(){obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Qué guardo y cómo borrarlo</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+  <div class="hist-sheet-body ob-priv">${_privacyTxtHtml()}</div>`,'Qué guardo y cómo borrarlo');}
+function _privacyTxtHtml(){return`<p>Todo se queda en este móvil: no hay cuenta ni servidor.</p>
+  <p>Con tu permiso guardo tus molestias (zona y tipo), si tienes huesos frágiles, el posparto con el alta y que conviene ir con calma, <b>sin el motivo</b>. Sin tu permiso, las uso solo para la rutina de ahora y no quedan en ningún sitio.</p>
+  <p>Nunca guardo tu edad si tienes menos de 16, ni si estás embarazada, ni qué marcaste en «Antes de empezar».</p>
+  <p>Puedes borrarlo cuando quieras en Ajustes › Tu entrenamiento › Mis molestias. Las copias de seguridad las llevan solo si lo dejas activado allí.</p>`;}
 // ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
