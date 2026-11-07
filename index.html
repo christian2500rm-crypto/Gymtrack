@@ -194,7 +194,38 @@ input{font-family:inherit}
 .wo-empty{padding:4px 16px 16px}.wo-empty .empty{padding:20px 8px 14px}.wo-empty .btn{width:100%} /* (E1a) día sin ejercicios en Entreno */
 .fbanner{background:var(--green-bg);border:1px solid var(--green-b);border-radius:var(--rsm);padding:12px 14px;margin:0 14px 8px;font-size:13px;color:var(--green-hi);line-height:1.5}
 /* ONBOARDING */
-#onboarding{position:fixed;inset:0;background:var(--bg);z-index:999;display:flex;flex-direction:column;overflow-y:auto;padding:calc(var(--st) + 44px) 24px calc(var(--sb) + 40px);max-width:480px;margin:0 auto}
+#onboarding{position:fixed;inset:0;background:var(--bg);z-index:390;display:flex;flex-direction:column;overflow-y:auto;padding:calc(var(--st) + 24px) 20px calc(var(--sb) + 28px);max-width:480px;margin:0 auto}
+/* (E7) Cuestionario: capa a 390 (encima: confirmModal 400, Wrapped, toast, selector, ficha y «Mi material»; debajo: Ajustes y editor) */
+#ob-root{display:flex;flex-direction:column;gap:18px;min-height:100%}
+.ob-body{display:flex;flex-direction:column;gap:16px;animation:fu .3s ease}
+.ob-head{position:sticky;top:calc(-1*(var(--st) + 24px));z-index:3;display:flex;align-items:center;gap:6px;min-height:56px;margin:calc(-1*(var(--st) + 24px)) -20px 0;padding:var(--st) 8px 0;background:var(--bg)}
+.ob-hb{width:44px;height:44px;flex:none;border:0;border-radius:12px;background:none;color:var(--text);font-size:24px;line-height:1;cursor:pointer}
+.ob-hb:focus-visible,.ob-card:focus-visible,.ob-link:focus-visible,.ob-dn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.ob-prog{flex:1;display:flex;flex-direction:column;gap:5px;align-items:stretch}
+.ob-bars{display:flex;gap:4px}.ob-bars i{flex:1;height:4px;border-radius:2px;background:var(--border2)}.ob-bars i.on{background:var(--green)}.ob-bars i.cur{background:color-mix(in srgb,var(--green) 55%,var(--border2))}
+.ob-blk{font-size:11px;color:var(--text3);text-align:center;letter-spacing:.2px}
+#ob-h{outline:none}
+.ob-q{font-size:17px;font-weight:600;margin:4px 0 -4px}
+.ob-acts{display:flex;flex-direction:column;gap:10px}
+.ob-card{display:flex;gap:14px;align-items:flex-start;width:100%;min-height:56px;padding:15px 16px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
+.ob-card:active{transform:scale(.99)}
+.ob-card.on,.ob-card[aria-checked=true]{border-color:var(--green);background:var(--green-bg2)}
+.ob-ci{font-size:24px;line-height:1.2;flex:none}
+.ob-ct{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.ob-ct b{font-size:16px;font-weight:600;line-height:1.3}
+.ob-ct span{font-size:13px;color:var(--text2);line-height:1.5}
+.ob-tag{font-family:'DM Mono',monospace;font-size:11px;color:var(--green);font-style:normal}
+.ob-link{align-self:flex-start;min-height:44px;padding:10px 0;border:0;background:none;color:var(--green);font:inherit;font-size:14px;text-align:left;cursor:pointer}
+.ob-foot{font-size:12px;color:var(--text3);line-height:1.5}
+.ob-resume{font-size:13px;color:var(--green)}
+.ob-own,.ob-safe{display:flex;flex-direction:column;gap:10px}
+.ob-own-t{font-size:16px;font-weight:600}
+.ob-own-l{font-size:13px;color:var(--text2)}
+.ob-own-p{font-size:13px;color:var(--text2);line-height:1.55;margin:0}
+.ob-days{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.ob-dn{min-height:48px;border:1px solid var(--border2);border-radius:12px;background:var(--bg2);color:var(--text);font:inherit;font-family:'DM Mono',monospace;font-size:18px;font-weight:600;cursor:pointer}
+.ob-dn.on{border-color:var(--green);background:var(--green-bg2);color:var(--green)}
+#ob-sheet-root .ob-over{z-index:395}
 .ob-step{display:none;flex-direction:column;gap:22px}
 .ob-step.active{display:flex;animation:fu .35s ease}
 @keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
@@ -1748,41 +1779,23 @@ input[type=number]{-moz-appearance:textfield}
 </head>
 <body>
 
-<div id="onboarding">
-  <div class="ob-step active" id="ob1">
-    <div class="ob-dots"><div class="ob-dot on"></div><div class="ob-dot"></div></div>
-    <div>
-      <svg class="ob-teca" viewBox="278 206 468 638" role="img" aria-label="Teca, la pesa de Gymteca"><path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="var(--green)" stroke-width="92" stroke-linecap="round"/><path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="var(--green)"/><g fill="none" stroke="var(--bg)" stroke-linecap="round" stroke-linejoin="round"><circle cx="436" cy="648" r="34" fill="var(--bg)" stroke="none"/><path d="M554 658q34-46 68 0" stroke-width="28"/><path d="M442 728q70 66 140 0" stroke-width="30"/></g></svg>
-      <div class="ob-title">Bienvenido a Gymteca</div>
+<div id="onboarding" role="dialog" aria-modal="true" aria-labelledby="ob-h">
+  <svg style="display:none" aria-hidden="true"><symbol id="ob-teca-path" viewBox="278 206 468 638"><path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="var(--green)" stroke-width="92" stroke-linecap="round"/><path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="var(--green)"/><g fill="none" stroke="var(--bg)" stroke-linecap="round" stroke-linejoin="round"><circle cx="436" cy="648" r="34" fill="var(--bg)" stroke="none"/><path d="M554 658q34-46 68 0" stroke-width="28"/><path d="M442 728q70 66 140 0" stroke-width="30"/></g></symbol></svg>
+  <div id="ob-live" class="sr-only" aria-live="polite"></div>
+  <div id="ob-root"><div class="ob-body" data-scr="ob-hola">
+    <svg class="ob-teca" viewBox="278 206 468 638" aria-hidden="true"><use href="#ob-teca-path"/></svg>
+    <h1 class="ob-title" id="ob-h" tabindex="-1">Te doy la bienvenida a Gymteca</h1>
+    <p class="ob-sub">Tu entrenamiento, ordenado y a tu ritmo. Sin cuenta y sin conexión: lo que respondas se queda en este móvil.</p>
+    <h2 class="ob-q">¿Cómo quieres empezar?</h2>
+    <div class="ob-acts">
+      <button type="button" class="ob-card" onclick="obStart('gen')"><span class="ob-ci" aria-hidden="true">✨</span><span class="ob-ct"><b>Créame una rutina</b><span>Te hago unas preguntas y te preparo una rutina completa con tu material.</span><em class="ob-tag">Unos 2-3 min</em></span></button>
+      <button type="button" class="ob-card" onclick="obStart('own')"><span class="ob-ci" aria-hidden="true">📋</span><span class="ob-ct"><b>Ya tengo una rutina</b><span>Entras directo a la app. Puedes meter tu rutina o pedirme una cuando quieras.</span></span></button>
     </div>
-    <div class="ob-sub">Tu app de entrenamiento personal. Simple, sin distracciones, diseñada para ir al gym 3 veces por semana y ver resultados reales.</div>
-    <div>
-      <div class="ob-lbl">¿Cuánto pesas hoy? (kg)</div>
-      <input class="ob-inp" id="ob-weight" type="number" placeholder="105" step="0.1" inputmode="decimal"/>
-    </div>
-    <div>
-      <button class="btn bp" onclick="obNext()">Continuar →</button>
-      <p style="font-size:12px;color:var(--text3);text-align:center;margin-top:10px">Este será tu punto de partida real.</p>
-    </div>
-  </div>
-  <div class="ob-step" id="ob2">
-    <div class="ob-dots"><div class="ob-dot"></div><div class="ob-dot on"></div></div>
-    <div>
-      <div class="ob-title">¿Con qué día empezamos?</div>
-      <div class="ob-sub" style="margin-top:8px">Elige el entrenamiento de tu primera sesión. El orden A → B → C rotará solo.</div>
-    </div>
-    <div class="ob-days">
-      <div class="ob-day sel" id="sel-A" onclick="selDay('A')"><div class="di">🦵</div><div class="dn">Día A</div><div class="df">Piernas y abdomen</div></div>
-      <div class="ob-day" id="sel-B" onclick="selDay('B')"><div class="di">🏋️</div><div class="dn">Día B</div><div class="df">Pecho, hombros, tríceps</div></div>
-      <div class="ob-day" id="sel-C" onclick="selDay('C')"><div class="di">🚣</div><div class="dn">Día C</div><div class="df">Espalda y bíceps</div></div>
-    </div>
-    <p style="font-size:12px;color:var(--text3);line-height:1.55">💡 Si es tu primer día, empieza con el Día A. Si ya tienes historial, elige el que corresponda.</p>
-    <div>
-      <button class="btn bp" onclick="obFinish()">Empezar a entrenar →</button>
-      <button class="btn bs" style="margin-top:8px" onclick="obBack()">← Volver</button>
-    </div>
-  </div>
+    <button type="button" class="ob-link" onclick="obRestore()">💾 ¿Tienes una copia de seguridad? Restaurar</button>
+    <p class="ob-foot">Podrás cambiar esto cuando quieras en Ajustes.</p>
+  </div></div>
 </div>
+<div id="ob-sheet-root"></div>
 
 <div id="app" style="display:none">
   <!-- (15) Aviso de versión nueva: arriba y en el flujo (empuja la pantalla, no tapa nada) -->
@@ -13792,6 +13805,158 @@ function genRowToEx(row){
 // primero; la app enseña los 3 primeros avisos y el resto en «ver más»). g = genRoutineFrom(…).
 function genTexts(g){const X=g.E.X;return{porque:X.porque(g.res,g.inp),avisos:X.avisos(g.res,g.inp),visibles:X.AVISOS_VISIBLES};}
 // ══════════════════════════════════════════════════════════
+// (E7) CUESTIONARIO: CAPA, BIENVENIDA Y «YA TENGO UNA» (30-propuesta-final.md §B, §C.0, P1, §G.11)
+// ══════════════════════════════════════════════════════════
+// La capa #onboarding (z 390: encima quedan confirmModal, el selector, la ficha y «Mi material»; debajo, Ajustes y el editor) pinta
+// una pantalla cada vez en #ob-root. _ob vive solo en memoria: las respuestas que no son de salud van además al borrador (S.obDraft)
+// al momento; las de salud (P8, P8p, P9), solo en memoria hasta el consentimiento (§D.1).
+let _ob=null;
+const OB_SCR={}; // pantallas: {html(), block, auto, title}
+const OB_BLOCK_LBL=['','Tu objetivo','Tu tiempo y tu sitio','Tu cuerpo'];
+function _obOpen(){return!!_ob;}
+function _obEl(){return document.getElementById('onboarding');}
+// Abre el cuestionario. o = {from:'first'|'settings', step}
+function showOnboarding(o){
+  o=o||{};const d=S.obDraft;
+  const a=d&&_isPlainObj(d.a)?JSON.parse(JSON.stringify(d.a)):{};
+  _ob={from:o.from==='settings'?'settings':'first',step:'ob-hola',hist:[],a,h:{},alt:d?d.alt||0:0,pins:d&&d.pins?Object.assign({},d.pins):{},
+    places:d&&d.places?JSON.parse(JSON.stringify(d.places)):null,resumed:false};
+  let st=o.step||(d&&OB_STEPS.includes(d.step)?d.step:null);
+  // (§C.0) los pasos de salud nunca se retoman desde el borrador: se vuelven a preguntar
+  if(st&&['ob-salud','ob-medico','ob-supervision','ob-posparto','ob-embarazo','ob-molestias','ob-consulta'].includes(st))st='ob-salud';
+  if(st&&st!=='ob-hola'&&OB_SCR[st]){_ob.step=st;_ob.resumed=!o.step;}
+  else if(_ob.from==='settings')_ob.step=OB_SCR['ob-meta']?'ob-meta':'ob-hola';
+  const ob=_obEl(),app=document.getElementById('app');
+  ob.style.display='flex';ob.setAttribute('role','dialog');ob.setAttribute('aria-modal','true');ob.setAttribute('aria-labelledby','ob-h');
+  if(_ob.from==='first')app.style.display='none';
+  app.inert=true;
+  obRender();
+}
+function hideOnboarding(){
+  _ob=null;const ob=_obEl(),app=document.getElementById('app');
+  ob.style.display='none';app.style.display='flex';app.inert=false;
+  const sr=document.getElementById('ob-sheet-root');if(sr)sr.innerHTML='';
+}
+// Cabecera (‹ · bloques · ✕), cuerpo con el foco en el título y pie con «Para qué lo pregunto»
+function obRender(o){
+  if(!_ob)return;o=o||{};
+  const root=document.getElementById('ob-root');if(!root)return;
+  const sc=OB_SCR[_ob.step]||OB_SCR['ob-hola'];
+  const blk=sc.block||0,head=_ob.step==='ob-hola'?'':`<div class="ob-head">
+    <button type="button" class="ob-hb" aria-label="Atrás" onclick="obBack()">‹</button>
+    <div class="ob-prog" aria-hidden="true"><div class="ob-bars">${[1,2,3].map(i=>`<i class="${i<blk?'on':i===blk?'cur':''}"></i>`).join('')}</div><div class="ob-blk">${esc(OB_BLOCK_LBL[blk]||'')}</div></div>
+    <button type="button" class="ob-hb" aria-label="Salir" onclick="obClose()">✕</button></div>`;
+  root.innerHTML=head+`<div class="ob-body" data-scr="${_ob.step}">${_ob.resumed&&_ob.step!=='ob-hola'?'<div class="ob-resume">Seguimos donde lo dejaste.</div>':''}${sc.html()}</div>`;
+  _ob.resumed=false;
+  const live=document.getElementById('ob-live');if(live)live.textContent=_ob.step==='ob-hola'?'':`${OB_BLOCK_LBL[blk]||''}. ${sc.auto?'Al elegir, pasas a la siguiente.':''}`;
+  if(!o.keepFocus){const h=root.querySelector('#ob-h');if(h)try{h.focus({preventScroll:true});}catch(e){}}
+  const ob=_obEl();if(ob&&!o.keepScroll)ob.scrollTop=0;
+}
+// Ir a una pantalla (y guardar el borrador); Atrás conserva lo respondido
+function obGo(id){if(!_ob||!OB_SCR[id])return;_ob.hist.push(_ob.step);_ob.step=id;_obSaveDraft();obRender();}
+function obBack(){
+  if(!_ob)return;
+  if(!_ob.hist.length){if(_ob.from==='settings'){obClose();return;}if(_ob.step!=='ob-hola'){_ob.step='ob-hola';_obSaveDraft();obRender();}return;}
+  _ob.step=_ob.hist.pop();_obSaveDraft();obRender();
+}
+// Escape: la hoja propia, si la hay; si no, Atrás (en P1 del primer arranque, nada)
+function obEsc(){
+  const sr=document.getElementById('ob-sheet-root');if(sr&&sr.innerHTML){obSheetClose();return;}
+  if(_ob.step==='ob-hola'&&_ob.from==='first')return;
+  obBack();
+}
+// Borrador: solo lo que no es de salud
+function _obSaveDraft(){
+  if(!_ob)return;
+  const a=JSON.parse(JSON.stringify(_ob.a));['screen','zones','huesos','posparto','otraTxt'].forEach(k=>{delete a[k];});
+  S.obDraft=_sanitizeObDraft({v:1,ts:Date.now(),from:_ob.from,step:_ob.step,a,alt:_ob.alt||0,pins:_ob.pins||{},places:_ob.places,
+    accepted:S.obDraft&&S.obDraft.accepted||null});
+  saveState();
+}
+// Respuestas que quedan por contestar (para «Termina tu rutina: te quedan N preguntas»)
+function obLeft(a){a=a||(S.obDraft&&S.obDraft.a)||{};let n=0;['goal','exp','days','age'].forEach(k=>{if(a[k]==null)n++;});if(!a.places&&!(S.obDraft&&S.obDraft.places))n++;return n+2;}
+// ✕: «¿Lo dejamos aquí?». En el primer arranque, salir = entrar en la app con la rutina de ejemplo y el borrador guardado
+function obClose(){
+  if(!_ob)return;
+  if(_ob.from==='settings'&&_ob.single){hideOnboarding();openSettings();return;}
+  confirmModal({title:'¿Lo dejamos aquí?',body:_ob.from==='settings'?'Guardo tus respuestas y tu rutina no cambia. Puedes seguir cuando quieras desde Ajustes.':'Guardo tus respuestas y puedes terminar cuando quieras desde Inicio o Ajustes.',
+    okText:'Salir',cancelText:'Seguir respondiendo',onOk:()=>{
+      if(!_ob)return;_obSaveDraft();const from=_ob.from;
+      if(from==='first'){S.onboarded=true;if(!S.coachStart)S.coachStart=S.sessions.length>0?(S.sessions[0].ts||Date.now()):Date.now();saveState();}
+      hideOnboarding();go('dash');render();if(from==='settings')openSettings();
+    }});
+}
+// P1: las dos acciones y «Restaurar»
+function obStart(mode){
+  if(!_ob)showOnboarding({from:'first'});
+  if(mode==='own'){_obOwn();return;}
+  _ob.a.mode='gen';_obSaveDraft();
+  if(OB_SCR['ob-meta'])obGo('ob-meta');
+}
+function _obOwn(){
+  const p=_sanitizeProfile(Object.assign({},S.profile||{},{mode:'own'}));S.profile=p;S.onboarded=true;S.obDraft=null;
+  if(!S.coachStart)S.coachStart=S.sessions.length>0?(S.sessions[0].ts||Date.now()):Date.now();
+  saveState();hideOnboarding();go('dash');render();
+}
+function obRestore(){importData({fromOnboarding:true});}
+// Hojas propias del cuestionario (#ob-sheet-root, z 395)
+function obSheet(html,label){
+  const sr=document.getElementById('ob-sheet-root');if(!sr)return;
+  sr.innerHTML=`<div class="hist-over ob-over" onclick="if(event.target===this)obSheetClose()"><div class="hist-sheet ob-sheet" role="dialog" aria-modal="true" aria-label="${esc(label||'')}" tabindex="-1">${html}</div></div>`;
+  const sh=sr.querySelector('.ob-sheet');if(sh)try{sh.focus({preventScroll:true});}catch(e){}
+}
+function obSheetClose(){const sr=document.getElementById('ob-sheet-root');if(sr)sr.innerHTML='';const h=document.getElementById('ob-h');if(h)try{h.focus({preventScroll:true});}catch(e){}}
+// Tab no sale de la capa (con #app inerte basta casi siempre; esto cubre los botones de la propia capa)
+function _obTrap(ev){
+  if(!_ob||ev.key!=='Tab')return;
+  const sr=document.getElementById('ob-sheet-root'),box=sr&&sr.innerHTML?sr:_obEl();
+  const f=[...box.querySelectorAll('button:not([disabled]),[href],input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])')].filter(x=>x.offsetParent!==null);
+  if(!f.length)return;const i=f.indexOf(document.activeElement);
+  if(ev.shiftKey&&(i<=0)){ev.preventDefault();f[f.length-1].focus();}
+  else if(!ev.shiftKey&&(i===f.length-1||i<0&&!box.contains(document.activeElement))){ev.preventDefault();f[0].focus();}
+}
+document.addEventListener('keydown',_obTrap);
+// P1 · ob-hola (la misma que el HTML estático, por si se vuelve a ella)
+OB_SCR['ob-hola']={block:0,html:()=>`<svg class="ob-teca" viewBox="278 206 468 638" aria-hidden="true"><use href="#ob-teca-path"/></svg>
+  <h1 class="ob-title" id="ob-h" tabindex="-1">Te doy la bienvenida a Gymteca</h1>
+  <p class="ob-sub">Tu entrenamiento, ordenado y a tu ritmo. Sin cuenta y sin conexión: lo que respondas se queda en este móvil.</p>
+  <h2 class="ob-q">¿Cómo quieres empezar?</h2>
+  <div class="ob-acts">
+    <button type="button" class="ob-card" onclick="obStart('gen')"><span class="ob-ci" aria-hidden="true">✨</span><span class="ob-ct"><b>Créame una rutina</b><span>Te hago unas preguntas y te preparo una rutina completa con tu material.</span><em class="ob-tag">Unos 2-3 min</em></span></button>
+    <button type="button" class="ob-card" onclick="obStart('own')"><span class="ob-ci" aria-hidden="true">📋</span><span class="ob-ct"><b>Ya tengo una rutina</b><span>Entras directo a la app. Puedes meter tu rutina o pedirme una cuando quieras.</span></span></button>
+  </div>
+  <button type="button" class="ob-link" onclick="obRestore()">💾 ¿Tienes una copia de seguridad? Restaurar</button>
+  <p class="ob-foot">Podrás cambiar esto cuando quieras en Ajustes.</p>`};
+// Inicio: «Pon tu rutina en Gymteca» (quien eligió «Ya tengo una») y, una vez, «Si algo duele»
+let _ownPick=null;
+function ownCardHtml(){
+  const p=S.profile;if(!p||p.mode!=='own'||(p.dismiss&&p.dismiss.own))return'';
+  const st=_ownPick||(_ownPick={n:Math.min(6,Math.max(2,getWeeklyTarget())),pl:(S.places&&S.places.main)||'g'});
+  return`<div class="card ob-own" id="ob-own"><div class="ob-own-t">Pon tu rutina en Gymteca</div>
+    <div class="ob-own-l" id="own-dl">¿Cuántos días entrenas a la semana?</div>
+    <div class="ob-days" role="radiogroup" aria-labelledby="own-dl">${[2,3,4,5,6].map(n=>`<button type="button" class="ob-dn${st.n===n?' on':''}" role="radio" aria-checked="${st.n===n}" onclick="ownPick('n',${n})">${n}</button>`).join('')}</div>
+    <div class="ob-own-l" id="own-pl">¿Dónde entrenas?</div>
+    <div class="lib-place" role="radiogroup" aria-labelledby="own-pl">${[['g','🏋️ Gimnasio'],['c','🏠 Casa o aire libre']].map(([k,t])=>`<button type="button" class="lib-pl${st.pl===k?' on':''}" role="radio" aria-checked="${st.pl===k}" onclick="ownPick('pl','${k}')">${t}</button>`).join('')}</div>
+    <button type="button" class="btn bp" onclick="ownStart()">Empezar con ${plural(st.n,'día vacío','días vacíos')}</button>
+    <button type="button" class="btn bs" onclick="ownKeep()">Partir de la de ejemplo</button></div>`;
+}
+function ownPick(k,v){if(!_ownPick)_ownPick={n:3,pl:'g'};_ownPick[k]=v;render();}
+function _ownPlace(){const pl=(_ownPick&&_ownPick.pl)||'g';ensurePlaces();if(S.places){if(pl==='c'&&!S.places.c)S.places.c=placeFromPreset('basico');S.places.main=pl;S.places=_sanitizePlaces(S.places);try{_syncLibKit();}catch(e){}}}
+function ownStart(){
+  const n=(_ownPick&&_ownPick.n)||3;if(_dayEditBlocked())return;
+  _ownPlace();startFromScratch(n);S.profile.dismiss.own=Date.now();S.profile=_sanitizeProfile(S.profile);saveState();
+  toast(`Listo: ${plural(n,'día vacío','días vacíos')}. Empieza por el Día A`,3200);
+  openRoutineEditor('A');render();
+}
+function ownKeep(){_ownPlace();S.profile.dismiss.own=Date.now();S.profile=_sanitizeProfile(S.profile);saveState();render();toast('Tu rutina es la de ejemplo: cámbiala cuando quieras en «Editar rutina»',3200);}
+function safetyCardHtml(){
+  const p=S.profile;if(!p||(p.dismiss&&p.dismiss.safety))return'';
+  return`<div class="card ob-safe" id="ob-safe"><div class="ob-own-t">Si algo duele, para</div>
+    <p class="ob-own-p">Una molestia leve (3 de 10 o menos) que no empeora al día siguiente es aceptable. Si es punzante, pasa de 3 de 10 o va a más, deja ese ejercicio, cámbialo con ⇄ y, si sigue, consulta. Gymteca no sustituye a un profesional sanitario.</p>
+    <button type="button" class="btn bs" onclick="safetyOk()">Entendido</button></div>`;
+}
+function safetyOk(){if(!S.profile)return;S.profile.dismiss.safety=Date.now();S.profile=_sanitizeProfile(S.profile);saveState();render();}
+// ══════════════════════════════════════════════════════════
 // (E5) APLICAR UNA RUTINA GENERADA Y DESHACER (30-propuesta-final.md §G.9, §G.10)
 // ══════════════════════════════════════════════════════════
 // Candidata: lo que enseña el resultado y lo que se aplica, con las letras del generador. g = genRoutineFrom(…). Cada ejercicio
@@ -14179,6 +14344,7 @@ document.addEventListener('keydown',e=>{
     if(_libKitOpen){closeLibKit();return;} // «Mi material», encima del selector (y de la ficha)
     if(_libDetail){closeLibDetail();return;} // (11) la ficha de un ejercicio, encima del selector
     if(_pickerState){closeExercisePicker();return;}
+    if(_obOpen()){obEsc();return;} // (E7) el cuestionario (z 390): debajo del selector, encima de Ajustes
     if(_busy){closeBusy();return;} // (11) hoja «¿Máquina ocupada?»
     // Otros modales propios de #cmodal-root (trasladar historial, editar peso, próxima sesión…)
     {const cr=document.getElementById('cmodal-root');if(cr&&cr.firstElementChild){cr.innerHTML='';_restPickEx=null;return;}}
@@ -14205,28 +14371,6 @@ function haptic(pattern){
   }catch(e){}
 }
 
-let obSelDay='A';
-function selDay(d){obSelDay=d;['A','B','C'].forEach(k=>document.getElementById('sel-'+k).classList.toggle('sel',k===d));}
-function obBack(){document.getElementById('ob2').classList.remove('active');document.getElementById('ob1').classList.add('active');}
-function obNext(){
-  const inp=document.getElementById('ob-weight'),v=parseFloat(inp.value);
-  if(!v||v<30||v>300){inp.style.borderColor='var(--red)';inp.focus();setTimeout(()=>inp.style.borderColor='',2000);return;}
-  document.getElementById('ob1').classList.remove('active');document.getElementById('ob2').classList.add('active');
-}
-function obFinish(){
-  const v=parseFloat(document.getElementById('ob-weight').value);
-  if(!v||v<30||v>300)return;
-  const now=Date.now();
-  S.weights.push({d:fmtDate(new Date()),v,ts:now});
-  // (E1a) el día elegido, si existe en tu rutina y tiene ejercicios; si no, el primero que los tenga
-  const _sd=_dayLive(getPlan()[obSelDay])?obSelDay:getNextDay(null);
-  S.startDay=_sd;S.nextDay=_sd;S.day=_sd;S.onboarded=true;
-  // Preservar coachStart si ya hay historial — solo inicializar en primera vez
-  if(!S.coachStart){
-    S.coachStart=S.sessions.length>0?(S.sessions[0].ts||now):now;
-  }
-  saveState();document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();
-}
 
 function fmtDate(d){return d.getDate()+' '+MONTHS[d.getMonth()];}
 // (E1a) Rotación: el día siguiente a c en el orden de la rutina, saltando los días vacíos (no entran en la rotación hasta
@@ -18924,6 +19068,7 @@ function renderDash(){
   </div>
   </div></div>
   ${hoyCardHtml()}
+  ${ownCardHtml()}${safetyCardHtml()}
   ${dashCoachHtml()}
   ${rest0?'':`<div class="sh">Esta semana</div>
   <div class="card">
@@ -25757,7 +25902,7 @@ function _backupPayload(){
   if(S.bkHealth===false)delete p.health;
   return p;
 }
-function importData(){
+function importData(o){o=o||{}; // (E7) o.fromOnboarding: desde la bienvenida
   const inp=document.createElement('input');
   inp.type='file';inp.accept='application/json,.json';
   inp.onchange=(e)=>{
@@ -25887,6 +26032,7 @@ function importData(){
             syncActiveWorkout();
             S.settingsOpen=true;
             _bkTrackStart(); // lo importado es el nuevo punto de partida de «cambios desde la copia»
+            if(o.fromOnboarding){S.settingsOpen=false;if(S.onboarded&&_obOpen())hideOnboarding();} // (E7) la copia trae onboarded → la app; si no, sigue la bienvenida
             saveState();render();
             storagePersist(); // (15b) datos que importan: pide que no se borren (una vez por arranque)
             toast('✓ Datos importados correctamente',3500);
@@ -25901,8 +26047,8 @@ function importData(){
 
 function resetOnboarding(){
   confirmModal({
-    title:'Rehacer onboarding',
-    body:'Volverás a la pantalla inicial para confirmar peso y día de inicio. Tus datos de entrenamiento no se borran.',
+    title:'Volver a la bienvenida',
+    body:'Vuelves a la pantalla de bienvenida para elegir cómo empezar. Tus datos de entrenamiento no se borran.',
     okText:'Rehacer',
     cancelText:'Cancelar',
     onOk:()=>{
@@ -25910,13 +26056,7 @@ function resetOnboarding(){
       // El selector vuelve a empezar en el gimnasio (favoritos, recientes y (E3c) tu material de casa se quedan: es tuyo, §G.7)
       S.libPlace='g';
       saveState();
-      document.getElementById('app').style.display='none';
-      document.getElementById('onboarding').style.display='flex';
-      document.getElementById('ob1').classList.add('active');
-      document.getElementById('ob2').classList.remove('active');
-      // Resetear input
-      const w=document.getElementById('ob-weight');
-      if(w)w.value=S.weights.length?S.weights[S.weights.length-1].v:'';
+      showOnboarding({from:'first',step:'ob-hola'}); // (E7) la bienvenida nueva
     }
   });
 }
@@ -26174,7 +26314,7 @@ function _swWatch(reg){
 try{if(_fixPlanLetters())saveState();}catch(e){console.warn(e);} // (E1b) letras de día consecutivas (A, B, D → A, B, C)
 try{_bkTrackStart();}catch(e){} // (15) punto de partida de «cambios desde la última copia» (lo que se cargó no es un cambio)
 if(S.onboarded){try{if(applyLaunchParam())saveState();}catch(e){console.warn(e);}document.getElementById('onboarding').style.display='none';document.getElementById('app').style.display='flex';render();}
-else{try{applyLaunchParam();}catch(e){}} // sin onboarding: solo quita ?abrir= de la dirección
+else{try{applyLaunchParam();}catch(e){}try{showOnboarding({from:'first'});}catch(e){console.error(e);}} // sin onboarding: quita ?abrir= y abre la bienvenida (E7)
 // Temporizador de descanso/cardio guardado: reanudarlo, o terminarlo si acabó con la app cerrada
 try{RT.sync();}catch(e){console.error(e);}
 </script>
