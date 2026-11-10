@@ -13442,7 +13442,7 @@ function _backfillStrengthNames(data){
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',hRange:'6m',rRange:'6m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],dlRecoSnoozeTs:null,loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true,restOn:true,
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',hRange:'6m',rRange:'6m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],dlRecoSnoozeTs:null,loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true,restOn:true,rpeOn:true,
   lastBackupTs:null,backupSnoozeTs:null,lastBackupKind:null,lastJsonBackupTs:null,dataEditTs:null,libPlace:'g',libKit:null,libFav:[],libRecent:[],...V21_DEFAULTS},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
@@ -13604,6 +13604,8 @@ if(typeof S.keepAwake!=='boolean')S.keepAwake=true;
 // (M1) Descanso entre series (Ajustes → «Descanso entre series»): encendido salvo que lo apagues. Sin subir SCHEMA_VERSION:
 // quien ya usa la app no lo tiene y lo recibe encendido aquí (y al importar una copia que no lo trae, el de este móvil)
 if(typeof S.restOn!=='boolean')S.restOn=true;
+// (M2) Esfuerzo de cada serie (Ajustes → «Esfuerzo de cada serie»): igual, encendido salvo que lo apagues
+if(typeof S.rpeOn!=='boolean')S.rpeOn=true;
 // «Solo hoy» (v20): sustituciones con forma válida (las caducadas vuelven en el primer render, subTick)
 _sanitizePlanSubs(S.currentPlan);
 
@@ -16520,7 +16522,7 @@ const RT={
     if(t.kind==='rest'&&!_restOn()){S.restTimer=null;saveState();Beep.cancel();Beep.release();this._hideEl();return;} // (M1) apagado
     // Tras recargar la app con un descanso de una serie (en marcha o que terminó mientras tanto): el RPE de la barra vuelve
     // a ser el de esa serie, si sigue marcada
-    if(!_rpeOpen&&t.kind==='rest'&&Number.isInteger(t.setIdx)&&t.exId&&S.sets[t.exId]&&S.sets[t.exId][t.setIdx]){
+    if(!_rpeOpen&&_rpeOn()&&t.kind==='rest'&&Number.isInteger(t.setIdx)&&t.exId&&S.sets[t.exId]&&S.sets[t.exId][t.setIdx]){
       const ex=_dayEx(t.exId);if(ex&&!ex.cardio)_rpeOpen={exId:t.exId,setIdx:t.setIdx,ex,rest:true};
     }
     if(t.endTs<=Date.now()){this._complete(Date.now()-t.endTs>RT_LATE_MS);return;}
@@ -16736,6 +16738,26 @@ function toggleRestOn(){
   const snd=document.querySelector('#set-sound .set-row-d');if(snd)snd.textContent=timerSoundDesc();
   toast(S.restOn?'⏱ Descanso entre series activado':'Descanso entre series desactivado: sin cuenta atrás');
 }
+// ── ESFUERZO DE CADA SERIE: ENCENDIDO / APAGADO (M2) ─────────────────
+// S.rpeOn (por defecto true), gemelo de S.restOn. Apagado, la app ni pregunta el esfuerzo ni lo usa: sin chips (😌 💪 🥵) en
+// la barra del descanso, en el modo a pantalla completa ni en la barra sin reloj (_rpeTargetFor → null), el descanso con su
+// duración normal (_rpeRest), y el Coach y las pantallas como si no hubiera esfuerzo apuntado (rpeCat → null y _rpeOn() en
+// las lecturas directas: fatiga, zonas, estadística, historial, ficha, resumen). Lo apuntado (S.rpe, rec.rpe,
+// rec.sets[i].rpe) no se borra: al encenderlo vuelve todo como estaba.
+function _rpeOn(){return S.rpeOn!==false;}
+function toggleRpeOn(){
+  S.rpeOn=S.rpeOn===false;
+  saveState();
+  if(!S.rpeOn){
+    // Fuera los chips que estén a la vista (lo ya apuntado se queda); un descanso en marcha vuelve a su duración normal
+    closeRpeSelector();
+    const t=S.restTimer;if(t&&t.kind==='rest'&&t.exId)RT.rebase(t.exId);
+  }
+  _setRerender=true;
+  const row=document.getElementById('set-rpe');
+  if(row){row.setAttribute('aria-checked',String(S.rpeOn));const sw=row.querySelector('.sw');if(sw)sw.classList.toggle('on',S.rpeOn);}
+  toast(S.rpeOn?'💪 Esfuerzo de cada serie activado':'Esfuerzo de cada serie desactivado');
+}
 
 // ── DESCANSO POR EJERCICIO (v19) ────────────────────────────────
 // Automático por tipo: aislamiento 60 s, multiarticular 90 s y, si es pesado (8 reps o menos en su rango), 120 s.
@@ -16793,7 +16815,7 @@ function openRestPicker(exId){
   root.innerHTML=`<div class="cmov" onclick="if(event.target===this)closeRestPicker()"><div class="cmod" role="dialog" aria-label="Descanso entre series">
     <div class="cmod-hdl"></div>
     <div class="cmod-t">Descanso entre series</div>
-    <div class="cmod-b"><b style="color:var(--text);font-weight:600">${esc(ex.n)}</b> · ${esc(restDefaultWhy(ex))}. Lo que elijas se guarda para este ejercicio; el RPE de cada serie lo ajusta (fácil −15 %, al límite +15 %).</div>
+    <div class="cmod-b"><b style="color:var(--text);font-weight:600">${esc(ex.n)}</b> · ${esc(restDefaultWhy(ex))}. Lo que elijas se guarda para este ejercicio${_rpeOn()?'; el RPE de cada serie lo ajusta (fácil −15 %, al límite +15 %)':''}.</div>
     <div class="rest-opts" id="rest-opts">
       <button type="button" class="rest-opt auto" aria-pressed="${cur==null}" onclick="pickRest(null)">Automático · ${fmtClock(def)}</button>
       ${opts.map(s=>`<button type="button" class="rest-opt" data-s="${s}" aria-pressed="${cur===s}" onclick="pickRest(${s})">${fmtClock(s)}${s===def?'<small>auto</small>':''}</button>`).join('')}
@@ -17345,7 +17367,7 @@ function setRowsHtml(ex,p,rows){
   const live=prLive(ex,rows);
   const optA=K.lt==='w'?null:K.pc?' (lastre opcional)':' (opcional)';
   const rowHtml=rows.map(r=>{
-    const n=r.i+1,rpeA=r.rpe===1?' · fácil':r.rpe===2?' · justo':r.rpe===3?' · al límite':'';
+    const n=r.i+1,rv=_rpeOn()?r.rpe:0,rpeA=rv===1?' · fácil':rv===2?' · justo':rv===3?' · al límite':''; // (M2) apagado: sin el color ni el texto del esfuerzo
     const pj=r.done?live.flags[r.i]||null:null;
     const g=pj?'':_ghostTxt(lw,r.i);
     const prLine=pj?`<div class="lg-pr got">🏆 ${esc(prTxt(pj))}</div>`
@@ -17364,7 +17386,7 @@ function setRowsHtml(ex,p,rows){
       <span class="lg-n" aria-hidden="true">${n}</span>
       ${wCell}
       ${repsCell}
-      <button type="button" class="lg-ck${r.done?' on':''}${pj?' pr':''}${r.done&&r.rpe?' r'+r.rpe:''}" aria-pressed="${r.done}" aria-label="${r.done?`Serie ${n} hecha${rpeA}${pj?' · ¡récord!':''}. Toca para desmarcarla`:`Marcar la serie ${n} como hecha`}" onclick="setCheck(this)">✓</button>
+      <button type="button" class="lg-ck${r.done?' on':''}${pj?' pr':''}${r.done&&rv?' r'+rv:''}" aria-pressed="${r.done}" aria-label="${r.done?`Serie ${n} hecha${rpeA}${pj?' · ¡récord!':''}. Toca para desmarcarla`:`Marcar la serie ${n} como hecha`}" onclick="setCheck(this)">✓</button>
     </div>${g?`<div class="lg-ghost">${esc(g)}</div>`:''}${prLine}`;
   }).join('');
   return`<div class="lg-sets" data-ex="${eid}">
@@ -17806,7 +17828,8 @@ function toggleSet(id,i,evt){
       // (M1) Con el descanso apagado no arranca nada: los chips salen solos en la barra, sin reloj (_rpeOnly)
       const rs=getRestSecs(id);
       const started=_restOn()&&RT.start(rs,ex.n,{exId:id,setIdx:i,base:rs});
-      showRpeSelector(id,i,ex,started);
+      // (M2) Con el esfuerzo apagado no se pregunta (con el descanso también apagado, al marcar no sale nada)
+      if(_rpeOn())showRpeSelector(id,i,ex,started);
     }
     if(ex){
       // Que las filas sigan a la vista sobre las barras de abajo; al completar el ejercicio, avance automático
@@ -17834,7 +17857,7 @@ function showRpeSelector(exId,setIdx,ex,rest){
 // (M1) Con el descanso apagado y sin temporizador (t null): la última serie marcada (la barra del esfuerzo sin reloj)
 function _rpeTargetFor(t){
   const o=_rpeOpen;
-  if(!o)return null;
+  if(!o||!_rpeOn())return null; // (M2) esfuerzo apagado: sin chips en ningún sitio
   if(!t){if(_restOn())return null;}
   else if(t.kind!=='rest'||t.exId!==o.exId||!Number.isInteger(t.setIdx)||t.setIdx!==o.setIdx)return null;
   if(!S.sets[o.exId]||!S.sets[o.exId][o.setIdx])return null; // desmarcada
@@ -17847,10 +17870,11 @@ function rpeChipsHtml(lvl,big){
 // Descanso según el esfuerzo, sobre el del ejercicio (el guardado en su descanso si lo hay: base)
 function _rpeRest(level,exId,t){
   const b=t&&+t.base>0?+t.base:getRestSecs(exId);
+  if(!_rpeOn())return b; // (M2) esfuerzo apagado: la duración normal, sin ajuste
   return level===3?Math.round(b*1.15):level===1?Math.round(b*0.85):b;
 }
 function setRpe(level){
-  if(!_rpeOpen)return;
+  if(!_rpeOpen||!_rpeOn())return;
   level=+level;if(level!==1&&level!==2&&level!==3)return;
   const o=_rpeOpen,{exId,setIdx,ex}=o;
   if(!S.rpe[exId])S.rpe[exId]={};
@@ -18728,6 +18752,7 @@ function coach_balance(){
 function coach_rpeByMuscle(lastN){
   const sessions=(S.sessions||[]).slice(-Math.max(1,lastN||6));
   if(sessions.length===0)return null;
+  if(!_rpeOn())return[]; // (M2) esfuerzo apagado: ninguna zona por esfuerzo
   const byMuscle={};
   // Reunir RPE por grupo muscular usando los registros de strength
   Object.values(S.strength||{}).forEach(records=>{
@@ -18860,6 +18885,9 @@ function _fatRecs(from,to){
 function coach_fatigueMeter(an){
   const now=Date.now(),DAY=86400000,from=now-FATIGUE_DAYS*DAY;
   const recs=_fatRecs(from,now+1),hasSess=(S.sessions||[]).some(s=>s&&+s.ts>0);
+  // (M2) Esfuerzo apagado: sin el factor «Al límite» (ni el «al límite» de los objetivos sin cumplir); la nota se reparte
+  // entre los demás factores con datos, como ya se hace con los que aún no tienen datos
+  const on=_rpeOn();
   const F={};
   // 1. Al límite
   {let n=0,r3=0;recs.forEach(x=>x.list.forEach(s=>{if(s.rpe>=1&&s.rpe<=3){n++;if(s.rpe===3)r3++;}}));
@@ -18874,7 +18902,7 @@ function coach_fatigueMeter(an){
       // fallida, como juzga el Coach de carga (_loadFail): 2+ reps por debajo del mínimo (por tiempo o distancia, más
       // de un 10 % por debajo), o por debajo y «Al límite». Quedarse a una rep del mínimo es parte de progresar.
       x.list.forEach(s=>{const v=t.k==='t'?s.t:t.k==='d'?s.d:s.r;if(!(v>0))return;n++;
-        if((t.k==='r'?v<t.lo-1:v<t.lo*0.9)||(v<t.lo&&s.rpe===3))m++;});
+        if((t.k==='r'?v<t.lo-1:v<t.lo*0.9)||(on&&v<t.lo&&s.rpe===3))m++;});
       const ps=parseInt(x.rec.ps);
       if(ps>0&&ps>x.list.length){n+=ps-x.list.length;m+=ps-x.list.length;}
     });
@@ -18903,17 +18931,17 @@ function coach_fatigueMeter(an){
     if(ok){const all=avg(old);rec.forEach(s=>{const sd=old.filter(o=>sessSameDay(o,s));R+=+s.durationMin;B+=sd.length?avg(sd):all;});R/=rec.length;B/=rec.length;c=B>0?R/B-1:0;}
     F.dur={key:'dur',label:'Duración',ok,v:c,s:ok?_fatClamp((c-0.05)/0.20):0,
       txt:ok?`${Math.round(R)}${NB}min de media frente a ${Math.round(B)}${NB}(${c>=0?'+':'−'}${Math.round(Math.abs(c)*100)}${NB}%)`:'Pocas sesiones con duración'};}
-  const factors=['rpe','miss','drop','weeks','dur'].map(k=>Object.assign(F[k],{w:FATIGUE_W[k],pts:F[k].ok?Math.round(FATIGUE_W[k]*F[k].s):0}));
+  const factors=(on?['rpe','miss','drop','weeks','dur']:['miss','drop','weeks','dur']).map(k=>Object.assign(F[k],{w:FATIGUE_W[k],pts:F[k].ok?Math.round(FATIGUE_W[k]*F[k].s):0}));
   const okF=factors.filter(f=>f.ok),wSum=okF.reduce((a,f)=>a+f.w,0);
-  const enough=(F.rpe.ok||F.miss.ok)&&okF.length>=3;
+  const enough=((on&&F.rpe.ok)||F.miss.ok)&&okF.length>=3;
   const score=enough?Math.round(100*okF.reduce((a,f)=>a+f.w*f.s,0)/wSum):null;
   const level=score==null?null:score>=FATIGUE_HIGH?'alta':score>=FATIGUE_MOD?'moderada':'baja';
   const top=enough?okF.slice().sort((a,b)=>b.w*b.s-a.w*a.s)[0]:null;
   const main=top&&top.s>0.05?top:null;
   const recent=recs.length>0||(S.sessions||[]).some(s=>s&&+s.ts>=from);
-  const why=score==null?(!hasSess?'Entrena y marca el esfuerzo de tus series: con 2 semanas de datos verás tu fatiga.'
+  const why=score==null?(!hasSess?(on?'Entrena y marca el esfuerzo de tus series: con 2 semanas de datos verás tu fatiga.':'Entrena: con 2 semanas de datos verás tu fatiga.')
       :!recent?`No has entrenado en las 2${NB}últimas semanas: no hay fatiga que medir.`
-      :'Aún faltan datos: marca el esfuerzo de tus series (Fácil, Justo o Al límite) un par de semanas más.')
+      :on?'Aún faltan datos: marca el esfuerzo de tus series (Fácil, Justo o Al límite) un par de semanas más.':'Aún faltan datos: entrena un par de semanas más.')
     :_fatWhyCtx(level,an);
   // dlGo: con la recomendación pospuesta y la línea pidiendo descarga, el medidor ofrece empezarla (botón)
   const dlGo=score!=null&&!!_fatDlAsk(level,an)&&_dlSnoozedOffer();
@@ -18945,11 +18973,11 @@ function _fatWhyCtx(level,an){
   const f=an&&(an.fatigue||coach_fatigue(an)),lv=level==='alta'?'Fatiga alta':level==='moderada'?'Fatiga moderada':'Fatiga baja';
   // (16e) «aunque acabas de recuperar» solo si de verdad hubo una recuperación (descarga, descanso o parón)
   if(level==='alta'&&!ask)return f&&f.weeks<2&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS&&_recoveryInfo().src
-    ?'Fatiga alta, aunque acabas de recuperar: estos días ve suave, sin series al límite, y duerme bien.'
-    :'Fatiga alta: estos días ve suave, sin series al límite, y duerme bien.';
+    ?`Fatiga alta, aunque acabas de recuperar: estos días ve suave${_rpeOn()?', sin series al límite,':''} y duerme bien.`
+    :`Fatiga alta: estos días ve suave${_rpeOn()?', sin series al límite,':''} y duerme bien.`;
   if(ask==='weeks')return`${lv}, pero llevas ${plural(Math.floor(f.weeks),'semana')} sin descanso: una semana de descarga ahora te ayuda a seguir progresando.`;
   if(ask==='regress')return`${lv}${level==='alta'?' y':', pero'} ${f.regress} ejercicios bajan de nivel: una semana de descarga te ayuda a recuperarlos.`;
-  return level==='moderada'?'Fatiga moderada: duerme bien y no sumes más series al límite.':'Fatiga baja: vas fresco, puedes seguir apretando.';
+  return level==='moderada'?(_rpeOn()?'Fatiga moderada: duerme bien y no sumes más series al límite.':'Fatiga moderada: duerme bien y no sumes más series.'):'Fatiga baja: vas fresco, puedes seguir apretando.';
 }
 // (13e r1) Con la recomendación pospuesta («Ahora no») la única oferta de descarga es el botón del medidor
 // («Elegir mi semana de descarga», abre Ajustes → «Descarga o descanso»); la propuesta del ciclo queda en espera.
@@ -19033,21 +19061,22 @@ function _fatBarsHtml(wk){
 }
 // Tarjeta «Fatiga» del Coach: medidor, factores y barras de esfuerzo de 8 semanas
 function fatigueCardHtml(an){
-  const m=coach_fatigueMeter(an),wk=coach_rpeWeeks(8);
+  const m=coach_fatigueMeter(an),wk=_rpeOn()?coach_rpeWeeks(8):[];
   const aria=m.score==null?`Fatiga: sin datos suficientes. ${m.why}`:`Fatiga ${m.score} de 100, ${m.level}. ${m.why}${m.main?` Lo que más pesa: ${m.main.label.toLowerCase()}.`:''}`;
   const rows=m.factors.map(f=>`<li class="fat-f${f.ok?'':' off'}">
       <span class="fat-fd" aria-hidden="true" style="background:${f.ok?_fatSevCol(f.s):'var(--text4)'}"></span>
       <span class="fat-fb"><span class="fat-fl">${esc(f.label)}</span><span class="fat-fv">${_nwUnits(esc(f.txt))}</span></span>
       <span class="fat-fp"><span aria-hidden="true">${f.ok?`${f.pts}<small>/${f.w}</small>`:'—'}</span><span class="sr-only">${f.ok?`${f.pts} de ${f.w} puntos`:'sin datos'}</span></span></li>`).join('');
-  return`<div class="sh">Fatiga y esfuerzo</div>
+  const on=_rpeOn(); // (M2) sin esfuerzo: «Fatiga», sin el factor «al límite» ni las barras de esfuerzo
+  return`<div class="sh">${on?'Fatiga y esfuerzo':'Fatiga'}</div>
   <div class="card fat-card" id="fat-card" data-score="${m.score==null?'':m.score}" data-level="${m.level||''}">
     <div class="fat-top" role="img" aria-label="${esc(aria)}">${_fatGaugeSvg(m)}</div>
     <div class="fat-why">${_nwUnits(esc(m.why))}${m.main?` <span class="fat-main">Lo que más pesa: ${esc(m.main.label.toLowerCase())}.</span>`:''}</div>
     ${m.dlGo||(_dlSnoozedOffer()&&_dlPropActive())?`<button type="button" class="fat-go" id="fat-go" onclick="openRecoveryChooser()">Elegir mi semana de descarga <span aria-hidden="true">›</span></button>`:''}
     <ul class="fat-fs" aria-label="Factores de la fatiga">${rows}</ul>
-    <details class="fat-how"><summary>Cómo se calcula</summary><p>Cada factor suma hasta sus puntos: al límite 30, objetivo sin cumplir 20, bajan de nivel 20, semanas sin descanso 20 y duración 10. Los que aún no tienen datos no cuentan y la nota se reparte entre los demás. Baja hasta 39, moderada de 40 a 69, alta desde 70.</p></details>
-    <div class="fat-sub">Esfuerzo por semana</div>
-    ${_fatBarsHtml(wk)}
+    <details class="fat-how"><summary>Cómo se calcula</summary><p>Cada factor suma hasta sus puntos: ${on?'al límite 30, ':''}objetivo sin cumplir 20, bajan de nivel 20, semanas sin descanso 20 y duración 10. Los que aún no tienen datos no cuentan y la nota se reparte entre los demás. Baja hasta 39, moderada de 40 a 69, alta desde 70.</p></details>
+    ${on?`<div class="fat-sub">Esfuerzo por semana</div>
+    ${_fatBarsHtml(wk)}`:''}
   </div>`;
 }
 // ─── (13d) RECOMENDACIÓN: SEMANA DE DESCARGA ─────────────────────
@@ -19949,7 +19978,7 @@ function coach_weeklyInsight(){
     {l:'Sesiones',v:cur.sessions,d:sessionsDiff,unit:''},
     {l:'Volumen',v:cur.totalVolume,d:volumeDiff,unit:cur.totalVolume>0?' kg':''}
   ];
-  if(cur.avgRpe){
+  if(cur.avgRpe&&_rpeOn()){ // (M2) sin la estadística «Esfuerzo» con el esfuerzo apagado
     const rpeLabel=cur.avgRpe<=1.4?'Fácil':cur.avgRpe<=2.4?'Justo':'Al límite';
     stats.push({l:'Esfuerzo',v:rpeLabel,d:0,unit:''});
   }
@@ -20189,7 +20218,7 @@ function renderCoach(){
       <div class="insight-ic good">🎯</div>
       <div class="insight-body">
         <div class="insight-t">Te dice qué peso poner</div>
-        <div class="insight-d">En cada ejercicio: primero más reps y luego más peso, con los saltos de tu equipo y según tu esfuerzo.</div>
+        <div class="insight-d">En cada ejercicio: primero más reps y luego más peso, con los saltos de tu equipo${_rpeOn()?' y según tu esfuerzo':''}.</div>
       </div>
     </div>
     <div class="insight">
@@ -20868,7 +20897,8 @@ function _r2(v){return Math.round(v*100)/100;}
 // 57.5 → «57.5», 60 → «60», 9.25 → «9.25»
 function kgTxt(v){const n=+v;return isFinite(n)?String(_r2(n)):'';}
 // RPE medio guardado (1-3) → 1 fácil · 2 justo · 3 al límite (null sin dato)
-function rpeCat(v){v=+v;return v>0&&isFinite(v)?(v<=1.4?1:v<=2.4?2:3):null;}
+function rpeCat(v){if(!_rpeOn())return null;v=+v; // (M2) esfuerzo apagado: como si no hubiera esfuerzo apuntado (Coach, «¿Por qué?», historial)
+  return v>0&&isFinite(v)?(v<=1.4?1:v<=2.4?2:3):null;}
 const RPE_TXT={1:'fácil',2:'a esfuerzo justo',3:'al límite'};
 // Tipo de equipo para el salto de peso: el del material de su ejercicio de la biblioteca (MAT[mat].cls; máquina y polea
 // según sea multiarticular; peso corporal con lastre: bw). Sin biblioteca (personalizado o importado), o cardio: por
@@ -21462,6 +21492,7 @@ function toggleTgtWhy(btn){
 }
 // «¿Por qué?»: tus 5 últimas sesiones (peso, reps y esfuerzo) + la regla que aplica
 const RPE_COL={1:'var(--green)',2:'var(--amber)',3:'var(--red)'};
+const TGT_LEG_RPE='<div class="tgt-leg"><span><i style="background:var(--green)"></i>fácil</span><span><i style="background:var(--amber)"></i>justo</span><span><i style="background:var(--red)"></i>al límite</span></div>';
 function presWhyHtml(ex,p){
   if(!_presIsKg(p))return _presWhyNoKg(ex,p);
   const recs=(Array.isArray(S.strength[ex.id])?S.strength[ex.id]:[]).filter(r=>r&&+r.v>0&&!r.dl).slice(-5);
@@ -21479,11 +21510,12 @@ function presWhyHtml(ex,p){
   }
   const st=kgTxt(p.step);
   const src=p.stepSrc==='ajuste'?`+${st} kg (lo elegiste en Ajustes)`:p.stepSrc==='historial'?`+${st} kg, el que sueles usar aquí`:`+${st} kg (${(LOAD_EQ[p.eq]||{l:'tu equipo'}).l.toLowerCase()})`;
-  return`${svg}<div class="tgt-leg"><span><i style="background:var(--green)"></i>fácil</span><span><i style="background:var(--amber)"></i>justo</span><span><i style="background:var(--red)"></i>al límite</span></div>
+  const on=_rpeOn(); // (M2) sin la leyenda ni las reglas del esfuerzo
+  return`${svg}${on?TGT_LEG_RPE:''}
     <ul class="tgt-rules">
       <li>Rango <b>${p.lo}-${p.hi} reps</b>: mismo peso y una rep más cada vez. Al hacer ${p.hi} en todas las series, sube un salto y vuelve a ${p.lo}.</li>
-      <li>Salto: <b>${esc(src)}</b>. Sube como mucho un 10 % (doble si fue fácil). Con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.</li>
-      <li>«Al límite» no sube peso. Dos sesiones seguidas por debajo de ${p.lo} reps: baja un 5-10 %, al menos un salto.</li>${p.hiK?`
+      <li>Salto: <b>${esc(src)}</b>. Sube como mucho un 10 % (doble si ${on?'fue fácil':'te sobran 3 reps o más'}). Con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.</li>
+      <li>${on?'«Al límite» no sube peso. ':''}Dos sesiones seguidas por debajo de ${p.lo} reps: baja un 5-10 %, al menos un salto.</li>${p.hiK?`
       <li>Pesas fijas: +${esc(st)} kg es un ${Math.round(p.step/Math.max(1,p.last)*100)} %. Antes de saltar llegas a ${p.hiK} reps; tras el salto empiezas con menos reps y vuelves a subir.</li>`:''}
     </ul>
     ${LOAD_EQ[p.eq]&&p.weight>0?'<button type="button" class="tgt-set" onclick="openLoadSettings()">Cambiar saltos de peso ›</button>':''}`;
@@ -21506,16 +21538,17 @@ function _presWhyNoKg(ex,p){
   const rule=lt==='t'?`Suma 5 s por sesión hasta <b>${esc(fmtSecs(p.hi))}</b> en todas las series; después, la variante más difícil${wm?' (con peso: sube un salto y vuelve a '+esc(fmtSecs(p.lo))+')':''}.`
     :lt==='d'?`Suma distancia hasta <b>${esc(fmtM(p.hi))}</b>; con peso, completa ${esc(fmtM(p.lo))} en todas las series y sube un salto.`
     :`Rango <b>${p.lo}-${p.hi} reps</b>: una rep más cada vez. Con ${p.hi} en todas las series, pasas a la variante más difícil (o banda más dura / lastre) y vuelves a ${p.lo}.`;
-  return`${svg}<div class="tgt-leg"><span><i style="background:var(--green)"></i>fácil</span><span><i style="background:var(--amber)"></i>justo</span><span><i style="background:var(--red)"></i>al límite</span></div>
+  const on=_rpeOn();
+  return`${svg}${on?TGT_LEG_RPE:''}
     <ul class="tgt-rules">
       <li>${rule}</li>
-      <li>Al límite no sube. Dos sesiones claramente por debajo: variante más fácil.</li>
+      <li>${on?'Al límite no sube. ':''}Dos sesiones claramente por debajo: variante más fácil.</li>
     </ul>
     ${LOAD_EQ[p.eq]&&p.weight>0?'<button type="button" class="tgt-set" onclick="openLoadSettings()">Cambiar saltos de peso ›</button>':''}`;
 }
 // Ajuste en vivo entre series: tras una serie «al límite», mantener o bajar; si todo va «fácil», probar un salto más
 function liveAdjHtml(ex,p){
-  if(!ex||!p||p.kind==='deload')return'';
+  if(!ex||!p||p.kind==='deload'||!_rpeOn())return''; // (M2) sin esfuerzo no hay ajuste en vivo
   const n=parseInt(ex.s)||0,c=S.sets[ex.id]||{},rp=(S.rpe&&S.rpe[ex.id])||{};
   const marked=[];for(let i=0;i<n;i++)if(c[i])marked.push(i);
   if(!marked.length||marked.length>=n)return'';
@@ -21607,7 +21640,7 @@ function coachPlanCardHtml(){
   const aw=getActiveWorkout();
   return`<div class="sh">🎯 ${aw?'Tu entreno de hoy':'Tu próxima sesión'} · ${esc(day.label)}</div>
   <div class="card coach-plan">${list}
-    <div class="coach-plan-f">Doble progresión: primero reps, luego peso. Con tu esfuerzo (😌 💪 🥵) ajusto el salto.</div>
+    <div class="coach-plan-f">Doble progresión: primero reps, luego peso.${_rpeOn()?' Con tu esfuerzo (😌 💪 🥵) ajusto el salto.':''}</div>
     <button class="btn bs" onclick="${aw?'resumeWorkout()':"S.day=S.nextDay;go('workout')"}">${aw?'Seguir entrenando':'Ir a entrenar'} ${esc(day.label)} →</button>
   </div>`;
 }
@@ -23018,7 +23051,7 @@ function _renderSummary(){
   const exs=D.rows.length?`<div class="sum-sec">Ejercicios</div><div id="sum-exs">${D.rows.map(r=>`<div class="sum-ex" data-ex="${esc(r.id)}"><div class="sum-ex-i"><div class="sum-ex-n">${esc(r.name)}${r.pr?'<em role="img" aria-label="récord">🏆</em>':''}</div><div class="sum-ex-s">${esc(r.line)}${r.dl?' · descarga':''}${r.sub!=null?` · <span class="sub-tag">⇄ solo hoy</span>${r.sub?' en lugar de '+esc(r.sub):''}`:''}</div></div>${r.delta?`<span class="sum-ex-d ${r.delta.cls}" aria-label="${esc(r.delta.a)}">${esc(r.delta.t)}</span>`:r.cardio?'<span class="sum-ex-d up" aria-label="hecho">✓</span>':''}</div>`).join('')}</div>`
     :`<div class="sum-nopr" style="margin-top:14px">Esta sesión no tiene series guardadas.</div>`;
   // Reparto del esfuerzo (RPE) por serie
-  const R=D.rpe,tot=R[0]+R[1]+R[2]+R[3];let eff='';
+  const R=D.rpe,tot=_rpeOn()?R[0]+R[1]+R[2]+R[3]:0;let eff=''; // (M2) esfuerzo apagado: sin «Esfuerzo por serie»
   if(tot&&R[0]<tot){
     const L=[[1,'😌 Fácil','fácil','fáciles'],[2,'💪 Justo','justa','justas'],[3,'🥵 Al límite','al límite','al límite'],[0,'Sin dato','sin dato','sin dato']].filter(([k])=>R[k]>0);
     eff=`<div class="sum-sec">Esfuerzo por serie</div><div class="sum-rpe" id="sum-rpe" role="img" aria-label="Esfuerzo por serie: ${esc(L.map(([k,,a1,a2])=>`${R[k]} ${R[k]===1?a1:a2}`).join(', '))}">${L.map(([k])=>`<i class="r${k}" style="flex:${R[k]} 1 0"></i>`).join('')}</div>
@@ -24796,8 +24829,8 @@ function renderProg(){
   <div class="sh">Guía de progresión</div>
   <div class="card">
     <div style="display:flex;flex-direction:column;gap:12px">
-      ${[['var(--green)','↑','¿Llegaste al tope del rango en todas las series?','Sube un salto de tu equipo (2.5 kg en Smith, 1 kg en polea o mancuerna…) y vuelve al mínimo del rango. Si fue fácil, puede ser doble. Como mucho un 10 %: con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.'],
-         ['var(--blue)','+','¿Dentro del rango, o al límite?','Mismo peso y una rep más la próxima vez. «Al límite» nunca sube peso.'],
+      ${[['var(--green)','↑','¿Llegaste al tope del rango en todas las series?','Sube un salto de tu equipo (2.5 kg en Smith, 1 kg en polea o mancuerna…) y vuelve al mínimo del rango. '+(_rpeOn()?'Si fue fácil':'Si te sobran 3 reps o más')+', puede ser doble. Como mucho un 10 %: con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.'],
+         _rpeOn()?['var(--blue)','+','¿Dentro del rango, o al límite?','Mismo peso y una rep más la próxima vez. «Al límite» nunca sube peso.']:['var(--blue)','+','¿Dentro del rango?','Mismo peso y una rep más la próxima vez.'], // (M2)
          ['var(--amber)','↓','¿Dos sesiones seguidas por debajo del rango?','Baja un 5–10 % (al menos un salto) y vuelve a subir desde ahí. No pasa nada.'],
          ['var(--blue)','→','La regla de oro',`${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}/semana durante meses = resultados reales. La constancia lo es todo.`],
       ].map(([c,i,t,d])=>`<div style="display:flex;gap:12px;align-items:flex-start">
@@ -27040,6 +27073,13 @@ function renderSettings(){
           </div>
           <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
         </div>`;})()}
+        ${(()=>{const on=_rpeOn();return`<div class="set-row" id="set-rpe" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRpeOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRpeOn();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Esfuerzo de cada serie</div>
+            <div class="set-row-d">Fácil, justo o al límite tras cada serie: el Coach lo usa para ajustar el salto. Apágalo si no quieres apuntarlo</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
         ${(()=>{const on=S.timerSound!==false;return`<div class="set-row" id="set-sound" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleTimerSound()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTimerSound();}">
           <div class="set-row-info">
             <div class="set-row-t">Sonido del temporizador</div>
@@ -27628,6 +27668,8 @@ function importData(o){o=o||{}; // (E7) o.fromOnboarding: desde la bienvenida
             const _kaImp=typeof data.keepAwake==='boolean'?data.keepAwake:S.keepAwake!==false;
             // (M1) Descanso entre series: el del backup solo si lo trae; si no, el de este móvil
             const _restImp=typeof data.restOn==='boolean'?data.restOn:S.restOn!==false;
+            // (M2) Esfuerzo de cada serie: igual
+            const _rpeImp=typeof data.rpeOn==='boolean'?data.rpeOn:S.rpeOn!==false;
             // (E2) Foto de las claves que trae la copia ANTES de migrar (después, data ya está cambiado): 42 R1
             const had=new Set(Object.keys(data));
             // Aplicar migración por si viene de versión antigua
@@ -27640,6 +27682,7 @@ function importData(o){o=o||{}; // (E7) o.fromOnboarding: desde la bienvenida
             migrated.restOverrides=_roImp;
             migrated.keepAwake=_kaImp;
             migrated.restOn=_restImp;
+            migrated.rpeOn=_rpeImp;
             // Temporizador: nunca se importa ni se hereda (el del backup es de otro momento; el actual, de otros datos)
             migrated.restTimer=null;
             // Sanear nombres y campos de texto del plan personalizado (defensa XSS). Sin las claves del catálogo (se leen
