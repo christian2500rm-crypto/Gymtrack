@@ -375,6 +375,10 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .rt-rpe .rpe-chip{font-size:11px;gap:3px}
 #rest-timer.has-rpe.done .rt-label{display:none}
 #rest-timer.has-rpe.done .rt-q{color:var(--amber);font-weight:600}
+/* (M1) Descanso apagado: la misma barra solo con el esfuerzo de la serie (sin anillo ni modo a pantalla completa) */
+#rest-timer[data-kind="rpe"]{cursor:default}
+#rest-timer[data-kind="rpe"] .rt-ring{display:none}
+#rest-timer[data-kind="rpe"] .rt-btn{min-width:44px;padding:7px 12px;font-size:14px}
 /* Modo descanso a pantalla completa (#rest-full): mm:ss enorme, anillo, ±15 s, RPE, siguiente serie / ejercicio */
 /* (16) Opaco desde el primer fotograma: solo entra el contenido (antes el fondo hacía el fundido y se veía Entreno debajo) */
 .rf{position:fixed;inset:0;z-index:350;background:var(--bg);display:flex;justify-content:center;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
@@ -13438,7 +13442,7 @@ function _backfillStrengthNames(data){
 
 let S=Object.assign({tab:'dash',day:'A',nextDay:'A',open:null,logs:{},sets:{},weights:[],sessions:[],strength:{},wmodal:false,wnew:'',onboarded:false,startDay:'A',
   coachStart:null,mesocycles:[],currentPlan:null,coachInsights:null,coachInsightsStale:true,coachLastAnalyzed:null,schema_version:SCHEMA_VERSION,settingsOpen:false,
-  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',hRange:'6m',rRange:'6m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],dlRecoSnoozeTs:null,loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true,
+  pendingCoachProposals:[],appliedProposals:[],rpe:{},warmups:{},weeklyAnalyses:[],lastWeekAnalysisTs:null,weeklyTarget:WEEKLY_TARGET_DEFAULT,activeWorkout:null,restWeeks:[],wRange:'3m',hRange:'6m',rRange:'6m',reopenedSession:null,restTimer:null,timerSound:true,deload:null,deloadHistory:[],dlRecoSnoozeTs:null,loadSteps:_defaultLoadSteps(),mmRange:'4w',restOverrides:{},keepAwake:true,restOn:true,
   lastBackupTs:null,backupSnoozeTs:null,lastBackupKind:null,lastJsonBackupTs:null,dataEditTs:null,libPlace:'g',libKit:null,libFav:[],libRecent:[],...V21_DEFAULTS},migrateState(loadState())||{});
 
 // Inicializar currentPlan mutable desde PLAN si no existe aún
@@ -13597,6 +13601,9 @@ S.loadSteps=_sanitizeLoadSteps(S.loadSteps);
 // Descanso por ejercicio y pantalla encendida (v19): siempre con forma válida
 S.restOverrides=_sanitizeRestOverrides(S.restOverrides);
 if(typeof S.keepAwake!=='boolean')S.keepAwake=true;
+// (M1) Descanso entre series (Ajustes → «Descanso entre series»): encendido salvo que lo apagues. Sin subir SCHEMA_VERSION:
+// quien ya usa la app no lo tiene y lo recibe encendido aquí (y al importar una copia que no lo trae, el de este móvil)
+if(typeof S.restOn!=='boolean')S.restOn=true;
 // «Solo hoy» (v20): sustituciones con forma válida (las caducadas vuelven en el primer render, subTick)
 _sanitizePlanSubs(S.currentPlan);
 
@@ -15562,6 +15569,7 @@ function _beforePlanSwap(){
   stampSessionsLbl();
   dayKeys().forEach(dk=>{revertDaySubs(dk);(getPlan()[dk].ex||[]).forEach(e=>_stampExName(routineEx(e)));});
   if(S.restTimer){try{RT.stop();}catch(e){}}
+  try{closeRpeSelector();}catch(e){} // (M1) y la barra del esfuerzo sin reloj, si la había
   const dl=!!S.deload;if(S.deload)_restoreDeload(true);
   return dl;
 }
@@ -16414,6 +16422,7 @@ const RT={
     secs=Math.round(+secs);
     if(!(secs>0))return false;
     const kind=opts.kind==='cardio'?'cardio':'rest';
+    if(kind==='rest'&&!_restOn())return false; // (M1) descanso entre series apagado en Ajustes
     const cur=S.restTimer;
     // Un cardio en marcha tiene prioridad sobre un descanso (no se pierde su auto-marcado)
     if(kind==='rest'&&cur&&cur.kind==='cardio'&&cur.endTs>Date.now())return false;
@@ -16478,13 +16487,28 @@ const RT={
     const el=this._el('rest-timer'),box=this._el('rt-rpe'),q=this._el('rt-q');
     if(!el||!box)return;
     const t=S.restTimer||this._doneT,tg=_rpeTargetFor(t);
+    if(!t)this._rpeOnly(tg); // (M1) descanso apagado: la barra solo con el esfuerzo (o se va)
+    else if(el.dataset.kind==='rpe')el.dataset.kind=t.kind; // un cardio ocupa la barra
     el.classList.toggle('has-rpe',!!tg);
     if(!tg){if(box.firstChild)box.innerHTML='';box.dataset.k='';if(q)q.textContent='';_dockSync();return;}
     const n=Math.max(1,parseInt(tg.ex&&tg.ex.s)||1),lvl=+(((S.rpe||{})[tg.exId]||{})[tg.setIdx])||0,k=tg.setIdx+':'+lvl;
-    if(q)q.textContent=S.restTimer?`Serie ${tg.setIdx+1}/${n} · ¿qué tal?`:`¡Listo! · ¿qué tal la serie ${tg.setIdx+1}?`;
+    if(q)q.textContent=S.restTimer||!t?`Serie ${tg.setIdx+1}/${n} · ¿qué tal?`:`¡Listo! · ¿qué tal la serie ${tg.setIdx+1}?`;
     box.setAttribute('aria-label',`¿Qué tal la serie ${tg.setIdx+1} de ${n}${tg.ex&&tg.ex.n?' de '+tg.ex.n:''}?`);
     if(box.dataset.k!==k){box.innerHTML=rpeChipsHtml(lvl,false);box.dataset.k=k;}
     _dockSync();
+  },
+  // (M1) Barra del esfuerzo sin temporizador (descanso apagado): la misma #rest-timer con data-kind="rpe", sin anillo ni
+  // modo a pantalla completa; «✕» la cierra (skip). Se va sola al elegir (setRpe) y la sustituye la siguiente serie
+  // marcada. tg null → se esconde (solo si era la del esfuerzo: nunca esconde un descanso o un cardio).
+  _rpeOnly(tg){
+    const el=this._el('rest-timer');if(!el)return;
+    if(!tg){if(el.dataset.kind==='rpe'){el.classList.remove('show','has-rpe');el.dataset.kind='';el.setAttribute('role','timer');el.removeAttribute('aria-label');}return;}
+    el.classList.remove('done');el.classList.add('show');
+    el.dataset.kind='rpe';el.setAttribute('role','group');el.setAttribute('aria-label','Esfuerzo de la serie');
+    const lab=this._el('rt-label'),msg=this._el('rt-msg'),btn=this._el('rt-skip');
+    if(lab)lab.textContent='Esfuerzo';
+    if(msg)msg.textContent=tg.ex&&tg.ex.n||'';
+    if(btn){btn.textContent='✕';btn.setAttribute('aria-label','Cerrar sin apuntar el esfuerzo');}
   },
   // Segundos que faltan del temporizador activo (0 si no hay)
   remaining(){const t=S.restTimer;return t?Math.max(0,Math.ceil((t.endTs-Date.now())/1000)):0;},
@@ -16493,6 +16517,7 @@ const RT={
     const t=S.restTimer;
     if(!t){if(!this._hideT)this._hideEl();return;}
     if(!_validRestTimer(t)){S.restTimer=null;saveState();this._hideEl();return;}
+    if(t.kind==='rest'&&!_restOn()){S.restTimer=null;saveState();Beep.cancel();Beep.release();this._hideEl();return;} // (M1) apagado
     // Tras recargar la app con un descanso de una serie (en marcha o que terminó mientras tanto): el RPE de la barra vuelve
     // a ser el de esa serie, si sigue marcada
     if(!_rpeOpen&&t.kind==='rest'&&Number.isInteger(t.setIdx)&&t.exId&&S.sets[t.exId]&&S.sets[t.exId][t.setIdx]){
@@ -16526,6 +16551,7 @@ const RT={
     const cardio=t.kind==='cardio';
     el.classList.remove('done');el.classList.add('show');
     el.dataset.kind=t.kind;
+    el.setAttribute('role','timer');el.removeAttribute('aria-label'); // (M1) por si era la barra del esfuerzo
     const lab=this._el('rt-label'),msg=this._el('rt-msg'),btn=this._el('rt-skip'),num=this._el('rt-num');
     if(lab)lab.textContent=cardio?'Cardio':'Descanso';
     if(msg)msg.textContent=t.label||(cardio?'Cardio':'Recuperando…');
@@ -16570,7 +16596,7 @@ const RT={
     if(!el)return;
     const cardio=t.kind==='cardio';
     el.classList.add('show','done');
-    el.dataset.kind=t.kind;
+    el.dataset.kind=t.kind;el.setAttribute('role','timer');el.removeAttribute('aria-label');
     const num=this._el('rt-num'),msg=this._el('rt-msg'),lab=this._el('rt-label'),btn=this._el('rt-skip'),arc=this._el('rt-arc');
     if(num){num.textContent='✓';num.classList.remove('long');}
     if(arc){arc.style.strokeDasharray=CIRC;arc.style.strokeDashoffset=0;arc.style.stroke='';}
@@ -16604,6 +16630,8 @@ const RT={
   },
   // Botón de la barra: «Saltar» (descanso) / «Parar» (cardio) / «OK» (ya terminado)
   skip(){
+    // (M1) «✕» de la barra del esfuerzo (sin reloj): solo la cierra
+    {const el=this._el('rest-timer');if(!S.restTimer&&el&&el.dataset.kind==='rpe'){closeRpeSelector();return;}}
     const wasCardio=!!(S.restTimer&&S.restTimer.kind==='cardio');
     this.stop();
     if(wasCardio)render(); // la tarjeta del cardio deja de mostrar «En marcha»
@@ -16682,6 +16710,32 @@ function toggleKeepAwake(){
   if(row){row.setAttribute('aria-checked',String(S.keepAwake));const sw=row.querySelector('.sw');if(sw)sw.classList.toggle('on',S.keepAwake);}
   toast(S.keepAwake?'🔆 La pantalla no se apagará mientras entrenas':'La pantalla se apagará como siempre');
 }
+// ── DESCANSO ENTRE SERIES: ENCENDIDO / APAGADO (M1) ─────────────────
+// S.restOn (por defecto true). Apagado: al marcar una serie (o un calentamiento) no arranca ningún descanso (RT.start lo
+// rechaza), no hay barra con reloj, modo a pantalla completa, ±15 s, «Saltar», pitidos ni vibración de fin, y la tarjeta
+// no enseña «⏱ Descanso entre series». El esfuerzo de la serie se apunta igual en la barra, sin reloj (_rpeTargetFor).
+// El cardio sigue con su cronómetro (RT kind 'cardio'). Lo elegido por ejercicio (S.restOverrides) no se toca.
+function _restOn(){return S.restOn!==false;}
+let _setRerender=false; // la lista de detrás cambia: se repinta al cerrar Ajustes (repintar ahora movería la hoja)
+function toggleRestOn(){
+  S.restOn=S.restOn===false;
+  saveState();
+  if(!S.restOn){
+    // Un descanso en marcha (o su «¡Listo!») se para y se cierra lo suyo; el cardio sigue
+    const t=S.restTimer;
+    if(t&&t.kind==='rest')RT.stop();
+    else if(!t&&RT._doneT&&RT._doneT.kind==='rest'){clearTimeout(RT._hideT);RT._hideT=null;RT._hideEl();}
+    if(RF.open&&!(S.restTimer&&S.restTimer.kind==='cardio'))RF.close();
+    if(_restPickEx)closeRestPicker();
+  }
+  try{RT._paintRpe();}catch(e){console.error(e);} // la barra del esfuerzo sin reloj aparece o se va
+  _setRerender=true;
+  // Actualizar solo las filas (sin re-render: la hoja no salta)
+  const row=document.getElementById('set-rest');
+  if(row){row.setAttribute('aria-checked',String(S.restOn));const sw=row.querySelector('.sw');if(sw)sw.classList.toggle('on',S.restOn);}
+  const snd=document.querySelector('#set-sound .set-row-d');if(snd)snd.textContent=timerSoundDesc();
+  toast(S.restOn?'⏱ Descanso entre series activado':'Descanso entre series desactivado: sin cuenta atrás');
+}
 
 // ── DESCANSO POR EJERCICIO (v19) ────────────────────────────────
 // Automático por tipo: aislamiento 60 s, multiarticular 90 s y, si es pesado (8 reps o menos en su rango), 120 s.
@@ -16724,6 +16778,7 @@ function setRestOverride(exId,secs){
 }
 // Control de la tarjeta (debajo de las series)
 function restCtlHtml(ex){
+  if(!_restOn())return''; // (M1) descanso entre series apagado: la tarjeta no lo enseña
   const o=_restOverrideOf(ex.id),s=getRestSecs(ex.id),eid=esc(ex.id);
   return`<button type="button" class="lg-rest" data-ex="${eid}" onclick="openRestPicker(this.dataset.ex)" aria-label="Descanso entre series: ${fmtClock(s)}${o==null?', automático':''}. Cambiar"><span>⏱ Descanso<span class="lg-rest-x"> entre series</span></span> <b>${fmtClock(s)}</b>${o==null?'<span class="lg-rest-k">auto</span>':''}<span class="lg-rest-go" aria-hidden="true">Cambiar ›</span></button>`;
 }
@@ -16731,7 +16786,7 @@ const REST_OPTS=[45,60,75,90,105,120,150,180,240];
 let _restPickEx=null;
 function openRestPicker(exId){
   const ex=_dayEx(exId),root=document.getElementById('cmodal-root');
-  if(!ex||ex.cardio||!root)return;
+  if(!ex||ex.cardio||!root||!_restOn())return;
   _restPickEx=ex.id;
   const def=restDefaultSecs(ex),cur=_restOverrideOf(ex.id),opts=REST_OPTS.slice();
   if(cur!=null&&!opts.includes(cur)){opts.push(cur);opts.sort((a,b)=>a-b);}
@@ -17013,6 +17068,7 @@ function startCardioTimer(exId,mins){
   if(!(mins>0))return;
   syncActiveWorkout();
   saveState();
+  if(!_restOn())closeRpeSelector(); // (M1) la barra del esfuerzo sin reloj deja sitio al cardio (y no vuelve al acabar)
   RT.start(Math.round(mins*60),ex.n,{kind:'cardio',exId,day:S.day});
   haptic([60]);
   render(); // la tarjeta pasa a «En marcha»
@@ -17083,8 +17139,8 @@ function toggleWarmupSet(exId,wIdx){
   const wasOff=!S.warmups[exId][wIdx];
   S.warmups[exId][wIdx]=!S.warmups[exId][wIdx];
   saveState();render();
-  // Tras calentar, descanso corto (45s)
-  if(wasOff){
+  // Tras calentar, descanso corto (45s) · (M1) nunca con el descanso entre series apagado
+  if(wasOff&&_restOn()){
     const ex=_dayEx(exId);
     if(ex)RT.start(45,ex.n+' · calentamiento',{exId});
   }
@@ -17747,8 +17803,9 @@ function toggleSet(id,i,evt){
     if(ex&&!ex.cardio){
       // El descanso empieza YA (antes esperaba al RPE). El RPE se elige con los chips de la barra (o del modo a
       // pantalla completa) mientras corre, se puede cambiar y ajusta su duración (al límite +15 %, fácil −15 %).
+      // (M1) Con el descanso apagado no arranca nada: los chips salen solos en la barra, sin reloj (_rpeOnly)
       const rs=getRestSecs(id);
-      const started=RT.start(rs,ex.n,{exId:id,setIdx:i,base:rs});
+      const started=_restOn()&&RT.start(rs,ex.n,{exId:id,setIdx:i,base:rs});
       showRpeSelector(id,i,ex,started);
     }
     if(ex){
@@ -17774,9 +17831,12 @@ function showRpeSelector(exId,setIdx,ex,rest){
   RT._paintRpe();RF.render();
 }
 // Serie de los chips para el descanso t (en marcha o recién terminado): la última marcada, si ese descanso es el suyo
+// (M1) Con el descanso apagado y sin temporizador (t null): la última serie marcada (la barra del esfuerzo sin reloj)
 function _rpeTargetFor(t){
   const o=_rpeOpen;
-  if(!o||!t||t.kind!=='rest'||t.exId!==o.exId||!Number.isInteger(t.setIdx)||t.setIdx!==o.setIdx)return null;
+  if(!o)return null;
+  if(!t){if(_restOn())return null;}
+  else if(t.kind!=='rest'||t.exId!==o.exId||!Number.isInteger(t.setIdx)||t.setIdx!==o.setIdx)return null;
   if(!S.sets[o.exId]||!S.sets[o.exId][o.setIdx])return null; // desmarcada
   return o;
 }
@@ -17801,16 +17861,19 @@ function setRpe(level){
   // Solo arranca aquí si no pudo arrancar al marcar (había un cardio en marcha).
   const t=S.restTimer;
   if(t&&t.kind==='rest'&&t.exId===exId&&(!Number.isInteger(t.setIdx)||t.setIdx===setIdx)&&t.endTs>Date.now())RT.adjustRest(exId,_rpeRest(level,exId,t));
-  else if(!o.rest){const b=getRestSecs(exId);if(RT.start(_rpeRest(level,exId),ex.n,{exId,setIdx,base:b}))o.rest=true;}
+  else if(!o.rest&&_restOn()){const b=getRestSecs(exId);if(RT.start(_rpeRest(level,exId),ex.n,{exId,setIdx,base:b}))o.rest=true;}
   render();
   RT._paintRpe();RF.render();
+  // (M1) Barra del esfuerzo sin reloj: se ve lo elegido un momento y se va sola
+  if(!S.restTimer&&!_restOn()){clearTimeout(_rpeSoloT);_rpeSoloT=setTimeout(()=>{_rpeSoloT=null;if(_rpeOpen===o&&!S.restTimer)closeRpeSelector();},RPE_SOLO_MS);}
 }
+const RPE_SOLO_MS=700;let _rpeSoloT=null;
 function skipRpe(){
   const o=_rpeOpen;
   closeRpeSelector();
   // Sin esfuerzo: descanso normal (si no había empezado ya al marcar la serie)
   const last=o||_rpeOpenLast;
-  if(last&&!last.rest){const b=getRestSecs(last.exId);RT.start(b,last.ex.n,{exId:last.exId,setIdx:last.setIdx,base:b});}
+  if(last&&!last.rest&&_restOn()){const b=getRestSecs(last.exId);RT.start(b,last.ex.n,{exId:last.exId,setIdx:last.setIdx,base:b});}
   _rpeOpenLast=null;
 }
 let _rpeOpenLast=null;
@@ -26887,6 +26950,10 @@ function render(){
 // ══════════════════════════════════════════════════════════
 // AJUSTES · Export/Import · Editar peso · Reset · Onboarding
 // ══════════════════════════════════════════════════════════
+// (M1) Texto de «Sonido del temporizador»: con el descanso apagado solo queda el cronómetro del cardio
+function timerSoundDesc(){
+  return(_restOn()?'Pitidos suaves 3-2-1 al acabar el descanso y el cardio':'Pitidos suaves 3-2-1 al acabar el cardio')+(Beep._AC()?'':' · este navegador no admite sonido');
+}
 // Sonido del temporizador (S.timerSound). Al activarlo suena un pitido de prueba (y se desbloquea el audio).
 function toggleTimerSound(){
   S.timerSound=S.timerSound===false;
@@ -26899,7 +26966,7 @@ function toggleTimerSound(){
   toast(S.timerSound?'🔔 Sonido activado':'🔕 Sonido desactivado');
 }
 function openSettings(){S.settingsOpen=true;_routineEdOpen=false;_edDragging=false;renderSettings();}
-function closeSettings(){S.settingsOpen=false;renderSettings();}
+function closeSettings(){S.settingsOpen=false;if(_setRerender){_setRerender=false;render();return;}renderSettings();} // (M1) con el descanso cambiado, la lista de detrás también
 function renderSettings(){
   const root=document.getElementById('settings-root');
   if(!root)return;
@@ -26966,10 +27033,17 @@ function renderSettings(){
       </div>
       <div class="sh">Durante el entreno</div>
       <div class="set-section">
+        ${(()=>{const on=_restOn();return`<div class="set-row" id="set-rest" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRestOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRestOn();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Descanso entre series</div>
+            <div class="set-row-d">Cuenta atrás al marcar cada serie. Apágalo si prefieres descansar a tu aire</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
         ${(()=>{const on=S.timerSound!==false;return`<div class="set-row" id="set-sound" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleTimerSound()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTimerSound();}">
           <div class="set-row-info">
             <div class="set-row-t">Sonido del temporizador</div>
-            <div class="set-row-d">Pitidos suaves 3-2-1 al acabar el descanso y el cardio${Beep._AC()?'':' · este navegador no admite sonido'}</div>
+            <div class="set-row-d">${timerSoundDesc()}</div>
           </div>
           <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
         </div>`;})()}
@@ -27552,6 +27626,8 @@ function importData(o){o=o||{}; // (E7) o.fromOnboarding: desde la bienvenida
             // Descanso por ejercicio y pantalla encendida (v19): los del backup solo si los trae; si no, los de este móvil
             const _roImp=_sanitizeRestOverrides(_isPlainObj(data.restOverrides)?data.restOverrides:S.restOverrides);
             const _kaImp=typeof data.keepAwake==='boolean'?data.keepAwake:S.keepAwake!==false;
+            // (M1) Descanso entre series: el del backup solo si lo trae; si no, el de este móvil
+            const _restImp=typeof data.restOn==='boolean'?data.restOn:S.restOn!==false;
             // (E2) Foto de las claves que trae la copia ANTES de migrar (después, data ya está cambiado): 42 R1
             const had=new Set(Object.keys(data));
             // Aplicar migración por si viene de versión antigua
@@ -27563,6 +27639,7 @@ function importData(o){o=o||{}; // (E7) o.fromOnboarding: desde la bienvenida
             migrated.mmRange=_mmImp;
             migrated.restOverrides=_roImp;
             migrated.keepAwake=_kaImp;
+            migrated.restOn=_restImp;
             // Temporizador: nunca se importa ni se hereda (el del backup es de otro momento; el actual, de otros datos)
             migrated.restTimer=null;
             // Sanear nombres y campos de texto del plan personalizado (defensa XSS). Sin las claves del catálogo (se leen
