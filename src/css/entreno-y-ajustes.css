@@ -208,9 +208,9 @@ body:has(.hist-over) #toast.show{transform:translateY(0)}
 @media (max-width:359px){#swup{padding-left:10px;font-size:12px}.swup-go{padding:0 10px}}
 @media (prefers-reduced-motion:reduce){#swup.in{animation:none}}
 /* ── CONFIRM MODAL ── */
-.cmov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .2s ease;overscroll-behavior:contain;padding-bottom:var(--kb)}
+.cmov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overscroll-behavior:contain;padding-bottom:var(--kb)}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.cmod{background:var(--bg2);width:100%;max-width:480px;max-height:calc(85vh - var(--kb));max-height:calc(85dvh - var(--kb));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));border-top:1px solid var(--border2);animation:slideUp .3s cubic-bezier(.34,1.2,.64,1)}
+.cmod{background:var(--bg2);width:100%;max-width:480px;max-height:calc(85vh - var(--kb));max-height:calc(85dvh - var(--kb));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));border-top:1px solid var(--border2)}
 @keyframes slideUp{from{transform:translateY(20px);opacity:.5}to{transform:translateY(0);opacity:1}}
 .cmod-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
 .cmod-t{font-size:17px;font-weight:600;letter-spacing:-.2px;margin-bottom:8px}

@@ -1317,9 +1317,9 @@ body:has(.hist-over) #toast.show{transform:translateY(0)}
 @media (max-width:359px){#swup{padding-left:10px;font-size:12px}.swup-go{padding:0 10px}}
 @media (prefers-reduced-motion:reduce){#swup.in{animation:none}}
 /* ── CONFIRM MODAL ── */
-.cmov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .2s ease;overscroll-behavior:contain;padding-bottom:var(--kb)}
+.cmov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);overscroll-behavior:contain;padding-bottom:var(--kb)}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
-.cmod{background:var(--bg2);width:100%;max-width:480px;max-height:calc(85vh - var(--kb));max-height:calc(85dvh - var(--kb));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));border-top:1px solid var(--border2);animation:slideUp .3s cubic-bezier(.34,1.2,.64,1)}
+.cmod{background:var(--bg2);width:100%;max-width:480px;max-height:calc(85vh - var(--kb));max-height:calc(85dvh - var(--kb));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));border-top:1px solid var(--border2)}
 @keyframes slideUp{from{transform:translateY(20px);opacity:.5}to{transform:translateY(0);opacity:1}}
 .cmod-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
 .cmod-t{font-size:17px;font-weight:600;letter-spacing:-.2px;margin-bottom:8px}
@@ -2077,6 +2077,50 @@ input[type=number]{-moz-appearance:textfield}
 .coach-hero-icon .ic{width:28px;height:28px;color:var(--green)}
 .dlr-ic .ic,.proposal-ic .ic,.pl-w-ic .ic,.rc-eic .ic,.dl-banner-ic .ic{width:24px;height:24px}
 .pl-w-ic .ic,.rc-eic .ic{color:var(--text2)}
+
+/* ── Hojas: la misma anatomía en todas (fichas, Ajustes, modales, confirmaciones): esquinas, asa, título de 17 px, ✕ de 44 px arriba
+      a la derecha, mismo relleno y botones abajo con el principal a la derecha. Sin contorno al recibir el foco al abrirse ── */
+.hist-sheet,.cmod,.modal{border-radius:22px 22px 0 0;border-top-color:transparent}
+.hist-sheet:focus,.cmod:focus,.modal:focus{outline:none}
+.hist-sheet-hdl,.cmod-hdl,.modal-hdl{width:36px;height:4px;border-radius:2px;background:var(--bg4);margin:0 auto 14px}
+.hist-sheet-title,.cmod-t,.modal h3{font-size:17px;font-weight:600;letter-spacing:-.2px}
+.cmod-t,.modal h3{margin-bottom:8px}
+.hist-sheet-title,.hist-sheet-sub{padding-right:44px}
+.hist-sheet-head{padding:12px 16px;border-bottom-color:transparent}
+.hist-sheet-close,.hist-sheet-close.x44{width:44px;height:44px;top:10px;right:8px;border-color:transparent;background:var(--bg3)}
+.hist-sheet-close.lib-fav{right:58px}
+.hist-sheet-close:not(.x44)::before{content:none} /* ya mide 44 px: sin zona de toque ampliada */
+.cmod,.modal{padding:12px 20px calc(20px + var(--sb))}
+.cmod-btns .btn{min-height:50px}
+
+/* ── Un solo control de pestañas: días de Entreno y de la rutina propuesta, rangos de fechas, Gimnasio/Casa y días del editor.
+      Una cápsula con las opciones dentro; la elegida, en una pastilla más clara. Cada opción mide 44 px de alto ── */
+.tabs,.wc-ranges,.lib-place,.edit-day-tab{display:flex;gap:3px;padding:3px;background:var(--bg3);border:0;border-radius:14px}
+.edit-day-tab{margin:0 14px 12px}
+.tab,.wc-rg,.lib-pl,.edit-day-btn{position:relative;flex:1;min-width:0;min-height:44px;padding:6px 4px;border:0;border-radius:11px;background:none;color:var(--text2);font-size:14px;font-weight:600;text-align:center;box-shadow:none}
+.tab.on,.wc-rg.on,.lib-pl[aria-checked="true"],.edit-day-btn.on{background:var(--bg4);color:var(--text);border:0;box-shadow:none}
+.wc-rg.on{color:var(--green)}
+.wc-rg,.lib-pl,.edit-day-btn{white-space:nowrap} /* «4 semanas», «Día A»: nunca en dos líneas */
+.wc-rg{padding-left:2px;padding-right:2px}
+@media (max-width:340px){.wc-rg{font-size:13px}}
+.ob-tabs{overflow-x:auto}.ob-tab{flex:none}
+
+/* ── Movimiento: fundido al cambiar de pestaña, hojas que suben desde abajo (y se arrastran para cerrarlas: gestos.js) y la misma
+      respuesta al tocar. Con «reducir movimiento», nada de esto se anima ── */
+@keyframes tabIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+#screen.tab-in{animation:tabIn .14s ease-out}
+@keyframes sheetIn{from{transform:translateY(100%)}to{transform:none}}
+@keyframes dimIn{from{background-color:transparent}}
+.sheet-in{animation:dimIn .2s ease-out}
+.sheet-in>.hist-sheet,.sheet-in>.cmod,.sheet-in>.modal{animation:sheetIn .3s cubic-bezier(.2,.8,.2,1)}
+.hist-sheet.dragging,.cmod.dragging,.modal.dragging{will-change:transform;transition:none;animation:none}
+.hist-over:has(>.dragging),.cmov:has(>.dragging),.mover:has(>.dragging){background:rgba(0,0,0,calc(.8*var(--drag,1)));backdrop-filter:none;-webkit-backdrop-filter:none}
+.set-row:active,.sess-row:active,.cfold-h:active{background:color-mix(in srgb,var(--text) 5%,transparent)}
+.btn:active,.icon-btn:active,.tab:active,.wc-rg:active,.lib-pl:active,.edit-day-btn:active{transform:scale(.97)}
+@media (prefers-reduced-motion:reduce){
+  #screen.tab-in,.sheet-in,.sheet-in>.hist-sheet,.sheet-in>.cmod,.sheet-in>.modal{animation:none}
+  .btn:active,.icon-btn:active,.tab:active,.wc-rg:active,.lib-pl:active,.edit-day-btn:active{transform:none}
+}
 </style>
 </head>
 <body>
@@ -20947,10 +20991,12 @@ function coach_fixLegacyDeload(restore){
 // ═══════════════════════════════════════════════════════════
 
 function go(tab){
+  const prevTab=S.tab;
   _uiGen++;_scrollTo=null; // cambiar de pantalla cancela el avance automático pendiente del modo gym
   // (08) El RPE ya no es una ventana: sus chips van en la barra del descanso, que se ve en todas las pantallas
   S.tab=tab;['dash','workout','coach','prog'].forEach(t=>{const b=document.getElementById('nb-'+t);b.classList.toggle('on',t===tab);if(t===tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}); // la pestaña activa, también para el lector de pantalla
   document.getElementById('screen').scrollTop=0;render();saveState();_toastPlace();
+  if(prevTab!==tab)_tabIn();
   try{if(_sw.pending)swUpdateSync(true);}catch(e){} // (15) el aviso de versión nueva se esconde al entrar en Entreno; (16c) y vuelve al salir
 }
 
@@ -21362,7 +21408,7 @@ function renderWmodal(){
     <h3>Registrar peso corporal</h3>
     <input class="ob-inp" id="wmodal-input" type="number" placeholder="${lw?lw.v:'105'}" value="${S.wnew||''}" oninput="S.wnew=this.value" step="0.1" inputmode="decimal" onkeydown="if(event.key==='Enter')logW()"/>
     <p style="font-size:13px;color:var(--text3);text-align:center;margin:8px 0 14px">Pésate siempre en las mismas condiciones (mañana, en ayunas)</p>
-    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="logW()">Guardar</button><button class="btn bs" style="width:90px" onclick="S.wmodal=false;S.wnew='';renderWmodal()">Cancelar</button></div>
+    <div class="cmod-btns"><button class="btn bs" onclick="S.wmodal=false;S.wnew='';renderWmodal()">Cancelar</button><button class="btn bp" onclick="logW()">Guardar</button></div>
   </div></div>`;
   // Focus diferido: iOS a veces ignora autofocus en elementos insertados dinámicamente
   setTimeout(()=>{const i=document.getElementById('wmodal-input');if(i){i.focus();i.select&&i.select();}},60);
@@ -28382,6 +28428,99 @@ function resetAllData(){
   });
 }
 
+// ═══════════════════════════════════════════════════════════
+// MOVIMIENTO Y GESTOS: fundido entre pestañas, hojas que suben y se arrastran para cerrar
+// ═══════════════════════════════════════════════════════════
+// 1) Al cambiar de pestaña, la pantalla entra con un fundido corto (_tabIn, lo llama go()).
+// 2) Una hoja que se abre sube desde abajo mientras el fondo se oscurece (clase .sheet-in en su fondo). Solo al abrirse: repintar
+//    una hoja ya abierta (cada interruptor de Ajustes repinta la suya) no repite la entrada.
+// 3) Las hojas se pueden bajar con el dedo para cerrarlas: desde el asa o la cabecera y, con su lista arriba del todo, también desde
+//    el cuerpo. Al soltar pasado un tercio de su alto, o con un gesto rápido, se cierran (como con su ✕ o tocando fuera); si no,
+//    vuelven a su sitio.
+// Lo que NO hace, para no pelearse con el desplazamiento ni con los gestos del sistema: no arrastra desde campos, animaciones 3D,
+// gráficas ni asas de reordenar; ni cuando el gesto es horizontal (deslizar pestañas, girar una animación, volver atrás), sube, usa
+// dos dedos o empieza en un borde de la pantalla; ni una hoja que no se pueda cerrar tocando fuera. Hasta que el arrastre empieza no
+// se retiene ningún evento: la lista se desplaza como siempre.
+// Con «reducir movimiento» no hay animaciones: la pestaña y la hoja aparecen de golpe y, al soltar, la hoja se cierra o vuelve sin
+// transición (sigue al dedo mientras se arrastra, que es movimiento que haces tú).
+let _motionOn=true; // las pruebas lo apagan para medir pantallas y hojas recién abiertas, sin esperar a su entrada
+const SHEET_SEL='.hist-sheet,.cmod,.modal',SHEET_OVER='.hist-over,.cmov,.mover';
+const SHEET_NODRAG='input,textarea,select,[contenteditable="true"],canvas,.wchart,.drag-handle,[data-nodrag]';
+const SHEET_EDGE=20,SHEET_OUT=1/3,SHEET_FLICK=0.55; // px del borde de la pantalla · fracción del alto · px/ms del gesto rápido
+
+function _motion(){return _motionOn&&!_rm();}
+function _tabIn(){
+  if(!_motion())return;
+  const sc=document.getElementById('screen');if(!sc)return;
+  sc.classList.remove('tab-in');void sc.offsetWidth;sc.classList.add('tab-in');
+}
+// La entrada de una hoja: cuando a una raíz (#…-root) le llega un fondo de hoja y no tenía otro (si lo tenía, es un repintado)
+(function(){
+  if(typeof MutationObserver==='undefined')return;
+  const isOver=n=>n.nodeType===1&&n.matches&&n.matches(SHEET_OVER);
+  const mo=new MutationObserver(recs=>{
+    if(!_motion())return;
+    for(const r of recs){if([...r.removedNodes].some(isOver))continue;r.addedNodes.forEach(n=>{if(isOver(n))n.classList.add('sheet-in');});}
+  });
+  document.querySelectorAll('body > div[id$="-root"]').forEach(el=>mo.observe(el,{childList:true}));
+})();
+
+// ── Arrastrar una hoja para cerrarla ──
+let _shDrag=null; // {sh, ov, x0, y0, t0, dy, on}
+// Cómo se cierra una hoja: su ✕ o, si no tiene, tocar el fondo (si el fondo no cierra, la hoja no se arrastra)
+function _sheetCloser(sh){
+  const x=sh.querySelector('.hist-sheet-close:not(.lib-fav)');if(x)return()=>x.click();
+  const ov=sh.parentElement;
+  return ov&&ov.matches(SHEET_OVER)&&ov.hasAttribute('onclick')?()=>ov.dispatchEvent(new MouseEvent('click',{bubbles:true,cancelable:true})):null;
+}
+function _sheetDragStart(e){
+  _shDrag=null;
+  if(!e.touches||e.touches.length!==1)return;
+  const t=e.target,sh=t&&t.closest?t.closest(SHEET_SEL):null;if(!sh||t.closest(SHEET_NODRAG))return;
+  const p=e.touches[0];
+  if(p.clientX<SHEET_EDGE||p.clientX>innerWidth-SHEET_EDGE||p.clientY>innerHeight-SHEET_EDGE)return; // bordes: gestos del sistema
+  if(!_sheetCloser(sh))return;
+  // desde el cuerpo, solo si lo que se desplaza bajo el dedo está arriba del todo (si no, el gesto es desplazar la lista)
+  if(!t.closest('.hist-sheet-head,.hist-sheet-hdl,.cmod-hdl,.modal-hdl')){
+    for(let n=t;n&&n!==sh.parentElement;n=n.parentElement){
+      if(n.scrollTop>0&&n.scrollHeight>n.clientHeight+1&&/auto|scroll/.test(getComputedStyle(n).overflowY))return;}
+  }
+  _shDrag={sh,ov:sh.parentElement,x0:p.clientX,y0:p.clientY,t0:performance.now(),dy:0,on:false};
+}
+function _sheetDragMove(e){
+  const d=_shDrag;if(!d)return;
+  if(e.touches.length!==1||!d.sh.isConnected){_sheetDragCancel();return;}
+  const p=e.touches[0],dy=p.clientY-d.y0,dx=p.clientX-d.x0;
+  if(!d.on){
+    if(dy<-8||Math.abs(dx)>12&&Math.abs(dx)>Math.abs(dy)){_shDrag=null;return;} // sube o va de lado: no es para la hoja
+    if(dy<8||Math.abs(dy)<Math.abs(dx)*1.2)return;
+    d.on=true;d.sh.classList.add('dragging');
+  }
+  d.dy=Math.max(0,dy);
+  d.sh.style.transform='translateY('+d.dy+'px)';
+  if(d.ov)d.ov.style.setProperty('--drag',String(Math.max(0,1-d.dy/(d.sh.offsetHeight||1))));
+  if(e.cancelable)e.preventDefault(); // ya arrastrando: que no se desplace ni tire de la página lo de debajo
+}
+function _sheetDragReset(d){d.sh.classList.remove('dragging');d.sh.style.transform='';d.sh.style.transition='';if(d.ov)d.ov.style.removeProperty('--drag');}
+function _sheetDragCancel(){const d=_shDrag;_shDrag=null;if(d&&d.on)_sheetDragReset(d);}
+function _sheetDragEnd(){
+  const d=_shDrag;_shDrag=null;if(!d||!d.on)return;
+  if(!d.sh.isConnected)return; // la hoja se repintó a medio arrastre: esa ya no existe, y la nueva se queda como está
+  const h=d.sh.offsetHeight||1,v=d.dy/Math.max(1,performance.now()-d.t0),out=d.dy>h*SHEET_OUT||(v>SHEET_FLICK&&d.dy>40),calm=!_motion();
+  const close=_sheetCloser(d.sh);
+  // si tras cerrarla la hoja sigue ahí (su cierre pidió confirmación o la repintó), vuelve a su sitio
+  const done=()=>{if(out&&close)close();if(d.sh.isConnected)_sheetDragReset(d);};
+  d.sh.classList.remove('dragging');
+  if(calm){done();return;}
+  d.sh.style.transition='transform .2s cubic-bezier(.2,.8,.2,1)';
+  if(out){d.sh.style.transform='translateY(100%)';if(d.ov)d.ov.style.setProperty('--drag','0');}
+  else{d.sh.style.transform='';if(d.ov)d.ov.style.removeProperty('--drag');}
+  setTimeout(done,210);
+}
+document.addEventListener('touchstart',_sheetDragStart,{passive:true});
+document.addEventListener('touchmove',_sheetDragMove,{passive:false});
+document.addEventListener('touchend',_sheetDragEnd);
+document.addEventListener('touchcancel',_sheetDragCancel);
 // ── Actualizar contador de duración de sesión cada 30s ──────────
 setInterval(()=>{
   const el=document.getElementById('live-dur');

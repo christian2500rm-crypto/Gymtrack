@@ -106,4 +106,5 @@ js/app/material-y-selector.js # «Mi material», selector de ejercicios, ficha y
 js/app/coach-propuestas.js    # propuestas del Coach (generación y aplicación), pintado del editor de rutina y render() general
 js/app/ajustes.js             # hoja de Ajustes: sonido, peso, día siguiente y objetivo semanal
 js/app/copias.js              # copias de seguridad, almacenamiento persistente, exportar e importar, reinicios (15b)
+js/app/gestos.js              # fundido entre pestañas, entrada de las hojas y arrastrarlas para cerrar
 js/app/arranque.js            # contador de sesión, PWA (manifest, atajos, service worker), teclado de iOS y arranque

@@ -15,6 +15,9 @@ CFOLD_KEYS.forEach(k=>_cfold.add(k));
 // (B3-4) Inicio enseña un aviso a la vez: los pasos de siempre miran cada aviso, así que corren con todos a la vista («N avisos
 // más» abierto); el estado de serie, el orden de la cola y el turno diario los cubre b3Inicio.
 _dashMore=true;
+// (B3-7) Movimiento: las pantallas entran con un fundido y las hojas suben desde abajo. Los pasos de siempre miden unas y otras
+// nada más abrirlas, así que corren con esas entradas apagadas; las cubre (con los gestos) b3Movimiento.
+_motionOn=false;
 // (flake) Esperas en tiempo REAL. applaunch.sh corre con --virtual-time-budget: en cuanto la página no tiene trabajo, el
 // reloj virtual salta al siguiente temporizador sin esperar a la E/S del navegador (FileReader) ni dejar pintar (rAF,
 // IntersectionObserver y scroll van con los fotogramas, y en un bucle de W() casi no llegan). Una petición de red pausa el
@@ -5676,14 +5679,13 @@ await safe('progreso2r1',async()=>{
       at(3);r.dispatchEvent(new PointerEvent('pointerleave',{pointerType:'mouse',bubbles:true}));if(lv.style.opacity==='0')throw new Error('no vuelve al soltar');}
     {const bl=document.querySelector('#hist-root .sc-bl')||document.querySelector('#hist-root .sc-svg').appendChild(document.createElementNS('http://www.w3.org/2000/svg','text'));bl.setAttribute('class','sc-bl');
       if(parseFloat(getComputedStyle(bl).fontSize)<10||getComputedStyle(bl).fill!==_cssRgb('var(--text2)'))throw new Error('rótulo de franja pequeño');}
-    // 3) ✕ de la ficha: círculo de 28 px, zona de toque ≥ 44 px (a 390, 360 y 320)
+    // 3) ✕ de la ficha: (B3-7) un círculo de 44 px de verdad, sin zona de toque ampliada alrededor (a 390, 360 y 320)
     for(const w of [390,360,320]){document.body.style.width=w+'px';renderHist();await W(10);
       const x=document.querySelector('#hist-root .hist-sheet-close'),q=x.getBoundingClientRect(),bf=getComputedStyle(x,'::before');
-      const hw=q.width-2*parseFloat(bf.left),hh=q.height-2*parseFloat(bf.top);
-      if(q.width>30||hw<44||hh<44)throw new Error('✕ a '+w+': '+q.width+' / '+hw+'×'+hh);
-      const cx=q.left+q.width/2,cy=q.top+q.height/2,h=q.width/2+7;
+      if(q.width<44||q.height<44||q.width>46||bf.content!=='none')throw new Error('✕ a '+w+': '+q.width+'×'+q.height+' / '+bf.content);
+      const cx=q.left+q.width/2,cy=q.top+q.height/2,h=q.width/2-3;
       for(const [px,py] of [[cx-h,cy],[cx,cy+h],[cx+h*0.7,cy-h*0.7]]){const e=document.elementFromPoint(px,py);
-        if(!e||!e.closest('.hist-sheet-close'))throw new Error('✕ no se toca a 7 px del borde ('+Math.round(px-cx)+','+Math.round(py-cy)+') a '+w);}}
+        if(!e||!e.closest('.hist-sheet-close'))throw new Error('✕ no se toca junto a su borde ('+Math.round(px-cx)+','+Math.round(py-cy)+') a '+w);}}
     document.body.style.width=bw0;
     closeHist();
     // 4) recomposición: kilos antiguos sin reps → no dice «sin kilos»; con un registro con reps, el mensaje de siempre
@@ -9603,7 +9605,7 @@ await safe('pulido16e',async()=>{
       for(const sel of ['.settings-btn','.icon-btn']){const e=document.querySelector('#app '+sel);E(e&&e.getBoundingClientRect().height<44&&await hitsW(e,1),sel+' sin 44 px a '+w);}
       {const sb=document.querySelector('#app .settings-btn');E(sb&&Math.round(sb.getBoundingClientRect().width)===34,'.settings-btn cambió de tamaño');}
       go('workout');await W(5);const k=getPlan()[S.day].ex.find(e=>!e.cardio).id;S.open=k;render();await W(10);
-      {const t=document.querySelector('#app .tab');t.scrollIntoView({block:'center'});await W(5);hTst();E(t.getBoundingClientRect().height<44&&await hitsW(t,0),'.tab sin 44 px a '+w);}
+      {const t=document.querySelector('#app .tab');t.scrollIntoView({block:'center'});await W(5);hTst();E(t.getBoundingClientRect().height>=44&&await hitsW(t,0),'.tab sin 44 px a '+w);}
       {const s=document.querySelector('#app .warmup-skip');if(s){s.scrollIntoView({block:'center'});await W(5);const cs=getComputedStyle(s);
         E(await hitsW(s,1),'«Saltar» sin 44 px a '+w);E(cs.color===col('var(--text2)')&&parseFloat(cs.fontSize)>=12,'«Saltar» '+cs.color+' '+cs.fontSize);}}
       {toggleSet(k,1,{});await W(10);const rr=document.querySelector('#rest-timer.show button.rt-ring');if(rr){hTst();const uni=document.getElementById('app').classList.contains('rt-uni');
@@ -12890,6 +12892,134 @@ await safe('b3Ajustes',async()=>{
       closeRoutineEditor();}
     if(bad.length)throw new Error(bad.join(' | '));
   }finally{if(fr){fr.style.width=fw;fr.style.height=fh;}document.getElementById('cmodal-root').innerHTML='';_cmodalState=null;try{closeLoadSheet();}catch(e){}closeSettings();S.loadSteps=JSON.parse(ls0);_rest11(j);saveState();render();await W(40);}
+});
+await safe('b3Movimiento',async()=>{
+  // (B3-7) Lo transversal: todas las hojas con la misma anatomía (M2), un solo control de pestañas de 44 px (S6) y el movimiento
+  // (X1): fundido al cambiar de pestaña, hojas que suben al abrirse (no al repintarse) y que se arrastran para cerrarlas sin
+  // pelearse con el desplazamiento ni con los gestos del sistema; con «reducir movimiento», sin animaciones.
+  const j=_snap11(),bad=[],E=(c,m)=>{if(!c)bad.push(m);},rm0=_rm,mo0=_motionOn,$=s=>document.querySelector(s),sc=document.getElementById('screen');
+  const fr=window.frameElement,fw=fr&&fr.style.width,fh=fr&&fr.style.height;
+  const size=async(w,h)=>{if(!fr)return false;fr.style.width=w+'px';fr.style.height=h+'px';await W(40);for(let i=0;i<20&&(innerWidth!==w||innerHeight!==h);i++)await W(20);return innerWidth===w&&innerHeight===h;};
+  const col=v=>{const p=document.createElement('span');p.style.color=v;document.body.appendChild(p);const c=getComputedStyle(p).color;p.remove();return c;};
+  // un toque de verdad (TouchEvent) sobre un elemento; si el navegador no los construye, los mismos manejadores con un evento de mentira
+  const T=(type,el,x,y,n)=>{const mk=(X,Y,i)=>({identifier:i||1,target:el,clientX:X,clientY:Y,pageX:X,pageY:Y}),ts=type==='touchend'?[]:Array.from({length:n||1},(_,i)=>mk(x+i*40,y,i+1));
+    let ev=null;try{const tt=ts.map(o=>new Touch(o));ev=new TouchEvent(type,{bubbles:true,cancelable:true,touches:tt,targetTouches:tt,changedTouches:tt.length?tt:[new Touch(mk(x,y))]});}catch(e){ev=null;}
+    if(ev){(el.isConnected?el:document).dispatchEvent(ev);return ev.defaultPrevented;}
+    let dp=false;(type==='touchstart'?_sheetDragStart:type==='touchmove'?_sheetDragMove:_sheetDragEnd)({touches:ts,target:el,cancelable:true,preventDefault(){dp=true;}});return dp;};
+  // arrastre desde un elemento: baja dy (y se va dx de lado); devuelve cómo iba a mitad y si retuvo el desplazamiento
+  const drag=async(el,dx,dy,o)=>{o=o||{};if(!el){E(false,'falta de dónde arrastrar: '+(o.de||dx+','+dy));return{ini:false,mid:{on:false,tr:'',cls:false},ret:false};}const r=el.getBoundingClientRect(),x=o.x!=null?o.x:Math.min(innerWidth-40,Math.max(40,r.left+r.width/2)),y=r.top+Math.min(r.height/2,20);
+    T('touchstart',el,x,y,o.n);const ini=!!_shDrag,p1=T('touchmove',el,x+dx/2,y+dy/2,o.n);
+    const mid=_shDrag?{on:_shDrag.on,tr:_shDrag.sh.style.transform,cls:_shDrag.sh.classList.contains('dragging')}:{on:false,tr:'',cls:false};
+    const p2=T('touchmove',el,x+dx,y+dy,o.n);if(o.slow)await W(o.slow);T('touchend',el,x+dx,y+dy);await W(5);return{ini,mid,ret:p1||p2};};
+  const setts=()=>$('#settings-root .hist-sheet');
+  try{
+    if(fr)await size(390,844); // (el tamaño no depende del paso anterior: la lista de Ajustes tiene que poder desplazarse)
+    RT.stop();go('dash');await W(5);
+    // ── X1 · fundido al cambiar de pestaña: solo al cambiar, y nunca con «reducir movimiento»
+    _motionOn=true;_rm=()=>false;sc.classList.remove('tab-in');
+    go('coach');E(sc.classList.contains('tab-in')&&getComputedStyle(sc).animationName==='tabIn','sin fundido al cambiar de pestaña');
+    sc.classList.remove('tab-in');go('coach');E(!sc.classList.contains('tab-in'),'fundido al repintar la misma pestaña');
+    _rm=()=>true;go('prog');E(!sc.classList.contains('tab-in'),'fundido con movimiento reducido');
+    _rm=()=>false;_motionOn=false;go('dash');E(!sc.classList.contains('tab-in'),'fundido con el movimiento apagado');
+    // ── X1 · una hoja que se abre, sube (clase .sheet-in en su fondo); repintarla abierta no repite la entrada
+    _motionOn=true;
+    openSettings();await W(5);
+    {const ov=$('#settings-root .hist-over');E(ov&&ov.classList.contains('sheet-in')&&getComputedStyle(setts()).animationName==='sheetIn'&&getComputedStyle(ov).animationName==='dimIn','Ajustes no entra subiendo');
+      render();await W(5);const ov2=$('#settings-root .hist-over');E(ov2&&ov2!==ov&&!ov2.classList.contains('sheet-in')&&getComputedStyle(setts()).animationName==='none','repintar Ajustes repite la entrada');
+      // otra hoja encima sí entra; y al cerrarla, Ajustes sigue quieta
+      openLoadSheet();await W(5);E($('#ls-root .hist-over').classList.contains('sheet-in'),'la hoja de encima no entra');
+      openLoadStep('polea');await W(5);E($('#cmodal-root .cmov').classList.contains('sheet-in')&&getComputedStyle($('#cmodal-root .cmod')).animationName==='sheetIn','el selector no entra');
+      pickLoadStep('polea','auto');await W(5);E(!$('#ls-root .hist-over').classList.contains('sheet-in'),'repintar la hoja de los saltos repite la entrada');
+      closeLoadSheet();closeSettings();}
+    S.wmodal=true;renderWmodal();await W(5);E($('#wmodal-root .mover').classList.contains('sheet-in')&&getComputedStyle($('#wmodal-root .modal')).animationName==='sheetIn','el modal del peso no entra');S.wmodal=false;renderWmodal();
+    _rm=()=>true;openSettings();await W(5);E(!$('#settings-root .hist-over').classList.contains('sheet-in'),'entrada con movimiento reducido');closeSettings();_rm=()=>false;
+    {const rs=[...document.styleSheets].flatMap(ss=>{try{return[...ss.cssRules];}catch(e){return[];}}).filter(r=>r instanceof CSSMediaRule&&/prefers-reduced-motion/.test(r.conditionText)).flatMap(r=>[...r.cssRules]);
+      const off=sel=>rs.some(r=>r.selectorText&&r.selectorText.split(',').map(x=>x.trim()).includes(sel)&&r.style.animationName==='none');
+      E(off('#screen.tab-in')&&off('.sheet-in')&&off('.sheet-in > .hist-sheet')&&off('.sheet-in > .cmod')&&off('.sheet-in > .modal'),'el CSS no quita las animaciones con movimiento reducido');}
+    // ── X1 · arrastrar para cerrar (sin animación: _motionOn apagado, la hoja se cierra o vuelve al soltar)
+    _motionOn=false;
+    openSettings();await W(5);
+    {const head=()=>$('#settings-root .hist-sheet-head'),h=setts().offsetHeight;
+      // corto y despacio desde la cabecera: sigue al dedo y vuelve
+      let r=await drag(head(),0,36,{slow:500}); // (36 px: ni por distancia ni por rapidez puede contar como cierre, tarde lo que tarde)
+      E(r.ini&&r.mid.on&&r.mid.cls&&r.mid.tr==='translateY(18px)'&&r.ret,'la hoja no sigue al dedo: '+JSON.stringify(r));
+      E(S.settingsOpen&&setts()&&setts().style.transform===''&&!setts().classList.contains('dragging'),'un arrastre corto no devuelve la hoja a su sitio'+' '+JSON.stringify(r)+' '+innerWidth+'×'+innerHeight+' h'+h);
+      // si la hoja se repinta a medio arrastre (un temporizador que repinta la app), soltar no la cierra
+      {const hd=head(),q=hd.getBoundingClientRect(),x=q.left+q.width/2,y=q.top+18;T('touchstart',hd,x,y);T('touchmove',hd,x,y+60);T('touchmove',hd,x,y+120);
+        E(!!_shDrag&&_shDrag.on,'no empieza el arrastre');render();T('touchend',document.body,x,y+120);await W(5);
+        E(S.settingsOpen&&setts()&&setts().style.transform===''&&!setts().classList.contains('dragging')&&!_shDrag,'repintar a medio arrastre cierra o descoloca la hoja');}
+      // de lado, hacia arriba, con dos dedos o desde el borde de la pantalla: no es para la hoja, y no retiene nada
+      r=await drag(head(),90,6);E(!r.mid.on&&!r.ret&&S.settingsOpen,'un gesto horizontal arrastra la hoja'+' '+JSON.stringify(r)+' '+innerWidth+'×'+innerHeight+' h'+h);
+      r=await drag(head(),0,-60);E(!r.mid.on&&!r.ret&&S.settingsOpen,'un gesto hacia arriba arrastra la hoja'+' '+JSON.stringify(r)+' '+innerWidth+'×'+innerHeight+' h'+h);
+      r=await drag(head(),0,h,{n:2});E(!r.ini&&!r.mid.on&&S.settingsOpen,'dos dedos arrastran la hoja'+' '+JSON.stringify(r)+' '+innerWidth+'×'+innerHeight+' h'+h);
+      r=await drag(head(),0,h,{x:6});E(!r.ini&&S.settingsOpen,'se arrastra desde el borde de la pantalla'+' '+JSON.stringify(r)+' '+innerWidth+'×'+innerHeight+' h'+h);
+      r=await drag(head(),0,h,{x:innerWidth-6});E(!r.ini&&S.settingsOpen,'se arrastra desde el borde derecho'+' '+JSON.stringify(r)+' '+innerWidth+'×'+innerHeight+' h'+h);
+      // desde el cuerpo con la lista desplazada: es desplazar la lista (no se retiene el gesto)
+      if(!setts()){E(false,'Ajustes se cerró con un gesto que no era para la hoja');openSettings();await W(5);}
+      setts().scrollTop=200;const row=$('#set-recovery')||$('#settings-root .set-row');E(setts().scrollTop===200,'la lista de Ajustes no se desplaza ('+innerWidth+'×'+innerHeight+')');
+      r=await drag(row,0,300);E(!r.ini&&!r.ret&&S.settingsOpen&&setts().scrollTop===200,'con la lista desplazada, el cuerpo arrastra la hoja');
+      // desde el cuerpo con la lista arriba: baja la hoja; pasado un tercio de su alto, se cierra
+      if(!setts()){openSettings();await W(5);}setts().scrollTop=0;r=await drag($('#settings-root .set-row'),0,Math.round(h/3)+40,{slow:600});
+      E(r.mid.on&&!S.settingsOpen&&!setts(),'un arrastre largo desde el cuerpo no cierra la hoja');
+      // un gesto rápido y corto también la cierra
+      openSettings();await W(5);r=await drag(head(),0,120);E(r.mid.on&&!S.settingsOpen,'un gesto rápido no cierra la hoja');}
+    // un campo, una gráfica y un asa de reordenar no arrastran su hoja; el asa del modal del peso, sí (se cierra como al tocar fuera)
+    S.wmodal=true;renderWmodal();await W(5);
+    {let r=await drag($('#wmodal-input'),0,300);E(!r.ini&&S.wmodal,'el campo del peso arrastra el modal');
+      r=await drag($('#wmodal-root .modal-hdl'),0,300,{slow:600});E(r.mid.on&&!S.wmodal&&!$('#wmodal-root .modal'),'arrastrar el modal del peso no lo cierra');}
+    openWDetail();await W(10);
+    {const ch=$('#wdetail-root .wchart');if(ch){const r=await drag(ch,0,300);E(!r.ini&&S._wdetail,'la gráfica del peso arrastra su hoja');}closeWDetail();}
+    openRoutineEditor('A');await W(10);
+    {const r=await drag($('#routine-ed .drag-handle'),0,300);E(!r.ini&&!!$('#routine-ed'),'el asa de reordenar arrastra el editor');closeRoutineEditor();}
+    // una confirmación (sin ✕): arrastrarla es cancelarla, nunca aceptarla
+    {let ok=0,no=0;confirmModal({title:'Prueba',body:'x',onOk:()=>{ok++;},onCancel:()=>{no++;}});await W(5);
+      const r=await drag($('#cmodal-root .cmod-hdl'),0,300,{slow:600});E(r.mid.on&&!_cmodalState&&no===1&&ok===0,'arrastrar una confirmación: '+ok+' / '+no);}
+    // con animación: al soltar lejos, la hoja termina de bajar y se cierra un momento después
+    _motionOn=true;openSettings();await W(5);
+    {const sh=setts();sh.getAnimations().forEach(a=>a.finish()); // ya ha terminado de entrar
+      const r=await drag($('#settings-root .hist-sheet-head'),0,Math.round(sh.offsetHeight/3)+40,{slow:600});
+      E(r.mid.on&&S.settingsOpen&&sh.style.transform==='translateY(100%)'&&/transform/.test(sh.style.transition),'al soltar no termina de bajar');
+      await W(260);E(!S.settingsOpen&&!setts(),'la hoja no se cierra tras bajar');}
+    _motionOn=false;
+    // ── M2 · la misma anatomía en todas las hojas
+    {const anat=(name,sh)=>{const cs=getComputedStyle(sh),hd=sh.querySelector('.hist-sheet-hdl,.cmod-hdl,.modal-hdl'),t=sh.querySelector('.hist-sheet-title,.cmod-t,h3'),x=sh.querySelector('.hist-sheet-close:not(.lib-fav)');
+        E(cs.borderTopLeftRadius==='22px'&&cs.borderTopRightRadius==='22px',name+': esquinas '+cs.borderTopLeftRadius);
+        E(hd&&hd.offsetWidth===36&&hd.offsetHeight===4&&getComputedStyle(hd).marginBottom==='14px',name+': asa');
+        E(t&&getComputedStyle(t).fontSize==='17px'&&getComputedStyle(t).fontWeight==='600',name+': título '+(t&&getComputedStyle(t).fontSize));
+        if(x){const q=x.getBoundingClientRect(),r=(sh.querySelector('.hist-sheet-head')||sh).getBoundingClientRect(); // (respecto a la cabecera: en escritorio la hoja lleva barra de desplazamiento)
+          E(q.width===44&&q.height===44&&Math.abs(r.right-q.right-8)<1&&Math.abs(q.top-r.top-10)<=1.5&&getComputedStyle(x,'::before').content==='none',name+': ✕ '+[q.width,q.height,r.right-q.right,q.top-r.top,getComputedStyle(x,'::before').content]);
+          if(t)E(t.getBoundingClientRect().right-parseFloat(getComputedStyle(t).paddingRight)<=q.left+1||t.getBoundingClientRect().bottom<=q.top,name+': el título pisa el ✕');}
+        try{sh.focus();}catch(e){}E(getComputedStyle(sh).outlineStyle==='none',name+': contorno al recibir el foco');
+        const bs=[...sh.querySelectorAll('.cmod-btns .btn')];
+        if(bs.length>1){E(bs[bs.length-1].classList.contains('bp')&&!bs[0].classList.contains('bp')&&bs[0].getBoundingClientRect().left<bs[1].getBoundingClientRect().left,name+': el botón principal no va a la derecha');}
+        bs.forEach(b=>E(b.getBoundingClientRect().height>=50,name+': botón de menos de 50 px'));
+        E(document.documentElement.scrollWidth<=innerWidth,name+': desborda');};
+      for(const [w,h] of [[390,844],[320,568]]){if(fr&&!await size(w,h))continue;const L=innerWidth+' ';
+        openSettings();await W(5);anat(L+'Ajustes',setts());openLoadSheet();await W(5);anat(L+'saltos de peso',$('#ls-sheet'));closeLoadSheet();closeSettings();
+        {const id=Object.keys(S.strength||{}).find(k=>Array.isArray(S.strength[k])&&S.strength[k].length&&_dayEx(k));if(id){openHist(id);await W(10);anat(L+'ficha',$('#hist-root .hist-sheet'));closeHist();}}
+        openWDetail();await W(10);if($('#wdetail-root .hist-sheet'))anat(L+'peso corporal',$('#wdetail-root .hist-sheet'));closeWDetail();
+        S.wmodal=true;renderWmodal();await W(5);anat(L+'registrar peso',$('#wmodal-root .modal'));S.wmodal=false;renderWmodal();
+        confirmModal({title:'Prueba',body:'x'});await W(5);anat(L+'confirmación',$('#cmodal-root .cmod'));closeCmodal(false);
+        go('prog');openProgGuide();await W(5);anat(L+'guía',$('#cmodal-root .cmod'));closeProgGuide();go('dash');}
+      if(fr){fr.style.width=fw;fr.style.height=fh;await W(40);}}
+    // ── S6 · un solo control de pestañas: cápsula, opciones de 44 px y la elegida en una pastilla más clara
+    {const b3=col('var(--bg3)'),b4=col('var(--bg4)'),ctl=(name,box,sel,on)=>{
+        if(!box){E(false,name+': sin control');return;}
+        const cs=getComputedStyle(box),os=[...box.querySelectorAll(sel)],act=os.filter(on);
+        E(cs.backgroundColor===b3&&cs.borderTopLeftRadius==='14px'&&cs.display==='flex'&&cs.borderTopWidth==='0px',name+': cápsula '+cs.backgroundColor+' '+cs.borderTopLeftRadius);
+        E(os.length>=2&&os.every(o=>o.getBoundingClientRect().height>=44),name+': opciones de menos de 44 px ('+os.map(o=>Math.round(o.getBoundingClientRect().height))+')');
+        E(act.length===1&&getComputedStyle(act[0]).backgroundColor===b4&&getComputedStyle(act[0]).borderTopLeftRadius==='11px',name+': la elegida');
+        E(os.filter(o=>!on(o)).every(o=>/rgba\(0, 0, 0, 0\)|transparent/.test(getComputedStyle(o).backgroundColor)&&getComputedStyle(o).borderTopWidth==='0px'),name+': las no elegidas llevan fondo o borde');
+        E(os.every(o=>o.scrollWidth<=o.clientWidth+1)&&document.documentElement.scrollWidth<=innerWidth,name+': no cabe');};
+      for(const [w,h] of [[390,844],[320,568]]){if(fr&&!await size(w,h))continue;const L=innerWidth+' ';
+        go('workout');await W(5);ctl(L+'días de Entreno',$('#screen .tabs'),'.tab',o=>o.classList.contains('on'));
+        go('dash');openWDetail();await W(10);if($('#wdetail-root .wc-ranges'))ctl(L+'rangos de fechas',$('#wdetail-root .wc-ranges'),'.wc-rg',o=>o.classList.contains('on'));closeWDetail();
+        openRoutineEditor('A');await W(10);ctl(L+'días del editor',$('#routine-ed .edit-day-tab'),'.edit-day-btn',o=>o.classList.contains('on'));closeRoutineEditor();
+        openSettings();openMyMaterial();await W(10);{const lp=$('#mat-root .lib-place');if(lp)ctl(L+'Gimnasio / Casa',lp,'.lib-pl',o=>o.getAttribute('aria-checked')==='true');}closeMyMaterial();closeSettings();}
+      if(fr){fr.style.width=fw;fr.style.height=fh;await W(40);}}
+    if(bad.length)throw new Error([...new Set(bad)].slice(0,10).join(' | '));
+  }finally{_rm=rm0;_motionOn=mo0;_shDrag=null;if(fr){fr.style.width=fw;fr.style.height=fh;}sc.classList.remove('tab-in');
+    try{closeProgGuide();}catch(e){}document.getElementById('cmodal-root').innerHTML='';_cmodalState=null;try{closeLoadSheet();closeMyMaterial();closeWDetail();closeHist();}catch(e){}S.wmodal=false;renderWmodal();closeSettings();_rest11(j);saveState();render();await W(40);}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

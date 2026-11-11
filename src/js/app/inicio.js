@@ -1,9 +1,11 @@
 
 function go(tab){
+  const prevTab=S.tab;
   _uiGen++;_scrollTo=null; // cambiar de pantalla cancela el avance automático pendiente del modo gym
   // (08) El RPE ya no es una ventana: sus chips van en la barra del descanso, que se ve en todas las pantallas
   S.tab=tab;['dash','workout','coach','prog'].forEach(t=>{const b=document.getElementById('nb-'+t);b.classList.toggle('on',t===tab);if(t===tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}); // la pestaña activa, también para el lector de pantalla
   document.getElementById('screen').scrollTop=0;render();saveState();_toastPlace();
+  if(prevTab!==tab)_tabIn();
   try{if(_sw.pending)swUpdateSync(true);}catch(e){} // (15) el aviso de versión nueva se esconde al entrar en Entreno; (16c) y vuelve al salir
 }
 
@@ -415,7 +417,7 @@ function renderWmodal(){
     <h3>Registrar peso corporal</h3>
     <input class="ob-inp" id="wmodal-input" type="number" placeholder="${lw?lw.v:'105'}" value="${S.wnew||''}" oninput="S.wnew=this.value" step="0.1" inputmode="decimal" onkeydown="if(event.key==='Enter')logW()"/>
     <p style="font-size:13px;color:var(--text3);text-align:center;margin:8px 0 14px">Pésate siempre en las mismas condiciones (mañana, en ayunas)</p>
-    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="logW()">Guardar</button><button class="btn bs" style="width:90px" onclick="S.wmodal=false;S.wnew='';renderWmodal()">Cancelar</button></div>
+    <div class="cmod-btns"><button class="btn bs" onclick="S.wmodal=false;S.wnew='';renderWmodal()">Cancelar</button><button class="btn bp" onclick="logW()">Guardar</button></div>
   </div></div>`;
   // Focus diferido: iOS a veces ignora autofocus en elementos insertados dinámicamente
   setTimeout(()=>{const i=document.getElementById('wmodal-input');if(i){i.focus();i.select&&i.select();}},60);
