@@ -538,7 +538,7 @@ function showUndoToast(label,onUndo,cls,ms){ // (E10b) ms: cuánto se ve (por de
   if(!el)return;
   // (16) «80 kg», «12 reps», «45 s» (y «1RM est. 86.5 kg») no se parten entre líneas (el texto no cambia: solo se envuelven)
   const lbl=_nwX(esc(label)); // (18) y «× 10» de «15 kg × 10» junto
-  el.innerHTML=`<span style="margin-right:14px">${lbl}</span><button id="undo-btn" style="background:transparent;border:1px solid var(--green);color:var(--green);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;pointer-events:auto">Deshacer</button>`;
+  el.innerHTML=`<span style="margin-right:14px">${lbl}</span><button id="undo-btn" style="background:transparent;border:1px solid var(--green);color:var(--green);border-radius:6px;padding:3px 10px;font-size:13px;font-weight:600;cursor:pointer;pointer-events:auto">Deshacer</button>`;
   el.classList.toggle('pr',cls==='pr');
   _toastPlace();
   el.classList.add('show');
@@ -823,7 +823,7 @@ function openFinishModal(doneEx,totalEx){
     <div class="cmod-t">${esc(title)}</div>
     <div class="cmod-b">${esc(body)}</div>
     ${missHtml}
-    <textarea id="finish-note-inp" class="inp" placeholder="Notas opcionales (p. ej.: dolió el hombro, cardio sin pausa, sueño regular…)" rows="3" maxlength="500" style="width:100%;font-size:14px;font-family:inherit;font-weight:400;resize:vertical;min-height:60px;margin-bottom:14px">${esc(note)}</textarea>
+    <textarea id="finish-note-inp" class="inp" placeholder="Notas opcionales (p. ej.: dolió el hombro, cardio sin pausa, sueño regular…)" rows="3" maxlength="500" style="width:100%;font-size:15px;font-family:inherit;font-weight:400;resize:vertical;min-height:60px;margin-bottom:14px">${esc(note)}</textarea>
     <div class="cmod-btns">
       ${miss.length
         ?`<button class="btn bs" onclick="finishReview()">Revisar</button>

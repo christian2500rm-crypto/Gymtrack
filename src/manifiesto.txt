@@ -21,6 +21,7 @@ css/editor-y-biblioteca.css   # editor de rutina, biblioteca 3D, selector, ficha
 css/entreno-y-ajustes.css     # RPE, modo gym serie a serie, calentamiento, avisos, confirmación, hoja de Ajustes
 css/progreso.css              # mapa muscular, récords y resumen de sesión, ficha 2.0, fuerza, constancia, «Más fuerte y más ligero»
 css/wrapped-e-inicio.css      # resumen «Wrapped», tarjeta «Hoy toca» de Inicio, ajustes de iOS y movimiento reducido
+css/sistema.css               # capa de sistema: cabecera, rótulos, tarjetas y piel común (va la última: ajusta lo anterior)
 
 [anim]
 # Motor 3D GymAnim. GENERADO por el laboratorio (tools/lab, ver su README): no editar a mano.

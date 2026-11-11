@@ -370,7 +370,7 @@ function renderWorkout(){
       <div class="exh" role="button" tabindex="0" aria-expanded="${isOpen}" data-ex="${eid}" onclick="toggleCard(this.dataset.ex)" onkeydown="if(event.key==='Enter'){event.preventDefault();toggleCard(this.dataset.ex)}">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${exIconHtml(ex)}</div>
         <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)}${NB}· ${_nwUnits(ex.cardio?esc(ex.r):esc(ex.s)+'×'+(pr&&(pr.unit==='kg'||pr.unit==='reps')&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex))))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal ${presKCls(pr)}" role="img" aria-label="Objetivo de hoy: ${_presIsKg(pr)&&!pr.up?`${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones`:esc(presValTxt(pr))}, ${esc(presWord(pr))}"><span class="ex-goal-v">🎯 ${esc(presShortTxt(pr))}</span><span class="ex-goal-k">${presWord(pr)}</span></div>`:''}${doneSum}</div>
-        ${dots}${exDone?'<span style="font-size:18px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
+        ${dots}${exDone?'<span style="font-size:20px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${!ex.cardio?body
         :`${busyBarHtml(ex,c[0]||RT.cardioRunning(ex.id)?1:0)}${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${_tipHtml(ex.tip)}</div>${(()=>{

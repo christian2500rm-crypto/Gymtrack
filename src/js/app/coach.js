@@ -1133,7 +1133,7 @@ function coach_generateInsights(an,pend,resIds){
       type:bwInsight.type,
       ic:bwInsight.ic,
       t:bwInsight.title,
-      d:bwInsight.description+(bwInsight.bw?` <span style="opacity:.6;font-family:'DM Mono',monospace;font-size:11px">[${bwInsight.bw}]</span>`:'')
+      d:bwInsight.description+(bwInsight.bw?` <span style="opacity:.6;font-family:'DM Sans',sans-serif;font-size:12px">[${bwInsight.bw}]</span>`:'')
     });
   }
 
@@ -1735,7 +1735,7 @@ function renderCoach(){
     <div class="insight">
       <div class="insight-ic info">🔄</div>
       <div class="insight-body">
-        <div class="insight-t">Renueva tu plan cada 4 semanas</div>
+        <div class="insight-t">Renueva tu plan cada 4&nbsp;semanas</div>
         <div class="insight-d">Te propone cambios concretos (series, esquema o ejercicio) y semanas de descarga cuando toca. Tú decides si los aplicas.</div>
       </div>
     </div>
@@ -1787,7 +1787,7 @@ function renderCoach(){
   <div class="topbar">
     <div class="topbar-row">
       <div><h1>Coach</h1><div class="sub">Mesociclo ${(S.mesocycles?.length||0)+1} · Semana ${cycle.weekNum}/${CYCLE_WEEKS}</div>
-        ${cycle.overdue?`<div class="coach-over">Ciclo terminado${overW>=1?` hace ${overW} sem.`:''}${cycle.readyForReview?' · ciérralo abajo':''}</div>`:''}</div>
+        ${cycle.overdue?`<div class="coach-over">Ciclo terminado${overW>=1?` hace ${overW}${NB}sem.`:''}${cycle.readyForReview?' · ciérralo abajo':''}</div>`:''}</div>
       <div class="score-ring${scoreData.fresh?' fresh':''}" role="img" aria-label="${scoreData.fresh?'Ciclo nuevo: la nota aparece tras la primera semana':`Nota del ciclo: ${scoreData.score} de 100, ${esc(scoreData.grade)}`}">
         <svg viewBox="0 0 80 80">
           <circle class="sbg" cx="40" cy="40" r="32"/>
@@ -1822,7 +1822,7 @@ function renderCoach(){
   <div class="coach-cycle">
     <div class="coach-cycle-info">
       <div class="coach-cycle-lbl">${cycle.fresh?'Ciclo nuevo':'Ciclo actual'}</div>
-      <div class="coach-cycle-val">${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} · ${weeksTxt}</div>
+      <div class="coach-cycle-val">${_nwUnits(`${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} · ${weeksTxt}`)}</div>
       ${cycle.fresh?`<div class="coach-cycle-sub">Tu nota aparece tras la primera semana. Tus datos anteriores siguen contando.</div>`
         :cycle.overdue?`<div class="coach-cycle-sub">El ciclo es de ${CYCLE_WEEKS} semanas${cycle.readyForReview?': ciérralo para recibir propuestas':''}</div>`:''}
     </div>

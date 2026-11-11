@@ -127,14 +127,14 @@ function weekGrid(){
     const cls=done?'done':isT?'today':''; // (E12) los días sin sesión, neutros
     // (16e) Cada día con su nombre para lectores: «sábado, descanso», «lunes, entrenado», «jueves, hoy»
     const al=['lunes','martes','miércoles','jueves','viernes','sábado','domingo'][i]+(done?', entrenado':isT?', hoy':d>t?', pendiente':', sin entrenar');
-    return`<div class="dd ${cls}" role="img" aria-label="${al}">${l}${done?'<span style="font-size:7px" aria-hidden="true">✓</span>':''}</div>`;
+    return`<div class="dd ${cls}" role="img" aria-label="${al}">${l}${done?'<span style="font-size:11px" aria-hidden="true">✓</span>':''}</div>`;
   }).join('');
 }
 
 // cuts (opcional): posiciones en las que empieza una banda más dura (_bandCuts). Ahí la línea se corta y una raya
 // discontinua lo marca, para que el cambio de banda no se lea como una caída.
 function spark(data,color,cuts){
-  if(!data||data.length<2)return`<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:12px">Necesitas al menos 2 registros</div>`;
+  if(!data||data.length<2)return`<div style="display:flex;align-items:center;justify-content:center;height:100%;color:var(--text3);font-size:13px">Necesitas al menos 2 registros</div>`;
   const vs=data.map(d=>d.v),mn=Math.min(...vs)-.5,mx=Math.max(...vs)+.5;
   const W=320,H=90,P=14;
   const px=i=>(i/(data.length-1))*(W-P*2)+P;
@@ -337,7 +337,7 @@ function renderWeightCard(emptyMsg){
   return`<div class="card wcard">
     <div class="wc-top">
       <div><div class="wc-now">${wf1(last.v)}<small> kg</small></div><div class="wc-sub">${wWhen(last.t)} · tendencia ${wf1(last.tr)} kg</div></div>
-      <div class="wc-right"><div class="wc-badge ${ch<=0?'dn':'up'}">${wSign(ch)} kg</div><div class="wc-rl">${wRangeLbl(rp,R)}</div></div>
+      <div class="wc-right"><div class="wc-badge ${ch<=0?'dn':'up'}">${wSign(ch)} kg</div><div class="wc-rl">${_nwUnits(wRangeLbl(rp,R))}</div></div>
     </div>
     ${wRangeChips(k)}
     <div class="wchart">${wChartSVG(rp,{h:150,w:_wcW(68)})}</div>

@@ -212,7 +212,7 @@ function renderSettings(){
           <span class="set-row-arrow">›</span>
         </div>
       </div>
-      <div style="text-align:center;padding:18px 14px 24px;font-size:11px;color:var(--text3);font-family:'DM Mono',monospace">
+      <div style="text-align:center;padding:18px 14px 24px;font-size:12px;color:var(--text3);font-family:'DM Sans',sans-serif">
         <div class="set-links" style="margin-bottom:14px"><a href="https://gymteca.com/privacidad" target="_blank" rel="noopener" style="color:var(--text2)">Privacidad</a> · <a href="https://gymteca.com/soporte" target="_blank" rel="noopener" style="color:var(--text2)">Soporte</a> · <a href="https://gymteca.com/" target="_blank" rel="noopener" style="color:var(--text2)">gymteca.com</a></div>
         Gymteca · Schema ${SCHEMA_VERSION}
       </div>
@@ -319,7 +319,7 @@ function settingsChangeWeeklyTarget(){
   if(cur<WEEKLY_PICK_MIN)ns.unshift(cur);else if(cur>WEEKLY_PICK_MAX)ns.push(cur); // (E1b) el 1 o el 7 que ya tenías
   for(const n of ns){
     const sel=n===cur;
-    opts.push(`<button onclick="pickWeeklyTarget(${n})" style="flex:0 0 auto;width:46px;height:52px;border-radius:var(--rsm);border:1px solid ${sel?'var(--green)':'var(--border2)'};background:${sel?'var(--green-bg2)':'var(--bg3)'};color:${sel?'var(--green)':'var(--text2)'};font-family:'DM Mono',monospace;font-size:20px;font-weight:600;cursor:pointer;transition:all .15s" aria-label="${n} días por semana" aria-pressed="${sel}">${n}</button>`);
+    opts.push(`<button onclick="pickWeeklyTarget(${n})" style="flex:0 0 auto;width:46px;height:52px;border-radius:var(--rsm);border:1px solid ${sel?'var(--green)':'var(--border2)'};background:${sel?'var(--green-bg2)':'var(--bg3)'};color:${sel?'var(--green)':'var(--text2)'};font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;cursor:pointer;transition:all .15s" aria-label="${n} días por semana" aria-pressed="${sel}">${n}</button>`);
   }
   root.innerHTML=`<div class="cmov" onclick="if(event.target===this){document.getElementById('cmodal-root').innerHTML=''}"><div class="cmod">
     <div class="cmod-hdl"></div>

@@ -8674,8 +8674,9 @@ try{
           const bt=document.querySelector('.botbar').getBoundingClientRect().top,ys=[cr.top+2,cr.top+cr.height/2,cr.bottom-2].filter(y=>y>0&&y<bt);
           ys.forEach(y=>{const x=cr.left+cr.width/2,p=document.elementFromPoint(x,y);E(p&&!el.contains(p)&&c.contains(p),w+': un toque en «Empezar» ('+Math.round(y)+') va a '+(p&&(p.className||p.tagName)));});
           // la comprobación detecta el aviso flotando abajo como antes (sobre la navegación)
+          // (B1) al sacar el aviso del flujo la pantalla sube: se compara con «Empezar» donde queda (si ya no está en esa franja, no aplica)
           if(w===390&&h===844&&cr.bottom>h-58-10-46&&cr.top<h-58-10){el.style.cssText='position:fixed;left:50%;bottom:68px;transform:translateX(-50%);margin:0;animation:none';
-            E(hit(el.getBoundingClientRect(),c.getBoundingClientRect()),'la comprobación no detecta el aviso abajo');el.style.cssText='';el.style.animation='none';}}
+            const c2=c.getBoundingClientRect();if(c2.bottom>h-58-10-46&&c2.top<h-58-10)E(hit(el.getBoundingClientRect(),c2),'la comprobación no detecta el aviso abajo');el.style.cssText='';el.style.animation='none';}}
         else bad.push(w+': Inicio sin «Empezar» ('+hoyState().k+')');}
       el.style.animation='';
       swUpdateLater();hTst();await W(10);
@@ -9989,7 +9990,7 @@ await safe('arreglos18r2',async()=>{
       for(const t of ['57.5 kg × 12','52.5 kg × 13']){v.innerHTML=_nwX(esc(t));E(lines(v)===1,w+': «'+t+'» en '+lines(v)+' líneas');}
       v.innerHTML=keep;const br=b.getBoundingClientRect();E(br.width>=44&&br.height>=44,w+': «¿Por qué?» '+Math.round(br.width)+'×'+Math.round(br.height));
       E(document.documentElement.scrollWidth<=document.documentElement.clientWidth,w+': desborde');
-      E(getComputedStyle(v).fontSize===(w<=320?'16px':w<=340?'17px':'20px'),w+': tamaño del objetivo '+getComputedStyle(v).fontSize);
+      E(getComputedStyle(v).fontSize===(w<=320?'15px':w<=340?'17px':'20px'),w+': tamaño del objetivo '+getComputedStyle(v).fontSize); // (B1) 16 → 15: paso de la escala
       _clearMarks();RT.stop();S.open='a2';render();toggleSet('a2',0,{});await W(20);RF.openFull();await W(30);
       const nn=document.querySelector('.rf-nn'),nv=nn&&nn.querySelector('.rf-nv');
       if(nn&&/^Serie /.test(nn.textContent)){E(nv&&getComputedStyle(nv).display==='inline-block','.rf-nv no es inline-block');
@@ -12223,6 +12224,24 @@ await safe('arreglosB1',async()=>{
     E(parseFloat(cs.bottom)>=58&&t.getBoundingClientRect().top>innerHeight/2,'el aviso no sale abajo, sobre la navegación: bottom '+cs.bottom);
     E(_toastCover()===0,'_toastCover ya no debe reservar hueco arriba');}
   if(bad.length)throw new Error(bad.join(' | '));
+});
+await safe('escalaB1',async()=>{
+  // (B1) Sistema: en las hojas de estilo de la app no hay letra por debajo de 11 px ni tamaños fuera de la escala
+  // (11·12·13·14·15·17·20·24·32); las cifras van en DM Sans y solo el reloj que
+  // corre conserva la monoespaciada; las tarjetas no llevan borde visible y los rótulos de sección van en frase normal
+  // (no entran: el «Wrapped», el texto de las gráficas SVG —reglas con fill— ni el emoji de la miniatura sin animación)
+  const ok=new Set([11,12,13,14,15,17,20,24,32]),bad=new Set();
+  const walk=rs=>{for(const r of rs){if(r.cssRules&&r.cssRules.length)walk(r.cssRules);const f=r.style&&r.style.fontSize,sel=r.selectorText||'';
+    if(!f||!/px$/.test(f)||/(^|[\s,])[.#]wr/.test(sel)||r.style.fill||/\.(lib-th-e|fat-lv|fat-sc|rc-lv|rc-yw|rc-ys|sc-bl|sc-lastv|sc-u|tgt-sp-t|wc-ann|wc-lastv|wc-t1|wc-t2|wc-xtk|wc-ytk)(?![a-z0-9-])/.test(sel))continue;
+    if(!ok.has(parseFloat(f)))bad.add(sel.slice(0,40)+' '+f);}};
+  for(const sh of document.styleSheets){let rs;try{rs=sh.cssRules;}catch(e){continue;}walk(rs);}
+  if(bad.size)throw new Error('fuera de la escala: '+[...bad].slice(0,8).join(' | '));
+  const probe=(cls,tag)=>{const e=document.createElement(tag||'div');e.className=cls;document.getElementById('screen').appendChild(e);const cs=getComputedStyle(e),o={ff:cs.fontFamily,tt:cs.textTransform,bc:cs.borderTopColor,fs:cs.fontSize};e.remove();return o;};
+  const E=(c,m)=>{if(!c)throw new Error(m);};
+  E(!/Mono/.test(probe('mval').ff)&&!/Mono/.test(probe('stp-v','input').ff),'las cifras siguen en monoespaciada: '+probe('mval').ff);
+  E(/Mono/.test(probe('rt-ring-num').ff)&&/Mono/.test(probe('rf-num').ff),'el reloj que corre perdió la monoespaciada');
+  E(probe('sh').tt==='none'&&probe('clbl').tt==='none'&&parseFloat(probe('sh').fs)>=15,'rótulos de sección en mayúsculas o pequeños: '+probe('sh').tt+' '+probe('sh').fs);
+  E(/rgba\(0, 0, 0, 0\)|transparent/.test(probe('card').bc)&&/rgba\(0, 0, 0, 0\)|transparent/.test(probe('excard').bc),'tarjeta con borde visible: '+probe('card').bc);
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

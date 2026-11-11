@@ -1,0 +1,45 @@
+/* CAPA DE SISTEMA
+   Piel común de la app: va la última en la cascada y ajusta los estilos de cada pantalla, que conservan su estructura.
+   Solo piel (color, borde, radio, peso y caja de la letra): ni márgenes ni tamaños de caja, para no pisar los ajustes de
+   pantallas estrechas de cada fichero. La escala tipográfica y los radios están en :root (base.css). */
+
+.mval,.wc-now,.stp-v,.tgt-v,.sum-k b{letter-spacing:-.3px}
+
+/* Cabecera de pantalla: título con más peso y sin raya */
+.topbar{border-bottom-color:transparent}
+.topbar h1{font-weight:700;letter-spacing:-.5px}
+
+/* Rótulos de sección y de bloque en frase normal (antes MAYÚSCULAS de 10 px). Las MAYÚSCULAS quedan solo para etiquetas
+   cortas (SUBE, AUTO, PR) y para el pie de una cifra (racha actual, mín., máx.), siempre a 11 px. */
+.sh{font-size:15px;font-weight:600;letter-spacing:-.1px;text-transform:none;color:var(--text)}
+.clbl{font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--text2)}
+.obx-lbl,.rf-lbl,.rf-nl,.coach-cycle-lbl,.hist-list-h,.tgt-l,.tgl-h,.lib-group-h,.lib-tail-h,.mat-sh,.bk-k,.dlr-tag,.warmup-h,.mm-plan-h,.sum-sec,.hoy-k,.hoy-lh,.lg-l,.rt-label,.fat-sub{font-size:13px;letter-spacing:0;text-transform:none}
+.lg-l,.rt-label{color:var(--text2)}
+.score-val .u{letter-spacing:0;text-transform:none}
+
+/* Tarjetas: una sola piel, sin borde, sin caja dentro de caja y sin degradados */
+.card,.excard,.excard.open,.excard.complete,.met,.wchart,.week-card,.coach-entry,.insight,.rec-card,.mesocycle-log,.coach-cycle,.metric-box{border-color:transparent}
+.bk-card{border-color:transparent!important}
+.met{background:var(--bg3)}
+.excard,.week-card,.coach-entry{background:var(--bg2)}
+.week-card-t{color:var(--text)}
+.week-card-tag{background:var(--bg3);color:var(--text2);border-radius:20px}
+.hoy,.hoy.k-extra,.hoy.k-done,.hoy.k-rest{background:var(--bg2);border-color:transparent}
+.hoy.k-live{background:var(--bg2);border-color:color-mix(in srgb,var(--amber) 40%,transparent)}
+.icon-btn{border-color:transparent;border-radius:20px;color:var(--text)}
+.settings-btn{border-color:transparent}
+
+/* Entreno: el cuerpo de la tarjeta sin fondo propio y el objetivo como texto (antes, pastilla con borde) */
+.exn{font-weight:600}
+.exb{background:transparent}
+.ex-goal{background:none;border-color:transparent;padding-left:0;font-weight:600;color:var(--green-hi)}
+.ex-goal-k{color:var(--text3)}
+.ex-dots i{border-color:transparent}
+.tip{border-left-color:transparent;background:var(--bg3);color:var(--text2)}
+.hist-btn,.sug-tag.ok{border-color:transparent;border-radius:20px}
+.ex-busy-b{border-color:transparent!important;border-radius:20px}
+.tab.on{border-color:transparent;background:var(--bg4)}
+
+/* Barras flotantes (descanso y siguiente serie): misma piel, sin borde de color */
+#rest-timer,#nextbar{border-color:var(--border2);background:color-mix(in srgb,var(--bg3) 94%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
+.rt-btn,.rpe-chip{border-color:transparent}

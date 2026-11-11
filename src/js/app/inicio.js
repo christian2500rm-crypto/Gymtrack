@@ -303,11 +303,11 @@ function renderDash(){
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
       <span style="font-size:15px;font-weight:600;min-width:0">${Math.min(wk,target)} de <span class="nw">${plural(target,'sesión','sesiones')}</span>${wk>target?` <span style="white-space:nowrap">· +${wk-target} extra 🔥</span>`:''}</span>
-      <span style="font-size:12px;font-weight:500;white-space:nowrap;flex-shrink:0;color:${wk>=target?'var(--green)':wk>0?'var(--amber)':'var(--text2)'}">${wk>=target?'¡Semana completa! 🎉':wk>0?(target-wk===1?'Una más 🔥':`${target-wk} más 💪`):'Sin sesiones aún'}</span>
+      <span style="font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;color:${wk>=target?'var(--green)':wk>0?'var(--amber)':'var(--text2)'}">${wk>=target?'¡Semana completa! 🎉':wk>0?(target-wk===1?'Una más 🔥':`${target-wk} más 💪`):'Sin sesiones aún'}</span>
     </div>
     <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(wk/target*100))}%"></div></div>
     <div class="wgrid" role="group" aria-label="Días de esta semana">${weekGrid()}</div>
-    <div style="display:flex;gap:12px;margin-top:9px;font-size:10px;color:var(--text3)"><span style="color:var(--green)">■ Entrenado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span></div>${weekLineHtml()}
+    <div style="display:flex;gap:12px;margin-top:9px;font-size:11px;color:var(--text3)"><span style="color:var(--green)">■ Entrenado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span></div>${weekLineHtml()}
   </div>`}
   ${backupReminderHtml()}
   <div class="sh" id="dash-w">Peso corporal</div>
@@ -345,13 +345,13 @@ function renderDash(){
     const isLast=s.ts===lastTs,npr=prs[s.ts]||0;
     return`<div class="sess-row" role="button" tabindex="0" data-ts="${+s.ts}" onclick="openSessionSummary(+this.dataset.ts)" onkeydown="if(event.target===this&&(event.key==='Enter'||event.key===' ')){event.preventDefault();openSessionSummary(+this.dataset.ts)}" aria-label="${esc(lbl)}, ${esc(s.date||'')}${npr?`, ${npr===1?'1 récord':npr+' récords'}`:''}. Ver el resumen de la sesión">
       <div class="sess-top">
-        <span class="pill p${esc(String(s.day).toLowerCase())}" style="font-size:11px;padding:3px 9px">${esc(lbl)}</span>
+        <span class="pill p${esc(String(s.day).toLowerCase())}" style="font-size:12px;padding:3px 9px">${esc(lbl)}</span>
         <span class="sess-f">${esc(focus)}</span>
         ${npr?`<span class="sess-pr" aria-hidden="true">🏆 ${npr}</span>`:''}
-        <span style="font-size:12px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap">${esc(s.date||'')}${dur}</span>
+        <span style="font-size:13px;color:var(--text3);font-family:'DM Sans',sans-serif;white-space:nowrap">${esc(s.date||'')}${dur}</span>
         <span class="sess-go" aria-hidden="true">›</span>
       </div>
-      ${s.note?`<div style="font-size:12px;color:var(--text2);margin-top:6px;padding:6px 10px;background:color-mix(in srgb,var(--text) 3%,transparent);border-radius:6px;border-left:2px solid var(--border2);line-height:1.5;font-style:italic">«${esc(s.note)}»</div>`:''}
+      ${s.note?`<div style="font-size:13px;color:var(--text2);margin-top:6px;padding:6px 10px;background:color-mix(in srgb,var(--text) 3%,transparent);border-radius:6px;border-left:2px solid var(--border2);line-height:1.5;font-style:italic">«${esc(s.note)}»</div>`:''}
       ${isLast&&canReopen&&sessDayKey(s)&&sessOfRoutine(s)?`<button type="button" class="hist-btn sess-reopen" onclick="event.stopPropagation();reopenSession(${s.ts})">${s.totalEx&&s.doneEx<s.totalEx?'↩ Reabrir para terminar':'↩ Reabrir para corregir'}</button>`:''}
     </div>`;
   }).join('')}</div>`;
@@ -390,7 +390,7 @@ function renderWmodal(){
     <div class="modal-hdl"></div>
     <h3>Registrar peso corporal</h3>
     <input class="ob-inp" id="wmodal-input" type="number" placeholder="${lw?lw.v:'105'}" value="${S.wnew||''}" oninput="S.wnew=this.value" step="0.1" inputmode="decimal" onkeydown="if(event.key==='Enter')logW()"/>
-    <p style="font-size:12px;color:var(--text3);text-align:center;margin:8px 0 14px">Pésate siempre en las mismas condiciones (mañana, en ayunas)</p>
+    <p style="font-size:13px;color:var(--text3);text-align:center;margin:8px 0 14px">Pésate siempre en las mismas condiciones (mañana, en ayunas)</p>
     <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="logW()">Guardar</button><button class="btn bs" style="width:90px" onclick="S.wmodal=false;S.wnew='';renderWmodal()">Cancelar</button></div>
   </div></div>`;
   // Focus diferido: iOS a veces ignora autofocus en elementos insertados dinámicamente

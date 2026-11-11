@@ -870,7 +870,7 @@ function warmupBlockHtml(ex){
   </div>`;
   return`<div class="warmup-block">
     <div class="warmup-h">
-      <span class="warmup-h-l">🔥 Calentamiento sugerido<span style="opacity:.8">${NB}·</span> <span style="font-family:'DM Mono',monospace;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8;white-space:nowrap">${esc(getWarmupTarget(ex))} kg</span></span>
+      <span class="warmup-h-l">🔥 Calentamiento sugerido<span style="opacity:.8">${NB}·</span> <span style="font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8;white-space:nowrap">${esc(getWarmupTarget(ex))} kg</span></span>
       <button class="warmup-skip" data-ex="${esc(ex.id)}" onclick="skipWarmup(this.dataset.ex)">Saltar</button>
     </div>
     ${wu.map((s,i)=>`<div class="warmup-row">

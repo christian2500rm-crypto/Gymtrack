@@ -502,8 +502,8 @@ function renderProg(){
          ['var(--amber)','↓','¿Dos sesiones seguidas por debajo del rango?','Baja un 5–10 % (al menos un salto) y vuelve a subir desde ahí. No pasa nada.'],
          ['var(--blue)','→','La regla de oro',`${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}/semana durante meses = resultados reales. La constancia lo es todo.`],
       ].map(([c,i,t,d])=>`<div style="display:flex;gap:12px;align-items:flex-start">
-        <span style="color:${c};font-size:18px;font-weight:700;line-height:1.3;flex-shrink:0;width:20px;text-align:center">${i}</span>
-        <div><div style="font-size:13px;font-weight:500;margin-bottom:2px">${t}</div><div style="font-size:12px;color:var(--text2);line-height:1.55">${_nwUnits(d)}</div></div>
+        <span style="color:${c};font-size:20px;font-weight:700;line-height:1.3;flex-shrink:0;width:20px;text-align:center">${i}</span>
+        <div><div style="font-size:14px;font-weight:500;margin-bottom:2px">${t}</div><div style="font-size:13px;color:var(--text2);line-height:1.55">${_nwUnits(d)}</div></div>
       </div>`).join('')}
     </div>
   </div>`;

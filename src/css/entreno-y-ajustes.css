@@ -1,5 +1,5 @@
 /* ── RPE (08: 3 chips dentro del descanso, en la barra y en el modo a pantalla completa) ── */
-.rpe-chip{flex:1 1 0;min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;border-radius:10px;background:var(--bg3);border:1px solid var(--border2);font-size:11.5px;font-weight:600;color:var(--text2);white-space:nowrap;touch-action:manipulation;transition:background .15s,border-color .15s,color .15s,transform .1s}
+.rpe-chip{flex:1 1 0;min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;border-radius:10px;background:var(--bg3);border:1px solid var(--border2);font-size:12px;font-weight:600;color:var(--text2);white-space:nowrap;touch-action:manipulation;transition:background .15s,border-color .15s,color .15s,transform .1s}
 .rpe-chip i{font-style:normal;font-size:15px;line-height:1}
 .rpe-chip span{overflow:hidden;text-overflow:ellipsis}
 .rpe-chip:active{transform:scale(.95)}
@@ -8,7 +8,7 @@
 .rpe-chip.r3[aria-pressed="true"]{background:color-mix(in srgb,var(--red) 16%,transparent);border-color:var(--red);color:var(--red-hi2)}
 /* Por debajo de 390 px los chips de la barra ponen el texto bajo el emoji (cabe «Límite» sin recortar); por debajo de
    360 px «Saltar» cede algo de ancho para que los chips sigan midiendo ≥ 44 px */
-@media (max-width:389px){.rt-rpe .rpe-chip{flex-direction:column;gap:1px;padding:2px 2px 1px;font-size:9.5px;letter-spacing:.2px}.rt-rpe .rpe-chip i{font-size:14px}}
+@media (max-width:389px){.rt-rpe .rpe-chip{flex-direction:column;gap:1px;padding:2px 2px 1px;font-size:11px;letter-spacing:.2px}.rt-rpe .rpe-chip i{font-size:14px}}
 @media (max-width:359px){#rest-timer .rt-btn{min-width:54px;padding:7px 8px}}
 .sb.r1{box-shadow:inset 0 0 0 2px var(--green)}
 .sb.r2{box-shadow:inset 0 0 0 2px var(--amber)}
@@ -17,8 +17,8 @@
 .ex-dots{display:inline-flex;align-items:center;gap:3px;flex-shrink:0}
 .ex-dots i{width:7px;height:7px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2)}
 .ex-dots i.on{background:var(--green);border-color:var(--green)}
-.ex-today{color:var(--text);font-family:'DM Mono',monospace;font-weight:500}
-.ex-done-sum{font-size:11.5px;color:var(--text2);margin-top:3px;font-family:'DM Mono',monospace;overflow-wrap:anywhere}
+.ex-today{color:var(--text);font-family:'DM Sans',sans-serif;font-weight:500}
+.ex-done-sum{font-size:12px;color:var(--text2);margin-top:3px;font-family:'DM Sans',sans-serif;overflow-wrap:anywhere}
 .ex-done-sum b{color:var(--green-hi);font-weight:500;white-space:nowrap}
 .excard.just-done .exic{animation:ckPop .5s cubic-bezier(.34,1.56,.64,1)}
 @keyframes ckPop{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
@@ -27,14 +27,14 @@
 .anim-mini:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ex-anim.mini{width:86px;height:56px;margin:0;flex-shrink:0;border-radius:var(--rxs);pointer-events:none}
 .anim-mini-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
-.anim-mini-t b{font-size:12px;font-weight:600;color:var(--text)}
-.anim-mini-t span{font-size:11px;color:var(--text2);line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:break-word}
-.anim-mini-go{font-size:11px;font-weight:600;color:var(--green);flex-shrink:0;white-space:nowrap}
-.anim-less{display:block;width:100%;min-height:44px;margin:-8px 0 6px;font-size:12px;font-weight:600;color:var(--text2)}
+.anim-mini-t b{font-size:13px;font-weight:600;color:var(--text)}
+.anim-mini-t span{font-size:12px;color:var(--text2);line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:break-word}
+.anim-mini-go{font-size:12px;font-weight:600;color:var(--green);flex-shrink:0;white-space:nowrap}
+.anim-less{display:block;width:100%;min-height:44px;margin:-8px 0 6px;font-size:13px;font-weight:600;color:var(--text2)}
 .lg-sets{margin:0 -6px 8px}
 .lg-h{display:flex;align-items:center;gap:8px;margin:0 6px 6px;min-height:28px}
-.lg-l{flex:1;min-width:0;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;line-height:1.35}
-.lg-l b{color:var(--text2);font-family:'DM Mono',monospace;font-weight:600}
+.lg-l{flex:1;min-width:0;font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;line-height:1.35}
+.lg-l b{color:var(--text2);font-family:'DM Sans',sans-serif;font-weight:600}
 .lg-d{display:inline-block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
 .lg-d.sepw-s{max-width:calc(100% + var(--sepw))}
 .lg-h .sug-tag{min-width:0}
@@ -43,7 +43,7 @@
 .lg-row.done{background:color-mix(in srgb,var(--green) 7%,transparent)}
 .lg-row.done .stp{border-color:color-mix(in srgb,var(--green) 28%,transparent);background:color-mix(in srgb,var(--green) 7%,var(--bg2))}
 .lg-row.done .stp-u{color:var(--text2)} /* (16d) «KG/REPS» en --text3 sobre el tinte de la serie hecha: 4,4:1 */
-.lg-n{width:16px;flex-shrink:0;text-align:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--text3)}
+.lg-n{width:16px;flex-shrink:0;text-align:center;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text3)}
 .lg-row.next .lg-n{color:var(--green)}
 .lg-row.done .lg-n{color:var(--green-hi)}
 .stp{display:flex;align-items:stretch;height:48px;min-width:0;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);overflow:hidden;transition:border-color .2s}
@@ -56,29 +56,29 @@
 .lg-row.td .stp-w{flex:1 1 0}
 .stp:focus-within{border-color:var(--green)}
 .stp.need,.lg-row.done .stp.need{border-color:color-mix(in srgb,var(--amber) 75%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--amber) 14%,transparent)}
-.stp-b{width:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:500;line-height:1;color:var(--text2);touch-action:manipulation}
+.stp-b{width:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;line-height:1;color:var(--text2);touch-action:manipulation}
 .stp-b:active{background:var(--bg4);color:var(--text)}
 .stp-c{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:text}
-.stp-v{width:100%;min-width:0;padding:0;border:none;outline:none;background:none;text-align:center;font-family:'DM Mono',monospace;font-size:16px;font-weight:600;line-height:1.15;color:var(--text2);letter-spacing:-.3px;-webkit-appearance:none;border-radius:0}
+.stp-v{width:100%;min-width:0;padding:0;border:none;outline:none;background:none;text-align:center;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;line-height:1.15;color:var(--text2);letter-spacing:-.3px;-webkit-appearance:none;border-radius:0}
 .lg-row.next .stp-v,.lg-row.done .stp-v{color:var(--text)}
-.stp-v.lg5{font-size:12.5px;letter-spacing:-.6px}
+.stp-v.lg5{font-size:13px;letter-spacing:-.6px}
 .stp-v::placeholder{color:var(--text3);font-weight:400;font-style:italic}
-.stp-u{font-size:8.5px;line-height:1;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
-.stp-fix{justify-content:center;align-items:center;font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--text2)}
+.stp-u{font-size:11px;line-height:1;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
+.stp-fix{justify-content:center;align-items:center;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text2)}
 .lg-ck{position:relative;width:48px;height:48px;flex-shrink:0;border-radius:var(--rsm);border:1px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:20px;font-weight:700;transition:background .15s,color .15s,transform .1s;touch-action:manipulation}
 .lg-ck:active{transform:scale(.92)}
 .lg-row.next .lg-ck{border-color:var(--green-b);color:var(--green)}
 .lg-ck.on{background:var(--green);border-color:var(--green);color:var(--accent-ink)}
 .lg-ck.r1::after,.lg-ck.r2::after,.lg-ck.r3::after{content:'';position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--accent-ink)}
 .lg-ck.r1::after{background:var(--green-hi2)}.lg-ck.r2::after{background:var(--amber)}.lg-ck.r3::after{background:var(--red)}
-.lg-ghost{margin:1px 0 0 24px;font-size:10.5px;line-height:14px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg-ghost{margin:1px 0 0 24px;font-size:11px;line-height:14px;color:var(--text3);font-family:'DM Sans',sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .lg-sets .need-hint{margin:6px 6px 0 30px}
 .tgt.cmp{padding:6px 6px 6px 12px}
-.tgt.cmp .tgt-r{margin-top:0;font-size:12px}
+.tgt.cmp .tgt-r{margin-top:0;font-size:13px}
 /* Móviles por debajo de 390 px: los −/+ siguen en 44 px y el ✓ en 48; el sitio sale de los márgenes, los huecos y el nº.
    Solo en los muy estrechos (≤340 px) el ✓ baja a 44 px. */
 @media (max-width:389px){.lg-n{width:10px;font-size:11px}.lg-sets{margin:0 -11px 8px}.lg-row{gap:4px;padding-left:0}.lg-ghost{margin-left:14px}.stp-v{font-size:15px}}
-@media (max-width:340px){.lg-n{display:none}.lg-sets{margin:0 -12px 8px}.lg-ck{width:44px}.stp-w{flex:1.15 1 0}.stp-v{font-size:13.5px;letter-spacing:-.5px}.lg-ghost{margin-left:4px}}
+@media (max-width:340px){.lg-n{display:none}.lg-sets{margin:0 -12px 8px}.lg-ck{width:44px}.stp-w{flex:1.15 1 0}.stp-v{font-size:13px;letter-spacing:-.5px}.lg-ghost{margin-left:4px}}
 /* Por debajo de 360 px, por tiempo o distancia: el peso (opcional y casi siempre el mismo en todas las series) se escribe
    sin −/+, y así los segundos o metros caben enteros; los −/+ que quedan siguen en 44 px */
 @media (max-width:359px){.lg-row.td .stp-w{flex:0 0 58px}.lg-row.td .stp-w .stp-b{display:none}}
@@ -89,14 +89,14 @@
 #nextbar.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
 #app.typing #nextbar{opacity:0;pointer-events:none}
 .nb-info{flex:1;min-width:0;min-height:48px;display:flex;flex-direction:column;justify-content:center;text-align:left;color:inherit}
-.nb-t{font-size:11.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.nb-t{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
 .nb-t b{color:var(--green);font-weight:600}
 /* Nombre largo: se recorta el nombre, nunca «Serie N/M» */
 .nb-t.split{display:flex;min-width:0}
 .nb-tn{min-width:0;overflow:hidden;text-overflow:ellipsis}
 .nb-tc{flex-shrink:0;white-space:pre}
 .nb-s{font-size:15px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
-.nb-s b{font-family:'DM Mono',monospace;font-weight:600}
+.nb-s b{font-family:'DM Sans',sans-serif;font-weight:600}
 .nb-go{flex-shrink:0;min-height:48px;min-width:108px;padding:0 14px;border-radius:10px;background:var(--green);color:var(--accent-ink);font-size:15px;font-weight:700;touch-action:manipulation}
 .nb-go:active{transform:scale(.96);background:var(--green-d)}
 /* (16) Con la barra «siguiente serie», la lista termina justo encima de lo que flota abajo (navegación + barra + descanso,
@@ -106,20 +106,20 @@
 #app.nb-on #screen .excard :is(input,button,[tabindex]){scroll-margin-bottom:12px}
 #app.nb-on #rest-timer{bottom:calc(58px + var(--sb) + 8px + 66px);padding:6px 8px 6px 10px;gap:10px}
 #app.nb-on .rt-ring,#app.nb-on .rt-ring svg{width:40px;height:40px}
-.hist-item-w small{display:block;font-size:10.5px;font-weight:400;color:var(--text3);margin-top:1px;overflow-wrap:anywhere}
+.hist-item-w small{display:block;font-size:11px;font-weight:400;color:var(--text3);margin-top:1px;overflow-wrap:anywhere}
 
 /* ── WARMUP SECTION ── */
 .warmup-block{background:color-mix(in srgb,var(--amber) 6%,transparent);border:1px dashed color-mix(in srgb,var(--amber) 25%,transparent);border-radius:var(--rsm);padding:10px 12px;margin-bottom:10px}
-.warmup-h{font-size:11px;color:var(--amber-hi);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.warmup-h{font-size:12px;color:var(--amber-hi);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:6px}
 .warmup-h-l{display:block;min-width:0} /* (16d) texto en línea: a 320 px «· 65 kg» ya no hace columna aparte («CALENTAMIENTO / SUGERIDO» y «· 65 / kg») */
-.warmup-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px}
+.warmup-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:13px}
 .warmup-row:last-child{margin-bottom:0}
-.warmup-sb{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent);color:var(--amber-hi);font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Mono',monospace;transition:all .15s}
+.warmup-sb{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent);color:var(--amber-hi);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Sans',sans-serif;transition:all .15s}
 .warmup-sb.on{background:color-mix(in srgb,var(--amber) 20%,transparent);color:var(--amber-hi2)}
 .warmup-sb:active{transform:scale(.92)}
-.warmup-info{font-size:11px;color:var(--text2);flex:1}
+.warmup-info{font-size:12px;color:var(--text2);flex:1}
 .warmup-info b{color:var(--text);font-weight:500}
-.warmup-skip{background:transparent;border:none;color:var(--text2);font-size:12px;cursor:pointer;text-decoration:underline}
+.warmup-skip{background:transparent;border:none;color:var(--text2);font-size:13px;cursor:pointer;text-decoration:underline}
 /* (16e) Toque de 44 px sin cambiar el aspecto (como «Deshacer»): una zona transparente centrada en el control. En los
    segmentos (.tab, .wc-rg), que van pegados, solo crece en alto para no pisar al vecino */
 .warmup-skip,.settings-btn,.icon-btn,.hist-btn,.tab,.wc-rg{position:relative}
@@ -138,28 +138,28 @@
 /* ── WEEKLY MINI-INSIGHT ── */
 .week-card{background:linear-gradient(135deg,color-mix(in srgb,var(--blue) 8%,transparent),color-mix(in srgb,var(--green) 5%,transparent));border:1px solid color-mix(in srgb,var(--blue) 20%,transparent);border-radius:var(--r);padding:14px 16px;margin:0 14px 10px}
 .week-card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.week-card-t{font-size:13px;font-weight:600;color:var(--blue-hi)}
-.week-card-tag{font-size:10px;background:color-mix(in srgb,var(--blue) 15%,transparent);color:var(--blue-hi);border-radius:4px;padding:2px 7px}
-.week-card-d{font-size:12px;color:var(--text2);line-height:1.55}
-.week-stats{display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--text) 6%,transparent);font-family:'DM Mono',monospace}
+.week-card-t{font-size:14px;font-weight:600;color:var(--blue-hi)}
+.week-card-tag{font-size:11px;background:color-mix(in srgb,var(--blue) 15%,transparent);color:var(--blue-hi);border-radius:4px;padding:2px 7px}
+.week-card-d{font-size:13px;color:var(--text2);line-height:1.55}
+.week-stats{display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--text) 6%,transparent);font-family:'DM Sans',sans-serif}
 .week-stat{flex:1}
 .week-stat-v{font-size:15px;font-weight:600;color:var(--text)}
 .week-stat-v.up{color:var(--green-hi)}
 .week-stat-v.dn{color:var(--amber-hi)}
-.week-stat-l{font-size:10px;color:var(--text3);margin-top:1px;font-family:-apple-system,sans-serif}
+.week-stat-l{font-size:11px;color:var(--text3);margin-top:1px;font-family:-apple-system,sans-serif}
 
 /* ── TOAST ── */
 /* El aviso sale abajo, encima de la navegación y de las barras flotantes (--toast-b lo pone _dockSync con su alto real):
    arriba tapaba el título y los botones de la cabecera, y «Deshacer» quedaba lejos del pulgar. */
 /* (16c) centrado con left/right 0 y margin auto, ancho al contenido hasta el de la pantalla menos 14 px por lado (antes
    left:50% dejaba solo media pantalla al ajuste de ancho y los textos largos ocupaban 3-5 líneas) */
-#toast{position:fixed;top:auto;bottom:calc(var(--toast-b,calc(58px + var(--sb) + 12px)) + var(--kb));left:0;right:0;margin:0 auto;width:fit-content;width:-webkit-fit-content;box-sizing:border-box;transform:translateY(24px);background:color-mix(in srgb,var(--bg2) 96%,transparent);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:min(calc(100% - 28px),440px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
+#toast{position:fixed;top:auto;bottom:calc(var(--toast-b,calc(58px + var(--sb) + 12px)) + var(--kb));left:0;right:0;margin:0 auto;width:fit-content;width:-webkit-fit-content;box-sizing:border-box;transform:translateY(24px);background:color-mix(in srgb,var(--bg2) 96%,transparent);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:14px;font-weight:500;z-index:500;max-width:min(calc(100% - 28px),440px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
 #toast.show{transform:translateY(0);opacity:1}
 #toast:not(.show){pointer-events:none!important} /* escondido no recoge toques: ahora queda cerca del pulgar, sobre botones */
 /* (15) Aviso de versión nueva: franja arriba de #app, en el flujo (empuja la pantalla hacia abajo y no tapa nada:
    antes flotaba sobre la navegación y pisaba «Empezar» en Inicio). Ocupa el hueco de la zona segura de arriba, así que la
    cabecera de la pantalla no lo repite; el toast baja para no taparlo. */
-#swup{flex:none;display:flex;align-items:center;gap:2px;margin:calc(var(--st) + 8px) 12px 0;box-sizing:border-box;min-height:46px;padding:0 0 0 14px;background:color-mix(in srgb,var(--green) 8%,var(--bg2));color:var(--text);border:1px solid var(--green-b);border-radius:var(--rsm);font-size:13px;font-weight:500}
+#swup{flex:none;display:flex;align-items:center;gap:2px;margin:calc(var(--st) + 8px) 12px 0;box-sizing:border-box;min-height:46px;padding:0 0 0 14px;background:color-mix(in srgb,var(--green) 8%,var(--bg2));color:var(--text);border:1px solid var(--green-b);border-radius:var(--rsm);font-size:14px;font-weight:500}
 #swup[hidden]{display:none}
 body.swup-on #screen .topbar{padding-top:14px}
 /* (16 r2) Con una hoja abierta el aviso sale abajo (encima del teclado si está abierto): arriba tapaba el título de la
@@ -185,7 +185,7 @@ body:has(.hist-over) #toast.show{transform:translateY(0)}
 @keyframes slideUp{from{transform:translateY(20px);opacity:.5}to{transform:translateY(0);opacity:1}}
 .cmod-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
 .cmod-t{font-size:17px;font-weight:600;letter-spacing:-.2px;margin-bottom:8px}
-.cmod-b{font-size:14px;color:var(--text2);line-height:1.55;margin-bottom:18px}
+.cmod-b{font-size:15px;color:var(--text2);line-height:1.55;margin-bottom:18px}
 .cmod-btns{display:flex;gap:10px}
 .cmod-btns .btn{flex:1}
 /* ── SHAKE ── */
@@ -203,11 +203,11 @@ body:has(.hist-over) #toast.show{transform:translateY(0)}
 .set-row:last-child{border-bottom:none}
 .set-row:active{background:var(--bg3)}
 .set-row-info{flex:1;min-width:0}
-.set-row-t{font-size:14px;font-weight:500;margin-bottom:2px}
-.set-row-d{font-size:12px;color:var(--text2);line-height:1.4}
-.set-row-v{font-size:13px;color:var(--text3);font-family:'DM Mono',monospace;flex-shrink:0}
+.set-row-t{font-size:15px;font-weight:500;margin-bottom:2px}
+.set-row-d{font-size:13px;color:var(--text2);line-height:1.4}
+.set-row-v{font-size:14px;color:var(--text3);font-family:'DM Sans',sans-serif;flex-shrink:0}
 .set-row.danger .set-row-t{color:var(--red)}
-.set-row-arrow{color:var(--text3);font-size:14px;flex-shrink:0}
+.set-row-arrow{color:var(--text3);font-size:15px;flex-shrink:0}
 /* Interruptor (Ajustes) */
 .sw{position:relative;width:44px;height:26px;border-radius:13px;background:var(--bg3);border:1px solid var(--border2);flex-shrink:0;transition:background .2s,border-color .2s}
 .sw-k{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--text2);transition:transform .2s,background .2s}
@@ -215,8 +215,8 @@ body:has(.hist-over) #toast.show{transform:translateY(0)}
 .sw.on .sw-k{transform:translateX(18px);background:var(--green)}
 .set-row[role="switch"]:focus-visible{outline:2px solid var(--green-b);outline-offset:-2px}
 /* Cardio en marcha (tarjeta) */
-.cardio-run{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:10px;border-radius:var(--rxs);background:color-mix(in srgb,var(--blue) 8%,transparent);border:1px solid color-mix(in srgb,var(--blue) 25%,transparent);font-size:13px;color:var(--text2)}
-.cardio-run b{color:var(--text);font-family:'DM Mono',monospace;font-weight:600}
+.cardio-run{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:10px;border-radius:var(--rxs);background:color-mix(in srgb,var(--blue) 8%,transparent);border:1px solid color-mix(in srgb,var(--blue) 25%,transparent);font-size:14px;color:var(--text2)}
+.cardio-run b{color:var(--text);font-family:'DM Sans',sans-serif;font-weight:600}
 /* Campo grande de los modales de peso: había perdido sus estilos y salía el recuadro blanco del navegador */
 .ob-inp{display:block;width:100%;margin:6px 0 12px;padding:13px 16px;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);color:var(--text);font-size:20px;font-weight:600;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none;-moz-appearance:textfield}
 .ob-inp:focus{border-color:var(--green)}
