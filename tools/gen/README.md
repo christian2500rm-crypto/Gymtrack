@@ -15,9 +15,7 @@ node tools/gen/build.js --check   # sin escribir: src/js/gen/ coincide byte a by
 
 En noviembre de 2026 (163050c) `build.js` reproduce `src/js/gen/` byte a byte (generador v11). Antes escribía en
 `index.html` entre las marcas `GYM-GEN`; ahora escribe un fichero por módulo: `cabecera.js` abre una función que cierra
-`exporta.js` (`window.GymGen`), así que solo compilan juntos. La cabecera generada conserva la ruta antigua del script
-(`.claude/gymtrack-work/onboarding/gen/build.js`) para no cambiar `index.html`; se puede corregir en el próximo cambio de
-GymGen. La opción `--solo-catalogo` (de la etapa E3a) ya no existe.
+`exporta.js` (`window.GymGen`), así que solo compilan juntos. La opción `--solo-catalogo` (de la etapa E3a) ya no existe.
 
 ## Pruebas
 

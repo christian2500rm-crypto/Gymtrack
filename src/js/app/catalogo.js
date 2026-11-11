@@ -1,6 +1,6 @@
 // ══════════════════════════════════════════════════════════
 // BIBLIOTECA DE EJERCICIOS (catálogo)
-// Una fila por ejercicio en LIB_ROWS (la genera .claude/gymtrack-work/catalog/rows.js desde catalog.json), 19 columnas:
+// Una fila por ejercicio en LIB_ROWS (la genera tools/catalog/rows.js desde tools/catalog/catalog.json), 19 columnas:
 //   id|n|ic|eq|muscle|s|r|lt|mat|pl|dif|x|pat|mus|alt|why|up|al|tip
 // Las 46 de siempre van primero y no cambian (ids, nombres y campos: están en tus planes, tu historial y tus backups).
 // Objeto: {id,n,ic,eq,muscle,s,r,tip,compound|cardio, al,mat,pl,dif,lt,x,pat,mus,alt,why,up} (congelado). Las copias del

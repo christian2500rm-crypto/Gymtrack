@@ -41,10 +41,8 @@ if (K.faltan.length || K.maqSinFam.length || K.cardSinTipo.length) {
 const cat = JSON.parse(fs.readFileSync(CAT, 'utf8'));
 const UNI = cat.filter(e => e.u).map(e => e.id);
 const genVer = (fs.readFileSync(path.join(SIM, 'generador.js'), 'utf8').match(/const GEN_VERSION = (\d+)/) || [])[1] || '0';
-// La cabecera conserva la ruta antigua de este script (.claude/gymtrack-work/…) para que index.html no cambie: se puede
-// corregir a «tools/gen/build.js» en el próximo cambio de GymGen, que ya cambia index.html de todos modos.
 const ficheros = new Map([
-  ['cabecera.js', '// Generado por .claude/gymtrack-work/onboarding/gen/build.js desde el prototipo (onboarding/sim): no editar a mano.\n' +
+  ['cabecera.js', '// Generado por tools/gen/build.js desde el prototipo (tools/gen/sim): no editar a mano.\n' +
     '// Etiquetas de seguridad del catálogo: PENDIENTES DE REVISIÓN HUMANA (decisión D2).\n' +
     '(function () {\n\'use strict\';\n'],
   ['catalogo.js', modulo('catalogo.js', '_catalogo')],

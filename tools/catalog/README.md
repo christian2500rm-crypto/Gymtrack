@@ -13,8 +13,7 @@ node tools/catalog/rows.js --check   # sin escribir: catalogo-filas.js coincide 
 
 En noviembre de 2026 (163050c) `rows.js` reproduce `src/js/app/catalogo-filas.js` byte a byte. Antes escribía en
 `index.html` entre las marcas; ahora escribe ese fichero entero. El formato de las 19 columnas está al principio de
-`rows.js` y lo lee `_parseLib` en `src/js/app/catalogo-lector.js`. Un comentario de `src/js/app/catalogo.js` aún nombra la
-ruta antigua (`.claude/gymtrack-work/catalog/rows.js`): se puede corregir en cualquier cambio que ya toque `index.html`.
+`rows.js` y lo lee `_parseLib` en `src/js/app/catalogo-lector.js`.
 
 ## Otras comprobaciones
 

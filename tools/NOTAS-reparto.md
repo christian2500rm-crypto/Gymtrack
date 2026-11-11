@@ -9,6 +9,8 @@ montaje que genera el mismo `index.html` byte a byte, y versionar el kit de prue
   `.gitattributes` y `CLAUDE.md`.
 - [x] **R2 · Pruebas versionadas** en `tools/test/`, de un solo comando (`bash tools/test/smoke.sh`).
 - [x] **R3 · Laboratorio 3D, catálogo y prototipo del generador** en `tools/lab`, `tools/catalog` y `tools/gen`.
+- [x] **R4 · Remates.** `robots.txt` excluye `/src/`, `/tools/` y `/CLAUDE.md` (y sigue `/brand/`); los dos comentarios
+  de `index.html` con rutas `.claude/gymtrack-work/…` pasan a las de `tools/` (son las únicas líneas que cambian).
 
 ## Decisiones
 
@@ -52,11 +54,6 @@ montaje que genera el mismo `index.html` byte a byte, y versionar el kit de prue
 
 ## Pendientes
 
-- Dos comentarios de `index.html` aún nombran rutas antiguas (`.claude/gymtrack-work/…`): el de `LIB_ROWS` en
-  `src/js/app/catalogo.js` y la cabecera que genera `tools/gen/build.js`. Se pueden corregir en el próximo cambio que
-  ya toque `index.html` (aquí no, porque tenía que quedar idéntico).
-- `tools/` y `src/` se publican con la web. `__seed.html` y `guarda.html` llevan `noindex` y la guarda; si se quiere,
-  `robots.txt` puede añadir `Disallow: /tools/` y `Disallow: /src/` (fichero publicado: lo decide el usuario).
 - En copias de trabajo ya existentes en Windows, `index.html` está en CRLF y, con `.gitattributes`, saldrá como
   modificado aunque no lo esté: `node tools/build.js` lo deja en LF, igual que en git.
 - Revisión D2 de las etiquetas de seguridad del generador (pendiente de antes, `REVISADO: false`).
