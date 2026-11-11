@@ -714,9 +714,17 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .tgl-v{flex:0 1 auto;min-width:0;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text)}
 .coach-plan .tgl{background:none;padding:0;margin-bottom:8px}
 .coach-plan-f{font-size:12px;color:var(--text3);line-height:1.5;margin-bottom:12px}
-.ls-row{cursor:default}
-.ls-row:active{background:none}
-.ls-sel{flex-shrink:0;min-height:44px;width:104px;padding:0 10px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px}
+/* Saltos de peso: su hoja (#ls-root, encima de Ajustes) y el selector de cada equipo */
+#ls-root .hist-over{z-index:320}
+#ls-sheet:focus,.ls-pick:focus{outline:none}
+.ls-sec{margin:4px 0 0}
+.ls-v.on{color:var(--green)}
+.ls-row:focus-visible,#set-ls:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
+.ls-opts{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:4px 0 16px}
+.ls-opt{min-height:52px;border-radius:var(--rsm);background:var(--bg3);border:1px solid transparent;color:var(--text);font-size:15px;font-weight:600;font-family:'DM Sans',sans-serif}
+.ls-opt.on{background:var(--green-bg2);border-color:var(--green);color:var(--green)}
+.ls-opt:active{transform:scale(.97)}
+.ls-opt:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ls-note{padding:12px 16px;font-size:12px;color:var(--text3);line-height:1.5}
 
 /* ── Coach en dos niveles: filas de «Más detalle» (cfoldHtml). Plegada, cada fila es título + resumen + flecha; abierta, su
@@ -770,14 +778,15 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .edit-ex-info{flex:1;min-width:0}
 .edit-ex-name{font-size:14px;font-weight:500;color:var(--text);line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:break-word}
 .edit-ex-meta{font-size:12px;color:var(--text3);margin-top:2px}
-.edit-ex-actions{display:flex;gap:6px;flex-shrink:0}
-.edit-ex-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rxs);width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;color:var(--text2);flex-shrink:0}
+.edit-ex-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.edit-ex-btn{background:var(--bg3);border:1px solid transparent;border-radius:var(--rsm);width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;color:var(--text2);flex-shrink:0;touch-action:manipulation}
 .edit-ex-btn:active{transform:scale(.9)}
-.edit-ex-btn.danger{color:var(--red);border-color:color-mix(in srgb,var(--red) 30%,transparent)}
+.edit-ex-btn.danger{color:var(--red);background:color-mix(in srgb,var(--red) 12%,transparent)}
+.edit-ex-btn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .edit-add-btn{margin:4px 14px 12px;background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--rsm);padding:11px;font-size:14px;color:var(--text2);width:calc(100% - 28px);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
 .edit-add-btn:active{background:var(--bg3)}
 /* Ajuste series/reps inline */
-.sr-editor{display:flex;align-items:center;flex-wrap:wrap;column-gap:12px;row-gap:6px;margin-top:5px}
+.sr-editor{display:flex;align-items:center;flex-wrap:wrap;column-gap:12px;row-gap:14px;margin-top:8px}
 .sr-g{display:flex;align-items:center;gap:4px}
 .sr-label{font-size:11px;color:var(--text3);min-width:22px}
 .sr-val{font-size:13px;font-weight:600;color:var(--text2);min-width:18px;text-align:center;white-space:nowrap}
@@ -2134,6 +2143,7 @@ input[type=number]{-moz-appearance:textfield}
 <div id="swup-live" class="sr-only" aria-live="polite"></div>
 <div id="cmodal-root"></div>
 <div id="settings-root"></div>
+<div id="ls-root"></div>
 <div id="wmodal-root"></div>
 <div id="hist-root"></div>
 <div id="wdetail-root"></div>
@@ -16293,6 +16303,7 @@ document.addEventListener('keydown',e=>{
     if(_busy){closeBusy();return;} // (11) hoja «¿Máquina ocupada?»
     // Otros modales propios de #cmodal-root (trasladar historial, editar peso, próxima sesión…)
     {const cr=document.getElementById('cmodal-root');if(cr&&cr.firstElementChild){cr.innerHTML='';_restPickEx=null;return;}}
+    if(_lsSheetOpen()){closeLoadSheet();return;} // saltos de peso (encima de Ajustes)
     if(RF.open){RF.close();return;} // modo descanso a pantalla completa
     if(_sum){closeSessionSummary();return;} // (09) resumen de una sesión (puede estar encima del historial)
     if(_mmSheet){closeMuscleSheet();return;} // hoja de un grupo muscular (puede estar encima del editor)
@@ -22146,18 +22157,66 @@ function coachPlanCardHtml(){
   </div>`;
 }
 // ── Ajustes → Coach de carga: salto de peso por tipo de equipo ──
-function loadStepsSettingsHtml(){
+// En Ajustes es una sola fila («Saltos de peso») que abre su hoja; dentro, cada equipo con su valor a la derecha y, al tocarlo, sus
+// opciones en un selector de la app (antes eran siete desplegables del sistema en mitad de Ajustes).
+function _lsVal(k){const v=(S.loadSteps||{})[k];return v===undefined||v==='auto'?null:+v;} // null = automático
+function _lsTxt(v){return v==null?'Auto':'+'+kgTxt(v)+NB+'kg';}
+function loadStepsRowHtml(){
+  const n=Object.keys(LOAD_EQ).filter(k=>_lsVal(k)!=null).length;
   return`<div class="sh" id="set-load">Coach de carga</div>
   <div class="set-section">
-    ${Object.keys(LOAD_EQ).map(k=>{const q=LOAD_EQ[k],cur=(S.loadSteps||{})[k]===undefined?'auto':String(S.loadSteps[k]);
-      return`<div class="set-row ls-row">
-        <div class="set-row-info"><div class="set-row-t">${esc(q.l)}</div><div class="set-row-d">${_nwUnits(esc(q.d))}</div></div>
-        <select class="ls-sel" data-k="${k}" aria-label="Salto de peso: ${esc(q.l)}" onchange="setLoadStep(this.dataset.k,this.value)">
-          <option value="auto"${cur==='auto'?' selected':''}>Auto</option>
-          ${q.opts.map(v=>`<option value="${v}"${cur===String(v)?' selected':''}>+${kgTxt(v)} kg</option>`).join('')}
-        </select></div>`;}).join('')}
-    <div class="ls-note">Auto: el salto que ya usas en cada ejercicio. Si aún no has subido, el habitual de su equipo (<span class="nw">+2.5 kg</span> en barra, máquinas y discos, <span class="nw">+1 kg</span> en mancuernas y polea, <span class="nw">+4 kg</span> en kettlebell). Sube como mucho un 10 %; con pesos ligeros o pesas fijas (kettlebell, discos), antes suma <span class="nw">2 reps</span> y luego da el salto mínimo de tu equipo.</div>
+    <div class="set-row" id="set-ls" role="button" tabindex="0" aria-haspopup="dialog" onclick="openLoadSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLoadSheet();}">
+      <div class="set-row-info"><div class="set-row-t">Saltos de peso</div><div class="set-row-d">Cuánto sube cada equipo cuando toca subir</div></div>
+      <span class="set-row-v">${n?`${n} a tu medida`:'Auto'}</span><span class="set-row-arrow" aria-hidden="true">›</span>
+    </div>
   </div>`;
+}
+function _lsRowsHtml(){
+  return Object.keys(LOAD_EQ).map(k=>{const q=LOAD_EQ[k],v=_lsVal(k);
+    return`<div class="set-row ls-row" role="button" tabindex="0" aria-haspopup="dialog" data-k="${k}" onclick="openLoadStep(this.dataset.k)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLoadStep(this.dataset.k);}" aria-label="Salto de peso de ${esc(q.l)}: ${v==null?'automático':'más '+kgTxt(v)+' kilos'}. Cambiar">
+      <div class="set-row-info"><div class="set-row-t">${esc(q.l)}</div><div class="set-row-d">${_nwUnits(esc(q.d))}</div></div>
+      <span class="set-row-v ls-v${v==null?'':' on'}">${_lsTxt(v)}</span><span class="set-row-arrow" aria-hidden="true">›</span></div>`;}).join('');
+}
+// La hoja de los saltos de peso (encima de Ajustes, o sola si se llega desde el objetivo de un ejercicio)
+function _lsSheetOpen(){return!!document.querySelector('#ls-root .hist-sheet');}
+function openLoadSheet(focusK){
+  const root=document.getElementById('ls-root');if(!root)return;
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeLoadSheet()"><div class="hist-sheet" id="ls-sheet" role="dialog" aria-modal="true" aria-labelledby="ls-t" tabindex="-1" style="max-height:90vh;max-height:90dvh">
+    <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title" id="ls-t">Saltos de peso</div><div class="hist-sheet-sub">Cuánto sube cada equipo cuando toca subir</div>
+      <button type="button" class="hist-sheet-close" onclick="closeLoadSheet()" aria-label="Cerrar">✕</button></div>
+    <div class="hist-sheet-body"><div class="set-section ls-sec">${_lsRowsHtml()}
+      <div class="ls-note">Auto: el salto que ya usas en cada ejercicio. Si aún no has subido, el habitual de su equipo (<span class="nw">+2.5 kg</span> en barra, máquinas y discos, <span class="nw">+1 kg</span> en mancuernas y polea, <span class="nw">+4 kg</span> en kettlebell). Sube como mucho un 10 %; con pesos ligeros o pesas fijas (kettlebell, discos), antes suma <span class="nw">2 reps</span> y luego da el salto mínimo de tu equipo.</div></div></div></div></div>`;
+  const el=(focusK&&root.querySelector('.ls-row[data-k="'+focusK+'"]'))||document.getElementById('ls-sheet');
+  if(el)try{el.focus({preventScroll:true});}catch(e){}
+}
+function closeLoadSheet(){
+  const root=document.getElementById('ls-root');if(!root||!_lsSheetOpen())return;
+  root.innerHTML='';
+  const b=document.getElementById('set-ls');if(b)try{b.focus({preventScroll:true});}catch(e){}
+}
+// El selector de un equipo: «Auto» y sus saltos. Elegir guarda al momento y vuelve a la hoja, con el foco en su fila
+function openLoadStep(k){
+  const q=LOAD_EQ[k],root=document.getElementById('cmodal-root');if(!q||!root)return;
+  const cur=_lsVal(k),opt=v=>`<button type="button" class="ls-opt${cur===v?' on':''}" role="radio" aria-checked="${cur===v}" data-k="${k}" data-v="${v==null?'auto':v}" onclick="pickLoadStep(this.dataset.k,this.dataset.v)">${_lsTxt(v)}</button>`;
+  root.innerHTML=`<div class="cmov" onclick="if(event.target===this)closeLoadStep()"><div class="cmod ls-pick" role="dialog" aria-modal="true" aria-labelledby="lsp-t" tabindex="-1" data-k="${k}">
+    <div class="cmod-hdl"></div>
+    <div class="cmod-t" id="lsp-t">${esc(q.l)}</div>
+    <div class="cmod-b">${_nwUnits(esc(q.d))}. Elige cuánto sube cuando toca subir.</div>
+    <div class="ls-opts" role="radiogroup" aria-labelledby="lsp-t">${opt(null)}${q.opts.map(opt).join('')}</div>
+    <div class="cmod-btns"><button type="button" class="btn bs" onclick="closeLoadStep()">Cerrar</button></div>
+  </div></div>`;
+  const el=root.querySelector('.ls-opt.on')||root.querySelector('.ls-pick');if(el)try{el.focus({preventScroll:true});}catch(e){}
+}
+function closeLoadStep(){
+  const root=document.getElementById('cmodal-root'),d=root&&root.querySelector('.ls-pick');if(!d)return;
+  const k=d.dataset.k;root.innerHTML='';
+  const b=document.querySelector('#ls-root .ls-row[data-k="'+k+'"]');if(b)try{b.focus({preventScroll:true});}catch(e){}
+}
+function pickLoadStep(k,v){
+  if(!LOAD_EQ[k])return;
+  setLoadStep(k,v);
+  const root=document.getElementById('cmodal-root');if(root&&root.querySelector('.ls-pick'))root.innerHTML='';
+  if(_lsSheetOpen())openLoadSheet(k);
 }
 function setLoadStep(k,v){
   if(!LOAD_EQ[k])return;
@@ -22171,16 +22230,7 @@ function setLoadStep(k,v){
   const sh2=document.querySelector('#settings-root .hist-sheet');if(sh2)sh2.scrollTop=sc;
   toast(nv==='auto'?`${LOAD_EQ[k].l}: salto automático`:`${LOAD_EQ[k].l}: +${kgTxt(nv)} kg`);
 }
-function openLoadSettings(){
-  openSettings();
-  // Bajar hasta «Coach de carga» (por debajo de la cabecera fija de la hoja)
-  setTimeout(()=>{
-    const sh=document.querySelector('#settings-root .hist-sheet'),el=document.getElementById('set-load');
-    if(!sh||!el)return;
-    const hd=sh.querySelector('.hist-sheet-head');
-    sh.scrollTop+=el.getBoundingClientRect().top-sh.getBoundingClientRect().top-(hd?hd.offsetHeight:0)-6;
-  },60);
-}
+function openLoadSettings(){openLoadSheet();}
 
 // ─── FICHA DEL EJERCICIO 2.0: gráfica con eje de tiempo ───
 // El mismo motor que la del peso corporal (_wc + wcMove: lectura al tocar o arrastrar, rangos 1M-Todo) con la medida de
@@ -27564,8 +27614,37 @@ function renderSettings(){
       <button class="hist-sheet-close" onclick="closeSettings()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
-      <div class="sh" style="margin-top:2px">Tu entrenamiento</div>
-      <div class="set-section" id="set-train">${trainSectionHtml()}</div>
+      <div class="sh" style="margin-top:2px">Durante el entreno</div>
+      <div class="set-section">
+        ${(()=>{const on=_restOn();return`<div class="set-row" id="set-rest" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRestOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRestOn();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Descanso entre series</div>
+            <div class="set-row-d">Cuenta atrás al marcar cada serie. Apágalo si prefieres descansar a tu aire</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
+        ${(()=>{const on=_rpeOn();return`<div class="set-row" id="set-rpe" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRpeOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRpeOn();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Esfuerzo de cada serie</div>
+            <div class="set-row-d">Fácil, justo o al límite tras cada serie: el Coach lo usa para ajustar el salto. Apágalo si no quieres apuntarlo</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
+        ${(()=>{const on=S.timerSound!==false;return`<div class="set-row" id="set-sound" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleTimerSound()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTimerSound();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Sonido del temporizador</div>
+            <div class="set-row-d">${timerSoundDesc()}</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
+        ${(()=>{const on=S.keepAwake!==false;return`<div class="set-row" id="set-awake" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleKeepAwake()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleKeepAwake();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Pantalla encendida</div>
+            <div class="set-row-d">Mientras entrenas, el móvil no se bloquea solo entre series${WL.supported()?'':' · este navegador no lo admite'}</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
+      </div>
       <div class="sh">Rutina</div>
       <div class="set-section">
         <div class="set-row" onclick="closeSettings();openRoutineEditor()">
@@ -27602,38 +27681,9 @@ function renderSettings(){
           <span class="set-row-arrow">›</span>
         </div>`;})()}
       </div>
-      <div class="sh">Durante el entreno</div>
-      <div class="set-section">
-        ${(()=>{const on=_restOn();return`<div class="set-row" id="set-rest" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRestOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRestOn();}">
-          <div class="set-row-info">
-            <div class="set-row-t">Descanso entre series</div>
-            <div class="set-row-d">Cuenta atrás al marcar cada serie. Apágalo si prefieres descansar a tu aire</div>
-          </div>
-          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
-        </div>`;})()}
-        ${(()=>{const on=_rpeOn();return`<div class="set-row" id="set-rpe" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRpeOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRpeOn();}">
-          <div class="set-row-info">
-            <div class="set-row-t">Esfuerzo de cada serie</div>
-            <div class="set-row-d">Fácil, justo o al límite tras cada serie: el Coach lo usa para ajustar el salto. Apágalo si no quieres apuntarlo</div>
-          </div>
-          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
-        </div>`;})()}
-        ${(()=>{const on=S.timerSound!==false;return`<div class="set-row" id="set-sound" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleTimerSound()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTimerSound();}">
-          <div class="set-row-info">
-            <div class="set-row-t">Sonido del temporizador</div>
-            <div class="set-row-d">${timerSoundDesc()}</div>
-          </div>
-          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
-        </div>`;})()}
-        ${(()=>{const on=S.keepAwake!==false;return`<div class="set-row" id="set-awake" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleKeepAwake()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleKeepAwake();}">
-          <div class="set-row-info">
-            <div class="set-row-t">Pantalla encendida</div>
-            <div class="set-row-d">Mientras entrenas, el móvil no se bloquea solo entre series${WL.supported()?'':' · este navegador no lo admite'}</div>
-          </div>
-          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
-        </div>`;})()}
-      </div>
-      ${loadStepsSettingsHtml()}
+      <div class="sh">Tu entrenamiento</div>
+      <div class="set-section" id="set-train">${trainSectionHtml()}</div>
+      ${loadStepsRowHtml()}
       <div class="sh">Datos personales</div>
       <div class="set-section">
         <div class="set-row" onclick="openEditWeight('first')">
@@ -27699,27 +27749,6 @@ function renderSettings(){
           </div>
           <span class="set-row-v"></span>
           <span class="set-row-arrow" aria-hidden="true">›</span>
-        </div>
-      </div>
-      <div class="sh">Estadísticas</div>
-      <div class="set-section">
-        <div class="set-row" style="cursor:default">
-          <div class="set-row-info">
-            <div class="set-row-t">Sesiones totales</div>
-          </div>
-          <span class="set-row-v">${totalSessions}</span>
-        </div>
-        <div class="set-row" style="cursor:default">
-          <div class="set-row-info">
-            <div class="set-row-t">Registros de peso</div>
-          </div>
-          <span class="set-row-v">${S.weights.length}</span>
-        </div>
-        <div class="set-row" style="cursor:default">
-          <div class="set-row-info">
-            <div class="set-row-t">Mesociclos completados</div>
-          </div>
-          <span class="set-row-v">${S.mesocycles?.length||0}</span>
         </div>
       </div>
       <div class="sh">Zona de peligro</div>

@@ -27,14 +27,15 @@
 .edit-ex-info{flex:1;min-width:0}
 .edit-ex-name{font-size:14px;font-weight:500;color:var(--text);line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:break-word}
 .edit-ex-meta{font-size:12px;color:var(--text3);margin-top:2px}
-.edit-ex-actions{display:flex;gap:6px;flex-shrink:0}
-.edit-ex-btn{background:var(--bg3);border:1px solid var(--border);border-radius:var(--rxs);width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:15px;cursor:pointer;color:var(--text2);flex-shrink:0}
+.edit-ex-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.edit-ex-btn{background:var(--bg3);border:1px solid transparent;border-radius:var(--rsm);width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:17px;cursor:pointer;color:var(--text2);flex-shrink:0;touch-action:manipulation}
 .edit-ex-btn:active{transform:scale(.9)}
-.edit-ex-btn.danger{color:var(--red);border-color:color-mix(in srgb,var(--red) 30%,transparent)}
+.edit-ex-btn.danger{color:var(--red);background:color-mix(in srgb,var(--red) 12%,transparent)}
+.edit-ex-btn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .edit-add-btn{margin:4px 14px 12px;background:var(--bg2);border:1px dashed var(--border2);border-radius:var(--rsm);padding:11px;font-size:14px;color:var(--text2);width:calc(100% - 28px);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
 .edit-add-btn:active{background:var(--bg3)}
 /* Ajuste series/reps inline */
-.sr-editor{display:flex;align-items:center;flex-wrap:wrap;column-gap:12px;row-gap:6px;margin-top:5px}
+.sr-editor{display:flex;align-items:center;flex-wrap:wrap;column-gap:12px;row-gap:14px;margin-top:8px}
 .sr-g{display:flex;align-items:center;gap:4px}
 .sr-label{font-size:11px;color:var(--text3);min-width:22px}
 .sr-val{font-size:13px;font-weight:600;color:var(--text2);min-width:18px;text-align:center;white-space:nowrap}

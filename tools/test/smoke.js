@@ -1217,15 +1217,17 @@ await safe('loadStepsSettings',async()=>{
   try{
     S.loadSteps=_defaultLoadSteps();_mk5('b4',[[8.5,17,2]]);
     openLoadSettings();await W(90);
-    const sels=document.querySelectorAll('#settings-root .ls-sel');
-    if(sels.length!==Object.keys(LOAD_EQ).length)throw new Error('selects '+sels.length);
-    const sp=document.querySelector('#settings-root .ls-sel[data-k="polea"]');
-    if([...sels].some(s=>s.getBoundingClientRect().height<44))throw new Error('selects < 44 px');
-    sp.value='0.5';sp.dispatchEvent(new Event('change'));await W(10);
+    // (B3-6) los saltos van en su hoja: una fila por equipo (44 px o más) con su valor; al tocarla, sus opciones en un selector
+    const sels=document.querySelectorAll('#ls-root .ls-row');
+    if(sels.length!==Object.keys(LOAD_EQ).length)throw new Error('filas '+sels.length);
+    const sp=document.querySelector('#ls-root .ls-row[data-k="polea"]');
+    if([...sels].some(s=>s.getBoundingClientRect().height<44))throw new Error('filas < 44 px');
+    sp.click();await W(10);
+    {const o=document.querySelector('#cmodal-root .ls-opt[data-v="0.5"]');if(!o||o.getBoundingClientRect().height<44)throw new Error('sin la opción +0.5 kg');o.click();await W(10);}
     if(S.loadSteps.polea!==0.5||JSON.parse(localStorage.getItem('gymtrack_v3')).loadSteps.polea!==0.5)throw new Error('no se guardó');
-    if(!document.querySelector('#settings-root .ls-sel[data-k="polea"]')||document.querySelector('#settings-root .ls-sel[data-k="polea"]').value!=='0.5')throw new Error('la hoja no refleja el cambio');
+    {const v=document.querySelector('#ls-root .ls-row[data-k="polea"] .ls-v');if(!v||v.textContent.replace(/\s/g,'')!=='+0.5kg'||document.querySelector('#cmodal-root .ls-pick'))throw new Error('la hoja no refleja el cambio');}
     if(coach_prescribe('b4').weight!==9)throw new Error('b4 con +0.5 → '+coach_prescribe('b4').weight);
-    closeSettings();
+    closeLoadSheet();
     // Import: un backup sin loadSteps no pisa los de este móvil; uno con valores raros se sanea
     const base={schema_version:14,sessions:[],weights:[],strength:{},currentPlan:JSON.parse(JSON.stringify(PLAN))};
     await run(base);
@@ -1387,7 +1389,7 @@ await safe('loadTextsPolish',async()=>{
     _clearMarks();S.loadSteps=_defaultLoadSteps();S.restWeeks=[];if(getActiveDeload())_restoreDeload(true);
     // Textos de ayuda: «como mucho un 10 %» (con pesos ligeros, antes reps) y bajada «al menos un salto»
     openLoadSettings();await W(90);
-    const note=document.querySelector('#settings-root .ls-note').textContent;closeSettings();
+    const note=document.querySelector('#ls-root .ls-note').textContent;closeLoadSheet();
     if(/Nunca/.test(note)||!/como mucho un 10 %/.test(note)||!/suma 2 reps/.test(note))throw new Error('nota de Ajustes: '+note);
     _mk5('c6',[[142.25,13,2]]);
     go('workout');S.day='C';S.open='c6';render();await W(10);
@@ -9942,7 +9944,7 @@ await safe('cortes18',async()=>{
       ['peso',async()=>{openWDetail();await sc('peso');closeWDetail();}],
       ['wrapped',async()=>{const L=wrapMonths();if(L.length&&openWrapped({kind:'month',y:L[0].y,m:L[0].m})){for(let i=0;i<_wr.D.pages.length;i++){_wrShow(i);_wr.paused=true;await sc('Wrapped mes '+i);}closeWrapped();}
         const n=Array.isArray(S.mesocycles)?S.mesocycles.length:0;if(n&&openWrapped({kind:'cycle',n})){for(let i=0;i<_wr.D.pages.length;i++){_wrShow(i);_wr.paused=true;await sc('Wrapped ciclo '+i);}closeWrapped();}}],
-      ['ajustes',async()=>{openSettings();await sc('Ajustes');closeSettings();openRoutineEditor();await sc('editor de rutina');closeRoutineEditor();document.getElementById('settings-root').innerHTML='';S.settingsOpen=false;openLoadSettings();await sc('Coach de carga');closeSettings();}],
+      ['ajustes',async()=>{openSettings();await sc('Ajustes');closeSettings();openRoutineEditor();await sc('editor de rutina');closeRoutineEditor();document.getElementById('settings-root').innerHTML='';S.settingsOpen=false;openLoadSettings();await sc('Coach de carga');openLoadStep('polea');await sc('selector de salto');closeLoadStep();closeLoadSheet();}],
       ['selector',async()=>{showExercisePicker({title:'Elige',muscle:null,onPick:()=>{}});await sc('selector');for(const id of libIds){pickerDetail(id);await sc('ficha '+id);closeLibDetail();}closeExercisePicker();}],
       ['resumen',async()=>{for(const ts of sess)if(openSessionSummary(ts)){await sc('resumen '+ts);closeSessionSummary();}}],
       ['fin',async()=>{openFinishModal(3,5);await sc('guardar entreno');closeCmodal(false);}],
@@ -12799,6 +12801,95 @@ await safe('b3Rutina',async()=>{
       E(document.documentElement.scrollWidth<=innerWidth&&document.getElementById('onboarding').scrollWidth<=innerWidth,'320: la rutina desborda');}
     if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
   }finally{if(fr)fr.style.width=fw;await _m3Back(full);}
+});
+await safe('b3Ajustes',async()=>{
+  // (B3-6) Ajustes en orden (A2), los saltos de peso en su hoja con selector propio (A3) y, en el editor de rutina, ⇄ y ✕ de 44 px
+  // con su confirmación al quitar (A4).
+  const j=_snap11(),bad=[],E=(c,m)=>{if(!c)bad.push(m);},ls0=JSON.stringify(S.loadSteps);
+  const fr=window.frameElement,fw=fr&&fr.style.width,fh=fr&&fr.style.height;
+  const size=async(w,h)=>{if(!fr)return false;fr.style.width=w+'px';fr.style.height=h+'px';await W(40);for(let i=0;i<20&&(innerWidth!==w||innerHeight!==h);i++)await W(20);return innerWidth===w&&innerHeight===h;};
+  const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=sel=>document.querySelector(sel);
+  const key=(el,k)=>el.dispatchEvent(new KeyboardEvent('keydown',{key:k,bubbles:true,cancelable:true}));
+  try{
+    RT.stop();S.loadSteps=_defaultLoadSteps();go('dash');openSettings();await W(20);
+    // ── A2 · el orden de las secciones; «Estadísticas» ya no está (esas cifras se ven en Progreso)
+    {const sh=[...document.querySelectorAll('#settings-root .hist-sheet-body > .sh')].map(tx);
+      const want=['Durante el entreno','Rutina','Tu entrenamiento','Coach de carga','Datos personales','Tus datos','Zona de peligro'];
+      E(sh.filter(t=>want.includes(t)).join('|')===want.join('|'),'orden de Ajustes: '+sh.join('|'));
+      E(!sh.includes('Estadísticas')&&!/Sesiones totales|Mesociclos completados/.test(tx($('#settings-root'))),'siguen las estadísticas');
+      E(['#set-rest','#set-rpe','#set-sound','#set-awake','#set-recovery','#set-train','#set-ls','#set-bk'].every(q=>!!$(q)),'falta alguna fila de Ajustes');
+      E(!$('#settings-root select'),'queda un desplegable del sistema en Ajustes');}
+    // ── los saltos de peso: una fila que dice cómo están y abre su hoja
+    {const row=$('#set-ls');
+      E(row&&row.getAttribute('role')==='button'&&row.tabIndex===0&&row.getBoundingClientRect().height>=44&&/Saltos de peso/.test(tx(row))&&tx(row.querySelector('.set-row-v'))==='Auto','fila de los saltos: '+tx(row));
+      row.click();await W(10);
+      const sh=$('#ls-sheet');
+      E(sh&&sh.getAttribute('role')==='dialog'&&sh.getAttribute('aria-modal')==='true'&&tx(document.getElementById(sh.getAttribute('aria-labelledby')))==='Saltos de peso'&&document.activeElement===sh,'la hoja de los saltos no es un diálogo con título y foco');
+      E(S.settingsOpen&&!!$('#settings-root .hist-sheet'),'abrir los saltos cierra Ajustes');
+      // encima de Ajustes: lo que hay en el centro de la pantalla es de la hoja
+      {const r=sh.getBoundingClientRect(),h=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);E(h&&sh.contains(h),'la hoja de los saltos queda debajo de Ajustes');}
+      const rows=[...document.querySelectorAll('#ls-root .ls-row')];
+      E(rows.length===Object.keys(LOAD_EQ).length&&rows.every(r=>r.getAttribute('role')==='button'&&r.tabIndex===0&&r.getBoundingClientRect().height>=44&&tx(r.querySelector('.ls-v'))==='Auto'&&/automático/.test(r.getAttribute('aria-label'))),'filas de equipo');
+      E(/como mucho un 10 %/.test(tx($('#ls-root .ls-note'))),'sin la nota de los saltos');
+      E(document.documentElement.scrollWidth<=innerWidth,'la hoja de los saltos desborda');}
+    // ── A3 · el selector de un equipo: «Auto» y sus saltos, como radios de 44 px; elegir guarda y vuelve a la hoja
+    {const k='manc',q=LOAD_EQ[k];$('#ls-root .ls-row[data-k="'+k+'"]').click();await W(10);
+      const d=$('#cmodal-root .ls-pick'),os=[...document.querySelectorAll('#cmodal-root .ls-opt')];
+      E(d&&d.getAttribute('role')==='dialog'&&tx(document.getElementById(d.getAttribute('aria-labelledby')))===q.l&&!!d.querySelector('[role="radiogroup"]'),'el selector no es un diálogo con su grupo de opciones');
+      E(os.length===q.opts.length+1&&os.map(o=>o.dataset.v).join()===['auto'].concat(q.opts).join()&&os.every(o=>o.getAttribute('role')==='radio'&&o.getBoundingClientRect().height>=44&&o.getBoundingClientRect().width>=44),'opciones: '+os.map(o=>o.dataset.v));
+      E(os.filter(o=>o.getAttribute('aria-checked')==='true').map(o=>o.dataset.v).join()==='auto'&&document.activeElement===os[0],'la opción en uso no va marcada y con el foco');
+      E(!$('#cmodal-root select')&&!$('#ls-root select'),'queda un desplegable del sistema');
+      os[os.length-1].click();await W(10);
+      const v=q.opts[q.opts.length-1],row=$('#ls-root .ls-row[data-k="'+k+'"]');
+      E(S.loadSteps[k]===v&&JSON.parse(localStorage.getItem('gymtrack_v3')).loadSteps[k]===v,'el salto no se guarda');
+      E(!$('#cmodal-root .ls-pick')&&row&&tx(row.querySelector('.ls-v')).replace(/\s/g,'')==='+'+kgTxt(v)+'kg'&&row.querySelector('.ls-v').classList.contains('on')&&document.activeElement===row,'la hoja no refleja lo elegido o pierde el foco');
+      E(/más /.test(row.getAttribute('aria-label')),'nombre de la fila tras elegir: '+row.getAttribute('aria-label'));
+      // el selector marca ahora lo elegido; «Cerrar» y Escape no cambian nada y devuelven el foco a la fila
+      row.click();await W(10);
+      E(tx($('#cmodal-root .ls-opt[aria-checked="true"]')).replace(/\s/g,'')==='+'+kgTxt(v)+'kg','el selector no marca lo elegido');
+      $('#cmodal-root .ls-pick .btn').click();await W(5);
+      E(!$('#cmodal-root .ls-pick')&&S.loadSteps[k]===v&&document.activeElement===$('#ls-root .ls-row[data-k="'+k+'"]'),'«Cerrar» del selector');
+      // por teclado: Intro abre el selector de la fila
+      key($('#ls-root .ls-row[data-k="'+k+'"]'),'Enter');await W(5);E(!!$('#cmodal-root .ls-pick'),'Intro no abre el selector');
+      key(document,'Escape');await W(5);E(!$('#cmodal-root .ls-pick')&&!!$('#ls-sheet'),'Escape no cierra solo el selector');
+      // volver a «Auto»
+      $('#ls-root .ls-row[data-k="'+k+'"]').click();await W(5);$('#cmodal-root .ls-opt[data-v="auto"]').click();await W(10);
+      E(S.loadSteps[k]==='auto'&&tx($('#ls-root .ls-row[data-k="'+k+'"] .ls-v'))==='Auto','volver a Auto: '+S.loadSteps[k]);
+      // cerrar la hoja: Ajustes sigue abierto, su fila cuenta lo cambiado y recibe el foco
+      setLoadStep('polea','0.5');setLoadStep('barra','5');await W(5);
+      key(document,'Escape');await W(5);
+      E(!$('#ls-sheet')&&S.settingsOpen&&tx($('#set-ls .set-row-v'))==='2 a tu medida'&&document.activeElement===$('#set-ls'),'cerrar los saltos: '+tx($('#set-ls')));
+      S.loadSteps=_defaultLoadSteps();closeSettings();await W(5);}
+    // «Cambiar saltos de peso ›» (desde el objetivo de un ejercicio) abre la hoja sola, sin Ajustes debajo
+    openLoadSettings();await W(10);E(!!$('#ls-sheet')&&!S.settingsOpen&&!$('#settings-root .hist-sheet'),'openLoadSettings no abre la hoja sola');closeLoadSheet();E(!$('#ls-sheet'),'closeLoadSheet');
+    // ── a 320 px: Ajustes, la hoja y el selector, sin desbordes
+    if(fr&&await size(320,568)){openSettings();await W(10);E(document.documentElement.scrollWidth<=innerWidth,'320: Ajustes desborda');
+      openLoadSheet();await W(5);E(document.documentElement.scrollWidth<=innerWidth&&[...document.querySelectorAll('#ls-root .ls-v')].every(v=>v.getClientRects().length===1),'320: la hoja de los saltos');
+      openLoadStep('polea');await W(5);{const os=[...document.querySelectorAll('#cmodal-root .ls-opt')];E(os.every(o=>o.getBoundingClientRect().height>=44&&o.scrollWidth<=o.clientWidth+1)&&document.documentElement.scrollWidth<=innerWidth,'320: el selector');}
+      closeLoadStep();closeLoadSheet();closeSettings();}
+    // ── A4 · editor de rutina: ⇄ y ✕ de 44 px, uno encima del otro y sin pisarse; quitar pide confirmación
+    for(const [w,h] of [[390,844],[320,568]]){if(fr&&!await size(w,h))continue;
+      const L=innerWidth+'px';openRoutineEditor('A');await W(20);
+      const it=[...document.querySelectorAll('#routine-ed .edit-ex-item')];E(it.length>=2,L+': editor sin ejercicios');
+      for(const row of it.slice(0,3)){const bs=[...row.querySelectorAll('.edit-ex-btn')],a=bs[0]&&bs[0].getBoundingClientRect(),b=bs[1]&&bs[1].getBoundingClientRect();
+        E(bs.length===2&&a.width>=44&&a.height>=44&&b.width>=44&&b.height>=44,L+': botones del editor '+(a&&Math.round(a.width)+'×'+Math.round(a.height)));
+        E(bs.length===2&&b.top>=a.bottom+4&&Math.abs(a.left-b.left)<1,L+': ⇄ y ✕ no van uno encima del otro');
+        E(bs.length===2&&bs[0].getAttribute('aria-label')==='Cambiar ejercicio'&&bs[1].getAttribute('aria-label')==='Eliminar'&&bs[1].classList.contains('danger'),L+': nombres de ⇄ y ✕');
+        // los − + de series y reps: sus zonas de toque (44 px) no se pisan de una línea a otra
+        const sb=[...row.querySelectorAll('.sr-btn')].map(x=>x.getBoundingClientRect()),tops=[...new Set(sb.map(q=>Math.round(q.top)))].sort((x,y)=>x-y);
+        if(tops.length>1)E(tops[1]-tops[0]>=44,L+': los − + de dos líneas se pisan ('+(tops[1]-tops[0])+')');}
+      E(document.documentElement.scrollWidth<=innerWidth&&![...document.querySelectorAll('#routine-ed .edit-ex-item *')].some(e=>{const q=e.getBoundingClientRect();return q.width&&q.right>innerWidth+.5;}),L+': el editor desborda');
+      closeRoutineEditor();}
+    if(fr){fr.style.width=fw;fr.style.height=fh;await W(40);}
+    {openRoutineEditor('A');await W(20);const n0=getPlan().A.ex.length,row=$('#routine-ed #edi_1'),name=tx(row.querySelector('.edit-ex-name'));
+      row.querySelector('.edit-ex-btn.danger').click();await W(5);
+      E(!!_cmodalState&&/Eliminar ejercicio/.test(tx($('#cmodal-root')))&&tx($('#cmodal-root')).includes(name)&&getPlan().A.ex.length===n0,'quitar no pide confirmación');
+      closeCmodal(true);await W(5);E(!_cmodalState&&getPlan().A.ex.length===n0&&tx($('#routine-ed #edi_1 .edit-ex-name'))===name,'«Cancelar» quita el ejercicio');
+      $('#routine-ed #edi_1 .edit-ex-btn.danger').click();await W(5);cmodalOk();await W(10);
+      E(getPlan().A.ex.length===n0-1&&!!$('#routine-ed')&&tx($('#routine-ed #edi_1 .edit-ex-name'))!==name,'«Eliminar» no quita el ejercicio');
+      closeRoutineEditor();}
+    if(bad.length)throw new Error(bad.join(' | '));
+  }finally{if(fr){fr.style.width=fw;fr.style.height=fh;}document.getElementById('cmodal-root').innerHTML='';_cmodalState=null;try{closeLoadSheet();}catch(e){}closeSettings();S.loadSteps=JSON.parse(ls0);_rest11(j);saveState();render();await W(40);}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

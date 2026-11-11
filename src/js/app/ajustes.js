@@ -44,8 +44,37 @@ function renderSettings(){
       <button class="hist-sheet-close" onclick="closeSettings()" aria-label="Cerrar">✕</button>
     </div>
     <div class="hist-sheet-body">
-      <div class="sh" style="margin-top:2px">Tu entrenamiento</div>
-      <div class="set-section" id="set-train">${trainSectionHtml()}</div>
+      <div class="sh" style="margin-top:2px">Durante el entreno</div>
+      <div class="set-section">
+        ${(()=>{const on=_restOn();return`<div class="set-row" id="set-rest" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRestOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRestOn();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Descanso entre series</div>
+            <div class="set-row-d">Cuenta atrás al marcar cada serie. Apágalo si prefieres descansar a tu aire</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
+        ${(()=>{const on=_rpeOn();return`<div class="set-row" id="set-rpe" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRpeOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRpeOn();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Esfuerzo de cada serie</div>
+            <div class="set-row-d">Fácil, justo o al límite tras cada serie: el Coach lo usa para ajustar el salto. Apágalo si no quieres apuntarlo</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
+        ${(()=>{const on=S.timerSound!==false;return`<div class="set-row" id="set-sound" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleTimerSound()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTimerSound();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Sonido del temporizador</div>
+            <div class="set-row-d">${timerSoundDesc()}</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
+        ${(()=>{const on=S.keepAwake!==false;return`<div class="set-row" id="set-awake" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleKeepAwake()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleKeepAwake();}">
+          <div class="set-row-info">
+            <div class="set-row-t">Pantalla encendida</div>
+            <div class="set-row-d">Mientras entrenas, el móvil no se bloquea solo entre series${WL.supported()?'':' · este navegador no lo admite'}</div>
+          </div>
+          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
+        </div>`;})()}
+      </div>
       <div class="sh">Rutina</div>
       <div class="set-section">
         <div class="set-row" onclick="closeSettings();openRoutineEditor()">
@@ -82,38 +111,9 @@ function renderSettings(){
           <span class="set-row-arrow">›</span>
         </div>`;})()}
       </div>
-      <div class="sh">Durante el entreno</div>
-      <div class="set-section">
-        ${(()=>{const on=_restOn();return`<div class="set-row" id="set-rest" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRestOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRestOn();}">
-          <div class="set-row-info">
-            <div class="set-row-t">Descanso entre series</div>
-            <div class="set-row-d">Cuenta atrás al marcar cada serie. Apágalo si prefieres descansar a tu aire</div>
-          </div>
-          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
-        </div>`;})()}
-        ${(()=>{const on=_rpeOn();return`<div class="set-row" id="set-rpe" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleRpeOn()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleRpeOn();}">
-          <div class="set-row-info">
-            <div class="set-row-t">Esfuerzo de cada serie</div>
-            <div class="set-row-d">Fácil, justo o al límite tras cada serie: el Coach lo usa para ajustar el salto. Apágalo si no quieres apuntarlo</div>
-          </div>
-          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
-        </div>`;})()}
-        ${(()=>{const on=S.timerSound!==false;return`<div class="set-row" id="set-sound" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleTimerSound()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleTimerSound();}">
-          <div class="set-row-info">
-            <div class="set-row-t">Sonido del temporizador</div>
-            <div class="set-row-d">${timerSoundDesc()}</div>
-          </div>
-          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
-        </div>`;})()}
-        ${(()=>{const on=S.keepAwake!==false;return`<div class="set-row" id="set-awake" role="switch" tabindex="0" aria-checked="${on}" onclick="toggleKeepAwake()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();toggleKeepAwake();}">
-          <div class="set-row-info">
-            <div class="set-row-t">Pantalla encendida</div>
-            <div class="set-row-d">Mientras entrenas, el móvil no se bloquea solo entre series${WL.supported()?'':' · este navegador no lo admite'}</div>
-          </div>
-          <span class="sw${on?' on':''}" aria-hidden="true"><span class="sw-k"></span></span>
-        </div>`;})()}
-      </div>
-      ${loadStepsSettingsHtml()}
+      <div class="sh">Tu entrenamiento</div>
+      <div class="set-section" id="set-train">${trainSectionHtml()}</div>
+      ${loadStepsRowHtml()}
       <div class="sh">Datos personales</div>
       <div class="set-section">
         <div class="set-row" onclick="openEditWeight('first')">
@@ -179,27 +179,6 @@ function renderSettings(){
           </div>
           <span class="set-row-v"></span>
           <span class="set-row-arrow" aria-hidden="true">›</span>
-        </div>
-      </div>
-      <div class="sh">Estadísticas</div>
-      <div class="set-section">
-        <div class="set-row" style="cursor:default">
-          <div class="set-row-info">
-            <div class="set-row-t">Sesiones totales</div>
-          </div>
-          <span class="set-row-v">${totalSessions}</span>
-        </div>
-        <div class="set-row" style="cursor:default">
-          <div class="set-row-info">
-            <div class="set-row-t">Registros de peso</div>
-          </div>
-          <span class="set-row-v">${S.weights.length}</span>
-        </div>
-        <div class="set-row" style="cursor:default">
-          <div class="set-row-info">
-            <div class="set-row-t">Mesociclos completados</div>
-          </div>
-          <span class="set-row-v">${S.mesocycles?.length||0}</span>
         </div>
       </div>
       <div class="sh">Zona de peligro</div>

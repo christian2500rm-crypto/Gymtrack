@@ -780,18 +780,66 @@ function coachPlanCardHtml(){
   </div>`;
 }
 // ── Ajustes → Coach de carga: salto de peso por tipo de equipo ──
-function loadStepsSettingsHtml(){
+// En Ajustes es una sola fila («Saltos de peso») que abre su hoja; dentro, cada equipo con su valor a la derecha y, al tocarlo, sus
+// opciones en un selector de la app (antes eran siete desplegables del sistema en mitad de Ajustes).
+function _lsVal(k){const v=(S.loadSteps||{})[k];return v===undefined||v==='auto'?null:+v;} // null = automático
+function _lsTxt(v){return v==null?'Auto':'+'+kgTxt(v)+NB+'kg';}
+function loadStepsRowHtml(){
+  const n=Object.keys(LOAD_EQ).filter(k=>_lsVal(k)!=null).length;
   return`<div class="sh" id="set-load">Coach de carga</div>
   <div class="set-section">
-    ${Object.keys(LOAD_EQ).map(k=>{const q=LOAD_EQ[k],cur=(S.loadSteps||{})[k]===undefined?'auto':String(S.loadSteps[k]);
-      return`<div class="set-row ls-row">
-        <div class="set-row-info"><div class="set-row-t">${esc(q.l)}</div><div class="set-row-d">${_nwUnits(esc(q.d))}</div></div>
-        <select class="ls-sel" data-k="${k}" aria-label="Salto de peso: ${esc(q.l)}" onchange="setLoadStep(this.dataset.k,this.value)">
-          <option value="auto"${cur==='auto'?' selected':''}>Auto</option>
-          ${q.opts.map(v=>`<option value="${v}"${cur===String(v)?' selected':''}>+${kgTxt(v)} kg</option>`).join('')}
-        </select></div>`;}).join('')}
-    <div class="ls-note">Auto: el salto que ya usas en cada ejercicio. Si aún no has subido, el habitual de su equipo (<span class="nw">+2.5 kg</span> en barra, máquinas y discos, <span class="nw">+1 kg</span> en mancuernas y polea, <span class="nw">+4 kg</span> en kettlebell). Sube como mucho un 10 %; con pesos ligeros o pesas fijas (kettlebell, discos), antes suma <span class="nw">2 reps</span> y luego da el salto mínimo de tu equipo.</div>
+    <div class="set-row" id="set-ls" role="button" tabindex="0" aria-haspopup="dialog" onclick="openLoadSheet()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLoadSheet();}">
+      <div class="set-row-info"><div class="set-row-t">Saltos de peso</div><div class="set-row-d">Cuánto sube cada equipo cuando toca subir</div></div>
+      <span class="set-row-v">${n?`${n} a tu medida`:'Auto'}</span><span class="set-row-arrow" aria-hidden="true">›</span>
+    </div>
   </div>`;
+}
+function _lsRowsHtml(){
+  return Object.keys(LOAD_EQ).map(k=>{const q=LOAD_EQ[k],v=_lsVal(k);
+    return`<div class="set-row ls-row" role="button" tabindex="0" aria-haspopup="dialog" data-k="${k}" onclick="openLoadStep(this.dataset.k)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openLoadStep(this.dataset.k);}" aria-label="Salto de peso de ${esc(q.l)}: ${v==null?'automático':'más '+kgTxt(v)+' kilos'}. Cambiar">
+      <div class="set-row-info"><div class="set-row-t">${esc(q.l)}</div><div class="set-row-d">${_nwUnits(esc(q.d))}</div></div>
+      <span class="set-row-v ls-v${v==null?'':' on'}">${_lsTxt(v)}</span><span class="set-row-arrow" aria-hidden="true">›</span></div>`;}).join('');
+}
+// La hoja de los saltos de peso (encima de Ajustes, o sola si se llega desde el objetivo de un ejercicio)
+function _lsSheetOpen(){return!!document.querySelector('#ls-root .hist-sheet');}
+function openLoadSheet(focusK){
+  const root=document.getElementById('ls-root');if(!root)return;
+  root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeLoadSheet()"><div class="hist-sheet" id="ls-sheet" role="dialog" aria-modal="true" aria-labelledby="ls-t" tabindex="-1" style="max-height:90vh;max-height:90dvh">
+    <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title" id="ls-t">Saltos de peso</div><div class="hist-sheet-sub">Cuánto sube cada equipo cuando toca subir</div>
+      <button type="button" class="hist-sheet-close" onclick="closeLoadSheet()" aria-label="Cerrar">✕</button></div>
+    <div class="hist-sheet-body"><div class="set-section ls-sec">${_lsRowsHtml()}
+      <div class="ls-note">Auto: el salto que ya usas en cada ejercicio. Si aún no has subido, el habitual de su equipo (<span class="nw">+2.5 kg</span> en barra, máquinas y discos, <span class="nw">+1 kg</span> en mancuernas y polea, <span class="nw">+4 kg</span> en kettlebell). Sube como mucho un 10 %; con pesos ligeros o pesas fijas (kettlebell, discos), antes suma <span class="nw">2 reps</span> y luego da el salto mínimo de tu equipo.</div></div></div></div></div>`;
+  const el=(focusK&&root.querySelector('.ls-row[data-k="'+focusK+'"]'))||document.getElementById('ls-sheet');
+  if(el)try{el.focus({preventScroll:true});}catch(e){}
+}
+function closeLoadSheet(){
+  const root=document.getElementById('ls-root');if(!root||!_lsSheetOpen())return;
+  root.innerHTML='';
+  const b=document.getElementById('set-ls');if(b)try{b.focus({preventScroll:true});}catch(e){}
+}
+// El selector de un equipo: «Auto» y sus saltos. Elegir guarda al momento y vuelve a la hoja, con el foco en su fila
+function openLoadStep(k){
+  const q=LOAD_EQ[k],root=document.getElementById('cmodal-root');if(!q||!root)return;
+  const cur=_lsVal(k),opt=v=>`<button type="button" class="ls-opt${cur===v?' on':''}" role="radio" aria-checked="${cur===v}" data-k="${k}" data-v="${v==null?'auto':v}" onclick="pickLoadStep(this.dataset.k,this.dataset.v)">${_lsTxt(v)}</button>`;
+  root.innerHTML=`<div class="cmov" onclick="if(event.target===this)closeLoadStep()"><div class="cmod ls-pick" role="dialog" aria-modal="true" aria-labelledby="lsp-t" tabindex="-1" data-k="${k}">
+    <div class="cmod-hdl"></div>
+    <div class="cmod-t" id="lsp-t">${esc(q.l)}</div>
+    <div class="cmod-b">${_nwUnits(esc(q.d))}. Elige cuánto sube cuando toca subir.</div>
+    <div class="ls-opts" role="radiogroup" aria-labelledby="lsp-t">${opt(null)}${q.opts.map(opt).join('')}</div>
+    <div class="cmod-btns"><button type="button" class="btn bs" onclick="closeLoadStep()">Cerrar</button></div>
+  </div></div>`;
+  const el=root.querySelector('.ls-opt.on')||root.querySelector('.ls-pick');if(el)try{el.focus({preventScroll:true});}catch(e){}
+}
+function closeLoadStep(){
+  const root=document.getElementById('cmodal-root'),d=root&&root.querySelector('.ls-pick');if(!d)return;
+  const k=d.dataset.k;root.innerHTML='';
+  const b=document.querySelector('#ls-root .ls-row[data-k="'+k+'"]');if(b)try{b.focus({preventScroll:true});}catch(e){}
+}
+function pickLoadStep(k,v){
+  if(!LOAD_EQ[k])return;
+  setLoadStep(k,v);
+  const root=document.getElementById('cmodal-root');if(root&&root.querySelector('.ls-pick'))root.innerHTML='';
+  if(_lsSheetOpen())openLoadSheet(k);
 }
 function setLoadStep(k,v){
   if(!LOAD_EQ[k])return;
@@ -805,14 +853,5 @@ function setLoadStep(k,v){
   const sh2=document.querySelector('#settings-root .hist-sheet');if(sh2)sh2.scrollTop=sc;
   toast(nv==='auto'?`${LOAD_EQ[k].l}: salto automático`:`${LOAD_EQ[k].l}: +${kgTxt(nv)} kg`);
 }
-function openLoadSettings(){
-  openSettings();
-  // Bajar hasta «Coach de carga» (por debajo de la cabecera fija de la hoja)
-  setTimeout(()=>{
-    const sh=document.querySelector('#settings-root .hist-sheet'),el=document.getElementById('set-load');
-    if(!sh||!el)return;
-    const hd=sh.querySelector('.hist-sheet-head');
-    sh.scrollTop+=el.getBoundingClientRect().top-sh.getBoundingClientRect().top-(hd?hd.offsetHeight:0)-6;
-  },60);
-}
+function openLoadSettings(){openLoadSheet();}
 

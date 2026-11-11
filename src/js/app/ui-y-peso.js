@@ -70,6 +70,7 @@ document.addEventListener('keydown',e=>{
     if(_busy){closeBusy();return;} // (11) hoja «¿Máquina ocupada?»
     // Otros modales propios de #cmodal-root (trasladar historial, editar peso, próxima sesión…)
     {const cr=document.getElementById('cmodal-root');if(cr&&cr.firstElementChild){cr.innerHTML='';_restPickEx=null;return;}}
+    if(_lsSheetOpen()){closeLoadSheet();return;} // saltos de peso (encima de Ajustes)
     if(RF.open){RF.close();return;} // modo descanso a pantalla completa
     if(_sum){closeSessionSummary();return;} // (09) resumen de una sesión (puede estar encima del historial)
     if(_mmSheet){closeMuscleSheet();return;} // hoja de un grupo muscular (puede estar encima del editor)
