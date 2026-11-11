@@ -7,7 +7,7 @@ montaje que genera el mismo `index.html` byte a byte, y versionar el kit de prue
 
 - [x] **R1 · Fuentes y montaje.** `src/` (plantilla, manifiesto, CSS, `js/anim`, `js/gen`, `js/app`), `tools/build.js`,
   `.gitattributes` y `CLAUDE.md`.
-- [ ] **R2 · Pruebas versionadas** en `tools/test/`, de un solo comando.
+- [x] **R2 · Pruebas versionadas** en `tools/test/`, de un solo comando (`bash tools/test/smoke.sh`).
 - [ ] **R3 · Laboratorio 3D, catálogo y prototipo del generador** en `tools/lab`, `tools/catalog` y `tools/gen`.
 
 ## Decisiones
@@ -28,6 +28,16 @@ montaje que genera el mismo `index.html` byte a byte, y versionar el kit de prue
 - **Tamaños.** La app queda en 25 ficheros de 52 a 1.981 líneas. Tres son pequeños a propósito, porque rodean a
   `LIB_ROWS` (`catalogo.js`, `catalogo-lector.js`) o son una pieza suelta (`fuentes.css`).
 - **Manifiesto** en texto (`src/manifiesto.txt`), con una línea por fichero y un comentario de qué lleva cada uno.
+
+- **Kit de pruebas.** `kit.js` (Node, sin dependencias) hace de servidor estático y lanza Chrome con los argumentos en
+  una lista (sin pasar por el shell), así que funciona en Windows, macOS y Linux; los `.sh` son atajos con el uso de
+  siempre. `smoke.js` se copió tal cual de la versión más reciente (la de M3b, con los pasos de M1, M2, M3 y M2b ya
+  dentro): las fuentes sueltas de esos pasos y sus scripts de montaje no se versionan porque ya no hacen falta.
+- **Página de siembra.** Vive en `tools/test/__seed.html` (no en la raíz) y abre la app con `../../index.html`; así no
+  hay que copiarla a ningún sitio. Lleva una guarda: fuera de `localhost`/`127.0.0.1` no hace nada. `guarda.html` y
+  `kit.js guarda` lo comprueban con un host ajeno resuelto a 127.0.0.1 y con `localhost` como control (y se probó que
+  detecta una página sin guarda). La entrada `__seed.html` de `.gitignore` se queda, por las copias antiguas en la raíz.
+- **Fallos conocidos** en `sum.js`: se enseñan pero no hacen fallar `smoke.sh`; cualquier otro fallo, sí.
 
 ## Cómo retomar
 

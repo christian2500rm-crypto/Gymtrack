@@ -2,4 +2,4 @@
 web/
 # Herramientas locales y datos de prueba
 .claude/
-__seed.html
+/__seed.html

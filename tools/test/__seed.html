@@ -1,0 +1,43 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>seed</title></head>
+<body style="margin:0;background:#000">
+<iframe id="f" style="border:0;display:block"></iframe><pre id="out" style="color:#0f0;font:11px monospace;white-space:pre-wrap"></pre>
+<script>
+// Página de pruebas del kit (tools/test, la usa kit.js): siembra 6 meses de datos realistas, abre la app, ejecuta
+// ?run=<js> dentro de ella y (con &out=1) escribe el resultado + errores JS en #out.
+// Parámetros: &empty=1 usuario nuevo · &fresh=1 sin datos · &keep=1 no toca los datos · &tab= · &w= &h= · &wait=ms
+//
+// GUARDA. El repositorio se publica entero, así que esta página también está en gymteca.app/tools/test/__seed.html, en
+// el mismo origen que la app. Escribe en localStorage con la clave real de la app («gymtrack_v3»): abierta en la web
+// BORRARÍA los datos de quien la abriera. Por eso, fuera de localhost o 127.0.0.1 no hace nada (ni lee ni escribe ni
+// carga la app). Lo comprueba «node tools/test/kit.js guarda» (y smoke.sh antes de cada pasada) con guarda.html.
+const HOSTS_PRUEBA=['localhost','127.0.0.1'];
+if(!HOSTS_PRUEBA.includes(location.hostname)){
+  document.getElementById('out').textContent='BLOQUEADA: esta página de pruebas solo funciona en localhost o 127.0.0.1 ('+location.hostname+'). No ha tocado nada.';
+  document.title='seed: bloqueada';
+}else{
+const q=new URLSearchParams(location.search);const H=+(q.get('h')||844),Wd=+(q.get('w')||390);
+const f=document.getElementById('f');f.style.width=Wd+'px';f.style.height=H+'px';
+let seed=7;const rnd=()=>{seed=(seed*16807)%2147483647;return seed/2147483647;};
+const M=['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];const fd=t=>{const d=new Date(t);return d.getDate()+' '+M[d.getMonth()];};
+const DAY=864e5,end=Date.now()-DAY,start=end-197*DAY;
+const weights=[];for(let t=start;t<=end;t+=(1+Math.floor(rnd()*2.2))*DAY){const fr=(t-start)/(end-start);weights.push({d:fd(t),v:Math.round((104.6-4*fr+.8*Math.sin(fr*9)+(rnd()-.5)*1.6)*10)/10,ts:t});}
+weights[0].v=104.6;weights[weights.length-1].v=100.6;
+const base={a2:40,a3:35,a4:30,a5:20,b2:30,b3:35,b4:5,b5:20,c2:45,c3:40,c4:16,c5:20,c6:25};
+const order=['A','B','C'];const sessions=[],strength={};let k=0;
+for(let t=start+5*DAY;t<=end;t+=DAY){const dw=new Date(t).getDay();if(![1,3,5].includes(dw))continue;if(rnd()<.12)continue;
+  const day=order[k%3];k++;const dur=50+Math.floor(rnd()*28);
+  sessions.push({day,date:fd(t),ts:t,doneEx:4,totalEx:4,note:rnd()<.08?'Buen día, subí peso en el compuesto':null,durationMin:dur});
+  Object.keys(base).filter(id=>id[0].toUpperCase()===day).forEach(id=>{const n=(strength[id]||[]).length;const inc=id==='b4'?.5:2.5;
+    const v=+(base[id]+inc*Math.floor(n/3)).toFixed(1);(strength[id]=strength[id]||[]).push({d:fd(t),v,r:10+Math.floor(rnd()*3),setsDone:3,rpe:+(1.4+rnd()*1.2).toFixed(2),muscle:null,ts:t});});}
+const st={onboarded:true,startDay:'A',nextDay:order[k%3],day:order[k%3],schema_version:10,weights,sessions,strength,coachStart:sessions[0].ts,weeklyTarget:3,restWeeks:[],tab:q.get('tab')||'dash'};
+if(q.get('empty')==='1'){st.weights=[{d:fd(end),v:100.6,ts:end}];st.sessions=[];st.strength={};st.coachStart=null;}
+if(q.get('fresh')==='1'){localStorage.removeItem('gymtrack_v3');}else if(q.get('keep')!=='1')localStorage.setItem('gymtrack_v3',JSON.stringify(st));
+const errs=[];
+f.src='../../index.html'; // la app, en la raíz del repositorio (esta página vive en tools/test/)
+f.onload=()=>{const w=f.contentWindow;w.addEventListener('error',e=>errs.push(String(e.message)+' @'+(e.lineno||'')));w.addEventListener('unhandledrejection',e=>errs.push('promise: '+String(e.reason&&e.reason.message||e.reason)));
+  const oe=w.console.error.bind(w.console);w.console.error=(...a)=>{errs.push('console.error: '+a.map(String).join(' '));oe(...a);};
+  setTimeout(async()=>{let res=null;try{if(q.get('run')){res=w.eval(q.get('run'));if(res&&typeof res.then==='function')res=await res;}}catch(e){errs.push('RUN: '+e.message);document.title='ERR '+e.message;}
+    if(q.get('out')==='1'){await new Promise(r=>setTimeout(r,+(q.get('wait')||300)));let s;try{s=typeof res==='string'?res:JSON.stringify(res);}catch(e){s=String(res);}
+      document.getElementById('out').textContent='RESULT:'+s+'\nERRORS:'+JSON.stringify(errs);}},200);};
+}
+</script></body></html>

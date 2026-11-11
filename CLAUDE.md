@@ -29,6 +29,20 @@ Partes generadas por herramientas (no se editan en `src/`, sino en su herramient
   prototipo y app dan las mismas rutinas.
 - `src/js/app/catalogo-filas.js` (`LIB_ROWS`): desde el catálogo `catalog.json`.
 
+## Pruebas
+
+```bash
+bash tools/test/smoke.sh
+```
+
+Con Node y Chrome basta (ruta de Chrome en la variable `CHROME` si no está en el sitio habitual). Comprueba el montaje,
+arranca su propio servidor, pasa el smoke con datos sembrados y como usuario nuevo, y resume. Línea base: 271 pasos por
+pasada y fallos conocidos de «Wrapped» que dependen de la fecha (ver `tools/test/README.md`). Toda mejora añade sus
+pasos a `tools/test/smoke.js` y deja el smoke en la línea base antes del commit.
+
+`tools/test/__seed.html` escribe datos de prueba con la clave real de la app y también se publica: su guarda (no hace
+nada fuera de `localhost` y `127.0.0.1`) no se quita nunca, y el smoke comprueba que sigue funcionando.
+
 ## Reglas
 
 - No cambiar la clave `gymtrack_v3` de `localStorage` ni romper las migraciones: hay datos reales de usuarios.

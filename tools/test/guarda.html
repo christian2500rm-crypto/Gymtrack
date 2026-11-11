@@ -1,0 +1,16 @@
+<!doctype html><html><head><meta charset="utf-8"><meta name="robots" content="noindex"><title>guarda</title></head>
+<body>
+<iframe id="f" src="__seed.html?out=1&amp;run=1&amp;wait=1" style="width:390px;height:200px"></iframe><pre id="res"></pre>
+<script>
+// Comprobación de la guarda de __seed.html (la lanza «node tools/test/kit.js guarda»): carga la página de siembra en un
+// iframe y mira si ha escrito en localStorage la clave de la app. Esta página solo LEE: no escribe nada en ningún host.
+// kit.js la abre dos veces: en un host que no es de prueba (debe salir «escrito:no» y el aviso BLOQUEADA) y en localhost
+// (debe salir «escrito:sí»: así se sabe que la comprobación detecta una escritura de verdad).
+const antes=localStorage.getItem('gymtrack_v3');
+setTimeout(()=>{
+  let aviso='',app=false;
+  try{const d=document.getElementById('f').contentDocument;aviso=(d.getElementById('out').textContent||'').slice(0,120);app=!!d.getElementById('f').getAttribute('src');}catch(e){aviso='ERROR '+e.message;}
+  const escrito=localStorage.getItem('gymtrack_v3')!==antes;
+  document.getElementById('res').textContent='GUARDA host:'+location.hostname+' escrito:'+(escrito?'sí':'no')+' app:'+(app?'sí':'no')+' aviso:'+JSON.stringify(aviso);
+},2500);
+</script></body></html>
