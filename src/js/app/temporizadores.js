@@ -216,6 +216,7 @@ const RT={
     if(!t)this._rpeOnly(tg); // (M1) descanso apagado: la barra solo con el esfuerzo (o se va)
     else if(el.dataset.kind==='rpe')el.dataset.kind=t.kind; // un cardio ocupa la barra
     el.classList.toggle('has-rpe',!!tg);
+    el.classList.toggle('rpe-set',!!tg&&(+(((S.rpe||{})[tg.exId]||{})[tg.setIdx])||0)>0); // ya contestado: en la barra única, la tira se recoge
     if(!tg){if(box.firstChild)box.innerHTML='';box.dataset.k='';if(q)q.textContent='';_dockSync();return;}
     const n=Math.max(1,parseInt(tg.ex&&tg.ex.s)||1),lvl=+(((S.rpe||{})[tg.exId]||{})[tg.setIdx])||0,k=tg.setIdx+':'+lvl;
     if(q)q.textContent=S.restTimer||!t?`Serie ${tg.setIdx+1}/${n} · ¿qué tal?`:`¡Listo! · ¿qué tal la serie ${tg.setIdx+1}?`;
@@ -722,6 +723,12 @@ const RF={
   }
 };
 // Tocar la barra del descanso (fuera de sus botones) abre el modo a pantalla completa
+// El anillo: abre el modo a pantalla completa (−15 s, Saltar, +15 s). En la barra única, con el descanso ya terminado, lo cierra
+function rtRingTap(){
+  const rt=document.getElementById('rest-timer'),app=document.getElementById('app');
+  if(rt&&app&&rt.classList.contains('done')&&app.classList.contains('rt-uni')){RT.skip();return;}
+  RF.openFull();
+}
 function rtBarTap(e){
   const tg=e&&e.target;
   if(tg&&tg.closest&&tg.closest('button'))return;

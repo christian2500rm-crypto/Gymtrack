@@ -349,12 +349,13 @@ function renderWorkout(){
     const doneSum=!ex.cardio&&exDone&&sum&&(sum.w||(nk&&sum.sets.length))?`<div class="ex-done-sum">${_nwX(esc(_setsLine(sum.sets)))}${nx?` · próxima <b>${_nwX(esc(presValTxt(nx)))}</b>`:''}</div>`:'';
     let body='';
     if(isOpen&&!ex.cardio){
-      // Modo gym: antes de la primera serie, la técnica en grande (animación, consejo, objetivo y calentamiento);
-      // después, las series arriba del todo y la animación en miniatura (se toca para ampliarla)
-      const ak=exAnimKey(ex),training=nDone>0,big=!training||_animBig.has(ex.id);
+      // Modo gym: la primera vez que haces un ejercicio, la técnica en grande (animación, consejo, objetivo y calentamiento).
+      // Con la primera serie hecha, o si ya lo conoces (tiene historial), las series arriba y la animación en miniatura:
+      // tocarla la amplía (y «Reducir animación» la vuelve a plegar); en grande, un toque la pausa, como siempre.
+      const ak=exAnimKey(ex),training=nDone>0,known=!training&&(S.strength[ex.id]||[]).length>0,big=!(training||known)||_animBig.has(ex.id);
       const spec=ak&&typeof GymAnim!=='undefined'?GymAnim.get(ak):null;
       const anim=!ak?'':big
-        ?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>${training?`<button type="button" class="anim-less" data-ex="${eid}" onclick="animShrink(this.dataset.ex)">Reducir animación ▴</button>`:''}`
+        ?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>${training||known?`<button type="button" class="anim-less" data-ex="${eid}" onclick="animShrink(this.dataset.ex)">Reducir animación ▴</button>`:''}`
         :`<div class="anim-mini" role="button" tabindex="0" data-ex="${eid}" onclick="animGrow(this.dataset.ex)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();animGrow(this.dataset.ex)}" aria-label="Ver la técnica de ${esc(ex.n)} en grande"><div class="ex-anim mini" data-ex="${eid}" data-gym-anim="${ak}"></div><div class="anim-mini-t"><b>Técnica</b><span>${esc(spec&&spec.labels?spec.labels.join(' · '):(ex.eq||''))}</span></div><span class="anim-mini-go" aria-hidden="true">Ampliar ▾</span></div>`;
       // (08) debajo de las series: el descanso entre series de este ejercicio (automático o el elegido)
       const setsHtml=setRowsHtml(ex,pr,rows)+restCtlHtml(ex);
@@ -364,6 +365,9 @@ function renderWorkout(){
       const busy=busyBarHtml(ex,nDone);
       body=training
         ?`${busy}${anim}${big?`<div class="tip">${_tipHtml(ex.tip)}</div>`:''}${setsHtml}${la}${presTargetHtml(ex,pr,true)}${sugHtml}`
+        // conocido y sin empezar: aviso de sustituto (si lo hay), técnica mini, calentamiento y series; debajo, «¿Máquina ocupada?» y el
+        // objetivo entero (con su valor y el botón de variante, que el compacto no lleva). Sin animación que ampliar, el consejo se queda
+        :known?`${ex.sub?busy:''}${anim}${big||!ak?`<div class="tip">${_tipHtml(ex.tip)}</div>`:''}<div class="wu-slot">${warmupBlockHtml(ex)}</div>${setsHtml}${ex.sub?'':busy}${la}${presTargetHtml(ex,pr)}${sugHtml}`
         :`${busy}${anim}<div class="tip">${_tipHtml(ex.tip)}</div>${presTargetHtml(ex,pr)}<div class="wu-slot">${warmupBlockHtml(ex)}</div>${setsHtml}${la}${sugHtml}`;
     }
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}" data-ex="${eid}">
@@ -417,7 +421,7 @@ function renderWorkout(){
   ${lightBannerHtml('workout')}
   ${allDone?`<div class="fbanner">${ic('sparkles')} ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
   ${exHtml}
-  ${live?`<div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?ic('check')+' Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`
+  ${live?(allDone&&dayMarkCount(S.day).marks>0?'':`<div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?ic('check')+' Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`)
     :`<div class="card wo-empty"><div class="empty"><div class="eic" aria-hidden="true">${ic('note')}</div><p>Este día aún no tiene ejercicios. Mientras esté vacío, no entra en tu rotación.</p></div>
       <button type="button" class="btn bp" data-dk="${esc(S.day)}" onclick="addExerciseUI(this.dataset.dk)">Añadir ejercicio</button></div>`}
   `;

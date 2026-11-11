@@ -1810,7 +1810,10 @@ await safe('gymCompactAboveFold',async()=>{
     _prep7();
     for(const [dk,id] of [['A','a2'],['C','c2']]){
       go('workout');S.day=dk;S.open=id;render();
-      if(_card7(id).querySelector('.ex-anim.mini')||!_card7(id).querySelector('.wu-slot'))throw new Error(id+': compacta antes de la 1.ª serie');
+      // antes de la 1.ª serie: el calentamiento siempre; la técnica, en grande y con su consejo la primera vez, y en miniatura
+      // (sin el consejo) si el ejercicio ya tiene historial (E3)
+      {const c0=_card7(id),hist=(S.strength[id]||[]).length>0,mini=!!c0.querySelector('.ex-anim.mini'),tip=!!c0.querySelector('.exb > .tip');
+        if(!c0.querySelector('.wu-slot')||mini!==hist||tip===hist)throw new Error(id+': antes de la 1.ª serie '+(hist?'con':'sin')+' historial: miniatura '+mini+', consejo '+tip);}
       _row7(id,0).querySelector('.lg-ck').click();setRpe(2);await W(700); // con el descanso en marcha
       const c=_card7(id),b=c.querySelector('.exb');
       if(!c.querySelector('.ex-anim.mini')||!c.querySelector('.anim-mini')||c.querySelector('.wu-slot')||c.querySelector('.exb > .tip'))throw new Error(id+': no se compacta');
@@ -1821,7 +1824,13 @@ await safe('gymCompactAboveFold',async()=>{
       const rows=[...c.querySelectorAll('.lg-row')].map(r=>r.getBoundingClientRect());
       if(rows.some(r=>r.bottom>lim+1||r.top<0))throw new Error(id+': filas fuera de la vista '+rows.map(r=>Math.round(r.top)+'-'+Math.round(r.bottom))+' límite '+Math.round(lim));
       // posiciones de maqueta (sin la transición de entrada, que en headless no siempre avanza)
-      {const rt=document.getElementById('rest-timer'),nb=document.getElementById('nextbar');if(rt.offsetTop+rt.offsetHeight>nb.offsetTop+1)throw new Error('descanso tapa la barra');}
+      {const rt=document.getElementById('rest-timer'),nb=document.getElementById('nextbar');
+        if(document.getElementById('app').classList.contains('rt-uni')){
+          // barra única (E4): el descanso es un ancla sin alto y su anillo cae dentro de la barra, a la izquierda del texto
+          const rg=rt.querySelector('.rt-ring'),inf=nb.querySelector('.nb-info'),top=rt.offsetTop+rg.offsetTop,left=rt.offsetLeft+rg.offsetLeft;
+          if(rt.offsetHeight>1||top<nb.offsetTop-1||top+rg.offsetHeight>nb.offsetTop+nb.offsetHeight+1||left<nb.offsetLeft-1||left+rg.offsetWidth>nb.offsetLeft+inf.offsetLeft+1)
+            throw new Error('anillo fuera de la barra: '+[rt.offsetHeight,top,rg.offsetHeight,nb.offsetTop,nb.offsetHeight,left,rg.offsetWidth,nb.offsetLeft,inf.offsetLeft]);
+        }else if(rt.offsetTop+rt.offsetHeight>nb.offsetTop+1)throw new Error('descanso tapa la barra');}
       RT.stop();_clearMarks();
     }
   }finally{_rest7(j);render();}
@@ -2129,10 +2138,16 @@ await safe('gymNarrowTargets',async()=>{
     // la fecha de la cabecera de las series no se parte («ÚLTIMA 23 / OCT»)
     const d=_card7('b2').querySelector('.lg-h .lg-d');
     if((S.strength.b2||[]).length&&(!d||getComputedStyle(d).whiteSpace!=='nowrap'||d.getClientRects().length!==1))throw new Error('fecha partida');
-    // (08) «Saltar» del descanso y los 3 chips del RPE en la barra ≥ 44 px
+    // (08) el anillo del descanso y los 3 chips del RPE ≥ 44 px. Con la barra única (E4) «Saltar» no va en la barra: está a un
+    // toque del anillo, a pantalla completa, y también ≥ 44 px
     toggleSet('b2',0,{});
     if(document.querySelectorAll('#rest-timer .rpe-chip').length!==3)throw new Error('sin chips de RPE');
-    for(const b of document.querySelectorAll('#rest-timer #rt-skip,#rest-timer .rpe-chip')){const sk=b.getBoundingClientRect();if(sk.width<44||sk.height<44)throw new Error('«'+b.textContent+'» '+Math.round(sk.width)+'×'+Math.round(sk.height));}
+    if(!document.getElementById('app').classList.contains('rt-uni-ring'))throw new Error('sin barra única con el descanso en marcha');
+    for(const b of document.querySelectorAll('#rest-timer .rt-ring,#rest-timer .rpe-chip')){const sk=b.getBoundingClientRect();if(sk.width<44||sk.height<44)throw new Error('«'+b.textContent+'» '+Math.round(sk.width)+'×'+Math.round(sk.height));}
+    {const sk=document.getElementById('rt-skip').getBoundingClientRect();if(sk.width||sk.height)throw new Error('«Saltar» sigue en la barra única');}
+    document.getElementById('rt-open').click();
+    {const fs=document.getElementById('rf-skip'),sk=fs&&fs.getBoundingClientRect();
+      if(!RF.open||!fs||sk.width<44||sk.height<44)throw new Error('«Saltar» a pantalla completa '+(fs?Math.round(sk.width)+'×'+Math.round(sk.height):'no está'));RF.close();}
     // código muerto del antiguo campo único, fuera
     if(typeof window.updLog!=='undefined'||typeof window.onWeightInput!=='undefined'||typeof window.onRepsInput!=='undefined')throw new Error('código muerto');
     clearTimeout(_advT);
@@ -6020,12 +6035,21 @@ await safe('animTouch',async()=>{
   const tapAt=async(el,x,y,dy,id)=>{P(el,'pointerdown',x,y,id);await W(30);if(dy)P(el,'pointermove',x,y+dy,id);await W(30);P(el,'pointerup',x,y+(dy||0),id);await W(330);};
   const B=getPlan().B.ex.find(e=>!e.cardio&&GymAnim.has(exAnimKey(e)));if(!B)throw new Error('sin ejercicio con 3D en el día B');
   S.day='B';go('workout');S.open=B.id;render();await W(80);
+  // (E3) un ejercicio que ya conoces se abre con la técnica en miniatura: ahí el toque es de la app (la amplía), ni pausa ni gira
+  {const mn=document.querySelector('#screen .anim-mini');
+    if(((S.strength[B.id]||[]).length>0)!==!!mn)throw new Error('miniatura '+(mn?'sin':'con')+' historial');
+    if(mn){const mb=mn.querySelector('.ex-anim.mini'),mc=mb&&mb.querySelector('canvas');if(!mc||!mb._ga)throw new Error('sin vista en la miniatura');
+      const q=mc.getBoundingClientRect(),p1=mb._ga.paused;await tapAt(mc,q.left+q.width/2,q.top+q.height/2,0,40);
+      if(mb._ga.paused!==p1)throw new Error('el toque pausa la miniatura');
+      if(getComputedStyle(mb).pointerEvents!=='none')throw new Error('la miniatura se queda el toque');
+      mn.click();await W(80);
+      if(document.querySelector('#screen .anim-mini')||!document.querySelector('#screen .anim-less'))throw new Error('tocar la miniatura no la amplía');}}
   const box=document.querySelector('#screen .ex-anim[data-gym-anim]'),cv=box&&box.querySelector('canvas');if(!cv||!box._ga)throw new Error('sin vista en la tarjeta');
   const r=cv.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2,p0=box._ga.paused;
   await tapAt(cv,cx,cy,0,41);if(box._ga.paused===p0)throw new Error('el toque no pausa la tarjeta');
   await tapAt(cv,cx,cy,12,42);if(box._ga.paused===p0)throw new Error('un deslizamiento vertical de 12 px cambia la pausa');
   await tapAt(cv,cx,cy,0,43);if(box._ga.paused!==p0)throw new Error('el segundo toque no reanuda');
-  S.open=null;render();openBusy(B.id);await W(80);
+  _animBig.clear();S.open=null;render();openBusy(B.id);await W(80);
   if(!_busy||!_busy.alts.length)throw new Error('sin alternativas para '+B.n);
   const pv=document.getElementById('busy-pv'),pc=pv&&pv.querySelector('canvas');if(!pc||!pv._ga)throw new Error('sin vista en la hoja');
   if(/Toca para pausar/.test(pc.getAttribute('aria-label')||''))throw new Error('aria de la hoja: '+pc.getAttribute('aria-label'));
@@ -8851,7 +8875,12 @@ await safe('entrenoDock16',async()=>{
       toggleCard('a2');const want=_scrollTo&&_scrollTo.top;
       if(want!=null){await _untilRT(()=>Math.abs(sc.scrollTop-want)<2,150);E(Math.abs(sc.scrollTop-want)<2,'suave: no llega '+sc.scrollTop+' / '+want);}
       const card=_openCard('a2'),tg=card&&card.querySelector('.exb .tgt'),sr=sc.getBoundingClientRect();
-      if(tg&&innerHeight>=844)E(tg.getBoundingClientRect().bottom<=sr.bottom+0.5,'suave: «Objetivo de hoy» tapado');
+      // (E3) un ejercicio conocido lleva las series arriba y el objetivo debajo: ahí lo que no puede quedar tapado son las series
+      {const ls=card&&card.querySelector('.exb .lg-sets'),setsFirst=!!(ls&&tg&&(ls.compareDocumentPosition(tg)&Node.DOCUMENT_POSITION_FOLLOWING));
+        E(setsFirst===((S.strength.a2||[]).length>0),'suave: orden de series y objetivo');
+        if(setsFirst){const lim=app.getBoundingClientRect().bottom-_dockH();
+          if(innerHeight>=844)card.querySelectorAll('.lg-row').forEach(r=>E(r.getBoundingClientRect().bottom<=lim+1&&r.getBoundingClientRect().top>=sr.top-1,'suave: series tapadas'));}
+        else if(tg&&innerHeight>=844)E(tg.getBoundingClientRect().bottom<=sr.bottom+0.5,'suave: «Objetivo de hoy» tapado');}
       // ya a la vista: abrir otra vez no mueve nada
       toggleCard('a2');toggleCard('a2');const st=sc.scrollTop;await W(30);E(Math.abs(sc.scrollTop-st)<2,'reabrir mueve la lista');
     }
@@ -9530,7 +9559,7 @@ await safe('pulido16e',async()=>{
       E(tp.includes('3–5 %')&&tp.includes('5 km/h')&&tt.includes('1 % de inclinación'),'consejos: '+tp+' | '+tt);
       E(LIB_BY_ID.get('lib_cardio_run').tip.includes('3-5%'),'se tocó el catálogo');
       const src=[...document.scripts].map(s=>s.textContent).join('\n');
-      E(!/esc\((ex|e)\.tip/.test(src)&&(src.match(/class="tip">\$\{_tipHtml\(/g)||[]).length===5,'consejos sin _tipHtml');
+      E(!/esc\((ex|e)\.tip/.test(src)&&(src.match(/class="tip">\$\{_tipHtml\(/g)||[]).length===6,'consejos sin _tipHtml');
       E(_nwUnits('3×12 → 2×12 · 7 días')==='3×12 → 2×12 · <span class="nw">7 días</span>'&&/rec-chip">\$\{_nwUnits\(esc\(p\.diff\)\)/.test(src)&&/proposal-diff">\$\{_nwUnits\(esc\(p\.diff\)\)/.test(src),'«7 días» sin .nw');}
     // «Próximo ciclo» del Coach a 320 px: ninguna cifra con su unidad partida en dos líneas
     if(await size(320,568)){go('coach');await W(10);
@@ -9556,7 +9585,9 @@ await safe('pulido16e',async()=>{
       {const t=document.querySelector('#app .tab');t.scrollIntoView({block:'center'});await W(5);hTst();E(t.getBoundingClientRect().height<44&&await hitsW(t,0),'.tab sin 44 px a '+w);}
       {const s=document.querySelector('#app .warmup-skip');if(s){s.scrollIntoView({block:'center'});await W(5);const cs=getComputedStyle(s);
         E(await hitsW(s,1),'«Saltar» sin 44 px a '+w);E(cs.color===col('var(--text2)')&&parseFloat(cs.fontSize)>=12,'«Saltar» '+cs.color+' '+cs.fontSize);}}
-      {toggleSet(k,1,{});await W(10);const rr=document.querySelector('#rest-timer.show button.rt-ring');if(rr){hTst();E(rr.getBoundingClientRect().height<44&&await hitsW(rr,1),'anillo del descanso sin 44 px a '+w);}RT.stop();}
+      {toggleSet(k,1,{});await W(10);const rr=document.querySelector('#rest-timer.show button.rt-ring');if(rr){hTst();const uni=document.getElementById('app').classList.contains('rt-uni');
+        // en la barra única el anillo mide 44 px de verdad; fuera de ella sigue siendo menor, con su zona de toque de 44
+        E((uni?rr.getBoundingClientRect().height>=44:rr.getBoundingClientRect().height<44)&&await hitsW(rr,1),'anillo del descanso sin 44 px a '+w);}RT.stop();}
       // rangos del peso: en la tarjeta de Inicio y en la hoja del peso
       hTst();{const r=document.querySelector('#screen .wc-rg:not(.on)');if(r){r.scrollIntoView({block:'center'});await W(5);E(r.getBoundingClientRect().height<44&&await hitsW(r,0),'.wc-rg de Inicio sin 44 px a '+w);}}
       go('dash');openWDetail();await W(10);{const r=document.querySelector('#wdetail-root .wc-rg:not(.on)');if(r){r.scrollIntoView({block:'center'});await W(5);E(await hitsW(r,0),'.wc-rg del peso sin 44 px a '+w);}}closeWDetail();
@@ -12339,6 +12370,117 @@ await safe('pantallasB1',async()=>{
     if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
   }finally{try{RT.skip();}catch(e){}Object.assign(S,JSON.parse(j));for(const k of Object.keys(S))if(!(k in JSON.parse(j)))delete S[k];
     if(fr){fr.style.width=fw;fr.style.height=fh;await W(40);}saveState();render();}
+});
+await safe('b3Entreno',async()=>{
+  // (B3-1) Entreno: en un ejercicio que ya conoces, las series arriba y la técnica plegada (E3); una sola barra flotante, con el
+  // descanso dentro y «Saltar» a un toque del anillo (E4); y un solo botón de guardar.
+  const j=_snap9(),bad=[],E=(c,m)=>{if(!c)bad.push(m);};
+  const app=document.getElementById('app'),nb=document.getElementById('nextbar'),rt=document.getElementById('rest-timer'),sc=document.getElementById('screen');
+  const fr=window.frameElement,fw=fr&&fr.style.width,fh=fr&&fr.style.height;
+  const size=async(w,h)=>{if(!fr)return false;fr.style.width=w+'px';fr.style.height=h+'px';await W(40);for(let i=0;i<20&&(innerWidth!==w||innerHeight!==h);i++)await W(20);return innerWidth===w&&innerHeight===h;};
+  const kids=c=>[...c.querySelector('.exb').children].map(x=>x.classList[0]);
+  const hist=(id,on)=>{if(on)S.strength[id]=[60,62.5].map((v,i)=>({d:'x',v,r:10,setsDone:3,rpe:2,ts:Date.now()-(9-i*4)*864e5}));else delete S.strength[id];};
+  const rowTop=id=>{const c=_card7(id);return c.querySelector('.lg-row').getBoundingClientRect().top-c.getBoundingClientRect().top;};
+  const akReal=window.exAnimKey;
+  try{
+    _prep7();RT.stop();go('workout');S.day='A';
+    const ex=getPlan().A.ex.find(e=>!e.cardio&&!e.sub&&exAnimKey(e)),id=ex.id;
+    // ── E3 · la primera vez (sin historial): técnica en grande con su consejo, y el objetivo antes de las series
+    hist(id,false);_clearMarks();S.open=id;render();sc.scrollTop=0;
+    {const c=_card7(id),k=kids(c);
+      E(!c.querySelector('.anim-mini')&&c.querySelector('.ex-anim:not(.mini)')&&c.querySelector('.exb > .tip')&&!c.querySelector('.anim-less'),'primera vez: la técnica no va en grande');
+      E(k.indexOf('tgt')<k.indexOf('lg-sets')&&k.indexOf('tip')<k.indexOf('lg-sets'),'primera vez: orden '+k);}
+    const top0=rowTop(id);
+    // ── E3 · ejercicio conocido: miniatura, calentamiento y series; debajo, «¿Máquina ocupada?» y el objetivo entero
+    hist(id,true);render();
+    {const c=_card7(id),k=kids(c),mn=c.querySelector('.anim-mini'),tg=c.querySelector('.exb .tgt');
+      E(mn&&c.querySelector('.ex-anim.mini')&&!c.querySelector('.exb > .tip')&&!c.querySelector('.anim-less'),'conocido: la técnica no va plegada');
+      E(k.indexOf('anim-mini')>=0&&k.indexOf('anim-mini')<k.indexOf('wu-slot')&&k.indexOf('wu-slot')<k.indexOf('lg-sets')&&k.indexOf('lg-sets')<k.indexOf('tgt'),'conocido: orden '+k);
+      E(k.indexOf('ex-busy')<0||k.indexOf('ex-busy')>k.indexOf('lg-sets'),'conocido: «¿Máquina ocupada?» antes de las series');
+      E(tg&&!tg.classList.contains('cmp')&&tg.querySelector('.tgt-v'),'conocido: el objetivo no va entero');
+      E(rowTop(id)<top0-80,'conocido: las series no suben ('+Math.round(rowTop(id))+' / '+Math.round(top0)+')');
+      // la miniatura es un botón con nombre y 44 px o más: tocarla despliega la técnica (con su consejo) y «Reducir» la pliega
+      if(mn){E(mn.getAttribute('role')==='button'&&mn.tabIndex===0&&/en grande/.test(mn.getAttribute('aria-label')||'')&&mn.getBoundingClientRect().height>=44,'miniatura: no es un botón de 44 px');
+        mn.click();
+        const c2=_card7(id),ls=c2.querySelector('.anim-less');
+        E(!c2.querySelector('.anim-mini')&&c2.querySelector('.ex-anim:not(.mini)')&&c2.querySelector('.exb > .tip')&&ls,'ampliar no despliega la técnica');
+        E(ls&&ls.getBoundingClientRect().height>=44,'«Reducir animación» sin 44 px');
+        if(ls)ls.click();
+        E(!!_card7(id).querySelector('.anim-mini')&&!_card7(id).querySelector('.exb > .tip'),'«Reducir animación» no pliega');}}
+    // sin animación que ampliar, el consejo no se pierde
+    window.exAnimKey=()=>'';render();
+    {const c=_card7(id);E(!c.querySelector('.anim-mini')&&!c.querySelector('.ex-anim')&&c.querySelector('.exb > .tip')&&kids(c).indexOf('lg-sets')<kids(c).indexOf('tgt'),'conocido sin animación: sin consejo');}
+    window.exAnimKey=akReal;render();
+    // ── E4 · una sola barra flotante
+    for(const [w,h] of [[390,844],[320,568]]){
+      if(fr&&!await size(w,h))continue;
+      const L=innerWidth+'px';
+      _clearMarks();RT.stop();hist(id,true);S.day='A';S.open=id;go('workout');render();await W(10);
+      E(nb.classList.contains('show')&&!app.classList.contains('rt-uni'),L+': barra única sin descanso');
+      const pad0=parseFloat(getComputedStyle(nb).paddingLeft),bb=document.querySelector('.botbar'),inf=rt.querySelector('.rt-info'),rg=rt.querySelector('.rt-ring');
+      toggleSet(id,0,{});await W(10);
+      if(!S.restTimer||S.restTimer.kind!=='rest'){E(false,L+': sin descanso tras marcar la serie');continue;}
+      E(app.classList.contains('rt-uni')&&app.classList.contains('rt-uni-ring'),L+': sin barra única con el descanso en marcha');
+      // el descanso no flota aparte: es un ancla sin alto y su anillo (44 px) cae dentro de la barra, a la izquierda del texto
+      {const top=rt.offsetTop+rg.offsetTop,left=rt.offsetLeft+rg.offsetLeft,ni=nb.querySelector('.nb-info');
+        E(rt.offsetHeight<=1,L+': el descanso sigue ocupando '+rt.offsetHeight+' px');
+        E(rg.offsetWidth>=44&&rg.offsetHeight>=44,L+': anillo de '+rg.offsetWidth+'×'+rg.offsetHeight);
+        E(top>=nb.offsetTop-1&&top+rg.offsetHeight<=nb.offsetTop+nb.offsetHeight+1&&left>=nb.offsetLeft&&left+rg.offsetWidth<=nb.offsetLeft+ni.offsetLeft+1,L+': anillo fuera de su sitio');
+        E(parseFloat(getComputedStyle(nb).paddingLeft)>=pad0+38,L+': la barra no deja sitio al anillo');
+        E(/saltar/i.test(rg.getAttribute('aria-label')||''),L+': el anillo no dice dónde se salta');
+        // el botón «✓ Hecho» conserva sus 44 px y el texto de la barra no se queda sin sitio
+        const go_=document.getElementById('nb-go');E(go_&&go_.offsetHeight>=44&&go_.offsetWidth>=44&&ni.offsetWidth>=120,L+': barra apretada ('+(ni&&ni.offsetWidth)+')');
+        E(document.documentElement.scrollWidth<=innerWidth,L+': desborda');}
+      // la pregunta del esfuerzo: una tira pegada encima de la barra hasta que se contesta
+      if(rt.classList.contains('has-rpe')){
+        E(app.classList.contains('rt-uni-strip')&&getComputedStyle(inf).display!=='none',L+': sin la tira del esfuerzo');
+        const ch=[...rt.querySelectorAll('.rpe-chip')];
+        E(ch.length===3&&ch.every(b=>b.offsetWidth>=44&&b.offsetHeight>=44),L+': chips del esfuerzo '+ch.map(b=>b.offsetWidth+'×'+b.offsetHeight));
+        E(Math.abs(rt.offsetTop+inf.offsetTop+inf.offsetHeight-nb.offsetTop)<=2&&Math.abs(inf.offsetWidth-nb.offsetWidth)<=1,L+': la tira no va pegada a la barra');
+        {const q=rt.querySelector('.rt-q');E(q&&q.scrollWidth<=q.clientWidth+1&&q.offsetHeight<=inf.offsetHeight,L+': la pregunta se corta');}
+        E(Math.abs(_dockH()-(bb.offsetHeight+8+nb.offsetHeight+6+inf.offsetHeight))<1,L+': hueco con la tira '+_dockH());
+        setRpe(2);await W(10);
+        E(!app.classList.contains('rt-uni-strip')&&app.classList.contains('rt-uni-ring')&&getComputedStyle(inf).display==='none',L+': la tira no se recoge al contestar');}
+      // lo que flota: la navegación y UNA barra
+      E(Math.abs(_dockH()-(bb.offsetHeight+8+nb.offsetHeight+6))<1,L+': hueco de lo que flota '+_dockH());
+      // «Saltar» no va en la barra: está a un toque del anillo, a pantalla completa, con sus 44 px
+      {const sk=document.getElementById('rt-skip').getBoundingClientRect();E(!sk.width&&!sk.height,L+': «Saltar» sigue en la barra');}
+      rg.click();
+      {const fs=document.getElementById('rf-skip'),r=fs&&fs.getBoundingClientRect();
+        E(RF.open&&fs&&/Saltar/.test(fs.textContent)&&r.width>=44&&r.height>=44,L+': sin «Saltar» a pantalla completa');
+        if(fs)fs.click();await W(10);}
+      E(!S.restTimer&&!app.classList.contains('rt-uni')&&Math.abs(parseFloat(getComputedStyle(nb).paddingLeft)-pad0)<0.5,L+': saltar no devuelve la barra a su sitio');
+      RF.close();
+      // descanso terminado («✓»): el anillo sigue en la barra y tocarlo lo cierra, sin abrir la pantalla completa
+      toggleSet(id,1,{});await W(10);
+      if(S.restTimer){RT._complete(false);await W(10);
+        E(rt.classList.contains('done')&&app.classList.contains('rt-uni-ring'),L+': descanso terminado fuera de la barra');
+        rg.click();await W(10);
+        E(!RF.open&&!rt.classList.contains('show')&&!app.classList.contains('rt-uni'),L+': el anillo terminado no se cierra');}
+      // escribiendo un número, el anillo se esconde con la barra
+      toggleSet(id,2,{});await W(10);
+      if(S.restTimer){app.classList.add('typing');E(getComputedStyle(rt).opacity==='0',L+': el anillo no se esconde al escribir');app.classList.remove('typing');}
+      // un cardio en marcha conserva su barra de siempre
+      RT.stop();
+      {const cd=getPlan().A.ex.find(e=>e.cardio);
+        if(cd&&RT.start(600,cd.n,{kind:'cardio',exId:cd.id,day:'A'})){await W(10);
+          E(nb.classList.contains('show')&&rt.classList.contains('show')&&!app.classList.contains('rt-uni')&&rt.offsetHeight>=44,L+': el cardio en marcha pierde su barra');
+          E(rt.offsetTop+rt.offsetHeight<=nb.offsetTop+1,L+': el cardio tapa la barra');RT.stop();}}
+    }
+    if(fr){fr.style.width=fw;fr.style.height=fh;await W(40);}
+    // ── Un solo botón de guardar: a medias, el de la lista; con la fuerza completa, solo el de la barra
+    _clearMarks();RT.stop();S.day='A';S.open=null;go('workout');
+    const sv=()=>[...document.querySelectorAll('#screen button[onclick="finishSession()"]')],str=getPlan().A.ex.filter(e=>!e.cardio);
+    S.sets[str[0].id]={0:true};syncActiveWorkout();render();
+    E(sv().length===1&&/incompleto/.test(sv()[0].textContent)&&sv()[0].classList.contains('bs'),'a medias: sin «Guardar entrenamiento (incompleto)»');
+    E(document.getElementById('nb-go')&&/Hecho/.test(document.getElementById('nb-go').textContent),'a medias: la barra no ofrece la siguiente serie');
+    str.forEach(e=>{S.sets[e.id]={};for(let i=0;i<e.s;i++)S.sets[e.id][i]=true;});syncActiveWorkout();render();
+    {const g=document.getElementById('nb-go');
+      E(sv().length===0,'todo hecho: dos botones de guardar');
+      E(nb.classList.contains('show')&&g&&g.textContent.trim()==='Guardar'&&g.getAttribute('onclick')==='finishSession()'&&g.offsetHeight>=44,'todo hecho: la barra no guarda');
+      E(!!document.querySelector('#screen .fbanner'),'todo hecho: sin el aviso de completado');}
+    if(bad.length)throw new Error(bad.join(' | '));
+  }finally{window.exAnimKey=akReal;if(fr){fr.style.width=fw;fr.style.height=fh;}app.classList.remove('typing');_animBig.clear();RF.close();RT.stop();_rest9(j);render();await W(40);}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

@@ -105,6 +105,35 @@
 #app.nb-on #screen,#app.dock-on #screen{margin-bottom:var(--dock-h,calc(58px + var(--sb) + 80px));padding-bottom:16px;scroll-padding-bottom:12px}
 #app.nb-on #screen .excard :is(input,button,[tabindex]){scroll-margin-bottom:12px}
 #app.nb-on #rest-timer{bottom:calc(58px + var(--sb) + 8px + 66px);padding:6px 8px 6px 10px;gap:10px}
+/* Barra única (#app.rt-uni, lo decide _rtUni): con la barra «siguiente serie» a la vista, el descanso no flota aparte.
+   #rest-timer pasa a ser un ancla sin alto en el sitio de la barra: su anillo (44 px) cae dentro de ella, a la izquierda, y
+   la pregunta del esfuerzo va en una tira pegada encima hasta que se contesta. «Saltar» queda en el modo a pantalla completa
+   (tocando el anillo). --nb-h es el alto real de la barra (lo pone _dockSync). */
+#app.rt-uni #rest-timer{display:block;height:0;min-height:0;padding:0;gap:0;border:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;bottom:calc(58px + var(--sb) + 8px);cursor:default;pointer-events:none;
+  transform:translateX(-50%);transition:opacity .2s} /* el anillo aparece en su sitio: no sube desde abajo como la barra suelta */
+#app.rt-uni #rest-timer .rt-ring,#app.rt-uni #rest-timer.has-rpe .rt-ring{position:absolute;left:8px;bottom:calc((var(--nb-h,58px) - 44px)/2);width:44px;height:44px;pointer-events:auto}
+#app.rt-uni #rest-timer .rt-ring svg,#app.rt-uni #rest-timer.has-rpe .rt-ring svg{width:44px;height:44px}
+#app.rt-uni:not(.rt-uni-ring) #rest-timer .rt-ring{display:none}
+#app.rt-uni #rest-timer .rt-info,#app.rt-uni #rest-timer .rt-btn{display:none}
+#app.rt-uni-ring #nextbar{padding-left:60px}
+#app.rt-uni-strip #nextbar{border-top-left-radius:0;border-top-right-radius:0}
+#app.rt-uni-strip #rest-timer .rt-info{display:flex;align-items:center;gap:8px;position:absolute;left:0;right:0;bottom:calc(var(--nb-h,58px) - 1px);min-height:48px;padding:2px 6px 2px 14px;
+  background:color-mix(in srgb,var(--bg3) 94%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border2);border-bottom-color:var(--border);border-radius:16px 16px 0 0;pointer-events:auto}
+#app.rt-uni-strip #rest-timer .rt-top{flex:0 1 auto;min-width:0;white-space:normal}
+#app.rt-uni-strip #rest-timer .rt-label{display:none}
+#app.rt-uni-strip #rest-timer .rt-q{font-size:13px;line-height:1.25;color:var(--text2);white-space:normal}
+#app.rt-uni-strip #rest-timer .rt-rpe{flex:1 1 0;min-width:0;margin-top:0}
+#app.rt-uni-strip #rest-timer .rpe-chip{background:var(--bg4)}
+#app.rt-uni-strip:not(.rt-uni-ring) #rest-timer .rt-info{padding-right:52px} /* sin descanso (solo esfuerzo): sitio para su ✕ */
+#app.rt-uni-strip:not(.rt-uni-ring) #rest-timer .rt-btn{display:block;position:absolute;right:4px;bottom:calc(var(--nb-h,58px) + 1px);min-width:44px;min-height:44px;padding:0;background:none;border:0;pointer-events:auto}
+/* con la barra a la vista, el descanso que se va desaparece sin más (al irse deja de ser la barra única y, con su transición
+   de salida, se vería un momento la barra suelta de antes). El cardio conserva su salida. */
+#app.nb-on #rest-timer:not(.show):not([data-kind="cardio"]){transition:none}
+#app.typing.rt-uni #rest-timer{opacity:0}
+#app.typing.rt-uni #rest-timer *{pointer-events:none}
+/* móviles estrechos: el anillo se arrima y «✓ Hecho» se estrecha, para que el nombre del ejercicio no se quede sin sitio */
+@media (max-width:359px){#app.rt-uni-strip #rest-timer .rt-info{padding-left:10px;gap:4px}#app.rt-uni-strip #rest-timer .rt-q{font-size:12px}
+  #app.rt-uni #rest-timer .rt-ring,#app.rt-uni #rest-timer.has-rpe .rt-ring{left:4px}#app.rt-uni-ring #nextbar{padding-left:54px;gap:8px}#app.rt-uni-ring .nb-go{min-width:92px;padding:0 10px}}
 #app.nb-on .rt-ring,#app.nb-on .rt-ring svg{width:40px;height:40px}
 .hist-item-w small{display:block;font-size:11px;font-weight:400;color:var(--text3);margin-top:1px;overflow-wrap:anywhere}
 

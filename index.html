@@ -1182,6 +1182,35 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 #app.nb-on #screen,#app.dock-on #screen{margin-bottom:var(--dock-h,calc(58px + var(--sb) + 80px));padding-bottom:16px;scroll-padding-bottom:12px}
 #app.nb-on #screen .excard :is(input,button,[tabindex]){scroll-margin-bottom:12px}
 #app.nb-on #rest-timer{bottom:calc(58px + var(--sb) + 8px + 66px);padding:6px 8px 6px 10px;gap:10px}
+/* Barra única (#app.rt-uni, lo decide _rtUni): con la barra «siguiente serie» a la vista, el descanso no flota aparte.
+   #rest-timer pasa a ser un ancla sin alto en el sitio de la barra: su anillo (44 px) cae dentro de ella, a la izquierda, y
+   la pregunta del esfuerzo va en una tira pegada encima hasta que se contesta. «Saltar» queda en el modo a pantalla completa
+   (tocando el anillo). --nb-h es el alto real de la barra (lo pone _dockSync). */
+#app.rt-uni #rest-timer{display:block;height:0;min-height:0;padding:0;gap:0;border:0;background:none;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;bottom:calc(58px + var(--sb) + 8px);cursor:default;pointer-events:none;
+  transform:translateX(-50%);transition:opacity .2s} /* el anillo aparece en su sitio: no sube desde abajo como la barra suelta */
+#app.rt-uni #rest-timer .rt-ring,#app.rt-uni #rest-timer.has-rpe .rt-ring{position:absolute;left:8px;bottom:calc((var(--nb-h,58px) - 44px)/2);width:44px;height:44px;pointer-events:auto}
+#app.rt-uni #rest-timer .rt-ring svg,#app.rt-uni #rest-timer.has-rpe .rt-ring svg{width:44px;height:44px}
+#app.rt-uni:not(.rt-uni-ring) #rest-timer .rt-ring{display:none}
+#app.rt-uni #rest-timer .rt-info,#app.rt-uni #rest-timer .rt-btn{display:none}
+#app.rt-uni-ring #nextbar{padding-left:60px}
+#app.rt-uni-strip #nextbar{border-top-left-radius:0;border-top-right-radius:0}
+#app.rt-uni-strip #rest-timer .rt-info{display:flex;align-items:center;gap:8px;position:absolute;left:0;right:0;bottom:calc(var(--nb-h,58px) - 1px);min-height:48px;padding:2px 6px 2px 14px;
+  background:color-mix(in srgb,var(--bg3) 94%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--border2);border-bottom-color:var(--border);border-radius:16px 16px 0 0;pointer-events:auto}
+#app.rt-uni-strip #rest-timer .rt-top{flex:0 1 auto;min-width:0;white-space:normal}
+#app.rt-uni-strip #rest-timer .rt-label{display:none}
+#app.rt-uni-strip #rest-timer .rt-q{font-size:13px;line-height:1.25;color:var(--text2);white-space:normal}
+#app.rt-uni-strip #rest-timer .rt-rpe{flex:1 1 0;min-width:0;margin-top:0}
+#app.rt-uni-strip #rest-timer .rpe-chip{background:var(--bg4)}
+#app.rt-uni-strip:not(.rt-uni-ring) #rest-timer .rt-info{padding-right:52px} /* sin descanso (solo esfuerzo): sitio para su ✕ */
+#app.rt-uni-strip:not(.rt-uni-ring) #rest-timer .rt-btn{display:block;position:absolute;right:4px;bottom:calc(var(--nb-h,58px) + 1px);min-width:44px;min-height:44px;padding:0;background:none;border:0;pointer-events:auto}
+/* con la barra a la vista, el descanso que se va desaparece sin más (al irse deja de ser la barra única y, con su transición
+   de salida, se vería un momento la barra suelta de antes). El cardio conserva su salida. */
+#app.nb-on #rest-timer:not(.show):not([data-kind="cardio"]){transition:none}
+#app.typing.rt-uni #rest-timer{opacity:0}
+#app.typing.rt-uni #rest-timer *{pointer-events:none}
+/* móviles estrechos: el anillo se arrima y «✓ Hecho» se estrecha, para que el nombre del ejercicio no se quede sin sitio */
+@media (max-width:359px){#app.rt-uni-strip #rest-timer .rt-info{padding-left:10px;gap:4px}#app.rt-uni-strip #rest-timer .rt-q{font-size:12px}
+  #app.rt-uni #rest-timer .rt-ring,#app.rt-uni #rest-timer.has-rpe .rt-ring{left:4px}#app.rt-uni-ring #nextbar{padding-left:54px;gap:8px}#app.rt-uni-ring .nb-go{min-width:92px;padding:0 10px}}
 #app.nb-on .rt-ring,#app.nb-on .rt-ring svg{width:40px;height:40px}
 .hist-item-w small{display:block;font-size:11px;font-weight:400;color:var(--text3);margin-top:1px;overflow-wrap:anywhere}
 
@@ -2038,7 +2067,7 @@ input[type=number]{-moz-appearance:textfield}
   <!-- (08) Tocar la barra (fuera de sus botones) abre el modo descanso a pantalla completa; el RPE de la serie va en
        la propia barra (#rt-rpe, 3 chips) y se puede cambiar mientras dura el descanso -->
   <div id="rest-timer" role="timer" aria-live="off" onclick="rtBarTap(event)">
-    <button type="button" class="rt-ring" id="rt-open" onclick="RF.openFull()" aria-label="Ver el descanso a pantalla completa">
+    <button type="button" class="rt-ring" id="rt-open" onclick="rtRingTap()" aria-label="Ver el descanso a pantalla completa (ahí puedes saltarlo)">
       <svg viewBox="0 0 48 48" aria-hidden="true"><circle class="rt-ring-bg" cx="24" cy="24" r="20"/><circle class="rt-ring-fg" id="rt-arc" cx="24" cy="24" r="20"/></svg>
       <span class="rt-ring-num" id="rt-num">1:30</span>
       <span class="rt-exp" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M7 1h4v4M5 11H1V7M11 1 7.2 4.8M1 11l3.8-3.8"/></svg></span>
@@ -16821,6 +16850,7 @@ const RT={
     if(!t)this._rpeOnly(tg); // (M1) descanso apagado: la barra solo con el esfuerzo (o se va)
     else if(el.dataset.kind==='rpe')el.dataset.kind=t.kind; // un cardio ocupa la barra
     el.classList.toggle('has-rpe',!!tg);
+    el.classList.toggle('rpe-set',!!tg&&(+(((S.rpe||{})[tg.exId]||{})[tg.setIdx])||0)>0); // ya contestado: en la barra única, la tira se recoge
     if(!tg){if(box.firstChild)box.innerHTML='';box.dataset.k='';if(q)q.textContent='';_dockSync();return;}
     const n=Math.max(1,parseInt(tg.ex&&tg.ex.s)||1),lvl=+(((S.rpe||{})[tg.exId]||{})[tg.setIdx])||0,k=tg.setIdx+':'+lvl;
     if(q)q.textContent=S.restTimer||!t?`Serie ${tg.setIdx+1}/${n} · ¿qué tal?`:`¡Listo! · ¿qué tal la serie ${tg.setIdx+1}?`;
@@ -17327,6 +17357,12 @@ const RF={
   }
 };
 // Tocar la barra del descanso (fuera de sus botones) abre el modo a pantalla completa
+// El anillo: abre el modo a pantalla completa (−15 s, Saltar, +15 s). En la barra única, con el descanso ya terminado, lo cierra
+function rtRingTap(){
+  const rt=document.getElementById('rest-timer'),app=document.getElementById('app');
+  if(rt&&app&&rt.classList.contains('done')&&app.classList.contains('rt-uni')){RT.skip();return;}
+  RF.openFull();
+}
 function rtBarTap(e){
   const tg=e&&e.target;
   if(tg&&tg.closest&&tg.closest('button'))return;
@@ -17932,11 +17968,22 @@ function _scrollToCard(id){
 function _toastCover(){return 0;}
 // Hueco arriba al colocar una tarjeta: 10 px, o por debajo del aviso si está a la vista (que no tape su nombre)
 function _topOff(){const c=_toastCover();return c?Math.max(10,c+8):10;}
+// Barra única: con la barra «siguiente serie» a la vista, el descanso (o la pregunta del esfuerzo sin descanso) no flota
+// aparte: el anillo va dentro de la barra y la pregunta, en una tira pegada encima hasta que se contesta. Un cardio en marcha
+// conserva su barra. Devuelve null si no toca, o {ring, strip}.
+function _rtUni(){
+  const nb=document.getElementById('nextbar'),rt=document.getElementById('rest-timer');
+  if(!nb||!rt||!nb.classList.contains('show')||!rt.classList.contains('show'))return null;
+  const k=rt.dataset.kind;if(k!=='rest'&&k!=='rpe')return null;
+  return{ring:k==='rest',strip:rt.classList.contains('has-rpe')&&(k==='rpe'||!rt.classList.contains('rpe-set'))};
+}
 // Altura que tapan abajo la navegación, la barra «siguiente serie» y el descanso (px desde el borde inferior de #app)
 function _dockH(){
   let h=0;const bb=document.querySelector('.botbar');h+=bb?bb.offsetHeight:58;h+=8;
   const nb=document.getElementById('nextbar');if(nb&&nb.classList.contains('show'))h+=nb.offsetHeight+6;
-  const rt=document.getElementById('rest-timer');if(rt&&rt.classList.contains('show'))h+=rt.offsetHeight+6;
+  const rt=document.getElementById('rest-timer'),u=_rtUni();
+  if(u){if(u.strip){const inf=rt.querySelector('.rt-info');if(inf)h+=inf.offsetHeight;}} // la tira va pegada a la barra
+  else if(rt&&rt.classList.contains('show'))h+=rt.offsetHeight+6;
   return h;
 }
 // (16) La lista (#screen) se acaba donde empieza lo que flota abajo: --dock-h = _dockH() con sus alturas reales (la barra
@@ -17944,6 +17991,9 @@ function _dockH(){
 // descanso; un ResizeObserver recoge el resto (fuentes, textos que cambian de alto, giro de pantalla).
 function _dockSync(){
   const app=document.getElementById('app');if(!app)return;
+  {const u=_rtUni(),nb=document.getElementById('nextbar');
+    app.classList.toggle('rt-uni',!!u);app.classList.toggle('rt-uni-ring',!!(u&&u.ring));app.classList.toggle('rt-uni-strip',!!(u&&u.strip));
+    const nh=(u&&nb?nb.offsetHeight:0)+'px';if(app.style.getPropertyValue('--nb-h')!==nh)app.style.setProperty('--nb-h',nh);}
   const v=_dockH()+'px';
   if(app.style.getPropertyValue('--dock-h')!==v)app.style.setProperty('--dock-h',v);
   _toastPlace(); // el aviso (#toast), justo encima
@@ -22367,12 +22417,13 @@ function renderWorkout(){
     const doneSum=!ex.cardio&&exDone&&sum&&(sum.w||(nk&&sum.sets.length))?`<div class="ex-done-sum">${_nwX(esc(_setsLine(sum.sets)))}${nx?` · próxima <b>${_nwX(esc(presValTxt(nx)))}</b>`:''}</div>`:'';
     let body='';
     if(isOpen&&!ex.cardio){
-      // Modo gym: antes de la primera serie, la técnica en grande (animación, consejo, objetivo y calentamiento);
-      // después, las series arriba del todo y la animación en miniatura (se toca para ampliarla)
-      const ak=exAnimKey(ex),training=nDone>0,big=!training||_animBig.has(ex.id);
+      // Modo gym: la primera vez que haces un ejercicio, la técnica en grande (animación, consejo, objetivo y calentamiento).
+      // Con la primera serie hecha, o si ya lo conoces (tiene historial), las series arriba y la animación en miniatura:
+      // tocarla la amplía (y «Reducir animación» la vuelve a plegar); en grande, un toque la pausa, como siempre.
+      const ak=exAnimKey(ex),training=nDone>0,known=!training&&(S.strength[ex.id]||[]).length>0,big=!(training||known)||_animBig.has(ex.id);
       const spec=ak&&typeof GymAnim!=='undefined'?GymAnim.get(ak):null;
       const anim=!ak?'':big
-        ?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>${training?`<button type="button" class="anim-less" data-ex="${eid}" onclick="animShrink(this.dataset.ex)">Reducir animación ▴</button>`:''}`
+        ?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>${training||known?`<button type="button" class="anim-less" data-ex="${eid}" onclick="animShrink(this.dataset.ex)">Reducir animación ▴</button>`:''}`
         :`<div class="anim-mini" role="button" tabindex="0" data-ex="${eid}" onclick="animGrow(this.dataset.ex)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();animGrow(this.dataset.ex)}" aria-label="Ver la técnica de ${esc(ex.n)} en grande"><div class="ex-anim mini" data-ex="${eid}" data-gym-anim="${ak}"></div><div class="anim-mini-t"><b>Técnica</b><span>${esc(spec&&spec.labels?spec.labels.join(' · '):(ex.eq||''))}</span></div><span class="anim-mini-go" aria-hidden="true">Ampliar ▾</span></div>`;
       // (08) debajo de las series: el descanso entre series de este ejercicio (automático o el elegido)
       const setsHtml=setRowsHtml(ex,pr,rows)+restCtlHtml(ex);
@@ -22382,6 +22433,9 @@ function renderWorkout(){
       const busy=busyBarHtml(ex,nDone);
       body=training
         ?`${busy}${anim}${big?`<div class="tip">${_tipHtml(ex.tip)}</div>`:''}${setsHtml}${la}${presTargetHtml(ex,pr,true)}${sugHtml}`
+        // conocido y sin empezar: aviso de sustituto (si lo hay), técnica mini, calentamiento y series; debajo, «¿Máquina ocupada?» y el
+        // objetivo entero (con su valor y el botón de variante, que el compacto no lleva). Sin animación que ampliar, el consejo se queda
+        :known?`${ex.sub?busy:''}${anim}${big||!ak?`<div class="tip">${_tipHtml(ex.tip)}</div>`:''}<div class="wu-slot">${warmupBlockHtml(ex)}</div>${setsHtml}${ex.sub?'':busy}${la}${presTargetHtml(ex,pr)}${sugHtml}`
         :`${busy}${anim}<div class="tip">${_tipHtml(ex.tip)}</div>${presTargetHtml(ex,pr)}<div class="wu-slot">${warmupBlockHtml(ex)}</div>${setsHtml}${la}${sugHtml}`;
     }
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}" data-ex="${eid}">
@@ -22435,7 +22489,7 @@ function renderWorkout(){
   ${lightBannerHtml('workout')}
   ${allDone?`<div class="fbanner">${ic('sparkles')} ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
   ${exHtml}
-  ${live?`<div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?ic('check')+' Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`
+  ${live?(allDone&&dayMarkCount(S.day).marks>0?'':`<div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?ic('check')+' Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`)
     :`<div class="card wo-empty"><div class="empty"><div class="eic" aria-hidden="true">${ic('note')}</div><p>Este día aún no tiene ejercicios. Mientras esté vacío, no entra en tu rotación.</p></div>
       <button type="button" class="btn bp" data-dk="${esc(S.day)}" onclick="addExerciseUI(this.dataset.dk)">Añadir ejercicio</button></div>`}
   `;

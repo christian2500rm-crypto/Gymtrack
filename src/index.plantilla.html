@@ -68,7 +68,7 @@
   <!-- (08) Tocar la barra (fuera de sus botones) abre el modo descanso a pantalla completa; el RPE de la serie va en
        la propia barra (#rt-rpe, 3 chips) y se puede cambiar mientras dura el descanso -->
   <div id="rest-timer" role="timer" aria-live="off" onclick="rtBarTap(event)">
-    <button type="button" class="rt-ring" id="rt-open" onclick="RF.openFull()" aria-label="Ver el descanso a pantalla completa">
+    <button type="button" class="rt-ring" id="rt-open" onclick="rtRingTap()" aria-label="Ver el descanso a pantalla completa (ahí puedes saltarlo)">
       <svg viewBox="0 0 48 48" aria-hidden="true"><circle class="rt-ring-bg" cx="24" cy="24" r="20"/><circle class="rt-ring-fg" id="rt-arc" cx="24" cy="24" r="20"/></svg>
       <span class="rt-ring-num" id="rt-num">1:30</span>
       <span class="rt-exp" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M7 1h4v4M5 11H1V7M11 1 7.2 4.8M1 11l3.8-3.8"/></svg></span>

@@ -426,11 +426,22 @@ function _scrollToCard(id){
 function _toastCover(){return 0;}
 // Hueco arriba al colocar una tarjeta: 10 px, o por debajo del aviso si está a la vista (que no tape su nombre)
 function _topOff(){const c=_toastCover();return c?Math.max(10,c+8):10;}
+// Barra única: con la barra «siguiente serie» a la vista, el descanso (o la pregunta del esfuerzo sin descanso) no flota
+// aparte: el anillo va dentro de la barra y la pregunta, en una tira pegada encima hasta que se contesta. Un cardio en marcha
+// conserva su barra. Devuelve null si no toca, o {ring, strip}.
+function _rtUni(){
+  const nb=document.getElementById('nextbar'),rt=document.getElementById('rest-timer');
+  if(!nb||!rt||!nb.classList.contains('show')||!rt.classList.contains('show'))return null;
+  const k=rt.dataset.kind;if(k!=='rest'&&k!=='rpe')return null;
+  return{ring:k==='rest',strip:rt.classList.contains('has-rpe')&&(k==='rpe'||!rt.classList.contains('rpe-set'))};
+}
 // Altura que tapan abajo la navegación, la barra «siguiente serie» y el descanso (px desde el borde inferior de #app)
 function _dockH(){
   let h=0;const bb=document.querySelector('.botbar');h+=bb?bb.offsetHeight:58;h+=8;
   const nb=document.getElementById('nextbar');if(nb&&nb.classList.contains('show'))h+=nb.offsetHeight+6;
-  const rt=document.getElementById('rest-timer');if(rt&&rt.classList.contains('show'))h+=rt.offsetHeight+6;
+  const rt=document.getElementById('rest-timer'),u=_rtUni();
+  if(u){if(u.strip){const inf=rt.querySelector('.rt-info');if(inf)h+=inf.offsetHeight;}} // la tira va pegada a la barra
+  else if(rt&&rt.classList.contains('show'))h+=rt.offsetHeight+6;
   return h;
 }
 // (16) La lista (#screen) se acaba donde empieza lo que flota abajo: --dock-h = _dockH() con sus alturas reales (la barra
@@ -438,6 +449,9 @@ function _dockH(){
 // descanso; un ResizeObserver recoge el resto (fuentes, textos que cambian de alto, giro de pantalla).
 function _dockSync(){
   const app=document.getElementById('app');if(!app)return;
+  {const u=_rtUni(),nb=document.getElementById('nextbar');
+    app.classList.toggle('rt-uni',!!u);app.classList.toggle('rt-uni-ring',!!(u&&u.ring));app.classList.toggle('rt-uni-strip',!!(u&&u.strip));
+    const nh=(u&&nb?nb.offsetHeight:0)+'px';if(app.style.getPropertyValue('--nb-h')!==nh)app.style.setProperty('--nb-h',nh);}
   const v=_dockH()+'px';
   if(app.style.getPropertyValue('--dock-h')!==v)app.style.setProperty('--dock-h',v);
   _toastPlace(); // el aviso (#toast), justo encima
