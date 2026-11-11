@@ -12015,7 +12015,9 @@ await safe('obImgRows',async()=>{
     scr(document.querySelector('#ob-root .ob-tabs').offsetTop-70);
     await _untilRT(()=>im().slice(0,3).every(_m3Ok),1500);
     E(im().slice(0,3).every(_m3Ok),'las que se ven no se dibujan: '+im().map(i=>i.getAttribute('data-ga-st')||'-').join(' '));
-    scr(ob.scrollHeight);await W(200);scr(ob.scrollTop-1);
+    // (B3-5) la rutina va arriba: «bajar» es llevar a la vista el final del día (antes bastaba con ir al final de la página)
+    {const pn=document.querySelector('#ob-root .ob-dpanel'),top=y=>y.getBoundingClientRect().top-ob.getBoundingClientRect().top+ob.scrollTop;
+      scr(Math.max(0,top(pn)+pn.offsetHeight-ob.clientHeight+60));await W(200);scr(ob.scrollTop-1);}
     await _untilRT(()=>im().every(_m3Ok),1500);
     E(im().every(_m3Ok),'al bajar no se dibujan todas: '+im().map(i=>i.getAttribute('data-ga-st')||'-').join(' '));
     E(JSON.stringify(_m3Rows().map(r=>r.offsetHeight))===h0,'la lista se mueve al llegar las imágenes');
@@ -12754,6 +12756,49 @@ await safe('b3Inicio',async()=>{
         const o2=dashNotices();E(!o2.order.includes('safety')&&o2.order.length===o.order.length-1&&shown()===(o2.order[0]||''),'tras «Entendido»: '+shown()+' / '+o2.order);}}
     if(bad.length)throw new Error(bad.join(' | '));
   }finally{unstub();_dashMore=more0;if(fr){fr.style.width=fw;fr.style.height=fh;}S.profile=JSON.parse(prof0);_rest9(j);saveState();render();await W(40);}
+});
+await safe('b3Rutina',async()=>{
+  // (B3-5) «Tu rutina está lista» con la rutina primero (Q2): tras lo que me contaste van los días con sus ejercicios; después,
+  // «Tu semana», el porqué, los avisos y el resto. El aviso de consultar con tu médico no baja: se queda delante de la rutina.
+  const full=_m3Full(),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const fr=window.frameElement,fw=fr&&fr.style.width;
+  const r=()=>document.getElementById('ob-root'),q=sel=>r().querySelector(sel);
+  const after=(a,b)=>!!(a&&b&&(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING));
+  const h2=t=>[...r().querySelectorAll('.ob-h2')].find(e=>_m3tx(e).includes(t));
+  try{
+    _m3New();await _m3Open('first');
+    E(_ob.step==='ob-rutina'&&/Tu rutina está lista/.test(_m3tx(q('#ob-h'))),'sin la rutina propuesta: '+_ob.step);
+    // ── el orden: chips → días y ejercicios → «Tu semana» → porqué → avisos → cómo avanzar
+    const orden=()=>[q('.ob-chips'),q('.ob-tabs'),q('.ob-dpanel'),q('.ob-split'),h2('¿Por qué esta rutina?'),h2('Cómo vas a avanzar'),h2('Tu primera semana'),q('.ob-next')];
+    {const o=orden();E(o.every(Boolean),'faltan piezas: '+o.map(x=>!!x));
+      for(let i=0;i+1<o.length;i++)E(after(o[i],o[i+1]),'orden: la pieza '+i+' no va antes de la '+(i+1));}
+    // la rutina se ve sin bajar: el primer ejercicio del día cae en la primera pantalla
+    {const ob=document.getElementById('onboarding');ob.scrollTop=0;await W(5);
+      const row=q('.ob-dpanel .ob-row');E(row&&row.getBoundingClientRect().top<innerHeight,'el primer ejercicio no se ve al abrir ('+Math.round(row&&row.getBoundingClientRect().top)+' / '+innerHeight+')');}
+    // los días siguen funcionando igual: pestañas, imágenes y «¿Por qué?»
+    {const tabs=[...r().querySelectorAll('.ob-tabs [role=tab]')];E(tabs.length===Object.keys(_ob.c.days).length&&tabs[0].getAttribute('aria-selected')==='true','pestañas de día');
+      E(r().querySelectorAll('.ob-dpanel .ob-thb').length>=3,'sin imágenes');
+      if(tabs[1]){tabs[1].click();await W(5);E(_ob.step==='ob-rutina'&&_ob.tab===tabs[1].dataset.k&&after(q('.ob-dpanel'),q('.ob-split')),'cambiar de día descoloca la rutina');}}
+    // ── «A tener en cuenta»: después de la rutina y del porqué…
+    {const av=h2('A tener en cuenta');
+      if(_ob.t.avisos.length)E(av&&after(q('.ob-dpanel'),av)&&after(h2('¿Por qué esta rutina?'),av)&&after(av,h2('Cómo vas a avanzar')),'avisos fuera de sitio');
+      else E(!av,'avisos sin avisos');
+      E(r().querySelectorAll('.ob-av').length<=1,'avisos repetidos');}
+    // … salvo el de consultar con tu médico cuando has seguido adelante: ese se queda delante de la rutina, y el primero
+    {const t0=_ob.t.avisos.slice(),c0=_ob.h.consulta;
+      _ob.t.avisos=['Un aviso cualquiera.','Consulta con tu médico antes de empezar.'].concat(t0);_ob.h.consulta='igual';obRender();await W(5);
+      const av=h2('A tener en cuenta'),li=av&&av.parentNode.querySelector('.ob-av li');
+      E(av&&after(q('.ob-chips'),av)&&after(av,q('.ob-tabs'))&&r().querySelectorAll('.ob-av').length===1,'el aviso médico no va delante de la rutina');
+      E(li&&/médico/.test(li.textContent),'el aviso médico no es el primero: '+(li&&li.textContent));
+      // sin haber seguido adelante («consulta» sin contestar), el mismo texto va con los demás, abajo
+      _ob.h.consulta=c0==='igual'?null:c0;obRender();await W(5);
+      E(after(q('.ob-dpanel'),h2('A tener en cuenta')),'avisos delante sin motivo');
+      _ob.t.avisos=t0;_ob.h.consulta=c0;obRender();await W(5);}
+    // ── a 320 px no desborda y el orden es el mismo
+    if(fr){fr.style.width='320px';await W(40);}
+    {const o=orden();for(let i=0;i+1<o.length;i++)E(after(o[i],o[i+1]),'320: orden');
+      E(document.documentElement.scrollWidth<=innerWidth&&document.getElementById('onboarding').scrollWidth<=innerWidth,'320: la rutina desborda');}
+    if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+  }finally{if(fr)fr.style.width=fw;await _m3Back(full);}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

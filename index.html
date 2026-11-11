@@ -15408,6 +15408,10 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   const ks=Object.keys(r.days);
   const av=t.avisos.slice();if(_ob.h.consulta==='igual'){const i=av.findIndex(x=>/médico/.test(x));if(i>0)av.unshift(av.splice(i,1)[0]);}
   const kg=r.det.some(x=>x.rows.some(y=>y.kind==='str'&&(LIB_K.BY.get(y.lib)||{}).lt==='w'));
+  // «A tener en cuenta»: va después de la rutina, salvo con el aviso de consultar con tu médico (med), que se queda delante
+  const med=_ob.h.consulta==='igual'&&av.some(x=>/médico/.test(x));
+  const avHtml=av.length?`<section class="ob-sec"><h2 class="ob-h2">A tener en cuenta</h2><ul class="ob-ul ob-av">${av.slice(0,more.av?99:t.visibles).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+    ${av.length>t.visibles?`<button type="button" class="ob-link" onclick="obMore('av')">${more.av?'Ver menos':'Ver más ('+(av.length-t.visibles)+')'}</button>`:''}</section>`:'';
   const changed=_ob.changed?`<div class="ob-changed" aria-live="polite">Ha cambiado: ${esc(_ob.changed)}</div>`:'<div class="ob-changed" aria-live="polite"></div>';
   // músculos de la rutina candidata (bloque plegado para quien empieza, cautos y 65 o más)
   const tmp={};ks.forEach(k=>{tmp[k]={label:'Día '+k,focus:'',did:'d_tmp'+k.toLowerCase(),ex:c.days[k].ex.map((x,j)=>Object.assign(_libCopy(LIB_BY_ID.get(x.lib),'t_'+k+j),{s:x.s,r:x.r,cardio:x.cardio}))};});
@@ -15415,13 +15419,13 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   return`<h1 class="ob-title" id="ob-h" tabindex="-1">Tu rutina está lista</h1>
   <p class="ob-sub">Basada en lo que me has contado. Toca cualquier dato para cambiarlo.</p>
   <div class="ob-chips">${_obChips().map(([l,st])=>`<button type="button" class="lib-chip ob-ch" onclick="obEditFromResult('${st}')">${esc(l).replace(/&nbsp;/g,NB)}</button>`).join('')}</div>${changed}
+  ${med?avHtml:''}
+  ${_obDaysHtml()}
   <section class="card ob-split"><div class="ob-wk">${esc(_obWeekLine(g))}</div><p class="ob-p">${esc(pq[0]||'')}</p>
     ${typeof obSplitSheet==='function'?'<button type="button" class="ob-link" onclick="obSplitSheet()">Cambiar reparto ›</button>':''}</section>
   <section class="ob-sec"><h2 class="ob-h2">¿Por qué esta rutina?</h2><ul class="ob-ul">${pq.slice(1,4).map(x=>`<li>${icEsf(esc(x))}</li>`).join('')}</ul>
     ${pq.length>4?'<button type="button" class="ob-link" onclick="obWhyAll()">Ver todo ›</button>':''}</section>
-  ${av.length?`<section class="ob-sec"><h2 class="ob-h2">A tener en cuenta</h2><ul class="ob-ul ob-av">${av.slice(0,more.av?99:t.visibles).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
-    ${av.length>t.visibles?`<button type="button" class="ob-link" onclick="obMore('av')">${more.av?'Ver menos':'Ver más ('+(av.length-t.visibles)+')'}</button>`:''}</section>`:''}
-  ${_obDaysHtml()}
+  ${med?'':avHtml}
   <section class="ob-sec"><h2 class="ob-h2">📈 Cómo vas a avanzar</h2><ul class="ob-ul">${cauto?'<li>Las primeras 4 semanas, 2 series y subidas pequeñas; después te propongo pasar a 3.</li>':''}
     <li>Cada sesión: el Coach te dice cuánto poner (primero más repeticiones, luego más peso).</li><li>Cada 4 semanas: revisas tu ciclo y te propongo hasta 3 cambios.</li><li>Si te notas cansado o te estancas: una semana suave.</li></ul></section>
   <section class="ob-sec"><h2 class="ob-h2">🧭 Tu primera semana</h2><ul class="ob-ul"><li>La primera vez que hagas cada ejercicio, elige ${kg?'un peso':'la variante'} con ${kg?'el':'la'} que te sobren ${cauto?'unas 3':'2-3'} repeticiones. Desde la segunda sesión, el Coach te dice cuánto poner.</li>
