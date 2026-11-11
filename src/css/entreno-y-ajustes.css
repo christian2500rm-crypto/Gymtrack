@@ -41,12 +41,12 @@
 .lg-row{display:flex;align-items:center;gap:6px;padding-left:2px;border-radius:var(--rsm);transition:background .2s}
 .lg-row+.lg-row{margin-top:6px}.lg-ghost+.lg-row{margin-top:3px}
 .lg-row.done{background:color-mix(in srgb,var(--green) 7%,transparent)}
-.lg-row.done .stp{border-color:color-mix(in srgb,var(--green) 28%,transparent);background:color-mix(in srgb,var(--green) 7%,var(--bg2))}
+.lg-row.done .stp{background:color-mix(in srgb,var(--green) 7%,var(--bg2))}
 .lg-row.done .stp-u{color:var(--text2)} /* (16d) «KG/REPS» en --text3 sobre el tinte de la serie hecha: 4,4:1 */
 .lg-n{width:16px;flex-shrink:0;text-align:center;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text3)}
 .lg-row.next .lg-n{color:var(--green)}
 .lg-row.done .lg-n{color:var(--green-hi)}
-.stp{display:flex;align-items:stretch;height:48px;min-width:0;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);overflow:hidden;transition:border-color .2s}
+.stp{display:flex;align-items:stretch;height:54px;min-width:0;border:1px solid transparent;border-radius:var(--rsm);background:var(--bg3);overflow:hidden;transition:border-color .2s}
 .stp-w{flex:1.2 1 0}
 .stp-r{flex:1 1 0}
 .stp-t,.stp-d{flex:1 1 0}
@@ -59,13 +59,13 @@
 .stp-b{width:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:500;line-height:1;color:var(--text2);touch-action:manipulation}
 .stp-b:active{background:var(--bg4);color:var(--text)}
 .stp-c{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:text}
-.stp-v{width:100%;min-width:0;padding:0;border:none;outline:none;background:none;text-align:center;font-family:'DM Sans',sans-serif;font-size:17px;font-weight:600;line-height:1.15;color:var(--text2);letter-spacing:-.3px;-webkit-appearance:none;border-radius:0}
+.stp-v{width:100%;min-width:0;padding:0;border:none;outline:none;background:none;text-align:center;font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;line-height:1.15;color:var(--text2);letter-spacing:-.3px;-webkit-appearance:none;border-radius:0}
 .lg-row.next .stp-v,.lg-row.done .stp-v{color:var(--text)}
-.stp-v.lg5{font-size:13px;letter-spacing:-.6px}
+.stp-v.lg5{font-size:15px;letter-spacing:-.6px}
 .stp-v::placeholder{color:var(--text3);font-weight:400;font-style:italic}
-.stp-u{font-size:11px;line-height:1;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
+.stp-u{font-size:11px;line-height:1.1;color:var(--text3)}
 .stp-fix{justify-content:center;align-items:center;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text2)}
-.lg-ck{position:relative;width:48px;height:48px;flex-shrink:0;border-radius:var(--rsm);border:1px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:20px;font-weight:700;transition:background .15s,color .15s,transform .1s;touch-action:manipulation}
+.lg-ck{position:relative;width:54px;height:54px;flex-shrink:0;border-radius:var(--rsm);border:1px solid transparent;background:var(--bg3);color:var(--text3);font-size:20px;font-weight:700;transition:background .15s,color .15s,transform .1s;touch-action:manipulation}
 .lg-ck:active{transform:scale(.92)}
 .lg-row.next .lg-ck{border-color:var(--green-b);color:var(--green)}
 .lg-ck.on{background:var(--green);border-color:var(--green);color:var(--accent-ink)}
@@ -77,8 +77,8 @@
 .tgt.cmp .tgt-r{margin-top:0;font-size:13px}
 /* Móviles por debajo de 390 px: los −/+ siguen en 44 px y el ✓ en 48; el sitio sale de los márgenes, los huecos y el nº.
    Solo en los muy estrechos (≤340 px) el ✓ baja a 44 px. */
-@media (max-width:389px){.lg-n{width:10px;font-size:11px}.lg-sets{margin:0 -11px 8px}.lg-row{gap:4px;padding-left:0}.lg-ghost{margin-left:14px}.stp-v{font-size:15px}}
-@media (max-width:340px){.lg-n{display:none}.lg-sets{margin:0 -12px 8px}.lg-ck{width:44px}.stp-w{flex:1.15 1 0}.stp-v{font-size:13px;letter-spacing:-.5px}.lg-ghost{margin-left:4px}}
+@media (max-width:389px){.lg-n{width:10px;font-size:11px}.lg-sets{margin:0 -11px 8px}.lg-row{gap:4px;padding-left:0}.lg-ghost{margin-left:14px}.stp-v{font-size:17px}.stp-v.lg5{font-size:13px}.lg-ck{width:48px}}
+@media (max-width:340px){.lg-n{display:none}.lg-sets{margin:0 -12px 8px}.lg-ck{width:44px}.stp-w{flex:1.15 1 0}.stp-v{font-size:15px;letter-spacing:-.5px}.lg-ghost{margin-left:4px}}
 /* Por debajo de 360 px, por tiempo o distancia: el peso (opcional y casi siempre el mismo en todas las series) se escribe
    sin −/+, y así los segundos o metros caben enteros; los −/+ que quedan siguen en 44 px */
 @media (max-width:359px){.lg-row.td .stp-w{flex:0 0 58px}.lg-row.td .stp-w .stp-b{display:none}}

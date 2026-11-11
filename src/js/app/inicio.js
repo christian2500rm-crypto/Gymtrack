@@ -183,10 +183,11 @@ function _hoyTrainHtml(st){
     ${live?'':`<div class="hoy-m">${meta}</div>`}
     ${head}
     ${ak?`<div class="hoy-pv" id="hoy-pv" data-ex="${esc(pv.id)}" data-gym-anim="${esc(ak)}"></div>`:''}
+    ${cta}
     ${info.ex.length?`<div class="hoy-l" role="group" aria-label="Ejercicios de ${esc(info.label)}">
       ${info.str.length?`<div class="hoy-lh"><span>${live?'Tu entreno de hoy':anyP?(anyNk?'Objetivos de hoy':'Pesos objetivo de hoy'):'Tus ejercicios de hoy'}</span>${ak?'<small>toca uno para ver su técnica</small>':''}</div>${rows}`:''}
       ${_hoyCarHtml(info,live)}</div>`:`<div class="hoy-note">Este día no tiene ejercicios: añádelos en Ajustes → Editar rutina.</div>`}
-    ${cta}${foot}${live?'':_hoyEmptyDaysHtml()}
+    ${foot}${live?'':_hoyEmptyDaysHtml()}
   </div>`;
 }
 // Ya entrenaste hoy: lo de hoy (duración, series, tonelaje y récords → su resumen) y la próxima, con sus objetivos

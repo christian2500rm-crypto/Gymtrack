@@ -200,7 +200,7 @@
 .k-extra .hoy-k{color:var(--text2)}.k-live .hoy-k{color:var(--amber)}.k-rest .hoy-k{color:var(--green-hi)}
 .hoy-t{display:flex;align-items:center;gap:9px;margin-top:7px;min-width:0}
 .hoy-t .pill{flex-shrink:0}
-.hoy-nm{flex:1;min-width:0;font-size:20px;font-weight:600;letter-spacing:-.3px;line-height:1.2;overflow-wrap:anywhere}
+.hoy-nm{flex:1;min-width:0;font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1.2;overflow-wrap:anywhere}
 .hoy-sets{margin-left:auto}
 .hoy-m{font-size:13px;color:var(--text2);margin-top:6px;line-height:1.45}
 .hoy-m b{font-family:'DM Sans',sans-serif;font-weight:500;color:var(--text)}
@@ -231,20 +231,20 @@ body.swup-on .hoy-pv{height:120px}
 .hoy-ex.on .hoy-ex-n{color:var(--green-hi)}
 .hoy-ex.on .hoy-ex-m{color:var(--text2)} /* (16d) --text3 sobre el tinte menta se quedaba en 4,4:1 */
 .hoy-ex-m{font-size:12px;color:var(--text3);font-family:'DM Sans',sans-serif;line-height:1.4;margin-top:1px}
-.hoy-tg{flex:0 1 auto;min-width:0;max-width:55%;overflow:hidden;display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap}
+.hoy-tg{flex:0 1 auto;min-width:0;max-width:55%;overflow:hidden;display:inline-flex;align-items:center;gap:5px;padding:5px 0 5px 8px;font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text);white-space:nowrap}
 .hoy-tg .tgl-v{font:inherit;color:inherit;max-width:none}
-.hoy-tg i{flex-shrink:0;font-style:normal;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;color:var(--text2)}
-.hoy-tg.k-up,.hoy-tg.k-harder{border-color:color-mix(in srgb,var(--green) 45%,transparent);background:var(--green-bg);color:var(--green-hi)}.hoy-tg.k-up i,.hoy-tg.k-harder i{color:var(--green-hi)}
-.hoy-tg.k-reps,.hoy-tg.k-deload{border-color:color-mix(in srgb,var(--blue) 35%,transparent);background:color-mix(in srgb,var(--blue) 8%,transparent);color:var(--blue-hi2)}.hoy-tg.k-reps i{color:var(--blue-hi)}
-.hoy-tg.k-down{border-color:color-mix(in srgb,var(--amber) 40%,transparent);background:color-mix(in srgb,var(--amber) 8%,transparent);color:var(--amber-hi)}.hoy-tg.k-down i{color:var(--amber-hi)}
+.hoy-tg i{flex-shrink:0;font-style:normal;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:var(--text3)}
+.hoy-tg.k-up,.hoy-tg.k-harder{color:var(--green-hi)}.hoy-tg.k-up i,.hoy-tg.k-harder i{color:var(--green-hi)}
+.hoy-tg.k-reps,.hoy-tg.k-deload{color:var(--blue-hi2)}.hoy-tg.k-reps i{color:var(--blue-hi)}
+.hoy-tg.k-down{color:var(--amber-hi)}.hoy-tg.k-down i{color:var(--amber-hi)}
 .hoy-tg.new{font-family:'DM Sans',sans-serif;font-weight:500;font-size:12px;color:var(--text2)}
-.hoy-tg.ok{font-family:'DM Sans',sans-serif;font-size:13px;border-color:var(--green-b);background:var(--green-bg);color:var(--green)}
-.hoy-tg.part{border-color:color-mix(in srgb,var(--amber) 40%,transparent);background:color-mix(in srgb,var(--amber) 8%,transparent);color:var(--amber-hi)}
+.hoy-tg.ok{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--green)}
+.hoy-tg.part{color:var(--amber-hi)}
 .hoy-car{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 0 2px;border-top:1px solid var(--border);font-size:13px;color:var(--text2);line-height:1.4}
 .hoy-car>span:first-child{font-size:15px;flex-shrink:0}
 .hoy-car b{font-family:'DM Sans',sans-serif;font-weight:500;color:var(--text)}
 .hoy-car .ok{color:var(--green)}
-.hoy-go{margin-top:12px;min-height:52px;font-size:17px}
+.hoy-go{margin-top:12px;min-height:54px;font-size:17px}
 .hoy-acts{display:flex;gap:8px;margin-top:12px}
 .hoy-acts .btn{min-height:50px}
 .hoy-acts .hoy-go{margin-top:0;flex:1}
@@ -259,7 +259,7 @@ body.swup-on .hoy-pv{height:120px}
    dejaba asomar las filas por las esquinas) y llega hasta el borde de lo que se ve, sin la franja de 8 px por la que se
    veían filas cortadas: sin descanso, el borde de contenido de la lista queda 6 px encima de la navegación (bottom −6);
    con la barra o el descanso, la lista tiene 16 px de relleno por debajo (bottom −16). Mismo sitio en la tarjeta que antes */
-.hoy>.hoy-cta{position:sticky;bottom:-6px;z-index:2;margin:6px -6px -2px;padding:6px;background:var(--bg2)}
+.hoy>.hoy-cta{position:sticky;bottom:-6px;z-index:2;margin:6px -6px 0;padding:6px;background:var(--bg2)}
 #app.nb-on .hoy>.hoy-cta,#app.dock-on .hoy>.hoy-cta{bottom:-16px}
 .hoy-cta>.hoy-go{margin-top:0}
 .hoy-last{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-height:44px;margin-top:2px;font-size:12px;color:var(--text3);text-align:center;line-height:1.35}

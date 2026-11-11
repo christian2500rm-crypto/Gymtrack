@@ -914,7 +914,7 @@ await safe('progNamesColors',async()=>{
   const k=_snap4();
   try{
     _clearMarks();
-    const card=id=>{const c=document.querySelector('#app .card[data-ex="'+CSS.escape(id)+'"]');return c&&{t:c.querySelector('.clbl').textContent,out:!!c.querySelector('.prog-out'),col:getComputedStyle(c.querySelector('.pl-v')).color};};
+    const card=id=>{const c=document.querySelector('#app .card[data-ex="'+CSS.escape(id)+'"]');return c&&{t:c.querySelector('.clbl').textContent,out:!!c.querySelector('.prog-out'),col:getComputedStyle(c.querySelector('.pl-dot')).backgroundColor};}; // (B1) el color del día va en el punto; la cifra, en neutro
     const ids=()=>[...document.querySelectorAll('#app .card[data-ex]')].map(c=>c.dataset.ex);
     // colores de la paleta (variables de :root): cada sesión el suyo, distintos entre sí y del gris de lo desconocido
     const rgb={A:_cssRgb('var(--blue)'),B:_cssRgb('var(--pink)'),C:_cssRgb('var(--green)'),X:_cssRgb('var(--text2)')};
@@ -1050,7 +1050,7 @@ await safe('importStrengthNames',async()=>{
     const t=[...document.querySelectorAll('#app .card[data-ex] .clbl')].map(e=>e.textContent);
     if(!t.includes('Extensión de cuádriceps')||t.some(x=>/^(a3|ex_)/i.test(x)))throw new Error('Progreso tras importar: '+t);
     const c7=document.querySelector('#app .card[data-ex="ex_7_q"]');
-    if(!c7||getComputedStyle(c7.querySelector('.pl-v')).color!==_cssRgb('var(--blue)')||_cssRgb('var(--blue)')===_cssRgb('var(--text2)'))throw new Error('color por sesión tras importar');
+    if(!c7||getComputedStyle(c7.querySelector('.pl-dot')).backgroundColor!==_cssRgb('var(--blue)')||_cssRgb('var(--blue)')===_cssRgb('var(--text2)'))throw new Error('color por sesión tras importar');
   }finally{document.createElement=ce;_rest4(k);}
 });
 // ── 05_coach_carga ──
@@ -12295,6 +12295,50 @@ await safe('iconosB1',async()=>{
     E(!small.length,'iconos de menos de 12 px: '+small.length);}
   S.open=o0;go(t0);await W(2);
   if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
+});
+await safe('pantallasB1',async()=>{
+  // (B1) Inicio: «Empezar» va justo debajo de la animación (antes de la lista) y se ve sin desplazar; los objetivos de la lista
+  // van sin caja. Series: cifras grandes, «kg» y «reps» legibles y ✓ de 44 px o más, sin desbordar a 320 px. Ejercicio hecho,
+  // sin tachar y con su ✓. Fuerza por ejercicio: la cifra en neutro y el estado como texto, sin pastilla.
+  const j=JSON.stringify(S),fr=window.frameElement,fw=fr&&fr.style.width,fh=fr&&fr.style.height,bad=[],E=(c,m)=>{if(!c)bad.push(m);};
+  const size=async(w,h)=>{if(!fr)return false;fr.style.width=w+'px';fr.style.height=h+'px';await W(30);for(let i=0;i<20&&(innerWidth!==w||innerHeight!==h);i++)await W(20);await W(20);return innerWidth===w&&innerHeight===h;};
+  const clear=c=>/rgba\(0, 0, 0, 0\)|transparent/.test(c);
+  try{
+    S.sets={};S.open=null;S.reopenedSession=null;S.deload=null;S.restWeeks=[];try{RT.skip();}catch(e){}
+    {const d0=new Date();d0.setHours(0,0,0,0);S.sessions=(S.sessions||[]).filter(x=>!(x&&x.ts>=+d0));} // sin sesión de hoy: Inicio propone entrenar
+    syncActiveWorkout();
+    const dk=getNextDay(),ex=getPlan()[dk].ex.find(e=>!e.cardio);
+    for(const [w,h] of [[390,844],[320,568]]){if(!(await size(w,h))){E(false,'sin tamaño '+w);continue;}
+      go('dash');await W(30);document.getElementById('screen').scrollTop=0;await W(10);
+      const hoy=document.getElementById('hoy'),cta=hoy&&hoy.querySelector('.hoy-cta'),go1=cta&&cta.querySelector('.hoy-go'),l=hoy&&hoy.querySelector('.hoy-l'),pv=hoy&&hoy.querySelector('.hoy-pv');
+      if(!cta||!l){E(false,w+': Inicio sin botón o sin lista ('+hoyState().k+')');continue;}
+      E(!!(cta.compareDocumentPosition(l)&Node.DOCUMENT_POSITION_FOLLOWING)&&(!pv||!!(pv.compareDocumentPosition(cta)&Node.DOCUMENT_POSITION_FOLLOWING)),w+': «Empezar» no va entre la animación y la lista');
+      const r=go1.getBoundingClientRect(),nav=document.querySelector('.botbar').getBoundingClientRect().top;
+      E(r.top>0&&r.bottom<=nav+0.5&&r.height>=52,w+': «Empezar» no se ve entero sin desplazar '+Math.round(r.top)+'-'+Math.round(r.bottom)+' / '+Math.round(nav));
+      const tg=hoy.querySelector('.hoy-tg');if(tg){const cs=getComputedStyle(tg);E(clear(cs.backgroundColor)&&(clear(cs.borderTopColor)||cs.borderTopWidth==='0px'),w+': el objetivo de la lista lleva caja');}
+      // series
+      go('workout');S.day=dk;S.open=ex.id;render();await W(40);
+      const row=document.querySelector('.excard.open .lg-row'),v=row&&row.querySelector('.stp-v'),u=row&&row.querySelector('.stp-u'),ck=row&&row.querySelector('.lg-ck'),sets=document.querySelector('.excard.open .lg-sets');
+      if(!row||!v||!ck){E(false,w+': sin filas de series');continue;}
+      E(parseFloat(getComputedStyle(v).fontSize)>=(w>=390?20:15),w+': cifra de la serie '+getComputedStyle(v).fontSize);
+      if(u)E(getComputedStyle(u).textTransform==='none'&&parseFloat(getComputedStyle(u).fontSize)>=11,w+': unidad '+getComputedStyle(u).textTransform+' '+getComputedStyle(u).fontSize);
+      {const q=ck.getBoundingClientRect();E(q.width>=44&&q.height>=48,w+': ✓ de '+Math.round(q.width)+'×'+Math.round(q.height));}
+      E(row.scrollWidth<=row.clientWidth+1&&sets.getBoundingClientRect().right<=innerWidth+0.5&&[...row.querySelectorAll('.stp-b')].every(b=>b.getBoundingClientRect().width>=44),w+': la fila de series desborda o encoge sus botones');
+      E(v.scrollWidth<=v.clientWidth+1,w+': la cifra no cabe en su caja');
+    }
+    await size(390,844);
+    // ejercicio hecho: sin tachar y con ✓
+    go('workout');S.day=dk;S.open=null;for(let i=0;i<ex.s;i++)toggleSet(ex.id,i,{});try{RT.skip();}catch(e){}S.open=null;render();await W(30);
+    {const c=document.querySelector('.excard[data-ex="'+ex.id+'"]'),n=c&&c.querySelector('.exn');
+      E(c&&c.classList.contains('complete')&&n&&getComputedStyle(n).textDecorationLine==='none'&&c.querySelector('.ex-ok svg.ic-check'),'ejercicio hecho tachado o sin ✓: '+(n&&getComputedStyle(n).textDecorationLine));}
+    // fuerza por ejercicio
+    if(Object.keys(S.strength||{}).length){go('prog');await W(40);const pr=document.querySelector('#prog-str .pl-row');
+      if(pr){const pv2=pr.querySelector('.pl-v'),st=pr.querySelector('.pl-st'),cs=getComputedStyle(st);
+        E(getComputedStyle(pv2).color===_cssRgb('var(--text)'),'la cifra de fuerza no va en neutro: '+getComputedStyle(pv2).color);
+        E(clear(cs.backgroundColor)&&cs.borderTopWidth==='0px','el estado de fuerza sigue en pastilla');}}
+    if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+  }finally{try{RT.skip();}catch(e){}Object.assign(S,JSON.parse(j));for(const k of Object.keys(S))if(!(k in JSON.parse(j)))delete S[k];
+    if(fr){fr.style.width=fw;fr.style.height=fh;await W(40);}saveState();render();}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

@@ -100,7 +100,7 @@ function plRowHtml(x,s){
   return`<div class="card prog-tap pl-row" data-ex="${esc(id)}" data-st="${s.k}" role="button" tabindex="0" aria-label="${esc(aria)}" onclick="openHist(this.dataset.ex)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openHist(this.dataset.ex)}">
     <span class="pl-dot" style="background:${color}" aria-hidden="true"></span>
     <span class="pl-main"><span class="clbl pl-n">${esc(name)}</span>${out?`<span class="prog-out">${out}</span>`:''}
-      <span class="pl-sub"><span class="pl-v${lastre?' lt':''}" style="color:${color}">${lastre?`${esc('+'+lastW+NB+'kg')}<small> lastre</small>`:esc(vTxt)}</span><span class="pl-g ${gain[0]}${gain[0]==='band'?' prog-band':''}">${esc(gain[1])}</span></span></span>
+      <span class="pl-sub"><span class="pl-v${lastre?' lt':''}">${lastre?`${esc('+'+lastW+NB+'kg')}<small> lastre</small>`:esc(vTxt)}</span><span class="pl-g ${gain[0]}${gain[0]==='band'?' prog-band':''}">${esc(gain[1])}</span></span></span>
     <span class="pl-side">${plSpark(spk,color,cuts)}<span class="pl-st ${s.k}" title="${esc(why)}"><span aria-hidden="true">${icE(st.ic)}</span> ${chip==='Récord reciente'?'Récord<span class="pl-st-x"> reciente</span>':/^(Recién cambiado|En descarga)$/.test(chip)?chip.replace(/^([^ ]+ )(.+)$/,'<span class="pl-st-x">$1</span><span class="pl-st-c">$2</span>'):esc(chip)}</span></span>
     <span class="prog-go" aria-hidden="true">›</span>
   </div>`;
