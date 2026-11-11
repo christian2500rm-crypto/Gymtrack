@@ -421,15 +421,9 @@ function _scrollToCard(id){
   const top=Math.max(0,c.getBoundingClientRect().top-s.getBoundingClientRect().top+s.scrollTop-_topOff());
   _smoothScroll(s,top);
 }
-// Lo que tapa arriba el aviso flotante (#toast, p. ej. «Serie 3 marcada · Deshacer», 5 s): px desde el borde superior
-// de la lista. Se mide su posición final (sin la transformación de la entrada, que acaba de empezar).
-function _toastCover(){
-  const t=document.getElementById('toast'),s=document.getElementById('screen');
-  if(!t||!s||!t.classList.contains('show')||!t.offsetHeight||t.closest('#rest-full'))return 0; // (16) dentro del modo descanso no tapa la lista
-  if(document.querySelector('.hist-over'))return 0; // (16 r2) con una hoja abierta el aviso va abajo
-  let ty=0;try{const m=new DOMMatrixReadOnly(getComputedStyle(t).transform);ty=m.m42||0;}catch(e){}
-  return Math.max(0,Math.round(t.getBoundingClientRect().bottom-ty-s.getBoundingClientRect().top));
-}
+// El aviso flotante (#toast) sale abajo, encima de la navegación y de las barras de descanso y «siguiente serie»
+// (--toast-b, que pone _dockSync): ya no tapa nada arriba de la lista.
+function _toastCover(){return 0;}
 // Hueco arriba al colocar una tarjeta: 10 px, o por debajo del aviso si está a la vista (que no tape su nombre)
 function _topOff(){const c=_toastCover();return c?Math.max(10,c+8):10;}
 // Altura que tapan abajo la navegación, la barra «siguiente serie» y el descanso (px desde el borde inferior de #app)
@@ -446,6 +440,7 @@ function _dockSync(){
   const app=document.getElementById('app');if(!app)return;
   const v=_dockH()+'px';
   if(app.style.getPropertyValue('--dock-h')!==v)app.style.setProperty('--dock-h',v);
+  _toastPlace(); // el aviso (#toast), justo encima
   const rt=document.getElementById('rest-timer'),on=!!(rt&&rt.classList.contains('show'));
   if(app.classList.contains('dock-on')!==on)app.classList.toggle('dock-on',on);
 }
@@ -545,6 +540,7 @@ function showUndoToast(label,onUndo,cls,ms){ // (E10b) ms: cuánto se ve (por de
   const lbl=_nwX(esc(label)); // (18) y «× 10» de «15 kg × 10» junto
   el.innerHTML=`<span style="margin-right:14px">${lbl}</span><button id="undo-btn" style="background:transparent;border:1px solid var(--green);color:var(--green);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;pointer-events:auto">Deshacer</button>`;
   el.classList.toggle('pr',cls==='pr');
+  _toastPlace();
   el.classList.add('show');
   el.style.pointerEvents='auto';
   try{if(RF.open)RF._toastSeen();}catch(e){} // (16) con el modo descanso abierto, dentro de él y a la vista

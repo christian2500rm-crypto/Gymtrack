@@ -235,7 +235,7 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.fat-go:active{transform:none}}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 /* coach tab adjustment */
-.botbar.coach-enabled{padding:0}
+.botbar.coach-enabled{padding:0 0 var(--sb)} /* sin relleno lateral, pero conserva la zona segura de abajo: las etiquetas no pisan el indicador de inicio */
 .botbar.coach-enabled .bb{font-size:9.5px}
 .botbar.coach-enabled .bb svg{width:20px;height:20px}
 /* HISTORIAL + SUGERENCIA PESO */

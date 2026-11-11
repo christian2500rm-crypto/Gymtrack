@@ -1,5 +1,15 @@
 // ── UI HELPERS ────────────────────────────────────────────────
 let _toastT=null;
+// Dónde sale el aviso (#toast): abajo, encima de lo que flota (navegación, barra de descanso y de «siguiente serie») y, en
+// Inicio, encima del botón «Empezar» cuando va pegado al borde. Se calcula al mostrarlo, al cambiar de pantalla y cuando
+// cambian las barras (--toast-b; con una hoja abierta manda la regla de la hoja).
+function _toastPlace(){
+  try{
+    let b=_dockH();const app=document.getElementById('app').getBoundingClientRect(),cta=S.tab==='dash'?document.querySelector('.hoy>.hoy-cta'):null;
+    if(cta){const r=cta.getBoundingClientRect(),dk=app.bottom-b;if(r.height&&r.bottom>dk-70&&r.top<dk)b=Math.round(app.bottom-r.top)+4;}
+    const v=b+'px',rs=document.documentElement.style;if(rs.getPropertyValue('--toast-b')!==v)rs.setProperty('--toast-b',v);
+  }catch(e){}
+}
 function toast(msg,ms){
   const el=document.getElementById('toast');
   if(!el)return;
@@ -8,6 +18,7 @@ function toast(msg,ms){
   el.style.pointerEvents='';
   el.textContent=msg;
   el.classList.remove('pr');
+  _toastPlace();
   el.classList.add('show');
   try{if(RF.open)RF._toastSeen();}catch(e){} // (16) con el modo descanso abierto, dentro de él y a la vista
   clearTimeout(_toastT);

@@ -149,17 +149,19 @@
 .week-stat-l{font-size:10px;color:var(--text3);margin-top:1px;font-family:-apple-system,sans-serif}
 
 /* ── TOAST ── */
+/* El aviso sale abajo, encima de la navegación y de las barras flotantes (--toast-b lo pone _dockSync con su alto real):
+   arriba tapaba el título y los botones de la cabecera, y «Deshacer» quedaba lejos del pulgar. */
 /* (16c) centrado con left/right 0 y margin auto, ancho al contenido hasta el de la pantalla menos 14 px por lado (antes
    left:50% dejaba solo media pantalla al ajuste de ancho y los textos largos ocupaban 3-5 líneas) */
-#toast{position:fixed;top:calc(var(--st) + 14px);left:0;right:0;margin:0 auto;width:fit-content;width:-webkit-fit-content;box-sizing:border-box;transform:translateY(-120%);background:color-mix(in srgb,var(--bg2) 96%,transparent);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:min(calc(100% - 28px),440px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
+#toast{position:fixed;top:auto;bottom:calc(var(--toast-b,calc(58px + var(--sb) + 12px)) + var(--kb));left:0;right:0;margin:0 auto;width:fit-content;width:-webkit-fit-content;box-sizing:border-box;transform:translateY(24px);background:color-mix(in srgb,var(--bg2) 96%,transparent);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:min(calc(100% - 28px),440px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
 #toast.show{transform:translateY(0);opacity:1}
+#toast:not(.show){pointer-events:none!important} /* escondido no recoge toques: ahora queda cerca del pulgar, sobre botones */
 /* (15) Aviso de versión nueva: franja arriba de #app, en el flujo (empuja la pantalla hacia abajo y no tapa nada:
    antes flotaba sobre la navegación y pisaba «Empezar» en Inicio). Ocupa el hueco de la zona segura de arriba, así que la
    cabecera de la pantalla no lo repite; el toast baja para no taparlo. */
 #swup{flex:none;display:flex;align-items:center;gap:2px;margin:calc(var(--st) + 8px) 12px 0;box-sizing:border-box;min-height:46px;padding:0 0 0 14px;background:color-mix(in srgb,var(--green) 8%,var(--bg2));color:var(--text);border:1px solid var(--green-b);border-radius:var(--rsm);font-size:13px;font-weight:500}
 #swup[hidden]{display:none}
 body.swup-on #screen .topbar{padding-top:14px}
-body.swup-on #toast{top:calc(var(--st) + 8px + 46px + 8px)}
 /* (16 r2) Con una hoja abierta el aviso sale abajo (encima del teclado si está abierto): arriba tapaba el título de la
    hoja y su ✕ (a 320 px un aviso largo ocupa 3 líneas). Va después de la regla del aviso de versión para ganarle */
 body:has(.hist-over) #toast{top:auto;bottom:calc(14px + env(safe-area-inset-bottom,0px) + var(--kb));transform:translateY(120%)}
@@ -215,3 +217,8 @@ body:has(.hist-over) #toast.show{transform:translateY(0)}
 /* Cardio en marcha (tarjeta) */
 .cardio-run{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:10px;border-radius:var(--rxs);background:color-mix(in srgb,var(--blue) 8%,transparent);border:1px solid color-mix(in srgb,var(--blue) 25%,transparent);font-size:13px;color:var(--text2)}
 .cardio-run b{color:var(--text);font-family:'DM Mono',monospace;font-weight:600}
+/* Campo grande de los modales de peso: había perdido sus estilos y salía el recuadro blanco del navegador */
+.ob-inp{display:block;width:100%;margin:6px 0 12px;padding:13px 16px;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);color:var(--text);font-size:20px;font-weight:600;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none;-moz-appearance:textfield}
+.ob-inp:focus{border-color:var(--green)}
+.ob-inp::placeholder{color:var(--text3);font-weight:500}
+.ob-inp::-webkit-outer-spin-button,.ob-inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}

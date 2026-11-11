@@ -121,7 +121,7 @@ function _obTrap(ev){
 }
 document.addEventListener('keydown',_obTrap);
 // P1 · ob-hola (la misma que el HTML estático, por si se vuelve a ella)
-OB_SCR['ob-hola']={block:0,html:()=>`<svg class="ob-teca" viewBox="278 206 468 638" aria-hidden="true"><use href="#ob-teca-path"/></svg>
+OB_SCR['ob-hola']={block:0,html:()=>`<svg class="ob-teca" viewBox="0 0 468 638" aria-hidden="true"><use href="#ob-teca-path"/></svg>
   <h1 class="ob-title" id="ob-h" tabindex="-1">Te doy la bienvenida a Gymteca</h1>
   <p class="ob-sub">Tu entrenamiento, ordenado y a tu ritmo. Sin cuenta y sin conexión: lo que respondas se queda en este móvil.</p>
   <h2 class="ob-q">¿Cómo quieres empezar?</h2>

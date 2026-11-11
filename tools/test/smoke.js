@@ -2094,16 +2094,17 @@ await safe('gymToastClear',async()=>{
     _row7('c2',0).scrollIntoView({block:'center'});await W(50);
     _row7('c2',0).querySelector('.lg-ck').click();setRpe(2);await W(900);
     const cov=_toastCover(),hdr=_card7('c2').getBoundingClientRect().top-sc.getBoundingClientRect().top;
-    if(!t.classList.contains('show')||cov<20)throw new Error('sin aviso: '+cov);
+    if(!t.classList.contains('show')||cov!==0)throw new Error('sin aviso, o aún reserva hueco arriba: '+cov); // (B1) el aviso sale abajo
     if(hdr<cov)throw new Error('el aviso tapa la cabecera: '+Math.round(hdr)+' < '+cov);
     const lim=document.getElementById('app').getBoundingClientRect().bottom-_dockH();
     if([...Array(3).keys()].some(i=>_row7('c2',i).getBoundingClientRect().bottom>lim+1))throw new Error('filas bajo las barras');
+    {const tr=t.getBoundingClientRect();if(tr.bottom>lim+1||tr.top<innerHeight/2)throw new Error('el aviso no queda abajo, encima de las barras: '+Math.round(tr.top)+'-'+Math.round(tr.bottom)+' / '+Math.round(lim));}
     // tras el avance automático, la cabecera de la siguiente también
     for(let i=1;i<3;i++){_row7('c2',i).querySelector('.lg-ck').click();setRpe(2);}
     await W(ADV_MS+1100);
     const nx=_nextUnfinishedAfter('c2');if(!nx||S.open!==nx.id)throw new Error('no avanzó');
     const h2=_card7(nx.id).getBoundingClientRect().top-sc.getBoundingClientRect().top,cov2=_toastCover();
-    if(!cov2||h2<cov2||h2>cov2+40)throw new Error('siguiente bajo el aviso: '+Math.round(h2)+' / '+cov2);
+    if(cov2!==0||h2<0||h2>40)throw new Error('siguiente: cabecera fuera de sitio: '+Math.round(h2)+' / '+cov2);
     // sin aviso, arriba del todo como antes (10 px)
     t.classList.remove('show');if(_toastCover()!==0||_topOff()!==10)throw new Error('hueco sin aviso');
   }finally{_rest7(j);render();}
@@ -8679,7 +8680,7 @@ try{
       el.style.animation='';
       swUpdateLater();hTst();await W(10);
       E(el.hidden&&!document.body.classList.contains('swup-on')&&getComputedStyle(sc.querySelector('.topbar')).paddingTop===pad0,w+' '+t+': ✕ no devuelve la cabecera');
-      E(parseFloat(getComputedStyle(document.getElementById('toast')).top)<er.bottom,w+' '+t+': el toast no vuelve a su sitio');}
+      E(parseFloat(getComputedStyle(document.getElementById('toast')).bottom)>=58,w+' '+t+': el aviso no queda abajo, sobre la navegación');} // (B1)
   }
   await size(390,844);
   // Entreno sigue sin aviso
@@ -9446,7 +9447,7 @@ await safe('arreglos16r2',async()=>{
         const hd=document.querySelector('#settings-root .hist-sheet-head'),tr=R(t);
         E(tr.top>R(hd).bottom&&tr.bottom<=innerHeight+0.5,w+': el aviso tapa la cabecera de la hoja '+Math.round(tr.top)+'-'+Math.round(tr.bottom)+' / '+Math.round(R(hd).bottom));
         E(_toastCover()===0,w+': _toastCover con hoja');
-        closeSettings();hTst();await W(400);toast('Hecho');await W(450);E(R(t).top<120,w+': sin hoja el aviso no vuelve arriba '+Math.round(R(t).top));hTst();await W(20);}
+        closeSettings();hTst();await W(400);toast('Hecho');await W(450);E(R(t).top>innerHeight/2&&R(t).bottom<=innerHeight-58+1,w+': sin hoja el aviso no sale sobre la navegación '+Math.round(R(t).top)+'-'+Math.round(R(t).bottom));hTst();await W(20);}
       t.style.transition='';}
     // ── (6) Récords: «antes 8.5 × 11» sin partir ──
     {E(_nwPrev('antes 8.5 × 11')==='antes <span class="nw">8.5 × 11</span>'&&_nwPrev('antes <b>')==='antes <span class="nw">&lt;b&gt;</span>'&&_nwPrev('')==='','_nwPrev');
@@ -12203,6 +12204,25 @@ await safe('obPorqueRestOff',async()=>{
     S.restOn=true;S.rpeOn=true;obRender();await W(5);E(_obPorque().some(x=>rx.test(x)),'al encender no vuelve');
     if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
   }finally{await _m3Back(full);}
+});
+await safe('arreglosB1',async()=>{
+  // (B1) Arreglos de interfaz: el logo de la bienvenida sale entero, el campo de peso tiene sus estilos, la navegación reserva la
+  // zona segura de abajo (iPhone) y el aviso (#toast) sale abajo, encima de la navegación, sin tapar la cabecera
+  const bad=[];const E=(c,m)=>{if(!c)bad.push(m);};
+  E(String(OB_SCR['ob-hola'].html).includes('class="ob-teca" viewBox="0 0 468 638"'),'logo: el <svg> repite el viewBox desplazado');
+  const w0=!!S.wmodal;S.wmodal=true;renderWmodal();await W(2);
+  {const i=document.getElementById('wmodal-input'),cs=i&&getComputedStyle(i);
+    E(cs&&parseFloat(cs.borderTopLeftRadius)>=8&&parseFloat(cs.paddingLeft)>=12&&cs.backgroundColor!=='rgb(255, 255, 255)','campo de peso sin estilo: '+(cs&&[cs.borderTopLeftRadius,cs.paddingLeft,cs.backgroundColor]));}
+  S.wmodal=w0;S.wnew='';renderWmodal();
+  const rs=document.documentElement.style,sb0=rs.getPropertyValue('--sb');rs.setProperty('--sb','34px');
+  {const b=document.querySelector('.botbar'),cs=getComputedStyle(b),h=Math.round(b.getBoundingClientRect().height);
+    E(cs.paddingBottom==='34px'&&h>=88,'la navegación no reserva la zona segura: relleno '+cs.paddingBottom+', alto '+h);}
+  if(sb0)rs.setProperty('--sb',sb0);else rs.removeProperty('--sb');
+  toast('prueba');await W(2);
+  {const t=document.getElementById('toast'),cs=getComputedStyle(t);
+    E(parseFloat(cs.bottom)>=58&&t.getBoundingClientRect().top>innerHeight/2,'el aviso no sale abajo, sobre la navegación: bottom '+cs.bottom);
+    E(_toastCover()===0,'_toastCover ya no debe reservar hueco arriba');}
+  if(bad.length)throw new Error(bad.join(' | '));
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

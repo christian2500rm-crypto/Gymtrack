@@ -621,7 +621,7 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 @media (prefers-reduced-motion:reduce){.fat-go:active{transform:none}}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 /* coach tab adjustment */
-.botbar.coach-enabled{padding:0}
+.botbar.coach-enabled{padding:0 0 var(--sb)} /* sin relleno lateral, pero conserva la zona segura de abajo: las etiquetas no pisan el indicador de inicio */
 .botbar.coach-enabled .bb{font-size:9.5px}
 .botbar.coach-enabled .bb svg{width:20px;height:20px}
 /* HISTORIAL + SUGERENCIA PESO */
@@ -1221,17 +1221,19 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .week-stat-l{font-size:10px;color:var(--text3);margin-top:1px;font-family:-apple-system,sans-serif}
 
 /* ── TOAST ── */
+/* El aviso sale abajo, encima de la navegación y de las barras flotantes (--toast-b lo pone _dockSync con su alto real):
+   arriba tapaba el título y los botones de la cabecera, y «Deshacer» quedaba lejos del pulgar. */
 /* (16c) centrado con left/right 0 y margin auto, ancho al contenido hasta el de la pantalla menos 14 px por lado (antes
    left:50% dejaba solo media pantalla al ajuste de ancho y los textos largos ocupaban 3-5 líneas) */
-#toast{position:fixed;top:calc(var(--st) + 14px);left:0;right:0;margin:0 auto;width:fit-content;width:-webkit-fit-content;box-sizing:border-box;transform:translateY(-120%);background:color-mix(in srgb,var(--bg2) 96%,transparent);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:min(calc(100% - 28px),440px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
+#toast{position:fixed;top:auto;bottom:calc(var(--toast-b,calc(58px + var(--sb) + 12px)) + var(--kb));left:0;right:0;margin:0 auto;width:fit-content;width:-webkit-fit-content;box-sizing:border-box;transform:translateY(24px);background:color-mix(in srgb,var(--bg2) 96%,transparent);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:min(calc(100% - 28px),440px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
 #toast.show{transform:translateY(0);opacity:1}
+#toast:not(.show){pointer-events:none!important} /* escondido no recoge toques: ahora queda cerca del pulgar, sobre botones */
 /* (15) Aviso de versión nueva: franja arriba de #app, en el flujo (empuja la pantalla hacia abajo y no tapa nada:
    antes flotaba sobre la navegación y pisaba «Empezar» en Inicio). Ocupa el hueco de la zona segura de arriba, así que la
    cabecera de la pantalla no lo repite; el toast baja para no taparlo. */
 #swup{flex:none;display:flex;align-items:center;gap:2px;margin:calc(var(--st) + 8px) 12px 0;box-sizing:border-box;min-height:46px;padding:0 0 0 14px;background:color-mix(in srgb,var(--green) 8%,var(--bg2));color:var(--text);border:1px solid var(--green-b);border-radius:var(--rsm);font-size:13px;font-weight:500}
 #swup[hidden]{display:none}
 body.swup-on #screen .topbar{padding-top:14px}
-body.swup-on #toast{top:calc(var(--st) + 8px + 46px + 8px)}
 /* (16 r2) Con una hoja abierta el aviso sale abajo (encima del teclado si está abierto): arriba tapaba el título de la
    hoja y su ✕ (a 320 px un aviso largo ocupa 3 líneas). Va después de la regla del aviso de versión para ganarle */
 body:has(.hist-over) #toast{top:auto;bottom:calc(14px + env(safe-area-inset-bottom,0px) + var(--kb));transform:translateY(120%)}
@@ -1287,6 +1289,11 @@ body:has(.hist-over) #toast.show{transform:translateY(0)}
 /* Cardio en marcha (tarjeta) */
 .cardio-run{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:10px;border-radius:var(--rxs);background:color-mix(in srgb,var(--blue) 8%,transparent);border:1px solid color-mix(in srgb,var(--blue) 25%,transparent);font-size:13px;color:var(--text2)}
 .cardio-run b{color:var(--text);font-family:'DM Mono',monospace;font-weight:600}
+/* Campo grande de los modales de peso: había perdido sus estilos y salía el recuadro blanco del navegador */
+.ob-inp{display:block;width:100%;margin:6px 0 12px;padding:13px 16px;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);color:var(--text);font-size:20px;font-weight:600;font-family:inherit;outline:none;-webkit-appearance:none;appearance:none;-moz-appearance:textfield}
+.ob-inp:focus{border-color:var(--green)}
+.ob-inp::placeholder{color:var(--text3);font-weight:500}
+.ob-inp::-webkit-outer-spin-button,.ob-inp::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
 /* ── MAPA MUSCULAR 3D (Progreso, Coach y editor de rutina) ── */
 .mm-fig{position:relative;width:100%;height:270px;border-radius:var(--rsm);background:var(--stage);overflow:hidden;touch-action:pan-y;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
 .mm-fig canvas{display:block;width:100%;height:100%;touch-action:pan-y}
@@ -1922,7 +1929,7 @@ input[type=number]{-moz-appearance:textfield}
   <svg style="display:none" aria-hidden="true"><symbol id="ob-teca-path" viewBox="278 206 468 638"><path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="var(--green)" stroke-width="92" stroke-linecap="round"/><path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="var(--green)"/><g fill="none" stroke="var(--bg)" stroke-linecap="round" stroke-linejoin="round"><circle cx="436" cy="648" r="34" fill="var(--bg)" stroke="none"/><path d="M554 658q34-46 68 0" stroke-width="28"/><path d="M442 728q70 66 140 0" stroke-width="30"/></g></symbol></svg>
   <div id="ob-live" class="sr-only" aria-live="polite"></div>
   <div id="ob-root"><div class="ob-body" data-scr="ob-hola">
-    <svg class="ob-teca" viewBox="278 206 468 638" aria-hidden="true"><use href="#ob-teca-path"/></svg>
+    <svg class="ob-teca" viewBox="0 0 468 638" aria-hidden="true"><use href="#ob-teca-path"/></svg>
     <h1 class="ob-title" id="ob-h" tabindex="-1">Te doy la bienvenida a Gymteca</h1>
     <p class="ob-sub">Tu entrenamiento, ordenado y a tu ritmo. Sin cuenta y sin conexión: lo que respondas se queda en este móvil.</p>
     <h2 class="ob-q">¿Cómo quieres empezar?</h2>
@@ -14633,7 +14640,7 @@ function _obTrap(ev){
 }
 document.addEventListener('keydown',_obTrap);
 // P1 · ob-hola (la misma que el HTML estático, por si se vuelve a ella)
-OB_SCR['ob-hola']={block:0,html:()=>`<svg class="ob-teca" viewBox="278 206 468 638" aria-hidden="true"><use href="#ob-teca-path"/></svg>
+OB_SCR['ob-hola']={block:0,html:()=>`<svg class="ob-teca" viewBox="0 0 468 638" aria-hidden="true"><use href="#ob-teca-path"/></svg>
   <h1 class="ob-title" id="ob-h" tabindex="-1">Te doy la bienvenida a Gymteca</h1>
   <p class="ob-sub">Tu entrenamiento, ordenado y a tu ritmo. Sin cuenta y sin conexión: lo que respondas se queda en este móvil.</p>
   <h2 class="ob-q">¿Cómo quieres empezar?</h2>
@@ -15987,6 +15994,16 @@ function _bandCuts(ex,list){const o=[];for(let i=1;i<list.length;i++)if(_bandUp(
 
 // ── UI HELPERS ────────────────────────────────────────────────
 let _toastT=null;
+// Dónde sale el aviso (#toast): abajo, encima de lo que flota (navegación, barra de descanso y de «siguiente serie») y, en
+// Inicio, encima del botón «Empezar» cuando va pegado al borde. Se calcula al mostrarlo, al cambiar de pantalla y cuando
+// cambian las barras (--toast-b; con una hoja abierta manda la regla de la hoja).
+function _toastPlace(){
+  try{
+    let b=_dockH();const app=document.getElementById('app').getBoundingClientRect(),cta=S.tab==='dash'?document.querySelector('.hoy>.hoy-cta'):null;
+    if(cta){const r=cta.getBoundingClientRect(),dk=app.bottom-b;if(r.height&&r.bottom>dk-70&&r.top<dk)b=Math.round(app.bottom-r.top)+4;}
+    const v=b+'px',rs=document.documentElement.style;if(rs.getPropertyValue('--toast-b')!==v)rs.setProperty('--toast-b',v);
+  }catch(e){}
+}
 function toast(msg,ms){
   const el=document.getElementById('toast');
   if(!el)return;
@@ -15995,6 +16012,7 @@ function toast(msg,ms){
   el.style.pointerEvents='';
   el.textContent=msg;
   el.classList.remove('pr');
+  _toastPlace();
   el.classList.add('show');
   try{if(RF.open)RF._toastSeen();}catch(e){} // (16) con el modo descanso abierto, dentro de él y a la vista
   clearTimeout(_toastT);
@@ -17769,15 +17787,9 @@ function _scrollToCard(id){
   const top=Math.max(0,c.getBoundingClientRect().top-s.getBoundingClientRect().top+s.scrollTop-_topOff());
   _smoothScroll(s,top);
 }
-// Lo que tapa arriba el aviso flotante (#toast, p. ej. «Serie 3 marcada · Deshacer», 5 s): px desde el borde superior
-// de la lista. Se mide su posición final (sin la transformación de la entrada, que acaba de empezar).
-function _toastCover(){
-  const t=document.getElementById('toast'),s=document.getElementById('screen');
-  if(!t||!s||!t.classList.contains('show')||!t.offsetHeight||t.closest('#rest-full'))return 0; // (16) dentro del modo descanso no tapa la lista
-  if(document.querySelector('.hist-over'))return 0; // (16 r2) con una hoja abierta el aviso va abajo
-  let ty=0;try{const m=new DOMMatrixReadOnly(getComputedStyle(t).transform);ty=m.m42||0;}catch(e){}
-  return Math.max(0,Math.round(t.getBoundingClientRect().bottom-ty-s.getBoundingClientRect().top));
-}
+// El aviso flotante (#toast) sale abajo, encima de la navegación y de las barras de descanso y «siguiente serie»
+// (--toast-b, que pone _dockSync): ya no tapa nada arriba de la lista.
+function _toastCover(){return 0;}
 // Hueco arriba al colocar una tarjeta: 10 px, o por debajo del aviso si está a la vista (que no tape su nombre)
 function _topOff(){const c=_toastCover();return c?Math.max(10,c+8):10;}
 // Altura que tapan abajo la navegación, la barra «siguiente serie» y el descanso (px desde el borde inferior de #app)
@@ -17794,6 +17806,7 @@ function _dockSync(){
   const app=document.getElementById('app');if(!app)return;
   const v=_dockH()+'px';
   if(app.style.getPropertyValue('--dock-h')!==v)app.style.setProperty('--dock-h',v);
+  _toastPlace(); // el aviso (#toast), justo encima
   const rt=document.getElementById('rest-timer'),on=!!(rt&&rt.classList.contains('show'));
   if(app.classList.contains('dock-on')!==on)app.classList.toggle('dock-on',on);
 }
@@ -17893,6 +17906,7 @@ function showUndoToast(label,onUndo,cls,ms){ // (E10b) ms: cuánto se ve (por de
   const lbl=_nwX(esc(label)); // (18) y «× 10» de «15 kg × 10» junto
   el.innerHTML=`<span style="margin-right:14px">${lbl}</span><button id="undo-btn" style="background:transparent;border:1px solid var(--green);color:var(--green);border-radius:6px;padding:3px 10px;font-size:12px;font-weight:600;cursor:pointer;pointer-events:auto">Deshacer</button>`;
   el.classList.toggle('pr',cls==='pr');
+  _toastPlace();
   el.classList.add('show');
   el.style.pointerEvents='auto';
   try{if(RF.open)RF._toastSeen();}catch(e){} // (16) con el modo descanso abierto, dentro de él y a la vista
@@ -20542,7 +20556,7 @@ function renderCoach(){
       <button class="btn bp" onclick="coach_applyRecommendations()">Cerrar ciclo e iniciar uno nuevo</button>
     </div>`:
     (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">Faltan ~<strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
+    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'Faltan unas':'Falta alrededor de'} <strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
     :`<div class="sh">Recomendaciones</div>
     <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`)}
 
@@ -20644,7 +20658,7 @@ function go(tab){
   _uiGen++;_scrollTo=null; // cambiar de pantalla cancela el avance automático pendiente del modo gym
   // (08) El RPE ya no es una ventana: sus chips van en la barra del descanso, que se ve en todas las pantallas
   S.tab=tab;['dash','workout','coach','prog'].forEach(t=>document.getElementById('nb-'+t).classList.toggle('on',t===tab));
-  document.getElementById('screen').scrollTop=0;render();saveState();
+  document.getElementById('screen').scrollTop=0;render();saveState();_toastPlace();
   try{if(_sw.pending)swUpdateSync(true);}catch(e){} // (15) el aviso de versión nueva se esconde al entrar en Entreno; (16c) y vuelve al salir
 }
 
