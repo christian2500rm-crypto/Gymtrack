@@ -66,7 +66,7 @@ function applyLaunchParam(){
     if(getPlan()[dk])S.day=dk;
     S.tab='workout';
   }else if(k==='progreso')S.tab='prog';
-  ['dash','workout','coach','prog'].forEach(t=>{const b=document.getElementById('nb-'+t);if(b)b.classList.toggle('on',t===S.tab);});
+  ['dash','workout','coach','prog'].forEach(t=>{const b=document.getElementById('nb-'+t);if(b){b.classList.toggle('on',t===S.tab);if(t===S.tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}});
   return k;
 }
 

@@ -2,7 +2,7 @@
 function go(tab){
   _uiGen++;_scrollTo=null; // cambiar de pantalla cancela el avance automático pendiente del modo gym
   // (08) El RPE ya no es una ventana: sus chips van en la barra del descanso, que se ve en todas las pantallas
-  S.tab=tab;['dash','workout','coach','prog'].forEach(t=>document.getElementById('nb-'+t).classList.toggle('on',t===tab));
+  S.tab=tab;['dash','workout','coach','prog'].forEach(t=>{const b=document.getElementById('nb-'+t);b.classList.toggle('on',t===tab);if(t===tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}); // la pestaña activa, también para el lector de pantalla
   document.getElementById('screen').scrollTop=0;render();saveState();_toastPlace();
   try{if(_sw.pending)swUpdateSync(true);}catch(e){} // (15) el aviso de versión nueva se esconde al entrar en Entreno; (16c) y vuelve al salir
 }

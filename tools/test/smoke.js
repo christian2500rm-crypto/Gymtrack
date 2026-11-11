@@ -12243,5 +12243,21 @@ await safe('escalaB1',async()=>{
   E(probe('sh').tt==='none'&&probe('clbl').tt==='none'&&parseFloat(probe('sh').fs)>=15,'rótulos de sección en mayúsculas o pequeños: '+probe('sh').tt+' '+probe('sh').fs);
   E(/rgba\(0, 0, 0, 0\)|transparent/.test(probe('card').bc)&&/rgba\(0, 0, 0, 0\)|transparent/.test(probe('excard').bc),'tarjeta con borde visible: '+probe('card').bc);
 });
+await safe('navB1',async()=>{
+  // (B1) Barra de abajo: etiquetas en frase normal y de al menos 11 px, iconos de 24 px, sin el punto de la pestaña activa,
+  // 44 px de toque y la pestaña activa marcada también para el lector de pantalla
+  const bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const t0=S.tab;
+  const bs=[...document.querySelectorAll('.botbar .bb')];E(bs.length===4,'pestañas: '+bs.length);
+  E(!document.querySelector('.bb-dot'),'queda el punto de la pestaña activa');
+  for(const b of bs){const cs=getComputedStyle(b),sv=b.querySelector('svg'),r=b.getBoundingClientRect();
+    E(cs.textTransform==='none'&&parseFloat(cs.fontSize)>=11,b.id+': etiqueta '+cs.textTransform+' '+cs.fontSize);
+    E(sv&&Math.round(sv.getBoundingClientRect().width)===24&&sv.getAttribute('aria-hidden')==='true',b.id+': icono');
+    E(r.height>=44&&r.width>=44,b.id+': zona de toque '+Math.round(r.width)+'×'+Math.round(r.height));}
+  for(const t of ['workout','coach','prog','dash']){go(t);await W(2);
+    const on=bs.filter(b=>b.classList.contains('on')),cur=bs.filter(b=>b.getAttribute('aria-current')==='page');
+    E(on.length===1&&on[0].id==='nb-'+t&&cur.length===1&&cur[0]===on[0],t+': pestaña activa mal marcada');}
+  go(t0);await W(2);
+  if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

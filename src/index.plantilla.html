@@ -48,21 +48,21 @@
   <div id="swup" role="region" aria-label="Actualización" hidden><span class="swup-t">Nueva versión disponible</span><button type="button" class="swup-go" onclick="swUpdateApply()">Actualizar</button><button type="button" class="swup-x" onclick="swUpdateLater()" aria-label="Ahora no (se pondrá al día la próxima vez)">✕</button></div>
   <div id="screen"></div>
   <nav class="botbar coach-enabled">
-    <button class="bb on" id="nb-dash" onclick="go('dash')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      Inicio<div class="bb-dot"></div>
+    <button class="bb on" id="nb-dash" aria-current="page" onclick="go('dash')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5v10h4.2V14h3.6v5.5H18v-10"/></svg>
+      Inicio
     </button>
     <button class="bb" id="nb-workout" onclick="go('workout')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 4v16M18 4v16M3 8h4M17 8h4M3 16h4M17 16h4"/></svg>
-      Entreno<div class="bb-dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M6.5 6v12M17.5 6v12M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
+      Entreno
     </button>
     <button class="bb" id="nb-coach" onclick="go('coach')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
-      Coach<div class="bb-dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.3 8.7-1.9 4.7-4.7 1.9 1.9-4.7z"/></svg>
+      Coach
     </button>
     <button class="bb" id="nb-prog" onclick="go('prog')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
-      Progreso<div class="bb-dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m4 17.5 5-5 3.5 3.5 7.5-8"/><path d="M15 8h5v5"/></svg>
+      Progreso
     </button>
   </nav>
   <!-- (08) Tocar la barra (fuera de sus botones) abre el modo descanso a pantalla completa; el RPE de la serie va en

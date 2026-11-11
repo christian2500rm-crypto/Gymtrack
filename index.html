@@ -60,11 +60,11 @@ input{font-family:inherit}
 #screen{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(64px + var(--sb))}
 #screen::-webkit-scrollbar{display:none}
 .botbar{position:absolute;bottom:0;left:0;right:0;height:calc(58px + var(--sb));padding-bottom:var(--sb);display:flex;background:color-mix(in srgb,var(--bg) 95%,transparent);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid var(--border);z-index:100}
-.bb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--text3);font-size:11px;font-weight:500;letter-spacing:.4px;text-transform:uppercase;transition:color .2s}
-.bb.on{color:var(--green)}
-.bb svg{width:21px;height:21px;stroke-width:1.8}
-.bb-dot{width:4px;height:4px;border-radius:50%;background:var(--green);opacity:0;margin-top:-1px;transition:opacity .2s}
-.bb.on .bb-dot{opacity:1}
+.bb{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text3);font-size:11px;font-weight:500;transition:color .2s}
+.bb.on{color:var(--green);font-weight:600}
+.bb svg{width:24px;height:24px;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.bb.on svg{stroke-width:2}
+.bb:focus-visible{outline:2px solid var(--green);outline-offset:-4px;border-radius:12px}
 .topbar{padding:calc(var(--st) + 20px) 18px 14px;border-bottom:1px solid var(--border)}
 .topbar-row{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .topbar h1{font-size:20px;font-weight:600;letter-spacing:-.4px;line-height:1.2}
@@ -625,8 +625,6 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap;border:0}
 /* coach tab adjustment */
 .botbar.coach-enabled{padding:0 0 var(--sb)} /* sin relleno lateral, pero conserva la zona segura de abajo: las etiquetas no pisan el indicador de inicio */
-.botbar.coach-enabled .bb{font-size:11px}
-.botbar.coach-enabled .bb svg{width:20px;height:20px}
 /* HISTORIAL + SUGERENCIA PESO */
 .hist-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:var(--rsm);padding:6px 10px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;gap:4px}
 .hist-btn:active{transform:scale(.95)}
@@ -1998,21 +1996,21 @@ input[type=number]{-moz-appearance:textfield}
   <div id="swup" role="region" aria-label="Actualización" hidden><span class="swup-t">Nueva versión disponible</span><button type="button" class="swup-go" onclick="swUpdateApply()">Actualizar</button><button type="button" class="swup-x" onclick="swUpdateLater()" aria-label="Ahora no (se pondrá al día la próxima vez)">✕</button></div>
   <div id="screen"></div>
   <nav class="botbar coach-enabled">
-    <button class="bb on" id="nb-dash" onclick="go('dash')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
-      Inicio<div class="bb-dot"></div>
+    <button class="bb on" id="nb-dash" aria-current="page" onclick="go('dash')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 9.5v10h4.2V14h3.6v5.5H18v-10"/></svg>
+      Inicio
     </button>
     <button class="bb" id="nb-workout" onclick="go('workout')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 4v16M18 4v16M3 8h4M17 8h4M3 16h4M17 16h4"/></svg>
-      Entreno<div class="bb-dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="M6.5 6v12M17.5 6v12M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
+      Entreno
     </button>
     <button class="bb" id="nb-coach" onclick="go('coach')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
-      Coach<div class="bb-dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="m15.3 8.7-1.9 4.7-4.7 1.9 1.9-4.7z"/></svg>
+      Coach
     </button>
     <button class="bb" id="nb-prog" onclick="go('prog')">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
-      Progreso<div class="bb-dot"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true"><path d="m4 17.5 5-5 3.5 3.5 7.5-8"/><path d="M15 8h5v5"/></svg>
+      Progreso
     </button>
   </nav>
   <!-- (08) Tocar la barra (fuera de sus botones) abre el modo descanso a pantalla completa; el RPE de la serie va en
@@ -20707,7 +20705,7 @@ function coach_fixLegacyDeload(restore){
 function go(tab){
   _uiGen++;_scrollTo=null; // cambiar de pantalla cancela el avance automático pendiente del modo gym
   // (08) El RPE ya no es una ventana: sus chips van en la barra del descanso, que se ve en todas las pantallas
-  S.tab=tab;['dash','workout','coach','prog'].forEach(t=>document.getElementById('nb-'+t).classList.toggle('on',t===tab));
+  S.tab=tab;['dash','workout','coach','prog'].forEach(t=>{const b=document.getElementById('nb-'+t);b.classList.toggle('on',t===tab);if(t===tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}); // la pestaña activa, también para el lector de pantalla
   document.getElementById('screen').scrollTop=0;render();saveState();_toastPlace();
   try{if(_sw.pending)swUpdateSync(true);}catch(e){} // (15) el aviso de versión nueva se esconde al entrar en Entreno; (16c) y vuelve al salir
 }
@@ -28129,7 +28127,7 @@ function applyLaunchParam(){
     if(getPlan()[dk])S.day=dk;
     S.tab='workout';
   }else if(k==='progreso')S.tab='prog';
-  ['dash','workout','coach','prog'].forEach(t=>{const b=document.getElementById('nb-'+t);if(b)b.classList.toggle('on',t===S.tab);});
+  ['dash','workout','coach','prog'].forEach(t=>{const b=document.getElementById('nb-'+t);if(b){b.classList.toggle('on',t===S.tab);if(t===S.tab)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current');}});
   return k;
 }
 
