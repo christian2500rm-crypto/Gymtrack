@@ -1,0 +1,59 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>GymAnim · cabezas</title>
+<style>
+body{margin:0;background:#0b0c0e;color:#cfd5dc;font:10px system-ui,sans-serif}
+.grid{display:flex;flex-wrap:wrap;gap:6px;padding:6px}
+.cell{display:flex;flex-direction:column;gap:2px}
+.cell .t{font:10px ui-monospace,monospace;color:#8b95a1;white-space:nowrap;overflow:hidden}
+.cell .t b{color:#e5e7eb}
+.row{display:flex;gap:4px}
+canvas{border-radius:6px;background:#111}
+</style>
+<script>
+// Hoja de cabezas: por cada animación, la vista de la ficha (358×200) y la cabeza ampliada en varios momentos.
+// ?keys=a,b (o ?from=0&count=60 sobre GymAnim.keys()) &n=2 (momentos: el de cara más de frente y los repartidos)
+// &yaw=… (gira la cámara como al arrastrar) &files=… (como lab.html; por defecto todos los ex/ de build.js en FILES)
+(function(){
+  const q=new URLSearchParams(location.search);
+  const files=(q.get('files')||'').split(',').filter(Boolean);
+  document.write('<script src="engine.js"><\/script>');
+  for(const f of files)document.write('<script src="'+f+'"><\/script>');
+})();
+</script>
+</head><body>
+<div id="out"></div>
+<script>
+(function(){
+const q=new URLSearchParams(location.search),GA=window.GymAnim,I=GA._,V=I.V;
+const W=358,H=200,DPR=+(q.get("dpr")||3),CROP=+(q.get("crop")||104),n=+(q.get('n')||2),yaw=q.get('yaw');
+let keys=q.get('keys')?q.get('keys').split(','):GA.keys();
+if(q.get('from')!=null)keys=keys.slice(+q.get('from'),+q.get('from')+(+(q.get('count')||60)));
+const proj=(cm,p)=>{const d=[p[0]-cm.t[0],p[1]-cm.t[1],p[2]-cm.t[2]];const z=-(d[0]*cm.d[0]+d[1]*cm.d[1]+d[2]*cm.d[2]);const k=cm.zoom/(1+z*cm.persp);
+  return[cm.ox+(d[0]*cm.R[0]+d[1]*cm.R[1]+d[2]*cm.R[2])*k,cm.oy-(d[0]*cm.U[0]+d[1]*cm.U[1]+d[2]*cm.U[2])*k,k];};
+const g=document.createElement('div');g.className='grid';document.getElementById('out').appendChild(g);
+const res=[];
+// &yaws=0,45,90…: una celda por giro de cámara (como al arrastrar), en el momento de la cara más de frente
+const yaws=q.get('yaws')?q.get('yaws').split(',').map(Number):[yaw!=null?+yaw:null];
+for(const k0 of keys)for(const yw of yaws){const k=k0,spec0=GA.get(k);if(!spec0)continue;
+  const spec=yw!=null?Object.assign({},spec0,{cam:Object.assign({},spec0.cam,{yaw:(spec0.cam&&spec0.cam.yaw||0)+yw})}):spec0;spec._tl=spec0._tl;
+  const tl=spec._tl,cm=I.fitCam(spec,W,H,I.PAD);
+  // momentos: el de la cara más de frente y n-1 repartidos
+  let best=0,bd=-9;const ts=[];for(let i=0;i<24;i++){const t=tl.total*i/24+.0001;const{b}=I.buildFrame(spec,I.evalTL(tl,spec,t));if(b.hf){const dn=V.dot(b.hf.F,cm.d);if(dn>bd){bd=dn;best=t;}}}
+  ts.push(best);for(let i=1;i<n;i++)ts.push((best+tl.total*i/n)%tl.total);
+  const cell=document.createElement('div');cell.className='cell';const lab=document.createElement('div');lab.className='t';
+  lab.innerHTML='<b>'+k.replace(/^lib_/,'')+'</b> dn '+bd.toFixed(2)+(yw!=null?' yaw+'+yw:'');cell.appendChild(lab);
+  const row=document.createElement('div');row.className='row';cell.appendChild(row);g.appendChild(cell);
+  const full=document.createElement('canvas');full.width=W*DPR;full.height=H*DPR;const fx=full.getContext('2d');
+  for(const t of ts){fx.setTransform(DPR,0,0,DPR,0,0);const c=I.evalTL(tl,spec,t);const b=I.renderTo(fx,spec,cm,c,W,H,{traces:false,hud:false});
+    // &full=1: la vista entera (como en la ficha) en vez de la cabeza ampliada
+    if(q.get('full')){const cv=document.createElement('canvas');cv.width=W*2;cv.height=H*2;cv.style.width=W+'px';row.appendChild(cv);
+      const c2=cv.getContext('2d');c2.setTransform(2,0,0,2,0,0);I.renderTo(c2,spec,cm,c,W,H,{traces:false});res.push({k,t});continue;}
+    const cv=document.createElement('canvas');cv.width=CROP;cv.height=CROP;cv.style.width=CROP+'px';row.appendChild(cv);
+    if(!b.headC){continue;}const P=proj(cm,b.headC),r=Math.max(.16*P[2],10);
+    cv.getContext('2d').drawImage(full,(P[0]-r)*DPR,(P[1]-r)*DPR,2*r*DPR,2*r*DPR,0,0,CROP,CROP);
+    res.push({k,t:+t.toFixed(3),dn:+V.dot(b.hf.F,cm.d).toFixed(3)});}
+}
+window.__res=res;document.title='OK '+res.length;
+})();
+</script>
+</body></html>

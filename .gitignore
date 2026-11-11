@@ -3,3 +3,9 @@ web/
 # Herramientas locales y datos de prueba
 .claude/
 /__seed.html
+# Salidas de las herramientas de tools/ (capturas, perfiles de Chrome, resultados del prototipo): no se versionan
+/tools/lab/shots/
+/tools/lab/.prof_*
+/tools/gen/sim/*.json
+/tools/gen/sim/revision-*.txt
+/tools/gen/sim/versiones/

@@ -23,11 +23,12 @@ node tools/build.js --check   # comprueba que index.html coincide con src/ (sin 
 Después de editar `src/`, monta y versiona `index.html` junto con `src/` en el mismo commit. Todo va en UTF-8 con LF y
 `.gitattributes` impide que git convierta finales de línea en `index.html`, `src/` y `tools/`.
 
-Partes generadas por herramientas (no se editan en `src/`, sino en su herramienta, que reescribe su fichero):
-- `src/js/anim/`: desde el laboratorio 3D. `GymAnim` no se toca sin el laboratorio.
-- `src/js/gen/`: desde el prototipo del generador. `GymGen` no se toca sin su prototipo y su arnés, que comprueba que
-  prototipo y app dan las mismas rutinas.
-- `src/js/app/catalogo-filas.js` (`LIB_ROWS`): desde el catálogo `catalog.json`.
+Partes generadas por herramientas (no se editan en `src/`, sino en su herramienta, que reescribe su fichero; cada
+una tiene `--check` y un README):
+- `src/js/anim/`: desde el laboratorio 3D, `node tools/lab/build.js`. `GymAnim` no se toca sin el laboratorio.
+- `src/js/gen/`: desde el prototipo del generador, `node tools/gen/build.js`. `GymGen` no se toca sin su prototipo
+  (`tools/gen/sim`) y su arnés, que comprueba que prototipo y app dan las mismas rutinas.
+- `src/js/app/catalogo-filas.js` (`LIB_ROWS`): desde `tools/catalog/catalog.json`, `node tools/catalog/rows.js`.
 
 ## Pruebas
 

@@ -1,0 +1,73 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>GymAnim lab</title>
+<style>
+body{margin:0;background:#0b0c0e;color:#cfd5dc;font:12px system-ui,sans-serif}
+.grid{display:flex;flex-wrap:wrap;gap:8px;padding:8px}
+.cell{display:flex;flex-direction:column;gap:3px}
+.cell .t{font:11px ui-monospace,monospace;color:#8b95a1;max-width:340px;overflow:hidden;white-space:nowrap}
+.cell .t b{color:#e5e7eb}
+.cell .t .bad{color:#ff6b6b;font-weight:bold}
+.box{width:340px;height:200px;border-radius:10px;overflow:hidden;background:#111;position:relative}
+h2{margin:8px 8px 0;font-size:13px;color:#e5e7eb}
+</style>
+<script>
+(function(){
+  const q=new URLSearchParams(location.search);
+  const files=(q.get('files')||'').split(',').filter(Boolean);
+  document.write('<script src="engine.js"><\/script>');
+  for(const f of files)document.write('<script src="'+f+'"><\/script>');
+})();
+</script>
+</head><body>
+<div id="out"></div>
+<script>
+(function(){
+const q=new URLSearchParams(location.search);
+const mode=q.get('mode')||'sheet';
+const GA=window.GymAnim,I=GA._;
+const out=document.getElementById('out');
+const W=+(q.get('w')||340),H=+(q.get('h')||200);
+function cell(label,draw,bad){const d=document.createElement('div');d.className='cell';
+  const t=document.createElement('div');t.className='t';t.innerHTML=label;
+  const box=document.createElement('div');box.className='box';box.style.width=W+'px';box.style.height=H+'px';
+  const cv=document.createElement('canvas');const dpr=2;cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';
+  box.appendChild(cv);d.appendChild(t);d.appendChild(box);
+  const ctx=cv.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+  try{draw(ctx,t);}catch(e){t.innerHTML+=' <span class="bad">ERR '+e.message+'</span>';console.error(e);}
+  return d;}
+function sheet(key,opts){
+  const spec=GA.get(key);if(!spec){out.innerHTML+='<h2 style="color:#f66">No existe: '+key+'</h2>';return;}
+  const tl=spec._tl;const n=+(q.get('n')||6);
+  const h=document.createElement('h2');h.textContent=key+' — '+(spec.title||'')+' · ciclo '+tl.total.toFixed(2)+'s · pasos: '+tl.steps.map(s=>(s.label||'·')+' '+s.dur+'s').join(' | ');out.appendChild(h);
+  const g=document.createElement('div');g.className='grid';out.appendChild(g);
+  const cm=I.fitCam(spec,W,H,I.PAD);
+  // tiempos: final de cada paso + mitades de los pasos que mueven
+  let times=[];if(q.get('times')){times=q.get('times').split(',').map(Number);}
+  else{for(const s of tl.steps){const mv=Object.keys(s.to).some(k=>k!=='act'&&s.to[k]!==s.from[k]);if(mv)times.push(s.t0+s.dur*.5);times.push(s.t0+s.dur*.995);} if(times.length>n+3)times=times.filter((_,i)=>i%Math.ceil(times.length/(n+2))===0);}
+  if(spec.cycle&&!q.get('times')){times=[];for(let i=0;i<n;i++)times.push(spec.cycle.period*i/n);}
+  let maxErr=0;
+  for(const t of times){g.appendChild(cell('',(ctx,lab)=>{const c=I.evalTL(tl,spec,t);const b=I.renderTo(ctx,spec,cm,c,W,H);maxErr=Math.max(maxErr,b.ikErr);
+    const ch=Object.keys(c).filter(k=>typeof c[k]==='number'&&!['t','u','stepIdx'].includes(k)).map(k=>k+'='+c[k].toFixed(2)).join(' ');
+    lab.innerHTML='t='+t.toFixed(2)+' <b>'+(c.step.label||'·')+'</b> '+ch+(b.ikErr>.004?' <span class="bad">IK '+(b.ikErr*100).toFixed(1)+'cm</span>':'');}));}
+  // vistas de control ortogonales en los extremos del movimiento
+  if(q.get('ctrl')!=='0'){
+    const views=[{yaw:0,pitch:0,n:'lateral der (yaw0)'},{yaw:90,pitch:0,n:'frontal (yaw90)'},{yaw:0,pitch:89,n:'cenital'}];
+    let tA=0,tB=0,pA=1e9,pB=-1e9;for(let i=0;i<60;i++){const t=tl.total*i/60;const c=I.evalTL(tl,spec,t);const p=spec.cycle?c.cyc:c.p;if(p<pA){pA=p;tA=t;}if(p>pB){pB=p;tB=t;}}
+    for(const v of views)for(const t of[tA,tB]){g.appendChild(cell('ctrl '+v.n+' t='+t.toFixed(2),(ctx)=>{
+      const s2=Object.assign({},spec,{cam:Object.assign({},spec.cam,{yaw:v.yaw,pitch:v.pitch,zoom:1,persp:0})});s2._tl=tl;
+      const cm2=I.fitCam(s2,W,H,I.PAD);const c=I.evalTL(tl,spec,t);I.renderTo(ctx,s2,cm2,c,W,H,{traces:false});}));}
+  }
+  const s=document.createElement('div');s.style.padding='0 8px';s.innerHTML='max IK err: <b'+(maxErr>.004?' class="bad"':'')+'>'+(maxErr*100).toFixed(2)+' cm</b>';out.appendChild(s);
+}
+function anim(key){const d=document.createElement('div');d.className='box';d.style.width=W+'px';d.style.height=H+'px';d.style.margin='10px';out.appendChild(d);GA.mount(d,key);}
+function all(){const g=document.createElement('div');g.className='grid';out.appendChild(g);
+  const keys=(q.get('keys')?q.get('keys').split(','):GA.keys());
+  for(const k of keys){const spec=GA.get(k);if(!spec)continue;g.appendChild(cell('<b>'+k+'</b> '+(spec.title||''),(ctx)=>{const cm=I.fitCam(spec,W,H,I.PAD);const tl=spec._tl;
+    let tB=0,pB=-1e9;for(let i=0;i<40;i++){const t=tl.total*i/40;const c=I.evalTL(tl,spec,t);const p=spec.cycle?(i===13?1:0):c.p;if(p>pB){pB=p;tB=t;}}
+    const fr=q.get('frac');const t=fr!=null?tl.total*(+fr):tB;
+    I.renderTo(ctx,spec,cm,I.evalTL(tl,spec,t),W,H);}));}}
+const key=q.get('ex');
+if(mode==='anim')anim(key);else if(mode==='all')all();else (key||'').split(',').forEach(k=>sheet(k));
+})();
+</script>
+</body></html>
