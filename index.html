@@ -15154,8 +15154,11 @@ function _obRowHtml(d,row,i){
 // (M2) Con el esfuerzo de cada serie apagado en Ajustes, la explicación de la rutina no habla de los chips 😌 💪 🥵: la línea del
 // generador «Esfuerzo: 💪 Justo, te sobran 1-2.» se queda en cuántas repeticiones deben sobrar (cualquier otra que los nombrara, fuera).
 // Se adapta al pintar: los textos del generador (y su prototipo gemelo) no se tocan.
+// (M3b) Con el descanso entre series apagado, tampoco da tiempos de descanso: fuera «Descansos de … en los básicos…».
 function _obPorque(){
-  const L=(_ob&&_ob.t&&_ob.t.porque)||[];if(_rpeOn())return L;
+  let L=(_ob&&_ob.t&&_ob.t.porque)||[];
+  if(!_restOn())L=L.filter(x=>!/^Descansos de /.test(x));
+  if(_rpeOn())return L;
   return L.map(x=>{const m=/^Esfuerzo: .*te sobran (.+?)(?: repeticiones)?\.$/.exec(x);
     return m?`Termina cada serie cuando aún te sobren ${m[1]} repeticiones.`:/😌|🥵|💪 Justo/.test(x)?null:x;}).filter(Boolean);
 }
