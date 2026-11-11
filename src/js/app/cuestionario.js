@@ -653,12 +653,23 @@ function _obPorque(){
 function obWhy(k){if(!_ob)return;_ob.why=_ob.why===k?null:k;obRender({keepFocus:true,keepScroll:true});}
 function obTab(k){if(!_ob)return;_ob.tab=k;_ob.why=null;obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root [role=tab][data-k="${k}"]`);if(b)try{b.focus();}catch(e){}}
 function obMore(k){if(!_ob)return;_ob.more=Object.assign({},_ob.more||{});_ob.more[k]=!_ob.more[k];obRender({keepFocus:true,keepScroll:true});}
+// Los días de la rutina generada: pestañas de día y, del día elegido, sus ejercicios con su imagen (abre la hoja de ver y
+// cambiar), «¿Por qué?» y «Cambiar». Los enseñan la rutina propuesta y la revisión de fin de ciclo.
+function _obDaysHtml(){
+  const g=_ob.g,r=g.res,c=_ob.c,P=g.E.G.effective(g.inp),two=!!(_ob.places&&_ob.places.g&&_ob.places.c);
+  const ks=Object.keys(r.days),tab=ks.includes(_ob.tab)?_ob.tab:ks[0],d=r.det.find(x=>x.letra===tab),rows=d.rows,nStr=rows.filter(x=>x.kind==='str').length;
+  return`<div class="tabs ob-tabs" role="tablist" aria-label="Días de tu rutina">${ks.map(k=>{const on=k===tab,dd=r.det.find(x=>x.letra===k);return`<button type="button" class="tab ob-tab${on?' on':''}" role="tab" aria-selected="${on}" tabindex="${on?0:-1}" data-k="${k}" onclick="obTab('${k}')"><span class="pill p${k.toLowerCase()}">${k}</span>${on?' · '+esc(String(r.days[k].focus).split(/\s+[—–-]\s+/)[0]):''}</button>`;}).join('')}</div>
+  <section class="ob-dpanel" role="tabpanel" aria-label="Día ${tab}">
+    <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?(d.place==='c'?'🏠 ':'🏋️ '):''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
+    ${rows.map((x,i)=>_obRowHtml(d,x,rows.filter(y=>y.kind!=='bal').indexOf(x))).join('')}
+    ${P.inicio||P.cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
+  </section>`;
+}
 OB_SCR['ob-rutina']={block:4,html:()=>{
   if(!_ob.g||_ob.dirty)_obGenerate();
   const g=_ob.g;if(!g)return`<h1 class="ob-title" id="ob-h" tabindex="-1">No he podido preparar tu rutina</h1>`;
-  const r=g.res,t=_ob.t,pq=_obPorque(),c=_ob.c,P=g.E.G.effective(g.inp),cauto=!!P.cauto,two=!!(_ob.places&&_ob.places.g&&_ob.places.c),more=_ob.more||{};
-  const ks=Object.keys(r.days),tab=ks.includes(_ob.tab)?_ob.tab:ks[0],d=r.det.find(x=>x.letra===tab),rows=d.rows;
-  const nStr=rows.filter(x=>x.kind==='str').length;
+  const r=g.res,t=_ob.t,pq=_obPorque(),c=_ob.c,P=g.E.G.effective(g.inp),cauto=!!P.cauto,more=_ob.more||{};
+  const ks=Object.keys(r.days);
   const av=t.avisos.slice();if(_ob.h.consulta==='igual'){const i=av.findIndex(x=>/médico/.test(x));if(i>0)av.unshift(av.splice(i,1)[0]);}
   const kg=r.det.some(x=>x.rows.some(y=>y.kind==='str'&&(LIB_K.BY.get(y.lib)||{}).lt==='w'));
   const changed=_ob.changed?`<div class="ob-changed" aria-live="polite">Ha cambiado: ${esc(_ob.changed)}</div>`:'<div class="ob-changed" aria-live="polite"></div>';
@@ -674,12 +685,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
     ${pq.length>4?'<button type="button" class="ob-link" onclick="obWhyAll()">Ver todo ›</button>':''}</section>
   ${av.length?`<section class="ob-sec"><h2 class="ob-h2">A tener en cuenta</h2><ul class="ob-ul ob-av">${av.slice(0,more.av?99:t.visibles).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
     ${av.length>t.visibles?`<button type="button" class="ob-link" onclick="obMore('av')">${more.av?'Ver menos':'Ver más ('+(av.length-t.visibles)+')'}</button>`:''}</section>`:''}
-  <div class="tabs ob-tabs" role="tablist" aria-label="Días de tu rutina">${ks.map(k=>{const on=k===tab,dd=r.det.find(x=>x.letra===k);return`<button type="button" class="tab ob-tab${on?' on':''}" role="tab" aria-selected="${on}" tabindex="${on?0:-1}" data-k="${k}" onclick="obTab('${k}')"><span class="pill p${k.toLowerCase()}">${k}</span>${on?' · '+esc(String(r.days[k].focus).split(/\s+[—–-]\s+/)[0]):''}</button>`;}).join('')}</div>
-  <section class="ob-dpanel" role="tabpanel" aria-label="Día ${tab}">
-    <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?(d.place==='c'?'🏠 ':'🏋️ '):''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
-    ${rows.map((x,i)=>_obRowHtml(d,x,rows.filter(y=>y.kind!=='bal').indexOf(x))).join('')}
-    ${P.inicio||cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
-  </section>
+  ${_obDaysHtml()}
   <section class="ob-sec"><h2 class="ob-h2">📈 Cómo vas a avanzar</h2><ul class="ob-ul">${cauto?'<li>Las primeras 4 semanas, 2 series y subidas pequeñas; después te propongo pasar a 3.</li>':''}
     <li>Cada sesión: el Coach te dice cuánto poner (primero más repeticiones, luego más peso).</li><li>Cada 4 semanas: revisas tu ciclo y te propongo hasta 3 cambios.</li><li>Si te notas cansado o te estancas: una semana suave.</li></ul></section>
   <section class="ob-sec"><h2 class="ob-h2">🧭 Tu primera semana</h2><ul class="ob-ul"><li>La primera vez que hagas cada ejercicio, elige ${kg?'un peso':'la variante'} con ${kg?'el':'la'} que te sobren ${cauto?'unas 3':'2-3'} repeticiones. Desde la segunda sesión, el Coach te dice cuánto poner.</li>
@@ -901,7 +907,7 @@ function obxUse(){
 function obxAvoid(){const x=_obx;if(!x||!_ob||!_ob.sw)return;obSwapAvoidOnly();_obxBack(x);}
 // Quien abrió la hoja (la imagen o ⇄ de su fila), también después de repintar la lista con el cambio
 function _obxOpener(x){return document.querySelector(`#ob-root .ob-row[data-j="${+x.j}"] .${x.k==='sw'?'ob-sw2':'ob-thb'}`)||document.querySelector(`#ob-root .ob-row[data-j="${+x.j}"] .ob-thb`);}
-function _obxBack(x){const b=x&&_ob&&_ob.step==='ob-rutina'?_obxOpener(x):null;if(b)try{b.focus({preventScroll:true});}catch(e){}}
+function _obxBack(x){const b=x&&_ob&&(_ob.step==='ob-rutina'||_ob.step==='ob-resp-qc')?_obxOpener(x):null;if(b)try{b.focus({preventScroll:true});}catch(e){}} // (las dos pantallas con los días)
 function _obxUnmount(sr){const pv=sr&&sr.querySelector('#obx-pv');if(pv&&typeof GymAnim!=='undefined'&&GymAnim.unmount){try{GymAnim.unmount(pv);}catch(e){}}}
 // Elegir una: queda fijada (pins) y la rutina se recalcula; «No me lo vuelvas a proponer» va a avoid
 function obPinPick(lib){
@@ -1010,6 +1016,8 @@ OB_SCR['ob-resp-qc']={block:0,html:()=>{
   <p>${esc(_obWeekLine(_ob.g))}</p>
   <p>Tu historial no se toca: lo que sale sigue en Progreso › Fuera de tu rutina y, si vuelve, retoma su historial. Guardo tu rutina actual por si quieres volver.</p>
   ${cy?`<p>Cierro tu ciclo actual (${plural(cy,'sesión','sesiones')}): lo verás en tu resumen.</p>`:''}</div>
+  <section class="ob-sec ob-qc-days"><h2 class="ob-h2">Tu rutina nueva</h2><p class="ob-foot">Toca una imagen para ver el ejercicio o cambiarlo antes de aplicar.</p></section>
+  ${_obDaysHtml()}
   <div class="ob-next ob-res"><button type="button" class="btn bp" id="ob-go" onclick="obRespApply()">Aplicar cambios</button>
   ${_ob.fromCycle?'':'<button type="button" class="btn bs" onclick="obRespSaveOnly()">Solo guardar la respuesta</button>'}<button type="button" class="ob-link" onclick="obRespCancel()">Cancelar</button></div>`;}};
 function obRespApply(){if(!_ob||!_ob.c)return;const bl=_applyGuard();if(bl){toast(bl.msg,3600);return;}_obDoApply();}

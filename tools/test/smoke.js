@@ -9,6 +9,9 @@ const _IC_EM={trophy:'🏆',leaf:'🧘',moon:'🌴',target:'🎯',clock:'⏱',fl
   wrench:'🔧',plus:'➕',sprout:'🌱',note:'📝',bell:'🔔',belloff:'🔕',sun:'🔆'};
 const _icTx=el=>{if(!el)return'';if(!el.cloneNode||!el.querySelectorAll)return el.textContent||'';const c=el.cloneNode(true);c.querySelectorAll('svg.ic').forEach(v=>{const n=(/ic-([a-z0-9]+)/.exec(v.getAttribute('class'))||[])[1];
   v.replaceWith(document.createTextNode(_IC_EM[n]||''));});return c.textContent;};
+// (B3-2) Coach en dos niveles: los pasos de siempre miran el contenido de cada pieza del Coach, así que corren con las filas de
+// «Más detalle» abiertas; el estado de serie (todo plegado), los resúmenes y el abrir y cerrar los cubre b3Coach.
+CFOLD_KEYS.forEach(k=>_cfold.add(k));
 // (flake) Esperas en tiempo REAL. applaunch.sh corre con --virtual-time-budget: en cuanto la página no tiene trabajo, el
 // reloj virtual salta al siguiente temporizador sin esperar a la E/S del navegador (FileReader) ni dejar pintar (rAF,
 // IntersectionObserver y scroll van con los fotogramas, y en un bucle de W() casi no llegan). Una petición de red pausa el
@@ -6523,6 +6526,13 @@ await safe('dlRecommend',async()=>{
     const os=[...c.querySelectorAll('.dlr-opt[role="radio"]')];
     if(os.length!==2||os.map(o=>o.getAttribute('aria-checked')).join()!=='true,false'||c.querySelector('[role="radiogroup"]')==null)throw new Error('planes');
     if([...c.querySelectorAll('button')].some(b=>b.getBoundingClientRect().height<44))throw new Error('botón de menos de 44 px');
+    // (B3-2 · C2) la lista de lo que cambia y la letra pequeña van plegadas tras «Ver qué cambia» (un botón con su estado); al
+    // abrirlas no cambia el plan elegido y el foco sigue en el botón
+    {const mb=c.querySelector('.dlr-more');
+      if(c.querySelector('.dlr-prev')||c.querySelector('.dlr-det')||!mb||mb.getAttribute('aria-expanded')!=='false'||!/Ver qué cambia/.test(mb.textContent))throw new Error('detalle de la descarga sin plegar');
+      mb.click();await W(5);c=card();const mb2=c.querySelector('.dlr-more');
+      if(!c.querySelector('.dlr-det .dlr-prev')||!c.querySelector('.dlr-det .dlr-note')||mb2.getAttribute('aria-expanded')!=='true'||!/Ocultar el detalle/.test(mb2.textContent)||document.activeElement!==mb2)throw new Error('«Ver qué cambia» no abre el detalle');
+      if(c.querySelectorAll('.dlr-opt[aria-checked="true"]').length!==1||c.dataset.plan!=='sets')throw new Error('abrir el detalle cambia el plan');}
     const nS=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio&&exLT(e)!=='c').length,pv=c.querySelectorAll('.dlr-prev li:not(.more)').length;
     if(pv!==Math.min(5,nS)||(nS>5&&!/^y \d+ ejercicios? más$/.test(c.querySelector('.dlr-prev li.more').textContent)))throw new Error('lo que cambia '+pv+'/'+nS);
     {const cr=c.getBoundingClientRect(),o=[...c.querySelectorAll('*')].filter(e=>{const q=e.getBoundingClientRect();return q.width&&(q.right>cr.right+0.5||q.left<cr.left-0.5);});
@@ -6588,7 +6598,7 @@ await safe('dlRecommend',async()=>{
     S.deload=null;
   }finally{
     Date.now=RN;const k=JSON.parse(keep);S.deload=null;S.strength=k.st;S.sessions=k.ss;S.restWeeks=k.rw;S.deloadHistory=k.dh;S.currentPlan=k.cp;
-    S.pendingCoachProposals=k.pc;S.appliedProposals=k.ap;S.dlRecoSnoozeTs=k.sn==null?null:k.sn;_dlRecoPlan='sets';closeCmodal&&closeCmodal(false);
+    S.pendingCoachProposals=k.pc;S.appliedProposals=k.ap;S.dlRecoSnoozeTs=k.sn==null?null:k.sn;_dlRecoPlan='sets';_dlRecoMore=false;closeCmodal&&closeCmodal(false);
     _rest11(j);saveState();render();
   }
 });
@@ -6821,6 +6831,8 @@ await safe('dlPolish13e',async()=>{
       // (13e r2) la vista previa de la tarjeta parte de las series de verdad de X (no de las ya recortadas) y coincide con lo que se aplica
       {const xc=getActiveDeload().changes.find(c=>c.exId===xid),pv=_dlPlanPreview('sets').find(x=>x.id===xid),want=_nb(`${xc.from} → ${_nSeries(_dlSetsTo(xc.from))}`);
         if(!pv||_nb(pv.txt)!==want)throw new Error('vista previa con «Descarga en X»: '+(pv&&pv.txt)+' ≠ '+want);
+        {const mb=document.querySelector('#dl-reco .dlr-more');if(mb&&mb.getAttribute('aria-expanded')!=='true'){mb.click();await W(5);}
+          if(!document.querySelector('#dl-reco .dlr-det .dlr-prev'))throw new Error('sin la lista de lo que cambia');}
         const row=[...document.querySelectorAll('#dl-reco .dlr-prev li:not(.more)')].find(li=>li.querySelector('.dlr-pn').textContent===findExInPlan(xid).n);
         if(row&&_nb(row.querySelector('.dlr-pv').textContent)!==want)throw new Error('fila de X en la tarjeta: '+row.textContent);
         const ap=JSON.stringify(S.appliedProposals||[]);
@@ -9792,16 +9804,18 @@ await safe('detalles17r1',async()=>{
     E(!/las 2 últimas semanas/.test(String(coach_fatigueMeter))&&/las 2\$\{NB\}últimas semanas/.test(String(coach_fatigueMeter)),'«2 últimas semanas» separable');
     // ── (3) Nota de la recomendación de descarga: «1 serie» en un .nw, en una línea (340/350/360)
     {const rec=coach_deloadReco()||{src:'weeks',tag:'5 semanas seguidas',why:'Llevas 5 semanas seguidas entrenando sin descanso.'};
+      _dlRecoMore=true; // (B3-2 · C2) la nota va en el detalle de la tarjeta («Ver qué cambia»)
       for(const w of [340,350,360]){if(!await size(w,740))continue;go('coach');await W(20);hTst();
         let dr=document.getElementById('dl-reco'),tmp=null;
         if(!dr){tmp=document.createElement('div');tmp.innerHTML=deloadRecoHtml(rec);document.querySelector('#app .card').before(tmp);dr=tmp.querySelector('#dl-reco');}
-        const nt=dr&&dr.querySelector('.dlr-note');
+        const nt=dr&&dr.querySelector('.dlr-det .dlr-note');
         if(!nt)E(false,'sin nota de descarga a '+w);
         else{const c=nt.cloneNode(true);c.querySelectorAll('.nw').forEach(x=>x.remove());
           if(dr.dataset.plan==='sets')E(/1 serie/.test(nt.textContent)&&!/\d (series?)\b/.test(c.textContent),'nota de descarga sin .nw a '+w+': '+nt.textContent);
           for(const n of nt.querySelectorAll('.nw'))E(n.getClientRects().length===1,'nota de descarga partida a '+w+': «'+n.textContent+'»');
           E(!split(nt).length,'nota de descarga: '+split(nt).join(', '));}
-        if(tmp)tmp.remove();}}
+        if(tmp)tmp.remove();}
+      _dlRecoMore=false;}
     // ── (4) Coach e Inicio: ninguna cifra separada de su unidad entre 320 y 362 px (objetivos, propuestas, análisis)
     for(const w of [320,334,340,350,360,362]){if(!await size(w,740))continue;
       for(const tab of ['coach','dash']){go(tab);await W(20);hTst();const h=split(document.getElementById('app'));E(!h.length,tab+' a '+w+': '+h.join(', '));E(noOver(),tab+' desborda a '+w);}}
@@ -11436,7 +11450,27 @@ try{
   await W(5);close();go('coach');await W(5);S.health=null;cycleNext('nueva');await W(10);
   E(_obOpen()&&_ob.fromCycle===true&&['ob-salud','ob-resp-qc'].includes(_ob.step),'rutina nueva: '+(_ob&&_ob.step));
   if(_obOpen()){_ob.healthAsked=true;_ob.step='ob-resp-qc';obRender();await W(10);const r=document.getElementById('ob-root');
-    E(/Qué cambia en tu rutina/.test(tx(r))&&!/Solo guardar la respuesta/.test(tx(r)),'qué cambia desde el ciclo');obRespCancel();await W(5);E(!_obOpen()&&S.tab==='coach','cancelar vuelve al Coach');}
+    E(/Qué cambia en tu rutina/.test(tx(r))&&!/Solo guardar la respuesta/.test(tx(r)),'qué cambia desde el ciclo');
+    // (B3-2 · C4) debajo, la rutina nueva: pestañas de día y los ejercicios con su imagen; se puede mirar otro día, ver un
+    // ejercicio y cambiarlo sin salir de la revisión, y lo cambiado es lo que se aplicaría
+    {const q=sel=>r.querySelector(sel),tabs=()=>[...r.querySelectorAll('.ob-tabs [role=tab]')],ks=Object.keys(_ob.c.days);
+      E(/Tu rutina nueva/.test(tx(q('.ob-qc-days')))&&tabs().length===ks.length&&tabs()[0].getAttribute('aria-selected')==='true','revisión sin los días de la rutina nueva');
+      E(q('.ob-dpanel')&&r.querySelectorAll('.ob-dpanel .ob-row').length>=3&&r.querySelectorAll('.ob-dpanel .ob-thb').length>=3,'revisión sin los ejercicios con su imagen');
+      E(!!(q('.ob-qc').compareDocumentPosition(q('.ob-dpanel'))&Node.DOCUMENT_POSITION_FOLLOWING)&&!!(q('.ob-dpanel').compareDocumentPosition(q('#ob-go'))&Node.DOCUMENT_POSITION_FOLLOWING),'la rutina nueva no va entre el resumen y «Aplicar cambios»');
+      if(tabs().length>1){tabs()[1].click();await W(10);
+        E(_ob.step==='ob-resp-qc'&&_ob.tab===ks[1]&&tabs()[1].getAttribute('aria-selected')==='true'&&new RegExp('^Día '+ks[1]).test(tx(q('.ob-dh'))),'cambiar de día en la revisión');}
+      const row=q('.ob-dpanel .ob-row[data-lib]'),lib0=row&&row.dataset.lib,j0=row&&+row.dataset.j,dk=_ob.tab;
+      if(row){row.querySelector('.ob-thb').click();await W(10);const sh=document.querySelector('#ob-sheet-root .ob-sheet');
+        E(sh&&/Ver y cambiar/.test(sh.getAttribute('aria-label')||'')&&_ob.step==='ob-resp-qc','la imagen no abre «Ver y cambiar»');
+        // cambiarlo en la hoja: se queda al repintar la revisión (que regenera la rutina), es lo que lleva la candidata y el foco
+        // vuelve a su imagen
+        const alt=sh&&sh.querySelectorAll('.obx-alt')[1];E(!!alt,'«Ver y cambiar» sin alternativas');
+        if(alt){const al=alt.dataset.lib;alt.click();await W(5);document.getElementById('obx-go').click();await W(10);
+          E(!document.querySelector('#ob-sheet-root .ob-sheet')&&_ob.step==='ob-resp-qc'&&al!==lib0&&_ob.c.days[dk].ex[j0].lib===al&&!!r.querySelector('.ob-dpanel .ob-row[data-lib="'+al+'"]'),'lo cambiado no se queda en la revisión: '+al+' / '+_ob.c.days[dk].ex[j0].lib);
+          E(document.activeElement===r.querySelector('.ob-dpanel .ob-row[data-j="'+j0+'"] .ob-thb'),'tras cambiar, el foco no vuelve a la imagen');
+        }else{obSheetClose();await W(10);}}
+      E(q('#ob-go')&&/Aplicar cambios/.test(tx(q('#ob-go'))),'revisión sin «Aplicar cambios»');}
+    obRespCancel();await W(5);E(!_obOpen()&&S.tab==='coach','cancelar vuelve al Coach');}
   // con tu propia rutina: sin «Rutina nueva con mis respuestas»
   await W(5);close();S.profile.mode='own';go('coach');await W(5);E(card()&&card().querySelectorAll('button').length===2,'rutina propia: 2 opciones');
   if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
@@ -12481,6 +12515,95 @@ await safe('b3Entreno',async()=>{
       E(!!document.querySelector('#screen .fbanner'),'todo hecho: sin el aviso de completado');}
     if(bad.length)throw new Error(bad.join(' | '));
   }finally{window.exAnimKey=akReal;if(fr){fr.style.width=fw;fr.style.height=fh;}app.classList.remove('typing');_animBig.clear();RF.close();RT.stop();_rest9(j);render();await W(40);}
+});
+await safe('b3Coach',async()=>{
+  // (B3-2) Coach en dos niveles (C1): arriba lo que pide una decisión y la próxima sesión; el resto, bajo «Más detalle», en filas
+  // plegadas con su resumen. Y la tarjeta de descarga resumida (C2). El resto del smoke corre con las filas abiertas; aquí, de serie.
+  const j=_snap9(),bad=[],E=(c,m)=>{if(!c)bad.push(m);},abiertas=[..._cfold],more0=_dlRecoMore;
+  const fr=window.frameElement,fw=fr&&fr.style.width,fh=fr&&fr.style.height,sc=document.getElementById('screen');
+  const size=async(w,h)=>{if(!fr)return false;fr.style.width=w+'px';fr.style.height=h+'px';await W(40);for(let i=0;i<20&&(innerWidth!==w||innerHeight!==h);i++)await W(20);return innerWidth===w&&innerHeight===h;};
+  const rows=()=>[...document.querySelectorAll('#screen .cfold')],row=k=>document.querySelector('#screen .cfold[data-k="'+k+'"]');
+  const after=(a,b)=>!!(a&&b&&(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING));
+  try{
+    RT.stop();_cfold.clear();_dlRecoMore=false;go('coach');await W(10);
+    if(S.sessions.length<CYCLE_MIN_SESSIONS){
+      // Coach de quien empieza: corto, sin filas plegables
+      E(!rows().length&&!document.querySelector('#screen .cfold-sh'),'Coach inicial con filas de «Más detalle»');
+      E(!!document.querySelector('#screen .coach-hero'),'Coach inicial sin su presentación');
+    }else{
+      // ── de serie: todo plegado, y nada del nivel 2 pintado
+      const ks=rows().map(r=>r.dataset.k),sh=document.querySelector('#screen .cfold-sh');
+      E(ks.length>=3&&ks.every(k=>CFOLD_KEYS.includes(k))&&ks.join()===CFOLD_KEYS.filter(k=>ks.includes(k)).join(),'filas: '+ks);
+      E(['ciclo','fat','ana','det'].every(k=>ks.includes(k)),'faltan filas: '+ks);
+      E(sh&&sh.textContent.trim()==='Más detalle'&&after(sh,rows()[0]),'sin el rótulo «Más detalle» antes de las filas');
+      E(!document.querySelector('#screen .cfold.on')&&!document.querySelector('#screen .cfold-b'),'filas abiertas de serie');
+      E(!document.getElementById('fat-card')&&!document.getElementById('mm-coach')&&!document.querySelector('#screen .coach-cycle')&&!document.querySelector('#screen .metric-grid')&&!document.querySelector('#screen .mesocycle-log'),'el nivel 2 se pinta plegado');
+      // nivel 1, antes de «Más detalle»: la descarga recomendada, las propuestas y la próxima sesión
+      for(const [sel,n] of [['#dl-reco','descarga recomendada'],['#coach-props','propuestas'],['.coach-plan','próxima sesión'],['.cta-banner','cierre del ciclo'],['#cyc-next','¿cómo seguimos?']]){
+        const el=document.querySelector('#screen '+sel);if(el)E(after(el,sh),n+' debajo de «Más detalle»');}
+      E(!!document.querySelector('#screen .coach-plan')===!!coachPlanCardHtml(),'próxima sesión');
+      // cada fila: un botón de 44 px o más con su estado, su título y su resumen entero
+      for(const [w,h] of [[390,844],[320,568]]){
+        if(fr&&!await size(w,h))continue;
+        go('coach');await W(10);
+        for(const r of rows()){const b=r.querySelector('.cfold-h'),t=r.querySelector('.cfold-t'),su=r.querySelector('.cfold-s'),k=r.dataset.k;
+          E(b&&b.tagName==='BUTTON'&&b.getAttribute('aria-expanded')==='false'&&!b.hasAttribute('aria-controls')&&b.getBoundingClientRect().height>=44,innerWidth+' '+k+': botón');
+          E(t&&t.textContent.trim().length>3&&t.scrollWidth<=t.clientWidth+1,innerWidth+' '+k+': título cortado');
+          E(su&&su.scrollWidth<=su.clientWidth+1,innerWidth+' '+k+': resumen cortado «'+(su&&su.textContent)+'»');
+          if(k!=='prev'&&k!=='det')E(su&&su.textContent.trim().length>2,innerWidth+' '+k+': sin resumen');}
+        E(document.documentElement.scrollWidth<=innerWidth,'Coach plegado desborda a '+innerWidth);
+        CFOLD_KEYS.forEach(k=>_cfold.add(k));render();await W(10);
+        E(document.documentElement.scrollWidth<=innerWidth,'Coach abierto desborda a '+innerWidth);
+        _cfold.clear();render();await W(10);
+      }
+      if(fr){fr.style.width=fw;fr.style.height=fh;await W(40);}
+      go('coach');await W(10);
+      // los resúmenes dicen lo que hay dentro
+      {const an=coach_analyze(),m=coach_fatigueMeter(an),cy=coach_cycleData(),tx=k=>row(k)?row(k).querySelector('.cfold-s').textContent:'';
+        E(tx('fat')===(m.score==null?'sin datos':m.score+' · '+(m.level||'')),'resumen de la fatiga: '+tx('fat'));
+        E(tx('ciclo').startsWith(plural(cy.sessions.length,'sesión','sesiones')+' · progresan '+an.up.length+'/'),'resumen del ciclo: '+tx('ciclo'));
+        E(/^\d+ observaci(ón|ones)$|^recopilando datos$/.test(tx('ana')),'resumen del análisis: '+tx('ana'));
+        E(row('fat').querySelector('.cfold-t').textContent===(_rpeOn()?'Fatiga y esfuerzo':'Fatiga'),'título de la fatiga');
+        E(row('det').querySelector('.cfold-t').textContent===(cy.readyForReview?'Análisis detallado':'Próximo análisis'),'título del análisis detallado');
+        if(row('prev'))E(tx('prev')===String(S.mesocycles.filter(_isPlainObj).length),'resumen de ciclos anteriores: '+tx('prev'));
+        E(!!row('prev')===!!(S.mesocycles&&S.mesocycles.filter(_isPlainObj).length),'fila de ciclos anteriores');}
+      // abrir una fila: solo esa, con su región y el foco en su botón; el rótulo que llevaba la pieza suelta no se repite
+      const h0=sc.scrollHeight;
+      row('fat').querySelector('.cfold-h').click();await W(10);
+      {const r=row('fat'),b=r.querySelector('.cfold-h'),body=r.querySelector('.cfold-b');
+        E(r.classList.contains('on')&&b.getAttribute('aria-expanded')==='true'&&body&&b.getAttribute('aria-controls')===body.id&&body.getAttribute('role')==='region'&&body.getAttribute('aria-labelledby')===b.id,'fila de la fatiga sin abrir');
+        E(document.activeElement===b,'el foco no sigue en la fila');
+        E(!!document.getElementById('fat-card')&&document.querySelectorAll('#screen .cfold.on').length===1&&sc.scrollHeight>h0,'abrir la fatiga');
+        const s2=body.querySelector(':scope > .sh');E(!s2||getComputedStyle(s2).display==='none','rótulo repetido dentro de la fila');
+        E(document.documentElement.scrollWidth<=innerWidth,'fila abierta desborda');}
+      // las filas abiertas se recuerdan al cambiar de pestaña; cerrar la despinta
+      go('dash');await W(5);go('coach');await W(10);
+      E(row('fat').classList.contains('on')&&!!document.getElementById('fat-card'),'la fila abierta no se recuerda');
+      row('fat').querySelector('.cfold-h').click();await W(10);
+      E(!row('fat').classList.contains('on')&&!document.getElementById('fat-card')&&document.activeElement===row('fat').querySelector('.cfold-h'),'cerrar la fila');
+      cfoldToggle('otra');E(!_cfold.size,'fila desconocida');
+      // el atajo a la fatiga (el de Inicio) abre su fila
+      go('dash');await W(5);goFatGo();await W(30);
+      E(S.tab==='coach'&&_cfold.has('fat')&&!!document.getElementById('fat-card'),'goFatGo no abre la fila de la fatiga');
+      _cfold.clear();go('coach');await W(10);goFatGo();await W(30);
+      E(_cfold.has('fat')&&!!document.getElementById('fat-card'),'goFatGo desde el Coach no abre la fila');
+      _cfold.clear();render();await W(10);
+      // ── C2 · tarjeta de descarga resumida: elegir el plan no la abre ni la cierra; «Ocultar el detalle» la pliega
+      const card=()=>document.getElementById('dl-reco');
+      if(card()){
+        E(!card().querySelector('.dlr-det')&&card().querySelector('.dlr-more').getBoundingClientRect().height>=44,'descarga: detalle sin plegar');
+        E(after(card().querySelector('.dlr-opts'),card().querySelector('.dlr-more'))&&after(card().querySelector('.dlr-more'),card().querySelector('.dlr-acts')),'descarga: «Ver qué cambia» fuera de sitio');
+        const hc=card().getBoundingClientRect().height;
+        dlRecoPick('weight');await W(5);E(!card().querySelector('.dlr-det')&&card().dataset.plan==='weight','descarga: elegir plan abre el detalle');
+        card().querySelector('.dlr-more').click();await W(5);
+        E(!!card().querySelector('.dlr-det .dlr-note')&&card().getBoundingClientRect().height>hc&&card().dataset.plan==='weight','descarga: «Ver qué cambia»');
+        dlRecoPick('sets');await W(5);E(!!card().querySelector('.dlr-det')&&card().dataset.plan==='sets'&&document.activeElement===card().querySelector('.dlr-opt[data-plan="sets"]'),'descarga: elegir plan cierra el detalle');
+        card().querySelector('.dlr-more').click();await W(5);
+        E(!card().querySelector('.dlr-det')&&card().querySelector('.dlr-more').getAttribute('aria-expanded')==='false'&&Math.abs(card().getBoundingClientRect().height-hc)<1,'descarga: «Ocultar el detalle»');
+      }
+    }
+    if(bad.length)throw new Error(bad.join(' | '));
+  }finally{if(fr){fr.style.width=fw;fr.style.height=fh;}_cfold.clear();abiertas.forEach(k=>_cfold.add(k));_dlRecoMore=more0;_dlRecoPlan='sets';_rest9(j);render();await W(40);}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

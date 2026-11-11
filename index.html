@@ -718,6 +718,29 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ls-row:active{background:none}
 .ls-sel{flex-shrink:0;min-height:44px;width:104px;padding:0 10px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px}
 .ls-note{padding:12px 16px;font-size:12px;color:var(--text3);line-height:1.5}
+
+/* ── Coach en dos niveles: filas de «Más detalle» (cfoldHtml). Plegada, cada fila es título + resumen + flecha; abierta, su
+      contenido va dentro de la misma tarjeta, sin las cajas ni los rótulos que llevaba suelto ── */
+.cfold-sh{margin-top:22px}
+.cfold{margin:0 14px 8px;background:var(--bg2);border-radius:var(--r);overflow:hidden}
+.cfold-h{display:flex;align-items:center;gap:10px;width:100%;min-height:54px;padding:8px 14px 8px 16px;text-align:left;color:inherit}
+.cfold-h:active{background:var(--bg3)}
+.cfold-h:focus-visible{outline:2px solid var(--green);outline-offset:-2px;border-radius:var(--r)}
+.cfold-t{flex:0 0 auto;font-size:15px;font-weight:600}
+.cfold-s{flex:1 1 0;min-width:0;font-size:13px;color:var(--text2);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfold-a{flex-shrink:0;font-size:17px;line-height:1;color:var(--text3);transition:transform .2s}
+.cfold.on .cfold-a{transform:rotate(90deg)}
+.cfold-b{padding:2px 0 10px;border-top:1px solid var(--border)}
+.cfold-b>.sh{display:none}
+.cfold-b>.card,.cfold-b>.insight,.cfold-b>.coach-cycle,.cfold-b>.mesocycle-log,.cfold-b>.rec-card{background:transparent;margin-left:0;margin-right:0;border-radius:0}
+.cfold-b>.metric-grid{margin:0 14px 4px}
+.cfold-b>.metric-grid .metric-box{background:var(--bg3)}
+.cfold-b>.insight,.cfold-b>.mesocycle-log,.cfold-b>.coach-cycle{margin-bottom:0}
+.cfold-b>.insight+.insight,.cfold-b>.mesocycle-log+.mesocycle-log{border-top:1px solid var(--border)}
+@media (prefers-reduced-motion:reduce){.cfold-a{transition:none}}
+/* ── Tarjeta de descarga resumida: «Ver qué cambia» abre la lista de ejercicios y la letra pequeña ── */
+.dlr-more{display:flex;align-items:center;gap:6px;min-height:44px;margin:2px 0 4px;padding:0 2px;font-size:14px;font-weight:600;color:var(--green)}
+.dlr-more:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:var(--rxs)}
 /* ── EDITOR DE RUTINA ── */
 .edit-day-tab{display:flex;gap:6px;padding:0 14px 12px}
 .edit-day-btn{flex:1;min-width:0;background:var(--bg3);border:1px solid var(--border);border-radius:var(--rsm);padding:9px 6px;font-size:14px;font-weight:500;color:var(--text2);text-align:center;cursor:pointer;transition:all .15s}
@@ -15341,12 +15364,23 @@ function _obPorque(){
 function obWhy(k){if(!_ob)return;_ob.why=_ob.why===k?null:k;obRender({keepFocus:true,keepScroll:true});}
 function obTab(k){if(!_ob)return;_ob.tab=k;_ob.why=null;obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root [role=tab][data-k="${k}"]`);if(b)try{b.focus();}catch(e){}}
 function obMore(k){if(!_ob)return;_ob.more=Object.assign({},_ob.more||{});_ob.more[k]=!_ob.more[k];obRender({keepFocus:true,keepScroll:true});}
+// Los días de la rutina generada: pestañas de día y, del día elegido, sus ejercicios con su imagen (abre la hoja de ver y
+// cambiar), «¿Por qué?» y «Cambiar». Los enseñan la rutina propuesta y la revisión de fin de ciclo.
+function _obDaysHtml(){
+  const g=_ob.g,r=g.res,c=_ob.c,P=g.E.G.effective(g.inp),two=!!(_ob.places&&_ob.places.g&&_ob.places.c);
+  const ks=Object.keys(r.days),tab=ks.includes(_ob.tab)?_ob.tab:ks[0],d=r.det.find(x=>x.letra===tab),rows=d.rows,nStr=rows.filter(x=>x.kind==='str').length;
+  return`<div class="tabs ob-tabs" role="tablist" aria-label="Días de tu rutina">${ks.map(k=>{const on=k===tab,dd=r.det.find(x=>x.letra===k);return`<button type="button" class="tab ob-tab${on?' on':''}" role="tab" aria-selected="${on}" tabindex="${on?0:-1}" data-k="${k}" onclick="obTab('${k}')"><span class="pill p${k.toLowerCase()}">${k}</span>${on?' · '+esc(String(r.days[k].focus).split(/\s+[—–-]\s+/)[0]):''}</button>`;}).join('')}</div>
+  <section class="ob-dpanel" role="tabpanel" aria-label="Día ${tab}">
+    <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?(d.place==='c'?'🏠 ':'🏋️ '):''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
+    ${rows.map((x,i)=>_obRowHtml(d,x,rows.filter(y=>y.kind!=='bal').indexOf(x))).join('')}
+    ${P.inicio||P.cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
+  </section>`;
+}
 OB_SCR['ob-rutina']={block:4,html:()=>{
   if(!_ob.g||_ob.dirty)_obGenerate();
   const g=_ob.g;if(!g)return`<h1 class="ob-title" id="ob-h" tabindex="-1">No he podido preparar tu rutina</h1>`;
-  const r=g.res,t=_ob.t,pq=_obPorque(),c=_ob.c,P=g.E.G.effective(g.inp),cauto=!!P.cauto,two=!!(_ob.places&&_ob.places.g&&_ob.places.c),more=_ob.more||{};
-  const ks=Object.keys(r.days),tab=ks.includes(_ob.tab)?_ob.tab:ks[0],d=r.det.find(x=>x.letra===tab),rows=d.rows;
-  const nStr=rows.filter(x=>x.kind==='str').length;
+  const r=g.res,t=_ob.t,pq=_obPorque(),c=_ob.c,P=g.E.G.effective(g.inp),cauto=!!P.cauto,more=_ob.more||{};
+  const ks=Object.keys(r.days);
   const av=t.avisos.slice();if(_ob.h.consulta==='igual'){const i=av.findIndex(x=>/médico/.test(x));if(i>0)av.unshift(av.splice(i,1)[0]);}
   const kg=r.det.some(x=>x.rows.some(y=>y.kind==='str'&&(LIB_K.BY.get(y.lib)||{}).lt==='w'));
   const changed=_ob.changed?`<div class="ob-changed" aria-live="polite">Ha cambiado: ${esc(_ob.changed)}</div>`:'<div class="ob-changed" aria-live="polite"></div>';
@@ -15362,12 +15396,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
     ${pq.length>4?'<button type="button" class="ob-link" onclick="obWhyAll()">Ver todo ›</button>':''}</section>
   ${av.length?`<section class="ob-sec"><h2 class="ob-h2">A tener en cuenta</h2><ul class="ob-ul ob-av">${av.slice(0,more.av?99:t.visibles).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
     ${av.length>t.visibles?`<button type="button" class="ob-link" onclick="obMore('av')">${more.av?'Ver menos':'Ver más ('+(av.length-t.visibles)+')'}</button>`:''}</section>`:''}
-  <div class="tabs ob-tabs" role="tablist" aria-label="Días de tu rutina">${ks.map(k=>{const on=k===tab,dd=r.det.find(x=>x.letra===k);return`<button type="button" class="tab ob-tab${on?' on':''}" role="tab" aria-selected="${on}" tabindex="${on?0:-1}" data-k="${k}" onclick="obTab('${k}')"><span class="pill p${k.toLowerCase()}">${k}</span>${on?' · '+esc(String(r.days[k].focus).split(/\s+[—–-]\s+/)[0]):''}</button>`;}).join('')}</div>
-  <section class="ob-dpanel" role="tabpanel" aria-label="Día ${tab}">
-    <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?(d.place==='c'?'🏠 ':'🏋️ '):''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
-    ${rows.map((x,i)=>_obRowHtml(d,x,rows.filter(y=>y.kind!=='bal').indexOf(x))).join('')}
-    ${P.inicio||cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
-  </section>
+  ${_obDaysHtml()}
   <section class="ob-sec"><h2 class="ob-h2">📈 Cómo vas a avanzar</h2><ul class="ob-ul">${cauto?'<li>Las primeras 4 semanas, 2 series y subidas pequeñas; después te propongo pasar a 3.</li>':''}
     <li>Cada sesión: el Coach te dice cuánto poner (primero más repeticiones, luego más peso).</li><li>Cada 4 semanas: revisas tu ciclo y te propongo hasta 3 cambios.</li><li>Si te notas cansado o te estancas: una semana suave.</li></ul></section>
   <section class="ob-sec"><h2 class="ob-h2">🧭 Tu primera semana</h2><ul class="ob-ul"><li>La primera vez que hagas cada ejercicio, elige ${kg?'un peso':'la variante'} con ${kg?'el':'la'} que te sobren ${cauto?'unas 3':'2-3'} repeticiones. Desde la segunda sesión, el Coach te dice cuánto poner.</li>
@@ -15589,7 +15618,7 @@ function obxUse(){
 function obxAvoid(){const x=_obx;if(!x||!_ob||!_ob.sw)return;obSwapAvoidOnly();_obxBack(x);}
 // Quien abrió la hoja (la imagen o ⇄ de su fila), también después de repintar la lista con el cambio
 function _obxOpener(x){return document.querySelector(`#ob-root .ob-row[data-j="${+x.j}"] .${x.k==='sw'?'ob-sw2':'ob-thb'}`)||document.querySelector(`#ob-root .ob-row[data-j="${+x.j}"] .ob-thb`);}
-function _obxBack(x){const b=x&&_ob&&_ob.step==='ob-rutina'?_obxOpener(x):null;if(b)try{b.focus({preventScroll:true});}catch(e){}}
+function _obxBack(x){const b=x&&_ob&&(_ob.step==='ob-rutina'||_ob.step==='ob-resp-qc')?_obxOpener(x):null;if(b)try{b.focus({preventScroll:true});}catch(e){}} // (las dos pantallas con los días)
 function _obxUnmount(sr){const pv=sr&&sr.querySelector('#obx-pv');if(pv&&typeof GymAnim!=='undefined'&&GymAnim.unmount){try{GymAnim.unmount(pv);}catch(e){}}}
 // Elegir una: queda fijada (pins) y la rutina se recalcula; «No me lo vuelvas a proponer» va a avoid
 function obPinPick(lib){
@@ -15698,6 +15727,8 @@ OB_SCR['ob-resp-qc']={block:0,html:()=>{
   <p>${esc(_obWeekLine(_ob.g))}</p>
   <p>Tu historial no se toca: lo que sale sigue en Progreso › Fuera de tu rutina y, si vuelve, retoma su historial. Guardo tu rutina actual por si quieres volver.</p>
   ${cy?`<p>Cierro tu ciclo actual (${plural(cy,'sesión','sesiones')}): lo verás en tu resumen.</p>`:''}</div>
+  <section class="ob-sec ob-qc-days"><h2 class="ob-h2">Tu rutina nueva</h2><p class="ob-foot">Toca una imagen para ver el ejercicio o cambiarlo antes de aplicar.</p></section>
+  ${_obDaysHtml()}
   <div class="ob-next ob-res"><button type="button" class="btn bp" id="ob-go" onclick="obRespApply()">Aplicar cambios</button>
   ${_ob.fromCycle?'':'<button type="button" class="btn bs" onclick="obRespSaveOnly()">Solo guardar la respuesta</button>'}<button type="button" class="ob-link" onclick="obRespCancel()">Cancelar</button></div>`;}};
 function obRespApply(){if(!_ob||!_ob.c)return;const bl=_applyGuard();if(bl){toast(bl.msg,3600);return;}_obDoApply();}
@@ -19462,6 +19493,7 @@ function fatigueCardHtml(an){
 // Se aplica con la misma descarga de siempre (beginFullDeload → S.deload): temporal, con aviso, «Terminar» y vuelta sola.
 const DELOAD_RECO_WEEKS=5,DELOAD_RECO_MIN_SESS=6;
 let _dlRecoPlan='sets'; // plan elegido en la tarjeta (no se guarda)
+let _dlRecoMore=false;   // «Ver qué cambia» abierto: la lista de ejercicios y la letra pequeña (no se guarda)
 function _dlRecoSnoozed(){const t=S.dlRecoSnoozeTs;return typeof t==='number'&&isFinite(t)&&Date.now()<t;}
 // ¿Hay una «Semana de descarga» del cierre de ciclo entre las propuestas activas?
 function _dlPropActive(){return(S.pendingCoachProposals||[]).some(p=>p&&p.type==='deload')&&coach_pendingView().active.some(p=>p&&p.type==='deload');}
@@ -19536,8 +19568,10 @@ function deloadRecoHtml(rec){
       ${opt('sets','Menos series',`−40${NB}% de series, mismo peso`)}
       ${opt('weight','Menos peso',`Mismas series, −15${NB}% de peso`)}
     </div>
-    ${rows.length?`<ul class="dlr-prev" aria-label="Lo que cambia en tu plan">${rows.slice(0,MAX).map(r=>`<li><span class="dlr-pn">${esc(r.n)}</span><span class="dlr-pv">${esc(r.txt)}</span></li>`).join('')}${rows.length>MAX?`<li class="more">y ${plural(rows.length-MAX,'ejercicio')} más</li>`:''}</ul>`:''}
-    <div class="dlr-note">${_nwUnits(note)} Esa semana no se sube nada; al terminar, tu plan vuelve solo.${exDl?` Tu «${esc(deloadTitle(exDl))}» termina al empezarla: la semana la sustituye.`:''}</div>
+    ${exDl?`<div class="dlr-note dlr-sub">Tu «${esc(deloadTitle(exDl))}» termina al empezarla: la semana la sustituye.</div>`:''}
+    <button type="button" class="dlr-more" aria-expanded="${_dlRecoMore}" onclick="dlRecoMore()">${_dlRecoMore?'Ocultar el detalle':'Ver qué cambia'} <span aria-hidden="true">${_dlRecoMore?'▴':'▾'}</span></button>
+    ${_dlRecoMore?`<div class="dlr-det">${rows.length?`<ul class="dlr-prev" aria-label="Lo que cambia en tu plan">${rows.slice(0,MAX).map(r=>`<li><span class="dlr-pn">${esc(r.n)}</span><span class="dlr-pv">${esc(r.txt)}</span></li>`).join('')}${rows.length>MAX?`<li class="more">y ${plural(rows.length-MAX,'ejercicio')} más</li>`:''}</ul>`:''}
+      <div class="dlr-note">${_nwUnits(note)} Esa semana no se sube nada; al terminar, tu plan vuelve solo.</div></div>`:''}
     <div class="dlr-acts"><button type="button" class="btn bp dlr-go" onclick="dlRecoStart()">Empezar descarga</button><button type="button" class="btn bs dlr-later" onclick="dlRecoLater()">Ahora no</button></div>
   </div>`;
 }
@@ -19546,6 +19580,11 @@ function dlRecoPick(k){_dlRecoPlan=k==='weight'?'weight':'sets';
   const el=document.getElementById('dl-reco'),rec=el?coach_deloadReco():null;
   if(el&&rec)el.outerHTML=deloadRecoHtml(rec);else render();
   const b=document.querySelector('#dl-reco .dlr-opt[data-plan="'+_dlRecoPlan+'"]');if(b)try{b.focus({preventScroll:true});}catch(e){}}
+// «Ver qué cambia» / «Ocultar el detalle»: como al elegir el plan, solo se repinta la tarjeta y el foco sigue en el botón
+function dlRecoMore(){_dlRecoMore=!_dlRecoMore;
+  const el=document.getElementById('dl-reco'),rec=el?coach_deloadReco():null;
+  if(el&&rec)el.outerHTML=deloadRecoHtml(rec);else render();
+  const b=document.querySelector('#dl-reco .dlr-more');if(b)try{b.focus({preventScroll:true});}catch(e){}}
 function dlRecoStart(){
   const r=beginFullDeload(_dlRecoPlan);
   if(!r.ok){toast(r.msg);render();return;}
@@ -19554,16 +19593,17 @@ function dlRecoStart(){
   for(let i=L.length-1;i>=0;i--){const p=L[i];if(p&&p.type==='deload'){L.splice(i,1);
     if(!Array.isArray(S.appliedProposals))S.appliedProposals=[];S.appliedProposals.push({...p,dayKey:null,appliedAt:Date.now(),dlId:r.dlId});}}
   if(Array.isArray(S.appliedProposals)&&S.appliedProposals.length>60)S.appliedProposals=S.appliedProposals.slice(-60);
-  S.dlRecoSnoozeTs=null;
+  S.dlRecoSnoozeTs=null;_dlRecoMore=false;
   saveState();render();toast(r.msg,3600);
 }
 function dlRecoLater(){
-  S.dlRecoSnoozeTs=_addDaysLocal(_startOfDay(Date.now()),7);
+  S.dlRecoSnoozeTs=_addDaysLocal(_startOfDay(Date.now()),7);_dlRecoMore=false;
   saveState();render();toast(`De acuerdo · te la vuelvo a proponer el ${_dlDayTxt(S.dlRecoSnoozeTs)}`,3600);
 }
 // (13e r1) Al botón del medidor (la oferta mientras la recomendación está pospuesta)
 function goFatGo(){
-  if(S.tab!=='coach')go('coach');
+  const open=!_cfold.has('fat');if(open)_cfold.add('fat'); // su fila de «Más detalle», abierta
+  if(S.tab!=='coach')go('coach');else if(open)render();
   requestAnimationFrame(()=>{const b=document.getElementById('fat-go')||document.getElementById('fat-card');if(!b)return;
     b.scrollIntoView({block:'center'});if(b.id==='fat-go')try{b.focus({preventScroll:true});}catch(e){}});
 }
@@ -20563,6 +20603,27 @@ function coach_score(an){
 
 // ─── 6. RENDER DE LA PANTALLA COACH ────────────────────────
 
+// ── Coach en dos niveles: filas de «Más detalle» ──
+// Plegada, cada fila enseña su título y un resumen; su contenido solo se pinta abierta. Las filas abiertas se recuerdan mientras
+// la app sigue abierta (no se guardan). Una pieza sin contenido no tiene fila.
+const CFOLD_KEYS=['ciclo','fat','ana','mm','det','prev'],_cfold=new Set();
+function cfoldHtml(k,title,sum,body){
+  if(!body||!String(body).trim())return'';
+  const on=_cfold.has(k);
+  return`<section class="cfold${on?' on':''}" data-k="${k}">
+    <button type="button" class="cfold-h" id="cfold-h-${k}" aria-expanded="${on}"${on?` aria-controls="cfold-b-${k}"`:''} onclick="cfoldToggle('${k}')"><span class="cfold-t">${title}</span><span class="cfold-s">${sum||''}</span><span class="cfold-a" aria-hidden="true">›</span></button>
+    ${on?`<div class="cfold-b" id="cfold-b-${k}" role="region" aria-labelledby="cfold-h-${k}">${body}</div>`:''}
+  </section>`;
+}
+function cfoldToggle(k){
+  if(!CFOLD_KEYS.includes(k))return;
+  if(_cfold.has(k))_cfold.delete(k);else _cfold.add(k);
+  render();
+  const h=document.getElementById('cfold-h-'+k);if(!h)return;
+  try{h.focus({preventScroll:true});}catch(e){}
+  // al abrir, que se vea lo abierto (o su principio, si no cabe)
+  if(_cfold.has(k))requestAnimationFrame(()=>{const sec=h.closest('.cfold');if(sec&&sec.isConnected)_revealSpan(document.getElementById('screen'),sec,sec);});
+}
 function renderCoach(){
   const cycle=coach_cycleData();
   const totalSessions=S.sessions.length;
@@ -20647,43 +20708,16 @@ function renderCoach(){
   // (16b) Si lo único propuesto es la descarga como enlace o fila de espera, sobra la pista del tope de cambios
   const onlyDlRow=!blockedAll&&!pv.reserve.length&&pv.active.length>0&&pv.active.every(p=>p.type==='deload'&&(dlReco||dlWait));
 
-  return`
-  <div class="topbar">
-    <div class="topbar-row">
-      <div><h1>Coach</h1><div class="sub">Mesociclo ${(S.mesocycles?.length||0)+1} · Semana ${cycle.weekNum}/${CYCLE_WEEKS}</div>
-        ${cycle.overdue?`<div class="coach-over">Ciclo terminado${overW>=1?` hace ${overW}${NB}sem.`:''}${cycle.readyForReview?' · ciérralo abajo':''}</div>`:''}</div>
-      <div class="score-ring${scoreData.fresh?' fresh':''}" role="img" aria-label="${scoreData.fresh?'Ciclo nuevo: la nota aparece tras la primera semana':`Nota del ciclo: ${scoreData.score} de 100, ${esc(scoreData.grade)}`}">
-        <svg viewBox="0 0 80 80">
-          <circle class="sbg" cx="40" cy="40" r="32"/>
-          <circle class="sfg" cx="40" cy="40" r="32" style="${scoreData.fresh?'stroke:var(--blue);stroke-dasharray:3 6;stroke-linecap:butt;opacity:.55':`stroke:${scoreData.color};stroke-dasharray:${R};stroke-dashoffset:${ringOff}`}"/>
-        </svg>
-        <div class="score-val">${scoreData.fresh
-          ?`<span class="n" style="color:var(--blue-hi)">—</span><span class="u">Nuevo<br>ciclo</span>`
-          :`<span class="n" style="color:${scoreData.color}">${scoreData.score}</span><span class="u">${scoreData.grade}</span>`}</div>
-      </div>
-    </div>
-  </div>
-
-  ${lightBannerHtml('coach')}
-
-  ${legacy?`<div class="card legacy-dl">
-    <div class="legacy-dl-t">${ic('wrench')} Tu plan sigue con series reducidas</div>
-    <div class="legacy-dl-d">Una descarga anterior bajó tus series y nunca se deshizo. ¿Las devuelvo a lo normal?</div>
-    <div class="rec-diff" style="margin-bottom:10px">${legacy.fixes.slice(0,6).map(f=>`<div class="rec-diff-row"><span class="sym add">↑</span><span>${esc(f.n)}: ${f.from} → ${f.to} series</span></div>`).join('')}${legacy.fixes.length>6?`<div class="rec-diff-row"><span class="sym add">+</span><span>y ${legacy.fixes.length-6} más</span></div>`:''}</div>
-    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="coach_fixLegacyDeload(true)">Restaurar series</button><button class="btn bs" style="width:120px" onclick="coach_fixLegacyDeload(false)">Dejar así</button></div>
-  </div>`:''}
-
-  ${wrapCycleOfferHtml(pv.active.filter(p=>!(p.type==='deload'&&(dlReco||dlWait))).length)}
-  ${cycleNextCardHtml()}
-
-  ${deloadRecoHtml(dlReco)}
-
-  ${cycle.readyForReview?`<div class="cta-banner" role="button" tabindex="0" onclick="coach_applyRecommendations()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();coach_applyRecommendations()}">
-    <div class="cta-banner-t">${cycle.overdue?`${ic('flag')} Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:ic('sparkles')+' Tu análisis de ciclo está listo'}</div>
-    <div class="cta-banner-d">${cycle.overdue?'Ciérralo para recibir tus propuestas y empezar uno nuevo':'Revisa el análisis abajo y cierra el ciclo para recibir tus propuestas'}</div>
-  </div>`:''}
-
-  <div class="coach-cycle">
+  // ── Dos niveles. Arriba (nivel 1), lo que pide una decisión —descarga recomendada, cierre del ciclo y propuestas— y la
+  // próxima sesión. Debajo, bajo «Más detalle», el resto, en filas que se abren (cfoldHtml).
+  const propsHtml=pend.length?`<div class="sh" id="coach-props">${ic('bulb')} El Coach propone — tú decides</div>
+  ${onlyDlRow?'':`<div class="prop-hint">${blockedAll?'Durante la descarga no se cambia el plan: podrás aplicarlas al terminar.'
+    :`Máximo ${PROP_MAX_TOTAL} cambios por ciclo y 1 por día de rutina${pv.appliedCount?` · llevas ${pv.appliedCount}`:''}.${blockedSome?' Lo que afecta a la descarga en curso podrás aplicarlo al terminarla.':''}`}</div>`}
+  ${pv.active.map(p=>p.type!=='deload'?_proposalCardHtml(p,_proposalBlocked(p)):dlReco?_propDlLinkHtml():dlWait?_propDlWaitHtml():_proposalCardHtml(p,_proposalBlocked(p))).join('')}
+  ${pv.reserve.length?`<button class="prop-res-tg" aria-expanded="${_coachShowReserve}" onclick="_coachShowReserve=!_coachShowReserve;render()">En reserva (${pv.reserve.length}) <span aria-hidden="true">${_coachShowReserve?'▴':'▾'}</span></button>
+    ${_coachShowReserve?`<div class="prop-res">${pv.reserve.map(p=>`<div class="prop-res-row"><span class="prop-res-n">${esc(p.title||'')}</span><span class="prop-res-d">${esc(_propWhere(p))}</span></div>`).join('')}
+      <div class="prop-res-note">${pv.active.length?'Entran si ignoras alguna de arriba':'Este ciclo ya tiene sus cambios'} (máx. ${PROP_MAX_TOTAL} por ciclo y 1 por día).</div></div>`:''}`:''}`:'';
+  const cicloHtml=`  <div class="coach-cycle">
     <div class="coach-cycle-info">
       <div class="coach-cycle-lbl">${cycle.fresh?'Ciclo nuevo':'Ciclo actual'}</div>
       <div class="coach-cycle-val">${_nwUnits(`${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} · ${weeksTxt}`)}</div>
@@ -20720,42 +20754,70 @@ function renderCoach(){
       <div class="mv" style="color:${weight.trend==='insufficient'?'var(--text3)':parseFloat(weight.change)<=0?'var(--green)':'var(--red)'}">${weight.trend==='insufficient'?'—':kgSign(weight.change)}</div>
       <div class="md">kg ${weight.trend==='insufficient'?'sin datos':'desde el inicio'}</div>
     </div>
-  </div>
-
-  ${fatigueCardHtml(an)}
-
-  ${coachPlanCardHtml()}
-
-  <div class="sh">Análisis del ciclo</div>
-  ${insights.length===0?`<div class="insight"><div class="insight-ic info">${ic('hourglass')}</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
-    insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${icE(i.ic)}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${_nwUnits(i.d)}</div></div></div>`).join('')}
-
-  ${pend.length?`<div class="sh" id="coach-props">${ic('bulb')} El Coach propone — tú decides</div>
-  ${onlyDlRow?'':`<div class="prop-hint">${blockedAll?'Durante la descarga no se cambia el plan: podrás aplicarlas al terminar.'
-    :`Máximo ${PROP_MAX_TOTAL} cambios por ciclo y 1 por día de rutina${pv.appliedCount?` · llevas ${pv.appliedCount}`:''}.${blockedSome?' Lo que afecta a la descarga en curso podrás aplicarlo al terminarla.':''}`}</div>`}
-  ${pv.active.map(p=>p.type!=='deload'?_proposalCardHtml(p,_proposalBlocked(p)):dlReco?_propDlLinkHtml():dlWait?_propDlWaitHtml():_proposalCardHtml(p,_proposalBlocked(p))).join('')}
-  ${pv.reserve.length?`<button class="prop-res-tg" aria-expanded="${_coachShowReserve}" onclick="_coachShowReserve=!_coachShowReserve;render()">En reserva (${pv.reserve.length}) <span aria-hidden="true">${_coachShowReserve?'▴':'▾'}</span></button>
-    ${_coachShowReserve?`<div class="prop-res">${pv.reserve.map(p=>`<div class="prop-res-row"><span class="prop-res-n">${esc(p.title||'')}</span><span class="prop-res-d">${esc(_propWhere(p))}</span></div>`).join('')}
-      <div class="prop-res-note">${pv.active.length?'Entran si ignoras alguna de arriba':'Este ciclo ya tiene sus cambios'} (máx. ${PROP_MAX_TOTAL} por ciclo y 1 por día).</div></div>`:''}`:''}`:''}
-
-  ${mmCoachCardHtml()}
-
-  ${cycle.readyForReview?`<div class="sh">Análisis detallado</div>
-    ${coach_detailHtml(an,pv)}
+  </div>`;
+  const anaHtml=insights.length===0?`<div class="insight"><div class="insight-ic info">${ic('hourglass')}</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
+    insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${icE(i.ic)}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${_nwUnits(i.d)}</div></div></div>`).join('');
+  const detHtml=cycle.readyForReview?`${coach_detailHtml(an,pv)}
     <div style="padding:4px 14px 14px">
       <button class="btn bp" onclick="coach_applyRecommendations()">Cerrar ciclo e iniciar uno nuevo</button>
     </div>`:
-    (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'Faltan unas':'Falta alrededor de'} <strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
-    :`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`)}
-
-  ${S.mesocycles&&S.mesocycles.length>0?`<div class="sh">Ciclos anteriores</div>
-    ${S.mesocycles.filter(_isPlainObj).map((m,i)=>({m,n:i+1})).reverse().slice(0,3).map(({m,n})=>`<div class="mesocycle-log">
+    (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'Faltan unas':'Falta alrededor de'} <strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
+    :`<div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`);
+  const prevHtml=S.mesocycles&&S.mesocycles.length>0?`${S.mesocycles.filter(_isPlainObj).map((m,i)=>({m,n:i+1})).reverse().slice(0,3).map(({m,n})=>`<div class="mesocycle-log">
       <h4>Mesociclo ${esc(m.num)} · ${esc(plural(m.sessionCount,'sesión','sesiones'))}</h4>
       <p>${esc(m.summary||'')}</p>
       ${_wrCycleBtn(n)}
-    </div>`).join('')}`:''}
+    </div>`).join('')}`:'';
+  // resúmenes de las filas plegadas
+  const fat=coach_fatigueMeter(an),mmK=mmRangeKey(),untilAn=Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks));
+
+  return`
+  <div class="topbar">
+    <div class="topbar-row">
+      <div><h1>Coach</h1><div class="sub">Mesociclo ${(S.mesocycles?.length||0)+1} · Semana ${cycle.weekNum}/${CYCLE_WEEKS}</div>
+        ${cycle.overdue?`<div class="coach-over">Ciclo terminado${overW>=1?` hace ${overW}${NB}sem.`:''}${cycle.readyForReview?' · ciérralo abajo':''}</div>`:''}</div>
+      <div class="score-ring${scoreData.fresh?' fresh':''}" role="img" aria-label="${scoreData.fresh?'Ciclo nuevo: la nota aparece tras la primera semana':`Nota del ciclo: ${scoreData.score} de 100, ${esc(scoreData.grade)}`}">
+        <svg viewBox="0 0 80 80">
+          <circle class="sbg" cx="40" cy="40" r="32"/>
+          <circle class="sfg" cx="40" cy="40" r="32" style="${scoreData.fresh?'stroke:var(--blue);stroke-dasharray:3 6;stroke-linecap:butt;opacity:.55':`stroke:${scoreData.color};stroke-dasharray:${R};stroke-dashoffset:${ringOff}`}"/>
+        </svg>
+        <div class="score-val">${scoreData.fresh
+          ?`<span class="n" style="color:var(--blue-hi)">—</span><span class="u">Nuevo<br>ciclo</span>`
+          :`<span class="n" style="color:${scoreData.color}">${scoreData.score}</span><span class="u">${scoreData.grade}</span>`}</div>
+      </div>
+    </div>
+  </div>
+
+  ${lightBannerHtml('coach')}
+
+  ${legacy?`<div class="card legacy-dl">
+    <div class="legacy-dl-t">${ic('wrench')} Tu plan sigue con series reducidas</div>
+    <div class="legacy-dl-d">Una descarga anterior bajó tus series y nunca se deshizo. ¿Las devuelvo a lo normal?</div>
+    <div class="rec-diff" style="margin-bottom:10px">${legacy.fixes.slice(0,6).map(f=>`<div class="rec-diff-row"><span class="sym add">↑</span><span>${esc(f.n)}: ${f.from} → ${f.to} series</span></div>`).join('')}${legacy.fixes.length>6?`<div class="rec-diff-row"><span class="sym add">+</span><span>y ${legacy.fixes.length-6} más</span></div>`:''}</div>
+    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="coach_fixLegacyDeload(true)">Restaurar series</button><button class="btn bs" style="width:120px" onclick="coach_fixLegacyDeload(false)">Dejar así</button></div>
+  </div>`:''}
+
+  ${wrapCycleOfferHtml(pv.active.filter(p=>!(p.type==='deload'&&(dlReco||dlWait))).length)}
+  ${cycleNextCardHtml()}
+
+  ${deloadRecoHtml(dlReco)}
+
+  ${cycle.readyForReview?`<div class="cta-banner" role="button" tabindex="0" onclick="coach_applyRecommendations()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();coach_applyRecommendations()}">
+    <div class="cta-banner-t">${cycle.overdue?`${ic('flag')} Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:ic('sparkles')+' Tu análisis de ciclo está listo'}</div>
+    <div class="cta-banner-d">${cycle.overdue?'Ciérralo para recibir tus propuestas y empezar uno nuevo':'Revisa el análisis abajo y cierra el ciclo para recibir tus propuestas'}</div>
+  </div>`:''}
+
+  ${propsHtml}
+
+  ${coachPlanCardHtml()}
+
+  <div class="sh cfold-sh">Más detalle</div>
+  ${cfoldHtml('ciclo','Tu ciclo',`${plural(cycle.sessions.length,'sesión','sesiones')} · progresan ${progressing}/${withData||'—'}`,cicloHtml)}
+  ${cfoldHtml('fat',_rpeOn()?'Fatiga y esfuerzo':'Fatiga',fat.score==null?'sin datos':`${fat.score} · ${esc(fat.level||'')}`,fatigueCardHtml(an))}
+  ${cfoldHtml('ana','Análisis del ciclo',insights.length?plural(insights.length,'observación','observaciones'):'recopilando datos',anaHtml)}
+  ${cfoldHtml('mm','Tus músculos',mmK==='7d'?'últimos 7 días':mmK==='cycle'?'este ciclo':'4 semanas',mmCoachCardHtml())}
+  ${cfoldHtml('det',cycle.readyForReview?'Análisis detallado':'Próximo análisis',cycle.readyForReview?'y cierre del ciclo':cycle.weeks<CYCLE_WEEKS*0.85?(untilAn===1?'en 1 semana':`en unas ${untilAn} semanas`):'casi listo',detHtml)}
+  ${cfoldHtml('prev','Ciclos anteriores',String(S.mesocycles?S.mesocycles.filter(_isPlainObj).length:0),prevHtml)}
   `;
 }
 

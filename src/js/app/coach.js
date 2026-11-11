@@ -598,6 +598,7 @@ function fatigueCardHtml(an){
 // Se aplica con la misma descarga de siempre (beginFullDeload → S.deload): temporal, con aviso, «Terminar» y vuelta sola.
 const DELOAD_RECO_WEEKS=5,DELOAD_RECO_MIN_SESS=6;
 let _dlRecoPlan='sets'; // plan elegido en la tarjeta (no se guarda)
+let _dlRecoMore=false;   // «Ver qué cambia» abierto: la lista de ejercicios y la letra pequeña (no se guarda)
 function _dlRecoSnoozed(){const t=S.dlRecoSnoozeTs;return typeof t==='number'&&isFinite(t)&&Date.now()<t;}
 // ¿Hay una «Semana de descarga» del cierre de ciclo entre las propuestas activas?
 function _dlPropActive(){return(S.pendingCoachProposals||[]).some(p=>p&&p.type==='deload')&&coach_pendingView().active.some(p=>p&&p.type==='deload');}
@@ -672,8 +673,10 @@ function deloadRecoHtml(rec){
       ${opt('sets','Menos series',`−40${NB}% de series, mismo peso`)}
       ${opt('weight','Menos peso',`Mismas series, −15${NB}% de peso`)}
     </div>
-    ${rows.length?`<ul class="dlr-prev" aria-label="Lo que cambia en tu plan">${rows.slice(0,MAX).map(r=>`<li><span class="dlr-pn">${esc(r.n)}</span><span class="dlr-pv">${esc(r.txt)}</span></li>`).join('')}${rows.length>MAX?`<li class="more">y ${plural(rows.length-MAX,'ejercicio')} más</li>`:''}</ul>`:''}
-    <div class="dlr-note">${_nwUnits(note)} Esa semana no se sube nada; al terminar, tu plan vuelve solo.${exDl?` Tu «${esc(deloadTitle(exDl))}» termina al empezarla: la semana la sustituye.`:''}</div>
+    ${exDl?`<div class="dlr-note dlr-sub">Tu «${esc(deloadTitle(exDl))}» termina al empezarla: la semana la sustituye.</div>`:''}
+    <button type="button" class="dlr-more" aria-expanded="${_dlRecoMore}" onclick="dlRecoMore()">${_dlRecoMore?'Ocultar el detalle':'Ver qué cambia'} <span aria-hidden="true">${_dlRecoMore?'▴':'▾'}</span></button>
+    ${_dlRecoMore?`<div class="dlr-det">${rows.length?`<ul class="dlr-prev" aria-label="Lo que cambia en tu plan">${rows.slice(0,MAX).map(r=>`<li><span class="dlr-pn">${esc(r.n)}</span><span class="dlr-pv">${esc(r.txt)}</span></li>`).join('')}${rows.length>MAX?`<li class="more">y ${plural(rows.length-MAX,'ejercicio')} más</li>`:''}</ul>`:''}
+      <div class="dlr-note">${_nwUnits(note)} Esa semana no se sube nada; al terminar, tu plan vuelve solo.</div></div>`:''}
     <div class="dlr-acts"><button type="button" class="btn bp dlr-go" onclick="dlRecoStart()">Empezar descarga</button><button type="button" class="btn bs dlr-later" onclick="dlRecoLater()">Ahora no</button></div>
   </div>`;
 }
@@ -682,6 +685,11 @@ function dlRecoPick(k){_dlRecoPlan=k==='weight'?'weight':'sets';
   const el=document.getElementById('dl-reco'),rec=el?coach_deloadReco():null;
   if(el&&rec)el.outerHTML=deloadRecoHtml(rec);else render();
   const b=document.querySelector('#dl-reco .dlr-opt[data-plan="'+_dlRecoPlan+'"]');if(b)try{b.focus({preventScroll:true});}catch(e){}}
+// «Ver qué cambia» / «Ocultar el detalle»: como al elegir el plan, solo se repinta la tarjeta y el foco sigue en el botón
+function dlRecoMore(){_dlRecoMore=!_dlRecoMore;
+  const el=document.getElementById('dl-reco'),rec=el?coach_deloadReco():null;
+  if(el&&rec)el.outerHTML=deloadRecoHtml(rec);else render();
+  const b=document.querySelector('#dl-reco .dlr-more');if(b)try{b.focus({preventScroll:true});}catch(e){}}
 function dlRecoStart(){
   const r=beginFullDeload(_dlRecoPlan);
   if(!r.ok){toast(r.msg);render();return;}
@@ -690,16 +698,17 @@ function dlRecoStart(){
   for(let i=L.length-1;i>=0;i--){const p=L[i];if(p&&p.type==='deload'){L.splice(i,1);
     if(!Array.isArray(S.appliedProposals))S.appliedProposals=[];S.appliedProposals.push({...p,dayKey:null,appliedAt:Date.now(),dlId:r.dlId});}}
   if(Array.isArray(S.appliedProposals)&&S.appliedProposals.length>60)S.appliedProposals=S.appliedProposals.slice(-60);
-  S.dlRecoSnoozeTs=null;
+  S.dlRecoSnoozeTs=null;_dlRecoMore=false;
   saveState();render();toast(r.msg,3600);
 }
 function dlRecoLater(){
-  S.dlRecoSnoozeTs=_addDaysLocal(_startOfDay(Date.now()),7);
+  S.dlRecoSnoozeTs=_addDaysLocal(_startOfDay(Date.now()),7);_dlRecoMore=false;
   saveState();render();toast(`De acuerdo · te la vuelvo a proponer el ${_dlDayTxt(S.dlRecoSnoozeTs)}`,3600);
 }
 // (13e r1) Al botón del medidor (la oferta mientras la recomendación está pospuesta)
 function goFatGo(){
-  if(S.tab!=='coach')go('coach');
+  const open=!_cfold.has('fat');if(open)_cfold.add('fat'); // su fila de «Más detalle», abierta
+  if(S.tab!=='coach')go('coach');else if(open)render();
   requestAnimationFrame(()=>{const b=document.getElementById('fat-go')||document.getElementById('fat-card');if(!b)return;
     b.scrollIntoView({block:'center'});if(b.id==='fat-go')try{b.focus({preventScroll:true});}catch(e){}});
 }
@@ -1699,6 +1708,27 @@ function coach_score(an){
 
 // ─── 6. RENDER DE LA PANTALLA COACH ────────────────────────
 
+// ── Coach en dos niveles: filas de «Más detalle» ──
+// Plegada, cada fila enseña su título y un resumen; su contenido solo se pinta abierta. Las filas abiertas se recuerdan mientras
+// la app sigue abierta (no se guardan). Una pieza sin contenido no tiene fila.
+const CFOLD_KEYS=['ciclo','fat','ana','mm','det','prev'],_cfold=new Set();
+function cfoldHtml(k,title,sum,body){
+  if(!body||!String(body).trim())return'';
+  const on=_cfold.has(k);
+  return`<section class="cfold${on?' on':''}" data-k="${k}">
+    <button type="button" class="cfold-h" id="cfold-h-${k}" aria-expanded="${on}"${on?` aria-controls="cfold-b-${k}"`:''} onclick="cfoldToggle('${k}')"><span class="cfold-t">${title}</span><span class="cfold-s">${sum||''}</span><span class="cfold-a" aria-hidden="true">›</span></button>
+    ${on?`<div class="cfold-b" id="cfold-b-${k}" role="region" aria-labelledby="cfold-h-${k}">${body}</div>`:''}
+  </section>`;
+}
+function cfoldToggle(k){
+  if(!CFOLD_KEYS.includes(k))return;
+  if(_cfold.has(k))_cfold.delete(k);else _cfold.add(k);
+  render();
+  const h=document.getElementById('cfold-h-'+k);if(!h)return;
+  try{h.focus({preventScroll:true});}catch(e){}
+  // al abrir, que se vea lo abierto (o su principio, si no cabe)
+  if(_cfold.has(k))requestAnimationFrame(()=>{const sec=h.closest('.cfold');if(sec&&sec.isConnected)_revealSpan(document.getElementById('screen'),sec,sec);});
+}
 function renderCoach(){
   const cycle=coach_cycleData();
   const totalSessions=S.sessions.length;
@@ -1783,43 +1813,16 @@ function renderCoach(){
   // (16b) Si lo único propuesto es la descarga como enlace o fila de espera, sobra la pista del tope de cambios
   const onlyDlRow=!blockedAll&&!pv.reserve.length&&pv.active.length>0&&pv.active.every(p=>p.type==='deload'&&(dlReco||dlWait));
 
-  return`
-  <div class="topbar">
-    <div class="topbar-row">
-      <div><h1>Coach</h1><div class="sub">Mesociclo ${(S.mesocycles?.length||0)+1} · Semana ${cycle.weekNum}/${CYCLE_WEEKS}</div>
-        ${cycle.overdue?`<div class="coach-over">Ciclo terminado${overW>=1?` hace ${overW}${NB}sem.`:''}${cycle.readyForReview?' · ciérralo abajo':''}</div>`:''}</div>
-      <div class="score-ring${scoreData.fresh?' fresh':''}" role="img" aria-label="${scoreData.fresh?'Ciclo nuevo: la nota aparece tras la primera semana':`Nota del ciclo: ${scoreData.score} de 100, ${esc(scoreData.grade)}`}">
-        <svg viewBox="0 0 80 80">
-          <circle class="sbg" cx="40" cy="40" r="32"/>
-          <circle class="sfg" cx="40" cy="40" r="32" style="${scoreData.fresh?'stroke:var(--blue);stroke-dasharray:3 6;stroke-linecap:butt;opacity:.55':`stroke:${scoreData.color};stroke-dasharray:${R};stroke-dashoffset:${ringOff}`}"/>
-        </svg>
-        <div class="score-val">${scoreData.fresh
-          ?`<span class="n" style="color:var(--blue-hi)">—</span><span class="u">Nuevo<br>ciclo</span>`
-          :`<span class="n" style="color:${scoreData.color}">${scoreData.score}</span><span class="u">${scoreData.grade}</span>`}</div>
-      </div>
-    </div>
-  </div>
-
-  ${lightBannerHtml('coach')}
-
-  ${legacy?`<div class="card legacy-dl">
-    <div class="legacy-dl-t">${ic('wrench')} Tu plan sigue con series reducidas</div>
-    <div class="legacy-dl-d">Una descarga anterior bajó tus series y nunca se deshizo. ¿Las devuelvo a lo normal?</div>
-    <div class="rec-diff" style="margin-bottom:10px">${legacy.fixes.slice(0,6).map(f=>`<div class="rec-diff-row"><span class="sym add">↑</span><span>${esc(f.n)}: ${f.from} → ${f.to} series</span></div>`).join('')}${legacy.fixes.length>6?`<div class="rec-diff-row"><span class="sym add">+</span><span>y ${legacy.fixes.length-6} más</span></div>`:''}</div>
-    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="coach_fixLegacyDeload(true)">Restaurar series</button><button class="btn bs" style="width:120px" onclick="coach_fixLegacyDeload(false)">Dejar así</button></div>
-  </div>`:''}
-
-  ${wrapCycleOfferHtml(pv.active.filter(p=>!(p.type==='deload'&&(dlReco||dlWait))).length)}
-  ${cycleNextCardHtml()}
-
-  ${deloadRecoHtml(dlReco)}
-
-  ${cycle.readyForReview?`<div class="cta-banner" role="button" tabindex="0" onclick="coach_applyRecommendations()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();coach_applyRecommendations()}">
-    <div class="cta-banner-t">${cycle.overdue?`${ic('flag')} Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:ic('sparkles')+' Tu análisis de ciclo está listo'}</div>
-    <div class="cta-banner-d">${cycle.overdue?'Ciérralo para recibir tus propuestas y empezar uno nuevo':'Revisa el análisis abajo y cierra el ciclo para recibir tus propuestas'}</div>
-  </div>`:''}
-
-  <div class="coach-cycle">
+  // ── Dos niveles. Arriba (nivel 1), lo que pide una decisión —descarga recomendada, cierre del ciclo y propuestas— y la
+  // próxima sesión. Debajo, bajo «Más detalle», el resto, en filas que se abren (cfoldHtml).
+  const propsHtml=pend.length?`<div class="sh" id="coach-props">${ic('bulb')} El Coach propone — tú decides</div>
+  ${onlyDlRow?'':`<div class="prop-hint">${blockedAll?'Durante la descarga no se cambia el plan: podrás aplicarlas al terminar.'
+    :`Máximo ${PROP_MAX_TOTAL} cambios por ciclo y 1 por día de rutina${pv.appliedCount?` · llevas ${pv.appliedCount}`:''}.${blockedSome?' Lo que afecta a la descarga en curso podrás aplicarlo al terminarla.':''}`}</div>`}
+  ${pv.active.map(p=>p.type!=='deload'?_proposalCardHtml(p,_proposalBlocked(p)):dlReco?_propDlLinkHtml():dlWait?_propDlWaitHtml():_proposalCardHtml(p,_proposalBlocked(p))).join('')}
+  ${pv.reserve.length?`<button class="prop-res-tg" aria-expanded="${_coachShowReserve}" onclick="_coachShowReserve=!_coachShowReserve;render()">En reserva (${pv.reserve.length}) <span aria-hidden="true">${_coachShowReserve?'▴':'▾'}</span></button>
+    ${_coachShowReserve?`<div class="prop-res">${pv.reserve.map(p=>`<div class="prop-res-row"><span class="prop-res-n">${esc(p.title||'')}</span><span class="prop-res-d">${esc(_propWhere(p))}</span></div>`).join('')}
+      <div class="prop-res-note">${pv.active.length?'Entran si ignoras alguna de arriba':'Este ciclo ya tiene sus cambios'} (máx. ${PROP_MAX_TOTAL} por ciclo y 1 por día).</div></div>`:''}`:''}`:'';
+  const cicloHtml=`  <div class="coach-cycle">
     <div class="coach-cycle-info">
       <div class="coach-cycle-lbl">${cycle.fresh?'Ciclo nuevo':'Ciclo actual'}</div>
       <div class="coach-cycle-val">${_nwUnits(`${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} · ${weeksTxt}`)}</div>
@@ -1856,42 +1859,70 @@ function renderCoach(){
       <div class="mv" style="color:${weight.trend==='insufficient'?'var(--text3)':parseFloat(weight.change)<=0?'var(--green)':'var(--red)'}">${weight.trend==='insufficient'?'—':kgSign(weight.change)}</div>
       <div class="md">kg ${weight.trend==='insufficient'?'sin datos':'desde el inicio'}</div>
     </div>
-  </div>
-
-  ${fatigueCardHtml(an)}
-
-  ${coachPlanCardHtml()}
-
-  <div class="sh">Análisis del ciclo</div>
-  ${insights.length===0?`<div class="insight"><div class="insight-ic info">${ic('hourglass')}</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
-    insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${icE(i.ic)}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${_nwUnits(i.d)}</div></div></div>`).join('')}
-
-  ${pend.length?`<div class="sh" id="coach-props">${ic('bulb')} El Coach propone — tú decides</div>
-  ${onlyDlRow?'':`<div class="prop-hint">${blockedAll?'Durante la descarga no se cambia el plan: podrás aplicarlas al terminar.'
-    :`Máximo ${PROP_MAX_TOTAL} cambios por ciclo y 1 por día de rutina${pv.appliedCount?` · llevas ${pv.appliedCount}`:''}.${blockedSome?' Lo que afecta a la descarga en curso podrás aplicarlo al terminarla.':''}`}</div>`}
-  ${pv.active.map(p=>p.type!=='deload'?_proposalCardHtml(p,_proposalBlocked(p)):dlReco?_propDlLinkHtml():dlWait?_propDlWaitHtml():_proposalCardHtml(p,_proposalBlocked(p))).join('')}
-  ${pv.reserve.length?`<button class="prop-res-tg" aria-expanded="${_coachShowReserve}" onclick="_coachShowReserve=!_coachShowReserve;render()">En reserva (${pv.reserve.length}) <span aria-hidden="true">${_coachShowReserve?'▴':'▾'}</span></button>
-    ${_coachShowReserve?`<div class="prop-res">${pv.reserve.map(p=>`<div class="prop-res-row"><span class="prop-res-n">${esc(p.title||'')}</span><span class="prop-res-d">${esc(_propWhere(p))}</span></div>`).join('')}
-      <div class="prop-res-note">${pv.active.length?'Entran si ignoras alguna de arriba':'Este ciclo ya tiene sus cambios'} (máx. ${PROP_MAX_TOTAL} por ciclo y 1 por día).</div></div>`:''}`:''}`:''}
-
-  ${mmCoachCardHtml()}
-
-  ${cycle.readyForReview?`<div class="sh">Análisis detallado</div>
-    ${coach_detailHtml(an,pv)}
+  </div>`;
+  const anaHtml=insights.length===0?`<div class="insight"><div class="insight-ic info">${ic('hourglass')}</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
+    insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${icE(i.ic)}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${_nwUnits(i.d)}</div></div></div>`).join('');
+  const detHtml=cycle.readyForReview?`${coach_detailHtml(an,pv)}
     <div style="padding:4px 14px 14px">
       <button class="btn bp" onclick="coach_applyRecommendations()">Cerrar ciclo e iniciar uno nuevo</button>
     </div>`:
-    (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'Faltan unas':'Falta alrededor de'} <strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
-    :`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`)}
-
-  ${S.mesocycles&&S.mesocycles.length>0?`<div class="sh">Ciclos anteriores</div>
-    ${S.mesocycles.filter(_isPlainObj).map((m,i)=>({m,n:i+1})).reverse().slice(0,3).map(({m,n})=>`<div class="mesocycle-log">
+    (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'Faltan unas':'Falta alrededor de'} <strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
+    :`<div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`);
+  const prevHtml=S.mesocycles&&S.mesocycles.length>0?`${S.mesocycles.filter(_isPlainObj).map((m,i)=>({m,n:i+1})).reverse().slice(0,3).map(({m,n})=>`<div class="mesocycle-log">
       <h4>Mesociclo ${esc(m.num)} · ${esc(plural(m.sessionCount,'sesión','sesiones'))}</h4>
       <p>${esc(m.summary||'')}</p>
       ${_wrCycleBtn(n)}
-    </div>`).join('')}`:''}
+    </div>`).join('')}`:'';
+  // resúmenes de las filas plegadas
+  const fat=coach_fatigueMeter(an),mmK=mmRangeKey(),untilAn=Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks));
+
+  return`
+  <div class="topbar">
+    <div class="topbar-row">
+      <div><h1>Coach</h1><div class="sub">Mesociclo ${(S.mesocycles?.length||0)+1} · Semana ${cycle.weekNum}/${CYCLE_WEEKS}</div>
+        ${cycle.overdue?`<div class="coach-over">Ciclo terminado${overW>=1?` hace ${overW}${NB}sem.`:''}${cycle.readyForReview?' · ciérralo abajo':''}</div>`:''}</div>
+      <div class="score-ring${scoreData.fresh?' fresh':''}" role="img" aria-label="${scoreData.fresh?'Ciclo nuevo: la nota aparece tras la primera semana':`Nota del ciclo: ${scoreData.score} de 100, ${esc(scoreData.grade)}`}">
+        <svg viewBox="0 0 80 80">
+          <circle class="sbg" cx="40" cy="40" r="32"/>
+          <circle class="sfg" cx="40" cy="40" r="32" style="${scoreData.fresh?'stroke:var(--blue);stroke-dasharray:3 6;stroke-linecap:butt;opacity:.55':`stroke:${scoreData.color};stroke-dasharray:${R};stroke-dashoffset:${ringOff}`}"/>
+        </svg>
+        <div class="score-val">${scoreData.fresh
+          ?`<span class="n" style="color:var(--blue-hi)">—</span><span class="u">Nuevo<br>ciclo</span>`
+          :`<span class="n" style="color:${scoreData.color}">${scoreData.score}</span><span class="u">${scoreData.grade}</span>`}</div>
+      </div>
+    </div>
+  </div>
+
+  ${lightBannerHtml('coach')}
+
+  ${legacy?`<div class="card legacy-dl">
+    <div class="legacy-dl-t">${ic('wrench')} Tu plan sigue con series reducidas</div>
+    <div class="legacy-dl-d">Una descarga anterior bajó tus series y nunca se deshizo. ¿Las devuelvo a lo normal?</div>
+    <div class="rec-diff" style="margin-bottom:10px">${legacy.fixes.slice(0,6).map(f=>`<div class="rec-diff-row"><span class="sym add">↑</span><span>${esc(f.n)}: ${f.from} → ${f.to} series</span></div>`).join('')}${legacy.fixes.length>6?`<div class="rec-diff-row"><span class="sym add">+</span><span>y ${legacy.fixes.length-6} más</span></div>`:''}</div>
+    <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="coach_fixLegacyDeload(true)">Restaurar series</button><button class="btn bs" style="width:120px" onclick="coach_fixLegacyDeload(false)">Dejar así</button></div>
+  </div>`:''}
+
+  ${wrapCycleOfferHtml(pv.active.filter(p=>!(p.type==='deload'&&(dlReco||dlWait))).length)}
+  ${cycleNextCardHtml()}
+
+  ${deloadRecoHtml(dlReco)}
+
+  ${cycle.readyForReview?`<div class="cta-banner" role="button" tabindex="0" onclick="coach_applyRecommendations()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();coach_applyRecommendations()}">
+    <div class="cta-banner-t">${cycle.overdue?`${ic('flag')} Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:ic('sparkles')+' Tu análisis de ciclo está listo'}</div>
+    <div class="cta-banner-d">${cycle.overdue?'Ciérralo para recibir tus propuestas y empezar uno nuevo':'Revisa el análisis abajo y cierra el ciclo para recibir tus propuestas'}</div>
+  </div>`:''}
+
+  ${propsHtml}
+
+  ${coachPlanCardHtml()}
+
+  <div class="sh cfold-sh">Más detalle</div>
+  ${cfoldHtml('ciclo','Tu ciclo',`${plural(cycle.sessions.length,'sesión','sesiones')} · progresan ${progressing}/${withData||'—'}`,cicloHtml)}
+  ${cfoldHtml('fat',_rpeOn()?'Fatiga y esfuerzo':'Fatiga',fat.score==null?'sin datos':`${fat.score} · ${esc(fat.level||'')}`,fatigueCardHtml(an))}
+  ${cfoldHtml('ana','Análisis del ciclo',insights.length?plural(insights.length,'observación','observaciones'):'recopilando datos',anaHtml)}
+  ${cfoldHtml('mm','Tus músculos',mmK==='7d'?'últimos 7 días':mmK==='cycle'?'este ciclo':'4 semanas',mmCoachCardHtml())}
+  ${cfoldHtml('det',cycle.readyForReview?'Análisis detallado':'Próximo análisis',cycle.readyForReview?'y cierre del ciclo':cycle.weeks<CYCLE_WEEKS*0.85?(untilAn===1?'en 1 semana':`en unas ${untilAn} semanas`):'casi listo',detHtml)}
+  ${cfoldHtml('prev','Ciclos anteriores',String(S.mesocycles?S.mesocycles.filter(_isPlainObj).length:0),prevHtml)}
   `;
 }
 

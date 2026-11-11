@@ -327,3 +327,26 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ls-row:active{background:none}
 .ls-sel{flex-shrink:0;min-height:44px;width:104px;padding:0 10px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:15px}
 .ls-note{padding:12px 16px;font-size:12px;color:var(--text3);line-height:1.5}
+
+/* ── Coach en dos niveles: filas de «Más detalle» (cfoldHtml). Plegada, cada fila es título + resumen + flecha; abierta, su
+      contenido va dentro de la misma tarjeta, sin las cajas ni los rótulos que llevaba suelto ── */
+.cfold-sh{margin-top:22px}
+.cfold{margin:0 14px 8px;background:var(--bg2);border-radius:var(--r);overflow:hidden}
+.cfold-h{display:flex;align-items:center;gap:10px;width:100%;min-height:54px;padding:8px 14px 8px 16px;text-align:left;color:inherit}
+.cfold-h:active{background:var(--bg3)}
+.cfold-h:focus-visible{outline:2px solid var(--green);outline-offset:-2px;border-radius:var(--r)}
+.cfold-t{flex:0 0 auto;font-size:15px;font-weight:600}
+.cfold-s{flex:1 1 0;min-width:0;font-size:13px;color:var(--text2);text-align:right;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cfold-a{flex-shrink:0;font-size:17px;line-height:1;color:var(--text3);transition:transform .2s}
+.cfold.on .cfold-a{transform:rotate(90deg)}
+.cfold-b{padding:2px 0 10px;border-top:1px solid var(--border)}
+.cfold-b>.sh{display:none}
+.cfold-b>.card,.cfold-b>.insight,.cfold-b>.coach-cycle,.cfold-b>.mesocycle-log,.cfold-b>.rec-card{background:transparent;margin-left:0;margin-right:0;border-radius:0}
+.cfold-b>.metric-grid{margin:0 14px 4px}
+.cfold-b>.metric-grid .metric-box{background:var(--bg3)}
+.cfold-b>.insight,.cfold-b>.mesocycle-log,.cfold-b>.coach-cycle{margin-bottom:0}
+.cfold-b>.insight+.insight,.cfold-b>.mesocycle-log+.mesocycle-log{border-top:1px solid var(--border)}
+@media (prefers-reduced-motion:reduce){.cfold-a{transition:none}}
+/* ── Tarjeta de descarga resumida: «Ver qué cambia» abre la lista de ejercicios y la letra pequeña ── */
+.dlr-more{display:flex;align-items:center;gap:6px;min-height:44px;margin:2px 0 4px;padding:0 2px;font-size:14px;font-weight:600;color:var(--green)}
+.dlr-more:focus-visible{outline:2px solid var(--green);outline-offset:2px;border-radius:var(--rxs)}
