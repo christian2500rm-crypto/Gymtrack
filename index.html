@@ -1681,6 +1681,26 @@ button.cal-c:focus-visible{outline:2px solid var(--green);outline-offset:1px;pos
 .sum-g[aria-pressed="true"]{border-color:var(--amber);color:var(--text)}
 .sum-note{font-size:13px;color:var(--text2);padding:8px 12px;background:color-mix(in srgb,var(--text) 3%,transparent);border-radius:6px;border-left:2px solid var(--border2);line-height:1.5;font-style:italic;overflow-wrap:anywhere}
 .sum-foot{font-size:11px;color:var(--text3);line-height:1.5;margin:14px 0 12px}
+
+/* ── Progreso: tres cifras arriba (progKpiHtml) y la guía en una hoja ── */
+.pk-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:6px 14px 10px}
+.pk{display:flex;flex-direction:column;align-items:flex-start;gap:3px;min-width:0;min-height:84px;padding:12px;border-radius:var(--rsm);background:var(--bg2);text-align:left;color:inherit;touch-action:manipulation}
+.pk:active{background:var(--bg3)}
+.pk:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.pk-l{font-size:12px;color:var(--text2)}
+.pk-v{font-family:'DM Sans',sans-serif;font-size:24px;font-weight:700;letter-spacing:-.5px;line-height:1.15;white-space:nowrap;font-variant-numeric:tabular-nums}
+.pk-v small{font-size:13px;font-weight:600;color:var(--text2);letter-spacing:0}
+.pk-s{font-size:11px;color:var(--text3);line-height:1.3}
+@media (max-width:359px){.pk-row{gap:6px}.pk{padding:10px 8px}.pk-v{font-size:20px}.pk-v small{font-size:12px}}
+.prog-guide{display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 28px);min-height:48px;margin:6px 14px 16px;border-radius:var(--rsm);background:var(--bg2);color:var(--green);font-size:14px;font-weight:600}
+.prog-guide:active{background:var(--bg3)}
+.prog-guide:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.pg-sheet:focus{outline:none}
+.pg-list{display:flex;flex-direction:column;gap:12px;margin:6px 0 18px}
+.pg-r{display:flex;gap:12px;align-items:flex-start}
+.pg-i{flex-shrink:0;width:20px;font-size:20px;font-weight:700;line-height:1.3;text-align:center}
+.pg-t{font-size:14px;font-weight:500;margin-bottom:2px}
+.pg-d{font-size:13px;color:var(--text2);line-height:1.55}
 /* ── (14) Resumen «Wrapped»: historia a pantalla completa, opaca y por encima de todo (menos los avisos) ── */
 .wr{position:fixed;inset:0;z-index:480;background:var(--bg);color:var(--text);display:flex;justify-content:center;overflow:hidden;overscroll-behavior:contain;outline:none;--wr-ac:var(--green)}
 .wr[data-ac="blue"]{--wr-ac:var(--blue)}
@@ -25260,36 +25280,69 @@ function calKey(e){
   e.preventDefault();bs.forEach((b,j)=>b.tabIndex=j===i?0:-1);bs[i].focus();
 }
 
+// ── Progreso: lo importante, arriba ──
+// Tres cifras de un vistazo: la fuerza y el peso del periodo de la gráfica («Más fuerte y más ligero») y la racha de semanas
+// cumplidas. Cada una es un botón que lleva a su sección. Sin sesiones no se pintan.
+function progKpiHtml(){
+  if(!(S.sessions||[]).length)return'';
+  const d=recompData(rRangeKey()),sl=d.s.length?d.s[d.s.length-1]:null,wl=d.w.length?d.w[d.w.length-1]:null,st=constancyStats();
+  const ps=sl?wRangeLbl(d.s,d.R):'',pw=wl?wRangeLbl(d.w,d.R):'',dk=wl?kgSign(wl.kg-d.w[0].kg):'';
+  const tile=(to,lbl,val,sub,aria)=>`<button type="button" class="pk" data-to="${to}" onclick="progJump(this.dataset.to)" aria-label="${esc(aria)}"><span class="pk-l">${lbl}</span><span class="pk-v">${val}</span><span class="pk-s">${sub}</span></button>`;
+  return`<div class="pk-row" role="group" aria-label="Tu progreso de un vistazo">
+    ${tile('rc-h','Fuerza',sl?`${_rcPct(sl.p)}<small>${NB}%</small>`:'—',sl?_nwUnits(esc(ps)):'aún sin datos',sl?`Fuerza: ${_rcPct(sl.p)}${NB}% ${ps}. Ver la gráfica`:'Fuerza: aún sin datos. Ver la gráfica')}
+    ${tile('pw-h','Peso',wl?`${dk}<small>${NB}kg</small>`:'—',wl?_nwUnits(esc(pw)):'sin pesadas',wl?`Peso: ${dk}${NB}kg ${pw}. Ver tu peso corporal`:'Peso: sin pesadas. Ver tu peso corporal')}
+    ${tile('cal-h','Racha',`${st.cur}<small>${NB}sem.</small>`,`mejor: ${st.best}`,`Racha: ${plural(st.cur,'semana')} cumpliendo tu objetivo; tu mejor racha, ${st.best}. Ver tu constancia`)}
+  </div>`;
+}
+// Lleva la lista a una sección de Progreso (su rótulo, arriba)
+function progJump(id){
+  const el=document.getElementById(id),sc=document.getElementById('screen');if(!el||!sc)return;
+  _smoothScroll(sc,Math.max(0,Math.round(sc.scrollTop+el.getBoundingClientRect().top-sc.getBoundingClientRect().top-10)));
+}
+// Guía de progresión: las cuatro reglas, en una hoja de ayuda (antes ocupaban el final de la pantalla)
+function progGuideHtml(){
+  const R=[['var(--green)','↑','¿Llegaste al tope del rango en todas las series?','Sube un salto de tu equipo (2.5 kg en Smith, 1 kg en polea o mancuerna…) y vuelve al mínimo del rango. '+(_rpeOn()?'Si fue fácil':'Si te sobran 3 reps o más')+', puede ser doble. Como mucho un 10 %: con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.'],
+    _rpeOn()?['var(--blue)','+','¿Dentro del rango, o al límite?','Mismo peso y una rep más la próxima vez. «Al límite» nunca sube peso.']:['var(--blue)','+','¿Dentro del rango?','Mismo peso y una rep más la próxima vez.'], // (M2)
+    ['var(--amber)','↓','¿Dos sesiones seguidas por debajo del rango?','Baja un 5–10 % (al menos un salto) y vuelve a subir desde ahí. No pasa nada.'],
+    ['var(--blue)','→','La regla de oro',`${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}/semana durante meses = resultados reales. La constancia lo es todo.`],
+  ];
+  return R.map(([c,i,t,d])=>`<div class="pg-r"><span class="pg-i" style="color:${c}" aria-hidden="true">${i}</span><div><div class="pg-t">${t}</div><div class="pg-d">${_nwUnits(d)}</div></div></div>`).join('');
+}
+function openProgGuide(){
+  const root=document.getElementById('cmodal-root');if(!root)return;
+  root.innerHTML=`<div class="cmov" onclick="if(event.target===this)closeProgGuide()"><div class="cmod pg-sheet" role="dialog" aria-modal="true" aria-labelledby="pg-t" tabindex="-1">
+    <div class="cmod-hdl"></div>
+    <div class="cmod-t" id="pg-t">Guía de progresión</div>
+    <div class="pg-list">${progGuideHtml()}</div>
+    <div class="cmod-btns"><button type="button" class="btn bp" onclick="closeProgGuide()">Entendido</button></div>
+  </div></div>`;
+  const d=root.querySelector('.pg-sheet');if(d)try{d.focus({preventScroll:true});}catch(e){}
+}
+function closeProgGuide(){
+  const root=document.getElementById('cmodal-root');if(root&&root.querySelector('.pg-sheet'))root.innerHTML='';
+  const b=document.querySelector('#screen .prog-guide');if(b)try{b.focus({preventScroll:true});}catch(e){}
+}
+// Orden: las tres cifras, la fuerza por ejercicio (lo que más se mira), la constancia, los músculos y los récords; después, las
+// gráficas de fondo (fuerza frente a peso, peso corporal), el resumen «Wrapped» y la guía.
 function renderProg(){
   const tot=S.sessions.length;
   return`
   <div class="topbar"><h1>Tu progreso</h1><div class="sub">${tot} ${tot===1?'sesión':'sesiones'} completada${tot!==1?'s':''}</div></div>
-  ${wrapProgCardHtml()}
-  <div class="sh">Constancia</div>
+  ${progKpiHtml()}
+  <div class="sh" id="pl-h">Fuerza por ejercicio</div>
+  ${progStrengthHtml()}
+  <div class="sh" id="cal-h">Constancia</div>
   ${constancyCardHtml()}
   <div class="sh">Músculos trabajados</div>
   ${mmProgCardHtml()}
-  <div class="sh" id="rc-h">Más fuerte y más ligero</div>
-  ${recompCardHtml()}
-  <div class="sh">Peso corporal</div>
-  ${progWeightLinkHtml()}
   <div class="sh">Récords</div>
   ${prWallHtml()}
-  <div class="sh" id="pl-h">Fuerza por ejercicio</div>
-  ${progStrengthHtml()}
-  <div class="sh">Guía de progresión</div>
-  <div class="card">
-    <div style="display:flex;flex-direction:column;gap:12px">
-      ${[['var(--green)','↑','¿Llegaste al tope del rango en todas las series?','Sube un salto de tu equipo (2.5 kg en Smith, 1 kg en polea o mancuerna…) y vuelve al mínimo del rango. '+(_rpeOn()?'Si fue fácil':'Si te sobran 3 reps o más')+', puede ser doble. Como mucho un 10 %: con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.'],
-         _rpeOn()?['var(--blue)','+','¿Dentro del rango, o al límite?','Mismo peso y una rep más la próxima vez. «Al límite» nunca sube peso.']:['var(--blue)','+','¿Dentro del rango?','Mismo peso y una rep más la próxima vez.'], // (M2)
-         ['var(--amber)','↓','¿Dos sesiones seguidas por debajo del rango?','Baja un 5–10 % (al menos un salto) y vuelve a subir desde ahí. No pasa nada.'],
-         ['var(--blue)','→','La regla de oro',`${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}/semana durante meses = resultados reales. La constancia lo es todo.`],
-      ].map(([c,i,t,d])=>`<div style="display:flex;gap:12px;align-items:flex-start">
-        <span style="color:${c};font-size:20px;font-weight:700;line-height:1.3;flex-shrink:0;width:20px;text-align:center">${i}</span>
-        <div><div style="font-size:14px;font-weight:500;margin-bottom:2px">${t}</div><div style="font-size:13px;color:var(--text2);line-height:1.55">${_nwUnits(d)}</div></div>
-      </div>`).join('')}
-    </div>
-  </div>`;
+  <div class="sh" id="rc-h">Más fuerte y más ligero</div>
+  ${recompCardHtml()}
+  <div class="sh" id="pw-h">Peso corporal</div>
+  ${progWeightLinkHtml()}
+  ${wrapProgCardHtml()}
+  <button type="button" class="prog-guide" aria-haspopup="dialog" onclick="openProgGuide()">¿Cómo se progresa? Guía rápida <span aria-hidden="true">›</span></button>`;
 }
 
 // ══════════════════════════════════════════════════════════

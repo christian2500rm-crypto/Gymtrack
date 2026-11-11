@@ -1399,7 +1399,10 @@ await safe('loadTextsPolish',async()=>{
     if(goal.getAttribute('role')!=='img'||!/^Objetivo de hoy: 142.25 kilos por \d+ repeticiones/.test(goal.getAttribute('aria-label')))throw new Error('chip a11y: '+goal.outerHTML.slice(0,160));
     _tgtWhyOpen.clear();
     go('prog');await W(10);
-    const guide=document.getElementById('app').textContent;
+    // (B3-3) la guía de progresión va en una hoja: se abre con su botón, al final de Progreso
+    if(/al menos un salto/.test(document.getElementById('app').textContent)||!document.querySelector('#screen .prog-guide'))throw new Error('la guía sigue en la pantalla');
+    document.querySelector('#screen .prog-guide').click();await W(5);
+    const guide=document.getElementById('cmodal-root').textContent;closeProgGuide();
     if(/nunca más de un 10 %/.test(guide)||!/al menos un salto/.test(guide))throw new Error('Guía de progresión');
     // Editor: muestra el rango que usa el Coach y se actualiza al cambiar las reps
     openRoutineEditor();editorSetDay('A');await W(10);
@@ -7585,8 +7588,9 @@ try{
     if(mb){
       const t=tx(mb);E(t.startsWith('Tu '+lblOf(main,cy))&&t.includes(pl(main.n,'sesión','sesiones')),'Progreso: principal «'+t+'» vs '+JSON.stringify(main));
       E(!!document.querySelector('.wrp-logo')&&!!document.getElementById('wrp-h'),'Progreso: logo o título');
-      // va antes de «Constancia»
-      const sh=[...document.querySelectorAll('#screen .sh')].map(tx);E(sh.indexOf('Tu resumen')===0&&sh[1]==='Constancia','Progreso: orden '+sh.slice(0,3));
+      // (B3-3) va al final, con su rótulo: después de «Peso corporal» y justo antes del botón de la guía
+      const sh=[...document.querySelectorAll('#screen .sh')].map(tx);E(sh[0]==='Fuerza por ejercicio'&&sh.indexOf('Tu resumen')===sh.length-1&&sh[sh.length-2]==='Peso corporal','Progreso: orden '+sh);
+      {const pg=document.querySelector('#screen .prog-guide');E(pg&&!!(card.compareDocumentPosition(pg)&Node.DOCUMENT_POSITION_FOLLOWING),'Progreso: la guía no va tras el resumen');}
       const chips=[...card.querySelectorAll('.wrp-chip:not(.wrp-all)')].map(tx),want=rest.slice(0,6).map(x=>cap(MO[x.m])+(x.y!==cy?' '+x.y:''));
       E(JSON.stringify(chips)===JSON.stringify(want),'Progreso: chips '+chips+' vs '+want);
       const more=card.querySelector('.wrp-all');E(rest.length>6?tx(more)==='Más ('+(rest.length-6)+')':!more,'Progreso: «Más» '+tx(more));
@@ -9645,9 +9649,12 @@ await safe('pulido16er1',async()=>{
       const ft=document.querySelector('#app .mm-foot span');if(ft){E(/Zona productiva: \d+–\d+ series por semana/.test(ft.textContent),'pie del mapa: '+ft.textContent);const n=ft.querySelector('.nw');E(n&&oneLine(n),'pie del mapa parte a '+w);}
       const em=document.querySelector('#prog-rc .rc-kp.w em');if(em&&/\d/.test(em.textContent)){[...em.querySelectorAll('.nw')].forEach(n=>E(oneLine(n),'recomposición: «'+n.textContent+'» parte a '+w));E(!/\d (meses|mes|semanas?|días?)\b/.test(em.textContent)||em.querySelectorAll('.nw').length>=2,'recomposición sin .nw: '+em.textContent);}
       const rv=document.querySelector('#prog-rc .rc-v span');if(rv&&/\d (meses|mes|semanas?|días?)/.test(rv.textContent))E(rv.querySelector('.nw'),'periodo de la recomposición sin .nw: '+rv.textContent);
-      const gd=[...document.querySelectorAll('#app .card')].find(c=>/La regla de oro/.test(c.textContent));
-      if(gd){E(/Baja un 5–10/.test(gd.textContent)&&!/5-10/.test(gd.textContent),'guía: rango con guion');[...gd.querySelectorAll('.nw')].forEach(n=>E(oneLine(n),'guía: «'+n.textContent+'» parte a '+w));
+      // (B3-3) la guía va en su hoja: se abre para mirarla y se cierra
+      openProgGuide();await W(5);
+      const gd=document.querySelector('#cmodal-root .pg-sheet');E(gd&&/La regla de oro/.test(gd.textContent),'sin la guía a '+w);
+      if(gd){E(/Baja un 5–10/.test(gd.textContent)&&!/5-10/.test(gd.textContent),'guía: rango con guion');E(gd.scrollWidth<=gd.clientWidth+1&&gd.getBoundingClientRect().right<=innerWidth+0.5,'la guía desborda a '+w);[...gd.querySelectorAll('.nw')].forEach(n=>E(oneLine(n),'guía: «'+n.textContent+'» parte a '+w));
         E([...gd.querySelectorAll('.nw')].some(n=>/días?\/semana$/.test(n.textContent)),'guía: «N días/semana» sin .nw');}
+      closeProgGuide();await W(5);
       E(document.documentElement.scrollWidth<=innerWidth,'Progreso desborda a '+w);}
     // ── Entreno: círculos del calentamiento con 44 px (sin pisarse) y «·» de la cabecera pegado a «sugerido»
     for(const [w,h] of [[390,844],[320,568]]){if(!await size(w,h)){bad.push('sin tamaño '+w);continue;}
@@ -12604,6 +12611,69 @@ await safe('b3Coach',async()=>{
     }
     if(bad.length)throw new Error(bad.join(' | '));
   }finally{if(fr){fr.style.width=fw;fr.style.height=fh;}_cfold.clear();abiertas.forEach(k=>_cfold.add(k));_dlRecoMore=more0;_dlRecoPlan='sets';_rest9(j);render();await W(40);}
+});
+await safe('b3Progreso',async()=>{
+  // (B3-3) Progreso con lo importante arriba (P1): tres cifras que llevan a su sección, la fuerza por ejercicio lo primero, el
+  // resumen «Wrapped» al final y la guía de progresión en una hoja.
+  const j=_snap9(),bad=[],E=(c,m)=>{if(!c)bad.push(m);},sc=document.getElementById('screen');
+  const fr=window.frameElement,fw=fr&&fr.style.width,fh=fr&&fr.style.height;
+  const size=async(w,h)=>{if(!fr)return false;fr.style.width=w+'px';fr.style.height=h+'px';await W(40);for(let i=0;i<20&&(innerWidth!==w||innerHeight!==h);i++)await W(20);return innerWidth===w&&innerHeight===h;};
+  const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',pks=()=>[...document.querySelectorAll('#screen .pk')];
+  const rm0=_rm;
+  try{
+    RT.stop();go('prog');await W(10);
+    // ── orden de las secciones
+    {const sh=[...document.querySelectorAll('#screen .sh')].map(tx).filter(t=>t!=='Tu resumen');
+      E(sh.join('|')==='Fuerza por ejercicio|Constancia|Músculos trabajados|Récords|Más fuerte y más ligero|Peso corporal','orden: '+sh.join('|'));
+      const pg=document.querySelector('#screen .prog-guide');
+      E(pg&&pg.tagName==='BUTTON'&&pg.getAttribute('aria-haspopup')==='dialog'&&pg.getBoundingClientRect().height>=44&&!pg.nextElementSibling,'el botón de la guía no cierra la pantalla');
+      E(!/La regla de oro/.test(sc.textContent),'la guía sigue pintada en la pantalla');}
+    // ── las tres cifras: solo con sesiones; cada una, un botón de 44 px o más con su nombre entero y su destino
+    E(!!pks().length===!!(S.sessions||[]).length,'cifras de arriba con '+(S.sessions||[]).length+' sesiones: '+pks().length);
+    const check=async L=>{
+      const B=pks();if(!B.length)return;
+      E(B.length===3&&B.map(b=>b.dataset.to).join()==='rc-h,pw-h,cal-h','cifras: '+B.map(b=>b.dataset.to));
+      const row=document.querySelector('#screen .pk-row');
+      E(row&&row.getAttribute('role')==='group'&&row.getAttribute('aria-label')&&row.previousElementSibling.classList.contains('topbar'),L+': las cifras no van bajo el título');
+      const d=recompData(rRangeKey()),st=constancyStats(),sl=d.s.length?d.s[d.s.length-1]:null,wl=d.w.length?d.w[d.w.length-1]:null;
+      E(tx(B[0].querySelector('.pk-v')).replace(/\s/g,'')===(sl?_rcPct(sl.p)+'%':'—'),L+': fuerza «'+tx(B[0].querySelector('.pk-v'))+'»');
+      E(tx(B[1].querySelector('.pk-v')).replace(/\s/g,'')===(wl?kgSign(wl.kg-d.w[0].kg)+'kg':'—'),L+': peso «'+tx(B[1].querySelector('.pk-v'))+'»');
+      E(tx(B[2].querySelector('.pk-v')).replace(/\s/g,'')===st.cur+'sem.'&&tx(B[2].querySelector('.pk-s'))==='mejor: '+st.best,L+': racha «'+tx(B[2])+'»');
+      E(tx(B[0].querySelector('.pk-s'))===(sl?wRangeLbl(d.s,d.R):'aún sin datos')&&tx(B[1].querySelector('.pk-s'))===(wl?wRangeLbl(d.w,d.R):'sin pesadas'),L+': periodos «'+tx(B[0].querySelector('.pk-s'))+'» «'+tx(B[1].querySelector('.pk-s'))+'»');
+      for(const b of B){const r=b.getBoundingClientRect(),v=b.querySelector('.pk-v'),a=b.getAttribute('aria-label')||'';
+        E(b.tagName==='BUTTON'&&r.height>=44&&r.width>=44,L+': cifra pequeña');
+        E(v.scrollWidth<=b.clientWidth-parseFloat(getComputedStyle(b).paddingLeft)*2+1&&v.getClientRects().length===1,L+': «'+tx(v)+'» no cabe');
+        E(a.startsWith(tx(b.querySelector('.pk-l'))+':')&&/Ver /.test(a)&&!/\d (%|kg)/.test(a),L+': nombre de la cifra «'+a+'»');
+        E(!!document.getElementById(b.dataset.to),L+': sin destino '+b.dataset.to);}
+      E(document.documentElement.scrollWidth<=innerWidth,L+': Progreso desborda');
+    };
+    for(const [w,h] of [[390,844],[320,568]]){if(fr&&!await size(w,h))continue;go('prog');await W(10);await check(innerWidth+'px');}
+    if(fr){fr.style.width=fw;fr.style.height=fh;await W(40);}
+    // sin datos de fuerza ni de peso: rayas y su porqué, no cifras inventadas
+    {const st0=S.strength,w0=S.weights;S.strength={};S.weights=[];go('prog');await W(10);
+      if(pks().length){E(tx(pks()[0].querySelector('.pk-v'))==='—'&&tx(pks()[0].querySelector('.pk-s'))==='aún sin datos'&&tx(pks()[1].querySelector('.pk-v'))==='—'&&tx(pks()[1].querySelector('.pk-s'))==='sin pesadas','sin datos: '+pks().map(tx).join(' · '));}
+      S.strength=st0;S.weights=w0;go('prog');await W(10);}
+    // ── tocar una cifra lleva a su sección (su rótulo, arriba); con movimiento reducido, de golpe
+    if(pks().length){_rm=()=>true;
+      for(const b of pks()){sc.scrollTop=0;b.click();await W(10);
+        const el=document.getElementById(b.dataset.to),top=el.getBoundingClientRect().top-sc.getBoundingClientRect().top,max=sc.scrollHeight-sc.clientHeight;
+        E(Math.abs(top-10)<=2||Math.abs(sc.scrollTop-max)<=2,'la cifra «'+tx(b.querySelector('.pk-l'))+'» no lleva a su sección ('+Math.round(top)+')');}
+      _rm=rm0;sc.scrollTop=0;}
+    // ── la guía de progresión, en su hoja: diálogo con título, sus cuatro reglas y vuelta del foco al botón
+    {const pg=document.querySelector('#screen .prog-guide');pg.click();await W(5);
+      const sh=document.querySelector('#cmodal-root .pg-sheet');
+      E(sh&&sh.getAttribute('role')==='dialog'&&sh.getAttribute('aria-modal')==='true'&&tx(document.getElementById(sh.getAttribute('aria-labelledby')))==='Guía de progresión','la guía no es un diálogo con título');
+      if(sh){E(sh.querySelectorAll('.pg-r').length===4&&/La regla de oro/.test(sh.textContent)&&new RegExp(getWeeklyTarget()+' días?/semana').test(tx(sh)),'reglas de la guía');
+        E(document.activeElement===sh,'el foco no entra en la guía');
+        E(/«Al límite» nunca sube peso/.test(sh.textContent)===_rpeOn(),'la guía no sigue el ajuste del esfuerzo');
+        const ok=sh.querySelector('.cmod-btns .btn');E(ok&&tx(ok)==='Entendido'&&ok.getBoundingClientRect().height>=44,'sin «Entendido»');
+        if(ok)ok.click();await W(5);
+        E(!document.querySelector('#cmodal-root .pg-sheet')&&document.activeElement===document.querySelector('#screen .prog-guide'),'«Entendido» no cierra o no devuelve el foco');}
+      // Escape también la cierra (el manejador general de los modales)
+      openProgGuide();await W(5);document.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));await W(5);
+      E(!document.querySelector('#cmodal-root .pg-sheet'),'Escape no cierra la guía');}
+    if(bad.length)throw new Error(bad.join(' | '));
+  }finally{_rm=rm0;if(fr){fr.style.width=fw;fr.style.height=fh;}document.getElementById('cmodal-root').innerHTML='';_rest9(j);render();await W(40);}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
