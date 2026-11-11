@@ -11930,7 +11930,7 @@ await safe('obImgRows',async()=>{
       E(b.offsetWidth===88&&b.offsetHeight===66,'tamaño '+j+': '+b.offsetWidth+'×'+b.offsetHeight);
       E(b.getAttribute('aria-label')==='Ver '+L.n+(row.kind==='str'?' y cambiarlo':'')&&b.getAttribute('aria-haspopup')==='dialog','nombre accesible '+j+': '+b.getAttribute('aria-label'));
       E(!!b.querySelector('.lib-th .lib-th-e')&&(!!L.cardio||!!b.querySelector('.lib-th svg.lib-fig')),'sin respaldo '+j);
-      E(!!b.querySelector('.ob-thp'),'sin ▶ '+j);
+      E(!!b.querySelector('.ob-thp svg.ic-expand')&&getComputedStyle(b.querySelector('.ob-thp'),'::before').content==='none','sin distintivo de ampliar '+j); // (B1) antes, un ▶
       E((row.kind==='str')===!!r.querySelector('.ob-sw2')&&(row.kind==='str')===[...r.querySelectorAll('.ob-rb')].some(x=>_m3tx(x)==='¿Por qué?'),'acciones '+j);});
     E(!!document.getElementById('lib-fig'),'sin la figura de respaldo (#lib-fig)');
     E(!_m3Rows().some(r=>_m3Ok(r.querySelector('.ob-thb img'))),'caché vacía: ya venían puestas');

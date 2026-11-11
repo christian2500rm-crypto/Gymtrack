@@ -614,7 +614,7 @@ function _obThumbHtml(e,P){
 }
 // La imagen de la fila j del día (índice en d.rows, con el equilibrio): un botón que abre la hoja (obSee). chg: se puede cambiar
 function _obThumbBtn(d,j,L,chg){
-  return`<button type="button" class="ob-thb" aria-haspopup="dialog" aria-label="Ver ${esc(L.n)}${chg?' y cambiarlo':''}" onclick="obSee('${d.letra}',${j},'th')">${_obThumbHtml(L,TH_OB)}<span class="ob-thp" aria-hidden="true"></span></button>`;
+  return`<button type="button" class="ob-thb" aria-haspopup="dialog" aria-label="Ver ${esc(L.n)}${chg?' y cambiarlo':''}" onclick="obSee('${d.letra}',${j},'th')">${_obThumbHtml(L,TH_OB)}<span class="ob-thp" aria-hidden="true">${ic('expand')}</span></button>`;
 }
 // (M3) Lo que lleva de verdad la rutina candidata en una fila de fuerza cuando lo has cambiado tú (⇄ o «Buscar otro ejercicio»): el
 // detalle del generador (d.rows) sigue con el que propuso él, y la fila enseñaba ese aunque la rutina que se aplica llevara el tuyo
