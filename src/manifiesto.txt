@@ -1,0 +1,107 @@
+# Manifiesto de montaje de index.html (lo lee tools/build.js).
+#
+# La plantilla es src/index.plantilla.html. Cada línea «<!-- @incluye NOMBRE -->» de la plantilla se sustituye por los
+# ficheros de la sección [NOMBRE] de este manifiesto, concatenados tal cual y EN ESTE ORDEN (no el alfabético).
+# Rutas relativas a src/. Las líneas que empiezan por # son comentarios.
+#
+# No hay módulos ni envoltorios: los ficheros de un mismo <script> comparten el ámbito global (los onclick="…" del HTML
+# llaman a funciones globales y los let/const de nivel superior se ven de un fichero a otro). El orden importa: un
+# fichero puede usar lo que declaran los anteriores al cargarse.
+
+[fuentes]
+# Primer <style>: las tipografías servidas desde el propio dominio
+css/fuentes.css
+
+[css]
+# Segundo <style>: paleta, base y estilos de cada pantalla
+css/base.css                  # paleta «Tiza y menta», base, tarjetas, peso corporal
+css/cuestionario.css          # bienvenida y cuestionario (onboarding), hoja de ver y cambiar un ejercicio (M3)
+css/descanso-y-coach.css      # modales, barra de descanso y modo a pantalla completa, Coach, historial, Coach de carga
+css/editor-y-biblioteca.css   # editor de rutina, biblioteca 3D, selector, ficha, «Mi material», «¿Máquina ocupada?», propuestas, descarga, copias
+css/entreno-y-ajustes.css     # RPE, modo gym serie a serie, calentamiento, avisos, confirmación, hoja de Ajustes
+css/progreso.css              # mapa muscular, récords y resumen de sesión, ficha 2.0, fuerza, constancia, «Más fuerte y más ligero»
+css/wrapped-e-inicio.css      # resumen «Wrapped», tarjeta «Hoy toca» de Inicio, ajustes de iOS y movimiento reducido
+
+[anim]
+# Motor 3D GymAnim. GENERADO por el laboratorio (tools/lab, ver su README): no editar a mano.
+# Mismo orden que la lista de tools/lab/build.js: motor, kit, familias fijas y luego las demás por orden alfabético.
+js/anim/engine.js
+js/anim/ex/_kit.js
+js/anim/ex/ref.js
+js/anim/ex/ref2.js
+js/anim/ex/legs_mach.js
+js/anim/ex/legs_free.js
+js/anim/ex/chest.js
+js/anim/ex/back.js
+js/anim/ex/shoulders.js
+js/anim/ex/biceps.js
+js/anim/ex/triceps.js
+js/anim/ex/core.js
+js/anim/ex/cardio.js
+js/anim/ex/n_ballistic.js
+js/anim/ex/n_cardio.js
+js/anim/ex/n_chest_press.js
+js/anim/ex/n_core_floor.js
+js/anim/ex/n_core_rot.js
+js/anim/ex/n_core_tools.js
+js/anim/ex/n_curls.js
+js/anim/ex/n_glute_acc.js
+js/anim/ex/n_hinge.js
+js/anim/ex/n_hip_thrust.js
+js/anim/ex/n_knee_flex.js
+js/anim/ex/n_lunges.js
+js/anim/ex/n_new_balance.js
+js/anim/ex/n_new_chair_core.js
+js/anim/ex/n_new_floor_bar.js
+js/anim/ex/n_new_home_load.js
+js/anim/ex/n_new_misc_load.js
+js/anim/ex/n_new_towel.js
+js/anim/ex/n_plyo_carry.js
+js/anim/ex/n_pull_vertical.js
+js/anim/ex/n_pushup_dip.js
+js/anim/ex/n_rows_free.js
+js/anim/ex/n_rows_rear.js
+js/anim/ex/n_shoulders.js
+js/anim/ex/n_squat_free.js
+js/anim/ex/n_squat_mach_calf.js
+js/anim/ex/n_triceps_forearm.js
+js/anim/firma.js              # huella del bloque (GymAnim._.buildHash, versiona las miniaturas guardadas)
+
+[gen]
+# Generador de rutinas GymGen. GENERADO desde el prototipo (tools/gen, ver su README): no editar a mano.
+# cabecera.js abre una función que cierra exporta.js: estos ficheros solo valen juntos y en este orden.
+js/gen/cabecera.js
+js/gen/catalogo.js            # etiquetas de seguridad, presets de material y placeCan (pendiente de revisión D2)
+js/gen/menus.js
+js/gen/generador.js
+js/gen/textos.js
+js/gen/seguridad.js
+js/gen/exporta.js             # window.GymGen = {…}
+
+[app]
+# La app. Cada fichero empieza en un rótulo de sección del código y se puede leer (y compilar) por separado.
+js/app/estado.js              # plan de fábrica, constantes, estado S en localStorage («gymtrack_v3») y migraciones
+js/app/catalogo.js            # biblioteca de ejercicios: grupos musculares, material, patrones y músculos
+js/app/catalogo-filas.js      # LIB_ROWS: una fila por ejercicio (GENERADO por tools/catalog desde catalog.json)
+js/app/catalogo-lector.js     # lector de LIB_ROWS (EXERCISE_DB) e índices; preferencias del selector
+js/app/perfil-y-material.js   # esquema 21 (respuestas, sitios, salud, rutina generada), filtro de material y puente con GymGen
+js/app/cuestionario.js        # bienvenida y cuestionario (E7-E12), rutina propuesta y su hoja de ver y cambiar (M3)
+js/app/rutina-generada.js     # aplicar una rutina generada y deshacer (E5)
+js/app/ui-y-peso.js           # avisos, confirmación, vibración, fechas, peso corporal y su gráfica, sugerencia de peso
+js/app/temporizadores.js      # animaciones, sonido, descanso y cardio, pantalla encendida, M1/M2, descanso a pantalla completa, calentamiento
+js/app/entreno.js             # modo gym serie a serie, barra «siguiente serie», RPE, pesos sin escribir, reanudar y reabrir
+js/app/coach.js               # Coach: métricas, diagnóstico, fatiga, descarga, insights y su pantalla
+js/app/inicio.js              # navegación (go), tarjeta «Hoy toca», Inicio y modal de peso
+js/app/coach-carga.js         # Coach de carga (v15): prescripción de peso y sus piezas de interfaz
+js/app/ficha-e-historial.js   # ficha del ejercicio 2.0, historial, pantalla de Entreno y nombre/día/color de cada ejercicio
+js/app/mapa-muscular.js       # mapa muscular 3D
+js/app/records-y-resumen.js   # récords y resumen de sesión (09)
+js/app/wrapped.js             # resumen «Wrapped» de un mes o de un ciclo (14)
+js/app/progreso.js            # Progreso: fuerza por ejercicio, «Más fuerte y más ligero», constancia
+js/app/editor-rutina.js       # editor de rutina y sus días
+js/app/biblioteca-3d.js       # biblioteca 3D (miniaturas) y «¿Máquina ocupada?» (11)
+js/app/material-y-selector.js # «Mi material», selector de ejercicios, ficha y reordenar arrastrando
+js/app/coach-propuestas.js    # propuestas del Coach (generación y aplicación), pintado del editor de rutina y render() general
+js/app/ajustes.js             # hoja de Ajustes: sonido, peso, día siguiente y objetivo semanal
+js/app/copias.js              # copias de seguridad, almacenamiento persistente, exportar e importar, reinicios (15b)
+js/app/arranque.js            # contador de sesión, PWA (manifest, atajos, service worker), teclado de iOS y arranque

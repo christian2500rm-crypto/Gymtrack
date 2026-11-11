@@ -1,0 +1,297 @@
+/* ── (14) Resumen «Wrapped»: historia a pantalla completa, opaca y por encima de todo (menos los avisos) ── */
+.wr{position:fixed;inset:0;z-index:480;background:var(--bg);color:var(--text);display:flex;justify-content:center;overflow:hidden;overscroll-behavior:contain;outline:none;--wr-ac:var(--green)}
+.wr[data-ac="blue"]{--wr-ac:var(--blue)}
+.wr[data-ac="pr"]{--wr-ac:var(--pr)}
+.wr[data-ac="neutral"]{--wr-ac:var(--text2)} /* (16c) comparación sin subida: ni aviso (ámbar) ni menta */
+.wr[data-ac="pink"]{--wr-ac:var(--pink)}
+.wr::before{content:'';position:absolute;inset:0;pointer-events:none;background:radial-gradient(130% 62% at 50% 0%,color-mix(in srgb,var(--wr-ac) 20%,transparent),transparent 70%),radial-gradient(90% 40% at 100% 100%,color-mix(in srgb,var(--wr-ac) 9%,transparent),transparent 70%)}
+.wr-in{position:relative;width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;padding:calc(var(--st) + 10px) max(16px,env(safe-area-inset-right,0px)) calc(var(--sb) + 8px) max(16px,env(safe-area-inset-left,0px))}
+.wr-bars{display:flex;gap:4px;height:4px;flex-shrink:0}
+.wr-bar{flex:1;min-width:0;border-radius:2px;background:color-mix(in srgb,var(--text) 22%,transparent);overflow:hidden}
+.wr-bar i{display:block;height:100%;width:0;background:var(--text);border-radius:2px}
+.wr-top{display:flex;align-items:center;gap:6px;margin-top:8px;flex-shrink:0}
+.wr-logo{width:26px;height:36px;flex-shrink:0;margin-right:4px}
+.wr-h{flex:1;min-width:0}
+.wr-k{font-size:10.5px;letter-spacing:1.1px;text-transform:uppercase;color:var(--text2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:389px){.wr-k-b{display:none}} /* (14e) en estrecho, «Resumen del mes/ciclo» sin la marca (el logo ya la dice) */
+.wr-t{font-size:17px;font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr-t small{font-size:12px;font-weight:500;color:var(--text2)}
+.wr-ic{width:44px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--text);background:color-mix(in srgb,var(--text) 8%,transparent)}
+.wr-ic.on{background:var(--green-bg2);color:var(--green-hi)}
+.wr-ic svg,.wr-nb svg{width:18px;height:18px}
+.wr-ic:focus-visible,.wr-nb:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.wr-stage{flex:1;min-height:0;position:relative;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;display:flex;flex-direction:column;scrollbar-width:none}
+.wr-stage::-webkit-scrollbar{display:none}
+.wr-pgc{margin:auto 0;padding:16px 2px 20px;display:flex;flex-direction:column;gap:14px;min-width:0}
+.wr-anim .wr-pgc{animation:wrIn .38s cubic-bezier(.2,.8,.2,1)}
+@keyframes wrIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.wr-kick{font-size:12px;font-weight:700;letter-spacing:1.4px;text-transform:uppercase;color:var(--wr-ac)}
+.wr-big{display:flex;align-items:baseline;flex-wrap:wrap;gap:2px 10px;line-height:1.02;min-width:0}
+.wr-big b{font-family:'DM Mono',monospace;font-weight:500;font-size:clamp(50px,17vw,80px);letter-spacing:-2px;color:var(--text);overflow-wrap:anywhere}
+.wr-big b.wr-pr-n{color:var(--pr)}
+.wr-cm{margin:0 -.16em 0 -.12em}
+.wr-big span{font-size:22px;font-weight:600;color:var(--text2)}
+.wr-big-s span{font-size:26px;line-height:1.2;color:var(--text)}
+.wr-line{font-size:17px;line-height:1.45;color:var(--text);overflow-wrap:anywhere}
+.wr-line b{color:var(--wr-ac);font-weight:600}
+.wr-line-s{font-size:14.5px;color:var(--text2)}
+.wr-note{font-size:12px;color:var(--text2);line-height:1.5}
+.wr-stat{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:var(--r);background:color-mix(in srgb,var(--text) 5%,transparent);border:1px solid var(--border);font-size:15px}
+.wr-stat-ic{font-size:22px;line-height:1.1}
+.wr-stat b{font-family:'DM Mono',monospace;font-weight:500;color:var(--wr-ac)}
+.wr-stat small{display:block;font-size:12px;color:var(--text2);line-height:1.45;margin-top:2px}
+.wr-days{display:flex;flex-wrap:wrap;gap:8px}
+.wr-day{display:inline-flex;align-items:center;gap:7px;min-height:32px;padding:0 12px;border-radius:16px;background:color-mix(in srgb,var(--dc) 12%,transparent);border:1px solid color-mix(in srgb,var(--dc) 32%,transparent);font-size:13px;color:var(--text)}
+.wr-day i{width:8px;height:8px;border-radius:4px;background:var(--dc)}
+.wr-day b{font-family:'DM Mono',monospace;font-weight:500}
+.wr-eq{display:flex;align-items:center;gap:14px;padding:14px;border-radius:var(--r);background:color-mix(in srgb,var(--wr-ac) 10%,transparent);border:1px solid color-mix(in srgb,var(--wr-ac) 26%,transparent);font-size:17px;line-height:1.35}
+.wr-eq-ic{font-size:44px;line-height:1;flex-shrink:0}
+.wr-eq b{color:var(--blue-hi);font-weight:600}
+.wr-eq small{display:block;font-size:12px;color:var(--text2);margin-top:3px}
+.wr-prs{display:flex;flex-direction:column;gap:8px}
+.wr-pr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--pr) 9%,transparent);border:1px solid color-mix(in srgb,var(--pr) 24%,transparent);min-width:0}
+.wr-pr-ic{font-size:18px;line-height:1;flex-shrink:0}
+.wr-pr-i{flex:1;min-width:0}
+.wr-pr-nm{font-size:13.5px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr-pr-v{font-size:11.5px;color:var(--pr-hi);font-family:'DM Mono',monospace;line-height:1.45;overflow-wrap:anywhere}
+.wr-pr-v span{white-space:nowrap}
+.wr-pr-d{font-size:11px;color:var(--text2);font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0}
+/* (14b) el que más mejoró, peso corporal, músculos y comparación */
+.wr-3d{position:relative;height:180px;border-radius:var(--r);background:var(--stage);border:1px solid var(--border);overflow:hidden;flex-shrink:0;display:flex;align-items:center;justify-content:center}
+.wr-3d .ga-cv{position:absolute;inset:0;display:block}
+.wr-3d-ic{font-size:64px;line-height:1}
+.wr-3d.on .wr-3d-ic{visibility:hidden}
+.wr-ex{font-size:22px;font-weight:600;line-height:1.25;overflow-wrap:anywhere}
+.wr-bw{display:block;width:100%;height:92px;overflow:visible}
+.wr-bw path{fill:none;vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
+.wr-bw-tr{stroke:var(--wr-ac);stroke-width:3}
+.wr-bw-raw{stroke:color-mix(in srgb,var(--text) 38%,transparent);stroke-width:1.5}
+.wr-bw-base{stroke:color-mix(in srgb,var(--text) 30%,transparent);stroke-width:1;stroke-dasharray:4 4}
+.wr-bw-key{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:var(--text2)}
+.wr-bw-key span{display:inline-flex;align-items:center;gap:6px}
+.wr-bw-key i{display:inline-block;width:16px;height:0;border-top:3px solid var(--wr-ac);border-radius:2px}
+.wr-bw-key i.raw{border-top:1.5px solid color-mix(in srgb,var(--text) 38%,transparent)}
+.wr-bw-key i.base{border-top:1px dashed color-mix(in srgb,var(--text) 45%,transparent)}
+.wr-mm{position:relative;height:200px;flex-shrink:0;pointer-events:none}
+.wr-mm .ga-cv{position:absolute;inset:0;display:block}
+.wr-mgs{display:flex;flex-direction:column;gap:7px}
+.wr-mg{display:grid;grid-template-columns:minmax(0,96px) 1fr auto;align-items:center;gap:10px;font-size:13.5px}
+.wr-mg-n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr-mg-t{height:8px;border-radius:4px;background:color-mix(in srgb,var(--text) 10%,transparent);overflow:hidden}
+.wr-mg-t i{display:block;height:100%;border-radius:4px;background:var(--wr-ac)}
+.wr-mg-v{font-family:'DM Mono',monospace;font-size:13px;min-width:28px;text-align:right}
+/* (14e) filas en rejilla: nombre | antes → ahora | diferencia; con subgrid las tres columnas son las mismas en todas
+   las filas (la diferencia siempre alineada a la derecha, las cifras empiezan a la misma altura), cada una en una línea */
+.wr-cmp{display:grid;grid-template-columns:minmax(0,max-content) minmax(0,1fr) max-content;gap:8px 0}
+.wr-cr{grid-column:1/-1;display:grid;grid-template-columns:4.7em minmax(0,1fr) max-content;align-items:center;column-gap:10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--text) 5%,transparent);border:1px solid var(--border);min-width:0}
+@supports (grid-template-columns:subgrid){.wr-cr{grid-template-columns:subgrid}}
+.wr-cr-l{font-size:14px;font-weight:500;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wr-cr-v{font-family:'DM Mono',monospace;font-size:13px;white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.wr-cr-b,.wr-cr-u{color:var(--text2)}
+.wr-cr-v b{font-weight:500;color:var(--text)}
+.wr-cr-d{display:inline-flex;align-items:center;gap:3px;font-family:'DM Mono',monospace;font-size:12.5px;white-space:nowrap;justify-content:flex-end;justify-self:end}
+.wr-cr-d i{font-style:normal;font-weight:700}
+.wr-cr-d.up{color:var(--green-hi)}
+.wr-cr-d.dn,.wr-cr-d.eq{color:var(--text2)}
+.wr-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-shrink:0;padding-top:6px}
+.wr-nb{width:48px;height:44px;border-radius:22px;display:flex;align-items:center;justify-content:center;color:var(--text);background:color-mix(in srgb,var(--text) 8%,transparent)}
+.wr-nb:disabled{opacity:.3}
+.wr-pg{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2)}
+/* (14c) Compartir como imagen: en la última página, en el sitio del contador; y la vista para guardarla a mano */
+.wr-nav-1{justify-content:center}
+.wr-share{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:44px;min-width:0;padding:0 20px;border-radius:22px;background:var(--green);color:var(--accent-ink);font-size:15px;font-weight:600;white-space:nowrap}
+.wr-share[hidden]{display:none}
+.wr-share svg{width:18px;height:18px;flex-shrink:0}
+.wr-share:active{background:var(--green-d)}
+.wr-share[aria-busy="true"]{opacity:.75;cursor:progress}
+.wr-share:focus-visible{outline:2px solid var(--text);outline-offset:2px}
+.wr-shot{position:absolute;inset:0;z-index:2;background:var(--bg);display:flex;flex-direction:column;align-items:center;gap:12px;padding:calc(var(--st) + 14px) max(16px,env(safe-area-inset-right,0px)) calc(var(--sb) + 12px) max(16px,env(safe-area-inset-left,0px))}
+.wr-shot-t{font-size:14px;line-height:1.4;color:var(--text2);text-align:center;flex-shrink:0}
+.wr-shot-i{flex:1;min-height:0;width:100%;display:flex;align-items:center;justify-content:center}
+.wr-shot-i img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;border-radius:12px;border:1px solid var(--border2);-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}
+.wr-shot-x{flex-shrink:0;max-width:320px}
+/* (14d) Entradas al resumen: Progreso («Tu octubre» + meses anteriores), oferta de inicio de mes (Inicio), ciclo cerrado (Coach) */
+.wrp{padding:6px 14px 12px}
+.wrp-main{display:flex;align-items:center;gap:12px;width:100%;min-height:60px;padding:8px 0;text-align:left;color:inherit;border-radius:var(--rsm)}
+.wrp-main:active{transform:scale(.98)}
+.wrp-logo,.wro-logo{width:28px;height:38px;flex-shrink:0}
+.wrp-t{flex:1;min-width:0;font-size:17px;font-weight:600;line-height:1.25;color:var(--text)}
+.wrp-t small,.wro-t small{display:block;font-size:12px;font-weight:400;color:var(--text2);margin-top:3px;line-height:1.4}
+.wrp-go,.wro-go{flex-shrink:0;font-size:13px;font-weight:600;color:var(--green);white-space:nowrap}
+.wrp-more{display:flex;flex-wrap:wrap;gap:8px;padding-top:10px;margin-top:4px;border-top:1px solid var(--border)}
+.wrp-chip{min-height:44px;padding:0 14px;border-radius:22px;border:1px solid var(--border2);background:var(--bg3);color:var(--text);font-size:13px;font-weight:500;white-space:nowrap;max-width:100%}
+.wrp-chip:active{background:var(--bg4)}
+.wrp-all{color:var(--text2);background:transparent}
+.mlog-go{margin-top:10px;color:var(--green)}
+.wro{display:flex;align-items:stretch;margin:0 14px 10px;background:linear-gradient(135deg,color-mix(in srgb,var(--green) 13%,var(--bg2)),var(--bg2) 70%);border:1px solid var(--green-b);border-radius:var(--r);overflow:hidden}
+.wro-t{flex:1;min-width:0;font-size:15px;font-weight:600;line-height:1.3;color:var(--text)}
+.wro-k{display:block;font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--green-hi);margin-bottom:2px}
+.wro-x{flex-shrink:0;width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;color:var(--text3);border-radius:var(--rsm)}
+/* (14e) oferta de inicio de mes: una píldora menta en la cabecera de Inicio, en el sitio de la fecha (se ve al abrir sin
+   desplazar y no empuja «HOY TOCA»). Los botones miden 44 px de alto, pero el margen negativo los deja ocupar lo que la
+   línea de la fecha: el toque sobra por encima y por debajo, sobre el margen de la cabecera */
+.wro-s{display:flex;align-items:center;margin-top:3px;min-width:0}
+.wro-s .wro-main{flex:0 1 auto;min-width:0;display:flex;align-items:center;min-height:44px;margin:-3px 0 -18px;padding:0 0 15px;text-align:left;color:inherit;border-radius:var(--rsm)}
+.wro-pill{display:inline-flex;align-items:center;gap:6px;min-width:0;padding:2px 9px 2px 6px;border-radius:11px;background:var(--green-bg2);border:1px solid var(--green-b);color:var(--green-hi);font-size:13px;font-weight:600;line-height:1.35}
+.wro-main:active .wro-pill{background:color-mix(in srgb,var(--green) 22%,transparent)}
+.wro-s .wro-logo{width:12px;height:16px;flex-shrink:0}
+/* (14 r1) siempre en una línea: el mes sin año («Tu diciembre», el anterior no tiene duda; el año y las cifras van para
+   lectores), la columna del saludo ocupa todo el ancho libre (.dash-hd), ✕ sin pisar la píldora y, desde 390 px, la fecha
+   corta delante («dom 1 ·»); a menos de 360 px, sin el logo */
+.dash-hd{flex:1;min-width:0}
+.wro-d{flex-shrink:0;white-space:nowrap;font-size:13px;color:var(--text2);margin-right:6px}
+.wro-s .wro-t{flex:0 1 auto;min-width:0;font-size:13px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wro-s .wro-go{font-size:14px;color:var(--green-hi);line-height:1}
+/* (16c) la zona de toque (44 px) empieza donde acaba el saludo (antes sobresalía 8 px dentro del h1 y le quitaba toques):
+   3 px por encima de la píldora y el resto por debajo, sobre el margen de la cabecera; la píldora y la ✕ siguen centradas
+   en su línea (padding-bottom) */
+.wro-s .wro-x{width:44px;min-height:44px;margin:-3px -12px -18px 0;padding:0 0 15px}
+@media (max-width:389px){.wro-d{display:none}}
+@media (max-width:359px){.wro-s .wro-logo{display:none}.wro-s .wro-pill{padding-left:9px}}
+.wro-x svg{width:16px;height:16px}
+.wro-x:active{color:var(--text)}
+.wro-c{flex-direction:column;padding:12px 4px 12px 14px;gap:10px}
+.wro-row{display:flex;align-items:flex-start;gap:12px}
+.wro-row .wro-logo{margin-top:2px}
+.wro-row .wro-x{margin-top:-8px}
+.wro-acts{display:flex;gap:8px;padding-right:10px}
+.wro-acts .btn{flex:1 1 0;width:auto;min-width:0;min-height:44px;padding:11px 12px;font-size:14px}
+.wro-acts .bs{flex:0 0 auto;white-space:nowrap}
+@media (max-width:359px){.wrp-t{font-size:16px}.wro-t{font-size:14px}.wrp-chip{padding:0 12px}.wro-acts .btn{padding:11px 8px}}
+@media (prefers-reduced-motion:reduce){.wrp-main:active{transform:none}}
+@media (max-width:359px){.wr-ex{font-size:19px}.wr-mg{grid-template-columns:minmax(0,84px) 1fr auto}.wr-cr-d{min-width:0}.wr-big span{font-size:19px}.wr-line{font-size:15.5px}.wr-eq{font-size:15.5px}.wr-eq-ic{font-size:36px}}
+@media (prefers-reduced-motion:reduce){.wr-anim .wr-pgc{animation:none}}
+/* pantallas bajas: la página cabe sin desplazar (animación y maniquí más bajos, menos filas, sin las notas de cómo se calcula) */
+@media (max-height:799px){.wr-mm{height:170px}}
+@media (max-height:699px){.wr-3d{height:130px}.wr-mm{height:130px}.wr-mg:nth-child(n+4){display:none}}
+/* (14e) músculos en 360×640: el titular ocupa 3 líneas y la nota otras 3; maniquí y huecos algo menores para que quepa */
+@media (max-height:699px) and (min-height:600px){.wr[data-page="muscles"] .wr-mm{height:112px}.wr[data-page="muscles"] .wr-pgc{gap:11px}}
+@media (max-height:639px) and (min-height:600px){.wr[data-page="muscles"] .wr-mm{height:100px}.wr[data-page="muscles"] .wr-x{display:none}.wr-3d{height:116px}.wr[data-page="best"] .wr-pgc{gap:11px}}
+@media (max-height:599px){.wr-pgc{gap:10px;padding:10px 2px 12px}.wr-3d{height:100px}.wr-mm{height:110px}.wr-mg:nth-child(n+4){display:none}.wr-x{display:none}.wr-cr{padding:7px 12px}.wr-cmp{gap:6px}}
+.pr-wall-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:8px}
+.pr-wall-n{font-size:13px;color:var(--text2)}
+.pr-wall-n b{font-family:'DM Mono',monospace;font-size:24px;color:var(--pr);font-weight:600}
+.pr-wall-t{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap}
+.pr-row{display:flex;align-items:center;gap:10px;width:100%;min-height:48px;padding:8px 0;border-top:1px solid var(--border);text-align:left;color:inherit}
+.pr-row:active{background:color-mix(in srgb,var(--text) 3%,transparent)}
+.pr-ic{font-size:18px;line-height:1;flex-shrink:0;width:22px;text-align:center}
+.pr-i{flex:1;min-width:0;display:flex;flex-direction:column}
+.pr-nm{font-size:13px;font-weight:500;line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden;overflow-wrap:break-word}
+.pr-v{font-size:11.5px;color:var(--pr-hi);font-family:'DM Mono',monospace;line-height:1.45;overflow-wrap:anywhere}
+.pr-v i{font-style:normal;color:var(--text3);font-family:'DM Sans',sans-serif}
+.pr-d{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;text-align:right;flex-shrink:0;white-space:nowrap}
+.pr-d small{display:block;font-family:'DM Sans',sans-serif;font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--pr);font-weight:600}
+.pr-empty{font-size:12.5px;color:var(--text2);line-height:1.55}
+.pr-more{display:block;width:100%;min-height:44px;margin-top:2px;font-size:12px;font-weight:600;color:var(--text2);border-top:1px solid var(--border)}
+/* ── (10) Tarjeta «HOY TOCA» de Inicio ── */
+.hoy{margin-top:12px;padding:14px 14px 10px;border-color:var(--green-b);background:linear-gradient(180deg,color-mix(in srgb,var(--green) 8%,transparent),color-mix(in srgb,var(--green) 0%,transparent) 150px),var(--bg2)}
+.hoy.k-extra{border-color:var(--border2);background:var(--bg2)}
+.hoy.k-live{border-color:color-mix(in srgb,var(--amber) 42%,transparent);background:linear-gradient(180deg,color-mix(in srgb,var(--amber) 8%,transparent),color-mix(in srgb,var(--amber) 0%,transparent) 150px),var(--bg2)}
+.hoy.k-done{background:linear-gradient(180deg,var(--green-bg),color-mix(in srgb,var(--green) 0%,transparent) 170px),var(--bg2)}
+.hoy.k-rest{border-color:var(--green-b);background:linear-gradient(180deg,var(--green-bg),color-mix(in srgb,var(--green) 0%,transparent) 170px),var(--bg2)}
+.hoy .dl-banner{margin:0 0 12px}
+.dl-banner.cmp{gap:9px;margin:0 0 10px;padding:2px 2px 2px 11px}
+.dl-banner.cmp .dl-banner-ic{font-size:17px}
+.dl-banner.cmp .dl-banner-t{font-size:12.5px;line-height:1.3}
+.dl-banner.cmp .dl-banner-d{font-size:11.5px;line-height:1.3;margin-top:1px}
+.dl-banner.cmp .dl-banner-btn{background:none;border-color:transparent;color:var(--blue-hi);padding:0 10px}
+.hoy-k{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:1.1px;text-transform:uppercase;color:var(--green)}
+.hoy-k span{font-weight:500;letter-spacing:.3px;text-transform:none;color:var(--text2);font-size:11.5px}
+.k-extra .hoy-k{color:var(--text2)}.k-live .hoy-k{color:var(--amber)}.k-rest .hoy-k{color:var(--green-hi)}
+.hoy-t{display:flex;align-items:center;gap:9px;margin-top:7px;min-width:0}
+.hoy-t .pill{flex-shrink:0}
+.hoy-nm{flex:1;min-width:0;font-size:19px;font-weight:600;letter-spacing:-.3px;line-height:1.2;overflow-wrap:anywhere}
+.hoy-sets{margin-left:auto}
+.hoy-m{font-size:12.5px;color:var(--text2);margin-top:6px;line-height:1.45}
+.hoy-m b{font-family:'DM Mono',monospace;font-weight:500;color:var(--text)}
+.hoy-m em{font-style:normal;font-weight:600;color:var(--text)}
+.hoy-nw{white-space:nowrap}
+.hoy-note{font-size:12.5px;line-height:1.5;color:var(--text2);margin-top:10px;padding:9px 11px;border-radius:var(--rsm);background:var(--bg3)}
+.hoy-note b{color:var(--green);font-weight:600}
+.hoy-bar{height:5px;border-radius:3px;background:var(--bg4);margin-top:10px;overflow:hidden}
+.hoy-bar i{display:block;height:100%;border-radius:3px;background:var(--amber);transition:width .4s ease}
+.hoy-pv{position:relative;width:100%;height:168px;margin-top:12px;border-radius:var(--rsm);background:var(--stage);overflow:hidden;touch-action:pan-y;-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.hoy-pv canvas{display:block;width:100%;height:100%;touch-action:pan-y}
+/* (16c) con el aviso de versión nueva arriba (48 px en el flujo), la vista previa cede ese alto: «Empezar Día X →» sigue
+   donde estaba, por encima de la navegación (a 844 px quedaba debajo) */
+body.swup-on .hoy-pv{height:120px}
+.hoy-pv.hoy-sw{animation:hoyIn .3s ease-out}
+@keyframes hoyIn{from{opacity:.2}to{opacity:1}}
+.hoy-lh{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;margin:12px 0 2px}
+.hoy-lh small{font-size:10px;font-weight:500;text-transform:none;letter-spacing:.2px}
+@media (max-width:359px){.hoy-lh small{display:none}}
+.hoy-ex{display:flex;align-items:center;gap:10px;width:calc(100% + 12px);min-height:44px;margin:0 -6px;padding:5px 6px;text-align:left;color:inherit;border-top:1px solid var(--border);border-radius:8px;transition:background .15s}
+.hoy-l .hoy-ex:first-of-type{border-top-color:transparent}
+.hoy-ex:active{background:color-mix(in srgb,var(--text) 4%,transparent)}
+.hoy-ex:focus-visible{outline:2px solid var(--green);outline-offset:-2px}
+.hoy-ex.on{background:color-mix(in srgb,var(--green) 7%,transparent);box-shadow:inset 3px 0 0 var(--green)}
+.hoy-ex:disabled{cursor:default;opacity:1;color:inherit}
+.hoy-ex-i{flex:1;min-width:0;display:flex;flex-direction:column}
+.hoy-ex-n{font-size:13.5px;font-weight:500;line-height:1.3;overflow-wrap:anywhere}
+.hoy-ex.on .hoy-ex-n{color:var(--green-hi)}
+.hoy-ex.on .hoy-ex-m{color:var(--text2)} /* (16d) --text3 sobre el tinte menta se quedaba en 4,4:1 */
+.hoy-ex-m{font-size:11px;color:var(--text3);font-family:'DM Mono',monospace;line-height:1.4;margin-top:1px}
+.hoy-tg{flex:0 1 auto;min-width:0;max-width:55%;overflow:hidden;display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:8px;background:var(--bg3);border:1px solid var(--border2);font-family:'DM Mono',monospace;font-size:12.5px;font-weight:600;color:var(--text);white-space:nowrap}
+.hoy-tg .tgl-v{font:inherit;color:inherit;max-width:none}
+.hoy-tg i{flex-shrink:0;font-style:normal;font-family:'DM Sans',sans-serif;font-size:11.5px;font-weight:700;color:var(--text2)}
+.hoy-tg.k-up,.hoy-tg.k-harder{border-color:color-mix(in srgb,var(--green) 45%,transparent);background:var(--green-bg);color:var(--green-hi)}.hoy-tg.k-up i,.hoy-tg.k-harder i{color:var(--green-hi)}
+.hoy-tg.k-reps,.hoy-tg.k-deload{border-color:color-mix(in srgb,var(--blue) 35%,transparent);background:color-mix(in srgb,var(--blue) 8%,transparent);color:var(--blue-hi2)}.hoy-tg.k-reps i{color:var(--blue-hi)}
+.hoy-tg.k-down{border-color:color-mix(in srgb,var(--amber) 40%,transparent);background:color-mix(in srgb,var(--amber) 8%,transparent);color:var(--amber-hi)}.hoy-tg.k-down i{color:var(--amber-hi)}
+.hoy-tg.new{font-family:'DM Sans',sans-serif;font-weight:500;font-size:11.5px;color:var(--text2)}
+.hoy-tg.ok{font-family:'DM Sans',sans-serif;font-size:12px;border-color:var(--green-b);background:var(--green-bg);color:var(--green)}
+.hoy-tg.part{border-color:color-mix(in srgb,var(--amber) 40%,transparent);background:color-mix(in srgb,var(--amber) 8%,transparent);color:var(--amber-hi)}
+.hoy-car{display:flex;align-items:center;gap:8px;min-height:40px;padding:6px 0 2px;border-top:1px solid var(--border);font-size:12px;color:var(--text2);line-height:1.4}
+.hoy-car>span:first-child{font-size:15px;flex-shrink:0}
+.hoy-car b{font-family:'DM Mono',monospace;font-weight:500;color:var(--text)}
+.hoy-car .ok{color:var(--green)}
+.hoy-go{margin-top:12px;min-height:52px;font-size:16px}
+.hoy-acts{display:flex;gap:8px;margin-top:12px}
+.hoy-acts .btn{min-height:50px}
+.hoy-acts .hoy-go{margin-top:0;flex:1}
+.hoy-acts .bs{width:112px;flex-shrink:0}
+/* (16e) «▶ Continuar (0/7)» siempre en una línea; por debajo de 360 px «Descartar» se estrecha a su texto */
+.hoy-acts .hoy-go{white-space:nowrap;min-width:0}
+@media (max-width:359px){.hoy-acts .hoy-go{padding-inline:8px;font-size:14px}.hoy-acts .bs{width:auto;padding-inline:12px}}
+/* (16) El botón principal de la tarjeta de hoy («Empezar Día X →», «▶ Continuar · Descartar») siempre a la vista mientras
+   se ve la tarjeta: en pantallas bajas se queda pegado justo encima de la navegación (o del descanso) y, al llegar al final
+   de la tarjeta, vuelve a su sitio. El halo del color de la tarjeta tapa las filas que pasan por debajo */
+/* (16 r2) El halo es la caja .hoy-cta (6 px de relleno con el fondo de la tarjeta, esquinas rectas: el box-shadow redondeado
+   dejaba asomar las filas por las esquinas) y llega hasta el borde de lo que se ve, sin la franja de 8 px por la que se
+   veían filas cortadas: sin descanso, el borde de contenido de la lista queda 6 px encima de la navegación (bottom −6);
+   con la barra o el descanso, la lista tiene 16 px de relleno por debajo (bottom −16). Mismo sitio en la tarjeta que antes */
+.hoy>.hoy-cta{position:sticky;bottom:-6px;z-index:2;margin:6px -6px -2px;padding:6px;background:var(--bg2)}
+#app.nb-on .hoy>.hoy-cta,#app.dock-on .hoy>.hoy-cta{bottom:-16px}
+.hoy-cta>.hoy-go{margin-top:0}
+.hoy-last{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-height:44px;margin-top:2px;font-size:11.5px;color:var(--text3);text-align:center;line-height:1.35}
+.hoy-last:active{color:var(--text2)}
+.hoy-last em{font-style:normal;font-size:15px;line-height:1}
+/* (E1b) «Te falta rellenar el Día D · Editar»: días vacíos de la rutina (no rotan) */
+.hoy-fill{display:flex;align-items:center;justify-content:center;gap:4px;width:100%;min-height:44px;margin-top:6px;padding:6px 10px;border-radius:var(--rsm);background:color-mix(in srgb,var(--amber) 10%,transparent);border:1px solid color-mix(in srgb,var(--amber) 28%,transparent);font-size:12.5px;font-weight:600;color:var(--amber-hi);text-align:center;line-height:1.35}
+.hoy-fill em{font-style:normal;font-size:15px;line-height:1}
+.hoy-tip{font-size:11.5px;color:var(--text3);text-align:center;line-height:1.5;margin:8px 4px 2px}
+.hoy-kpis{display:grid;grid-template-columns:1fr 1fr 1.35fr;gap:6px;margin-top:12px}
+.hoy-kpis .sum-k b{font-size:19px}
+.hoy-sum{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:48px;margin-top:8px;padding:0 12px;border-radius:var(--rsm);background:var(--green-bg);border:1px solid var(--green-b);color:var(--green-hi);font-size:13.5px;font-weight:600;text-align:left}
+.hoy-sum small{font-weight:500;color:var(--pr);font-size:12px;white-space:nowrap}
+.hoy-sum:active{transform:scale(.98)}
+.hoy-nx{margin-top:12px;padding-top:12px;border-top:1px solid var(--border)}
+.hoy-nx .hoy-k{color:var(--text2)}
+.hoy-nx .hoy-t{margin-top:6px}
+.hoy-nx .hoy-nm{font-size:15px}
+.hoy-nx .tgl{margin:10px 0 0}
+.hoy-nx .btn{margin-top:10px}
+.hoy-rest-h{display:flex;align-items:flex-start;gap:12px}
+.hoy-rest-ic{font-size:32px;line-height:1;flex-shrink:0;margin-top:2px}
+.hoy-rest-b{flex:1;min-width:0}
+.hoy-rest-p{font-size:12.5px;color:var(--text2);line-height:1.55;margin:10px 0 12px}
+.hoy-soft{display:flex;align-items:center;justify-content:center;width:100%;min-height:44px;margin-top:6px;font-size:12.5px;font-weight:600;color:var(--text2)}
+.hoy-soft:active{color:var(--text)}
+/* ── iOS-specific tweaks ── */
+input[type=number]::-webkit-outer-spin-button,input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]{-moz-appearance:textfield}
+/* evitar zoom en inputs (iOS hace zoom si font-size < 16px) */
+@supports(-webkit-touch-callout:none){.inp,.ob-inp{font-size:16px}}
+/* respetar preferencia de movimiento reducido */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+}

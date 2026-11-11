@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Gymteca"/>
+<meta name="theme-color" content="#0b1514"/>
+<title>Gymteca</title>
+<meta name="description" content="Gymteca: apunta tus entrenos de gimnasio serie a serie, descansa con temporizador y deja que el Coach te diga cuándo subir el peso. Gratis y sin registro."/>
+<link rel="canonical" href="https://gymteca.app/"/>
+<link rel="icon" href="assets/icons/favicon.svg" type="image/svg+xml"/>
+<link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32" type="image/png"/>
+<link rel="apple-touch-icon" sizes="180x180" href="assets/icons/icono-180.png"/>
+<link rel="manifest" href="manifest.webmanifest"/>
+<link rel="preload" href="assets/fonts/dm-sans.woff2" as="font" type="font/woff2" crossorigin/>
+<style>
+<!-- @incluye fuentes -->
+</style>
+<style>
+<!-- @incluye css -->
+</style>
+</head>
+<body>
+
+<div id="onboarding" role="dialog" aria-modal="true" aria-labelledby="ob-h">
+  <svg style="display:none" aria-hidden="true"><symbol id="ob-teca-path" viewBox="278 206 468 638"><path d="M336 560V368a112 112 0 0 1 112-112h128a112 112 0 0 1 112 112v192" fill="none" stroke="var(--green)" stroke-width="92" stroke-linecap="round"/><path d="M398.4 840a230 230 0 1 1 227.2 0z" fill="var(--green)"/><g fill="none" stroke="var(--bg)" stroke-linecap="round" stroke-linejoin="round"><circle cx="436" cy="648" r="34" fill="var(--bg)" stroke="none"/><path d="M554 658q34-46 68 0" stroke-width="28"/><path d="M442 728q70 66 140 0" stroke-width="30"/></g></symbol></svg>
+  <div id="ob-live" class="sr-only" aria-live="polite"></div>
+  <div id="ob-root"><div class="ob-body" data-scr="ob-hola">
+    <svg class="ob-teca" viewBox="278 206 468 638" aria-hidden="true"><use href="#ob-teca-path"/></svg>
+    <h1 class="ob-title" id="ob-h" tabindex="-1">Te doy la bienvenida a Gymteca</h1>
+    <p class="ob-sub">Tu entrenamiento, ordenado y a tu ritmo. Sin cuenta y sin conexión: lo que respondas se queda en este móvil.</p>
+    <h2 class="ob-q">¿Cómo quieres empezar?</h2>
+    <div class="ob-acts">
+      <button type="button" class="ob-card" onclick="obStart('gen')"><span class="ob-ci" aria-hidden="true">✨</span><span class="ob-ct"><b>Créame una rutina</b><span>Te hago unas preguntas y te preparo una rutina completa con tu material.</span><em class="ob-tag">Unos 2-3 min</em></span></button>
+      <button type="button" class="ob-card" onclick="obStart('own')"><span class="ob-ci" aria-hidden="true">📋</span><span class="ob-ct"><b>Ya tengo una rutina</b><span>Entras directo a la app. Puedes meter tu rutina o pedirme una cuando quieras.</span></span></button>
+    </div>
+    <button type="button" class="ob-link" onclick="obRestore()">💾 ¿Tienes una copia de seguridad? Restaurar</button>
+    <p class="ob-foot">Podrás cambiar esto cuando quieras en Ajustes.</p>
+  </div></div>
+</div>
+<div id="ob-sheet-root"></div>
+
+<div id="app" style="display:none">
+  <!-- (15) Aviso de versión nueva: arriba y en el flujo (empuja la pantalla, no tapa nada) -->
+  <div id="swup" role="region" aria-label="Actualización" hidden><span class="swup-t">Nueva versión disponible</span><button type="button" class="swup-go" onclick="swUpdateApply()">Actualizar</button><button type="button" class="swup-x" onclick="swUpdateLater()" aria-label="Ahora no (se pondrá al día la próxima vez)">✕</button></div>
+  <div id="screen"></div>
+  <nav class="botbar coach-enabled">
+    <button class="bb on" id="nb-dash" onclick="go('dash')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      Inicio<div class="bb-dot"></div>
+    </button>
+    <button class="bb" id="nb-workout" onclick="go('workout')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M6 4v16M18 4v16M3 8h4M17 8h4M3 16h4M17 16h4"/></svg>
+      Entreno<div class="bb-dot"></div>
+    </button>
+    <button class="bb" id="nb-coach" onclick="go('coach')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/></svg>
+      Coach<div class="bb-dot"></div>
+    </button>
+    <button class="bb" id="nb-prog" onclick="go('prog')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22,12 18,12 15,21 9,3 6,12 2,12"/></svg>
+      Progreso<div class="bb-dot"></div>
+    </button>
+  </nav>
+  <!-- (08) Tocar la barra (fuera de sus botones) abre el modo descanso a pantalla completa; el RPE de la serie va en
+       la propia barra (#rt-rpe, 3 chips) y se puede cambiar mientras dura el descanso -->
+  <div id="rest-timer" role="timer" aria-live="off" onclick="rtBarTap(event)">
+    <button type="button" class="rt-ring" id="rt-open" onclick="RF.openFull()" aria-label="Ver el descanso a pantalla completa">
+      <svg viewBox="0 0 48 48" aria-hidden="true"><circle class="rt-ring-bg" cx="24" cy="24" r="20"/><circle class="rt-ring-fg" id="rt-arc" cx="24" cy="24" r="20"/></svg>
+      <span class="rt-ring-num" id="rt-num">1:30</span>
+      <span class="rt-exp" aria-hidden="true"><svg viewBox="0 0 12 12"><path d="M7 1h4v4M5 11H1V7M11 1 7.2 4.8M1 11l3.8-3.8"/></svg></span>
+    </button>
+    <div class="rt-info">
+      <div class="rt-top"><div class="rt-label" id="rt-label">Descanso</div><span class="rt-q" id="rt-q"></span></div>
+      <div class="rt-msg" id="rt-msg">Recuperando…</div>
+      <div class="rt-rpe" id="rt-rpe" role="group" aria-label="¿Qué tal la serie?"></div>
+    </div>
+    <button class="rt-btn" id="rt-skip" onclick="RT.skip()" aria-label="Saltar el descanso">Saltar</button>
+  </div>
+  <div id="nextbar" role="region" aria-label="Siguiente serie"></div>
+</div>
+
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+<div id="swup-live" class="sr-only" aria-live="polite"></div>
+<div id="cmodal-root"></div>
+<div id="settings-root"></div>
+<div id="wmodal-root"></div>
+<div id="hist-root"></div>
+<div id="wdetail-root"></div>
+<div id="mmap-root"></div>
+<div id="summary-root"></div>
+<div id="restfull-root"></div>
+<div id="wrapped-root"></div>
+<div id="mat-root"></div>
+
+<!-- GYM-ANIM:BEGIN -->
+<script>
+<!-- @incluye anim -->
+</script>
+<!-- GYM-ANIM:END -->
+<!-- GYM-GEN:START -->
+<script>
+<!-- @incluye gen -->
+</script>
+<!-- GYM-GEN:END -->
+<script>
+<!-- @incluye app -->
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+# Sin conversión de finales de línea (aunque core.autocrlf esté activado): index.html se monta byte a byte desde src/
+# con tools/build.js y tiene que salir igual en cualquier máquina. Todo esto va en UTF-8 con LF.
+/index.html -text
+/src/** -text
+/tools/** -text
+/CLAUDE.md -text

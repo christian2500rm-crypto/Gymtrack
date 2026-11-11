@@ -1,0 +1,217 @@
+/* ── RPE (08: 3 chips dentro del descanso, en la barra y en el modo a pantalla completa) ── */
+.rpe-chip{flex:1 1 0;min-width:0;min-height:44px;display:flex;align-items:center;justify-content:center;gap:4px;padding:0 4px;border-radius:10px;background:var(--bg3);border:1px solid var(--border2);font-size:11.5px;font-weight:600;color:var(--text2);white-space:nowrap;touch-action:manipulation;transition:background .15s,border-color .15s,color .15s,transform .1s}
+.rpe-chip i{font-style:normal;font-size:15px;line-height:1}
+.rpe-chip span{overflow:hidden;text-overflow:ellipsis}
+.rpe-chip:active{transform:scale(.95)}
+.rpe-chip.r1[aria-pressed="true"]{background:color-mix(in srgb,var(--green) 16%,transparent);border-color:var(--green);color:var(--green-hi2)}
+.rpe-chip.r2[aria-pressed="true"]{background:color-mix(in srgb,var(--amber) 16%,transparent);border-color:var(--amber);color:var(--amber-hi2)}
+.rpe-chip.r3[aria-pressed="true"]{background:color-mix(in srgb,var(--red) 16%,transparent);border-color:var(--red);color:var(--red-hi2)}
+/* Por debajo de 390 px los chips de la barra ponen el texto bajo el emoji (cabe «Límite» sin recortar); por debajo de
+   360 px «Saltar» cede algo de ancho para que los chips sigan midiendo ≥ 44 px */
+@media (max-width:389px){.rt-rpe .rpe-chip{flex-direction:column;gap:1px;padding:2px 2px 1px;font-size:9.5px;letter-spacing:.2px}.rt-rpe .rpe-chip i{font-size:14px}}
+@media (max-width:359px){#rest-timer .rt-btn{min-width:54px;padding:7px 8px}}
+.sb.r1{box-shadow:inset 0 0 0 2px var(--green)}
+.sb.r2{box-shadow:inset 0 0 0 2px var(--amber)}
+.sb.r3{box-shadow:inset 0 0 0 2px var(--red)}
+/* MODO GYM (etapa 07): registro serie a serie, barra «siguiente serie», tarjetas con progreso */
+.ex-dots{display:inline-flex;align-items:center;gap:3px;flex-shrink:0}
+.ex-dots i{width:7px;height:7px;border-radius:50%;background:var(--bg4);border:1px solid var(--border2)}
+.ex-dots i.on{background:var(--green);border-color:var(--green)}
+.ex-today{color:var(--text);font-family:'DM Mono',monospace;font-weight:500}
+.ex-done-sum{font-size:11.5px;color:var(--text2);margin-top:3px;font-family:'DM Mono',monospace;overflow-wrap:anywhere}
+.ex-done-sum b{color:var(--green-hi);font-weight:500;white-space:nowrap}
+.excard.just-done .exic{animation:ckPop .5s cubic-bezier(.34,1.56,.64,1)}
+@keyframes ckPop{0%{transform:scale(.6)}60%{transform:scale(1.18)}100%{transform:scale(1)}}
+.anim-mini{display:flex;align-items:center;gap:12px;min-height:64px;padding:3px 10px 3px 3px;margin-bottom:10px;border:1px solid var(--border);border-radius:var(--rsm);background:var(--stage);cursor:pointer;-webkit-user-select:none;user-select:none}
+.anim-mini:active{background:var(--bg2)}
+.anim-mini:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.ex-anim.mini{width:86px;height:56px;margin:0;flex-shrink:0;border-radius:var(--rxs);pointer-events:none}
+.anim-mini-t{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.anim-mini-t b{font-size:12px;font-weight:600;color:var(--text)}
+.anim-mini-t span{font-size:11px;color:var(--text2);line-height:1.3;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;overflow-wrap:break-word}
+.anim-mini-go{font-size:11px;font-weight:600;color:var(--green);flex-shrink:0;white-space:nowrap}
+.anim-less{display:block;width:100%;min-height:44px;margin:-8px 0 6px;font-size:12px;font-weight:600;color:var(--text2)}
+.lg-sets{margin:0 -6px 8px}
+.lg-h{display:flex;align-items:center;gap:8px;margin:0 6px 6px;min-height:28px}
+.lg-l{flex:1;min-width:0;font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.8px;font-weight:600;line-height:1.35}
+.lg-l b{color:var(--text2);font-family:'DM Mono',monospace;font-weight:600}
+.lg-d{display:inline-block;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;vertical-align:bottom}
+.lg-d.sepw-s{max-width:calc(100% + var(--sepw))}
+.lg-h .sug-tag{min-width:0}
+.lg-row{display:flex;align-items:center;gap:6px;padding-left:2px;border-radius:var(--rsm);transition:background .2s}
+.lg-row+.lg-row{margin-top:6px}.lg-ghost+.lg-row{margin-top:3px}
+.lg-row.done{background:color-mix(in srgb,var(--green) 7%,transparent)}
+.lg-row.done .stp{border-color:color-mix(in srgb,var(--green) 28%,transparent);background:color-mix(in srgb,var(--green) 7%,var(--bg2))}
+.lg-row.done .stp-u{color:var(--text2)} /* (16d) «KG/REPS» en --text3 sobre el tinte de la serie hecha: 4,4:1 */
+.lg-n{width:16px;flex-shrink:0;text-align:center;font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--text3)}
+.lg-row.next .lg-n{color:var(--green)}
+.lg-row.done .lg-n{color:var(--green-hi)}
+.stp{display:flex;align-items:stretch;height:48px;min-width:0;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);overflow:hidden;transition:border-color .2s}
+.stp-w{flex:1.2 1 0}
+.stp-r{flex:1 1 0}
+.stp-t,.stp-d{flex:1 1 0}
+/* Sin celda de peso (solo reps, bandas, material sin kilos): la de reps, segundos o metros ocupa su sitio */
+.lg-row.nokg .stp-r,.lg-row.nokg .stp-t,.lg-row.nokg .stp-d{flex:2.2 1 0}
+/* Por tiempo o distancia con peso opcional: el peso y los segundos o metros (hasta 4 cifras: «1500») a partes iguales */
+.lg-row.td .stp-w{flex:1 1 0}
+.stp:focus-within{border-color:var(--green)}
+.stp.need,.lg-row.done .stp.need{border-color:color-mix(in srgb,var(--amber) 75%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--amber) 14%,transparent)}
+.stp-b{width:44px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:21px;font-weight:500;line-height:1;color:var(--text2);touch-action:manipulation}
+.stp-b:active{background:var(--bg4);color:var(--text)}
+.stp-c{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:text}
+.stp-v{width:100%;min-width:0;padding:0;border:none;outline:none;background:none;text-align:center;font-family:'DM Mono',monospace;font-size:16px;font-weight:600;line-height:1.15;color:var(--text2);letter-spacing:-.3px;-webkit-appearance:none;border-radius:0}
+.lg-row.next .stp-v,.lg-row.done .stp-v{color:var(--text)}
+.stp-v.lg5{font-size:12.5px;letter-spacing:-.6px}
+.stp-v::placeholder{color:var(--text3);font-weight:400;font-style:italic}
+.stp-u{font-size:8.5px;line-height:1;color:var(--text3);text-transform:uppercase;letter-spacing:.6px}
+.stp-fix{justify-content:center;align-items:center;font-family:'DM Mono',monospace;font-size:15px;font-weight:600;color:var(--text2)}
+.lg-ck{position:relative;width:48px;height:48px;flex-shrink:0;border-radius:var(--rsm);border:1px solid var(--border2);background:var(--bg3);color:var(--text3);font-size:20px;font-weight:700;transition:background .15s,color .15s,transform .1s;touch-action:manipulation}
+.lg-ck:active{transform:scale(.92)}
+.lg-row.next .lg-ck{border-color:var(--green-b);color:var(--green)}
+.lg-ck.on{background:var(--green);border-color:var(--green);color:var(--accent-ink)}
+.lg-ck.r1::after,.lg-ck.r2::after,.lg-ck.r3::after{content:'';position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;border:1.5px solid var(--accent-ink)}
+.lg-ck.r1::after{background:var(--green-hi2)}.lg-ck.r2::after{background:var(--amber)}.lg-ck.r3::after{background:var(--red)}
+.lg-ghost{margin:1px 0 0 24px;font-size:10.5px;line-height:14px;color:var(--text3);font-family:'DM Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lg-sets .need-hint{margin:6px 6px 0 30px}
+.tgt.cmp{padding:6px 6px 6px 12px}
+.tgt.cmp .tgt-r{margin-top:0;font-size:12px}
+/* Móviles por debajo de 390 px: los −/+ siguen en 44 px y el ✓ en 48; el sitio sale de los márgenes, los huecos y el nº.
+   Solo en los muy estrechos (≤340 px) el ✓ baja a 44 px. */
+@media (max-width:389px){.lg-n{width:10px;font-size:11px}.lg-sets{margin:0 -11px 8px}.lg-row{gap:4px;padding-left:0}.lg-ghost{margin-left:14px}.stp-v{font-size:15px}}
+@media (max-width:340px){.lg-n{display:none}.lg-sets{margin:0 -12px 8px}.lg-ck{width:44px}.stp-w{flex:1.15 1 0}.stp-v{font-size:13.5px;letter-spacing:-.5px}.lg-ghost{margin-left:4px}}
+/* Por debajo de 360 px, por tiempo o distancia: el peso (opcional y casi siempre el mismo en todas las series) se escribe
+   sin −/+, y así los segundos o metros caben enteros; los −/+ que quedan siguen en 44 px */
+@media (max-width:359px){.lg-row.td .stp-w{flex:0 0 58px}.lg-row.td .stp-w .stp-b{display:none}}
+/* ≤340 px: el chip del objetivo de la cabecera enseña el valor entero («37.5 kg × 12») sin la palabra del tipo (su color y
+   su aria-label la siguen diciendo) */
+@media (max-width:340px){.ex-goal-k{display:none}}
+#nextbar{position:fixed;bottom:calc(58px + var(--sb) + 8px);left:50%;transform:translateX(-50%) translateY(90px);width:calc(100% - 28px);max-width:452px;display:flex;align-items:center;gap:10px;padding:5px 5px 5px 14px;background:var(--bg2);border:1px solid var(--green-b);border-radius:14px;z-index:140;box-shadow:0 -4px 24px rgba(0,0,0,.55);opacity:0;pointer-events:none;transition:transform .28s cubic-bezier(.34,1.3,.64,1),opacity .2s}
+#nextbar.show{transform:translateX(-50%) translateY(0);opacity:1;pointer-events:auto}
+#app.typing #nextbar{opacity:0;pointer-events:none}
+.nb-info{flex:1;min-width:0;min-height:48px;display:flex;flex-direction:column;justify-content:center;text-align:left;color:inherit}
+.nb-t{font-size:11.5px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.35}
+.nb-t b{color:var(--green);font-weight:600}
+/* Nombre largo: se recorta el nombre, nunca «Serie N/M» */
+.nb-t.split{display:flex;min-width:0}
+.nb-tn{min-width:0;overflow:hidden;text-overflow:ellipsis}
+.nb-tc{flex-shrink:0;white-space:pre}
+.nb-s{font-size:15px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3}
+.nb-s b{font-family:'DM Mono',monospace;font-weight:600}
+.nb-go{flex-shrink:0;min-height:48px;min-width:108px;padding:0 14px;border-radius:10px;background:var(--green);color:var(--accent-ink);font-size:15px;font-weight:700;touch-action:manipulation}
+.nb-go:active{transform:scale(.96);background:var(--green-d)}
+/* (16) Con la barra «siguiente serie», la lista termina justo encima de lo que flota abajo (navegación + barra + descanso,
+   --dock-h medido en _dockSync): nada de la tarjeta —texto, «Objetivo de hoy», filas— queda nunca debajo de la barra.
+   Con el descanso flotando en cualquier pestaña (#app.dock-on), igual: el final de Inicio, Coach o Progreso no queda debajo */
+#app.nb-on #screen,#app.dock-on #screen{margin-bottom:var(--dock-h,calc(58px + var(--sb) + 80px));padding-bottom:16px;scroll-padding-bottom:12px}
+#app.nb-on #screen .excard :is(input,button,[tabindex]){scroll-margin-bottom:12px}
+#app.nb-on #rest-timer{bottom:calc(58px + var(--sb) + 8px + 66px);padding:6px 8px 6px 10px;gap:10px}
+#app.nb-on .rt-ring,#app.nb-on .rt-ring svg{width:40px;height:40px}
+.hist-item-w small{display:block;font-size:10.5px;font-weight:400;color:var(--text3);margin-top:1px;overflow-wrap:anywhere}
+
+/* ── WARMUP SECTION ── */
+.warmup-block{background:color-mix(in srgb,var(--amber) 6%,transparent);border:1px dashed color-mix(in srgb,var(--amber) 25%,transparent);border-radius:var(--rsm);padding:10px 12px;margin-bottom:10px}
+.warmup-h{font-size:11px;color:var(--amber-hi);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;gap:6px}
+.warmup-h-l{display:block;min-width:0} /* (16d) texto en línea: a 320 px «· 65 kg» ya no hace columna aparte («CALENTAMIENTO / SUGERIDO» y «· 65 / kg») */
+.warmup-row{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-size:12px}
+.warmup-row:last-child{margin-bottom:0}
+.warmup-sb{width:28px;height:28px;border-radius:50%;background:var(--bg3);border:1px solid color-mix(in srgb,var(--amber) 40%,transparent);color:var(--amber-hi);font-size:11px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-family:'DM Mono',monospace;transition:all .15s}
+.warmup-sb.on{background:color-mix(in srgb,var(--amber) 20%,transparent);color:var(--amber-hi2)}
+.warmup-sb:active{transform:scale(.92)}
+.warmup-info{font-size:11px;color:var(--text2);flex:1}
+.warmup-info b{color:var(--text);font-weight:500}
+.warmup-skip{background:transparent;border:none;color:var(--text2);font-size:12px;cursor:pointer;text-decoration:underline}
+/* (16e) Toque de 44 px sin cambiar el aspecto (como «Deshacer»): una zona transparente centrada en el control. En los
+   segmentos (.tab, .wc-rg), que van pegados, solo crece en alto para no pisar al vecino */
+.warmup-skip,.settings-btn,.icon-btn,.hist-btn,.tab,.wc-rg{position:relative}
+.warmup-skip::before,.settings-btn::before,.icon-btn::before,.hist-btn::before,button.rt-ring::before{content:'';position:absolute;left:50%;top:50%;width:max(100%,44px);height:max(100%,44px);transform:translate(-50%,-50%);border-radius:inherit}
+.tab::before,.wc-rg::before{content:'';position:absolute;left:0;right:0;top:50%;height:max(100%,44px);transform:translateY(-50%)}
+/* (16e r1) Círculos del calentamiento: zona de 44 px; cada fila mide 44 px (sin margen) para que las zonas no se pisen.
+   La cabecera pierde su margen: el círculo ya deja 8 px arriba, así el hueco visible sigue siendo el de antes */
+.warmup-sb{position:relative}
+.warmup-sb::before{content:'';position:absolute;left:50%;top:50%;width:44px;height:44px;transform:translate(-50%,-50%);border-radius:50%}
+.warmup-row,.warmup-row:last-child{min-height:44px;margin-bottom:0}
+.warmup-block .warmup-h{margin-bottom:0}
+/* (16e r1) Enlaces del pie de Ajustes (Privacidad · Soporte · gymteca.com): 44 px de alto de toque, mismo aspecto */
+.set-links a{position:relative}
+.set-links a::before{content:'';position:absolute;left:50%;top:50%;width:max(100%,44px);height:44px;transform:translate(-50%,-50%)}
+
+/* ── WEEKLY MINI-INSIGHT ── */
+.week-card{background:linear-gradient(135deg,color-mix(in srgb,var(--blue) 8%,transparent),color-mix(in srgb,var(--green) 5%,transparent));border:1px solid color-mix(in srgb,var(--blue) 20%,transparent);border-radius:var(--r);padding:14px 16px;margin:0 14px 10px}
+.week-card-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.week-card-t{font-size:13px;font-weight:600;color:var(--blue-hi)}
+.week-card-tag{font-size:10px;background:color-mix(in srgb,var(--blue) 15%,transparent);color:var(--blue-hi);border-radius:4px;padding:2px 7px}
+.week-card-d{font-size:12px;color:var(--text2);line-height:1.55}
+.week-stats{display:flex;gap:14px;margin-top:10px;padding-top:10px;border-top:1px solid color-mix(in srgb,var(--text) 6%,transparent);font-family:'DM Mono',monospace}
+.week-stat{flex:1}
+.week-stat-v{font-size:15px;font-weight:600;color:var(--text)}
+.week-stat-v.up{color:var(--green-hi)}
+.week-stat-v.dn{color:var(--amber-hi)}
+.week-stat-l{font-size:10px;color:var(--text3);margin-top:1px;font-family:-apple-system,sans-serif}
+
+/* ── TOAST ── */
+/* (16c) centrado con left/right 0 y margin auto, ancho al contenido hasta el de la pantalla menos 14 px por lado (antes
+   left:50% dejaba solo media pantalla al ajuste de ancho y los textos largos ocupaban 3-5 líneas) */
+#toast{position:fixed;top:calc(var(--st) + 14px);left:0;right:0;margin:0 auto;width:fit-content;width:-webkit-fit-content;box-sizing:border-box;transform:translateY(-120%);background:color-mix(in srgb,var(--bg2) 96%,transparent);color:var(--text);border:1px solid var(--border2);border-radius:var(--rsm);padding:11px 16px;font-size:13px;font-weight:500;z-index:500;max-width:min(calc(100% - 28px),440px);text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);opacity:0;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .3s;pointer-events:none}
+#toast.show{transform:translateY(0);opacity:1}
+/* (15) Aviso de versión nueva: franja arriba de #app, en el flujo (empuja la pantalla hacia abajo y no tapa nada:
+   antes flotaba sobre la navegación y pisaba «Empezar» en Inicio). Ocupa el hueco de la zona segura de arriba, así que la
+   cabecera de la pantalla no lo repite; el toast baja para no taparlo. */
+#swup{flex:none;display:flex;align-items:center;gap:2px;margin:calc(var(--st) + 8px) 12px 0;box-sizing:border-box;min-height:46px;padding:0 0 0 14px;background:color-mix(in srgb,var(--green) 8%,var(--bg2));color:var(--text);border:1px solid var(--green-b);border-radius:var(--rsm);font-size:13px;font-weight:500}
+#swup[hidden]{display:none}
+body.swup-on #screen .topbar{padding-top:14px}
+body.swup-on #toast{top:calc(var(--st) + 8px + 46px + 8px)}
+/* (16 r2) Con una hoja abierta el aviso sale abajo (encima del teclado si está abierto): arriba tapaba el título de la
+   hoja y su ✕ (a 320 px un aviso largo ocupa 3 líneas). Va después de la regla del aviso de versión para ganarle */
+body:has(.hist-over) #toast{top:auto;bottom:calc(14px + env(safe-area-inset-bottom,0px) + var(--kb));transform:translateY(120%)}
+body:has(.hist-over) #toast.show{transform:translateY(0)}
+/* «Deshacer» con 44 px de toque sin hacer más alto el aviso */
+#toast #undo-btn{position:relative}
+#toast #undo-btn::before{content:'';position:absolute;left:-6px;right:-6px;top:50%;height:44px;transform:translateY(-50%)}
+#swup.in{animation:swupIn .3s ease-out}
+@keyframes swupIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.swup-t{flex:1;min-width:0;padding:6px 8px 6px 0;line-height:1.3}
+.swup-go{flex:none;min-height:44px;padding:0 14px;border:4px solid transparent;border-left:0;border-right:0;background-clip:padding-box;border-radius:calc(var(--rxs) + 4px);background-color:var(--green);color:var(--accent-ink);font:inherit;font-weight:600;cursor:pointer}
+.swup-go:active{background-color:var(--green-d)}
+.swup-x{flex:none;width:44px;height:44px;border:0;background:transparent;color:var(--text2);font-size:15px;cursor:pointer;border-radius:var(--rsm)}
+.swup-go:focus-visible,.swup-x:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+@media (max-width:359px){#swup{padding-left:10px;font-size:12px}.swup-go{padding:0 10px}}
+@media (prefers-reduced-motion:reduce){#swup.in{animation:none}}
+/* ── CONFIRM MODAL ── */
+.cmov{position:fixed;inset:0;background:rgba(0,0,0,.72);z-index:400;display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .2s ease;overscroll-behavior:contain;padding-bottom:var(--kb)}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.cmod{background:var(--bg2);width:100%;max-width:480px;max-height:calc(85vh - var(--kb));max-height:calc(85dvh - var(--kb));overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;border-radius:var(--r) var(--r) 0 0;padding:22px 20px calc(22px + var(--sb));border-top:1px solid var(--border2);animation:slideUp .3s cubic-bezier(.34,1.2,.64,1)}
+@keyframes slideUp{from{transform:translateY(20px);opacity:.5}to{transform:translateY(0);opacity:1}}
+.cmod-hdl{width:36px;height:4px;background:var(--bg4);border-radius:2px;margin:0 auto 18px}
+.cmod-t{font-size:17px;font-weight:600;letter-spacing:-.2px;margin-bottom:8px}
+.cmod-b{font-size:14px;color:var(--text2);line-height:1.55;margin-bottom:18px}
+.cmod-btns{display:flex;gap:10px}
+.cmod-btns .btn{flex:1}
+/* ── SHAKE ── */
+.shake{animation:shake .5s}
+@keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(3px)}30%,50%,70%{transform:translateX(-5px)}40%,60%{transform:translateX(5px)}}
+/* ── SETTINGS BUTTON ── */
+.settings-btn{background:var(--bg3);border:1px solid var(--border2);border-radius:50%;width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:var(--text2);flex-shrink:0;cursor:pointer;transition:transform .15s}
+.settings-btn:active{transform:scale(.92)}
+.settings-btn svg{width:16px;height:16px;stroke-width:2}
+/* ── SETTINGS SHEET ── */
+.set-section{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);margin:0 14px 10px;overflow:hidden}
+/* (16d) a 320-359 px las secciones de Ajustes ocupan el ancho de la hoja (antes 30 px de sangría por lado: los textos partían en 3-4 líneas) */
+@media (max-width:359px){.set-section{margin-left:0;margin-right:0}.sh:has(+.set-section){margin-left:4px;margin-right:4px}}
+.set-row{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.set-row:last-child{border-bottom:none}
+.set-row:active{background:var(--bg3)}
+.set-row-info{flex:1;min-width:0}
+.set-row-t{font-size:14px;font-weight:500;margin-bottom:2px}
+.set-row-d{font-size:12px;color:var(--text2);line-height:1.4}
+.set-row-v{font-size:13px;color:var(--text3);font-family:'DM Mono',monospace;flex-shrink:0}
+.set-row.danger .set-row-t{color:var(--red)}
+.set-row-arrow{color:var(--text3);font-size:14px;flex-shrink:0}
+/* Interruptor (Ajustes) */
+.sw{position:relative;width:44px;height:26px;border-radius:13px;background:var(--bg3);border:1px solid var(--border2);flex-shrink:0;transition:background .2s,border-color .2s}
+.sw-k{position:absolute;top:2px;left:2px;width:20px;height:20px;border-radius:50%;background:var(--text2);transition:transform .2s,background .2s}
+.sw.on{background:var(--green-bg2);border-color:var(--green-b)}
+.sw.on .sw-k{transform:translateX(18px);background:var(--green)}
+.set-row[role="switch"]:focus-visible{outline:2px solid var(--green-b);outline-offset:-2px}
+/* Cardio en marcha (tarjeta) */
+.cardio-run{display:flex;align-items:center;gap:8px;padding:10px 12px;margin-bottom:10px;border-radius:var(--rxs);background:color-mix(in srgb,var(--blue) 8%,transparent);border:1px solid color-mix(in srgb,var(--blue) 25%,transparent);font-size:13px;color:var(--text2)}
+.cardio-run b{color:var(--text);font-family:'DM Mono',monospace;font-weight:600}
