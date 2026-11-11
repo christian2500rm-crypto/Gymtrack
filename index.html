@@ -198,6 +198,7 @@ input{font-family:inherit}
 /* (E7) Cuestionario: capa a 390 (encima: confirmModal 400, Wrapped, toast, selector, ficha y «Mi material»; debajo: Ajustes y editor) */
 #ob-root{display:flex;flex-direction:column;gap:18px;min-height:100%}
 .ob-body{display:flex;flex-direction:column;gap:16px;animation:fu .3s ease}
+.ob-body.ob-still{animation:none} /* (M3) repintar sin moverse de sitio («¿Por qué?», otro día, un cambio con ⇄) no repite la entrada */
 .ob-head{position:sticky;top:calc(-1*(var(--st) + 24px));z-index:3;display:flex;align-items:center;gap:6px;min-height:56px;margin:calc(-1*(var(--st) + 24px)) -20px 0;padding:var(--st) 8px 0;background:var(--bg)}
 .ob-hb{width:44px;height:44px;flex:none;border:0;border-radius:12px;background:none;color:var(--text);font-size:24px;line-height:1;cursor:pointer}
 .ob-hb:focus-visible,.ob-card:focus-visible,.ob-link:focus-visible,.ob-dn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
@@ -274,7 +275,7 @@ input{font-family:inherit}
 .ob-dpanel{display:flex;flex-direction:column;gap:2px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg2);padding:10px 12px;text-align:left}
 .ob-dh{display:flex;flex-direction:column;gap:2px;padding-bottom:6px;border-bottom:1px solid var(--border);font-size:14px}
 .ob-dh span{font-size:12px;color:var(--text2)}
-.ob-row{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--border)}
+.ob-row{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border)}
 .rep-t{font-weight:700;font-size:15px}.rep-d{color:var(--text2);font-size:13px;margin:4px 0 10px}.rep-b{display:flex;gap:8px}.rep-b .btn{flex:1}
 .ob-gen{position:fixed;inset:0;z-index:391;background:var(--bg);display:flex;flex-direction:column;justify-content:center;gap:12px;padding:24px 32px;transition:opacity .25s}
 .ob-gen.out{opacity:0;pointer-events:none}.ob-gen-t{font-size:22px;font-weight:700;margin-bottom:6px}
@@ -284,16 +285,67 @@ input{font-family:inherit}
 .cyc-next-t{font-weight:700;font-size:15px}.cyc-next-d{color:var(--text2);font-size:13px;margin:4px 0 10px}.cyc-next-b{display:flex;flex-direction:column;gap:8px}
 .ob-bal-h{font-size:12px;font-weight:700;color:var(--text2);margin:12px 0 0}
 .ob-row:last-child{border-bottom:0}
-.ob-ri{flex:none;width:40px;min-height:40px;display:grid;place-items:center;font-size:20px;position:relative}
-.ob-ri .exic-e{font-size:20px}
-.ob-rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px}
-.ob-rt b{font-size:14px;font-weight:600;line-height:1.3}
+.ob-ri{flex:none;width:88px;min-height:66px;display:grid;place-items:center;font-size:26px;position:relative;border-radius:var(--rsm);background:var(--inset)}
+.ob-rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;padding-top:1px}
+.ob-rt b{font-size:14.5px;font-weight:600;line-height:1.3;letter-spacing:-.1px;overflow-wrap:anywhere}
 .ob-rt>span{font-size:12.5px;color:var(--text2);line-height:1.45}
-.ob-rwhy{display:block;color:var(--text)!important;background:var(--bg3);border-radius:8px;padding:6px 8px}
+.ob-rwhy{display:block;color:var(--text)!important;background:var(--bg3);border-radius:8px;padding:7px 9px;margin-top:2px}
 .ob-cuid{font-style:normal;margin-left:6px;padding:1px 6px;border-radius:8px;background:color-mix(in srgb,var(--amber) 15%,transparent);color:var(--amber);font-size:11px}
-.ob-ra{display:flex;gap:4px;flex:none}
-.ob-rb{min-width:44px;min-height:44px;padding:0 8px;border:1px solid var(--border2);border-radius:10px;background:var(--bg3);color:var(--text2);font:inherit;font-size:12px;cursor:pointer}
-.ob-sw2{font-size:16px}
+/* (M3) Imagen 3D del ejercicio a la izquierda: un botón que abre la hoja de ver y cambiar. Tamaño fijo (la miniatura llega después
+   sin mover la lista); debajo, la figura teñida y su emoji de respaldo (.lib-th). El ▶ avisa de que hay algo que ver. */
+.ob-thb{position:relative;flex:none;width:88px;height:66px;padding:0;border:0;border-radius:var(--rsm);background:none;cursor:pointer;touch-action:manipulation}
+.ob-thb .lib-th{width:88px;height:66px;transition:transform .15s ease}
+.ob-thb .lib-th::after{content:"";position:absolute;inset:0;border-radius:inherit;box-shadow:inset 0 0 0 1px var(--border2);pointer-events:none;transition:box-shadow .15s ease}
+.ob-thb .lib-th-e{font-size:15px;top:4px}
+.ob-thb .lib-th.cardio .lib-th-e{font-size:30px}
+.ob-thb:active .lib-th{transform:scale(.96)}
+.ob-thb:active .lib-th::after{box-shadow:inset 0 0 0 1.5px var(--green)}
+.ob-thb:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.ob-thp{position:absolute;right:5px;bottom:5px;width:20px;height:20px;border-radius:50%;background:color-mix(in srgb,var(--bg) 78%,transparent);box-shadow:0 0 0 1px color-mix(in srgb,var(--text) 16%,transparent);display:grid;place-items:center;pointer-events:none}
+.ob-thp::before{content:"";margin-left:2px;border-style:solid;border-width:4px 0 4px 6.5px;border-color:transparent transparent transparent var(--text)}
+/* «¿Por qué?» y «⇄ Cambiar», debajo del nombre: 44 px de toque con un dibujo más ligero (la píldora interior) */
+.ob-ra{display:flex;flex-wrap:wrap;gap:0 6px;margin:2px 0 -4px -2px}
+.ob-rb{display:inline-flex;align-items:center;min-width:44px;min-height:44px;padding:0 2px;border:0;background:none;color:var(--text2);font:inherit;font-size:12.5px;cursor:pointer;touch-action:manipulation}
+.ob-rb>span{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:0 11px;border:1px solid var(--border2);border-radius:15px;background:var(--bg3);white-space:nowrap;transition:background .15s,border-color .15s,color .15s}
+.ob-rb:active>span{background:var(--bg4)}
+.ob-rb[aria-expanded="true"]>span{border-color:var(--green-b);background:var(--green-bg);color:var(--green-hi)}
+.ob-rb:focus-visible{outline:none}
+.ob-rb:focus-visible>span{outline:2px solid var(--green);outline-offset:2px}
+.ob-sw2>span{color:var(--green-hi)}
+.ob-sw2 i,.ob-sw2 em{font-style:normal}.ob-sw2 i{font-size:14px;line-height:1}
+@media (max-width:359px){.ob-row{gap:10px}.ob-thb,.ob-thb .lib-th,.ob-ri{width:76px;height:57px;min-height:57px}.ob-sw2 em{display:none}} /* estrecho: ⇄ sin la palabra, para que las dos píldoras quepan en una línea */
+/* (M3) Hoja de ver y cambiar un ejercicio de la rutina propuesta, con el lenguaje de «¿Máquina ocupada?». Cabecera, vista 3D con
+   sus datos y, abajo, la acción principal, fijas; en medio, las opciones (lo único que se desplaza): la animación sigue a la vista
+   mientras eliges. En pantallas muy bajas se desplaza la hoja entera y solo la acción se queda abajo. */
+.ob-sheet.obx{display:flex;flex-direction:column;overflow:hidden;max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb));animation:obxIn .28s cubic-bezier(.2,.8,.2,1)}
+.ob-over:has(>.obx){animation:fadeIn .2s ease}
+@keyframes obxIn{from{transform:translateY(28px);opacity:.4}to{transform:none;opacity:1}}
+.ob-sheet.obx:focus{outline:none}
+.obx button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.obx .hist-sheet-head{flex:none;padding-right:60px}
+.obx-top{flex:none;padding:12px 16px 0}
+.ex-anim.obx-pv{height:184px;margin-bottom:10px}
+.obx-pv.obx-swp canvas{animation:fadeIn .22s ease}
+.obx-n{font-size:16px;font-weight:600;line-height:1.3;letter-spacing:-.2px}
+.obx-mus{display:flex;gap:5px;min-height:19px;margin-top:6px;overflow:hidden}
+.obx-eq{font-size:12.5px;color:var(--text2);line-height:1.4;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.obx-sc{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;margin-top:12px;padding:0 16px 10px;border-top:1px solid var(--border)}
+.obx-lbl{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:14px 0 8px}
+.obx-alt{min-height:62px;transition:border-color .15s,background .15s}
+.obx-alt:active{background:var(--bg4)}
+.obx-alt .lib-th,.obx-alt .lib-item-badge{flex:none}
+.obx-none{margin:10px 2px 0}
+.obx-sc .tip{margin:14px 0 10px}
+.obx-out{display:flex;flex-direction:column;gap:8px;margin-top:2px;padding-top:12px;border-top:1px solid var(--border)}
+.obx-rm{min-height:46px;border:1px solid var(--border2);border-radius:var(--rsm);background:none;color:var(--text2);font:inherit;font-size:14px;font-weight:500;cursor:pointer;touch-action:manipulation}
+.obx-rm:active{background:var(--bg3)}
+.obx-rm:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+.obx-acts{flex:none;position:relative;z-index:1;padding:10px 16px 14px;background:var(--bg2)}
+.obx-acts::before{content:"";position:absolute;left:0;right:0;bottom:100%;height:16px;background:linear-gradient(to bottom,transparent,var(--bg2));pointer-events:none}
+.obx-acts .btn{min-height:50px}
+@media (max-height:740px){.ex-anim.obx-pv{height:150px}}
+@media (max-height:620px){.ob-sheet.obx{display:block;overflow-y:auto}.obx-sc{overflow:visible}.obx-acts{position:sticky;bottom:0}.ex-anim.obx-pv{height:136px}}
+@media (prefers-reduced-motion:reduce){.ob-sheet.obx,.ob-over:has(>.obx),.obx-pv.obx-swp canvas{animation:none}}
 .ob-fold{min-height:44px;border:0;background:none;color:var(--text);font:inherit;font-size:15px;font-weight:600;text-align:left;padding:0;cursor:pointer}
 .ob-res{display:flex;flex-direction:column;gap:8px}
 .ob-res2{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
@@ -14489,7 +14541,7 @@ function showOnboarding(o){
 function hideOnboarding(){
   _ob=null;const ob=_obEl(),app=document.getElementById('app');
   ob.style.display='none';app.style.display='flex';app.inert=false;
-  const sr=document.getElementById('ob-sheet-root');if(sr)sr.innerHTML='';
+  const sr=document.getElementById('ob-sheet-root');if(_obx){_obx=null;_obxUnmount(sr);}if(sr)sr.innerHTML='';
 }
 // Cabecera (‹ · bloques · ✕), cuerpo con el foco en el título y pie con «Para qué lo pregunto»
 function obRender(o){
@@ -14501,8 +14553,9 @@ function obRender(o){
     <div class="ob-prog" aria-hidden="true"><div class="ob-bars">${[1,2,3].map(i=>`<i class="${i<blk?'on':i===blk?'cur':''}"></i>`).join('')}</div><div class="ob-blk">${esc(OB_BLOCK_LBL[blk]||(blk>3?'Tu rutina':''))}</div></div>
     <button type="button" class="ob-hb" aria-label="Salir" onclick="obClose()">✕</button></div>`;
   let body=sc.html();if(_ob.single&&!/class="ob-next/.test(body))body+=_obNextBtn('obSingleSave()'); // (E10a) pantalla suelta: siempre «Guardar»
-  root.innerHTML=head+`<div class="ob-body" data-scr="${_ob.step}">${_ob.resumed&&_ob.step!=='ob-hola'?'<div class="ob-resume">Seguimos donde lo dejaste.</div>':''}${body}</div>`;
+  root.innerHTML=head+`<div class="ob-body${o.keepScroll?' ob-still':''}" data-scr="${_ob.step}">${_ob.resumed&&_ob.step!=='ob-hola'?'<div class="ob-resume">Seguimos donde lo dejaste.</div>':''}${body}</div>`;
   _ob.resumed=false;
+  thumbsIn(root); // (M3) las imágenes 3D de la rutina propuesta: se dibujan en tiempo libre, solo las que se ven
   const live=document.getElementById('ob-live');if(live)live.textContent=_ob.step==='ob-hola'?'':`${OB_BLOCK_LBL[blk]||''}. ${sc.auto?'Al elegir, pasas a la siguiente.':''}`;
   if(!o.keepFocus){const h=root.querySelector('#ob-h');if(h)try{h.focus({preventScroll:true});}catch(e){}}
   const ob=_obEl();if(ob&&!o.keepScroll)ob.scrollTop=0;
@@ -14560,10 +14613,15 @@ function obRestore(){importData({fromOnboarding:true});}
 // Hojas propias del cuestionario (#ob-sheet-root, z 395)
 function obSheet(html,label){
   const sr=document.getElementById('ob-sheet-root');if(!sr)return;
+  if(_obx){_obx=null;_obxUnmount(sr);} // (M3) otra hoja encima de la de ver y cambiar: esa suelta su animación
   sr.innerHTML=`<div class="hist-over ob-over" onclick="if(event.target===this)obSheetClose()"><div class="hist-sheet ob-sheet" role="dialog" aria-modal="true" aria-label="${esc(label||'')}" tabindex="-1">${html}</div></div>`;
   const sh=sr.querySelector('.ob-sheet');if(sh)try{sh.focus({preventScroll:true});}catch(e){}
 }
-function obSheetClose(){const sr=document.getElementById('ob-sheet-root');if(sr)sr.innerHTML='';const h=document.getElementById('ob-h');if(h)try{h.focus({preventScroll:true});}catch(e){}}
+// (M3) La hoja de ver y cambiar (_obx) suelta su animación 3D y devuelve el foco a quien la abrió (la imagen o ⇄ de su fila)
+let _obx=null; // la hoja de ver y cambiar abierta: {letra, j, ro, cur, alts, sel, k} · solo en memoria
+function obSheetClose(){const sr=document.getElementById('ob-sheet-root'),x=_obx;
+  if(x){_obx=null;if(_ob)_ob.sw=null;_obxUnmount(sr);}
+  if(sr)sr.innerHTML='';const h=x&&_obxOpener(x)||document.getElementById('ob-h');if(h)try{h.focus({preventScroll:true});}catch(e){}}
 // Tab no sale de la capa (con #app inerte basta casi siempre; esto cubre los botones de la propia capa)
 function _obTrap(ev){
   if(!_ob||ev.key!=='Tab')return;
@@ -15058,17 +15116,48 @@ function _obWeekLine(g){
   if(days>wd)t+=` + ${plural(days-wd,'día')} de caminar o cardio suave`;
   return t+'.';
 }
+// (M3) Imagen de un ejercicio de la biblioteca: el fotograma 3D del motor (thumbsIn lo dibuja en tiempo libre y lo guarda) encima
+// de su respaldo, la figura teñida con su emoji (cardio: solo el emoji), como en el selector. TH_OB: la de las filas de la rutina
+// propuesta, con su escenario; en la hoja de ver y cambiar, la del selector (TH_CARD, que quien ya lo abrió tiene en caché).
+const TH_OB={w:88,h:66,fit:'scene',bg:'scene'};
+function _obThumbHtml(e,P){
+  if(typeof _libSpriteOnce==='function')_libSpriteOnce();
+  return`<span class="lib-th${e.cardio?' cardio':''}" aria-hidden="true">${thumbImgHtml(e.id,P)}${e.cardio?'':`<svg class="lib-fig" viewBox="0 0 60 40" style="${_libFigStyle(e)}"><use href="#lib-fig"/></svg>`}<span class="lib-th-e">${esc(e.ic||matOf(_mat(e)).ic)}</span></span>`;
+}
+// La imagen de la fila j del día (índice en d.rows, con el equilibrio): un botón que abre la hoja (obSee). chg: se puede cambiar
+function _obThumbBtn(d,j,L,chg){
+  return`<button type="button" class="ob-thb" aria-haspopup="dialog" aria-label="Ver ${esc(L.n)}${chg?' y cambiarlo':''}" onclick="obSee('${d.letra}',${j},'th')">${_obThumbHtml(L,TH_OB)}<span class="ob-thp" aria-hidden="true"></span></button>`;
+}
+// (M3) Lo que lleva de verdad la rutina candidata en una fila de fuerza cuando lo has cambiado tú (⇄ o «Buscar otro ejercicio»): el
+// detalle del generador (d.rows) sigue con el que propuso él, y la fila enseñaba ese aunque la rutina que se aplica llevara el tuyo
+function _obRowPin(d,row){
+  const c=_ob&&_ob.c,x=row.kind==='str'&&c&&c.days[d.letra]?c.days[d.letra].ex[d.rows.indexOf(row)]:null;
+  return x&&x.pin&&x.lib!==row.lib&&LIB_BY_ID.has(x.lib)?x:null;
+}
+// «4 × 8-10» de una fila (lo tuyo si la cambiaste: las series y el objetivo que hereda, «30s» → «30 s»)
+function _obRowTgt(row,pin){return pin?`${pin.s} × ${String(pin.r).replace(/^(\d+)\s*s$/,'$1'+NB+'s')}`:`${row.series} × ${row.reps}`;}
 function _obRowHtml(d,row,i){
-  const L=LIB_BY_ID.get(row.lib);
-  if(row.kind==='warm'||row.kind==='cardio')return`<div class="ob-row ob-row-c"><span class="ob-ri" aria-hidden="true">${row.kind==='warm'?'🚶':'🏃'}</span><span class="ob-rt"><b>${(n=>row.kind==='warm'?(/^calentamiento/i.test(n)?n:'Calentamiento — '+n):(/^cardio/i.test(n)?n.replace(/^Cardio\b/,'Cardio final'):'Cardio final — '+n))(esc(L?L.n:row.n))}</b><span class="nw">${esc(row.reps)}</span></span></div>`;
+  const pin=_obRowPin(d,row),L=LIB_BY_ID.get(pin?pin.lib:row.lib),j=d.rows.indexOf(row);
+  const th=L?_obThumbBtn(d,j,L,row.kind==='str'):`<span class="ob-ri" aria-hidden="true">${row.kind==='warm'?'🚶':row.kind==='cardio'?'🏃':row.kind==='bal'?'⚖️':'💪'}</span>`;
+  if(row.kind==='warm'||row.kind==='cardio')return`<div class="ob-row ob-row-c" data-j="${j}">${th}<span class="ob-rt"><b>${(n=>row.kind==='warm'?(/^calentamiento/i.test(n)?n:'Calentamiento — '+n):(/^cardio/i.test(n)?n.replace(/^Cardio\b/,'Cardio final'):'Cardio final — '+n))(esc(L?L.n:row.n))}</b><span class="nw">${esc(row.reps)}</span></span></div>`;
   if(row.kind==='bal'){ // (E14a) ejercicios del catálogo: el primero lleva la cabecera del bloque y el último, cómo progresar
     const bs=d.rows.filter(x=>x.kind==='bal'),first=bs[0]===row,last=bs[bs.length-1]===row,min=bs.reduce((t,x)=>t+(+x.min||0),0),u=!!(L&&/U/.test(L.x||''));
-    return`${first?`<div class="ob-bal-h"><span aria-hidden="true">⚖️</span> Equilibrio · ${_nwX(plural(Math.round(min),'minuto'))}, junto a una pared o una silla</div>`:''}<div class="ob-row ob-row-c ob-row-bal" data-lib="${esc(row.lib||'')}"><span class="ob-ri" aria-hidden="true">${L?exIconHtml(L):'⚖️'}</span><span class="ob-rt"><b>${esc(L?L.n:row.n)}</b><span>${_nwX(`${row.series} × ${esc(row.reps)}`)}${u?' por lado':''}</span>${last?'<span class="ob-rwhy">Cuando te salgan fáciles, toca la pared solo con un dedo.</span>':''}</span></div>`;}
-  const rest=row.descanso_s?fmtClock(row.descanso_s):'',k=d.letra+':'+i,open=_ob.why===k;
-  const cuid=row.cuidado?'<em class="ob-cuid">Con cuidado</em>':'';
-  return`<div class="ob-row" data-lib="${esc(row.lib)}"><span class="ob-ri" aria-hidden="true">${L?exIconHtml(L):''}</span><span class="ob-rt"><b>${esc(L?L.n:row.n)}</b>
-    <span>${_nwX(`${row.series} × ${esc(row.reps)}`)}${rest?` · descanso ${_nwX(rest)}`:''}${cuid}</span>${open&&row.nota?`<span class="ob-rwhy">${esc(row.nota)}</span>`:''}</span>
-    <span class="ob-ra"><button type="button" class="ob-rb" aria-expanded="${open}" onclick="obWhy('${k}')">¿Por qué?</button>${typeof obSwap==='function'?`<button type="button" class="ob-rb ob-sw2" aria-label="Cambiar ${esc(L?L.n:'')}" onclick="obSwap('${d.letra}',${i})">⇄</button>`:''}</span></div>`;
+    return`${first?`<div class="ob-bal-h"><span aria-hidden="true">⚖️</span> Equilibrio · ${_nwX(plural(Math.round(min),'minuto'))}, junto a una pared o una silla</div>`:''}<div class="ob-row ob-row-c ob-row-bal" data-lib="${esc(row.lib||'')}" data-j="${j}">${th}<span class="ob-rt"><b>${esc(L?L.n:row.n)}</b><span>${_nwX(`${row.series} × ${esc(row.reps)}`)}${u?' por lado':''}</span>${last?'<span class="ob-rwhy">Cuando te salgan fáciles, toca la pared solo con un dedo.</span>':''}</span></div>`;}
+  // (M1) con el descanso entre series apagado en Ajustes, la fila no lo enseña
+  const rest=row.descanso_s&&_restOn()?fmtClock(row.descanso_s):'',k=d.letra+':'+i,open=_ob.why===k;
+  const cuid=row.cuidado&&!pin?'<em class="ob-cuid">Con cuidado</em>':'';
+  const why=pin?`Lo elegiste tú en lugar de ${(LIB_BY_ID.get(row.lib)||{}).n||row.n}.`:row.nota;
+  return`<div class="ob-row" data-lib="${esc(pin?pin.lib:row.lib)}" data-j="${j}">${th}<span class="ob-rt"><b>${esc(L?L.n:row.n)}</b>
+    <span>${_nwX(esc(_obRowTgt(row,pin)))}${rest?` · descanso ${_nwX(rest)}`:''}${cuid}</span>
+    <span class="ob-ra"><button type="button" class="ob-rb" aria-expanded="${open}" onclick="obWhy('${k}')"><span>¿Por qué?</span></button>${typeof obSwap==='function'?`<button type="button" class="ob-rb ob-sw2" aria-haspopup="dialog" aria-label="Cambiar ${esc(L?L.n:'')}" onclick="obSwap('${d.letra}',${i})"><span><i aria-hidden="true">⇄</i><em>Cambiar</em></span></button>`:''}</span>${open&&why?`<span class="ob-rwhy">${esc(why)}</span>`:''}</span></div>`;
+}
+// (M2) Con el esfuerzo de cada serie apagado en Ajustes, la explicación de la rutina no habla de los chips 😌 💪 🥵: la línea del
+// generador «Esfuerzo: 💪 Justo, te sobran 1-2.» se queda en cuántas repeticiones deben sobrar (cualquier otra que los nombrara, fuera).
+// Se adapta al pintar: los textos del generador (y su prototipo gemelo) no se tocan.
+function _obPorque(){
+  const L=(_ob&&_ob.t&&_ob.t.porque)||[];if(_rpeOn())return L;
+  return L.map(x=>{const m=/^Esfuerzo: .*te sobran (.+?)(?: repeticiones)?\.$/.exec(x);
+    return m?`Termina cada serie cuando aún te sobren ${m[1]} repeticiones.`:/😌|🥵|💪 Justo/.test(x)?null:x;}).filter(Boolean);
 }
 function obWhy(k){if(!_ob)return;_ob.why=_ob.why===k?null:k;obRender({keepFocus:true,keepScroll:true});}
 function obTab(k){if(!_ob)return;_ob.tab=k;_ob.why=null;obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root [role=tab][data-k="${k}"]`);if(b)try{b.focus();}catch(e){}}
@@ -15076,7 +15165,7 @@ function obMore(k){if(!_ob)return;_ob.more=Object.assign({},_ob.more||{});_ob.mo
 OB_SCR['ob-rutina']={block:4,html:()=>{
   if(!_ob.g||_ob.dirty)_obGenerate();
   const g=_ob.g;if(!g)return`<h1 class="ob-title" id="ob-h" tabindex="-1">No he podido preparar tu rutina</h1>`;
-  const r=g.res,t=_ob.t,c=_ob.c,P=g.E.G.effective(g.inp),cauto=!!P.cauto,two=!!(_ob.places&&_ob.places.g&&_ob.places.c),more=_ob.more||{};
+  const r=g.res,t=_ob.t,pq=_obPorque(),c=_ob.c,P=g.E.G.effective(g.inp),cauto=!!P.cauto,two=!!(_ob.places&&_ob.places.g&&_ob.places.c),more=_ob.more||{};
   const ks=Object.keys(r.days),tab=ks.includes(_ob.tab)?_ob.tab:ks[0],d=r.det.find(x=>x.letra===tab),rows=d.rows;
   const nStr=rows.filter(x=>x.kind==='str').length;
   const av=t.avisos.slice();if(_ob.h.consulta==='igual'){const i=av.findIndex(x=>/médico/.test(x));if(i>0)av.unshift(av.splice(i,1)[0]);}
@@ -15088,10 +15177,10 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   return`<h1 class="ob-title" id="ob-h" tabindex="-1">Tu rutina está lista</h1>
   <p class="ob-sub">Basada en lo que me has contado. Toca cualquier dato para cambiarlo.</p>
   <div class="ob-chips">${_obChips().map(([l,st])=>`<button type="button" class="lib-chip ob-ch" onclick="obEditFromResult('${st}')">${esc(l).replace(/&nbsp;/g,NB)}</button>`).join('')}</div>${changed}
-  <section class="card ob-split"><div class="ob-wk">${esc(_obWeekLine(g))}</div><p class="ob-p">${esc(t.porque[0]||'')}</p>
+  <section class="card ob-split"><div class="ob-wk">${esc(_obWeekLine(g))}</div><p class="ob-p">${esc(pq[0]||'')}</p>
     ${typeof obSplitSheet==='function'?'<button type="button" class="ob-link" onclick="obSplitSheet()">Cambiar reparto ›</button>':''}</section>
-  <section class="ob-sec"><h2 class="ob-h2">¿Por qué esta rutina?</h2><ul class="ob-ul">${t.porque.slice(1,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
-    ${t.porque.length>4?'<button type="button" class="ob-link" onclick="obWhyAll()">Ver todo ›</button>':''}</section>
+  <section class="ob-sec"><h2 class="ob-h2">¿Por qué esta rutina?</h2><ul class="ob-ul">${pq.slice(1,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+    ${pq.length>4?'<button type="button" class="ob-link" onclick="obWhyAll()">Ver todo ›</button>':''}</section>
   ${av.length?`<section class="ob-sec"><h2 class="ob-h2">A tener en cuenta</h2><ul class="ob-ul ob-av">${av.slice(0,more.av?99:t.visibles).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
     ${av.length>t.visibles?`<button type="button" class="ob-link" onclick="obMore('av')">${more.av?'Ver menos':'Ver más ('+(av.length-t.visibles)+')'}</button>`:''}</section>`:''}
   <div class="tabs ob-tabs" role="tablist" aria-label="Días de tu rutina">${ks.map(k=>{const on=k===tab,dd=r.det.find(x=>x.letra===k);return`<button type="button" class="tab ob-tab${on?' on':''}" role="tab" aria-selected="${on}" tabindex="${on?0:-1}" data-k="${k}" onclick="obTab('${k}')"><span class="pill p${k.toLowerCase()}">${k}</span>${on?' · '+esc(String(r.days[k].focus).split(/\s+[—–-]\s+/)[0]):''}</button>`;}).join('')}</div>
@@ -15103,7 +15192,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   <section class="ob-sec"><h2 class="ob-h2">📈 Cómo vas a avanzar</h2><ul class="ob-ul">${cauto?'<li>Las primeras 4 semanas, 2 series y subidas pequeñas; después te propongo pasar a 3.</li>':''}
     <li>Cada sesión: el Coach te dice cuánto poner (primero más repeticiones, luego más peso).</li><li>Cada 4 semanas: revisas tu ciclo y te propongo hasta 3 cambios.</li><li>Si te notas cansado o te estancas: una semana suave.</li></ul></section>
   <section class="ob-sec"><h2 class="ob-h2">🧭 Tu primera semana</h2><ul class="ob-ul"><li>La primera vez que hagas cada ejercicio, elige ${kg?'un peso':'la variante'} con ${kg?'el':'la'} que te sobren ${cauto?'unas 3':'2-3'} repeticiones. Desde la segunda sesión, el Coach te dice cuánto poner.</li>
-    <li>💪 Justo = te sobran 1-2. 😌 Fácil = 3 o más. 🥵 Al límite = ninguna.</li><li>Si algo duele más de 3 sobre 10 o empeora al día siguiente, cámbialo con ⇄.</li></ul></section>
+    ${_rpeOn()?'<li>💪 Justo = te sobran 1-2. 😌 Fácil = 3 o más. 🥵 Al límite = ninguna.</li>':''}<li>Si algo duele más de 3 sobre 10 o empeora al día siguiente, cámbialo con ⇄.</li></ul></section>
   <section class="ob-sec"><button type="button" class="ob-fold" aria-expanded="${mmOpen}" onclick="obMore('mm')">Tu semana por músculo <span aria-hidden="true">${mmOpen?'▾':'›'}</span></button>
     ${mmOpen?`<div class="mm-bars">${mmBarsHtml(mmPlanStats(tmp,r.weeklyTarget),{})}</div>`:''}</section>
   <section class="ob-sec"><button type="button" class="ob-fold" onclick="obAvoided()">Lo que he evitado ›</button></section>
@@ -15112,7 +15201,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
     ${typeof obOther==='function'?`<div class="ob-res2"><button type="button" class="btn bs" onclick="obOther(1)">Otra propuesta</button>${(_ob.alt||0)>0?'<button type="button" class="btn bs" onclick="obOther(-1)">‹ Anterior</button>':''}<button type="button" class="ob-link" onclick="obTune()">Afinar mi rutina</button></div>`:''}</div>`;}};
 // «Ver todo»: el porqué entero, en una hoja
 function obWhyAll(){if(!_ob||!_ob.t)return;obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">¿Por qué esta rutina?</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
-  <div class="hist-sheet-body"><ul class="ob-ul">${_ob.t.porque.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`,'¿Por qué esta rutina?');}
+  <div class="hist-sheet-body"><ul class="ob-ul">${_obPorque().map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`,'¿Por qué esta rutina?');}
 // «Lo que he evitado»: molestias, material y riesgos, con su motivo
 function obAvoided(){
   if(!_ob||!_ob.g)return;const g=_ob.g,z=_ob.h.zones||{},out=[];
@@ -15238,38 +15327,117 @@ function _obAlts(letra,i){
     if(Pl&&!LIB_K.placeCan(L,Pl,d.place))continue;if(!g.E.G.safeL(L,g.inp))continue;out.push(id);}
   return out;
 }
-function obSwap(letra,i){
-  if(!_ob||!_ob.c||!_ob.g)return;const dd=_ob.g.res.det.find(x=>x.letra===letra),rw=dd&&dd.rows.filter(x=>x.kind!=='bal')[i]; // (E16b) índice sin equilibrio → candidata
-  const ex=rw&&_ob.c.days[letra]&&_ob.c.days[letra].ex[dd.rows.indexOf(rw)];if(!ex)return;const L=LIB_BY_ID.get(ex.lib),alts=_obAlts(letra,i);
-  _ob.sw={letra,i};
-  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Cambiar «${esc(L.n)}»</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
-  <div class="hist-sheet-body"><p class="ob-p">Trabaja lo mismo: ${esc(_libMusLbl?(_libMusLbl(L)||[]).join(', ').toLowerCase():'')}</p>
-    <div class="ob-lbl">Otras opciones que te encajan</div>
-    <div class="ob-acts">${alts.length?alts.map(id=>{const A=LIB_BY_ID.get(id);return`<button type="button" class="ob-card" onclick="obPinPick('${id}')"><span class="ob-ci" aria-hidden="true">${exIconHtml(A)}</span><span class="ob-ct"><b>${esc(A.n)}</b><span>${esc(A.eq||'')}</span></span></button>`;}).join(''):'<p class="ob-foot">Con tu material y lo que me contaste no hay otra parecida.</p>'}</div>
-    <button type="button" class="ob-link" onclick="obSwapSearch()">Buscar otro ejercicio ›</button>
-    <button type="button" class="ob-chk" role="checkbox" aria-checked="false" id="ob-avoid" onclick="this.setAttribute('aria-checked',this.getAttribute('aria-checked')!=='true');this.classList.toggle('ok')"><span class="ob-cb" aria-hidden="true"></span><span class="ob-ct"><span>No me lo vuelvas a proponer</span></span></button>
-    <button type="button" class="btn bs" onclick="obSwapAvoidOnly()">Quitar y elegir otro</button></div>`,'Cambiar '+L.n);
+// ── (M3) Ver y cambiar un ejercicio de la rutina propuesta. Una sola hoja, la de ⇄ y la de tocar la imagen, con el lenguaje de
+// «¿Máquina ocupada?»: arriba, la animación 3D en vivo del ejercicio elegido con su nombre, sus músculos y su material; debajo, el
+// de tu rutina y las opciones que te encajan (_obAlts) como radios: elegir una cambia la vista y los datos; «Cambiar por este» la
+// fija con el flujo de siempre (obPinPick). Calentamiento, cardio final y equilibrio no se cambian aquí: la hoja solo los enseña ──
+function obSwap(letra,i){ // ⇄ (i: fila sin contar el equilibrio)
+  if(!_ob||!_ob.g)return;const d=_ob.g.res.det.find(x=>x.letra===letra),rw=d&&d.rows.filter(x=>x.kind!=='bal')[i];
+  if(rw)obSee(letra,d.rows.indexOf(rw),'sw');
 }
+// La imagen de la fila j (índice en d.rows, con el equilibrio). k: quién la abre ('th' la imagen, 'sw' ⇄): a él vuelve el foco
+function obSee(letra,j,k){
+  if(!_ob||!_ob.c||!_ob.g)return;const d=_ob.g.res.det.find(x=>x.letra===letra),row=d&&d.rows[j];if(!row)return;
+  const str=row.kind==='str',ex=str?_ob.c.days[letra]&&_ob.c.days[letra].ex[j]:null;if(str&&!ex)return; // (E16b) la candidata: lo fijado
+  const cur=ex?ex.lib:row.lib;if(!LIB_BY_ID.has(cur))return;
+  const i=str?d.rows.filter(x=>x.kind!=='bal').indexOf(row):-1;
+  const x={letra,j,ro:!str,cur,alts:str?_obAlts(letra,i):[],sel:cur,k:k==='sw'?'sw':'th'};
+  obSheet(_obxHtml(x,d,row),(str?'Ver y cambiar: ':'Ver ejercicio: ')+LIB_BY_ID.get(cur).n);
+  const sr=document.getElementById('ob-sheet-root'),sh=sr&&sr.querySelector('.ob-sheet');if(!sh)return;
+  _obx=x;_ob.sw=str?{letra,i}:null;sh.classList.add('obx');
+  if(typeof GymAnim!=='undefined'){try{GymAnim.mountAll(sr);}catch(e){}}
+  if(!sr.querySelector('#obx-pv[data-gym-anim]'))_busyPv(sr.querySelector('#obx-pv'),LIB_BY_ID.get(cur)); // sin animación: su mapa muscular
+  thumbsIn(sr);
+}
+// «Día A · 4 × 8-10 · descanso 2:00» (sin el descanso si lo tienes apagado en Ajustes) · «Día A · Calentamiento · 5 min»
+function _obxSubHtml(x,d,row){
+  const t=row.kind==='warm'?'Calentamiento · '+esc(row.reps):row.kind==='cardio'?'Cardio final · '+esc(row.reps)
+    :row.kind==='bal'?`Equilibrio · ${esc(row.series+' × '+row.reps)}${/U/.test((LIB_BY_ID.get(row.lib)||{}).x||'')?' por lado':''}`
+    :esc(_obRowTgt(row,_obRowPin(d,row)))+(row.descanso_s&&_restOn()?' · descanso '+fmtClock(row.descanso_s):'');
+  return`Día ${esc(x.letra)} · ${_nwX(t)}`;
+}
+// Nombre, músculos y material del ejercicio que se está viendo
+function _obxInfoHtml(L){
+  const mus=_libMusLbl(L,3),eq=L.eq||matLabel(_mat(L));
+  return`<div class="obx-n">${esc(L.n)}</div><div class="obx-mus"><span class="sr-only">Trabaja: </span>${mus.map(l=>`<span class="mchip">${esc(l)}</span>`).join(' ')}</div>
+    <div class="obx-eq"><span aria-hidden="true">${esc(matOf(_mat(L)).ic)}</span> <span class="sr-only">Material: </span>${esc(eq)}</div>`;
+}
+function _obxAltHtml(x,id){
+  const A=LIB_BY_ID.get(id),on=id===x.sel,cur=id===x.cur;
+  return`<button type="button" class="busy-alt obx-alt" role="radio" aria-checked="${on}" tabindex="${on?0:-1}" data-lib="${esc(id)}" onclick="obxSelect(this.dataset.lib)" onkeydown="obxKey(event)">${_obThumbHtml(A,TH_CARD)}
+    <span class="busy-alt-i"><span class="busy-alt-n">${esc(A.n)}</span><span class="busy-alt-m">${esc(A.eq||matLabel(_mat(A)))}</span></span>${cur?'<span class="lib-item-badge in">En tu rutina</span>':A.dif>1?`<span class="lib-item-badge">${A.dif>2?'Avanzado':'Intermedio'}</span>`:''}</button>`;
+}
+function _obxHtml(x,d,row){
+  const L=LIB_BY_ID.get(x.cur),anim=typeof GymAnim!=='undefined'&&GymAnim.has(L.id);
+  const body=x.ro?`${L.tip?`<div class="tip">${_tipHtml(L.tip)}</div>`:''}${row.kind==='cardio'?'<p class="lib-d-note">Si no lo quieres, quítalo en «Afinar mi rutina».</p>':''}`
+    :`<div class="obx-lbl" id="obx-lbl">Opciones que te encajan</div>
+      <div class="busy-list" role="radiogroup" aria-labelledby="obx-lbl">${[x.cur].concat(x.alts).map(id=>_obxAltHtml(x,id)).join('')}</div>
+      ${x.alts.length?'':'<p class="ob-foot obx-none">Con tu material y lo que me contaste no hay otra parecida.</p>'}
+      <button type="button" class="ob-link" onclick="obSwapSearch()">Buscar otro ejercicio ›</button>
+      <div class="obx-out"><button type="button" class="ob-chk" role="checkbox" aria-checked="false" id="ob-avoid" onclick="this.setAttribute('aria-checked',this.getAttribute('aria-checked')!=='true');this.classList.toggle('ok')"><span class="ob-cb" aria-hidden="true"></span><span class="ob-ct"><span>No me lo vuelvas a proponer</span></span></button>
+      <button type="button" class="obx-rm" onclick="obxAvoid()">Quitar y elegir otro</button></div>`;
+  return`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${x.ro?'Ver ejercicio':'Ver y cambiar'}</div><div class="hist-sheet-sub">${_obxSubHtml(x,d,row)}</div>
+      <button type="button" class="hist-sheet-close x44" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+    <div class="obx-top"><div class="ex-anim obx-pv" id="obx-pv"${anim?` data-gym-anim="${esc(L.id)}"`:''}></div>
+      <div class="obx-info" id="obx-info" aria-live="polite">${_obxInfoHtml(L)}</div></div>
+    <div class="obx-sc">${body}</div>
+    <div class="obx-acts"><button type="button" class="btn bs" id="obx-go" onclick="obxUse()">${x.ro?'Cerrar':'Me quedo con este'}</button></div>`;
+}
+// Elegir una opción: la vista en vivo y los datos pasan a ser los suyos, y el botón, «Cambiar por este»
+function obxSelect(lib){
+  const x=_obx,L=LIB_BY_ID.get(lib);if(!x||x.ro||!L||!(lib===x.cur||x.alts.includes(lib)))return;
+  if(lib===x.sel)return;x.sel=lib;
+  document.querySelectorAll('#ob-sheet-root .obx-alt').forEach(b=>{const on=b.dataset.lib===lib;b.setAttribute('aria-checked',String(on));b.tabIndex=on?0:-1;});
+  const pv=document.getElementById('obx-pv');_busyPv(pv,L);
+  if(pv){pv.classList.remove('obx-swp');void pv.offsetWidth;pv.classList.add('obx-swp');} // la vista nueva entra con un fundido
+  const inf=document.getElementById('obx-info');if(inf)inf.innerHTML=_obxInfoHtml(L);
+  const go=document.getElementById('obx-go'),chg=lib!==x.cur;if(go){go.className='btn '+(chg?'bp':'bs');go.textContent=chg?'Cambiar por este':'Me quedo con este';}
+  haptic(8);
+}
+// Las opciones son un grupo de radios: Tab entra en la elegida y las flechas (Inicio / Fin) la cambian
+function obxKey(ev){
+  const B=[...document.querySelectorAll('#ob-sheet-root .obx-alt')],i=B.indexOf(ev.currentTarget||ev.target),n=B.length;
+  const to={ArrowDown:i+1,ArrowRight:i+1,ArrowUp:i-1,ArrowLeft:i-1,Home:0,End:n-1}[ev.key];
+  if(to===undefined||i<0||!n)return;
+  ev.preventDefault();const b=B[(to+n)%n];obxSelect(b.dataset.lib);try{b.focus({preventScroll:true});b.scrollIntoView({block:'nearest'});}catch(e){}
+}
+// La acción principal: con otra elegida, queda fijada (obPinPick: se recalcula y avisa); con la de tu rutina, se cierra
+function obxUse(){
+  const x=_obx;if(!x||!_ob)return;
+  if(x.ro||x.sel===x.cur||!_ob.sw){obSheetClose();return;}
+  obPinPick(x.sel);_obxBack(x);
+}
+function obxAvoid(){const x=_obx;if(!x||!_ob||!_ob.sw)return;obSwapAvoidOnly();_obxBack(x);}
+// Quien abrió la hoja (la imagen o ⇄ de su fila), también después de repintar la lista con el cambio
+function _obxOpener(x){return document.querySelector(`#ob-root .ob-row[data-j="${+x.j}"] .${x.k==='sw'?'ob-sw2':'ob-thb'}`)||document.querySelector(`#ob-root .ob-row[data-j="${+x.j}"] .ob-thb`);}
+function _obxBack(x){const b=x&&_ob&&_ob.step==='ob-rutina'?_obxOpener(x):null;if(b)try{b.focus({preventScroll:true});}catch(e){}}
+function _obxUnmount(sr){const pv=sr&&sr.querySelector('#obx-pv');if(pv&&typeof GymAnim!=='undefined'&&GymAnim.unmount){try{GymAnim.unmount(pv);}catch(e){}}}
 // Elegir una: queda fijada (pins) y la rutina se recalcula; «No me lo vuelvas a proponer» va a avoid
 function obPinPick(lib){
   if(!_ob||!_ob.sw)return;const {letra,i}=_ob.sw,d=_ob.g.res.det.find(x=>x.letra===letra),rows=d.rows.filter(x=>x.kind!=='bal'),row=rows[i];
-  const av=document.getElementById('ob-avoid');if(av&&av.getAttribute('aria-checked')==='true'){_ob.a.avoid=[...new Set([...(_ob.a.avoid||[]),row.lib])];}
+  // (M3) «No me lo vuelvas a proponer» es el que se ve en la fila: el tuyo si ya lo habías cambiado, no el que propuso el generador
+  const av=document.getElementById('ob-avoid');if(av&&av.getAttribute('aria-checked')==='true'){_ob.a.avoid=[...new Set([...(_ob.a.avoid||[]),(_obRowPin(d,row)||row).lib])];}
   _ob.pins=Object.assign({},_ob.pins||{});_ob.pins[_obPinKey({rows,letra},row,i)]=lib;_ob.sw=null;
-  const c=_ob.c;_obApplyPins(c,_ob.g);_obSaveDraft();obSheetClose();obRender({keepFocus:true,keepScroll:true});
-  toast(`Cambiado. El Día ${letra} dura ahora ≈ ${Math.round(c.est[letra])}${NB}min`,2800);
+  // (M3) volver al que propuso el generador: _obApplyPins no deshace un cambio ya hecho en la candidata; se rehace entera (lo demás
+  // fijado se vuelve a aplicar) y el aviso lleva los minutos de la que queda
+  if(lib===row.lib)_ob.dirty=true;
+  _obApplyPins(_ob.c,_ob.g);_obSaveDraft();obSheetClose();obRender({keepFocus:true,keepScroll:true});
+  toast(`Cambiado. El Día ${letra} dura ahora ≈ ${Math.round(_ob.c.est[letra])}${NB}min`,2800);
 }
 // (E16b) «Buscar otro ejercicio ›»: el selector, en la zona del ejercicio y con el material del sitio de ese día; lo elegido queda fijado
 // («Otra propuesta» no lo toca). Si no encaja con lo que me contaste, se queda (lo has elegido tú) con un aviso.
 function obSwapSearch(){
   if(!_ob||!_ob.sw||!_ob.g)return;const {letra,i}=_ob.sw,d=_ob.g.res.det.find(x=>x.letra===letra),row=d&&d.rows.filter(x=>x.kind!=='bal')[i];if(!row)return;
-  const L=LIB_BY_ID.get(row.lib),g=_ob.g;
-  showExercisePicker({title:'Buscar otro ejercicio',mode:'swap',currentLib:row.lib,muscle:L?_grp(L):null,place:d.place,
+  const cur=(_obRowPin(d,row)||row).lib,L=LIB_BY_ID.get(cur),g=_ob.g; // (M3) el actual es el que se ve en la fila
+  showExercisePicker({title:'Buscar otro ejercicio',mode:'swap',currentLib:cur,muscle:L?_grp(L):null,place:d.place,
     ctx:{places:JSON.parse(JSON.stringify(_ob.places||{})),inPlan:{}},
-    onPick:E=>{if(!E||E.cardio||!_ob||!_ob.sw)return;const K=LIB_K.BY.get(E.id),ok=!K||g.E.G.safeL(K,g.inp);obPinPick(E.id);
+    onPick:E=>{if(!E||E.cardio||!_ob||!_ob.sw)return;const K=LIB_K.BY.get(E.id),ok=!K||g.E.G.safeL(K,g.inp),x=_obx;obPinPick(E.id);_obxBack(x); // (M3) el foco, a su fila
       if(!ok)toast('Lo dejo porque lo has elegido tú, pero no encaja del todo con lo que me contaste',3600);}});
 }
-function obSwapAvoidOnly(){if(!_ob||!_ob.sw)return;const {letra,i}=_ob.sw,d=_ob.g.res.det.find(x=>x.letra===letra),row=d.rows.filter(x=>x.kind!=='bal')[i];
-  _ob.a.avoid=[...new Set([...(_ob.a.avoid||[]),row.lib])];_ob.sw=null;_ob.dirty=true;_obSaveDraft();obSheetClose();obRender({keepFocus:true,keepScroll:true});toast('No te lo vuelvo a proponer',2400);}
+// (M3) Se quita el que se ve en la fila: si ya lo habías cambiado tú, el tuyo, que además deja de estar fijado
+function obSwapAvoidOnly(){if(!_ob||!_ob.sw)return;const {letra,i}=_ob.sw,d=_ob.g.res.det.find(x=>x.letra===letra),rows=d.rows.filter(x=>x.kind!=='bal'),row=rows[i],pin=_obRowPin(d,row);
+  if(pin){_ob.pins=Object.assign({},_ob.pins||{});delete _ob.pins[_obPinKey({rows,letra},row,i)];}
+  _ob.a.avoid=[...new Set([...(_ob.a.avoid||[]),(pin||row).lib])];_ob.sw=null;_ob.dirty=true;_obSaveDraft();obSheetClose();obRender({keepFocus:true,keepScroll:true});toast('No te lo vuelvo a proponer',2400);}
 // «Otra propuesta» y «‹ Anterior»: otra semilla con el mismo reparto, series y rangos; lo fijado se queda
 function obOther(dir){
   if(!_ob)return;const n=Math.max(0,(_ob.alt||0)+dir);
