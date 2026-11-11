@@ -296,8 +296,8 @@ function renderDash(){
   </div></div>
   ${healthWarnHtml()}${S.profile&&S.profile.nr&&!liveDayKeys().length?noRoutineCardHtml():hoyCardHtml()}
   ${_twoPlaces()&&otherPlaceDays().length&&!getActiveWorkout()&&!(S.profile&&S.profile.nr&&!liveDayKeys().length)?'<button type="button" class="ob-link ob-other" onclick="otherPlaceSheet()">¿Hoy en otro sitio? ›</button>':''}
-  ${repasoCardHtml()}${ownCardHtml()}${safetyCardHtml()}${balanceCardHtml()}${weightTodayCardHtml()}
-  ${dashCoachHtml()}
+  ${balanceCardHtml()}
+  ${dashNoticesHtml()}
   ${rest0?'':`<div class="sh">Esta semana</div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
@@ -308,7 +308,6 @@ function renderDash(){
     <div class="wgrid" role="group" aria-label="Días de esta semana">${weekGrid()}</div>
     <div style="display:flex;gap:12px;margin-top:9px;font-size:11px;color:var(--text3)"><span style="color:var(--green)">■ Entrenado</span><span style="border:1px solid var(--green);color:var(--green);padding:0 3px">■</span><span>Hoy</span></div>${weekLineHtml()}
   </div>`}
-  ${backupReminderHtml()}
   <div class="sh" id="dash-w">Peso corporal</div>
   ${renderWeightCard('Registra tu peso en cada sesión para ver la evolución aquí.')}
   ${(()=>{
@@ -360,11 +359,11 @@ function renderDash(){
 
 // Inicio: acceso compacto a las propuestas del Coach (se deciden en el Coach).
 // (10) El aviso de descarga activa va ahora dentro de la tarjeta «HOY TOCA» (hoyCardHtml).
-function dashCoachHtml(){
-  let h='';
+function dashCoachParts(){
+  let deload='',props='';
   // (13d) Semana de descarga recomendada: se elige y empieza en el Coach
   const rec=(S.sessions||[]).length>=CYCLE_MIN_SESSIONS?coach_deloadReco():null;
-  if(rec)h+=`<button class="coach-entry dlr-entry" onclick="goDeloadReco()">
+  if(rec)deload=`<button class="coach-entry dlr-entry" onclick="goDeloadReco()">
       <span class="coach-entry-ic" aria-hidden="true">${ic('leaf')}</span>
       <span class="coach-entry-t">Te toca una semana de descarga<small>${_nwUnits(esc(rec.tag))} · elige el plan en el Coach</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
@@ -372,13 +371,39 @@ function dashCoachHtml(){
     // (13e) la semana de descarga del ciclo ya sale arriba (una sola oferta) o está en espera tras «Ahora no»
     const dlOff=!!rec||_dlSnoozedOffer();
     const n=coach_pendingView().active.filter(p=>!(dlOff&&p.type==='deload')).length;
-    if(n)h+=`<button class="coach-entry" onclick="goCoachProposals()">
+    if(n)props=`<button class="coach-entry" onclick="goCoachProposals()">
       <span class="coach-entry-ic" aria-hidden="true">${ic('bulb')}</span>
       <span class="coach-entry-t">El Coach tiene ${n} propuesta${n!==1?'s':''} para tu rutina<small>Tú decides: aplicar o ignorar</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
   }
-  return h;
+  return{deload,props};
 }
+// ── Inicio: los avisos, de uno en uno ──
+// Bajo «Hoy toca» se ve UN aviso; los demás esperan detrás de «N avisos más» (un toque los enseña todos). El orden:
+//  1) fijos, siempre delante: «Si algo duele, para» (una vez, hasta «Entendido») y la copia de seguridad cuando urge (nunca has
+//     guardado una, o la última tiene BK_DAYS días o más);
+//  2) el resto —tu rutina por montar, la descarga recomendada, las propuestas del Coach, el repaso anual, la copia que aún no
+//     urge y el peso de hoy— se turna: cada día empieza por el siguiente, así que ninguno espera más días que avisos hay.
+// (El equilibrio de hoy no es un aviso: es parte del plan del día y va siempre a la vista, encima.)
+let _dashMore=false; // «N avisos más» abierto (solo en memoria)
+// L: [{k, pin}] en orden de prioridad → las claves en el orden en que se enseñan el día «day» (función pura)
+function dashNoticeOrder(L,day){
+  const pin=L.filter(x=>x.pin),rest=L.filter(x=>!x.pin),n=rest.length,k=n?((Math.trunc(day)%n)+n)%n:0;
+  return pin.concat(rest.slice(k),rest.slice(0,k)).map(x=>x.k);
+}
+// Número de día local (cambia a medianoche): el turno de los avisos
+function _dashDay(){const n=Date.now();return Math.floor((_startOfDay(n)-new Date(n).getTimezoneOffset()*60000)/DAY_MS);}
+function dashNotices(){
+  const bk=backupReminder(),urge=!!bk&&(bk.never||bk.days>=BK_DAYS),c=dashCoachParts();
+  const H={safety:safetyCardHtml(),backup:backupReminderHtml(),own:ownCardHtml(),deload:c.deload,props:c.props,repaso:repasoCardHtml(),weight:weightTodayCardHtml()};
+  const L=[['safety',1],urge&&['backup',1],['own'],['deload'],['props'],['repaso'],!urge&&['backup'],['weight']].filter(x=>x&&H[x[0]]).map(x=>({k:x[0],pin:!!x[1]}));
+  return{H,L,order:dashNoticeOrder(L,_dashDay())};
+}
+function dashNoticesHtml(){
+  const o=dashNotices(),n=o.order.length-1;if(n<0)return'';
+  return`<div class="dash-nt" id="dash-nt">${(_dashMore?o.order:o.order.slice(0,1)).map(k=>o.H[k]).join('')}${n?`<button type="button" class="dash-more" id="dash-more" aria-expanded="${_dashMore}" onclick="dashMoreToggle()">${_dashMore?'Ver solo el primero':plural(n,'aviso','avisos')+' más'} <span aria-hidden="true">${_dashMore?'▴':'▾'}</span></button>`:''}</div>`;
+}
+function dashMoreToggle(){_dashMore=!_dashMore;render();const b=document.getElementById('dash-more');if(b)try{b.focus({preventScroll:true});}catch(e){}}
 
 function renderWmodal(){
   const root=document.getElementById('wmodal-root');

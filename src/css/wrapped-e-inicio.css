@@ -295,3 +295,8 @@ input[type=number]{-moz-appearance:textfield}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 }
+
+/* ── Inicio: los avisos, de uno en uno (dashNoticesHtml). «N avisos más» enseña el resto ── */
+.dash-more{display:flex;align-items:center;justify-content:center;gap:6px;width:calc(100% - 28px);min-height:44px;margin:-4px 14px 8px;border-radius:var(--rsm);font-size:13px;font-weight:600;color:var(--text2)}
+.dash-more:active{background:var(--bg2)}
+.dash-more:focus-visible{outline:2px solid var(--green);outline-offset:-2px}

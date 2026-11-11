@@ -12,6 +12,9 @@ const _icTx=el=>{if(!el)return'';if(!el.cloneNode||!el.querySelectorAll)return e
 // (B3-2) Coach en dos niveles: los pasos de siempre miran el contenido de cada pieza del Coach, así que corren con las filas de
 // «Más detalle» abiertas; el estado de serie (todo plegado), los resúmenes y el abrir y cerrar los cubre b3Coach.
 CFOLD_KEYS.forEach(k=>_cfold.add(k));
+// (B3-4) Inicio enseña un aviso a la vez: los pasos de siempre miran cada aviso, así que corren con todos a la vista («N avisos
+// más» abierto); el estado de serie, el orden de la cola y el turno diario los cubre b3Inicio.
+_dashMore=true;
 // (flake) Esperas en tiempo REAL. applaunch.sh corre con --virtual-time-budget: en cuanto la página no tiene trabajo, el
 // reloj virtual salta al siguiente temporizador sin esperar a la E/S del navegador (FileReader) ni dejar pintar (rAF,
 // IntersectionObserver y scroll van con los fotogramas, y en un bucle de W() casi no llegan). Una petición de red pausa el
@@ -9735,7 +9738,7 @@ await safe('detalles17',async()=>{
       E(noOver(),'Coach desborda a '+w);
       go('dash');await W(20);const ce=document.querySelector('#app .dlr-entry small');if(ce){const l=loose(ce);E(!l,'entrada de descarga a '+w+': «'+l+'»');}}
     // fuente: la línea de factores y la de descarga pasan por _nwUnits
-    {const src=String(fatigueCardHtml)+String(deloadRecoHtml)+String(dashCoachHtml);
+    {const src=String(fatigueCardHtml)+String(deloadRecoHtml)+String(dashCoachParts);
       E(/fat-fv">\$\{_nwUnits\(esc\(f\.txt\)\)\}/.test(src)&&/fat-why">\$\{_nwUnits\(esc\(m\.why\)\)\}/.test(src)&&/dlr-why">\$\{_nwUnits\(esc\(rec\.why\)\)\}/.test(src)&&(src.match(/_nwUnits\(esc\(rec\.tag\)\)/g)||[]).length===2,'fatiga/descarga sin _nwUnits');}
     // ── (3) Consejos: ninguna cifra seguida de espacio normal y una palabra (unidades escritas incluidas), en todo el catálogo
     {const d=document.createElement('div'),badT=[];
@@ -12674,6 +12677,83 @@ await safe('b3Progreso',async()=>{
       E(!document.querySelector('#cmodal-root .pg-sheet'),'Escape no cierra la guía');}
     if(bad.length)throw new Error(bad.join(' | '));
   }finally{_rm=rm0;if(fr){fr.style.width=fw;fr.style.height=fh;}document.getElementById('cmodal-root').innerHTML='';_rest9(j);render();await W(40);}
+});
+await safe('b3Inicio',async()=>{
+  // (B3-4) Inicio, un aviso a la vez (H2): bajo «Hoy toca» se ve uno y los demás esperan tras «N avisos más». Delante van, fijos,
+  // la seguridad y la copia de seguridad cuando urge; el resto se turna cada día para que ninguno espere indefinidamente.
+  const j=_snap9(),bad=[],E=(c,m)=>{if(!c)bad.push(m);},more0=_dashMore,prof0=JSON.stringify(S.profile||null);
+  const fr=window.frameElement,fw=fr&&fr.style.width,fh=fr&&fr.style.height;
+  const size=async(w,h)=>{if(!fr)return false;fr.style.width=w+'px';fr.style.height=h+'px';await W(40);for(let i=0;i<20&&(innerWidth!==w||innerHeight!==h);i++)await W(20);return innerWidth===w&&innerHeight===h;};
+  const NAMES=['backupReminder','dashCoachParts','repasoCardHtml','ownCardHtml','weightTodayCardHtml','safetyCardHtml','balanceCardHtml','_dashDay'],real={};NAMES.forEach(k=>{real[k]=window[k];});
+  const unstub=()=>NAMES.forEach(k=>{window[k]=real[k];});
+  // avisos de mentira (uno por tipo) para fijar qué hay en la cola; la copia sí es la tarjeta de verdad, pintada desde su aviso
+  const stub=o=>{window.safetyCardHtml=()=>o.safety?'<div class="card ob-safe" id="ob-safe">s</div>':'';
+    window.backupReminder=()=>o.backup||null;
+    window.ownCardHtml=()=>o.own?'<div class="card ob-own" id="ob-own">o</div>':'';
+    window.dashCoachParts=()=>({deload:o.deload?'<button class="coach-entry dlr-entry">d</button>':'',props:o.props?'<button class="coach-entry">p</button>':''});
+    window.repasoCardHtml=()=>o.repaso?'<div class="card rep-card" id="rep-card">r</div>':'';
+    window.weightTodayCardHtml=()=>o.weight?'<div class="card ob-own">Peso de hoy</div>':'';
+    window.balanceCardHtml=()=>o.balance?'<div class="card ob-own" id="bal-x">equilibrio</div>':'';
+    window._dashDay=()=>o.day||0;};
+  const nt=()=>document.getElementById('dash-nt'),cards=()=>nt()?[...nt().children].filter(e=>e.id!=='dash-more'):[];
+  const keyOf=e=>e.id==='ob-safe'?'safety':e.id==='bk-card'?'backup':e.id==='ob-own'?'own':e.id==='rep-card'?'repaso':e.classList.contains('dlr-entry')?'deload':e.classList.contains('coach-entry')?'props':/Peso de hoy/.test(e.textContent)?'weight':'?';
+  const shown=()=>cards().map(keyOf).join(),more=()=>document.getElementById('dash-more');
+  const ALL={safety:1,own:1,deload:1,props:1,repaso:1,weight:1},NEVER={never:true,n:12,days:3,edits:false,csv:false},FRESH={never:false,n:12,days:5,edits:false,csv:false},OLD={never:false,n:0,days:BK_DAYS,edits:true,csv:false};
+  const after=(a,b)=>!!(a&&b&&(a.compareDocumentPosition(b)&Node.DOCUMENT_POSITION_FOLLOWING));
+  try{
+    // ── el orden, como función pura: los fijos delante y el resto, por turno
+    {const O=(L,d)=>dashNoticeOrder(L,d).join(),L5=[{k:'safety',pin:true},{k:'backup',pin:true},{k:'own'},{k:'deload'},{k:'props'}];
+      E(O(L5,0)==='safety,backup,own,deload,props'&&O(L5,1)==='safety,backup,deload,props,own'&&O(L5,2)==='safety,backup,props,own,deload'&&O(L5,3)===O(L5,0)&&O(L5,-1)===O(L5,2),'turno: '+O(L5,1)+' / '+O(L5,-1));
+      E(O([],5)===''&&O([{k:'a'}],7)==='a'&&O([{k:'p',pin:true}],3)==='p','listas cortas');
+      const R=[{k:'a'},{k:'b'},{k:'c'},{k:'d'}],first=new Set();for(let d=100;d<104;d++)first.add(dashNoticeOrder(R,d)[0]);
+      E(first.size===4,'en 4 días no todos van el primero');
+      E(Number.isInteger(real._dashDay())&&real._dashDay()>19000,'número de día: '+real._dashDay());}
+    RT.stop();S.open=null;_dashMore=false;
+    // ── de serie: un solo aviso y «N avisos más»
+    stub(Object.assign({backup:NEVER},ALL));go('dash');await W(10);
+    {const o=dashNotices();
+      E(o.order.join()==='safety,backup,own,deload,props,repaso,weight','cola con copia urgente: '+o.order);
+      E(shown()==='safety','de serie se ve '+shown());
+      const b=more();E(b&&b.tagName==='BUTTON'&&b.textContent.trim().startsWith('6 avisos más')&&b.getAttribute('aria-expanded')==='false'&&b.getBoundingClientRect().height>=44&&!b.nextElementSibling,'«N avisos más»: '+(b&&b.textContent));
+      // debajo de «Hoy toca» y antes de «Esta semana»; la copia de seguridad ya no va suelta más abajo
+      const sem=[...document.querySelectorAll('#screen .sh')].find(e=>/Esta semana|Peso corporal/.test(e.textContent));
+      E(after(document.getElementById('hoy')||document.querySelector('#screen .topbar'),nt())&&after(nt(),sem),'los avisos no van entre «Hoy toca» y «Esta semana»');
+      if(b){b.click();await W(5);
+        E(shown()===o.order.join(),'abierto: '+shown());
+        E(more().textContent.trim().startsWith('Ver solo el primero')&&more().getAttribute('aria-expanded')==='true'&&document.activeElement===more(),'«Ver solo el primero»');
+        E(document.querySelectorAll('#screen #bk-card').length===1&&nt().contains(document.getElementById('bk-card')),'la copia de seguridad va fuera de la cola');
+        E(document.documentElement.scrollWidth<=innerWidth,'Inicio con todos los avisos desborda');
+        more().click();await W(5);E(shown()==='safety'&&more().getAttribute('aria-expanded')==='false','no se recoge');}}
+    // ── la copia de seguridad: fija delante cuando urge (nunca hecha, o de hace BK_DAYS días o más); si no, a su turno
+    for(const [bk,name] of [[NEVER,'nunca hecha'],[OLD,'antigua']]){
+      for(let d=0;d<7;d++){stub(Object.assign({backup:bk,day:d},ALL,{safety:0}));go('dash');await W(5);if(shown()!=='backup')E(false,'copia '+name+' el día '+d+': se ve '+shown());}
+      stub(Object.assign({backup:bk,day:3},ALL));E(dashNotices().order.slice(0,2).join()==='safety,backup','copia '+name+' tras la seguridad: '+dashNotices().order);}
+    {const first=new Set();
+      for(let d=0;d<6;d++){stub(Object.assign({backup:FRESH,day:d},ALL));go('dash');await W(5);const o=dashNotices().order;
+        E(o[0]==='safety'&&shown()==='safety'&&o.length===7,'día '+d+': '+o);first.add(o[1]);}
+      // en seis días seguidos, los seis avisos que no son fijos han ido delante una vez (nada espera indefinidamente)
+      E(first.size===6&&first.has('backup')&&first.has('weight'),'turno de los avisos: '+[...first]);
+      stub(Object.assign({backup:FRESH,day:0},ALL));E(dashNotices().order.join()==='safety,own,deload,props,repaso,backup,weight','prioridad: '+dashNotices().order);}
+    // ── con uno solo no hay botón; sin ninguno, nada; el equilibrio de hoy no es un aviso: va siempre a la vista, encima
+    stub({props:1});go('dash');await W(5);E(shown()==='props'&&!more(),'un solo aviso: '+shown());
+    stub({});go('dash');await W(5);E(!nt()&&!more(),'sin avisos queda la cola');
+    stub(Object.assign({backup:NEVER,balance:1},ALL));go('dash');await W(5);
+    {const bal=document.getElementById('bal-x');E(bal&&!nt().contains(bal)&&after(bal,nt())&&shown()==='safety','el equilibrio de hoy entra en la cola');}
+    // ── a 320 px, con todos abiertos
+    if(fr&&await size(320,568)){_dashMore=true;go('dash');await W(10);
+      E(document.documentElement.scrollWidth<=innerWidth&&more().getBoundingClientRect().height>=44&&cards().length===7,'320: avisos abiertos');
+      _dashMore=false;fr.style.width=fw;fr.style.height=fh;await W(40);}
+    // ── con las tarjetas de verdad: se ve la primera de la cola; al contestarla pasa la siguiente
+    unstub();_dashMore=false;go('dash');await W(10);
+    {const o=dashNotices();
+      E(cards().length===Math.min(1,o.order.length)&&(!o.order.length||keyOf(cards()[0])===o.order[0]),'de verdad: se ve '+shown()+' y toca '+o.order);
+      E(!!more()===(o.order.length>1)&&(!more()||more().textContent.trim().startsWith(plural(o.order.length-1,'aviso','avisos')+' más')),'de verdad: «N avisos más»');}
+    if(S.profile){S.profile.dismiss=Object.assign({},S.profile.dismiss,{safety:0});go('dash');await W(10);
+      const o=dashNotices();E(o.order[0]==='safety'&&shown()==='safety','la seguridad no va la primera: '+o.order);
+      const ok=document.querySelector('#ob-safe .btn');if(ok){ok.click();await W(10);
+        const o2=dashNotices();E(!o2.order.includes('safety')&&o2.order.length===o.order.length-1&&shown()===(o2.order[0]||''),'tras «Entendido»: '+shown()+' / '+o2.order);}}
+    if(bad.length)throw new Error(bad.join(' | '));
+  }finally{unstub();_dashMore=more0;if(fr){fr.style.width=fw;fr.style.height=fh;}S.profile=JSON.parse(prof0);_rest9(j);saveState();render();await W(40);}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
