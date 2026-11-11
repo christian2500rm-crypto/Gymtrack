@@ -255,7 +255,7 @@ function mmProgBodyHtml(st){
     return`<div class="mm-empty">${none?'Completa entrenamientos y aquí verás qué músculos trabajas y cuánto.':'Sin series en este periodo. Prueba con otro rango.'}</div>`;
   }
   const ins=mmInsight(st,mmPlanStats());
-  return`${ins?`<div class="mm-ins" id="mm-ins-prog">💡 ${_nwUnits(esc(ins))}</div>`:''}
+  return`${ins?`<div class="mm-ins" id="mm-ins-prog">${ic('bulb')} ${_nwUnits(esc(ins))}</div>`:''}
     <div class="mm-sub">Series efectivas por semana · ${_nwUnits(esc(st.R.lbl))}</div>
     <div class="mm-bars">${mmBarsHtml(st,{tap:true,src:'prog'})}</div>
     <div class="mm-foot"><i aria-hidden="true"></i><span>${mmOwnZones()?'La franja de cada grupo es su zona, según tu rutina y tu objetivo. Es una guía orientativa, no una regla.':`Zona productiva: <span class="nw">${MM_ZONE.lo}–${MM_ZONE.hi} series</span> por semana y grupo. Es una guía orientativa, no una regla.`} Toca un grupo para ver sus ejercicios.</span></div>`;
@@ -291,7 +291,7 @@ function mmCoachCardHtml(){
   return`<div class="sh">Tus músculos · ${k==='7d'?'últimos 7 días':k==='cycle'?'este ciclo':'4 semanas'}</div>
   <div class="card mm-card mm-mini" id="mm-coach">
     ${mmFigHtml('coach',st,'coach',190)}
-    ${ins?`<div class="mm-ins">💡 ${_nwUnits(esc(ins))}</div>`:''}
+    ${ins?`<div class="mm-ins">${ic('bulb')} ${_nwUnits(esc(ins))}</div>`:''}
     ${low.length?`<div class="mm-mini-l">${mmOwnZones()?'Por debajo de su zona':`Por debajo de <span class="nw">${MM_ZONE.lo} series/semana</span>`}</div>
     <div class="mm-chips">${low.map(g=>`<button class="mm-chip ${mmCls(g.v,g.id)}" onclick="openMuscleSheet('${g.id}','coach')" aria-label="${g.n}: ${mmFmt(g.v)} series por semana. Ver ejercicios">${g.n} <b>${mmFmt(g.v)}</b></button>`).join('')}</div>`:''}
     <button class="mm-link" onclick="goMuscleMap()">Ver el mapa completo en Progreso ›</button>

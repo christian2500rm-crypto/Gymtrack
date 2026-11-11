@@ -331,7 +331,7 @@ const RT={
     // Lo importante primero: la barra recorta el final del texto en pantallas estrechas
     if(msg)msg.textContent=cardio
       ?(marked?`¡Hecho! ✓ ${t.label||''}`:`¡Tiempo cumplido! ${t.label||''}`).trim()
-      :(late&&mins>=1?`Terminó hace ${mins} min`:'¡Listo! Siguiente serie 💪');
+      :(late&&mins>=1?`Terminó hace ${mins} min`:'¡Listo! Siguiente serie');
     if(btn){btn.textContent='OK';btn.setAttribute('aria-label','Cerrar');}
     // El RPE de la serie sigue en la barra mientras se ve «¡Listo!» (se puede elegir tarde, sin otro descanso)
     this._doneT=t;this._paintRpe();
@@ -526,7 +526,7 @@ function setRestOverride(exId,secs){
 function restCtlHtml(ex){
   if(!_restOn())return''; // (M1) descanso entre series apagado: la tarjeta no lo enseña
   const o=_restOverrideOf(ex.id),s=getRestSecs(ex.id),eid=esc(ex.id);
-  return`<button type="button" class="lg-rest" data-ex="${eid}" onclick="openRestPicker(this.dataset.ex)" aria-label="Descanso entre series: ${fmtClock(s)}${o==null?', automático':''}. Cambiar"><span>⏱ Descanso<span class="lg-rest-x"> entre series</span></span> <b>${fmtClock(s)}</b>${o==null?'<span class="lg-rest-k">auto</span>':''}<span class="lg-rest-go" aria-hidden="true">Cambiar ›</span></button>`;
+  return`<button type="button" class="lg-rest" data-ex="${eid}" onclick="openRestPicker(this.dataset.ex)" aria-label="Descanso entre series: ${fmtClock(s)}${o==null?', automático':''}. Cambiar"><span>${ic('clock')} Descanso<span class="lg-rest-x"> entre series</span></span> <b>${fmtClock(s)}</b>${o==null?'<span class="lg-rest-k">auto</span>':''}<span class="lg-rest-go" aria-hidden="true">Cambiar ›</span></button>`;
 }
 const REST_OPTS=[45,60,75,90,105,120,150,180,240];
 let _restPickEx=null;
@@ -663,7 +663,7 @@ const RF={
     if(running&&!cardio&&ex&&!ex.cardio&&si!=null){
       const o=_restOverrideOf(ex.id),cur=getRestSecs(ex.id),adj=Math.round(+rt.adj)||0,save=Math.round((+rt.base||cur)+adj);
       const canSave=adj!==0&&save>=REST_MIN_S&&save<=REST_MAX_S&&save!==cur;
-      this._set('rf-ovr',`<div class="rf-ovr-t">⏱ Este ejercicio: <b>${fmtClock(cur)}</b>${o==null?' · auto':''}</div>${canSave
+      this._set('rf-ovr',`<div class="rf-ovr-t">${ic('clock')} Este ejercicio: <b>${fmtClock(cur)}</b>${o==null?' · auto':''}</div>${canSave
         ?`<button type="button" class="save" id="rf-save" onclick="rfSaveRest()">Usar ${fmtClock(save)} siempre</button>`
         :`<button type="button" id="rf-change" data-ex="${esc(ex.id)}" onclick="openRestPicker(this.dataset.ex)">Cambiar</button>`}`);
     }else this._set('rf-ovr',running&&cardio?`<div class="rf-ovr-t">Al terminar se marca como hecho ✓</div>`:'');
@@ -675,7 +675,7 @@ const RF={
       const nx=_rfTarget(t);let key='',act,goTxt,h;
       if(!nx){
         act='save';goTxt='Guardar';
-        h=`<div class="rf-nl">Siguiente</div><div class="rf-nn">Fuerza completada 🎉</div><div class="rf-ns">Guarda tu entreno cuando termines</div>`;
+        h=`<div class="rf-nl">Siguiente</div><div class="rf-nn">Fuerza completada ${ic('sparkles')}</div><div class="rf-ns">Guarda tu entreno cuando termines</div>`;
       }else if(nx.cardio){
         act='open';goTxt='Ir al cardio';key=exAnimKey(nx.ex);
         h=`<div class="rf-nl">Siguiente ejercicio</div><div class="rf-nn">${esc(nx.ex.n)}</div><div class="rf-ns">${esc(nx.ex.r||'')}</div>`;
@@ -686,7 +686,7 @@ const RF={
           const g=_ghostTxt(getLastW(nx.ex.id),nx.i);
           // (09) pista de récord para esa serie («🏆 Haz 11 reps para nuevo récord»)
           const lv=prLive(nx.ex,rows),ph=lv.next===nx.i?prHintTxt(lv.hint):'';
-          h=`<div class="rf-nl">Siguiente serie</div><div class="rf-nn">Serie ${nx.i+1}/${rows.length} · <span class="rf-nv">${_nwX(esc(val))}</span></div>${g?`<div class="rf-ns">${esc(g)}</div>`:''}${ph?`<div class="rf-ns rf-pr">${esc(ph)}</div>`:''}`;
+          h=`<div class="rf-nl">Siguiente serie</div><div class="rf-nn">Serie ${nx.i+1}/${rows.length} · <span class="rf-nv">${_nwX(esc(val))}</span></div>${g?`<div class="rf-ns">${esc(g)}</div>`:''}${ph?`<div class="rf-ns rf-pr">${icT(ph)}</div>`:''}`;
         }else{
           key=exAnimKey(nx.ex);
           h=`<div class="rf-nl">Siguiente ejercicio</div><div class="rf-nn">${esc(nx.ex.n)}</div><div class="rf-ns">Serie ${nx.i+1}/${rows.length} · <b>${_nwX(esc(val))}</b></div>`;
@@ -704,7 +704,7 @@ const RF={
       const num=this._el('rf-num'),arc=this._el('rf-arc'),of=this._el('rf-of'),ring=this._el('rf-ring');
       if(num){num.textContent='¡Listo!';num.classList.remove('warn');}
       if(arc){arc.style.strokeDasharray=RF_CIRC;arc.style.strokeDashoffset=0;arc.classList.remove('warn');}
-      if(of)of.textContent=cardio?'Cardio terminado ✓':'A por la siguiente 💪';
+      if(of)of.textContent=cardio?'Cardio terminado ✓':'A por la siguiente';
       if(ring)ring.setAttribute('aria-label',cardio?'Cardio terminado':'Descanso terminado');
     }
   },
@@ -866,11 +866,11 @@ function warmupBlockHtml(ex){
   if(!wu||(S.warmups[ex.id]&&S.warmups[ex.id]._skipped))return'';
   const w=S.warmups[ex.id]||{};
   if(wu.every((_,i)=>w[i]))return`<div class="warmup-block" style="opacity:.6">
-    <div class="warmup-h"><span class="warmup-h-l">🔥 Calentamiento ✓</span></div>
+    <div class="warmup-h"><span class="warmup-h-l">${ic('flame')} Calentamiento ✓</span></div>
   </div>`;
   return`<div class="warmup-block">
     <div class="warmup-h">
-      <span class="warmup-h-l">🔥 Calentamiento sugerido<span style="opacity:.8">${NB}·</span> <span style="font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8;white-space:nowrap">${esc(getWarmupTarget(ex))} kg</span></span>
+      <span class="warmup-h-l">${ic('flame')} Calentamiento sugerido<span style="opacity:.8">${NB}·</span> <span style="font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8;white-space:nowrap">${esc(getWarmupTarget(ex))} kg</span></span>
       <button class="warmup-skip" data-ex="${esc(ex.id)}" onclick="skipWarmup(this.dataset.ex)">Saltar</button>
     </div>
     ${wu.map((s,i)=>`<div class="warmup-row">

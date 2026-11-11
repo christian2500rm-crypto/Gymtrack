@@ -557,14 +557,14 @@ function _fatBarsHtml(wk){
   const max=Math.max(...wk.map(w=>w.total)),lbl=w=>{const d=new Date(w.start);return`${d.getDate()} ${MONTHS[d.getMonth()].toLowerCase()}`;};
   // (13e) La leyenda solo nombra lo que hay en las barras (niveles con series y semanas marcadas)
   const L=[[1,'Fácil'],[2,'Justo'],[3,'Al límite'],[0,'Sin marcar']].filter(([k])=>wk.some(w=>w.c[k]));
-  const marks=[wk.some(w=>w.kind==='deload')?'🧘 descarga':'',wk.some(w=>w.kind==='rest')?'🌴 descanso':''].filter(Boolean).join(' · ');
+  const marks=[wk.some(w=>w.kind==='deload')?ic('leaf')+' descarga':'',wk.some(w=>w.kind==='rest')?ic('moon')+' descanso':''].filter(Boolean).join(' · ');
   const kTxt={deload:'semana de descarga',rest:'semana de descanso'};
   const aria='Esfuerzo por semana, últimas 8 semanas: '+wk.map(w=>`${w.now?'esta semana':'semana del '+lbl(w)}${w.kind?' ('+kTxt[w.kind]+')':''}: ${w.total?L.filter(([k])=>w.c[k]).map(([k,l])=>`${w.c[k]} ${l.toLowerCase()}`).join(', '):'sin series'}`).join('; ');
   const cols=wk.map(w=>`<div class="fat-col${w.total?'':' empty'}${w.now?' now':''}">
       <span class="fat-n">${w.total||'—'}</span>
       ${w.total?`<div class="fat-st" style="height:${Math.max(4,Math.round(w.total/max*100))}%">${[0,3,2,1].filter(k=>w.c[k]).map(k=>`<i class="r${k}" style="flex:${w.c[k]} 1 0"></i>`).join('')}</div>`:'<div class="fat-st none"></div>'}
     </div>`).join('');
-  const lbls=wk.map(w=>`<span class="${w.now?'now':''}">${w.now?'Esta':esc(lbl(w))}${w.kind?`<i title="${kTxt[w.kind]}">${w.kind==='rest'?'🌴':'🧘'}</i>`:''}</span>`).join('');
+  const lbls=wk.map(w=>`<span class="${w.now?'now':''}">${w.now?'Esta':esc(lbl(w))}${w.kind?`<i title="${kTxt[w.kind]}">${ic(w.kind==='rest'?'moon':'leaf')}</i>`:''}</span>`).join('');
   const sum={1:0,2:0,3:0};wk.forEach(w=>{sum[1]+=w.c[1];sum[2]+=w.c[2];sum[3]+=w.c[3];});
   return`<div class="fat-bars" id="fat-bars" role="img" aria-label="${esc(aria)}">${cols}</div>
     <div class="fat-bl" aria-hidden="true">${lbls}</div>
@@ -663,7 +663,7 @@ function deloadRecoHtml(rec){
   const note=plan==='weight'?`Lo que no tiene peso que bajar (peso corporal, bandas) va con menos series; lo de tiempo o distancia sin peso, con un 15${NB}% menos.`
     :'Mismo peso que ahora: solo bajan las series. Los de 1 serie se quedan igual, más suaves.';
   return`<div class="card dlr-card" id="dl-reco" role="region" aria-labelledby="dlr-t" data-src="${rec.src}" data-plan="${plan}">
-    <div class="dlr-h"><span class="dlr-ic" aria-hidden="true">🧘</span><div class="dlr-hb">
+    <div class="dlr-h"><span class="dlr-ic" aria-hidden="true">${ic('leaf')}</span><div class="dlr-hb">
       <div class="dlr-tag${rec.src==='fatigue'?' hot':''}">Recomendado · ${_nwUnits(esc(rec.tag))}</div>
       <div class="dlr-t" id="dlr-t">Semana de descarga</div></div></div>
     <div class="dlr-why">${_nwUnits(esc(rec.why))}</div>
@@ -1709,7 +1709,7 @@ function renderCoach(){
     return`
     <div class="topbar"><h1>Coach</h1><div class="sub">Tu entrenador personal</div></div>
     <div class="coach-hero">
-      <div class="coach-hero-icon">🧠</div>
+      <div class="coach-hero-icon">${ic('chart')}</div>
       <div class="coach-hero-title">Analizando tu progreso</div>
       <div class="coach-hero-sub">Después de <strong style="color:var(--green)">${remaining}</strong> ${remaining===1?'sesión':'sesiones'} más, el coach podrá analizar tu patrón de entrenamiento y darte recomendaciones personalizadas.</div>
     </div>
@@ -1719,28 +1719,28 @@ function renderCoach(){
     ${mmCoachCardHtml()}
     <div class="sh">Qué hace el coach</div>
     <div class="insight">
-      <div class="insight-ic good">📊</div>
+      <div class="insight-ic good">${ic('chart')}</div>
       <div class="insight-body">
         <div class="insight-t">Analiza tu progresión</div>
         <div class="insight-d">Detecta qué ejercicios progresan, cuáles se estancan, y tu consistencia semanal.</div>
       </div>
     </div>
     <div class="insight">
-      <div class="insight-ic good">🎯</div>
+      <div class="insight-ic good">${ic('target')}</div>
       <div class="insight-body">
         <div class="insight-t">Te dice qué peso poner</div>
         <div class="insight-d">En cada ejercicio: primero más reps y luego más peso, con los saltos de tu equipo${_rpeOn()?' y según tu esfuerzo':''}.</div>
       </div>
     </div>
     <div class="insight">
-      <div class="insight-ic info">🔄</div>
+      <div class="insight-ic info">${ic('refresh')}</div>
       <div class="insight-body">
         <div class="insight-t">Renueva tu plan cada 4&nbsp;semanas</div>
         <div class="insight-d">Te propone cambios concretos (series, esquema o ejercicio) y semanas de descarga cuando toca. Tú decides si los aplicas.</div>
       </div>
     </div>
     <div class="insight">
-      <div class="insight-ic warn">💡</div>
+      <div class="insight-ic warn">${ic('bulb')}</div>
       <div class="insight-body">
         <div class="insight-t">Celebra tus logros</div>
         <div class="insight-d">Detecta récords personales, hitos de consistencia, y te da contexto de cuándo has logrado algo importante.</div>
@@ -1803,7 +1803,7 @@ function renderCoach(){
   ${lightBannerHtml('coach')}
 
   ${legacy?`<div class="card legacy-dl">
-    <div class="legacy-dl-t">🔧 Tu plan sigue con series reducidas</div>
+    <div class="legacy-dl-t">${ic('wrench')} Tu plan sigue con series reducidas</div>
     <div class="legacy-dl-d">Una descarga anterior bajó tus series y nunca se deshizo. ¿Las devuelvo a lo normal?</div>
     <div class="rec-diff" style="margin-bottom:10px">${legacy.fixes.slice(0,6).map(f=>`<div class="rec-diff-row"><span class="sym add">↑</span><span>${esc(f.n)}: ${f.from} → ${f.to} series</span></div>`).join('')}${legacy.fixes.length>6?`<div class="rec-diff-row"><span class="sym add">+</span><span>y ${legacy.fixes.length-6} más</span></div>`:''}</div>
     <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="coach_fixLegacyDeload(true)">Restaurar series</button><button class="btn bs" style="width:120px" onclick="coach_fixLegacyDeload(false)">Dejar así</button></div>
@@ -1815,7 +1815,7 @@ function renderCoach(){
   ${deloadRecoHtml(dlReco)}
 
   ${cycle.readyForReview?`<div class="cta-banner" role="button" tabindex="0" onclick="coach_applyRecommendations()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();coach_applyRecommendations()}">
-    <div class="cta-banner-t">${cycle.overdue?`⏰ Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:'✨ Tu análisis de ciclo está listo'}</div>
+    <div class="cta-banner-t">${cycle.overdue?`${ic('flag')} Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:ic('sparkles')+' Tu análisis de ciclo está listo'}</div>
     <div class="cta-banner-d">${cycle.overdue?'Ciérralo para recibir tus propuestas y empezar uno nuevo':'Revisa el análisis abajo y cierra el ciclo para recibir tus propuestas'}</div>
   </div>`:''}
 
@@ -1863,10 +1863,10 @@ function renderCoach(){
   ${coachPlanCardHtml()}
 
   <div class="sh">Análisis del ciclo</div>
-  ${insights.length===0?`<div class="insight"><div class="insight-ic info">⏳</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
-    insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${i.ic}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${_nwUnits(i.d)}</div></div></div>`).join('')}
+  ${insights.length===0?`<div class="insight"><div class="insight-ic info">${ic('hourglass')}</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
+    insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${icE(i.ic)}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${_nwUnits(i.d)}</div></div></div>`).join('')}
 
-  ${pend.length?`<div class="sh" id="coach-props">💡 El Coach propone — tú decides</div>
+  ${pend.length?`<div class="sh" id="coach-props">${ic('bulb')} El Coach propone — tú decides</div>
   ${onlyDlRow?'':`<div class="prop-hint">${blockedAll?'Durante la descarga no se cambia el plan: podrás aplicarlas al terminar.'
     :`Máximo ${PROP_MAX_TOTAL} cambios por ciclo y 1 por día de rutina${pv.appliedCount?` · llevas ${pv.appliedCount}`:''}.${blockedSome?' Lo que afecta a la descarga en curso podrás aplicarlo al terminarla.':''}`}</div>`}
   ${pv.active.map(p=>p.type!=='deload'?_proposalCardHtml(p,_proposalBlocked(p)):dlReco?_propDlLinkHtml():dlWait?_propDlWaitHtml():_proposalCardHtml(p,_proposalBlocked(p))).join('')}
@@ -1882,9 +1882,9 @@ function renderCoach(){
       <button class="btn bp" onclick="coach_applyRecommendations()">Cerrar ciclo e iniciar uno nuevo</button>
     </div>`:
     (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'Faltan unas':'Falta alrededor de'} <strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
+    <div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'Faltan unas':'Falta alrededor de'} <strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
     :`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`)}
+    <div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`)}
 
   ${S.mesocycles&&S.mesocycles.length>0?`<div class="sh">Ciclos anteriores</div>
     ${S.mesocycles.filter(_isPlainObj).map((m,i)=>({m,n:i+1})).reverse().slice(0,3).map(({m,n})=>`<div class="mesocycle-log">
@@ -1914,7 +1914,7 @@ function _proposalBlocked(p){
 // ciclo con el mismo título queda en un enlace a ella (empezarla desde la tarjeta también resuelve la propuesta)
 function _propDlLinkHtml(){
   return`<button type="button" class="coach-entry dlr-entry prop-dl-link" onclick="goDeloadReco()">
-      <span class="coach-entry-ic" aria-hidden="true">🧘</span>
+      <span class="coach-entry-ic" aria-hidden="true">${ic('leaf')}</span>
       <span class="coach-entry-t">Semana de descarga<small>Ya la tienes arriba: elige el plan y empiézala allí</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
 }
@@ -1922,7 +1922,7 @@ function _propDlLinkHtml(){
 // oferta es el botón del medidor, al que lleva este enlace
 function _propDlWaitHtml(){
   return`<button type="button" class="coach-entry dlr-entry prop-dl-wait" onclick="goFatGo()">
-      <span class="coach-entry-ic" aria-hidden="true">🧘</span>
+      <span class="coach-entry-ic" aria-hidden="true">${ic('leaf')}</span>
       <span class="coach-entry-t">Semana de descarga<small>En espera: te la vuelvo a proponer el ${esc(_dlDayTxt(S.dlRecoSnoozeTs))}. Si cambias de idea, empiézala en «Fatiga y esfuerzo».</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
 }
@@ -1930,7 +1930,7 @@ function _proposalCardHtml(p,blocked){
   const pid=esc(p.id),where=_propWhere(p),pr=_propPrio(p);
   return`<div class="proposal-card" data-pid="${pid}">
     <div class="proposal-head">
-      <div class="proposal-ic" aria-hidden="true">${esc(p.ic||'💡')}</div>
+      <div class="proposal-ic" aria-hidden="true">${icE(p.ic||'💡')}</div>
       <div style="min-width:0;flex:1">
         <div class="proposal-tag p${pr<=1?'w':pr===2?'v':'g'}">${esc(p.tag||'Propuesta')}${where?` · ${esc(where)}`:''}</div>
         <div class="proposal-t">${esc(p.title||'')}</div>

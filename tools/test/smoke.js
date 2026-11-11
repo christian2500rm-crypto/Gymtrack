@@ -2,6 +2,13 @@
 (async()=>{const W=ms=>new Promise(r=>setTimeout(r,ms));const rep={};
 // (16b) ancho con el que arrancó el repintado por resize, antes de que ningún paso cambie el tamaño
 const _wcRzW0=typeof _wcRzW!=='undefined'?_wcRzW:null,_cw0=document.documentElement.clientWidth;const safe=async(n,f)=>{try{await f();rep[n]='ok';}catch(e){rep[n]='FAIL '+e.message;}};
+// (B1) Los iconos de línea sustituyen a los emojis que hacían de icono. _icTx(el): el texto de un elemento con cada icono
+// escrito como su emoji (trofeo 🏆, descarga 🧘, descanso 🌴, objetivo 🎯, reloj ⏱…), para comprobar que el icono está en su sitio
+const _IC_EM={trophy:'🏆',leaf:'🧘',moon:'🌴',target:'🎯',clock:'⏱',flame:'🔥',sparkles:'🎉',done:'✅',check:'✅',hourglass:'⏳',pause:'⏸',bulb:'💡',
+  e1:'😌',e2:'💪',e3:'🥵',dumbbell:'💪',alert:'⚠️',trend:'📈',trenddown:'📉',scale:'⚖️',chart:'📊',refresh:'🔄',bolt:'⚡',calendar:'📅',flag:'⏰',activity:'🚶',
+  wrench:'🔧',plus:'➕',sprout:'🌱',note:'📝',bell:'🔔',belloff:'🔕',sun:'🔆'};
+const _icTx=el=>{if(!el)return'';if(!el.cloneNode||!el.querySelectorAll)return el.textContent||'';const c=el.cloneNode(true);c.querySelectorAll('svg.ic').forEach(v=>{const n=(/ic-([a-z0-9]+)/.exec(v.getAttribute('class'))||[])[1];
+  v.replaceWith(document.createTextNode(_IC_EM[n]||''));});return c.textContent;};
 // (flake) Esperas en tiempo REAL. applaunch.sh corre con --virtual-time-budget: en cuanto la página no tiene trabajo, el
 // reloj virtual salta al siguiente temporizador sin esperar a la E/S del navegador (FileReader) ni dejar pintar (rAF,
 // IntersectionObserver y scroll van con los fotogramas, y en un bucle de W() casi no llegan). Una petición de red pausa el
@@ -719,9 +726,9 @@ await safe('exDeloadKeepsFullDeload',async()=>{
     const act=coach_pendingView().active.map(p=>p.id);
     if(!act.includes('deload_week')||!act.includes('rm_set_c3'))throw new Error('activas '+act.join());
     // (13e r1) con la tarjeta «Semana de descarga» arriba, el toast la recomienda y no la cuenta entre las propuestas
-    {const tc=(document.getElementById('toast')||{}).textContent||'',np=coach_pendingView().active.filter(p=>p.type!=='deload').length;
-      const want=coach_deloadReco()?'🚀 Ciclo cerrado · te recomiendo una semana de descarga'+(np?` y ${np} propuesta${np!==1?'s esperan':' espera'} tu decisión`:'')
-        :`🚀 Ciclo cerrado · ${act.length} propuesta${act.length!==1?'s esperan':' espera'} tu decisión`;
+    {const tc=_icTx(document.getElementById('toast')),np=coach_pendingView().active.filter(p=>p.type!=='deload').length;
+      const want=coach_deloadReco()?'🎉 Ciclo cerrado · te recomiendo una semana de descarga'+(np?` y ${np} propuesta${np!==1?'s esperan':' espera'} tu decisión`:'')
+        :`🎉 Ciclo cerrado · ${act.length} propuesta${act.length!==1?'s esperan':' espera'} tu decisión`;
       if(tc!==want)throw new Error('toast del cierre: '+tc+' (quería '+want+')');}
     applyProposal('rm_set_c3');go('coach');await W(5);
     const b0=document.querySelector('#app .proposal-card[data-pid="deload_week"] .proposal-apply');
@@ -1006,8 +1013,7 @@ await safe('dashPolish',async()=>{
     if(!/Buen trabajo hoy/.test(document.querySelector('#app .topbar h1').textContent))throw new Error('saludo');
     const cta=[...document.querySelectorAll('#app .btn')].find(b=>/Día B/.test(b.textContent)&&/Adelantar|Empezar/.test(b.textContent));
     if(!cta||!cta.classList.contains('bs')||!/Adelantar/.test(cta.textContent))throw new Error('CTA tras entrenar: '+(cta&&cta.outerHTML.slice(0,80)));
-    const h1last=document.querySelector('#app .topbar h1').lastElementChild;
-    if(!h1last||h1last.style.whiteSpace!=='nowrap'||!/💪/.test(h1last.textContent))throw new Error('emoji suelto');
+    {const h1=document.querySelector('#app .topbar h1');if(h1.children.length||/[\u{1F300}-\u{1FAFF}]/u.test(h1.textContent))throw new Error('el saludo lleva emoji: '+h1.textContent);} // (B1) saludo sin emoji
     // Rango del peso: con menos datos que el rango, el texto dice lo que hay
     const R=k=>WRANGES.find(r=>r[0]===k);
     if(wRangeLbl([{t:0},{t:150*_D3}],R('1a'))!=='en 5 meses'||wRangeLbl([{t:0},{t:200*_D3}],R('6m'))!=='en 6 meses'||wRangeLbl([{t:0},{t:28*_D3}],R('1m'))!=='en 1 mes'||wRangeLbl([{t:0},{t:20*_D3}],R('3m'))!=='en 3 semanas')throw new Error('rango peso');
@@ -2568,7 +2574,7 @@ await safe('prLiveCelebrate',async()=>{
     go('workout');S.day='A';S.open='a2';S.logs.a2={sets:[{w:57.5,r:10},{w:57.5,r:11},{w:57.5,r:11}]};render();
     const c=()=>document.querySelector('#screen .excard.open[data-ex="a2"]');
     const ck=i=>c().querySelector(`.lg-row[data-set="${i}"] .lg-ck`);
-    const hint=()=>{const h=c().querySelector('.lg-pr.hint');return h&&!h.hidden?h.textContent:'';};
+    const hint=()=>{const h=c().querySelector('.lg-pr.hint');return h&&!h.hidden?_icTx(h):'';};
     // antes de la 1.ª serie (57.5×10, ya hiciste 57.5×10): la pista
     if(hint()!=='🏆 Haz 11 reps para nuevo récord')throw new Error('pista 1: '+hint());
     // la pista sigue a lo que escribes (−/+ de las reps sin repintar)
@@ -2584,10 +2590,10 @@ await safe('prLiveCelebrate',async()=>{
     if(hint()!=='🏆 Desde 11 reps: nuevo récord')throw new Error('pista 2: '+hint());
     // 2.ª serie 57.5×11: récord → aviso dorado con Deshacer, ✓ dorado, línea del récord, partículas y vibración propia
     vib.length=0;toggleSet('a2',1,{src:'row'});
-    if(!/^🏆 Récord: 57\.5 kg × 11 · 1RM est\. 78\.5 kg/.test(t.textContent)||!t.classList.contains('pr')||!document.getElementById('undo-btn'))throw new Error('aviso: '+t.textContent);
+    if(!/^🏆 Récord: 57\.5 kg × 11 · 1RM est\. 78\.5 kg/.test(_icTx(t))||!t.classList.contains('pr')||!document.getElementById('undo-btn'))throw new Error('aviso: '+_icTx(t));
     if(!ck(1).classList.contains('pr')||!ck(1).classList.contains('on')||!/récord/.test(ck(1).getAttribute('aria-label')))throw new Error('✓ dorado');
     const got=c().querySelector('.lg-row[data-set="1"]').nextElementSibling;
-    if(!got||!got.classList.contains('got')||got.textContent!=='🏆 57.5 kg × 11 · 1RM est. 78.5 kg')throw new Error('línea récord: '+(got&&got.textContent));
+    if(!got||!got.classList.contains('got')||_icTx(got)!=='🏆 57.5 kg × 11 · 1RM est. 78.5 kg')throw new Error('línea récord: '+(got&&_icTx(got)));
     if(vib.join()!==JSON.stringify(PR_HAPTIC))throw new Error('vibración '+vib);
     if(!_rm()&&(_prBursts!==b0+1||!document.querySelector('canvas.pr-burst')))throw new Error('partículas');
     // el lienzo de partículas no sale de la pantalla ni bloquea toques, y se va solo
@@ -2610,7 +2616,7 @@ await safe('prLiveCelebrate',async()=>{
     S.open='a2';render();_setOwn('a2',2,{w:60,r:8});_syncSetLog(_dayEx('a2'));render();
     if(hint()!=='🏆 Récord de peso si la completas')throw new Error('pista peso: '+hint());
     toggleSet('a2',2,{src:'row'});
-    if(!/^🏆 Récord de peso: 60 kg × 8 · 1RM est\. 76 kg/.test(t.textContent))throw new Error('peso: '+t.textContent);
+    if(!/^🏆 Récord de peso: 60 kg × 8 · 1RM est\. 76 kg/.test(_icTx(t)))throw new Error('peso: '+_icTx(t));
     // movimiento reducido: sin partículas (el ✓ dorado y el aviso siguen)
     _rm=()=>true;toggleSet('a2',2,{});const b2=_prBursts;toggleSet('a2',2,{src:'row'});
     if(_prBursts!==b2||!ck(2).classList.contains('pr')||!t.classList.contains('pr'))throw new Error('movimiento reducido');
@@ -2618,7 +2624,7 @@ await safe('prLiveCelebrate',async()=>{
     // modo descanso a pantalla completa: la pista de la siguiente serie
     _clearMarks();RT.stop();S.open='a2';S.logs.a2={sets:[{w:57.5,r:10},{w:57.5,r:11},{w:57.5,r:11}]};render();
     toggleSet('a2',0,{src:'row'});RF.openFull();
-    if(!/🏆 Desde 11 reps: nuevo récord/.test(document.getElementById('rf-nt').textContent))throw new Error('modo descanso: '+document.getElementById('rf-nt').textContent);
+    if(!/🏆 Desde 11 reps: nuevo récord/.test(_icTx(document.getElementById('rf-nt'))))throw new Error('modo descanso: '+_icTx(document.getElementById('rf-nt')));
     vib.length=0;const b3=_prBursts;_barMarkTs=0;rfDone();
     if(!S.sets.a2[1]||!t.classList.contains('pr')||(!_rm()&&_prBursts!==b3+1))throw new Error('rfDone récord');
     RF.close();
@@ -2733,7 +2739,7 @@ await safe('summaryAfterFinish',async()=>{
     if(S.sessions.length!==ns+1)throw new Error('no se guardó');
     const s=S.sessions.at(-1),sh=document.getElementById('sum-sheet');
     if(!sh||!_sum||_sum.ts!==s.ts||!_sum.fresh||S.tab!=='dash')throw new Error('sin resumen al guardar');
-    if(document.getElementById('sum-t').textContent!=='¡Sesión completada! 🎉')throw new Error('título');
+    if(document.getElementById('sum-t').textContent!=='¡Sesión completada!')throw new Error('título');
     await W(1300);
     const rec=S.strength[ex.id].at(-1),ton=rec.sets.reduce((a,x)=>a+x.w*x.r,0);
     const k=[...sh.querySelectorAll('.sum-n')].map(e=>e.textContent);
@@ -2794,7 +2800,7 @@ await safe('summaryImportCloses',async()=>{
 const _snap10=()=>JSON.stringify({k:_snap9(),wt:S.weeklyTarget,ro:S.reopenedSession});
 const _rest10=j=>{const o=JSON.parse(j);_hoyPick=null;closeCmodal(false);S.weeklyTarget=o.wt;S.reopenedSession=o.ro;_rest9(o.k);};
 const _hoy=()=>document.getElementById('hoy');
-const _tx10=e=>(e?e.textContent:'').replace(/\s+/g,' ').trim();
+const _tx10=e=>(e?_icTx(e):'').replace(/\s+/g,' ').trim();
 const _prep10=()=>{_clearMarks();S.sessions=S.sessions.filter(x=>!(x&&x.ts&&sameDayTs(x.ts,Date.now()))); // sesiones de hoy que dejan pasos anteriores
   S.restWeeks=[];if(getActiveDeload())_restoreDeload(true);RT.stop();_hoyPick=null;S.weeklyTarget=7;};
 const _noX10=n=>{const sc=document.getElementById('screen');if(sc.scrollWidth>sc.clientWidth+1)throw new Error('scroll horizontal ('+n+')');
@@ -2840,7 +2846,7 @@ await safe('hoyTopCard',async()=>{
     if(document.querySelector('#app .mrow'))throw new Error('sigue la fila de métricas');
     const shs=[...document.querySelectorAll('#app .sh')].map(e=>e.textContent);
     if(shs.some(t=>/Próxima sesión|Entreno sin terminar/.test(t)))throw new Error('bloques repetidos: '+shs);
-    if(!/^(Buenos días|Buenas tardes|Buenas noches) 👋$/.test(_tx10(document.querySelector('#app .topbar h1'))))throw new Error('saludo '+_tx10(document.querySelector('#app .topbar h1')));
+    if(!/^(Buenos días|Buenas tardes|Buenas noches)$/.test(_tx10(document.querySelector('#app .topbar h1'))))throw new Error('saludo '+_tx10(document.querySelector('#app .topbar h1')));
     // (fix 1) «Buenas tardes» hasta las 21:00
     {const g=[4,5,11,12,20,21,23].map(dashGreet).join();if(g!=='Buenas noches,Buenos días,Buenos días,Buenas tardes,Buenas tardes,Buenas noches,Buenas noches')throw new Error('saludo por hora: '+g);}
     _noX10('normal');
@@ -4046,7 +4052,7 @@ await safe('setRowsByLT',async()=>{
       S.open=E.lib_band_row.id;render();await W(10);const gv=_card7(E.lib_band_row.id).querySelector('.ex-goal .ex-goal-v');
       if(!gv||_tx10(gv)!=='🎯 banda más dura'||getComputedStyle(gv).textOverflow!=='ellipsis')throw new Error('chip de la cabecera '+(gv&&gv.outerHTML.slice(0,120)));}
     // (pulido) objetivos de Inicio: «🎯 Objetivos de hoy» si alguno no es de kilos (13 reps, 45 s); todos de kilos, «de carga»
-    {const db=dayTargetsHtml('B','dash'),da=dayTargetsHtml('A','dash');
+    {const _h=h=>{const x=document.createElement('div');x.innerHTML=h||'';return _icTx(x);},db=_h(dayTargetsHtml('B','dash')),da=_h(dayTargetsHtml('A','dash'));
       if(!/🎯 Objetivos de hoy/.test(db)||/Objetivos de carga/.test(db)||(da&&(!/🎯 Objetivos de carga/.test(da)||/Objetivos de hoy/.test(da))))throw new Error('título de objetivos '+db.slice(0,80)+' | '+da.slice(0,80));}
     // (pulido) «⇄ Ocupada»: sin material (plancha, flexiones) no sale; con banda o kettlebell, sí
     for(const [k,want] of [['lib_plank',false],['lib_pushup',false],['lib_band_row',true],['lib_kb_farmer_carry',true]]){
@@ -5537,7 +5543,7 @@ await safe('recompos',async()=>{
     for(const k of ['1m','3m','6m','1a','all'])chk(k,'pasada');
     {const e=indep(rRangeKey());
       if(e.s!=null){if(!card()||kpis()[0]!==pct(e.s)+' %'||(e.w!=null&&kpis()[1]!==pct(e.w)+' %'))throw new Error('tarjeta '+kpis()+' vs '+e.s+'/'+e.w);}
-      else if(!card()||card().querySelector('svg')||!/kilos/.test(_tx10(card())))throw new Error('vacío de la pasada '+_tx10(card()));
+      else if(!card()||card().querySelector('svg:not(.ic)')||!/kilos/.test(_tx10(card())))throw new Error('vacío de la pasada '+_tx10(card()));
       if(_tx10(document.getElementById('rc-h'))!=='Más fuerte y más ligero')throw new Error('cabecera');}
     // 2) datos fijos: dos de kilos (uno con una descarga a mitad), peso corporal, lastre, tiempo, uno de una sola sesión
     const T=d=>Date.now()-d*_D3,kg=(w,r,d,x)=>Object.assign({v:w,r,ts:T(d),setsDone:3,sets:[{w,r},{w,r:Math.max(1,r-2)}]},x||{});
@@ -5599,19 +5605,19 @@ await safe('recompos',async()=>{
       if(d.s.length!==2||_startOfDay(d.s[0].t)!==_startOfDay(T(40))||_startOfDay(d.s[1].t)!==_startOfDay(T(33))||d.undated)throw new Error('antiguos: fechas '+d.s.map(p=>new Date(p.t).toDateString()));
       if(/sin fecha/.test(_tx10(card())))throw new Error('antiguos con fecha avisados como sin fecha');}
     S.strength={rcO:[{v:40,r:10},{v:45,r:10}]};render();await W(10);
-    if(card().querySelector('svg')||recompData('3m').s.length||!/Con dos sesiones con kilos.*2 registros antiguos sin fecha no cuentan./.test(_tx10(card()))||/van sin kilos|no tienen las reps/.test(_tx10(card())))throw new Error('sin fecha: '+_tx10(card()));
+    if(card().querySelector('svg:not(.ic)')||recompData('3m').s.length||!/Con dos sesiones con kilos.*2 registros antiguos sin fecha no cuentan./.test(_tx10(card()))||/van sin kilos|no tienen las reps/.test(_tx10(card())))throw new Error('sin fecha: '+_tx10(card()));
     S.strength={rcO:[{v:40,r:10},{d:fmtDate(new Date(T(20))),v:42,r:10,ts:T(20)},{v:45,r:10,ts:T(10)}]};render();await W(10);
-    if(!card().querySelector('svg')||!/Un registro antiguo sin fecha no cuenta./.test(_tx10(card())))throw new Error('uno sin fecha: '+_tx10(card()));
+    if(!card().querySelector('svg:not(.ic)')||!/Un registro antiguo sin fecha no cuenta./.test(_tx10(card())))throw new Error('uno sin fecha: '+_tx10(card()));
     // 5) sin kilos (peso corporal, lastre, tiempo, distancia): se explica, sin gráfica ni rangos
     S.strength={rcBW:[{v:0,lt:'bw',r:12,ts:T(20)},{v:0,lt:'bw',r:15,ts:T(10)}],rcT:[{v:0,lt:'t',t:40,ts:T(20)},{v:0,lt:'t',t:60,ts:T(10)}],rcL:[{v:10,lt:'bw',r:8,ts:T(20)},{v:15,lt:'bw',r:8,ts:T(10)}]};render();await W(10);
-    if(card().querySelector('svg,.rc-ranges')||!/van sin kilos/.test(_tx10(card()))||!/Fuerza por ejercicio/.test(_tx10(card())))throw new Error('sin kilos '+_tx10(card()));
+    if(card().querySelector('svg:not(.ic),.rc-ranges')||!/van sin kilos/.test(_tx10(card()))||!/Fuerza por ejercicio/.test(_tx10(card())))throw new Error('sin kilos '+_tx10(card()));
     // 6) un registro de kilos por ejercicio; kilos solo antiguos fuera del periodo; usuario sin nada
     S.strength={rcF:[kg(80,8,10)]};render();await W(10);
-    if(card().querySelector('svg')||!/Con dos sesiones con kilos/.test(_tx10(card())))throw new Error('una sesión');
+    if(card().querySelector('svg:not(.ic)')||!/Con dos sesiones con kilos/.test(_tx10(card())))throw new Error('una sesión');
     S.strength={rcA:[kg(100,5,300),kg(110,5,280)]};S.weights=[{v:90,ts:T(5)},{v:89,ts:T(1)}];S.rRange='1m';render();await W(10);
-    if(card().querySelector('svg')||!card().querySelector('.rc-none')||!card().querySelector('.rc-ranges'))throw new Error('periodo sin datos');
+    if(card().querySelector('svg:not(.ic)')||!card().querySelector('.rc-none')||!card().querySelector('.rc-ranges'))throw new Error('periodo sin datos');
     S.strength={};S.weights=[];render();await W(10);
-    if(card().querySelector('svg')||!/Cuando tengas dos sesiones con kilos/.test(_tx10(card())))throw new Error('nada');
+    if(card().querySelector('svg:not(.ic)')||!/Cuando tengas dos sesiones con kilos/.test(_tx10(card())))throw new Error('nada');
   }finally{document.body.style.width=bw0;S.wmodal=false;renderWmodal();S.rRange=rr0;_rest11(j);go('dash');}
 });
 // (12 · arreglos ronda 1) ficha: «ligera» igual en filas y lectura, récord en semana ligera hueco, valor final bajo la lectura,
@@ -5746,7 +5752,7 @@ await safe('progreso2r2',async()=>{
       if(s0.getAttribute('aria-modal')!=='true'||document.activeElement!==s0.querySelector('.hist-sheet-close'))throw new Error('ficha vacía modal');
       closeHist();delete S.strength.zz0;}
     // 3) veredicto con las cifras tal como se muestran; periodos que no se confunden
-    if(_rcVerdict(5,-0.489)!=='Recomposición en marcha 💪'||_rcVerdict(5,-0.449)!=='Más fuerte con el mismo peso'||_rcVerdict(0.96,null)!=='Ganas fuerza'||_rcVerdict(-0.96,0.2)!=='Algo menos de fuerza en este periodo')throw new Error('veredicto redondeado');
+    if(_rcVerdict(5,-0.489)!=='Recomposición en marcha'||_rcVerdict(5,-0.449)!=='Más fuerte con el mismo peso'||_rcVerdict(0.96,null)!=='Ganas fuerza'||_rcVerdict(-0.96,0.2)!=='Algo menos de fuerza en este periodo')throw new Error('veredicto redondeado');
     {const P=d=>[{t:0},{t:d*D}],R6=WRANGES[2],RA=WRANGES[3],c=[[P(182),R6,'en 6 meses'],[P(197),RA,'en 6 meses y medio'],[P(190),RA,'en algo más de 6 meses'],
         [P(170),RA,'en 5 meses y medio'],[P(95),R6,'en algo más de 3 meses'],[P(91),R6,'en 3 meses'],[P(30),RA,'en 4 semanas'],[P(300),RA,'en 10 meses']];
       const bad=c.filter(([p,R,e])=>wRangeLbl(p,R)!==e);if(bad.length)throw new Error('periodos '+bad.map(([p,R,e])=>wRangeLbl(p,R)+' ≠ '+e));}
@@ -6170,8 +6176,8 @@ await safe('dlEndLocalMidnight',async()=>{
   }finally{Date.now=RN;_rest11(j);}
 });
 // ── 13b Una sola descarga y textos coherentes ──
-const _tx13=()=>{const t=document.getElementById('toast');return t?t.textContent:'';};
-const _bn13=t=>[...document.querySelectorAll('#app .dl-banner')].map(b=>b.textContent.replace(/\s+/g,' ').trim());
+const _tx13=()=>{const t=document.getElementById('toast');return t?_icTx(t):'';};
+const _bn13=t=>[...document.querySelectorAll('#app .dl-banner')].map(b=>_icTx(b).replace(/\s+/g,' ').trim());
 // Ajustes → «Descarga o descanso» y la propuesta del Coach empiezan LA MISMA descarga (forma, fechas y textos); aviso con
 // «Terminar» en Inicio, Entreno y Coach; terminar antes y caducar devuelven el plan
 await safe('dlUnifiedEntry',async()=>{
@@ -6447,9 +6453,9 @@ await safe('fatigueMeter',async()=>{
     if(ks[7]!=='deload')throw new Error('descarga en marcha '+ks);
     if(!/^Estás en tu semana de descarga/.test(_fatF(coach_fatigueMeter(),'weeks').txt))throw new Error('semanas en descarga');
     go('coach');await W(5);
-    const lb=[...document.querySelectorAll('#fat-card .fat-bl span')].map(s=>s.textContent);
+    const lb=[...document.querySelectorAll('#fat-card .fat-bl span')].map(s=>_icTx(s));
     if(lb.length!==8||lb[7]!=='Esta🧘'||lb[4].indexOf('🌴')<0||lb[2].indexOf('🧘')<0)throw new Error('etiquetas '+lb);
-    if(!/🧘 descarga · 🌴 descanso/.test(document.querySelector('#fat-card .fat-lg').textContent))throw new Error('leyenda de marcas');
+    if(!/🧘 descarga · 🌴 descanso/.test(_icTx(document.querySelector('#fat-card .fat-lg'))))throw new Error('leyenda de marcas');
     _restoreDeload(true);
   }finally{
     const k=JSON.parse(keep);S.deload=null;S.strength=k.st;S.sessions=k.ss;S.restWeeks=k.rw;S.deloadHistory=k.dh;S.currentPlan=k.cp;
@@ -6484,7 +6490,7 @@ await safe('dlRecommend',async()=>{
     _restoreDeload(true);if(!startDeload('all')||coach_deloadReco())throw new Error('en descarga');_restoreDeload(true);S.deloadHistory=[];
     // 2. La tarjeta: accesible, fechas (hoy → medianoche de dentro de 7 días), dos planes, lo que cambia; entrada en Inicio
     go('dash');await W(5);const en=entry();
-    if(!en||!/^🧘 ?Te toca una semana de descarga/.test(en.textContent.replace(/\s+/g,' ').trim())||en.getBoundingClientRect().height<44)throw new Error('entrada de Inicio');
+    if(!en||!/^🧘 ?Te toca una semana de descarga/.test(_icTx(en).replace(/\s+/g,' ').trim())||en.getBoundingClientRect().height<44)throw new Error('entrada de Inicio');
     en.click();await W(30);if(S.tab!=='coach'||!card())throw new Error('la entrada no lleva a la tarjeta');
     let c=card();const now=Date.now(),end=_deloadEndFrom(now);
     if(c.getAttribute('role')!=='region'||!c.getAttribute('aria-labelledby')||!document.getElementById(c.getAttribute('aria-labelledby')))throw new Error('región sin título');
@@ -6844,7 +6850,7 @@ await safe('dlPolish13e',async()=>{
         }
       }finally{window.Date=RD;S.deload=null;S.restWeeks=[];S.deloadHistory=JSON.parse(keep).dh;}}
     // 6. Leyenda: solo los niveles con series y las marcas que hay
-    {const lg=wk=>{const x=document.createElement('div');x.innerHTML=_fatBarsHtml(wk);return x.querySelector('.fat-lg').textContent;};
+    {const lg=wk=>{const x=document.createElement('div');x.innerHTML=_fatBarsHtml(wk);return _icTx(x.querySelector('.fat-lg'));};
       const w=(c,kind,now)=>({start:Date.now()-7*_D3,end:Date.now(),c:Object.assign({0:0,1:0,2:0,3:0},c),total:Object.values(c).reduce((a,b)=>a+b,0),now:!!now,kind:kind||null});
       let t=lg([w({2:5}),w({2:3}),w({},null,1)]);if(t!=='Justo')throw new Error('leyenda solo «Justo»: '+t);
       t=lg([w({1:2,3:1}),w({2:3},'rest',1)]);if(t!=='FácilJustoAl límite🌴 descanso')throw new Error('leyenda con descanso: '+t);
@@ -6855,7 +6861,7 @@ await safe('dlPolish13e',async()=>{
       const col=(el,v)=>{const p=document.createElement('span');p.style.color=`var(${v})`;el.appendChild(p);const c=getComputedStyle(p).color;p.remove();return c;};
       S.day='A';go('workout');await W(5);
       const b=document.querySelector('#app .dl-banner.rest'),bt=b&&b.querySelector('.dl-banner-t');
-      if(!b||!/🌴/.test(b.textContent)||getComputedStyle(bt).color!==col(b,'--green-hi')||!/--green/.test(ruleOf('.dl-banner.rest').style.background||ruleOf('.dl-banner.rest').style.backgroundColor))throw new Error('aviso de descanso no menta');
+      if(!b||!/🌴/.test(_icTx(b))||getComputedStyle(bt).color!==col(b,'--green-hi')||!/--green/.test(ruleOf('.dl-banner.rest').style.background||ruleOf('.dl-banner.rest').style.backgroundColor))throw new Error('aviso de descanso no menta');
       if(!/--blue/.test(ruleOf('.dl-banner').style.background||ruleOf('.dl-banner').style.backgroundColor))throw new Error('la descarga ya no es azul');
       // (13e r1) también el calendario de Progreso: días y semanas de descanso en menta
       for(const sel of ['.cal-c.rest','.cal-lg i.rest','.cal-w.wk-rest']){const x=ruleOf(sel),bg=x&&(x.style.background||x.style.backgroundImage||'');if(!/--green/.test(bg)||/--blue/.test(bg))throw new Error('descanso no menta en '+sel);}
@@ -6864,12 +6870,12 @@ await safe('dlPolish13e',async()=>{
       S.nextDay=Object.keys(getPlan()).find(k=>getPlan()[k].ex.some(e=>!e.cardio&&(S.strength[e.id]||[]).length))||S.nextDay;
       go('coach');await W(5);
       {const ic=[...document.querySelectorAll('#app .coach-plan .tgl-ic')];
-        if(!ic.length||ic.some(i=>i.textContent!=='🌴'||!i.classList.contains('k-rest')))throw new Error('objetivos sin 🌴: '+ic.map(i=>i.textContent).join(''));
+        if(!ic.length||ic.some(i=>_icTx(i)!=='🌴'||!i.classList.contains('k-rest')))throw new Error('objetivos sin 🌴: '+ic.map(i=>_icTx(i)).join(''));
         let wk=coach_rpeWeeks(8),lb=[...document.querySelectorAll('#fat-card .fat-bl span')];
         // (16e) hoy domingo (menos de un día en esta semana): sin marca en la actual; como si hubiera empezado el lunes, con 🌴
-        if(coach_weekRange(0).end+1-S.restWeeks[0].startTs<_D3-1){if(wk[7].kind!==null||(lb.length&&/🌴/.test(lb[7].textContent)))throw new Error('descanso desde el domingo marca la actual');
+        if(coach_weekRange(0).end+1-S.restWeeks[0].startTs<_D3-1){if(wk[7].kind!==null||(lb.length&&/🌴/.test(_icTx(lb[7]))))throw new Error('descanso desde el domingo marca la actual');
           S.restWeeks[0].startTs=coach_weekRange(0).start+3600e3;go('coach');await W(5);wk=coach_rpeWeeks(8);lb=[...document.querySelectorAll('#fat-card .fat-bl span')];}
-        if(wk[7].kind!=='rest'||(lb.length&&!/🌴/.test(lb[7].textContent)))throw new Error('semana actual sin 🌴');}
+        if(wk[7].kind!=='rest'||(lb.length&&!/🌴/.test(_icTx(lb[7]))))throw new Error('semana actual sin 🌴');}
       S.restWeeks=[];}
     // 8. Contraste y accesibilidad: nada de --text3 en la tarjeta, ≥ 9 px por debajo de 359 px, puntos con texto oculto
     {const t3=rules().filter(x=>/\.fat-/.test(x.selectorText||'')&&/--text3/.test(x.style.color||''));if(t3.length)throw new Error('--text3 en '+t3.map(x=>x.selectorText).join(' | '));
@@ -7342,7 +7348,7 @@ const resNav=()=>{['share','canShare'].forEach((k,i)=>{const d=i?o_cs:o_sh;if(d)
 const bad=[];const E=(c,m)=>{if(!c)bad.push(m);};
 // espera REAL a lo que el navegador hace aparte (codificar el PNG, decodificarlo, leer el blob): el reloj virtual no la espera
 const RT=p=>{let done=0,v,er;p.then(x=>{done=1;v=x;},e=>{done=1;er=e;});return _untilRT(()=>done,1500).then(()=>{if(!done)throw new Error('tiempo agotado');if(er)throw er;return v;});};
-const DAY=86400000,toastTxt=()=>{const t=document.getElementById('toast');return t&&t.classList.contains('show')?t.textContent:'';};
+const DAY=86400000,toastTxt=()=>{const t=document.getElementById('toast');return t&&t.classList.contains('show')?_icTx(t):'';};
 const hideToast=()=>{const t=document.getElementById('toast');if(t)t.classList.remove('show');};
 const rgbOf=h=>{const n=parseInt(h.slice(1),16);return[(n>>16)&255,(n>>8)&255,n&255];};
 const near=(p,c,tol)=>Math.abs(p[0]-c[0])<=tol&&Math.abs(p[1]-c[1])<=tol&&Math.abs(p[2]-c[2])<=tol;
@@ -7504,7 +7510,7 @@ const MO=['enero','febrero','marzo','abril','mayo','junio','julio','agosto','sep
 const tx=e=>e?e.textContent.replace(/\s+/g,' ').trim():'';
 const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
 const pl=(n,a,b)=>n+' '+(n===1?a:b);
-const toastTxt=()=>{const t=document.getElementById('toast');return t&&t.classList.contains('show')?t.textContent:'';};
+const toastTxt=()=>{const t=document.getElementById('toast');return t&&t.classList.contains('show')?_icTx(t):'';};
 const hideToast=()=>{const t=document.getElementById('toast');if(t)t.classList.remove('show');};
 const noX=(w,sel)=>{E(document.documentElement.scrollWidth<=document.documentElement.clientWidth+1,w+': scroll horizontal');
   document.querySelectorAll(sel).forEach(e=>{const r=e.getBoundingClientRect();E(r.right<=innerWidth+1&&r.left>=-1,w+': se sale '+(e.className||e.id)+' '+Math.round(r.left)+'-'+Math.round(r.right));});};
@@ -7638,7 +7644,7 @@ try{
     const wk=Math.max(1,Math.round((M.endTs-M.startTs)/(7*DAY)));
     E(c&&tx(c).includes('Tu ciclo 1')&&tx(c).includes(pl(k,'sesión','sesiones')+' en '+pl(wk,'semana','semanas')),'ciclo: tarjeta '+tx(c)+' vs '+k+'/'+wk);
     E(c&&c.getAttribute('role')==='region'&&c.getAttribute('aria-labelledby')==='wr-cyc-t','ciclo: región');
-    E(/^🚀 (Ciclo cerrado|Nuevo ciclo iniciado)/.test(toastTxt()),'ciclo: aviso de la etapa 13 '+toastTxt());
+    E(/^🎉 (Ciclo cerrado|Nuevo ciclo iniciado)/.test(toastTxt()),'ciclo: aviso de la etapa 13 '+toastTxt());
     E(document.getElementById('screen').scrollTop===0&&c&&c.getBoundingClientRect().bottom<document.querySelector('.botbar').getBoundingClientRect().top,'ciclo: tarjeta a la vista');
     const reco=coach_deloadReco();
     if(reco)E(c&&c.nextElementSibling&&c.nextElementSibling.id==='dl-reco','ciclo: la recomendación de descarga no va justo debajo');
@@ -8773,7 +8779,7 @@ await safe('entrenoDock16',async()=>{
       // ✓ Hecho → récord: aviso dorado dentro, a la vista, con «Deshacer» de 44 px y sin tapar nada del modo
       const sh0=document.getElementById('rf-num').getBoundingClientRect().top;
       _barMarkTs=0;rfDone();
-      E(S.sets.a2[1]&&t.classList.contains('pr')&&/^🏆 Récord: 57\.5 kg × 11 · 1RM est\. 78\.5 kg/.test(t.textContent),L+': aviso de récord '+t.textContent);
+      E(S.sets.a2[1]&&t.classList.contains('pr')&&/^🏆 Récord: 57\.5 kg × 11 · 1RM est\. 78\.5 kg/.test(_icTx(t)),L+': aviso de récord '+_icTx(t));
       const tr=t.getBoundingClientRect(),vr=rf.getBoundingClientRect();
       E(tr.height>0&&tr.top>=vr.top-0.5&&tr.bottom<=vr.bottom+0.5,L+': aviso fuera de la vista '+Math.round(tr.top)+'-'+Math.round(tr.bottom));
       ['rf-ring','rf-ctl','rf-x','rf-lbl','rf-name','rf-rpe','rf-ovr','rf-next'].forEach(id=>{const el=document.getElementById(id);if(el&&el.offsetHeight)E(!hit(tr,el.getBoundingClientRect()),L+': el aviso tapa #'+id);});
@@ -9202,7 +9208,7 @@ await safe('barrido16d',async()=>{
         const am=document.querySelector('#screen .anim-mini-t span');E(!am||!cut(am),tg+': músculos de la técnica recortados');
         const lr=document.querySelector('#screen .lg-rest');if(lr){const lh=parseFloat(getComputedStyle(lr).fontSize)*1.6;
           E(R(lr).height<=46&&[...lr.children].every(c=>!shown(c)||R(c).height<=lh),tg+': «Descanso entre series» en más de una línea ('+Math.round(R(lr).height)+')');
-          E(tx(lr).includes('⏱ Descanso entre series'),tg+': texto del descanso «'+tx(lr)+'»');
+          E(_icTx(lr).replace(/\s+/g,' ').includes('⏱ Descanso entre series'),tg+': texto del descanso «'+_icTx(lr)+'»');
           E(shown(lr.querySelector('.lg-rest-x'))===(w>=360),tg+': «entre series» '+(w>=360?'oculto':'visible a 320'));
           const gl=lr.querySelector('.lg-rest-x');if(w>=360&&gl){const a=lr.firstElementChild;E(a&&a.contains(gl)&&a.tagName==='SPAN','«Descanso entre series» partido en dos elementos de la fila');}}
         const wk=[...document.querySelectorAll('#screen .warmup-h-l span')].find(s=>/kg$/.test(s.textContent)); /* (16e r1) el «·» va en su propio span delante */if(wk)E(wk.getClientRects().length===1&&getComputedStyle(wk.parentElement).display==='block',tg+': «· N kg» del calentamiento partido');
@@ -9610,7 +9616,7 @@ await safe('pulido16er1',async()=>{
           E(b.parentElement.getBoundingClientRect().height>=44,'fila del calentamiento < 44 px a '+w);}
         const hl=document.querySelector('#app .warmup-h-l'),sp=[...hl.querySelectorAll('span')],sep=sp.find(s=>s.textContent.trim()==='·'),val=sp.find(s=>/kg$/.test(s.textContent));
         E(sep&&val&&!/·/.test(val.textContent)&&/^\d/.test(val.textContent),'cabecera del calentamiento: '+vis(hl.textContent));
-        if(sep){const t=hl.firstChild,rg=document.createRange();rg.setStart(t,t.textContent.length-1);rg.setEnd(t,t.textContent.length);
+        if(sep){const t=[...hl.childNodes].find(n=>n.nodeType===3&&n.textContent.trim()),rg=document.createRange();rg.setStart(t,t.textContent.length-1);rg.setEnd(t,t.textContent.length);
           E(Math.abs(rg.getBoundingClientRect().top-sep.getBoundingClientRect().top)<3,'«·» del calentamiento abre línea a '+w);}}
       E(document.documentElement.scrollWidth<=innerWidth,'Entreno desborda a '+w);}
     // ── cardio: «▶ Iniciar N min» con espacio duro
@@ -9791,7 +9797,7 @@ await safe('detalles17r1',async()=>{
           [...wrap.querySelectorAll('.pl-row')].forEach((r,i)=>{const [id,,k,kind]=cases[i],st=r.querySelector('.pl-st'),g=r.querySelector('.pl-g'),m=r.querySelector('.pl-main'),sd=r.querySelector('.pl-side');
             const lh=parseFloat(getComputedStyle(st).fontSize)*1.6+10;E(R(st).height>0,w+': pastilla sin medir');
             E(R(st).height<=lh,w+' '+id+'/'+k+': pastilla «'+st.textContent+'» en dos líneas ('+Math.round(R(st).height)+')');
-            if(kind)E(st.textContent===TX[kind],'texto de la pastilla: '+st.textContent);
+            if(kind)E(_icTx(st)===TX[kind],'texto de la pastilla: '+_icTx(st));
             const x=st.querySelector('.pl-st-x');if(x&&kind){E((getComputedStyle(x).display==='none')===(w<360),w+': «'+x.textContent+'» '+getComputedStyle(x).display);
               const c=st.querySelector('.pl-st-c');E(c&&getComputedStyle(c).textTransform===(w<360?'capitalize':'none'),w+': mayúscula de «'+(c&&c.textContent)+'»');}
             if(g.classList.contains('mute'))E(g.getClientRects().length===1&&R(g).height<parseFloat(getComputedStyle(g).fontSize)*2,w+': «'+g.textContent+'» partido');
@@ -9864,7 +9870,7 @@ await safe('cortes18',async()=>{
       E(/mm-sub">Series efectivas por semana · \$\{_nwUnits\(esc\(st\.R\.lbl\)\)\}/.test(SRC),'«últimas 4 semanas» del mapa sin _nwUnits');
       E(!/quedan <strong class="nw">/.test(SRC),'.nw anidado en la semana de descanso');
       // (18 r1) tarjeta de resultado, resumen del ejercicio hecho, «¿Máquina ocupada?» con historial y «·» de la lista
-      E(/\$\{_nwX\(g\.m\)\}/.test(SRC)&&/\$\{_nwX\(sug\.m\)\}/.test(SRC)&&!/\$\{(?:g|sug)\.m\}<\/div>/.test(SRC),'«Próxima sesión: …» de la tarjeta de resultado sin _nwX');
+      E(/\$\{_nwX\(icSin\(g\.m\)\)\}/.test(SRC)&&/\$\{_nwX\(icSin\(sug\.m\)\)\}/.test(SRC)&&!/\$\{(?:g|sug)\.m\}<\/div>/.test(SRC),'«Próxima sesión: …» de la tarjeta de resultado sin _nwX');
       E(/ex-done-sum">\$\{_nwX\(esc\(_setsLine\(sum\.sets\)\)\)\}\$\{nx\?` · próxima <b>\$\{_nwX\(esc\(presValTxt\(nx\)\)\)\}/.test(SRC),'resumen del ejercicio hecho sin _nwX');
       E(/Su último registro: <b>\$\{nk\?_nwX\(/.test(SRC)&&/ Hoy: <b>\$\{_nwX\(esc\(presValTxt\(pr\)\)\)\}/.test(SRC),'«Su último registro … Hoy …» de la máquina ocupada sin _nwX');
       E(/\$\{esc\(ex\.eq\)\}\$\{NB\}· \$\{_nwUnits\(ex\.cardio/.test(SRC),'«·» de la lista de Entreno sin espacio duro delante');}
@@ -11900,7 +11906,7 @@ const _m3A={mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,age:'40',
 const _m3New=()=>{S.onboarded=false;S.profile=null;S.obDraft=null;S.places=null;S.restOn=true;S.rpeOn=true;saveState();};
 const _m3Open=async(from,a,pl)=>{if(_obOpen())hideOnboarding();showOnboarding({from:from||'first'});await W(3);Object.assign(_ob.a,a||_m3A);_ob.places=pl||{v:1,main:'g',g:placeFromPreset('grande'),c:null};
   _ob.h={nada:true};_ob.pins={};_ob.alt=0;_ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);};
-const _m3tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'';
+const _m3tx=el=>el?_icTx(el).replace(/\s+/g,' ').trim():'';
 const _m3Rows=()=>[...document.querySelectorAll('#ob-root .ob-dpanel .ob-row')];
 const _m3Sr=()=>document.getElementById('ob-sheet-root'),_m3Sh=()=>document.querySelector('#ob-sheet-root .ob-sheet');
 const _m3R=()=>[..._m3Sr().querySelectorAll('.obx-alt')];
@@ -12257,6 +12263,37 @@ await safe('navB1',async()=>{
     const on=bs.filter(b=>b.classList.contains('on')),cur=bs.filter(b=>b.getAttribute('aria-current')==='page');
     E(on.length===1&&on[0].id==='nb-'+t&&cur.length===1&&cur[0]===on[0],t+': pestaña activa mal marcada');}
   go(t0);await W(2);
+  if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
+});
+await safe('iconosB1',async()=>{
+  // (B1) Iconos de línea en lugar de los emojis que hacían de icono, y el esfuerzo de la serie con barras en vez de caritas.
+  // Los emojis siguen en los datos y en las frases que devuelven las funciones; se cambian al pintar (ic, icE, icT, icSin, icEsf)
+  const bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const t0=S.tab,o0=S.open;
+  const EMO=/[🏆🎯🧘🌴⏱🔥✅💡📈📊⏳🔄⚠📅⏰🧠🔧🎉🚀😌🥵]/u;
+  // el juego: todo emoji con icono apunta a un dibujo que existe, y los tres ayudantes hacen lo que dicen
+  E(Object.values(ICONO_DE).every(n=>ICONOS[n])&&Object.keys(ICONOS).length>=30,'ICONO_DE apunta a un icono que no existe');
+  {const h=ic('trophy');E(/^<svg class="ic ic-trophy"/.test(h)&&/aria-hidden="true"/.test(h)&&ic('no-existe')==='','ic() '+h.slice(0,60));}
+  E(/ic-leaf/.test(icE('🧘'))&&/ic-scale/.test(icE('⚖️'))&&icE('↑')==='↑'&&icE('<b>')==='&lt;b&gt;','icE');
+  {const h=icT('🧘 Descarga <b> 💪');E(/^<svg class="ic ic-leaf"/.test(h)&&h.endsWith(' Descarga &lt;b&gt;')&&!EMO.test(h),'icT '+h.slice(-40));}
+  E(icT('Sin emoji')==='Sin emoji'&&icSin('Sube a 60 kg. 🎯 Bien. 💪')==='Sube a 60 kg. Bien.','icT / icSin sin icono');
+  E((icEsf('entre 😌 y 💪').match(/ic-e[12]/g)||[]).join()==='ic-e1,ic-e2','icEsf');
+  // avisos: el emoji que abre el texto es un icono y el de adorno del final desaparece
+  toast('🧘 Descarga terminada 💪');await W(2);
+  {const t=document.getElementById('toast');E(t.querySelector('svg.ic-leaf')&&t.textContent.trim()==='Descarga terminada','aviso: '+t.innerHTML.slice(0,80));t.classList.remove('show');}
+  // esfuerzo de la serie: tres chips con una, dos y tres barras, y su nombre
+  {const x=document.createElement('div');x.innerHTML=rpeChipsHtml(0,true);const c=[...x.querySelectorAll('.rpe-chip')];
+    E(c.length===3&&c.every((b,i)=>b.querySelector('svg.ic-e'+(i+1))&&!EMO.test(b.textContent))&&c.map(b=>b.textContent).join()==='Fácil,Justo,Al límite','chips de esfuerzo: '+x.innerHTML.slice(0,120));}
+  // las cuatro pantallas, sin emojis haciendo de icono (el pictograma de cada ejercicio no cuenta) y con iconos de línea
+  let nIc=0;
+  for(const t of ['dash','workout','coach','prog']){go(t);await W(5);const sc=document.getElementById('screen').cloneNode(true);
+    sc.querySelectorAll('.exic-e,.lib-th-e,.wro,.wrp-card').forEach(e=>e.remove());const m=EMO.exec(sc.textContent);
+    E(!m,t+': queda un emoji de icono «'+(m&&sc.textContent.slice(Math.max(0,m.index-20),m.index+12))+'»');
+    nIc+=document.querySelectorAll('#screen svg.ic').length;}
+  E(nIc>=3,'casi no hay iconos de línea en las cuatro pantallas: '+nIc);
+  // un icono mide según su letra y no baja de 12 px
+  {const small=[...document.querySelectorAll('#screen svg.ic')].filter(v=>{const r=v.getBoundingClientRect();return r.width&&r.width<12;});
+    E(!small.length,'iconos de menos de 12 px: '+small.length);}
+  S.open=o0;go(t0);await W(2);
   if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});

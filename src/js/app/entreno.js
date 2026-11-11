@@ -193,8 +193,8 @@ function setRowsHtml(ex,p,rows){
     const n=r.i+1,rv=_rpeOn()?r.rpe:0,rpeA=rv===1?' · fácil':rv===2?' · justo':rv===3?' · al límite':''; // (M2) apagado: sin el color ni el texto del esfuerzo
     const pj=r.done?live.flags[r.i]||null:null;
     const g=pj?'':_ghostTxt(lw,r.i);
-    const prLine=pj?`<div class="lg-pr got">🏆 ${esc(prTxt(pj))}</div>`
-      :r.i===live.next?`<div class="lg-pr hint" data-set="${r.i}"${live.hint?'':' hidden'}>${esc(prHintTxt(live.hint))}</div>`:'';
+    const prLine=pj?`<div class="lg-pr got">${ic('trophy')} ${esc(prTxt(pj))}</div>`
+      :r.i===live.next?`<div class="lg-pr hint" data-set="${r.i}"${live.hint?'':' hidden'}>${icT(prHintTxt(live.hint))}</div>`:'';
     const wNeed=r.done&&!bw&&!(r.w>0);
     let repsCell;
     if(K.td){
@@ -243,11 +243,11 @@ function _refreshSets(ex,skipInp){
   const h=box.querySelector('.need-hint');if(h)h.hidden=!(!bw&&rows.some(r=>r.done&&!(r.w>0)));
   // (09) Pista de récord de la siguiente serie (cambia con el peso y las reps) y el dorado de las hechas
   {const lv=prLive(ex,rows),he=box.querySelector('.lg-pr.hint');
-    if(he){const t=prHintTxt(lv.hint);if(he.textContent!==t)he.textContent=t;he.hidden=!t;}
+    if(he){const t=prHintTxt(lv.hint);if(he.dataset.t!==t){he.dataset.t=t;he.innerHTML=icT(t);}he.hidden=!t;}
     rows.forEach(r=>{if(!r.done)return;const row=box.querySelector(`.lg-row[data-set="${r.i}"]`);if(!row)return;
       const on=!!lv.flags[r.i];row.classList.toggle('pr',on);const ck=row.querySelector('.lg-ck');if(ck)ck.classList.toggle('pr',on);
       const got=row.nextElementSibling&&row.nextElementSibling.classList.contains('lg-pr')?row.nextElementSibling:null;
-      if(got&&got.classList.contains('got')){got.hidden=!on;if(on)got.textContent='🏆 '+prTxt(lv.flags[r.i]);}});}
+      if(got&&got.classList.contains('got')){got.hidden=!on;if(on)got.innerHTML=ic('trophy')+' '+esc(prTxt(lv.flags[r.i]));}});}
   const nx=rows.find(r=>!r.done),tag=box.querySelector('.sug-tag');
   if(tag&&p&&nx){const tv=_rowVal(nx,p);tag.textContent=presTagTxt(p,tv,nx.w);tag.className='sug-tag '+presTagCls(p,tv,nx.w);}
   const la=card.querySelector('.la-slot');if(la)la.innerHTML=liveAdjHtml(ex,p);
@@ -340,7 +340,7 @@ function renderNextBar(){
       <button type="button" class="nb-go" id="nb-go" onclick="nbDone()" aria-label="Marcar hecha la serie ${t.i+1} de ${esc(t.ex.n)}: ${esc(val)}">✓ Hecho</button>`;
   }else{
     const pend=day.ex.filter(e=>e.cardio&&!_exComplete(e));
-    h=`<div class="nb-info"><span class="nb-t">Fuerza completada 🎉</span><span class="nb-s">${pend.length?'Te queda: '+esc(pend[0].n):'Guarda tu entreno'}</span></div>
+    h=`<div class="nb-info"><span class="nb-t">Fuerza completada ${ic('sparkles')}</span><span class="nb-s">${pend.length?'Te queda: '+esc(pend[0].n):'Guarda tu entreno'}</span></div>
       <button type="button" class="nb-go" id="nb-go" onclick="finishSession()">Guardar</button>`;
   }
   if(el.innerHTML!==h)el.innerHTML=h;
@@ -537,7 +537,7 @@ function showUndoToast(label,onUndo,cls,ms){ // (E10b) ms: cuánto se ve (por de
   const el=document.getElementById('toast');
   if(!el)return;
   // (16) «80 kg», «12 reps», «45 s» (y «1RM est. 86.5 kg») no se parten entre líneas (el texto no cambia: solo se envuelven)
-  const lbl=_nwX(esc(label)); // (18) y «× 10» de «15 kg × 10» junto
+  const lbl=icT(label,{f:_nwX}); // (18) y «× 10» de «15 kg × 10» junto; el emoji que abre el aviso («🏆 Récord…»), como icono
   el.innerHTML=`<span style="margin-right:14px">${lbl}</span><button id="undo-btn" style="background:transparent;border:1px solid var(--green);color:var(--green);border-radius:6px;padding:3px 10px;font-size:13px;font-weight:600;cursor:pointer;pointer-events:auto">Deshacer</button>`;
   el.classList.toggle('pr',cls==='pr');
   _toastPlace();
@@ -684,7 +684,7 @@ function _rpeTargetFor(t){
 }
 const RPE_CHIPS=[[1,'😌','Fácil','Fácil'],[2,'💪','Justo','Justo'],[3,'🥵','Límite','Al límite']];
 function rpeChipsHtml(lvl,big){
-  return RPE_CHIPS.map(([n,ic,sh,l])=>`<button type="button" class="rpe-chip r${n}" data-l="${n}" aria-pressed="${lvl===n}" aria-label="${l}" onclick="setRpe(${n})"><i aria-hidden="true">${ic}</i><span>${big?l:sh}</span></button>`).join('');
+  return RPE_CHIPS.map(([n,,sh,l])=>`<button type="button" class="rpe-chip r${n}" data-l="${n}" aria-pressed="${lvl===n}" aria-label="${l}" onclick="setRpe(${n})"><i aria-hidden="true">${ic('e'+n)}</i><span>${big?l:sh}</span></button>`).join('');
 }
 // Descanso según el esfuerzo, sobre el del ejercicio (el guardado en su descanso si lo hay: base)
 function _rpeRest(level,exId,t){
@@ -736,7 +736,7 @@ function _refreshSugSlot(card,id){
     const slot=card&&card.isConnected?card.querySelector('.sug-slot'):null;
     if(!slot)return;
     const g=getSug(id);
-    slot.innerHTML=g?`<div class="sug ${g.t}">${_nwX(g.m)}</div>`:'';
+    slot.innerHTML=g?`<div class="sug ${g.t}">${_nwX(icSin(g.m))}</div>`:'';
   },250);
 }
 function logW(){
@@ -808,7 +808,7 @@ function openFinishModal(doneEx,totalEx){
   const note=rs&&rs.session.note?String(rs.session.note).slice(0,500):'';
   const nSug=miss.filter(m=>m.sug!=null).length,anySug=nSug>0;
   const missHtml=miss.length?`<div class="fin-miss" id="fin-miss">
-      <div class="fin-miss-h">⚠️ ${miss.length===1?'Falta el peso en 1 ejercicio':`Falta el peso en ${miss.length} ejercicios`}</div>
+      <div class="fin-miss-h">${ic('alert')} ${miss.length===1?'Falta el peso en 1 ejercicio':`Falta el peso en ${miss.length} ejercicios`}</div>
       <div class="fin-miss-p">Marcaste series sin escribir el peso y no contarían en tu progreso. ${nSug>1?'Usa los sugeridos, escribe otros aquí o revísalos.':anySug?'Usa el sugerido, escribe otro aquí o revísalo.':miss.length>1?'Escríbelos aquí o revísalos.':'Escríbelo aquí o revísalo.'}</div>
       ${miss.map(m=>`<div class="fin-miss-row">
         <div class="fin-miss-n">${esc(m.ex.n)}<small>${m.done} serie${m.done!==1?'s':''}${m.repsLbl?` · ${esc(m.repsLbl)}`:''}${m.last!=null?` · última ${m.last} kg`:' · sin historial'}</small></div>

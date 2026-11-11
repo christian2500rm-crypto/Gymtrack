@@ -299,7 +299,7 @@ function prWallHtml(){
     ${shown.map(x=>{
       const has=x.ts!=null&&!!findSession(x.ts),pv=prPrevTxt(x),nm=exDisplayName(x.id);
       return`<button type="button" class="pr-row" data-ts="${has?x.ts:''}" data-ex="${esc(x.id)}" onclick="prWallOpen(this)" aria-label="Récord de ${esc(prKindTxt(x).toLowerCase())} en ${esc(nm)}: ${esc(prTxt(x))}${pv?', '+esc(pv):''}${x.d?', '+esc(x.d):''}. ${has?'Ver la sesión':'Ver el historial'}">
-        <span class="pr-ic" aria-hidden="true">🏆</span>
+        <span class="pr-ic" aria-hidden="true">${ic('trophy')}</span>
         <span class="pr-i"><span class="pr-nm">${esc(nm)}</span><span class="pr-v">${x.val!=null?_nwUnits(esc(prTxt(x))):`<span class="nw">${esc(kgTxt(x.w))} kg</span>${x.r?' × '+x.r:''}`}${pv?` <i>(${_nwPrev(pv)})</i>`:''}</span></span>
         <span class="pr-d">${esc(x.d||'')}<small>${prKindTxt(x)}</small></span></button>`;}).join('')}
     ${list.length>5?`<button type="button" class="pr-more" onclick="prWallToggle()">${_prWallAll?'Ver menos':`Ver más (${max-5})`}</button>`:''}
@@ -472,7 +472,7 @@ function _renderSummary(){
   const fresh=_sum.fresh,anim=!_rm(),plan=getPlan();
   const dl=sessDayLbl(s),focus=sessDayFocus(s); // (E1b) el nombre y el foco con que se hizo
   const date=s.date?String(s.date):isFinite(+s.ts)?fmtDate(new Date(+s.ts)):'';
-  const title=fresh?'¡Sesión completada! 🎉':`${dl} · ${date}`;
+  const title=fresh?'¡Sesión completada!':`${dl} · ${date}`;
   const sub=fresh?[dl,focus,date].filter(Boolean).join(' · '):`${focus||'Sesión'}${_sumAgo(s.ts)}`;
   // Contadores (duración, series, tonelaje): suben de 0 a su valor (sin animación con movimiento reducido)
   const dur=+s.durationMin>0&&isFinite(+s.durationMin)?Math.round(+s.durationMin):null;
@@ -491,20 +491,20 @@ function _renderSummary(){
   // Récords de la sesión
   const nr=D.records.length,str=D.rows.some(r=>!r.cardio);
   const wRows=D.rows.filter(r=>!r.cardio&&!r.bw),allNew=wRows.length>0&&wRows.every(r=>r.delta&&r.delta.t==='nuevo');
-  const recs=nr?`<div class="sum-sec">🏆 ${nr===1?'1 récord':nr+' récords'} ${fresh?'hoy':'en esta sesión'}</div><div class="sum-prs" id="sum-prs">${D.records.map((j,i)=>{const pv=prPrevTxt(j);
-      return`<div class="sum-pr" style="animation-delay:${(.25+i*.12).toFixed(2)}s"><span class="sum-pr-ic" aria-hidden="true">🏆</span><div class="sum-pr-i"><div class="sum-pr-n">${esc(j.name)}</div><div class="sum-pr-v">${_nwUnits(esc(prTxt(j)))}${pv?` <i>· ${_nwPrev(pv)}</i>`:''}</div></div><span class="sum-pr-k">${prKindTxt(j)}</span></div>`;}).join('')}</div>`
+  const recs=nr?`<div class="sum-sec">${ic('trophy')} ${nr===1?'1 récord':nr+' récords'} ${fresh?'hoy':'en esta sesión'}</div><div class="sum-prs" id="sum-prs">${D.records.map((j,i)=>{const pv=prPrevTxt(j);
+      return`<div class="sum-pr" style="animation-delay:${(.25+i*.12).toFixed(2)}s"><span class="sum-pr-ic" aria-hidden="true">${ic('trophy')}</span><div class="sum-pr-i"><div class="sum-pr-n">${esc(j.name)}</div><div class="sum-pr-v">${_nwUnits(esc(prTxt(j)))}${pv?` <i>· ${_nwPrev(pv)}</i>`:''}</div></div><span class="sum-pr-k">${prKindTxt(j)}</span></div>`;}).join('')}</div>`
     :str?`<div class="sum-sec">Récords</div><div class="sum-nopr">${allNew?'Primera vez con estos ejercicios: desde la próxima sesión, cada mejora (más peso o más reps) será un récord.'
-      :fresh?'Hoy no hubo récord: la constancia también suma. 💪':'Sin récords en esta sesión.'}</div>`:'';
+      :fresh?'Hoy no hubo récord: la constancia también suma.':'Sin récords en esta sesión.'}</div>`:'';
   // Ejercicios: «55×12×3 ↑+2.5»
-  const exs=D.rows.length?`<div class="sum-sec">Ejercicios</div><div id="sum-exs">${D.rows.map(r=>`<div class="sum-ex" data-ex="${esc(r.id)}"><div class="sum-ex-i"><div class="sum-ex-n">${esc(r.name)}${r.pr?'<em role="img" aria-label="récord">🏆</em>':''}</div><div class="sum-ex-s">${esc(r.line)}${r.dl?' · descarga':''}${r.sub!=null?` · <span class="sub-tag">⇄ solo hoy</span>${r.sub?' en lugar de '+esc(r.sub):''}`:''}</div></div>${r.delta?`<span class="sum-ex-d ${r.delta.cls}" aria-label="${esc(r.delta.a)}">${esc(r.delta.t)}</span>`:r.cardio?'<span class="sum-ex-d up" aria-label="hecho">✓</span>':''}</div>`).join('')}</div>`
+  const exs=D.rows.length?`<div class="sum-sec">Ejercicios</div><div id="sum-exs">${D.rows.map(r=>`<div class="sum-ex" data-ex="${esc(r.id)}"><div class="sum-ex-i"><div class="sum-ex-n">${esc(r.name)}${r.pr?'<em role="img" aria-label="récord">'+ic('trophy')+'</em>':''}</div><div class="sum-ex-s">${esc(r.line)}${r.dl?' · descarga':''}${r.sub!=null?` · <span class="sub-tag">⇄ solo hoy</span>${r.sub?' en lugar de '+esc(r.sub):''}`:''}</div></div>${r.delta?`<span class="sum-ex-d ${r.delta.cls}" aria-label="${esc(r.delta.a)}">${esc(r.delta.t)}</span>`:r.cardio?'<span class="sum-ex-d up" aria-label="hecho">✓</span>':''}</div>`).join('')}</div>`
     :`<div class="sum-nopr" style="margin-top:14px">Esta sesión no tiene series guardadas.</div>`;
   // Reparto del esfuerzo (RPE) por serie
   const R=D.rpe,tot=_rpeOn()?R[0]+R[1]+R[2]+R[3]:0;let eff=''; // (M2) esfuerzo apagado: sin «Esfuerzo por serie»
   if(tot&&R[0]<tot){
-    const L=[[1,'😌 Fácil','fácil','fáciles'],[2,'💪 Justo','justa','justas'],[3,'🥵 Al límite','al límite','al límite'],[0,'Sin dato','sin dato','sin dato']].filter(([k])=>R[k]>0);
+    const L=[[1,'Fácil','fácil','fáciles'],[2,'Justo','justa','justas'],[3,'Al límite','al límite','al límite'],[0,'Sin dato','sin dato','sin dato']].filter(([k])=>R[k]>0);
     eff=`<div class="sum-sec">Esfuerzo por serie</div><div class="sum-rpe" id="sum-rpe" role="img" aria-label="Esfuerzo por serie: ${esc(L.map(([k,,a1,a2])=>`${R[k]} ${R[k]===1?a1:a2}`).join(', '))}">${L.map(([k])=>`<i class="r${k}" style="flex:${R[k]} 1 0"></i>`).join('')}</div>
       <div class="sum-rpe-l" aria-hidden="true">${L.map(([k,l])=>`<span><i class="r${k}"></i>${l} <b>${R[k]}</b></span>`).join('')}</div>${D.old?'<div class="sum-rpe-n">En los registros sin series guardadas cuenta el esfuerzo medio de cada ejercicio.</div>':''}`;
-  }else if(tot)eff=`<div class="sum-sec">Esfuerzo por serie</div><div class="sum-nopr">No apuntaste el esfuerzo (😌 💪 🥵) en esta sesión.</div>`;
+  }else if(tot)eff=`<div class="sum-sec">Esfuerzo por serie</div><div class="sum-nopr">No apuntaste el esfuerzo (fácil, justo o al límite) en esta sesión.</div>`;
   // Mapa muscular de la sesión (componente de la etapa 06): brillo ∝ series de cada músculo hoy
   const gs=D.mm.groups.filter(g=>g.v>=.05).sort((a,b)=>b.v-a.v);
   const canMap=typeof GymAnim!=='undefined'&&typeof GymAnim.muscleMap==='function';

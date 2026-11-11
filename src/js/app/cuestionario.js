@@ -670,7 +670,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   <div class="ob-chips">${_obChips().map(([l,st])=>`<button type="button" class="lib-chip ob-ch" onclick="obEditFromResult('${st}')">${esc(l).replace(/&nbsp;/g,NB)}</button>`).join('')}</div>${changed}
   <section class="card ob-split"><div class="ob-wk">${esc(_obWeekLine(g))}</div><p class="ob-p">${esc(pq[0]||'')}</p>
     ${typeof obSplitSheet==='function'?'<button type="button" class="ob-link" onclick="obSplitSheet()">Cambiar reparto ›</button>':''}</section>
-  <section class="ob-sec"><h2 class="ob-h2">¿Por qué esta rutina?</h2><ul class="ob-ul">${pq.slice(1,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  <section class="ob-sec"><h2 class="ob-h2">¿Por qué esta rutina?</h2><ul class="ob-ul">${pq.slice(1,4).map(x=>`<li>${icEsf(esc(x))}</li>`).join('')}</ul>
     ${pq.length>4?'<button type="button" class="ob-link" onclick="obWhyAll()">Ver todo ›</button>':''}</section>
   ${av.length?`<section class="ob-sec"><h2 class="ob-h2">A tener en cuenta</h2><ul class="ob-ul ob-av">${av.slice(0,more.av?99:t.visibles).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
     ${av.length>t.visibles?`<button type="button" class="ob-link" onclick="obMore('av')">${more.av?'Ver menos':'Ver más ('+(av.length-t.visibles)+')'}</button>`:''}</section>`:''}
@@ -683,7 +683,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   <section class="ob-sec"><h2 class="ob-h2">📈 Cómo vas a avanzar</h2><ul class="ob-ul">${cauto?'<li>Las primeras 4 semanas, 2 series y subidas pequeñas; después te propongo pasar a 3.</li>':''}
     <li>Cada sesión: el Coach te dice cuánto poner (primero más repeticiones, luego más peso).</li><li>Cada 4 semanas: revisas tu ciclo y te propongo hasta 3 cambios.</li><li>Si te notas cansado o te estancas: una semana suave.</li></ul></section>
   <section class="ob-sec"><h2 class="ob-h2">🧭 Tu primera semana</h2><ul class="ob-ul"><li>La primera vez que hagas cada ejercicio, elige ${kg?'un peso':'la variante'} con ${kg?'el':'la'} que te sobren ${cauto?'unas 3':'2-3'} repeticiones. Desde la segunda sesión, el Coach te dice cuánto poner.</li>
-    ${_rpeOn()?'<li>💪 Justo = te sobran 1-2. 😌 Fácil = 3 o más. 🥵 Al límite = ninguna.</li>':''}<li>Si algo duele más de 3 sobre 10 o empeora al día siguiente, cámbialo con ⇄.</li></ul></section>
+    ${_rpeOn()?`<li>${ic('e2')} Justo = te sobran 1-2. ${ic('e1')} Fácil = 3 o más. ${ic('e3')} Al límite = ninguna.</li>`:''}<li>Si algo duele más de 3 sobre 10 o empeora al día siguiente, cámbialo con ⇄.</li></ul></section>
   <section class="ob-sec"><button type="button" class="ob-fold" aria-expanded="${mmOpen}" onclick="obMore('mm')">Tu semana por músculo <span aria-hidden="true">${mmOpen?'▾':'›'}</span></button>
     ${mmOpen?`<div class="mm-bars">${mmBarsHtml(mmPlanStats(tmp,r.weeklyTarget),{})}</div>`:''}</section>
   <section class="ob-sec"><button type="button" class="ob-fold" onclick="obAvoided()">Lo que he evitado ›</button></section>
@@ -692,7 +692,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
     ${typeof obOther==='function'?`<div class="ob-res2"><button type="button" class="btn bs" onclick="obOther(1)">Otra propuesta</button>${(_ob.alt||0)>0?'<button type="button" class="btn bs" onclick="obOther(-1)">‹ Anterior</button>':''}<button type="button" class="ob-link" onclick="obTune()">Afinar mi rutina</button></div>`:''}</div>`;}};
 // «Ver todo»: el porqué entero, en una hoja
 function obWhyAll(){if(!_ob||!_ob.t)return;obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">¿Por qué esta rutina?</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
-  <div class="hist-sheet-body"><ul class="ob-ul">${_obPorque().map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`,'¿Por qué esta rutina?');}
+  <div class="hist-sheet-body"><ul class="ob-ul">${_obPorque().map(x=>`<li>${icEsf(esc(x))}</li>`).join('')}</ul></div>`,'¿Por qué esta rutina?');}
 // «Lo que he evitado»: molestias, material y riesgos, con su motivo
 function obAvoided(){
   if(!_ob||!_ob.g)return;const g=_ob.g,z=_ob.h.zones||{},out=[];

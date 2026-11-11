@@ -32,7 +32,7 @@
 /* Entreno: el cuerpo de la tarjeta sin fondo propio y el objetivo como texto (antes, pastilla con borde) */
 .exn{font-weight:600}
 .exb{background:transparent}
-.ex-goal{background:none;border-color:transparent;padding-left:0;font-weight:600;color:var(--green-hi)}
+.ex-goal,.ex-goal.k-up,.ex-goal.k-harder,.ex-goal.k-down{background:none;border-color:transparent;padding-left:0;font-weight:600;color:var(--green-hi)}
 .ex-goal-k{color:var(--text3)}
 .ex-dots i{border-color:transparent}
 .tip{border-left-color:transparent;background:var(--bg3);color:var(--text2)}
@@ -43,3 +43,23 @@
 /* Barras flotantes (descanso y siguiente serie): misma piel, sin borde de color */
 #rest-timer,#nextbar{border-color:var(--border2);background:color-mix(in srgb,var(--bg3) 94%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .rt-btn,.rpe-chip{border-color:transparent}
+
+/* Iconos de línea (src/js/app/iconos.js): miden según la letra que los rodea y toman su color. Unos pocos llevan color propio
+   cuando abren un rótulo (récord, objetivo, calentamiento…); dentro de botones, pastillas y avisos siguen el del texto. */
+.ic{display:inline-block;width:1.25em;height:1.25em;vertical-align:-.26em;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ic-trophy{color:var(--pr)}
+.ic-target,.ic-done,.ic-moon,.ic-sparkles,.ic-sprout{color:var(--green)}
+.ic-flame,.ic-bulb,.ic-alert,.ic-flag{color:var(--amber)}
+.ic-leaf{color:var(--blue)}
+.ic-e1,.ic-e2,.ic-e3{stroke-width:3}
+.ic-e1{color:var(--green)}.ic-e2{color:var(--amber)}.ic-e3{color:var(--red)}
+.btn .ic,.hist-item-pr .ic,.insight-ic .ic,.pl-st .ic,.tgl-ic .ic,.hoy-tg .ic,.cta-banner .ic,#toast .ic,.sug .ic,.live-adj .ic,.dl-banner-ic .ic{color:inherit}
+.ex-ok{flex-shrink:0;font-size:20px;line-height:1;color:var(--green)}
+.eic .ic{width:36px;height:36px;color:var(--text3);stroke-width:1.6}
+.coach-entry-ic .ic,.hoy-rest-ic .ic,.rc-ic .ic{width:24px;height:24px}
+.rpe-chip i .ic{width:18px;height:18px;vertical-align:-4px}
+.hoy-tg i .ic,.tgl-ic .ic{width:14px;height:14px;vertical-align:-2px}
+.insight-ic .ic{width:18px;height:18px}
+.coach-hero-icon .ic{width:28px;height:28px;color:var(--green)}
+.dlr-ic .ic,.proposal-ic .ic,.pl-w-ic .ic,.rc-eic .ic,.dl-banner-ic .ic{width:24px;height:24px}
+.pl-w-ic .ic,.rc-eic .ic{color:var(--text2)}

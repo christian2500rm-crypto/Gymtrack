@@ -87,7 +87,7 @@ function _hoyChip(ex,p,live){
   if(live){const n=Math.max(0,parseInt(ex.s)||0),c=countSetsDone(ex.id,n);
     if(n&&c>=n)return`<span class="hoy-tg ok">✓ hecho</span>`;
     if(c>0)return`<span class="hoy-tg part" role="img" aria-label="${c} de ${n} series">${c}/${n}</span>`;}
-  if(p)return`<span class="hoy-tg ${presKCls(p)}" role="img" aria-label="Objetivo: ${_presIsKg(p)&&!p.up?`${esc(kgTxt(p.weight))} kilos por ${p.reps}`:esc(presValTxt(p))}, ${esc(presWord(p))}"><i aria-hidden="true">${presIc(p)}</i><b class="tgl-v">${esc(presShortTxt(p))}</b></span>`;
+  if(p)return`<span class="hoy-tg ${presKCls(p)}" role="img" aria-label="Objetivo: ${_presIsKg(p)&&!p.up?`${esc(kgTxt(p.weight))} kilos por ${p.reps}`:esc(presValTxt(p))}, ${esc(presWord(p))}"><i aria-hidden="true">${icE(presIc(p))}</i><b class="tgl-v">${esc(presShortTxt(p))}</b></span>`;
   // Sin historial: cómo se mide (peso corporal, solo reps, por tiempo, distancia) o «nuevo»
   const lt=exLT(ex);
   return`<span class="hoy-tg new">${lt==='bw'?'peso corporal':lt==='r'?'reps':lt==='t'?'por tiempo':lt==='d'?'distancia':'nuevo'}</span>`;
@@ -102,7 +102,7 @@ function _hoyRowHtml(ex,p,sel,live){
 function _hoyCarHtml(info,live){
   if(!info.car.length)return'';
   const parts=info.car.map(e=>{const d=live&&_exComplete(e);return`<b${d?' class="ok"':''}>${esc(String(e.r==null?'':e.r))}${d?' ✓':''}</b>`;}).join(' + ');
-  return`<div class="hoy-car"><span aria-hidden="true">${esc(info.car[0].ic||'🚶')}</span><span>Cardio ${parts}${info.car[0].eq?` · ${esc(info.car[0].eq)}`:''}</span></div>`;
+  return`<div class="hoy-car"><span aria-hidden="true">${ic('activity')}</span><span>Cardio ${parts}${info.car[0].eq?` · ${esc(info.car[0].eq)}`:''}</span></div>`;
 }
 function hoyState(){
   const aw=getActiveWorkout();if(aw)return{k:'live',aw,dk:aw.day};
@@ -164,7 +164,7 @@ function _hoyTrainHtml(st){
     cta=`<div class="hoy-cta hoy-acts"><button class="btn bp hoy-go" onclick="resumeWorkout()" aria-label="Continuar el entreno: ${cd} de ${plural(ct,cu)}">▶ Continuar (${cd}/${ct})</button><button class="btn bs" onclick="discardWorkout()">Descartar</button></div>`;
   }else{
     if(st.k==='extra'){kick='Sesión extra <span>· opcional</span>';
-      head=`<div class="hoy-note"><b>¡Semana completa! ${Math.min(st.wk,st.target)}/${st.target}</b> 🎉 Si te apetece, una más.</div>`;}
+      head=`<div class="hoy-note"><b>¡Semana completa! ${Math.min(st.wk,st.target)}/${st.target}</b> Si te apetece, una más.</div>`;}
     else if(!tot)kick='Tu primera sesión';
     cta=`<div class="hoy-cta"><button class="btn ${st.k==='extra'?'bs':'bp'} hoy-go" data-dk="${esc(st.dk)}" onclick="hoyStart(this.dataset.dk)">Empezar ${esc(info.label)}${st.k==='extra'?' (extra)':''} →</button></div>`;
     const last=[...(S.sessions||[])].reverse().find(s=>s&&sessOfDay(s,st.dk)&&s.ts); // (E1b) por su id de día
@@ -202,7 +202,7 @@ function _hoyDoneHtml(st){
     <div class="hoy-k">Hecho hoy ✓</div>
     <div class="hoy-t"><span class="pill p${esc(String(s.day).toLowerCase())}">${esc(lbl)}</span><span class="hoy-nm">${esc(snm)}</span></div>
     <div class="hoy-kpis">${kp('Duración',dur==null?'—':dur,dur==null?'':'min')}${kp('Series',D.sets,'')}${D.kgSets||!D.sets?kp('Tonelaje',_kgK(D.ton),'kg'):kp('Tonelaje','—','')}</div>
-    <button class="hoy-sum" data-ts="${+s.ts}" onclick="openSessionSummary(+this.dataset.ts)"><span>Ver el resumen de hoy</span>${npr?`<small>🏆 ${plural(npr,'récord')}</small>`:''}<span aria-hidden="true">›</span></button>
+    <button class="hoy-sum" data-ts="${+s.ts}" onclick="openSessionSummary(+this.dataset.ts)"><span>Ver el resumen de hoy</span>${npr?`<small>${ic('trophy')} ${plural(npr,'récord')}</small>`:''}<span aria-hidden="true">›</span></button>
     ${ni?`<div class="hoy-nx">
       <div class="hoy-k">Próxima sesión</div>
       <div class="hoy-t"><span class="pill p${esc(String(nk).toLowerCase())}">${esc(ni.label)}</span><span class="hoy-nm">${esc(ni.name)}</span></div>
@@ -218,7 +218,7 @@ function _hoyRestHtml(st){
   const left=restDaysLeft(st.rest),wk=getWeekSessions(),info=_dayLive(getPlan()[st.dk])?hoyDayInfo(st.dk):null; // (E1b) nunca un día vacío
   return`<div class="card hoy k-rest" id="hoy" data-dk="${esc(st.dk)}">
     ${lightBannerHtml('hoy')}
-    <div class="hoy-rest-h"><span class="hoy-rest-ic" aria-hidden="true">🌴</span><div class="hoy-rest-b">
+    <div class="hoy-rest-h"><span class="hoy-rest-ic" aria-hidden="true">${ic('moon')}</span><div class="hoy-rest-b">
       <div class="hoy-k">Semana de descanso</div>
       <div class="hoy-t"><span class="hoy-nm">Hoy toca recuperar</span></div>
       <div class="hoy-m">${left>0?`Quedan <span class="nw">${plural(left,'día')}</span>`:'Termina hoy'} · el Coach no penaliza tu constancia</div>
@@ -281,9 +281,7 @@ function renderDash(){
   // (10) Saludo según la hora (antes rotaba con el nº de sesiones); después de entrenar, «¡Buen trabajo hoy! 💪»
   const now0=new Date(nowTs0),hr=now0.getHours();
   const greet=trainedToday?'¡Buen trabajo hoy!':dashGreet(hr);
-  const emo=trainedToday?'💪':'👋';
-  // El emoji va pegado a la última palabra (nunca solo en la segunda línea)
-  const gSp=greet.lastIndexOf(' '),greetHtml=gSp>0?`${greet.slice(0,gSp)} <span style="white-space:nowrap">${greet.slice(gSp+1)} ${emo}</span>`:`<span style="white-space:nowrap">${greet} ${emo}</span>`;
+  const greetHtml=greet; // sin emoji
   const today0=`${HOY_WD[now0.getDay()]} ${now0.getDate()} ${MONTHS[now0.getMonth()]}`;
   const rest0=getActiveRest();
   // (14e) los primeros días del mes, la oferta del resumen va en el sitio de la fecha (a la vista sin desplazar)
@@ -302,8 +300,8 @@ function renderDash(){
   ${rest0?'':`<div class="sh">Esta semana</div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
-      <span style="font-size:15px;font-weight:600;min-width:0">${Math.min(wk,target)} de <span class="nw">${plural(target,'sesión','sesiones')}</span>${wk>target?` <span style="white-space:nowrap">· +${wk-target} extra 🔥</span>`:''}</span>
-      <span style="font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;color:${wk>=target?'var(--green)':wk>0?'var(--amber)':'var(--text2)'}">${wk>=target?'¡Semana completa! 🎉':wk>0?(target-wk===1?'Una más 🔥':`${target-wk} más 💪`):'Sin sesiones aún'}</span>
+      <span style="font-size:15px;font-weight:600;min-width:0">${Math.min(wk,target)} de <span class="nw">${plural(target,'sesión','sesiones')}</span>${wk>target?` <span style="white-space:nowrap">· +${wk-target} extra</span>`:''}</span>
+      <span style="font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;color:${wk>=target?'var(--green)':wk>0?'var(--amber)':'var(--text2)'}">${wk>=target?'¡Semana completa!':wk>0?(target-wk===1?'Una más':`${target-wk} más`):'Sin sesiones aún'}</span>
     </div>
     <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(wk/target*100))}%"></div></div>
     <div class="wgrid" role="group" aria-label="Días de esta semana">${weekGrid()}</div>
@@ -318,8 +316,8 @@ function renderDash(){
     if(!w)return''; // función nunca debería devolver null ahora, pero por seguridad
     return`<div class="week-card">
       <div class="week-card-h">
-        <div class="week-card-t">📈 ${w.title}</div>
-        <span class="week-card-tag">${w.tag}</span>
+        <div class="week-card-t">${ic('trend')} ${w.title}</div>
+        <span class="week-card-tag">${icSin(w.tag)}</span>
       </div>
       <div class="week-card-d">${w.description}</div>
       <div class="week-stats">
@@ -347,7 +345,7 @@ function renderDash(){
       <div class="sess-top">
         <span class="pill p${esc(String(s.day).toLowerCase())}" style="font-size:12px;padding:3px 9px">${esc(lbl)}</span>
         <span class="sess-f">${esc(focus)}</span>
-        ${npr?`<span class="sess-pr" aria-hidden="true">🏆 ${npr}</span>`:''}
+        ${npr?`<span class="sess-pr" aria-hidden="true">${ic('trophy')} ${npr}</span>`:''}
         <span style="font-size:13px;color:var(--text3);font-family:'DM Sans',sans-serif;white-space:nowrap">${esc(s.date||'')}${dur}</span>
         <span class="sess-go" aria-hidden="true">›</span>
       </div>
@@ -366,7 +364,7 @@ function dashCoachHtml(){
   // (13d) Semana de descarga recomendada: se elige y empieza en el Coach
   const rec=(S.sessions||[]).length>=CYCLE_MIN_SESSIONS?coach_deloadReco():null;
   if(rec)h+=`<button class="coach-entry dlr-entry" onclick="goDeloadReco()">
-      <span class="coach-entry-ic" aria-hidden="true">🧘</span>
+      <span class="coach-entry-ic" aria-hidden="true">${ic('leaf')}</span>
       <span class="coach-entry-t">Te toca una semana de descarga<small>${_nwUnits(esc(rec.tag))} · elige el plan en el Coach</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
   if((S.pendingCoachProposals||[]).length&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS){
@@ -374,7 +372,7 @@ function dashCoachHtml(){
     const dlOff=!!rec||_dlSnoozedOffer();
     const n=coach_pendingView().active.filter(p=>!(dlOff&&p.type==='deload')).length;
     if(n)h+=`<button class="coach-entry" onclick="goCoachProposals()">
-      <span class="coach-entry-ic" aria-hidden="true">💡</span>
+      <span class="coach-entry-ic" aria-hidden="true">${ic('bulb')}</span>
       <span class="coach-entry-t">El Coach tiene ${n} propuesta${n!==1?'s':''} para tu rutina<small>Tú decides: aplicar o ignorar</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
   }

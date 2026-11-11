@@ -538,7 +538,7 @@ function openRecoveryChooser(){
     <div class="cmod-t" id="rc-t">Descarga o descanso</div>
     <div class="cmod-b">Una semana para recuperarte. Tu plan no se pierde: vuelve solo al terminar.</div>
     <div class="rc-opts">
-      <div class="rc-opt rc-dl" data-k="deload" role="group" aria-labelledby="rc-dl-t"><span class="rc-ic" aria-hidden="true">🧘</span><span class="rc-b">
+      <div class="rc-opt rc-dl" data-k="deload" role="group" aria-labelledby="rc-dl-t"><span class="rc-ic" aria-hidden="true">${ic('leaf')}</span><span class="rc-b">
         <span class="rc-t" id="rc-dl-t">Semana de descarga</span><span class="rc-d">${_rcDlDesc(_rcPlan,end)}</span>
         <span class="rc-plan dlr-opts" role="radiogroup" aria-label="Cómo quieres descargar">
           ${_dlrOptHtml('sets','Menos series',`−40${NB}% de series, mismo peso`,_rcPlan==='sets','rcPlanPick')}
@@ -546,7 +546,7 @@ function openRecoveryChooser(){
         </span>
         ${exDl?`<span class="rc-note">Tu «${esc(deloadTitle(exDl))}» termina al empezarla: la semana la sustituye.</span>`:''}
         <button type="button" class="btn bp rc-go" onclick="recoveryPick('deload')">Empezar descarga</button></span></div>
-      <button type="button" class="rc-opt" data-k="rest" onclick="recoveryPick('rest')"><span class="rc-ic" aria-hidden="true">🌴</span><span class="rc-b">
+      <button type="button" class="rc-opt" data-k="rest" onclick="recoveryPick('rest')"><span class="rc-ic" aria-hidden="true">${ic('moon')}</span><span class="rc-b">
         <span class="rc-t">Semana de descanso</span><span class="rc-d">7 días sin entrenar. El Coach no penaliza tu constancia ni tu racha.</span></span></button>
     </div>
     <button type="button" class="btn bs rc-cancel" onclick="closeRecoveryChooser()">Cancelar</button>
@@ -594,17 +594,17 @@ function lightBannerHtml(where){
     const whenH=over?'Tu plan vuelve al guardar este entreno':`Tu plan vuelve el <span class="dl-when">${esc(deloadEndTxt(d))}</span>`;
     const desc=where==='workout'?`${_capTxt(deloadPlanTxt(d))}: esta semana no subas peso.`:`${_capTxt(deloadPlanTxt(d))}. Después vuelves más fuerte.`;
     // (10) Dentro de la tarjeta «HOY TOCA»: versión compacta (las filas ya dicen «descarga» y su objetivo 🧘), para que «Empezar» quepa
-    if(where==='hoy')return`<div class="dl-banner cmp" role="status" title="${esc(desc)}"><span class="dl-banner-ic" aria-hidden="true">🧘</span><div class="dl-banner-b">
+    if(where==='hoy')return`<div class="dl-banner cmp" role="status" title="${esc(desc)}"><span class="dl-banner-ic" aria-hidden="true">${ic('leaf')}</span><div class="dl-banner-b">
       <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${whenH} · ${_dlPlanOf(d)==='weight'?'menos peso':'menos series'}</div></div>
       <button class="dl-banner-btn" onclick="endDeload()" aria-label="Terminar la descarga">Terminar</button></div>`;
-    return`<div class="dl-banner" role="status"><span class="dl-banner-ic" aria-hidden="true">🧘</span><div class="dl-banner-b">
+    return`<div class="dl-banner" role="status"><span class="dl-banner-ic" aria-hidden="true">${ic('leaf')}</span><div class="dl-banner-b">
       <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${whenH} · ${esc(desc)}</div></div>
       <button class="dl-banner-btn" onclick="endDeload()" aria-label="Terminar la descarga">Terminar</button></div>`;
   }
   const r=where==='workout'?getActiveRest():null;
   if(r){
     const left=restDaysLeft(r);
-    return`<div class="dl-banner rest" role="status"><span class="dl-banner-ic" aria-hidden="true">🌴</span><div class="dl-banner-b">
+    return`<div class="dl-banner rest" role="status"><span class="dl-banner-ic" aria-hidden="true">${ic('moon')}</span><div class="dl-banner-b">
       <div class="dl-banner-t">Semana de descanso · <span class="dl-when">${left>0?`quedan ${left} día${left!==1?'s':''}`:'termina hoy'}</span></div>
       <div class="dl-banner-d">Si entrenas, hazlo suave: mismo peso o menos. Esta semana no se sube peso.</div></div>
       <button class="dl-banner-btn" onclick="endRestWeek()" aria-label="Terminar la semana de descanso">Terminar</button></div>`;

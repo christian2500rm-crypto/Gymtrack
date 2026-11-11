@@ -101,14 +101,14 @@ function plRowHtml(x,s){
     <span class="pl-dot" style="background:${color}" aria-hidden="true"></span>
     <span class="pl-main"><span class="clbl pl-n">${esc(name)}</span>${out?`<span class="prog-out">${out}</span>`:''}
       <span class="pl-sub"><span class="pl-v${lastre?' lt':''}" style="color:${color}">${lastre?`${esc('+'+lastW+NB+'kg')}<small> lastre</small>`:esc(vTxt)}</span><span class="pl-g ${gain[0]}${gain[0]==='band'?' prog-band':''}">${esc(gain[1])}</span></span></span>
-    <span class="pl-side">${plSpark(spk,color,cuts)}<span class="pl-st ${s.k}" title="${esc(why)}"><span aria-hidden="true">${st.ic}</span> ${chip==='Récord reciente'?'Récord<span class="pl-st-x"> reciente</span>':/^(Recién cambiado|En descarga)$/.test(chip)?chip.replace(/^([^ ]+ )(.+)$/,'<span class="pl-st-x">$1</span><span class="pl-st-c">$2</span>'):esc(chip)}</span></span>
+    <span class="pl-side">${plSpark(spk,color,cuts)}<span class="pl-st ${s.k}" title="${esc(why)}"><span aria-hidden="true">${icE(st.ic)}</span> ${chip==='Récord reciente'?'Récord<span class="pl-st-x"> reciente</span>':/^(Recién cambiado|En descarga)$/.test(chip)?chip.replace(/^([^ ]+ )(.+)$/,'<span class="pl-st-x">$1</span><span class="pl-st-c">$2</span>'):esc(chip)}</span></span>
     <span class="prog-go" aria-hidden="true">›</span>
   </div>`;
 }
 // La sección entera (#prog-str): filtros, resumen, «Estancados primero» y las filas
 function progStrengthHtml(){
   const list=progStrengthList();
-  if(!list.length)return`<div class="card" id="prog-str"><div class="empty"><div class="eic">🏋️</div><p>Completa entrenamientos y registra pesos para ver tu progreso de fuerza.</p></div></div>`;
+  if(!list.length)return`<div class="card" id="prog-str"><div class="empty"><div class="eic">${ic('dumbbell')}</div><p>Completa entrenamientos y registra pesos para ver tu progreso de fuerza.</p></div></div>`;
   const st=progStatusMap(list),hasOut=list.some(x=>!x.inPlan),plan=getPlan();
   if(_plF==='out'&&!hasOut)_plF='all';
   const dks=dayKeys(plan); // (E1a) los días de tu rutina (2-6)
@@ -143,13 +143,13 @@ function plToggleStag(){_plStag=!_plStag;_plRefresh('.pl-stag');}
 // Peso corporal en Progreso: la gráfica está en Inicio (donde se registra); aquí, el último y su cambio con un enlace
 function progWeightLinkHtml(){
   const pts=wSeries();
-  if(!pts.length)return`<div class="card pl-w"><span class="pl-w-ic" aria-hidden="true">⚖️</span><span class="pl-w-m"><span class="pl-w-s">Registra tu peso y verás su evolución en Inicio.</span></span>
+  if(!pts.length)return`<div class="card pl-w"><span class="pl-w-ic" aria-hidden="true">${ic('scale')}</span><span class="pl-w-m"><span class="pl-w-s">Registra tu peso y verás su evolución en Inicio.</span></span>
     <button type="button" class="btn bs pl-w-b" onclick="S.wmodal=true;renderWmodal()">Registrar</button></div>`;
   const last=pts[pts.length-1];
   let sub='primer registro';
   if(pts.length>=2){const k=wRangeKey(),rp=wInRange(pts,k),R=WRANGES.find(x=>x[0]===k);sub=`${wSign(last.v-rp[0].v)} kg ${wRangeLbl(rp,R)}`;}
   return`<button type="button" class="card pl-w" onclick="progToWeight()" aria-label="Peso corporal: ${wf1(last.v)} kg, ${esc(sub)}. Ver la gráfica en Inicio">
-    <span class="pl-w-ic" aria-hidden="true">⚖️</span>
+    <span class="pl-w-ic" aria-hidden="true">${ic('scale')}</span>
     <span class="pl-w-m"><span class="pl-w-v">${wf1(last.v)}<small> kg</small></span><span class="pl-w-s">${esc(sub)} · ${esc(wWhen(last.t))}</span></span>
     <span class="pl-w-go">Ver gráfica<span aria-hidden="true"> ›</span></span></button>`;
 }
@@ -224,7 +224,7 @@ function _rcVerdict(sv,wv){
   const su=sv>=1,sd=sv<=-1;
   if(wv==null)return su?'Ganas fuerza':sd?'Algo menos de fuerza en este periodo':'Tu fuerza se mantiene';
   const wd=wv<=-0.5,wu=wv>=0.5;
-  if(su)return wd?'Recomposición en marcha 💪':wu?'Más fuerte, con algo más de peso':'Más fuerte con el mismo peso';
+  if(su)return wd?'Recomposición en marcha':wu?'Más fuerte, con algo más de peso':'Más fuerte con el mismo peso';
   if(sd)return wd?'Más ligero, con algo menos de fuerza':'Algo menos de fuerza en este periodo';
   return wd?'Más ligero sin perder fuerza':wu?'Misma fuerza, con algo más de peso':'Fuerza y peso estables';
 }
@@ -290,7 +290,7 @@ function recompCardHtml(){
       :d.kgAny||d.undated?'Con dos sesiones con kilos en un mismo ejercicio verás aquí si ganas fuerza mientras cambia tu peso.'
       :d.strAny?'Tus ejercicios van sin kilos (peso corporal, bandas, tiempo o distancia), así que aquí no hay índice de fuerza: su evolución la tienes en «Fuerza por ejercicio». Cuando registres kilos en un ejercicio, verás aquí tu fuerza frente a tu peso.'
       :'Cuando tengas dos sesiones con kilos en un ejercicio, verás aquí si ganas fuerza mientras cambia tu peso.';
-    return`<div class="card rc-card" id="prog-rc"><div class="rc-empty"><span class="rc-eic" aria-hidden="true">📈</span><p>${msg}${und}</p></div></div>`;
+    return`<div class="card rc-card" id="prog-rc"><div class="rc-empty"><span class="rc-eic" aria-hidden="true">${ic('trend')}</span><p>${msg}${und}</p></div></div>`;
   }
   const chips=`<div class="wc-ranges rc-ranges" role="tablist" aria-label="Periodo de la gráfica">${WRANGES.map(r=>`<button type="button" class="wc-rg${r[0]===d.k?' on':''}" data-r="${r[0]}" role="tab" aria-selected="${r[0]===d.k}" onclick="setRRange('${r[0]}')">${r[1]}</button>`).join('')}</div>`;
   if(!d.s.length)return`<div class="card rc-card" id="prog-rc">${chips}<p class="rc-hint rc-none">En este periodo ningún ejercicio con kilos tiene dos sesiones (sin contar semanas ligeras). Prueba un periodo más largo.${und}</p></div>`;
@@ -414,7 +414,7 @@ function constancyCardHtml(){
   else{
     sum=`<b>${plural(inWin.length,'sesión','sesiones')}</b> en ${CAL_WEEKS} semanas. Objetivo: <b>${plural(T,'día')}</b> por semana`+(counted?`, cumplido en <b>${met} de ${counted}</b>${NB}semanas.`:'.');
     if(nw&&nw.st==='open'&&nw.req>0){const f=nw.req-nw.n;sum+=` Esta semana llevas ${nw.n} de ${nw.req}: ${f===1?'te falta 1':'te faltan '+f} para ${st.cur?'alargar la racha':'empezar una racha'}.`;}
-    else if(nw&&nw.st==='met'&&nw.mon===cur)sum+=' Esta semana ya está cumplida. 💪';
+    else if(nw&&nw.st==='met'&&nw.mon===cur)sum+=' Esta semana ya está cumplida.';
     else if(nw&&nw.st==='rest')sum+=' Semana de descanso: no corta la racha.';
   }
   if(noTs)sum+=` ${noTs===1?'Una sesión antigua sin fecha no sale':plural(noTs,'sesión antigua','sesiones antiguas')+' sin fecha no salen'} en el calendario ni ${noTs===1?'cuenta':'cuentan'} para las rachas.`;

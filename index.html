@@ -1958,7 +1958,7 @@ input[type=number]{-moz-appearance:textfield}
 /* Entreno: el cuerpo de la tarjeta sin fondo propio y el objetivo como texto (antes, pastilla con borde) */
 .exn{font-weight:600}
 .exb{background:transparent}
-.ex-goal{background:none;border-color:transparent;padding-left:0;font-weight:600;color:var(--green-hi)}
+.ex-goal,.ex-goal.k-up,.ex-goal.k-harder,.ex-goal.k-down{background:none;border-color:transparent;padding-left:0;font-weight:600;color:var(--green-hi)}
 .ex-goal-k{color:var(--text3)}
 .ex-dots i{border-color:transparent}
 .tip{border-left-color:transparent;background:var(--bg3);color:var(--text2)}
@@ -1969,6 +1969,26 @@ input[type=number]{-moz-appearance:textfield}
 /* Barras flotantes (descanso y siguiente serie): misma piel, sin borde de color */
 #rest-timer,#nextbar{border-color:var(--border2);background:color-mix(in srgb,var(--bg3) 94%,transparent);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px)}
 .rt-btn,.rpe-chip{border-color:transparent}
+
+/* Iconos de línea (src/js/app/iconos.js): miden según la letra que los rodea y toman su color. Unos pocos llevan color propio
+   cuando abren un rótulo (récord, objetivo, calentamiento…); dentro de botones, pastillas y avisos siguen el del texto. */
+.ic{display:inline-block;width:1.25em;height:1.25em;vertical-align:-.26em;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0}
+.ic-trophy{color:var(--pr)}
+.ic-target,.ic-done,.ic-moon,.ic-sparkles,.ic-sprout{color:var(--green)}
+.ic-flame,.ic-bulb,.ic-alert,.ic-flag{color:var(--amber)}
+.ic-leaf{color:var(--blue)}
+.ic-e1,.ic-e2,.ic-e3{stroke-width:3}
+.ic-e1{color:var(--green)}.ic-e2{color:var(--amber)}.ic-e3{color:var(--red)}
+.btn .ic,.hist-item-pr .ic,.insight-ic .ic,.pl-st .ic,.tgl-ic .ic,.hoy-tg .ic,.cta-banner .ic,#toast .ic,.sug .ic,.live-adj .ic,.dl-banner-ic .ic{color:inherit}
+.ex-ok{flex-shrink:0;font-size:20px;line-height:1;color:var(--green)}
+.eic .ic{width:36px;height:36px;color:var(--text3);stroke-width:1.6}
+.coach-entry-ic .ic,.hoy-rest-ic .ic,.rc-ic .ic{width:24px;height:24px}
+.rpe-chip i .ic{width:18px;height:18px;vertical-align:-4px}
+.hoy-tg i .ic,.tgl-ic .ic{width:14px;height:14px;vertical-align:-2px}
+.insight-ic .ic{width:18px;height:18px}
+.coach-hero-icon .ic{width:28px;height:28px;color:var(--green)}
+.dlr-ic .ic,.proposal-ic .ic,.pl-w-ic .ic,.rc-eic .ic,.dl-banner-ic .ic{width:24px;height:24px}
+.pl-w-ic .ic,.rc-eic .ic{color:var(--text2)}
 </style>
 </head>
 <body>
@@ -13184,7 +13204,7 @@ function openRecoveryChooser(){
     <div class="cmod-t" id="rc-t">Descarga o descanso</div>
     <div class="cmod-b">Una semana para recuperarte. Tu plan no se pierde: vuelve solo al terminar.</div>
     <div class="rc-opts">
-      <div class="rc-opt rc-dl" data-k="deload" role="group" aria-labelledby="rc-dl-t"><span class="rc-ic" aria-hidden="true">🧘</span><span class="rc-b">
+      <div class="rc-opt rc-dl" data-k="deload" role="group" aria-labelledby="rc-dl-t"><span class="rc-ic" aria-hidden="true">${ic('leaf')}</span><span class="rc-b">
         <span class="rc-t" id="rc-dl-t">Semana de descarga</span><span class="rc-d">${_rcDlDesc(_rcPlan,end)}</span>
         <span class="rc-plan dlr-opts" role="radiogroup" aria-label="Cómo quieres descargar">
           ${_dlrOptHtml('sets','Menos series',`−40${NB}% de series, mismo peso`,_rcPlan==='sets','rcPlanPick')}
@@ -13192,7 +13212,7 @@ function openRecoveryChooser(){
         </span>
         ${exDl?`<span class="rc-note">Tu «${esc(deloadTitle(exDl))}» termina al empezarla: la semana la sustituye.</span>`:''}
         <button type="button" class="btn bp rc-go" onclick="recoveryPick('deload')">Empezar descarga</button></span></div>
-      <button type="button" class="rc-opt" data-k="rest" onclick="recoveryPick('rest')"><span class="rc-ic" aria-hidden="true">🌴</span><span class="rc-b">
+      <button type="button" class="rc-opt" data-k="rest" onclick="recoveryPick('rest')"><span class="rc-ic" aria-hidden="true">${ic('moon')}</span><span class="rc-b">
         <span class="rc-t">Semana de descanso</span><span class="rc-d">7 días sin entrenar. El Coach no penaliza tu constancia ni tu racha.</span></span></button>
     </div>
     <button type="button" class="btn bs rc-cancel" onclick="closeRecoveryChooser()">Cancelar</button>
@@ -13240,17 +13260,17 @@ function lightBannerHtml(where){
     const whenH=over?'Tu plan vuelve al guardar este entreno':`Tu plan vuelve el <span class="dl-when">${esc(deloadEndTxt(d))}</span>`;
     const desc=where==='workout'?`${_capTxt(deloadPlanTxt(d))}: esta semana no subas peso.`:`${_capTxt(deloadPlanTxt(d))}. Después vuelves más fuerte.`;
     // (10) Dentro de la tarjeta «HOY TOCA»: versión compacta (las filas ya dicen «descarga» y su objetivo 🧘), para que «Empezar» quepa
-    if(where==='hoy')return`<div class="dl-banner cmp" role="status" title="${esc(desc)}"><span class="dl-banner-ic" aria-hidden="true">🧘</span><div class="dl-banner-b">
+    if(where==='hoy')return`<div class="dl-banner cmp" role="status" title="${esc(desc)}"><span class="dl-banner-ic" aria-hidden="true">${ic('leaf')}</span><div class="dl-banner-b">
       <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${whenH} · ${_dlPlanOf(d)==='weight'?'menos peso':'menos series'}</div></div>
       <button class="dl-banner-btn" onclick="endDeload()" aria-label="Terminar la descarga">Terminar</button></div>`;
-    return`<div class="dl-banner" role="status"><span class="dl-banner-ic" aria-hidden="true">🧘</span><div class="dl-banner-b">
+    return`<div class="dl-banner" role="status"><span class="dl-banner-ic" aria-hidden="true">${ic('leaf')}</span><div class="dl-banner-b">
       <div class="dl-banner-t">${esc(t)}</div><div class="dl-banner-d">${whenH} · ${esc(desc)}</div></div>
       <button class="dl-banner-btn" onclick="endDeload()" aria-label="Terminar la descarga">Terminar</button></div>`;
   }
   const r=where==='workout'?getActiveRest():null;
   if(r){
     const left=restDaysLeft(r);
-    return`<div class="dl-banner rest" role="status"><span class="dl-banner-ic" aria-hidden="true">🌴</span><div class="dl-banner-b">
+    return`<div class="dl-banner rest" role="status"><span class="dl-banner-ic" aria-hidden="true">${ic('moon')}</span><div class="dl-banner-b">
       <div class="dl-banner-t">Semana de descanso · <span class="dl-when">${left>0?`quedan ${left} día${left!==1?'s':''}`:'termina hoy'}</span></div>
       <div class="dl-banner-d">Si entrenas, hazlo suave: mismo peso o menos. Esta semana no se sube peso.</div></div>
       <button class="dl-banner-btn" onclick="endRestWeek()" aria-label="Terminar la semana de descanso">Terminar</button></div>`;
@@ -13716,6 +13736,75 @@ if(typeof S.rpeOn!=='boolean')S.rpeOn=true;
 // «Solo hoy» (v20): sustituciones con forma válida (las caducadas vuelven en el primer render, subTick)
 _sanitizePlanSubs(S.currentPlan);
 
+// ═══════════════════════════════════════════════════════════
+// ICONOS DE LÍNEA
+// ═══════════════════════════════════════════════════════════
+// Un solo juego de iconos (24×24, trazo de 1,9 px, extremos redondos) que toma el color del texto. Sustituye a los emojis que
+// hacían de icono: cada móvil los dibuja distinto y no siguen la paleta. Los emojis se quedan donde son contenido (frases del
+// «Wrapped», pictograma de cada ejercicio y de cada material, opciones del cuestionario).
+//   ic('trophy')        → el icono, para escribirlo en una plantilla
+//   icE('🏆')           → el icono de un emoji que viene en los datos (propuestas e ideas del Coach guardan su emoji); si no
+//                         tiene icono, devuelve el propio carácter escapado
+//   icT('🧘 Descarga…') → un texto para pintar como HTML: lo escapa, cambia por su icono el emoji que lo abre y quita el de adorno
+//                         que lo cierra ({fin:false} lo deja; {html:true} si el texto ya es HTML)
+const ICONOS={
+  trophy:'<path d="M7.5 4h9v5a4.5 4.5 0 0 1-9 0z"/><path d="M7.5 6H5v1.2A3.3 3.3 0 0 0 8 10.5M16.5 6H19v1.2a3.3 3.3 0 0 1-3 3.3M12 13.5V17M8.5 20h7M9.5 17h5"/>',
+  target:'<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="4.5"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/>',
+  flame:'<path d="M12 3c.6 3 4.8 5.2 4.8 10.2a4.8 4.8 0 0 1-9.6 0c0-1.8.7-3.2 1.7-4.3.4 1.6 1.2 2.3 2 2.3-.5-2.8-.2-5.7 1.1-8.2z"/>',
+  leaf:'<path d="M5 19C5 10.5 10 5.5 19 5c0 9-5 14-13.5 14"/><path d="M5 19c2.5-4.5 5.5-7.5 9.5-9.5"/>',
+  moon:'<path d="M19.5 14.2A8 8 0 1 1 9.8 4.5a6.3 6.3 0 0 0 9.7 9.7z"/>',
+  scale:'<rect x="4" y="4.5" width="16" height="15" rx="3.5"/><path d="M8.5 9.5a5 5 0 0 1 7 0M12 9.5l1.6-2.2"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  done:'<circle cx="12" cy="12" r="8.5"/><path d="m8.3 12.3 2.5 2.5 4.9-5.3"/>',
+  clock:'<circle cx="12" cy="13" r="7.5"/><path d="M12 9.5V13l2.3 1.8M9.5 3h5"/>',
+  hourglass:'<path d="M7 4h10M7 20h10M8 4c0 4 4 5 4 8s-4 4-4 8M16 4c0 4-4 5-4 8s4 4 4 8"/>',
+  trend:'<path d="m3.5 17 5.5-5.5 4 4 7.5-8"/><path d="M15.5 7.5h5v5"/>',
+  trenddown:'<path d="m3.5 7 5.5 5.5 4-4 7.5 8"/><path d="M15.5 16.5h5v-5"/>',
+  chart:'<path d="M4 20h16M7.5 20v-6.5M12 20V6M16.5 20v-10"/>',
+  bulb:'<path d="M9.5 18.5h5M10.5 21h3M12 3.5a6 6 0 0 0-3.6 10.8c.6.5.9 1.1.9 1.8h5.4c0-.7.3-1.3.9-1.8A6 6 0 0 0 12 3.5z"/>',
+  sparkles:'<path d="m11 4.5 1.7 4.3 4.3 1.7-4.3 1.7-1.7 4.3-1.7-4.3L5 10.5l4.3-1.7z"/><path d="m18.5 15 .7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/>',
+  refresh:'<path d="M19 12a7 7 0 0 1-12.3 4.6M5 12a7 7 0 0 1 12.3-4.6"/><path d="M17.5 3.5v4h-4M6.5 20.5v-4h4"/>',
+  alert:'<path d="M12 4.5 20.5 19h-17z"/><path d="M12 10v4.2M12 16.7v.2"/>',
+  bolt:'<path d="M13 3 5.5 13.5H11L10 21l8-11h-5.5z"/>',
+  calendar:'<rect x="4" y="5.5" width="16" height="14.5" rx="3"/><path d="M4 10h16M8.5 3.5V7M15.5 3.5V7"/>',
+  flag:'<path d="M6 21V4h11l-2.2 4 2.2 4H6"/>',
+  activity:'<path d="M3 12h4l2.5-6.5 4.5 13 2.5-6.5H21"/>',
+  wrench:'<path d="M15.5 4.5a4.2 4.2 0 0 0-3.9 5.8l-6.8 6.8a1.5 1.5 0 0 0 2.1 2.1l6.8-6.8a4.2 4.2 0 0 0 5.8-3.9l-2.8 2.3-2.5-.7-.7-2.5z"/>',
+  plus:'<path d="M12 5.5v13M5.5 12h13"/>',
+  sprout:'<path d="M12 20v-8M12 12c0-3.5-2.5-5.5-6.5-5.5 0 3.5 2.5 5.5 6.5 5.5zM12 14c0-3 2-4.8 6-4.8 0 3-2 4.8-6 4.8z"/>',
+  note:'<path d="M7 3.5h7.5L18 7v13.5H7z"/><path d="M10 11h5M10 14.5h5"/>',
+  pause:'<path d="M9 6v12M15 6v12"/>',
+  bell:'<path d="M6.5 17v-6a5.5 5.5 0 0 1 11 0v6l1.5 1.5H5zM10.5 20.5h3"/>',
+  belloff:'<path d="M6.5 17v-6a5.5 5.5 0 0 1 11 0v6l1.5 1.5H5zM10.5 20.5h3M4 4l16 16"/>',
+  sun:'<circle cx="12" cy="12" r="3.8"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"/>',
+  dumbbell:'<path d="M6.5 6v12M17.5 6v12M3.5 9v6M20.5 9v6M6.5 12h11"/>',
+  // Esfuerzo de la serie: una, dos o tres barras (fácil, justo, al límite)
+  e1:'<path d="M6 18v-3"/><path d="M12 18v-7.5" opacity=".28"/><path d="M18 18V6" opacity=".28"/>',
+  e2:'<path d="M6 18v-3"/><path d="M12 18v-7.5"/><path d="M18 18V6" opacity=".28"/>',
+  e3:'<path d="M6 18v-3"/><path d="M12 18v-7.5"/><path d="M18 18V6"/>',
+};
+function ic(n,cls){const p=ICONOS[n];return p?`<svg class="ic ic-${n}${cls?' '+cls:''}" viewBox="0 0 24 24" aria-hidden="true" focusable="false">${p}</svg>`:'';}
+// Emoji → icono. Solo los que hacen de icono en la app; el resto se pinta tal cual.
+const ICONO_DE={'🏆':'trophy','🎖':'trophy','🎯':'target','🔥':'flame','🧘':'leaf','🌴':'moon','💤':'moon','⚖':'scale','✅':'done','⏱':'clock','⏳':'hourglass',
+  '📈':'trend','📉':'trenddown','📊':'chart','🧠':'chart','💡':'bulb','🎉':'sparkles','✨':'sparkles','🚀':'sparkles','🔄':'refresh','🔀':'refresh','⚠':'alert','⚡':'bolt',
+  '📅':'calendar','⏰':'flag','🚶':'activity','🏃':'activity','🚴':'activity','🔧':'wrench','➕':'plus','🌱':'sprout','📝':'note','⏸':'pause','🔔':'bell','🔕':'belloff',
+  '🔆':'sun','💪':'dumbbell'};
+const _icKey=e=>String(e==null?'':e).replace(/[️‍]/g,'');
+function icE(e,cls){const n=ICONO_DE[_icKey(e)];return n?ic(n,cls):esc(e==null?'':e);}
+// Emojis de adorno al final de una frase («…No pasa nada. 💪», «Una más 🔥»): con iconos de línea sobran, se quitan
+const _IC_FIN=/\s*(?:💪|👍|✊|🎯|🧘|🌴|🔥|🎉|👋)️?\s*$/u;
+const _IC_INI=new RegExp('^\\s*('+Object.keys(ICONO_DE).join('|')+')\\uFE0F?\\s*','u');
+// Frases que nombran la escala de esfuerzo con sus caritas (las escribe el generador: «Esfuerzo: 💪 Justo, te sobran 1-2.»):
+// al pintarlas, cada carita pasa a sus barras
+function icEsf(h){return String(h==null?'':h).replace(/😌|💪|🥵/gu,m=>ic({'😌':'e1','💪':'e2','🥵':'e3'}[m]));}
+// Texto ya montado (HTML) con emojis de adorno al final de sus frases: se quitan todos
+function icSin(h){return String(h==null?'':h).replace(/\s*(?:💪|👍|✊|🎯|🧘|🌴|🔥|🎉|👋)\uFE0F?(?=\s|<|$)/gu,'');}
+function icT(t,o){
+  let s=String(t==null?'':t),pre='';const m=_IC_INI.exec(s);
+  if(m){pre=ic(ICONO_DE[m[1]])+' ';s=s.slice(m[0].length);}
+  if(!(o&&o.fin===false))s=s.replace(_IC_FIN,'');
+  return pre+(o&&o.html?s:o&&o.f?o.f(esc(s)):esc(s)); // o.f: retoque del texto ya escapado (p. ej. _nwX, que junta «80 kg»)
+}
 // ══════════════════════════════════════════════════════════
 // BIBLIOTECA DE EJERCICIOS (catálogo)
 // Una fila por ejercicio en LIB_ROWS (la genera tools/catalog/rows.js desde tools/catalog/catalog.json), 19 columnas:
@@ -15237,7 +15326,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   <div class="ob-chips">${_obChips().map(([l,st])=>`<button type="button" class="lib-chip ob-ch" onclick="obEditFromResult('${st}')">${esc(l).replace(/&nbsp;/g,NB)}</button>`).join('')}</div>${changed}
   <section class="card ob-split"><div class="ob-wk">${esc(_obWeekLine(g))}</div><p class="ob-p">${esc(pq[0]||'')}</p>
     ${typeof obSplitSheet==='function'?'<button type="button" class="ob-link" onclick="obSplitSheet()">Cambiar reparto ›</button>':''}</section>
-  <section class="ob-sec"><h2 class="ob-h2">¿Por qué esta rutina?</h2><ul class="ob-ul">${pq.slice(1,4).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+  <section class="ob-sec"><h2 class="ob-h2">¿Por qué esta rutina?</h2><ul class="ob-ul">${pq.slice(1,4).map(x=>`<li>${icEsf(esc(x))}</li>`).join('')}</ul>
     ${pq.length>4?'<button type="button" class="ob-link" onclick="obWhyAll()">Ver todo ›</button>':''}</section>
   ${av.length?`<section class="ob-sec"><h2 class="ob-h2">A tener en cuenta</h2><ul class="ob-ul ob-av">${av.slice(0,more.av?99:t.visibles).map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
     ${av.length>t.visibles?`<button type="button" class="ob-link" onclick="obMore('av')">${more.av?'Ver menos':'Ver más ('+(av.length-t.visibles)+')'}</button>`:''}</section>`:''}
@@ -15250,7 +15339,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   <section class="ob-sec"><h2 class="ob-h2">📈 Cómo vas a avanzar</h2><ul class="ob-ul">${cauto?'<li>Las primeras 4 semanas, 2 series y subidas pequeñas; después te propongo pasar a 3.</li>':''}
     <li>Cada sesión: el Coach te dice cuánto poner (primero más repeticiones, luego más peso).</li><li>Cada 4 semanas: revisas tu ciclo y te propongo hasta 3 cambios.</li><li>Si te notas cansado o te estancas: una semana suave.</li></ul></section>
   <section class="ob-sec"><h2 class="ob-h2">🧭 Tu primera semana</h2><ul class="ob-ul"><li>La primera vez que hagas cada ejercicio, elige ${kg?'un peso':'la variante'} con ${kg?'el':'la'} que te sobren ${cauto?'unas 3':'2-3'} repeticiones. Desde la segunda sesión, el Coach te dice cuánto poner.</li>
-    ${_rpeOn()?'<li>💪 Justo = te sobran 1-2. 😌 Fácil = 3 o más. 🥵 Al límite = ninguna.</li>':''}<li>Si algo duele más de 3 sobre 10 o empeora al día siguiente, cámbialo con ⇄.</li></ul></section>
+    ${_rpeOn()?`<li>${ic('e2')} Justo = te sobran 1-2. ${ic('e1')} Fácil = 3 o más. ${ic('e3')} Al límite = ninguna.</li>`:''}<li>Si algo duele más de 3 sobre 10 o empeora al día siguiente, cámbialo con ⇄.</li></ul></section>
   <section class="ob-sec"><button type="button" class="ob-fold" aria-expanded="${mmOpen}" onclick="obMore('mm')">Tu semana por músculo <span aria-hidden="true">${mmOpen?'▾':'›'}</span></button>
     ${mmOpen?`<div class="mm-bars">${mmBarsHtml(mmPlanStats(tmp,r.weeklyTarget),{})}</div>`:''}</section>
   <section class="ob-sec"><button type="button" class="ob-fold" onclick="obAvoided()">Lo que he evitado ›</button></section>
@@ -15259,7 +15348,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
     ${typeof obOther==='function'?`<div class="ob-res2"><button type="button" class="btn bs" onclick="obOther(1)">Otra propuesta</button>${(_ob.alt||0)>0?'<button type="button" class="btn bs" onclick="obOther(-1)">‹ Anterior</button>':''}<button type="button" class="ob-link" onclick="obTune()">Afinar mi rutina</button></div>`:''}</div>`;}};
 // «Ver todo»: el porqué entero, en una hoja
 function obWhyAll(){if(!_ob||!_ob.t)return;obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">¿Por qué esta rutina?</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
-  <div class="hist-sheet-body"><ul class="ob-ul">${_obPorque().map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`,'¿Por qué esta rutina?');}
+  <div class="hist-sheet-body"><ul class="ob-ul">${_obPorque().map(x=>`<li>${icEsf(esc(x))}</li>`).join('')}</ul></div>`,'¿Por qué esta rutina?');}
 // «Lo que he evitado»: molestias, material y riesgos, con su motivo
 function obAvoided(){
   if(!_ob||!_ob.g)return;const g=_ob.g,z=_ob.h.zones||{},out=[];
@@ -16058,7 +16147,7 @@ function toast(msg,ms){
   // (16c) un «Deshacer» anterior ya no vacía este aviso al cumplir sus 5 s (dejaba una caja vacía de 34 px)
   try{if(_undoToastT){clearTimeout(_undoToastT);_undoToastT=null;_lastSetAction=null;}}catch(e){}
   el.style.pointerEvents='';
-  el.textContent=msg;
+  el.innerHTML=icT(msg);
   el.classList.remove('pr');
   _toastPlace();
   el.classList.add('show');
@@ -16372,7 +16461,7 @@ function wWhen(t){
 // Tarjeta de peso (Inicio y Progreso)
 function renderWeightCard(emptyMsg){
   const pts=wSeries();
-  if(pts.length<2)return`<div class="card">${pts.length?`<div class="wc-top"><div><div class="wc-now">${wf1(pts[0].v)}<small> kg</small></div><div class="wc-sub">Primer registro · ${wFmt(pts[0].t)}</div></div></div><p class="wc-hint">Registra tu peso otro día para ver la evolución.</p>`:`<div class="empty"><div class="eic">⚖️</div><p>${emptyMsg}</p></div>`}
+  if(pts.length<2)return`<div class="card">${pts.length?`<div class="wc-top"><div><div class="wc-now">${wf1(pts[0].v)}<small> kg</small></div><div class="wc-sub">Primer registro · ${wFmt(pts[0].t)}</div></div></div><p class="wc-hint">Registra tu peso otro día para ver la evolución.</p>`:`<div class="empty"><div class="eic">${ic('scale')}</div><p>${emptyMsg}</p></div>`}
     <button class="btn bs" style="margin-top:12px" onclick="S.wmodal=true;renderWmodal()">Registrar peso de hoy</button></div>`;
   const k=wRangeKey(),rp=wInRange(pts,k),last=pts[pts.length-1],ch=last.v-rp[0].v,rate=wRate(pts),R=WRANGES.find(x=>x[0]===k);
   const vs=rp.map(p=>p.v),avg=vs.reduce((a,b)=>a+b,0)/vs.length;
@@ -16844,7 +16933,7 @@ const RT={
     // Lo importante primero: la barra recorta el final del texto en pantallas estrechas
     if(msg)msg.textContent=cardio
       ?(marked?`¡Hecho! ✓ ${t.label||''}`:`¡Tiempo cumplido! ${t.label||''}`).trim()
-      :(late&&mins>=1?`Terminó hace ${mins} min`:'¡Listo! Siguiente serie 💪');
+      :(late&&mins>=1?`Terminó hace ${mins} min`:'¡Listo! Siguiente serie');
     if(btn){btn.textContent='OK';btn.setAttribute('aria-label','Cerrar');}
     // El RPE de la serie sigue en la barra mientras se ve «¡Listo!» (se puede elegir tarde, sin otro descanso)
     this._doneT=t;this._paintRpe();
@@ -17039,7 +17128,7 @@ function setRestOverride(exId,secs){
 function restCtlHtml(ex){
   if(!_restOn())return''; // (M1) descanso entre series apagado: la tarjeta no lo enseña
   const o=_restOverrideOf(ex.id),s=getRestSecs(ex.id),eid=esc(ex.id);
-  return`<button type="button" class="lg-rest" data-ex="${eid}" onclick="openRestPicker(this.dataset.ex)" aria-label="Descanso entre series: ${fmtClock(s)}${o==null?', automático':''}. Cambiar"><span>⏱ Descanso<span class="lg-rest-x"> entre series</span></span> <b>${fmtClock(s)}</b>${o==null?'<span class="lg-rest-k">auto</span>':''}<span class="lg-rest-go" aria-hidden="true">Cambiar ›</span></button>`;
+  return`<button type="button" class="lg-rest" data-ex="${eid}" onclick="openRestPicker(this.dataset.ex)" aria-label="Descanso entre series: ${fmtClock(s)}${o==null?', automático':''}. Cambiar"><span>${ic('clock')} Descanso<span class="lg-rest-x"> entre series</span></span> <b>${fmtClock(s)}</b>${o==null?'<span class="lg-rest-k">auto</span>':''}<span class="lg-rest-go" aria-hidden="true">Cambiar ›</span></button>`;
 }
 const REST_OPTS=[45,60,75,90,105,120,150,180,240];
 let _restPickEx=null;
@@ -17176,7 +17265,7 @@ const RF={
     if(running&&!cardio&&ex&&!ex.cardio&&si!=null){
       const o=_restOverrideOf(ex.id),cur=getRestSecs(ex.id),adj=Math.round(+rt.adj)||0,save=Math.round((+rt.base||cur)+adj);
       const canSave=adj!==0&&save>=REST_MIN_S&&save<=REST_MAX_S&&save!==cur;
-      this._set('rf-ovr',`<div class="rf-ovr-t">⏱ Este ejercicio: <b>${fmtClock(cur)}</b>${o==null?' · auto':''}</div>${canSave
+      this._set('rf-ovr',`<div class="rf-ovr-t">${ic('clock')} Este ejercicio: <b>${fmtClock(cur)}</b>${o==null?' · auto':''}</div>${canSave
         ?`<button type="button" class="save" id="rf-save" onclick="rfSaveRest()">Usar ${fmtClock(save)} siempre</button>`
         :`<button type="button" id="rf-change" data-ex="${esc(ex.id)}" onclick="openRestPicker(this.dataset.ex)">Cambiar</button>`}`);
     }else this._set('rf-ovr',running&&cardio?`<div class="rf-ovr-t">Al terminar se marca como hecho ✓</div>`:'');
@@ -17188,7 +17277,7 @@ const RF={
       const nx=_rfTarget(t);let key='',act,goTxt,h;
       if(!nx){
         act='save';goTxt='Guardar';
-        h=`<div class="rf-nl">Siguiente</div><div class="rf-nn">Fuerza completada 🎉</div><div class="rf-ns">Guarda tu entreno cuando termines</div>`;
+        h=`<div class="rf-nl">Siguiente</div><div class="rf-nn">Fuerza completada ${ic('sparkles')}</div><div class="rf-ns">Guarda tu entreno cuando termines</div>`;
       }else if(nx.cardio){
         act='open';goTxt='Ir al cardio';key=exAnimKey(nx.ex);
         h=`<div class="rf-nl">Siguiente ejercicio</div><div class="rf-nn">${esc(nx.ex.n)}</div><div class="rf-ns">${esc(nx.ex.r||'')}</div>`;
@@ -17199,7 +17288,7 @@ const RF={
           const g=_ghostTxt(getLastW(nx.ex.id),nx.i);
           // (09) pista de récord para esa serie («🏆 Haz 11 reps para nuevo récord»)
           const lv=prLive(nx.ex,rows),ph=lv.next===nx.i?prHintTxt(lv.hint):'';
-          h=`<div class="rf-nl">Siguiente serie</div><div class="rf-nn">Serie ${nx.i+1}/${rows.length} · <span class="rf-nv">${_nwX(esc(val))}</span></div>${g?`<div class="rf-ns">${esc(g)}</div>`:''}${ph?`<div class="rf-ns rf-pr">${esc(ph)}</div>`:''}`;
+          h=`<div class="rf-nl">Siguiente serie</div><div class="rf-nn">Serie ${nx.i+1}/${rows.length} · <span class="rf-nv">${_nwX(esc(val))}</span></div>${g?`<div class="rf-ns">${esc(g)}</div>`:''}${ph?`<div class="rf-ns rf-pr">${icT(ph)}</div>`:''}`;
         }else{
           key=exAnimKey(nx.ex);
           h=`<div class="rf-nl">Siguiente ejercicio</div><div class="rf-nn">${esc(nx.ex.n)}</div><div class="rf-ns">Serie ${nx.i+1}/${rows.length} · <b>${_nwX(esc(val))}</b></div>`;
@@ -17217,7 +17306,7 @@ const RF={
       const num=this._el('rf-num'),arc=this._el('rf-arc'),of=this._el('rf-of'),ring=this._el('rf-ring');
       if(num){num.textContent='¡Listo!';num.classList.remove('warn');}
       if(arc){arc.style.strokeDasharray=RF_CIRC;arc.style.strokeDashoffset=0;arc.classList.remove('warn');}
-      if(of)of.textContent=cardio?'Cardio terminado ✓':'A por la siguiente 💪';
+      if(of)of.textContent=cardio?'Cardio terminado ✓':'A por la siguiente';
       if(ring)ring.setAttribute('aria-label',cardio?'Cardio terminado':'Descanso terminado');
     }
   },
@@ -17379,11 +17468,11 @@ function warmupBlockHtml(ex){
   if(!wu||(S.warmups[ex.id]&&S.warmups[ex.id]._skipped))return'';
   const w=S.warmups[ex.id]||{};
   if(wu.every((_,i)=>w[i]))return`<div class="warmup-block" style="opacity:.6">
-    <div class="warmup-h"><span class="warmup-h-l">🔥 Calentamiento ✓</span></div>
+    <div class="warmup-h"><span class="warmup-h-l">${ic('flame')} Calentamiento ✓</span></div>
   </div>`;
   return`<div class="warmup-block">
     <div class="warmup-h">
-      <span class="warmup-h-l">🔥 Calentamiento sugerido<span style="opacity:.8">${NB}·</span> <span style="font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8;white-space:nowrap">${esc(getWarmupTarget(ex))} kg</span></span>
+      <span class="warmup-h-l">${ic('flame')} Calentamiento sugerido<span style="opacity:.8">${NB}·</span> <span style="font-family:'DM Sans',sans-serif;text-transform:none;letter-spacing:0;font-weight:500;opacity:.8;white-space:nowrap">${esc(getWarmupTarget(ex))} kg</span></span>
       <button class="warmup-skip" data-ex="${esc(ex.id)}" onclick="skipWarmup(this.dataset.ex)">Saltar</button>
     </div>
     ${wu.map((s,i)=>`<div class="warmup-row">
@@ -17607,8 +17696,8 @@ function setRowsHtml(ex,p,rows){
     const n=r.i+1,rv=_rpeOn()?r.rpe:0,rpeA=rv===1?' · fácil':rv===2?' · justo':rv===3?' · al límite':''; // (M2) apagado: sin el color ni el texto del esfuerzo
     const pj=r.done?live.flags[r.i]||null:null;
     const g=pj?'':_ghostTxt(lw,r.i);
-    const prLine=pj?`<div class="lg-pr got">🏆 ${esc(prTxt(pj))}</div>`
-      :r.i===live.next?`<div class="lg-pr hint" data-set="${r.i}"${live.hint?'':' hidden'}>${esc(prHintTxt(live.hint))}</div>`:'';
+    const prLine=pj?`<div class="lg-pr got">${ic('trophy')} ${esc(prTxt(pj))}</div>`
+      :r.i===live.next?`<div class="lg-pr hint" data-set="${r.i}"${live.hint?'':' hidden'}>${icT(prHintTxt(live.hint))}</div>`:'';
     const wNeed=r.done&&!bw&&!(r.w>0);
     let repsCell;
     if(K.td){
@@ -17657,11 +17746,11 @@ function _refreshSets(ex,skipInp){
   const h=box.querySelector('.need-hint');if(h)h.hidden=!(!bw&&rows.some(r=>r.done&&!(r.w>0)));
   // (09) Pista de récord de la siguiente serie (cambia con el peso y las reps) y el dorado de las hechas
   {const lv=prLive(ex,rows),he=box.querySelector('.lg-pr.hint');
-    if(he){const t=prHintTxt(lv.hint);if(he.textContent!==t)he.textContent=t;he.hidden=!t;}
+    if(he){const t=prHintTxt(lv.hint);if(he.dataset.t!==t){he.dataset.t=t;he.innerHTML=icT(t);}he.hidden=!t;}
     rows.forEach(r=>{if(!r.done)return;const row=box.querySelector(`.lg-row[data-set="${r.i}"]`);if(!row)return;
       const on=!!lv.flags[r.i];row.classList.toggle('pr',on);const ck=row.querySelector('.lg-ck');if(ck)ck.classList.toggle('pr',on);
       const got=row.nextElementSibling&&row.nextElementSibling.classList.contains('lg-pr')?row.nextElementSibling:null;
-      if(got&&got.classList.contains('got')){got.hidden=!on;if(on)got.textContent='🏆 '+prTxt(lv.flags[r.i]);}});}
+      if(got&&got.classList.contains('got')){got.hidden=!on;if(on)got.innerHTML=ic('trophy')+' '+esc(prTxt(lv.flags[r.i]));}});}
   const nx=rows.find(r=>!r.done),tag=box.querySelector('.sug-tag');
   if(tag&&p&&nx){const tv=_rowVal(nx,p);tag.textContent=presTagTxt(p,tv,nx.w);tag.className='sug-tag '+presTagCls(p,tv,nx.w);}
   const la=card.querySelector('.la-slot');if(la)la.innerHTML=liveAdjHtml(ex,p);
@@ -17754,7 +17843,7 @@ function renderNextBar(){
       <button type="button" class="nb-go" id="nb-go" onclick="nbDone()" aria-label="Marcar hecha la serie ${t.i+1} de ${esc(t.ex.n)}: ${esc(val)}">✓ Hecho</button>`;
   }else{
     const pend=day.ex.filter(e=>e.cardio&&!_exComplete(e));
-    h=`<div class="nb-info"><span class="nb-t">Fuerza completada 🎉</span><span class="nb-s">${pend.length?'Te queda: '+esc(pend[0].n):'Guarda tu entreno'}</span></div>
+    h=`<div class="nb-info"><span class="nb-t">Fuerza completada ${ic('sparkles')}</span><span class="nb-s">${pend.length?'Te queda: '+esc(pend[0].n):'Guarda tu entreno'}</span></div>
       <button type="button" class="nb-go" id="nb-go" onclick="finishSession()">Guardar</button>`;
   }
   if(el.innerHTML!==h)el.innerHTML=h;
@@ -17951,7 +18040,7 @@ function showUndoToast(label,onUndo,cls,ms){ // (E10b) ms: cuánto se ve (por de
   const el=document.getElementById('toast');
   if(!el)return;
   // (16) «80 kg», «12 reps», «45 s» (y «1RM est. 86.5 kg») no se parten entre líneas (el texto no cambia: solo se envuelven)
-  const lbl=_nwX(esc(label)); // (18) y «× 10» de «15 kg × 10» junto
+  const lbl=icT(label,{f:_nwX}); // (18) y «× 10» de «15 kg × 10» junto; el emoji que abre el aviso («🏆 Récord…»), como icono
   el.innerHTML=`<span style="margin-right:14px">${lbl}</span><button id="undo-btn" style="background:transparent;border:1px solid var(--green);color:var(--green);border-radius:6px;padding:3px 10px;font-size:13px;font-weight:600;cursor:pointer;pointer-events:auto">Deshacer</button>`;
   el.classList.toggle('pr',cls==='pr');
   _toastPlace();
@@ -18098,7 +18187,7 @@ function _rpeTargetFor(t){
 }
 const RPE_CHIPS=[[1,'😌','Fácil','Fácil'],[2,'💪','Justo','Justo'],[3,'🥵','Límite','Al límite']];
 function rpeChipsHtml(lvl,big){
-  return RPE_CHIPS.map(([n,ic,sh,l])=>`<button type="button" class="rpe-chip r${n}" data-l="${n}" aria-pressed="${lvl===n}" aria-label="${l}" onclick="setRpe(${n})"><i aria-hidden="true">${ic}</i><span>${big?l:sh}</span></button>`).join('');
+  return RPE_CHIPS.map(([n,,sh,l])=>`<button type="button" class="rpe-chip r${n}" data-l="${n}" aria-pressed="${lvl===n}" aria-label="${l}" onclick="setRpe(${n})"><i aria-hidden="true">${ic('e'+n)}</i><span>${big?l:sh}</span></button>`).join('');
 }
 // Descanso según el esfuerzo, sobre el del ejercicio (el guardado en su descanso si lo hay: base)
 function _rpeRest(level,exId,t){
@@ -18150,7 +18239,7 @@ function _refreshSugSlot(card,id){
     const slot=card&&card.isConnected?card.querySelector('.sug-slot'):null;
     if(!slot)return;
     const g=getSug(id);
-    slot.innerHTML=g?`<div class="sug ${g.t}">${_nwX(g.m)}</div>`:'';
+    slot.innerHTML=g?`<div class="sug ${g.t}">${_nwX(icSin(g.m))}</div>`:'';
   },250);
 }
 function logW(){
@@ -18222,7 +18311,7 @@ function openFinishModal(doneEx,totalEx){
   const note=rs&&rs.session.note?String(rs.session.note).slice(0,500):'';
   const nSug=miss.filter(m=>m.sug!=null).length,anySug=nSug>0;
   const missHtml=miss.length?`<div class="fin-miss" id="fin-miss">
-      <div class="fin-miss-h">⚠️ ${miss.length===1?'Falta el peso en 1 ejercicio':`Falta el peso en ${miss.length} ejercicios`}</div>
+      <div class="fin-miss-h">${ic('alert')} ${miss.length===1?'Falta el peso en 1 ejercicio':`Falta el peso en ${miss.length} ejercicios`}</div>
       <div class="fin-miss-p">Marcaste series sin escribir el peso y no contarían en tu progreso. ${nSug>1?'Usa los sugeridos, escribe otros aquí o revísalos.':anySug?'Usa el sugerido, escribe otro aquí o revísalo.':miss.length>1?'Escríbelos aquí o revísalos.':'Escríbelo aquí o revísalo.'}</div>
       ${miss.map(m=>`<div class="fin-miss-row">
         <div class="fin-miss-n">${esc(m.ex.n)}<small>${m.done} serie${m.done!==1?'s':''}${m.repsLbl?` · ${esc(m.repsLbl)}`:''}${m.last!=null?` · última ${m.last} kg`:' · sin historial'}</small></div>
@@ -19279,14 +19368,14 @@ function _fatBarsHtml(wk){
   const max=Math.max(...wk.map(w=>w.total)),lbl=w=>{const d=new Date(w.start);return`${d.getDate()} ${MONTHS[d.getMonth()].toLowerCase()}`;};
   // (13e) La leyenda solo nombra lo que hay en las barras (niveles con series y semanas marcadas)
   const L=[[1,'Fácil'],[2,'Justo'],[3,'Al límite'],[0,'Sin marcar']].filter(([k])=>wk.some(w=>w.c[k]));
-  const marks=[wk.some(w=>w.kind==='deload')?'🧘 descarga':'',wk.some(w=>w.kind==='rest')?'🌴 descanso':''].filter(Boolean).join(' · ');
+  const marks=[wk.some(w=>w.kind==='deload')?ic('leaf')+' descarga':'',wk.some(w=>w.kind==='rest')?ic('moon')+' descanso':''].filter(Boolean).join(' · ');
   const kTxt={deload:'semana de descarga',rest:'semana de descanso'};
   const aria='Esfuerzo por semana, últimas 8 semanas: '+wk.map(w=>`${w.now?'esta semana':'semana del '+lbl(w)}${w.kind?' ('+kTxt[w.kind]+')':''}: ${w.total?L.filter(([k])=>w.c[k]).map(([k,l])=>`${w.c[k]} ${l.toLowerCase()}`).join(', '):'sin series'}`).join('; ');
   const cols=wk.map(w=>`<div class="fat-col${w.total?'':' empty'}${w.now?' now':''}">
       <span class="fat-n">${w.total||'—'}</span>
       ${w.total?`<div class="fat-st" style="height:${Math.max(4,Math.round(w.total/max*100))}%">${[0,3,2,1].filter(k=>w.c[k]).map(k=>`<i class="r${k}" style="flex:${w.c[k]} 1 0"></i>`).join('')}</div>`:'<div class="fat-st none"></div>'}
     </div>`).join('');
-  const lbls=wk.map(w=>`<span class="${w.now?'now':''}">${w.now?'Esta':esc(lbl(w))}${w.kind?`<i title="${kTxt[w.kind]}">${w.kind==='rest'?'🌴':'🧘'}</i>`:''}</span>`).join('');
+  const lbls=wk.map(w=>`<span class="${w.now?'now':''}">${w.now?'Esta':esc(lbl(w))}${w.kind?`<i title="${kTxt[w.kind]}">${ic(w.kind==='rest'?'moon':'leaf')}</i>`:''}</span>`).join('');
   const sum={1:0,2:0,3:0};wk.forEach(w=>{sum[1]+=w.c[1];sum[2]+=w.c[2];sum[3]+=w.c[3];});
   return`<div class="fat-bars" id="fat-bars" role="img" aria-label="${esc(aria)}">${cols}</div>
     <div class="fat-bl" aria-hidden="true">${lbls}</div>
@@ -19385,7 +19474,7 @@ function deloadRecoHtml(rec){
   const note=plan==='weight'?`Lo que no tiene peso que bajar (peso corporal, bandas) va con menos series; lo de tiempo o distancia sin peso, con un 15${NB}% menos.`
     :'Mismo peso que ahora: solo bajan las series. Los de 1 serie se quedan igual, más suaves.';
   return`<div class="card dlr-card" id="dl-reco" role="region" aria-labelledby="dlr-t" data-src="${rec.src}" data-plan="${plan}">
-    <div class="dlr-h"><span class="dlr-ic" aria-hidden="true">🧘</span><div class="dlr-hb">
+    <div class="dlr-h"><span class="dlr-ic" aria-hidden="true">${ic('leaf')}</span><div class="dlr-hb">
       <div class="dlr-tag${rec.src==='fatigue'?' hot':''}">Recomendado · ${_nwUnits(esc(rec.tag))}</div>
       <div class="dlr-t" id="dlr-t">Semana de descarga</div></div></div>
     <div class="dlr-why">${_nwUnits(esc(rec.why))}</div>
@@ -20431,7 +20520,7 @@ function renderCoach(){
     return`
     <div class="topbar"><h1>Coach</h1><div class="sub">Tu entrenador personal</div></div>
     <div class="coach-hero">
-      <div class="coach-hero-icon">🧠</div>
+      <div class="coach-hero-icon">${ic('chart')}</div>
       <div class="coach-hero-title">Analizando tu progreso</div>
       <div class="coach-hero-sub">Después de <strong style="color:var(--green)">${remaining}</strong> ${remaining===1?'sesión':'sesiones'} más, el coach podrá analizar tu patrón de entrenamiento y darte recomendaciones personalizadas.</div>
     </div>
@@ -20441,28 +20530,28 @@ function renderCoach(){
     ${mmCoachCardHtml()}
     <div class="sh">Qué hace el coach</div>
     <div class="insight">
-      <div class="insight-ic good">📊</div>
+      <div class="insight-ic good">${ic('chart')}</div>
       <div class="insight-body">
         <div class="insight-t">Analiza tu progresión</div>
         <div class="insight-d">Detecta qué ejercicios progresan, cuáles se estancan, y tu consistencia semanal.</div>
       </div>
     </div>
     <div class="insight">
-      <div class="insight-ic good">🎯</div>
+      <div class="insight-ic good">${ic('target')}</div>
       <div class="insight-body">
         <div class="insight-t">Te dice qué peso poner</div>
         <div class="insight-d">En cada ejercicio: primero más reps y luego más peso, con los saltos de tu equipo${_rpeOn()?' y según tu esfuerzo':''}.</div>
       </div>
     </div>
     <div class="insight">
-      <div class="insight-ic info">🔄</div>
+      <div class="insight-ic info">${ic('refresh')}</div>
       <div class="insight-body">
         <div class="insight-t">Renueva tu plan cada 4&nbsp;semanas</div>
         <div class="insight-d">Te propone cambios concretos (series, esquema o ejercicio) y semanas de descarga cuando toca. Tú decides si los aplicas.</div>
       </div>
     </div>
     <div class="insight">
-      <div class="insight-ic warn">💡</div>
+      <div class="insight-ic warn">${ic('bulb')}</div>
       <div class="insight-body">
         <div class="insight-t">Celebra tus logros</div>
         <div class="insight-d">Detecta récords personales, hitos de consistencia, y te da contexto de cuándo has logrado algo importante.</div>
@@ -20525,7 +20614,7 @@ function renderCoach(){
   ${lightBannerHtml('coach')}
 
   ${legacy?`<div class="card legacy-dl">
-    <div class="legacy-dl-t">🔧 Tu plan sigue con series reducidas</div>
+    <div class="legacy-dl-t">${ic('wrench')} Tu plan sigue con series reducidas</div>
     <div class="legacy-dl-d">Una descarga anterior bajó tus series y nunca se deshizo. ¿Las devuelvo a lo normal?</div>
     <div class="rec-diff" style="margin-bottom:10px">${legacy.fixes.slice(0,6).map(f=>`<div class="rec-diff-row"><span class="sym add">↑</span><span>${esc(f.n)}: ${f.from} → ${f.to} series</span></div>`).join('')}${legacy.fixes.length>6?`<div class="rec-diff-row"><span class="sym add">+</span><span>y ${legacy.fixes.length-6} más</span></div>`:''}</div>
     <div style="display:flex;gap:8px"><button class="btn bp" style="flex:1" onclick="coach_fixLegacyDeload(true)">Restaurar series</button><button class="btn bs" style="width:120px" onclick="coach_fixLegacyDeload(false)">Dejar así</button></div>
@@ -20537,7 +20626,7 @@ function renderCoach(){
   ${deloadRecoHtml(dlReco)}
 
   ${cycle.readyForReview?`<div class="cta-banner" role="button" tabindex="0" onclick="coach_applyRecommendations()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();coach_applyRecommendations()}">
-    <div class="cta-banner-t">${cycle.overdue?`⏰ Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:'✨ Tu análisis de ciclo está listo'}</div>
+    <div class="cta-banner-t">${cycle.overdue?`${ic('flag')} Tu ciclo de ${CYCLE_WEEKS} semanas ha terminado`:ic('sparkles')+' Tu análisis de ciclo está listo'}</div>
     <div class="cta-banner-d">${cycle.overdue?'Ciérralo para recibir tus propuestas y empezar uno nuevo':'Revisa el análisis abajo y cierra el ciclo para recibir tus propuestas'}</div>
   </div>`:''}
 
@@ -20585,10 +20674,10 @@ function renderCoach(){
   ${coachPlanCardHtml()}
 
   <div class="sh">Análisis del ciclo</div>
-  ${insights.length===0?`<div class="insight"><div class="insight-ic info">⏳</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
-    insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${i.ic}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${_nwUnits(i.d)}</div></div></div>`).join('')}
+  ${insights.length===0?`<div class="insight"><div class="insight-ic info">${ic('hourglass')}</div><div class="insight-body"><div class="insight-t">Recopilando datos</div><div class="insight-d">El coach analizará patrones cuando tengas más sesiones registradas.</div></div></div>`:
+    insights.map(i=>`<div class="insight"><div class="insight-ic ${i.type}">${icE(i.ic)}</div><div class="insight-body"><div class="insight-t">${i.t}</div><div class="insight-d">${_nwUnits(i.d)}</div></div></div>`).join('')}
 
-  ${pend.length?`<div class="sh" id="coach-props">💡 El Coach propone — tú decides</div>
+  ${pend.length?`<div class="sh" id="coach-props">${ic('bulb')} El Coach propone — tú decides</div>
   ${onlyDlRow?'':`<div class="prop-hint">${blockedAll?'Durante la descarga no se cambia el plan: podrás aplicarlas al terminar.'
     :`Máximo ${PROP_MAX_TOTAL} cambios por ciclo y 1 por día de rutina${pv.appliedCount?` · llevas ${pv.appliedCount}`:''}.${blockedSome?' Lo que afecta a la descarga en curso podrás aplicarlo al terminarla.':''}`}</div>`}
   ${pv.active.map(p=>p.type!=='deload'?_proposalCardHtml(p,_proposalBlocked(p)):dlReco?_propDlLinkHtml():dlWait?_propDlWaitHtml():_proposalCardHtml(p,_proposalBlocked(p))).join('')}
@@ -20604,9 +20693,9 @@ function renderCoach(){
       <button class="btn bp" onclick="coach_applyRecommendations()">Cerrar ciclo e iniciar uno nuevo</button>
     </div>`:
     (cycle.weeks<CYCLE_WEEKS*0.85?`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'Faltan unas':'Falta alrededor de'} <strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
+    <div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">En camino al próximo análisis</div><div class="insight-d">${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'Faltan unas':'Falta alrededor de'} <strong>${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))}</strong> semana${Math.max(1,Math.ceil(CYCLE_WEEKS*0.85-cycle.weeks))!==1?'s':''} para el análisis del ciclo. Mientras tanto, sigue el plan actual.</div></div></div>`
     :`<div class="sh">Recomendaciones</div>
-    <div class="insight"><div class="insight-ic info">📅</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`)}
+    <div class="insight"><div class="insight-ic info">${ic('calendar')}</div><div class="insight-body"><div class="insight-t">Casi listo</div><div class="insight-d">Llevas ${cycle.sessions.length} ${cycle.sessions.length===1?'sesión':'sesiones'} en este ciclo: con ${Math.max(1,(cycle.overdue?3:CYCLE_MIN_SESSIONS)-cycle.sessions.length)} más tendrás su análisis.</div></div></div>`)}
 
   ${S.mesocycles&&S.mesocycles.length>0?`<div class="sh">Ciclos anteriores</div>
     ${S.mesocycles.filter(_isPlainObj).map((m,i)=>({m,n:i+1})).reverse().slice(0,3).map(({m,n})=>`<div class="mesocycle-log">
@@ -20636,7 +20725,7 @@ function _proposalBlocked(p){
 // ciclo con el mismo título queda en un enlace a ella (empezarla desde la tarjeta también resuelve la propuesta)
 function _propDlLinkHtml(){
   return`<button type="button" class="coach-entry dlr-entry prop-dl-link" onclick="goDeloadReco()">
-      <span class="coach-entry-ic" aria-hidden="true">🧘</span>
+      <span class="coach-entry-ic" aria-hidden="true">${ic('leaf')}</span>
       <span class="coach-entry-t">Semana de descarga<small>Ya la tienes arriba: elige el plan y empiézala allí</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
 }
@@ -20644,7 +20733,7 @@ function _propDlLinkHtml(){
 // oferta es el botón del medidor, al que lleva este enlace
 function _propDlWaitHtml(){
   return`<button type="button" class="coach-entry dlr-entry prop-dl-wait" onclick="goFatGo()">
-      <span class="coach-entry-ic" aria-hidden="true">🧘</span>
+      <span class="coach-entry-ic" aria-hidden="true">${ic('leaf')}</span>
       <span class="coach-entry-t">Semana de descarga<small>En espera: te la vuelvo a proponer el ${esc(_dlDayTxt(S.dlRecoSnoozeTs))}. Si cambias de idea, empiézala en «Fatiga y esfuerzo».</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
 }
@@ -20652,7 +20741,7 @@ function _proposalCardHtml(p,blocked){
   const pid=esc(p.id),where=_propWhere(p),pr=_propPrio(p);
   return`<div class="proposal-card" data-pid="${pid}">
     <div class="proposal-head">
-      <div class="proposal-ic" aria-hidden="true">${esc(p.ic||'💡')}</div>
+      <div class="proposal-ic" aria-hidden="true">${icE(p.ic||'💡')}</div>
       <div style="min-width:0;flex:1">
         <div class="proposal-tag p${pr<=1?'w':pr===2?'v':'g'}">${esc(p.tag||'Propuesta')}${where?` · ${esc(where)}`:''}</div>
         <div class="proposal-t">${esc(p.title||'')}</div>
@@ -20790,7 +20879,7 @@ function _hoyChip(ex,p,live){
   if(live){const n=Math.max(0,parseInt(ex.s)||0),c=countSetsDone(ex.id,n);
     if(n&&c>=n)return`<span class="hoy-tg ok">✓ hecho</span>`;
     if(c>0)return`<span class="hoy-tg part" role="img" aria-label="${c} de ${n} series">${c}/${n}</span>`;}
-  if(p)return`<span class="hoy-tg ${presKCls(p)}" role="img" aria-label="Objetivo: ${_presIsKg(p)&&!p.up?`${esc(kgTxt(p.weight))} kilos por ${p.reps}`:esc(presValTxt(p))}, ${esc(presWord(p))}"><i aria-hidden="true">${presIc(p)}</i><b class="tgl-v">${esc(presShortTxt(p))}</b></span>`;
+  if(p)return`<span class="hoy-tg ${presKCls(p)}" role="img" aria-label="Objetivo: ${_presIsKg(p)&&!p.up?`${esc(kgTxt(p.weight))} kilos por ${p.reps}`:esc(presValTxt(p))}, ${esc(presWord(p))}"><i aria-hidden="true">${icE(presIc(p))}</i><b class="tgl-v">${esc(presShortTxt(p))}</b></span>`;
   // Sin historial: cómo se mide (peso corporal, solo reps, por tiempo, distancia) o «nuevo»
   const lt=exLT(ex);
   return`<span class="hoy-tg new">${lt==='bw'?'peso corporal':lt==='r'?'reps':lt==='t'?'por tiempo':lt==='d'?'distancia':'nuevo'}</span>`;
@@ -20805,7 +20894,7 @@ function _hoyRowHtml(ex,p,sel,live){
 function _hoyCarHtml(info,live){
   if(!info.car.length)return'';
   const parts=info.car.map(e=>{const d=live&&_exComplete(e);return`<b${d?' class="ok"':''}>${esc(String(e.r==null?'':e.r))}${d?' ✓':''}</b>`;}).join(' + ');
-  return`<div class="hoy-car"><span aria-hidden="true">${esc(info.car[0].ic||'🚶')}</span><span>Cardio ${parts}${info.car[0].eq?` · ${esc(info.car[0].eq)}`:''}</span></div>`;
+  return`<div class="hoy-car"><span aria-hidden="true">${ic('activity')}</span><span>Cardio ${parts}${info.car[0].eq?` · ${esc(info.car[0].eq)}`:''}</span></div>`;
 }
 function hoyState(){
   const aw=getActiveWorkout();if(aw)return{k:'live',aw,dk:aw.day};
@@ -20867,7 +20956,7 @@ function _hoyTrainHtml(st){
     cta=`<div class="hoy-cta hoy-acts"><button class="btn bp hoy-go" onclick="resumeWorkout()" aria-label="Continuar el entreno: ${cd} de ${plural(ct,cu)}">▶ Continuar (${cd}/${ct})</button><button class="btn bs" onclick="discardWorkout()">Descartar</button></div>`;
   }else{
     if(st.k==='extra'){kick='Sesión extra <span>· opcional</span>';
-      head=`<div class="hoy-note"><b>¡Semana completa! ${Math.min(st.wk,st.target)}/${st.target}</b> 🎉 Si te apetece, una más.</div>`;}
+      head=`<div class="hoy-note"><b>¡Semana completa! ${Math.min(st.wk,st.target)}/${st.target}</b> Si te apetece, una más.</div>`;}
     else if(!tot)kick='Tu primera sesión';
     cta=`<div class="hoy-cta"><button class="btn ${st.k==='extra'?'bs':'bp'} hoy-go" data-dk="${esc(st.dk)}" onclick="hoyStart(this.dataset.dk)">Empezar ${esc(info.label)}${st.k==='extra'?' (extra)':''} →</button></div>`;
     const last=[...(S.sessions||[])].reverse().find(s=>s&&sessOfDay(s,st.dk)&&s.ts); // (E1b) por su id de día
@@ -20905,7 +20994,7 @@ function _hoyDoneHtml(st){
     <div class="hoy-k">Hecho hoy ✓</div>
     <div class="hoy-t"><span class="pill p${esc(String(s.day).toLowerCase())}">${esc(lbl)}</span><span class="hoy-nm">${esc(snm)}</span></div>
     <div class="hoy-kpis">${kp('Duración',dur==null?'—':dur,dur==null?'':'min')}${kp('Series',D.sets,'')}${D.kgSets||!D.sets?kp('Tonelaje',_kgK(D.ton),'kg'):kp('Tonelaje','—','')}</div>
-    <button class="hoy-sum" data-ts="${+s.ts}" onclick="openSessionSummary(+this.dataset.ts)"><span>Ver el resumen de hoy</span>${npr?`<small>🏆 ${plural(npr,'récord')}</small>`:''}<span aria-hidden="true">›</span></button>
+    <button class="hoy-sum" data-ts="${+s.ts}" onclick="openSessionSummary(+this.dataset.ts)"><span>Ver el resumen de hoy</span>${npr?`<small>${ic('trophy')} ${plural(npr,'récord')}</small>`:''}<span aria-hidden="true">›</span></button>
     ${ni?`<div class="hoy-nx">
       <div class="hoy-k">Próxima sesión</div>
       <div class="hoy-t"><span class="pill p${esc(String(nk).toLowerCase())}">${esc(ni.label)}</span><span class="hoy-nm">${esc(ni.name)}</span></div>
@@ -20921,7 +21010,7 @@ function _hoyRestHtml(st){
   const left=restDaysLeft(st.rest),wk=getWeekSessions(),info=_dayLive(getPlan()[st.dk])?hoyDayInfo(st.dk):null; // (E1b) nunca un día vacío
   return`<div class="card hoy k-rest" id="hoy" data-dk="${esc(st.dk)}">
     ${lightBannerHtml('hoy')}
-    <div class="hoy-rest-h"><span class="hoy-rest-ic" aria-hidden="true">🌴</span><div class="hoy-rest-b">
+    <div class="hoy-rest-h"><span class="hoy-rest-ic" aria-hidden="true">${ic('moon')}</span><div class="hoy-rest-b">
       <div class="hoy-k">Semana de descanso</div>
       <div class="hoy-t"><span class="hoy-nm">Hoy toca recuperar</span></div>
       <div class="hoy-m">${left>0?`Quedan <span class="nw">${plural(left,'día')}</span>`:'Termina hoy'} · el Coach no penaliza tu constancia</div>
@@ -20984,9 +21073,7 @@ function renderDash(){
   // (10) Saludo según la hora (antes rotaba con el nº de sesiones); después de entrenar, «¡Buen trabajo hoy! 💪»
   const now0=new Date(nowTs0),hr=now0.getHours();
   const greet=trainedToday?'¡Buen trabajo hoy!':dashGreet(hr);
-  const emo=trainedToday?'💪':'👋';
-  // El emoji va pegado a la última palabra (nunca solo en la segunda línea)
-  const gSp=greet.lastIndexOf(' '),greetHtml=gSp>0?`${greet.slice(0,gSp)} <span style="white-space:nowrap">${greet.slice(gSp+1)} ${emo}</span>`:`<span style="white-space:nowrap">${greet} ${emo}</span>`;
+  const greetHtml=greet; // sin emoji
   const today0=`${HOY_WD[now0.getDay()]} ${now0.getDate()} ${MONTHS[now0.getMonth()]}`;
   const rest0=getActiveRest();
   // (14e) los primeros días del mes, la oferta del resumen va en el sitio de la fecha (a la vista sin desplazar)
@@ -21005,8 +21092,8 @@ function renderDash(){
   ${rest0?'':`<div class="sh">Esta semana</div>
   <div class="card">
     <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px">
-      <span style="font-size:15px;font-weight:600;min-width:0">${Math.min(wk,target)} de <span class="nw">${plural(target,'sesión','sesiones')}</span>${wk>target?` <span style="white-space:nowrap">· +${wk-target} extra 🔥</span>`:''}</span>
-      <span style="font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;color:${wk>=target?'var(--green)':wk>0?'var(--amber)':'var(--text2)'}">${wk>=target?'¡Semana completa! 🎉':wk>0?(target-wk===1?'Una más 🔥':`${target-wk} más 💪`):'Sin sesiones aún'}</span>
+      <span style="font-size:15px;font-weight:600;min-width:0">${Math.min(wk,target)} de <span class="nw">${plural(target,'sesión','sesiones')}</span>${wk>target?` <span style="white-space:nowrap">· +${wk-target} extra</span>`:''}</span>
+      <span style="font-size:13px;font-weight:500;white-space:nowrap;flex-shrink:0;color:${wk>=target?'var(--green)':wk>0?'var(--amber)':'var(--text2)'}">${wk>=target?'¡Semana completa!':wk>0?(target-wk===1?'Una más':`${target-wk} más`):'Sin sesiones aún'}</span>
     </div>
     <div class="pbar"><div class="pinner" style="width:${Math.min(100,Math.round(wk/target*100))}%"></div></div>
     <div class="wgrid" role="group" aria-label="Días de esta semana">${weekGrid()}</div>
@@ -21021,8 +21108,8 @@ function renderDash(){
     if(!w)return''; // función nunca debería devolver null ahora, pero por seguridad
     return`<div class="week-card">
       <div class="week-card-h">
-        <div class="week-card-t">📈 ${w.title}</div>
-        <span class="week-card-tag">${w.tag}</span>
+        <div class="week-card-t">${ic('trend')} ${w.title}</div>
+        <span class="week-card-tag">${icSin(w.tag)}</span>
       </div>
       <div class="week-card-d">${w.description}</div>
       <div class="week-stats">
@@ -21050,7 +21137,7 @@ function renderDash(){
       <div class="sess-top">
         <span class="pill p${esc(String(s.day).toLowerCase())}" style="font-size:12px;padding:3px 9px">${esc(lbl)}</span>
         <span class="sess-f">${esc(focus)}</span>
-        ${npr?`<span class="sess-pr" aria-hidden="true">🏆 ${npr}</span>`:''}
+        ${npr?`<span class="sess-pr" aria-hidden="true">${ic('trophy')} ${npr}</span>`:''}
         <span style="font-size:13px;color:var(--text3);font-family:'DM Sans',sans-serif;white-space:nowrap">${esc(s.date||'')}${dur}</span>
         <span class="sess-go" aria-hidden="true">›</span>
       </div>
@@ -21069,7 +21156,7 @@ function dashCoachHtml(){
   // (13d) Semana de descarga recomendada: se elige y empieza en el Coach
   const rec=(S.sessions||[]).length>=CYCLE_MIN_SESSIONS?coach_deloadReco():null;
   if(rec)h+=`<button class="coach-entry dlr-entry" onclick="goDeloadReco()">
-      <span class="coach-entry-ic" aria-hidden="true">🧘</span>
+      <span class="coach-entry-ic" aria-hidden="true">${ic('leaf')}</span>
       <span class="coach-entry-t">Te toca una semana de descarga<small>${_nwUnits(esc(rec.tag))} · elige el plan en el Coach</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
   if((S.pendingCoachProposals||[]).length&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS){
@@ -21077,7 +21164,7 @@ function dashCoachHtml(){
     const dlOff=!!rec||_dlSnoozedOffer();
     const n=coach_pendingView().active.filter(p=>!(dlOff&&p.type==='deload')).length;
     if(n)h+=`<button class="coach-entry" onclick="goCoachProposals()">
-      <span class="coach-entry-ic" aria-hidden="true">💡</span>
+      <span class="coach-entry-ic" aria-hidden="true">${ic('bulb')}</span>
       <span class="coach-entry-t">El Coach tiene ${n} propuesta${n!==1?'s':''} para tu rutina<small>Tú decides: aplicar o ignorar</small></span>
       <span class="coach-entry-go">Ver ›</span></button>`;
   }
@@ -21680,20 +21767,20 @@ function presKCls(p){return _presRest(p)?'k-deload k-rest':'k-'+p.kind;}
 const _tgtWhyOpen=new Set(); // «¿Por qué?» abiertos (solo en memoria: no es estado de la app)
 // Bloque «Objetivo de hoy» de la tarjeta abierta: peso × reps, series, motivo y «¿Por qué?» desplegable
 function presTargetHtml(ex,p,compact){
-  if(ex&&!p&&_presRetake(ex.id))return`<div class="tgt k-keep"><div class="tgt-top"><div class="tgt-main"><div class="tgt-r">🎯 <b>Primera vez tras el parón:</b> elige un peso con el que te sobren unas 3 repeticiones. Lo de antes sigue en tu gráfico.</div></div></div></div>`; // (E6)
+  if(ex&&!p&&_presRetake(ex.id))return`<div class="tgt k-keep"><div class="tgt-top"><div class="tgt-main"><div class="tgt-r">${ic('target')} <b>Primera vez tras el parón:</b> elige un peso con el que te sobren unas 3 repeticiones. Lo de antes sigue en tu gráfico.</div></div></div></div>`; // (E6)
   if(!ex||!p)return'';
   const open=_tgtWhyOpen.has(ex.id);
   // Compacto (durante el ejercicio, debajo de las series): solo el motivo y «¿Por qué?» (las filas ya llevan los valores)
   if(compact)return`<div class="tgt cmp ${presKCls(p)}">
     <div class="tgt-top">
-      <div class="tgt-main"><div class="tgt-r">🎯 <b>${_nwUnits(esc(p.head))}:</b> ${_nwUnits(esc(p.reason))}</div></div>
+      <div class="tgt-main"><div class="tgt-r">${ic('target')} <b>${_nwUnits(esc(p.head))}:</b> ${_nwUnits(esc(p.reason))}</div></div>
       <button type="button" class="tgt-why-btn" data-ex="${esc(ex.id)}" aria-expanded="${open}" onclick="toggleTgtWhy(this)">¿Por qué? <span aria-hidden="true">${open?'▴':'▾'}</span></button>
     </div>
     <div class="tgt-why"${open?'':' hidden'}>${presWhyHtml(ex,p)}</div>
   </div>`;
   return`<div class="tgt ${presKCls(p)}">
     <div class="tgt-top">
-      <div class="tgt-main"><div class="tgt-l sepw"><span class="sepw-a">🎯 Objetivo de hoy</span> <span class="nw sepw-s"><i class="sep">· </i>${esc(plural(p.sets,'serie'))}</span></div>
+      <div class="tgt-main"><div class="tgt-l sepw"><span class="sepw-a">${ic('target')} Objetivo de hoy</span> <span class="nw sepw-s"><i class="sep">· </i>${esc(plural(p.sets,'serie'))}</span></div>
         <div class="tgt-v${p.up||p.dn||p.band?' var':''}">${_nwX(esc(presValTxt(p)))}</div></div>
       <button type="button" class="tgt-why-btn" data-ex="${esc(ex.id)}" aria-expanded="${open}" onclick="toggleTgtWhy(this)">¿Por qué? <span aria-hidden="true">${open?'▴':'▾'}</span></button>
     </div>
@@ -21797,8 +21884,8 @@ function liveAdjHtml(ex,p){
   const marked=[];for(let i=0;i<n;i++)if(c[i])marked.push(i);
   if(!marked.length||marked.length>=n)return'';
   if(!_presIsKg(p)){
-    if(rp[marked[marked.length-1]]===3)return`<div class="live-adj lim"><span>🥵 Serie al límite: repite lo mismo (o un poco menos) y cuida la técnica.</span></div>`;
-    if(marked.every(i=>rp[i]===1))return`<div class="live-adj easy"><span>😌 Te sobra: intenta ${p.unit==='reps'?'1-2 reps':p.unit==='s'?'5 s':'5 m'} más en la siguiente serie.</span></div>`;
+    if(rp[marked[marked.length-1]]===3)return`<div class="live-adj lim"><span>${ic('e3')} Serie al límite: repite lo mismo (o un poco menos) y cuida la técnica.</span></div>`;
+    if(marked.every(i=>rp[i]===1))return`<div class="live-adj easy"><span>${ic('e1')} Te sobra: intenta ${p.unit==='reps'?'1-2 reps':p.unit==='s'?'5 s':'5 m'} más en la siguiente serie.</span></div>`;
     return'';
   }
   // Peso de la SIGUIENTE serie (fila prerrellenada o tocada); sin él, el objetivo
@@ -21806,13 +21893,13 @@ function liveAdjHtml(ex,p){
   const lastR=rp[marked[marked.length-1]];
   if(lastR===3){
     const dn=_r2(w-p.step),canDown=dn>0&&w>p.weight-p.step+0.01; // no encadenar bajadas
-    return`<div class="live-adj lim"><span>🥵 Serie al límite: mantén ${esc(kgTxt(w))} kg${canDown?` o baja a ${esc(kgTxt(dn))} kg si no llegas a ${p.lo} reps`:' y cuida la técnica'}.</span>${canDown?`<button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${dn})">Bajar a ${esc(kgTxt(dn))}</button>`:''}</div>`;
+    return`<div class="live-adj lim"><span>${ic('e3')} Serie al límite: mantén ${esc(kgTxt(w))} kg${canDown?` o baja a ${esc(kgTxt(dn))} kg si no llegas a ${p.lo} reps`:' y cuida la técnica'}.</span>${canDown?`<button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${dn})">Bajar a ${esc(kgTxt(dn))}</button>`:''}</div>`;
   }
   if(p.kind!=='down'&&marked.every(i=>rp[i]===1)&&w<=p.weight+0.01){
     const lastDone=rows[marked[marked.length-1]],reps=lastDone&&lastDone.r>0?lastDone.r:_todayReps(ex,p);
-    if(p.step>w*LOAD_CAP+1e-9)return`<div class="live-adj easy"><span>😌 Te sobra: haz 1-2 reps más en la siguiente serie.</span></div>`;
+    if(p.step>w*LOAD_CAP+1e-9)return`<div class="live-adj easy"><span>${ic('e1')} Te sobra: haz 1-2 reps más en la siguiente serie.</span></div>`;
     const up=_r2(w+p.step);
-    return`<div class="live-adj easy"><span>😌 Te sobra: si hiciste ${reps?reps+' reps':'tus reps'}, prueba ${esc(kgTxt(up))} kg en la siguiente serie.</span><button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${up})">Poner ${esc(kgTxt(up))}</button></div>`;
+    return`<div class="live-adj easy"><span>${ic('e1')} Te sobra: si hiciste ${reps?reps+' reps':'tus reps'}, prueba ${esc(kgTxt(up))} kg en la siguiente serie.</span><button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${up})">Poner ${esc(kgTxt(up))}</button></div>`;
   }
   return'';
 }
@@ -21869,11 +21956,11 @@ function dayTargetsHtml(dk,mode){
   const t=dayTargets(dk);
   if(!t.length)return'';
   const rows=t.map(({ex,p})=>`<div class="tgl-row">
-      <span class="tgl-ic ${presKCls(p)}" role="img" aria-label="${esc(presWord(p))}">${presIc(p)}</span>
+      <span class="tgl-ic ${presKCls(p)}" role="img" aria-label="${esc(presWord(p))}">${icE(presIc(p))}</span>
       <span class="tgl-n">${esc(ex.n)}${mode==='coach'?`<small>${_nwUnits(esc(p.head))}: ${_nwUnits(esc(p.reason))}</small>`:''}</span>
       <span class="tgl-v">${esc(presShortTxt(p))}</span></div>`).join('');
   // Con algún objetivo que no es de kilos («13 reps», «45 s»), «Objetivos de hoy»; si todos lo son, «Objetivos de carga»
-  return`<div class="tgl${mode==='coach'?' full':''}">${mode==='dash'?`<div class="tgl-h">🎯 ${t.some(x=>!_presIsKg(x.p))?'Objetivos de hoy':'Objetivos de carga'}</div>`:''}${rows}</div>`;
+  return`<div class="tgl${mode==='coach'?' full':''}">${mode==='dash'?`<div class="tgl-h">${ic('target')} ${t.some(x=>!_presIsKg(x.p))?'Objetivos de hoy':'Objetivos de carga'}</div>`:''}${rows}</div>`;
 }
 // Día para «Tu próxima sesión» del Coach: el entreno a medias si lo hay; si no, el que toca
 function _coachPlanDay(){const aw=getActiveWorkout();return aw?aw.day:hoyDayKey();} // (E1b) el que toca de verdad
@@ -21882,9 +21969,9 @@ function coachPlanCardHtml(){
   const list=day?dayTargetsHtml(dk,'coach'):'';
   if(!list)return'';
   const aw=getActiveWorkout();
-  return`<div class="sh">🎯 ${aw?'Tu entreno de hoy':'Tu próxima sesión'} · ${esc(day.label)}</div>
+  return`<div class="sh">${ic('target')} ${aw?'Tu entreno de hoy':'Tu próxima sesión'} · ${esc(day.label)}</div>
   <div class="card coach-plan">${list}
-    <div class="coach-plan-f">Doble progresión: primero reps, luego peso.${_rpeOn()?' Con tu esfuerzo (😌 💪 🥵) ajusto el salto.':''}</div>
+    <div class="coach-plan-f">Doble progresión: primero reps, luego peso.${_rpeOn()?' Con tu esfuerzo (fácil, justo o al límite) ajusto el salto.':''}</div>
     <button class="btn bs" onclick="${aw?'resumeWorkout()':"S.day=S.nextDay;go('workout')"}">${aw?'Seguir entrenando':'Ir a entrenar'} ${esc(day.label)} →</button>
   </div>`;
 }
@@ -22010,7 +22097,7 @@ function _histPts(exId,data,H,o){
     }else if(H.lreps){const tp=_recTop(rec);v=(tp&&tp.r)||_setNumR(rec.r)||0;txt=_lastreTxt(rec);}
     else{v=_recMetric(rec,H.lt)||0;txt=_recValTxt(rec);}
     const rp=_recRpes(rec),rc=rp.length?Math.round(rp.reduce((a,b)=>a+b,0)/rp.length):0,ch=rc?RPE_CHIPS.find(c=>c[0]===rc):null;
-    const t2=[e?`1RM est. ${prKg(e)} kg`:'',ch?ch[1]+' '+ch[3]:'',pr?'🏆 Récord':'',light?'semana ligera':''].filter(Boolean).join(' · ');
+    const t2=[e?`1RM est. ${prKg(e)} kg`:'',ch?ch[3]:'',pr?'Récord':'',light?'semana ligera':''].filter(Boolean).join(' · ');
     // Fecha: la real con el día de la semana; la de un registro antiguo, como se apuntó («8 Sep»); si es aproximada, «≈»
     const es=ts.est?ts.est[i]:0,dt=es===0?wFmt(t,'wd'):es===1?wFmt(t):'≈ '+wFmt(t);
     return{t,v,e,w:+rec.v||0,pr,light,approx:es===2,cut:cutSet.has(i),t1:dt+' · '+txt.replace(/ /g,' '),t2};
@@ -22145,7 +22232,7 @@ function renderHist(){
     const fresh0=!root.querySelector('.hist-sheet')||root.dataset.ex!==exId;root.dataset.ex=exId;
     root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet" role="dialog" aria-modal="true" aria-label="Ficha de ${esc(ex.n)}">
       <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${esc(ex.n)}</div><div class="hist-sheet-sub">${esc(ex.eq)}${ex.s&&ex.r&&!ex._orphan?' · '+_nwUnits(esc(ex.s)+'×'+esc(fmtTargetReps(ex))):''}</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
-      <div class="hist-sheet-body"><div class="empty"><div class="eic">📊</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
+      <div class="hist-sheet-body"><div class="empty"><div class="eic">${ic('chart')}</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
     </div></div>`;
     if(fresh0)_histFocusIn(root);
     return;
@@ -22187,7 +22274,7 @@ function renderHist(){
     const pj=flags[data.length-1-i]||null,isPr=!!pj;
     const sess=d&&typeof d.ts==='number'&&isFinite(d.ts)?findSession(d.ts):null;
     const tapA=sess?` role="button" tabindex="0" data-ts="${d.ts}" onclick="openSessionSummary(+this.dataset.ts)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSessionSummary(+this.dataset.ts)}" aria-label="Sesión del ${esc(d.d)}: ${vt}${isPr?', récord':''}. Ver el resumen"`:'';
-    return`<div class="hist-item${isPr?' pr pw':''}${sess?' tap':''}"${tapA}${isPr?` title="${esc(prToastTxt(pj))}"`:''}>
+    return`<div class="hist-item${isPr?' pr pw':''}${sess?' tap':''}"${tapA}${isPr?` title="${esc(prToastTxt(pj).replace(/^🏆\s*/u,''))}"`:''}>
       <div class="hist-item-d">${esc(d.d)}</div>
       <div class="hist-item-w">${vt.replace(/ × (?=\d)/g,' ×'+NB)}${(()=>{
         // Serie a serie (v18) si el registro la guarda; si no, «3×12» como antes se apuntaba. Sin kilos, solo si las
@@ -22200,7 +22287,7 @@ function renderHist(){
         const e1=H.kg&&mine&&!lastreH?_recE1(d):0,dots=_rpeDotsHtml(d),j=kd.indexOf(d),lg=!!d.dl||_lightAt(exId,j>=0?kdTs[j]:d.ts);
         return dots||e1>0||lg?`<span class="hist-item-x">${dots}${e1>0?`<span>1RM est. ${esc(prKg(e1))} kg</span>`:''}${lg?'<span class="hist-lg">ligera</span>':''}</span>`:'';
       })()}</div>
-      ${isPr?`<span class="hist-item-pr ${pj.type}">${pj.type==='w'?'🏆 PR':pj.type==='xt'?'🏆 PR tiempo':pj.type==='xd'?'🏆 PR distancia':'🏆 PR reps'}</span>`:
+      ${isPr?`<span class="hist-item-pr ${pj.type}">${ic('trophy')} ${pj.type==='w'?'PR':pj.type==='xt'?'PR tiempo':pj.type==='xd'?'PR distancia':'PR reps'}</span>`:
         band?'<span class="hist-item-ch band">banda más dura</span>':
         delta!==0?`<span class="hist-item-ch ${delta>0?'up':'dn'}">${delta>0?'+':'−'}${du==null?kgTxt(Math.abs(delta))+NB+'kg':Math.abs(delta)+(du?NB+du:'')}</span>`:
         '<span class="hist-item-ch" style="color:var(--text3)">=</span>'}
@@ -22286,7 +22373,7 @@ function renderWorkout(){
       // (08) debajo de las series: el descanso entre series de este ejercicio (automático o el elegido)
       const setsHtml=setRowsHtml(ex,pr,rows)+restCtlHtml(ex);
       const la=`<div class="la-slot">${liveAdjHtml(ex,pr)}</div>`;
-      const sugHtml=`<div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${_nwX(sug.m)}</div>`:''}</div>`;
+      const sugHtml=`<div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${_nwX(icSin(sug.m))}</div>`:''}</div>`;
       // (11) «¿Máquina ocupada?»: antes de la primera serie, alternativas en un toque (o el aviso del sustituto de hoy)
       const busy=busyBarHtml(ex,nDone);
       body=training
@@ -22296,8 +22383,8 @@ function renderWorkout(){
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}" data-ex="${eid}">
       <div class="exh" role="button" tabindex="0" aria-expanded="${isOpen}" data-ex="${eid}" onclick="toggleCard(this.dataset.ex)" onkeydown="if(event.key==='Enter'){event.preventDefault();toggleCard(this.dataset.ex)}">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${exIconHtml(ex)}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)}${NB}· ${_nwUnits(ex.cardio?esc(ex.r):esc(ex.s)+'×'+(pr&&(pr.unit==='kg'||pr.unit==='reps')&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex))))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal ${presKCls(pr)}" role="img" aria-label="Objetivo de hoy: ${_presIsKg(pr)&&!pr.up?`${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones`:esc(presValTxt(pr))}, ${esc(presWord(pr))}"><span class="ex-goal-v">🎯 ${esc(presShortTxt(pr))}</span><span class="ex-goal-k">${presWord(pr)}</span></div>`:''}${doneSum}</div>
-        ${dots}${exDone?'<span style="font-size:20px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)}${NB}· ${_nwUnits(ex.cardio?esc(ex.r):esc(ex.s)+'×'+(pr&&(pr.unit==='kg'||pr.unit==='reps')&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex))))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal ${presKCls(pr)}" role="img" aria-label="Objetivo de hoy: ${_presIsKg(pr)&&!pr.up?`${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones`:esc(presValTxt(pr))}, ${esc(presWord(pr))}"><span class="ex-goal-v">${ic('target')} ${esc(presShortTxt(pr))}</span><span class="ex-goal-k">${presWord(pr)}</span></div>`:''}${doneSum}</div>
+        ${dots}${exDone?`<span class="ex-ok" aria-hidden="true">${ic('check')}</span>`:`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${!ex.cardio?body
         :`${busyBarHtml(ex,c[0]||RT.cardioRunning(ex.id)?1:0)}${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${_tipHtml(ex.tip)}</div>${(()=>{
@@ -22305,12 +22392,12 @@ function renderWorkout(){
           const m=String(ex.r||'').match(/(\d+)\s*min/i);
           const mins=m?parseInt(m[1]):0;
           if(c[0]){
-            return`<button class="btn bs" data-ex="${eid}" onclick="toggleSet(this.dataset.ex,0);render()">✅ Marcado como hecho</button>`;
+            return`<button class="btn bs" data-ex="${eid}" onclick="toggleSet(this.dataset.ex,0);render()">${ic('check')} Marcado como hecho</button>`;
           }
           if(RT.cardioRunning(ex.id)){
             // En marcha: hora de fin (no hace falta refrescar cada segundo; la cuenta atrás va en la barra)
             const end=new Date(S.restTimer.endTs),hhmm=String(end.getHours()).padStart(2,'0')+':'+String(end.getMinutes()).padStart(2,'0');
-            return`<div class="cardio-run">⏱ En marcha · termina a las <b>${hhmm}</b></div>
+            return`<div class="cardio-run">${ic('clock')} En marcha · termina a las <b>${hhmm}</b></div>
             <div style="display:flex;gap:8px">
               <button class="btn bs" style="flex:1" onclick="RT.skip()">■ Parar</button>
               <button class="btn bs" style="width:130px" data-ex="${eid}" onclick="toggleSet(this.dataset.ex,0);render()">Marcar hecho</button>
@@ -22342,10 +22429,10 @@ function renderWorkout(){
   <div class="pbar" style="border-radius:0;height:3px"><div class="pinner" style="width:${pct}%;border-radius:0"></div></div>
   <div class="tabs">${tabs}</div>
   ${lightBannerHtml('workout')}
-  ${allDone?`<div class="fbanner">🎉 ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
+  ${allDone?`<div class="fbanner">${ic('sparkles')} ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
   ${exHtml}
-  ${live?`<div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?'✅ Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`
-    :`<div class="card wo-empty"><div class="empty"><div class="eic" aria-hidden="true">📝</div><p>Este día aún no tiene ejercicios. Mientras esté vacío, no entra en tu rotación.</p></div>
+  ${live?`<div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?ic('check')+' Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`
+    :`<div class="card wo-empty"><div class="empty"><div class="eic" aria-hidden="true">${ic('note')}</div><p>Este día aún no tiene ejercicios. Mientras esté vacío, no entra en tu rotación.</p></div>
       <button type="button" class="btn bp" data-dk="${esc(S.day)}" onclick="addExerciseUI(this.dataset.dk)">Añadir ejercicio</button></div>`}
   `;
 }
@@ -22670,7 +22757,7 @@ function mmProgBodyHtml(st){
     return`<div class="mm-empty">${none?'Completa entrenamientos y aquí verás qué músculos trabajas y cuánto.':'Sin series en este periodo. Prueba con otro rango.'}</div>`;
   }
   const ins=mmInsight(st,mmPlanStats());
-  return`${ins?`<div class="mm-ins" id="mm-ins-prog">💡 ${_nwUnits(esc(ins))}</div>`:''}
+  return`${ins?`<div class="mm-ins" id="mm-ins-prog">${ic('bulb')} ${_nwUnits(esc(ins))}</div>`:''}
     <div class="mm-sub">Series efectivas por semana · ${_nwUnits(esc(st.R.lbl))}</div>
     <div class="mm-bars">${mmBarsHtml(st,{tap:true,src:'prog'})}</div>
     <div class="mm-foot"><i aria-hidden="true"></i><span>${mmOwnZones()?'La franja de cada grupo es su zona, según tu rutina y tu objetivo. Es una guía orientativa, no una regla.':`Zona productiva: <span class="nw">${MM_ZONE.lo}–${MM_ZONE.hi} series</span> por semana y grupo. Es una guía orientativa, no una regla.`} Toca un grupo para ver sus ejercicios.</span></div>`;
@@ -22706,7 +22793,7 @@ function mmCoachCardHtml(){
   return`<div class="sh">Tus músculos · ${k==='7d'?'últimos 7 días':k==='cycle'?'este ciclo':'4 semanas'}</div>
   <div class="card mm-card mm-mini" id="mm-coach">
     ${mmFigHtml('coach',st,'coach',190)}
-    ${ins?`<div class="mm-ins">💡 ${_nwUnits(esc(ins))}</div>`:''}
+    ${ins?`<div class="mm-ins">${ic('bulb')} ${_nwUnits(esc(ins))}</div>`:''}
     ${low.length?`<div class="mm-mini-l">${mmOwnZones()?'Por debajo de su zona':`Por debajo de <span class="nw">${MM_ZONE.lo} series/semana</span>`}</div>
     <div class="mm-chips">${low.map(g=>`<button class="mm-chip ${mmCls(g.v,g.id)}" onclick="openMuscleSheet('${g.id}','coach')" aria-label="${g.n}: ${mmFmt(g.v)} series por semana. Ver ejercicios">${g.n} <b>${mmFmt(g.v)}</b></button>`).join('')}</div>`:''}
     <button class="mm-link" onclick="goMuscleMap()">Ver el mapa completo en Progreso ›</button>
@@ -23095,7 +23182,7 @@ function prWallHtml(){
     ${shown.map(x=>{
       const has=x.ts!=null&&!!findSession(x.ts),pv=prPrevTxt(x),nm=exDisplayName(x.id);
       return`<button type="button" class="pr-row" data-ts="${has?x.ts:''}" data-ex="${esc(x.id)}" onclick="prWallOpen(this)" aria-label="Récord de ${esc(prKindTxt(x).toLowerCase())} en ${esc(nm)}: ${esc(prTxt(x))}${pv?', '+esc(pv):''}${x.d?', '+esc(x.d):''}. ${has?'Ver la sesión':'Ver el historial'}">
-        <span class="pr-ic" aria-hidden="true">🏆</span>
+        <span class="pr-ic" aria-hidden="true">${ic('trophy')}</span>
         <span class="pr-i"><span class="pr-nm">${esc(nm)}</span><span class="pr-v">${x.val!=null?_nwUnits(esc(prTxt(x))):`<span class="nw">${esc(kgTxt(x.w))} kg</span>${x.r?' × '+x.r:''}`}${pv?` <i>(${_nwPrev(pv)})</i>`:''}</span></span>
         <span class="pr-d">${esc(x.d||'')}<small>${prKindTxt(x)}</small></span></button>`;}).join('')}
     ${list.length>5?`<button type="button" class="pr-more" onclick="prWallToggle()">${_prWallAll?'Ver menos':`Ver más (${max-5})`}</button>`:''}
@@ -23268,7 +23355,7 @@ function _renderSummary(){
   const fresh=_sum.fresh,anim=!_rm(),plan=getPlan();
   const dl=sessDayLbl(s),focus=sessDayFocus(s); // (E1b) el nombre y el foco con que se hizo
   const date=s.date?String(s.date):isFinite(+s.ts)?fmtDate(new Date(+s.ts)):'';
-  const title=fresh?'¡Sesión completada! 🎉':`${dl} · ${date}`;
+  const title=fresh?'¡Sesión completada!':`${dl} · ${date}`;
   const sub=fresh?[dl,focus,date].filter(Boolean).join(' · '):`${focus||'Sesión'}${_sumAgo(s.ts)}`;
   // Contadores (duración, series, tonelaje): suben de 0 a su valor (sin animación con movimiento reducido)
   const dur=+s.durationMin>0&&isFinite(+s.durationMin)?Math.round(+s.durationMin):null;
@@ -23287,20 +23374,20 @@ function _renderSummary(){
   // Récords de la sesión
   const nr=D.records.length,str=D.rows.some(r=>!r.cardio);
   const wRows=D.rows.filter(r=>!r.cardio&&!r.bw),allNew=wRows.length>0&&wRows.every(r=>r.delta&&r.delta.t==='nuevo');
-  const recs=nr?`<div class="sum-sec">🏆 ${nr===1?'1 récord':nr+' récords'} ${fresh?'hoy':'en esta sesión'}</div><div class="sum-prs" id="sum-prs">${D.records.map((j,i)=>{const pv=prPrevTxt(j);
-      return`<div class="sum-pr" style="animation-delay:${(.25+i*.12).toFixed(2)}s"><span class="sum-pr-ic" aria-hidden="true">🏆</span><div class="sum-pr-i"><div class="sum-pr-n">${esc(j.name)}</div><div class="sum-pr-v">${_nwUnits(esc(prTxt(j)))}${pv?` <i>· ${_nwPrev(pv)}</i>`:''}</div></div><span class="sum-pr-k">${prKindTxt(j)}</span></div>`;}).join('')}</div>`
+  const recs=nr?`<div class="sum-sec">${ic('trophy')} ${nr===1?'1 récord':nr+' récords'} ${fresh?'hoy':'en esta sesión'}</div><div class="sum-prs" id="sum-prs">${D.records.map((j,i)=>{const pv=prPrevTxt(j);
+      return`<div class="sum-pr" style="animation-delay:${(.25+i*.12).toFixed(2)}s"><span class="sum-pr-ic" aria-hidden="true">${ic('trophy')}</span><div class="sum-pr-i"><div class="sum-pr-n">${esc(j.name)}</div><div class="sum-pr-v">${_nwUnits(esc(prTxt(j)))}${pv?` <i>· ${_nwPrev(pv)}</i>`:''}</div></div><span class="sum-pr-k">${prKindTxt(j)}</span></div>`;}).join('')}</div>`
     :str?`<div class="sum-sec">Récords</div><div class="sum-nopr">${allNew?'Primera vez con estos ejercicios: desde la próxima sesión, cada mejora (más peso o más reps) será un récord.'
-      :fresh?'Hoy no hubo récord: la constancia también suma. 💪':'Sin récords en esta sesión.'}</div>`:'';
+      :fresh?'Hoy no hubo récord: la constancia también suma.':'Sin récords en esta sesión.'}</div>`:'';
   // Ejercicios: «55×12×3 ↑+2.5»
-  const exs=D.rows.length?`<div class="sum-sec">Ejercicios</div><div id="sum-exs">${D.rows.map(r=>`<div class="sum-ex" data-ex="${esc(r.id)}"><div class="sum-ex-i"><div class="sum-ex-n">${esc(r.name)}${r.pr?'<em role="img" aria-label="récord">🏆</em>':''}</div><div class="sum-ex-s">${esc(r.line)}${r.dl?' · descarga':''}${r.sub!=null?` · <span class="sub-tag">⇄ solo hoy</span>${r.sub?' en lugar de '+esc(r.sub):''}`:''}</div></div>${r.delta?`<span class="sum-ex-d ${r.delta.cls}" aria-label="${esc(r.delta.a)}">${esc(r.delta.t)}</span>`:r.cardio?'<span class="sum-ex-d up" aria-label="hecho">✓</span>':''}</div>`).join('')}</div>`
+  const exs=D.rows.length?`<div class="sum-sec">Ejercicios</div><div id="sum-exs">${D.rows.map(r=>`<div class="sum-ex" data-ex="${esc(r.id)}"><div class="sum-ex-i"><div class="sum-ex-n">${esc(r.name)}${r.pr?'<em role="img" aria-label="récord">'+ic('trophy')+'</em>':''}</div><div class="sum-ex-s">${esc(r.line)}${r.dl?' · descarga':''}${r.sub!=null?` · <span class="sub-tag">⇄ solo hoy</span>${r.sub?' en lugar de '+esc(r.sub):''}`:''}</div></div>${r.delta?`<span class="sum-ex-d ${r.delta.cls}" aria-label="${esc(r.delta.a)}">${esc(r.delta.t)}</span>`:r.cardio?'<span class="sum-ex-d up" aria-label="hecho">✓</span>':''}</div>`).join('')}</div>`
     :`<div class="sum-nopr" style="margin-top:14px">Esta sesión no tiene series guardadas.</div>`;
   // Reparto del esfuerzo (RPE) por serie
   const R=D.rpe,tot=_rpeOn()?R[0]+R[1]+R[2]+R[3]:0;let eff=''; // (M2) esfuerzo apagado: sin «Esfuerzo por serie»
   if(tot&&R[0]<tot){
-    const L=[[1,'😌 Fácil','fácil','fáciles'],[2,'💪 Justo','justa','justas'],[3,'🥵 Al límite','al límite','al límite'],[0,'Sin dato','sin dato','sin dato']].filter(([k])=>R[k]>0);
+    const L=[[1,'Fácil','fácil','fáciles'],[2,'Justo','justa','justas'],[3,'Al límite','al límite','al límite'],[0,'Sin dato','sin dato','sin dato']].filter(([k])=>R[k]>0);
     eff=`<div class="sum-sec">Esfuerzo por serie</div><div class="sum-rpe" id="sum-rpe" role="img" aria-label="Esfuerzo por serie: ${esc(L.map(([k,,a1,a2])=>`${R[k]} ${R[k]===1?a1:a2}`).join(', '))}">${L.map(([k])=>`<i class="r${k}" style="flex:${R[k]} 1 0"></i>`).join('')}</div>
       <div class="sum-rpe-l" aria-hidden="true">${L.map(([k,l])=>`<span><i class="r${k}"></i>${l} <b>${R[k]}</b></span>`).join('')}</div>${D.old?'<div class="sum-rpe-n">En los registros sin series guardadas cuenta el esfuerzo medio de cada ejercicio.</div>':''}`;
-  }else if(tot)eff=`<div class="sum-sec">Esfuerzo por serie</div><div class="sum-nopr">No apuntaste el esfuerzo (😌 💪 🥵) en esta sesión.</div>`;
+  }else if(tot)eff=`<div class="sum-sec">Esfuerzo por serie</div><div class="sum-nopr">No apuntaste el esfuerzo (fácil, justo o al límite) en esta sesión.</div>`;
   // Mapa muscular de la sesión (componente de la etapa 06): brillo ∝ series de cada músculo hoy
   const gs=D.mm.groups.filter(g=>g.v>=.05).sort((a,b)=>b.v-a.v);
   const canMap=typeof GymAnim!=='undefined'&&typeof GymAnim.muscleMap==='function';
@@ -24677,14 +24764,14 @@ function plRowHtml(x,s){
     <span class="pl-dot" style="background:${color}" aria-hidden="true"></span>
     <span class="pl-main"><span class="clbl pl-n">${esc(name)}</span>${out?`<span class="prog-out">${out}</span>`:''}
       <span class="pl-sub"><span class="pl-v${lastre?' lt':''}" style="color:${color}">${lastre?`${esc('+'+lastW+NB+'kg')}<small> lastre</small>`:esc(vTxt)}</span><span class="pl-g ${gain[0]}${gain[0]==='band'?' prog-band':''}">${esc(gain[1])}</span></span></span>
-    <span class="pl-side">${plSpark(spk,color,cuts)}<span class="pl-st ${s.k}" title="${esc(why)}"><span aria-hidden="true">${st.ic}</span> ${chip==='Récord reciente'?'Récord<span class="pl-st-x"> reciente</span>':/^(Recién cambiado|En descarga)$/.test(chip)?chip.replace(/^([^ ]+ )(.+)$/,'<span class="pl-st-x">$1</span><span class="pl-st-c">$2</span>'):esc(chip)}</span></span>
+    <span class="pl-side">${plSpark(spk,color,cuts)}<span class="pl-st ${s.k}" title="${esc(why)}"><span aria-hidden="true">${icE(st.ic)}</span> ${chip==='Récord reciente'?'Récord<span class="pl-st-x"> reciente</span>':/^(Recién cambiado|En descarga)$/.test(chip)?chip.replace(/^([^ ]+ )(.+)$/,'<span class="pl-st-x">$1</span><span class="pl-st-c">$2</span>'):esc(chip)}</span></span>
     <span class="prog-go" aria-hidden="true">›</span>
   </div>`;
 }
 // La sección entera (#prog-str): filtros, resumen, «Estancados primero» y las filas
 function progStrengthHtml(){
   const list=progStrengthList();
-  if(!list.length)return`<div class="card" id="prog-str"><div class="empty"><div class="eic">🏋️</div><p>Completa entrenamientos y registra pesos para ver tu progreso de fuerza.</p></div></div>`;
+  if(!list.length)return`<div class="card" id="prog-str"><div class="empty"><div class="eic">${ic('dumbbell')}</div><p>Completa entrenamientos y registra pesos para ver tu progreso de fuerza.</p></div></div>`;
   const st=progStatusMap(list),hasOut=list.some(x=>!x.inPlan),plan=getPlan();
   if(_plF==='out'&&!hasOut)_plF='all';
   const dks=dayKeys(plan); // (E1a) los días de tu rutina (2-6)
@@ -24719,13 +24806,13 @@ function plToggleStag(){_plStag=!_plStag;_plRefresh('.pl-stag');}
 // Peso corporal en Progreso: la gráfica está en Inicio (donde se registra); aquí, el último y su cambio con un enlace
 function progWeightLinkHtml(){
   const pts=wSeries();
-  if(!pts.length)return`<div class="card pl-w"><span class="pl-w-ic" aria-hidden="true">⚖️</span><span class="pl-w-m"><span class="pl-w-s">Registra tu peso y verás su evolución en Inicio.</span></span>
+  if(!pts.length)return`<div class="card pl-w"><span class="pl-w-ic" aria-hidden="true">${ic('scale')}</span><span class="pl-w-m"><span class="pl-w-s">Registra tu peso y verás su evolución en Inicio.</span></span>
     <button type="button" class="btn bs pl-w-b" onclick="S.wmodal=true;renderWmodal()">Registrar</button></div>`;
   const last=pts[pts.length-1];
   let sub='primer registro';
   if(pts.length>=2){const k=wRangeKey(),rp=wInRange(pts,k),R=WRANGES.find(x=>x[0]===k);sub=`${wSign(last.v-rp[0].v)} kg ${wRangeLbl(rp,R)}`;}
   return`<button type="button" class="card pl-w" onclick="progToWeight()" aria-label="Peso corporal: ${wf1(last.v)} kg, ${esc(sub)}. Ver la gráfica en Inicio">
-    <span class="pl-w-ic" aria-hidden="true">⚖️</span>
+    <span class="pl-w-ic" aria-hidden="true">${ic('scale')}</span>
     <span class="pl-w-m"><span class="pl-w-v">${wf1(last.v)}<small> kg</small></span><span class="pl-w-s">${esc(sub)} · ${esc(wWhen(last.t))}</span></span>
     <span class="pl-w-go">Ver gráfica<span aria-hidden="true"> ›</span></span></button>`;
 }
@@ -24800,7 +24887,7 @@ function _rcVerdict(sv,wv){
   const su=sv>=1,sd=sv<=-1;
   if(wv==null)return su?'Ganas fuerza':sd?'Algo menos de fuerza en este periodo':'Tu fuerza se mantiene';
   const wd=wv<=-0.5,wu=wv>=0.5;
-  if(su)return wd?'Recomposición en marcha 💪':wu?'Más fuerte, con algo más de peso':'Más fuerte con el mismo peso';
+  if(su)return wd?'Recomposición en marcha':wu?'Más fuerte, con algo más de peso':'Más fuerte con el mismo peso';
   if(sd)return wd?'Más ligero, con algo menos de fuerza':'Algo menos de fuerza en este periodo';
   return wd?'Más ligero sin perder fuerza':wu?'Misma fuerza, con algo más de peso':'Fuerza y peso estables';
 }
@@ -24866,7 +24953,7 @@ function recompCardHtml(){
       :d.kgAny||d.undated?'Con dos sesiones con kilos en un mismo ejercicio verás aquí si ganas fuerza mientras cambia tu peso.'
       :d.strAny?'Tus ejercicios van sin kilos (peso corporal, bandas, tiempo o distancia), así que aquí no hay índice de fuerza: su evolución la tienes en «Fuerza por ejercicio». Cuando registres kilos en un ejercicio, verás aquí tu fuerza frente a tu peso.'
       :'Cuando tengas dos sesiones con kilos en un ejercicio, verás aquí si ganas fuerza mientras cambia tu peso.';
-    return`<div class="card rc-card" id="prog-rc"><div class="rc-empty"><span class="rc-eic" aria-hidden="true">📈</span><p>${msg}${und}</p></div></div>`;
+    return`<div class="card rc-card" id="prog-rc"><div class="rc-empty"><span class="rc-eic" aria-hidden="true">${ic('trend')}</span><p>${msg}${und}</p></div></div>`;
   }
   const chips=`<div class="wc-ranges rc-ranges" role="tablist" aria-label="Periodo de la gráfica">${WRANGES.map(r=>`<button type="button" class="wc-rg${r[0]===d.k?' on':''}" data-r="${r[0]}" role="tab" aria-selected="${r[0]===d.k}" onclick="setRRange('${r[0]}')">${r[1]}</button>`).join('')}</div>`;
   if(!d.s.length)return`<div class="card rc-card" id="prog-rc">${chips}<p class="rc-hint rc-none">En este periodo ningún ejercicio con kilos tiene dos sesiones (sin contar semanas ligeras). Prueba un periodo más largo.${und}</p></div>`;
@@ -24990,7 +25077,7 @@ function constancyCardHtml(){
   else{
     sum=`<b>${plural(inWin.length,'sesión','sesiones')}</b> en ${CAL_WEEKS} semanas. Objetivo: <b>${plural(T,'día')}</b> por semana`+(counted?`, cumplido en <b>${met} de ${counted}</b>${NB}semanas.`:'.');
     if(nw&&nw.st==='open'&&nw.req>0){const f=nw.req-nw.n;sum+=` Esta semana llevas ${nw.n} de ${nw.req}: ${f===1?'te falta 1':'te faltan '+f} para ${st.cur?'alargar la racha':'empezar una racha'}.`;}
-    else if(nw&&nw.st==='met'&&nw.mon===cur)sum+=' Esta semana ya está cumplida. 💪';
+    else if(nw&&nw.st==='met'&&nw.mon===cur)sum+=' Esta semana ya está cumplida.';
     else if(nw&&nw.st==='rest')sum+=' Semana de descanso: no corta la racha.';
   }
   if(noTs)sum+=` ${noTs===1?'Una sesión antigua sin fecha no sale':plural(noTs,'sesión antigua','sesiones antiguas')+' sin fecha no salen'} en el calendario ni ${noTs===1?'cuenta':'cuentan'} para las rachas.`;

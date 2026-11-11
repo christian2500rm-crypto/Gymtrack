@@ -83,7 +83,7 @@ function _histPts(exId,data,H,o){
     }else if(H.lreps){const tp=_recTop(rec);v=(tp&&tp.r)||_setNumR(rec.r)||0;txt=_lastreTxt(rec);}
     else{v=_recMetric(rec,H.lt)||0;txt=_recValTxt(rec);}
     const rp=_recRpes(rec),rc=rp.length?Math.round(rp.reduce((a,b)=>a+b,0)/rp.length):0,ch=rc?RPE_CHIPS.find(c=>c[0]===rc):null;
-    const t2=[e?`1RM est. ${prKg(e)} kg`:'',ch?ch[1]+' '+ch[3]:'',pr?'🏆 Récord':'',light?'semana ligera':''].filter(Boolean).join(' · ');
+    const t2=[e?`1RM est. ${prKg(e)} kg`:'',ch?ch[3]:'',pr?'Récord':'',light?'semana ligera':''].filter(Boolean).join(' · ');
     // Fecha: la real con el día de la semana; la de un registro antiguo, como se apuntó («8 Sep»); si es aproximada, «≈»
     const es=ts.est?ts.est[i]:0,dt=es===0?wFmt(t,'wd'):es===1?wFmt(t):'≈ '+wFmt(t);
     return{t,v,e,w:+rec.v||0,pr,light,approx:es===2,cut:cutSet.has(i),t1:dt+' · '+txt.replace(/ /g,' '),t2};
@@ -218,7 +218,7 @@ function renderHist(){
     const fresh0=!root.querySelector('.hist-sheet')||root.dataset.ex!==exId;root.dataset.ex=exId;
     root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeHist()"><div class="hist-sheet" role="dialog" aria-modal="true" aria-label="Ficha de ${esc(ex.n)}">
       <div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">${esc(ex.n)}</div><div class="hist-sheet-sub">${esc(ex.eq)}${ex.s&&ex.r&&!ex._orphan?' · '+_nwUnits(esc(ex.s)+'×'+esc(fmtTargetReps(ex))):''}</div><button class="hist-sheet-close" onclick="closeHist()" aria-label="Cerrar">✕</button></div>
-      <div class="hist-sheet-body"><div class="empty"><div class="eic">📊</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
+      <div class="hist-sheet-body"><div class="empty"><div class="eic">${ic('chart')}</div><p>Sin registros aún. Completa una sesión para ver historial.</p></div></div>
     </div></div>`;
     if(fresh0)_histFocusIn(root);
     return;
@@ -260,7 +260,7 @@ function renderHist(){
     const pj=flags[data.length-1-i]||null,isPr=!!pj;
     const sess=d&&typeof d.ts==='number'&&isFinite(d.ts)?findSession(d.ts):null;
     const tapA=sess?` role="button" tabindex="0" data-ts="${d.ts}" onclick="openSessionSummary(+this.dataset.ts)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openSessionSummary(+this.dataset.ts)}" aria-label="Sesión del ${esc(d.d)}: ${vt}${isPr?', récord':''}. Ver el resumen"`:'';
-    return`<div class="hist-item${isPr?' pr pw':''}${sess?' tap':''}"${tapA}${isPr?` title="${esc(prToastTxt(pj))}"`:''}>
+    return`<div class="hist-item${isPr?' pr pw':''}${sess?' tap':''}"${tapA}${isPr?` title="${esc(prToastTxt(pj).replace(/^🏆\s*/u,''))}"`:''}>
       <div class="hist-item-d">${esc(d.d)}</div>
       <div class="hist-item-w">${vt.replace(/ × (?=\d)/g,' ×'+NB)}${(()=>{
         // Serie a serie (v18) si el registro la guarda; si no, «3×12» como antes se apuntaba. Sin kilos, solo si las
@@ -273,7 +273,7 @@ function renderHist(){
         const e1=H.kg&&mine&&!lastreH?_recE1(d):0,dots=_rpeDotsHtml(d),j=kd.indexOf(d),lg=!!d.dl||_lightAt(exId,j>=0?kdTs[j]:d.ts);
         return dots||e1>0||lg?`<span class="hist-item-x">${dots}${e1>0?`<span>1RM est. ${esc(prKg(e1))} kg</span>`:''}${lg?'<span class="hist-lg">ligera</span>':''}</span>`:'';
       })()}</div>
-      ${isPr?`<span class="hist-item-pr ${pj.type}">${pj.type==='w'?'🏆 PR':pj.type==='xt'?'🏆 PR tiempo':pj.type==='xd'?'🏆 PR distancia':'🏆 PR reps'}</span>`:
+      ${isPr?`<span class="hist-item-pr ${pj.type}">${ic('trophy')} ${pj.type==='w'?'PR':pj.type==='xt'?'PR tiempo':pj.type==='xd'?'PR distancia':'PR reps'}</span>`:
         band?'<span class="hist-item-ch band">banda más dura</span>':
         delta!==0?`<span class="hist-item-ch ${delta>0?'up':'dn'}">${delta>0?'+':'−'}${du==null?kgTxt(Math.abs(delta))+NB+'kg':Math.abs(delta)+(du?NB+du:'')}</span>`:
         '<span class="hist-item-ch" style="color:var(--text3)">=</span>'}
@@ -359,7 +359,7 @@ function renderWorkout(){
       // (08) debajo de las series: el descanso entre series de este ejercicio (automático o el elegido)
       const setsHtml=setRowsHtml(ex,pr,rows)+restCtlHtml(ex);
       const la=`<div class="la-slot">${liveAdjHtml(ex,pr)}</div>`;
-      const sugHtml=`<div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${_nwX(sug.m)}</div>`:''}</div>`;
+      const sugHtml=`<div class="sug-slot" aria-live="polite">${sug?`<div class="sug ${sug.t}">${_nwX(icSin(sug.m))}</div>`:''}</div>`;
       // (11) «¿Máquina ocupada?»: antes de la primera serie, alternativas en un toque (o el aviso del sustituto de hoy)
       const busy=busyBarHtml(ex,nDone);
       body=training
@@ -369,8 +369,8 @@ function renderWorkout(){
     return`<div class="excard${isOpen?' open':''}${exDone?' complete':''}" data-ex="${eid}">
       <div class="exh" role="button" tabindex="0" aria-expanded="${isOpen}" data-ex="${eid}" onclick="toggleCard(this.dataset.ex)" onkeydown="if(event.key==='Enter'){event.preventDefault();toggleCard(this.dataset.ex)}">
         <div class="exic" style="${exDone?'background:var(--green-bg)':''}">${exIconHtml(ex)}</div>
-        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)}${NB}· ${_nwUnits(ex.cardio?esc(ex.r):esc(ex.s)+'×'+(pr&&(pr.unit==='kg'||pr.unit==='reps')&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex))))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal ${presKCls(pr)}" role="img" aria-label="Objetivo de hoy: ${_presIsKg(pr)&&!pr.up?`${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones`:esc(presValTxt(pr))}, ${esc(presWord(pr))}"><span class="ex-goal-v">🎯 ${esc(presShortTxt(pr))}</span><span class="ex-goal-k">${presWord(pr)}</span></div>`:''}${doneSum}</div>
-        ${dots}${exDone?'<span style="font-size:20px;flex-shrink:0">✅</span>':`<span class="exarrow">▼</span>`}
+        <div class="exin"><div class="exn" style="${exDone?'color:var(--text2);text-decoration:line-through':''}">${esc(ex.n)}</div><div class="exm">${ex.sub?'<span class="sub-tag">⇄ solo hoy</span> · ':''}${esc(ex.eq)}${NB}· ${_nwUnits(ex.cardio?esc(ex.r):esc(ex.s)+'×'+(pr&&(pr.unit==='kg'||pr.unit==='reps')&&pr.lo!==pr.hi?`${pr.lo}-${pr.hi} reps`:esc(fmtTargetReps(ex))))}${!ex.cardio&&deloadAppliesTo(ex.id)?' · <span class="dl-tag">descarga</span>':''}${todayW}</div>${pr&&!exDone?`<div class="ex-goal ${presKCls(pr)}" role="img" aria-label="Objetivo de hoy: ${_presIsKg(pr)&&!pr.up?`${esc(kgTxt(pr.weight))} kilos por ${pr.reps} repeticiones`:esc(presValTxt(pr))}, ${esc(presWord(pr))}"><span class="ex-goal-v">${ic('target')} ${esc(presShortTxt(pr))}</span><span class="ex-goal-k">${presWord(pr)}</span></div>`:''}${doneSum}</div>
+        ${dots}${exDone?`<span class="ex-ok" aria-hidden="true">${ic('check')}</span>`:`<span class="exarrow">▼</span>`}
       </div>
       ${isOpen?`<div class="exb">${!ex.cardio?body
         :`${busyBarHtml(ex,c[0]||RT.cardioRunning(ex.id)?1:0)}${(()=>{const ak=exAnimKey(ex);return ak?`<div class="ex-anim" data-ex="${eid}" data-gym-anim="${ak}"></div>`:'';})()}<div class="tip">${_tipHtml(ex.tip)}</div>${(()=>{
@@ -378,12 +378,12 @@ function renderWorkout(){
           const m=String(ex.r||'').match(/(\d+)\s*min/i);
           const mins=m?parseInt(m[1]):0;
           if(c[0]){
-            return`<button class="btn bs" data-ex="${eid}" onclick="toggleSet(this.dataset.ex,0);render()">✅ Marcado como hecho</button>`;
+            return`<button class="btn bs" data-ex="${eid}" onclick="toggleSet(this.dataset.ex,0);render()">${ic('check')} Marcado como hecho</button>`;
           }
           if(RT.cardioRunning(ex.id)){
             // En marcha: hora de fin (no hace falta refrescar cada segundo; la cuenta atrás va en la barra)
             const end=new Date(S.restTimer.endTs),hhmm=String(end.getHours()).padStart(2,'0')+':'+String(end.getMinutes()).padStart(2,'0');
-            return`<div class="cardio-run">⏱ En marcha · termina a las <b>${hhmm}</b></div>
+            return`<div class="cardio-run">${ic('clock')} En marcha · termina a las <b>${hhmm}</b></div>
             <div style="display:flex;gap:8px">
               <button class="btn bs" style="flex:1" onclick="RT.skip()">■ Parar</button>
               <button class="btn bs" style="width:130px" data-ex="${eid}" onclick="toggleSet(this.dataset.ex,0);render()">Marcar hecho</button>
@@ -415,10 +415,10 @@ function renderWorkout(){
   <div class="pbar" style="border-radius:0;height:3px"><div class="pinner" style="width:${pct}%;border-radius:0"></div></div>
   <div class="tabs">${tabs}</div>
   ${lightBannerHtml('workout')}
-  ${allDone?`<div class="fbanner">🎉 ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
+  ${allDone?`<div class="fbanner">${ic('sparkles')} ¡Todos los ejercicios completados! Guarda la sesión cuando termines el cardio.</div>`:''}
   ${exHtml}
-  ${live?`<div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?'✅ Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`
-    :`<div class="card wo-empty"><div class="empty"><div class="eic" aria-hidden="true">📝</div><p>Este día aún no tiene ejercicios. Mientras esté vacío, no entra en tu rotación.</p></div>
+  ${live?`<div style="padding:4px 14px 14px"><button class="btn ${allDone?'bp':'bs'}" onclick="finishSession()">${allDone?ic('check')+' Guardar entrenamiento':'Guardar entrenamiento (incompleto)'}</button></div>`
+    :`<div class="card wo-empty"><div class="empty"><div class="eic" aria-hidden="true">${ic('note')}</div><p>Este día aún no tiene ejercicios. Mientras esté vacío, no entra en tu rotación.</p></div>
       <button type="button" class="btn bp" data-dk="${esc(S.day)}" onclick="addExerciseUI(this.dataset.dk)">Añadir ejercicio</button></div>`}
   `;
 }

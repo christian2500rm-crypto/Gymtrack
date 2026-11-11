@@ -571,20 +571,20 @@ function presKCls(p){return _presRest(p)?'k-deload k-rest':'k-'+p.kind;}
 const _tgtWhyOpen=new Set(); // «¿Por qué?» abiertos (solo en memoria: no es estado de la app)
 // Bloque «Objetivo de hoy» de la tarjeta abierta: peso × reps, series, motivo y «¿Por qué?» desplegable
 function presTargetHtml(ex,p,compact){
-  if(ex&&!p&&_presRetake(ex.id))return`<div class="tgt k-keep"><div class="tgt-top"><div class="tgt-main"><div class="tgt-r">🎯 <b>Primera vez tras el parón:</b> elige un peso con el que te sobren unas 3 repeticiones. Lo de antes sigue en tu gráfico.</div></div></div></div>`; // (E6)
+  if(ex&&!p&&_presRetake(ex.id))return`<div class="tgt k-keep"><div class="tgt-top"><div class="tgt-main"><div class="tgt-r">${ic('target')} <b>Primera vez tras el parón:</b> elige un peso con el que te sobren unas 3 repeticiones. Lo de antes sigue en tu gráfico.</div></div></div></div>`; // (E6)
   if(!ex||!p)return'';
   const open=_tgtWhyOpen.has(ex.id);
   // Compacto (durante el ejercicio, debajo de las series): solo el motivo y «¿Por qué?» (las filas ya llevan los valores)
   if(compact)return`<div class="tgt cmp ${presKCls(p)}">
     <div class="tgt-top">
-      <div class="tgt-main"><div class="tgt-r">🎯 <b>${_nwUnits(esc(p.head))}:</b> ${_nwUnits(esc(p.reason))}</div></div>
+      <div class="tgt-main"><div class="tgt-r">${ic('target')} <b>${_nwUnits(esc(p.head))}:</b> ${_nwUnits(esc(p.reason))}</div></div>
       <button type="button" class="tgt-why-btn" data-ex="${esc(ex.id)}" aria-expanded="${open}" onclick="toggleTgtWhy(this)">¿Por qué? <span aria-hidden="true">${open?'▴':'▾'}</span></button>
     </div>
     <div class="tgt-why"${open?'':' hidden'}>${presWhyHtml(ex,p)}</div>
   </div>`;
   return`<div class="tgt ${presKCls(p)}">
     <div class="tgt-top">
-      <div class="tgt-main"><div class="tgt-l sepw"><span class="sepw-a">🎯 Objetivo de hoy</span> <span class="nw sepw-s"><i class="sep">· </i>${esc(plural(p.sets,'serie'))}</span></div>
+      <div class="tgt-main"><div class="tgt-l sepw"><span class="sepw-a">${ic('target')} Objetivo de hoy</span> <span class="nw sepw-s"><i class="sep">· </i>${esc(plural(p.sets,'serie'))}</span></div>
         <div class="tgt-v${p.up||p.dn||p.band?' var':''}">${_nwX(esc(presValTxt(p)))}</div></div>
       <button type="button" class="tgt-why-btn" data-ex="${esc(ex.id)}" aria-expanded="${open}" onclick="toggleTgtWhy(this)">¿Por qué? <span aria-hidden="true">${open?'▴':'▾'}</span></button>
     </div>
@@ -688,8 +688,8 @@ function liveAdjHtml(ex,p){
   const marked=[];for(let i=0;i<n;i++)if(c[i])marked.push(i);
   if(!marked.length||marked.length>=n)return'';
   if(!_presIsKg(p)){
-    if(rp[marked[marked.length-1]]===3)return`<div class="live-adj lim"><span>🥵 Serie al límite: repite lo mismo (o un poco menos) y cuida la técnica.</span></div>`;
-    if(marked.every(i=>rp[i]===1))return`<div class="live-adj easy"><span>😌 Te sobra: intenta ${p.unit==='reps'?'1-2 reps':p.unit==='s'?'5 s':'5 m'} más en la siguiente serie.</span></div>`;
+    if(rp[marked[marked.length-1]]===3)return`<div class="live-adj lim"><span>${ic('e3')} Serie al límite: repite lo mismo (o un poco menos) y cuida la técnica.</span></div>`;
+    if(marked.every(i=>rp[i]===1))return`<div class="live-adj easy"><span>${ic('e1')} Te sobra: intenta ${p.unit==='reps'?'1-2 reps':p.unit==='s'?'5 s':'5 m'} más en la siguiente serie.</span></div>`;
     return'';
   }
   // Peso de la SIGUIENTE serie (fila prerrellenada o tocada); sin él, el objetivo
@@ -697,13 +697,13 @@ function liveAdjHtml(ex,p){
   const lastR=rp[marked[marked.length-1]];
   if(lastR===3){
     const dn=_r2(w-p.step),canDown=dn>0&&w>p.weight-p.step+0.01; // no encadenar bajadas
-    return`<div class="live-adj lim"><span>🥵 Serie al límite: mantén ${esc(kgTxt(w))} kg${canDown?` o baja a ${esc(kgTxt(dn))} kg si no llegas a ${p.lo} reps`:' y cuida la técnica'}.</span>${canDown?`<button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${dn})">Bajar a ${esc(kgTxt(dn))}</button>`:''}</div>`;
+    return`<div class="live-adj lim"><span>${ic('e3')} Serie al límite: mantén ${esc(kgTxt(w))} kg${canDown?` o baja a ${esc(kgTxt(dn))} kg si no llegas a ${p.lo} reps`:' y cuida la técnica'}.</span>${canDown?`<button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${dn})">Bajar a ${esc(kgTxt(dn))}</button>`:''}</div>`;
   }
   if(p.kind!=='down'&&marked.every(i=>rp[i]===1)&&w<=p.weight+0.01){
     const lastDone=rows[marked[marked.length-1]],reps=lastDone&&lastDone.r>0?lastDone.r:_todayReps(ex,p);
-    if(p.step>w*LOAD_CAP+1e-9)return`<div class="live-adj easy"><span>😌 Te sobra: haz 1-2 reps más en la siguiente serie.</span></div>`;
+    if(p.step>w*LOAD_CAP+1e-9)return`<div class="live-adj easy"><span>${ic('e1')} Te sobra: haz 1-2 reps más en la siguiente serie.</span></div>`;
     const up=_r2(w+p.step);
-    return`<div class="live-adj easy"><span>😌 Te sobra: si hiciste ${reps?reps+' reps':'tus reps'}, prueba ${esc(kgTxt(up))} kg en la siguiente serie.</span><button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${up})">Poner ${esc(kgTxt(up))}</button></div>`;
+    return`<div class="live-adj easy"><span>${ic('e1')} Te sobra: si hiciste ${reps?reps+' reps':'tus reps'}, prueba ${esc(kgTxt(up))} kg en la siguiente serie.</span><button type="button" class="live-adj-btn" data-ex="${eid}" onclick="liveSetWeight(this.dataset.ex,${up})">Poner ${esc(kgTxt(up))}</button></div>`;
   }
   return'';
 }
@@ -760,11 +760,11 @@ function dayTargetsHtml(dk,mode){
   const t=dayTargets(dk);
   if(!t.length)return'';
   const rows=t.map(({ex,p})=>`<div class="tgl-row">
-      <span class="tgl-ic ${presKCls(p)}" role="img" aria-label="${esc(presWord(p))}">${presIc(p)}</span>
+      <span class="tgl-ic ${presKCls(p)}" role="img" aria-label="${esc(presWord(p))}">${icE(presIc(p))}</span>
       <span class="tgl-n">${esc(ex.n)}${mode==='coach'?`<small>${_nwUnits(esc(p.head))}: ${_nwUnits(esc(p.reason))}</small>`:''}</span>
       <span class="tgl-v">${esc(presShortTxt(p))}</span></div>`).join('');
   // Con algún objetivo que no es de kilos («13 reps», «45 s»), «Objetivos de hoy»; si todos lo son, «Objetivos de carga»
-  return`<div class="tgl${mode==='coach'?' full':''}">${mode==='dash'?`<div class="tgl-h">🎯 ${t.some(x=>!_presIsKg(x.p))?'Objetivos de hoy':'Objetivos de carga'}</div>`:''}${rows}</div>`;
+  return`<div class="tgl${mode==='coach'?' full':''}">${mode==='dash'?`<div class="tgl-h">${ic('target')} ${t.some(x=>!_presIsKg(x.p))?'Objetivos de hoy':'Objetivos de carga'}</div>`:''}${rows}</div>`;
 }
 // Día para «Tu próxima sesión» del Coach: el entreno a medias si lo hay; si no, el que toca
 function _coachPlanDay(){const aw=getActiveWorkout();return aw?aw.day:hoyDayKey();} // (E1b) el que toca de verdad
@@ -773,9 +773,9 @@ function coachPlanCardHtml(){
   const list=day?dayTargetsHtml(dk,'coach'):'';
   if(!list)return'';
   const aw=getActiveWorkout();
-  return`<div class="sh">🎯 ${aw?'Tu entreno de hoy':'Tu próxima sesión'} · ${esc(day.label)}</div>
+  return`<div class="sh">${ic('target')} ${aw?'Tu entreno de hoy':'Tu próxima sesión'} · ${esc(day.label)}</div>
   <div class="card coach-plan">${list}
-    <div class="coach-plan-f">Doble progresión: primero reps, luego peso.${_rpeOn()?' Con tu esfuerzo (😌 💪 🥵) ajusto el salto.':''}</div>
+    <div class="coach-plan-f">Doble progresión: primero reps, luego peso.${_rpeOn()?' Con tu esfuerzo (fácil, justo o al límite) ajusto el salto.':''}</div>
     <button class="btn bs" onclick="${aw?'resumeWorkout()':"S.day=S.nextDay;go('workout')"}">${aw?'Seguir entrenando':'Ir a entrenar'} ${esc(day.label)} →</button>
   </div>`;
 }

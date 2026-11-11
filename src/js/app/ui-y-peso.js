@@ -16,7 +16,7 @@ function toast(msg,ms){
   // (16c) un «Deshacer» anterior ya no vacía este aviso al cumplir sus 5 s (dejaba una caja vacía de 34 px)
   try{if(_undoToastT){clearTimeout(_undoToastT);_undoToastT=null;_lastSetAction=null;}}catch(e){}
   el.style.pointerEvents='';
-  el.textContent=msg;
+  el.innerHTML=icT(msg);
   el.classList.remove('pr');
   _toastPlace();
   el.classList.add('show');
@@ -330,7 +330,7 @@ function wWhen(t){
 // Tarjeta de peso (Inicio y Progreso)
 function renderWeightCard(emptyMsg){
   const pts=wSeries();
-  if(pts.length<2)return`<div class="card">${pts.length?`<div class="wc-top"><div><div class="wc-now">${wf1(pts[0].v)}<small> kg</small></div><div class="wc-sub">Primer registro · ${wFmt(pts[0].t)}</div></div></div><p class="wc-hint">Registra tu peso otro día para ver la evolución.</p>`:`<div class="empty"><div class="eic">⚖️</div><p>${emptyMsg}</p></div>`}
+  if(pts.length<2)return`<div class="card">${pts.length?`<div class="wc-top"><div><div class="wc-now">${wf1(pts[0].v)}<small> kg</small></div><div class="wc-sub">Primer registro · ${wFmt(pts[0].t)}</div></div></div><p class="wc-hint">Registra tu peso otro día para ver la evolución.</p>`:`<div class="empty"><div class="eic">${ic('scale')}</div><p>${emptyMsg}</p></div>`}
     <button class="btn bs" style="margin-top:12px" onclick="S.wmodal=true;renderWmodal()">Registrar peso de hoy</button></div>`;
   const k=wRangeKey(),rp=wInRange(pts,k),last=pts[pts.length-1],ch=last.v-rp[0].v,rate=wRate(pts),R=WRANGES.find(x=>x[0]===k);
   const vs=rp.map(p=>p.v),avg=vs.reduce((a,b)=>a+b,0)/vs.length;

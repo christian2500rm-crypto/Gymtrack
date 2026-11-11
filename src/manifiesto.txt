@@ -82,6 +82,7 @@ js/gen/exporta.js             # window.GymGen = {…}
 [app]
 # La app. Cada fichero empieza en un rótulo de sección del código y se puede leer (y compilar) por separado.
 js/app/estado.js              # plan de fábrica, constantes, estado S en localStorage («gymtrack_v3») y migraciones
+js/app/iconos.js              # iconos de línea (ic, icE, icT): sustituyen a los emojis que hacían de icono
 js/app/catalogo.js            # biblioteca de ejercicios: grupos musculares, material, patrones y músculos
 js/app/catalogo-filas.js      # LIB_ROWS: una fila por ejercicio (GENERADO por tools/catalog desde catalog.json)
 js/app/catalogo-lector.js     # lector de LIB_ROWS (EXERCISE_DB) e índices; preferencias del selector
