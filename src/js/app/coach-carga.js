@@ -197,6 +197,12 @@ function _limCase(d,last,w,r,top){
   return p&&Math.abs((+p.v||0)-w)<0.01&&_recReps(p)>=top?'repetido':'hold';
 }
 const LIM_TXT={sobran:', y te sobran repeticiones',repetido:' otra vez: toca subir',ultimas:' en las últimas series'};
+// (C2) Lo que hiciste, como fue: «3×12» si todas las series con el peso de referencia salieron iguales; si no, «12·12·10» (antes el
+// motivo decía «3×10», las más bajas, y no reconocías la sesión)
+function _didTxt(rec,sx,r){
+  const v=+rec.v||0,a=Array.isArray(rec.sets)?rec.sets.map(x=>x&&Math.abs((+x.w||0)-v)<0.01?_setNumR(x.r):null).filter(x=>x!=null):[];
+  return a.length>1&&a.length===sx&&a.some(x=>x!==a[0])?a.join('·'):`${sx}×${r}`;
+}
 function _presKg(exId,ex,opts){
   const rr=repRange(ex);
   if(!rr)return null;
@@ -222,7 +228,7 @@ function _presKg(exId,ex,opts){
   const sdj=sdTop!=null?sdTop:sd;
   const setsOk=sdj==null||!(sdj>=0)||sdj>=Math.min(lp.s,baseSets);
   const sx=sd>0?sd:lp.s; // «3×12»
-  const did=r!=null?`${sx}×${r}`:'';
+  const did=r!=null?_didTxt(last,sx,r):''; // (C2)
   const rpeT=rc?' '+RPE_TXT[rc]:'';
   const tr=targetRepsNum(ex),scheme=`${baseSets}×${tr!=null?tr:lo+'-'+hi}`; // «4×8» (solo números)
   const P={exId,eq:cls,step,stepSrc:ls.src,lo,hi,sets:Math.max(1,parseInt(ex.s)||baseSets),last:w,lastR:r,lastRpe:rc,lastSets:sd,lastD:last.d||'',lastTs:last.ts||null};

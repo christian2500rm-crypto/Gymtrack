@@ -19066,7 +19066,7 @@ function coach_cycleData(){
 //  · 'strong_up' / 'up' / 'flat' según la pendiente (mínimos cuadrados) del 1RM estimado en %/semana
 // Mismo peso con más reps (doble progresión) sube el 1RM estimado: nunca cuenta como estancamiento.
 const PROG_WINDOW=6,STAG_MIN_SESSIONS=4,STAG_MIN_DAYS=21,REG_DROP=0.95;
-function coach_e1rm(rec,ex){
+function coach_e1rm(rec,ex,all){ // all (C2): con las repeticiones de TODAS las series (la tendencia del Coach); sin él, las más bajas
   const v=+(rec&&rec.v);
   if(!(v>0)||!isFinite(v))return 0;
   // Con peso por tiempo o distancia (un paseo con mancuernas, una plancha con disco): el peso por su medida, sin tope
@@ -19078,11 +19078,19 @@ function coach_e1rm(rec,ex){
   // con el tiempo o la distancia de su plan, la misma escala que los nuevos (por reps saldría un falso retroceso)
   const xl=lt==='w'&&ex?exLT(ex):'w';
   if(xl==='t'||xl==='d'){const q={r:_recPlan(rec,ex).r},x=xl==='t'?_tgtSecs(q):_tgtMetres(q);if(x!=null)return v*(1+x/(xl==='t'?120:100));}
-  let r=parseInt(rec.r);
+  let r=all?_recRepsAvg(rec):parseInt(rec.r);
   if(!(r>0))r=targetRepsNum(ex)||10; // registros antiguos sin reps: las del objetivo
   return v*(1+Math.min(r,30)/30);
 }
 function _recReps(r){const n=parseInt(r&&r.r);return n>0?n:null;}
+// (C2) Repeticiones de un registro contando TODAS las series hechas con su peso de referencia (la media): mejorar en las dos
+// primeras series y repetir la tercera es progresar. El registro guarda en r las más bajas, y con ellas 10·10·10 → 12·12·10 era
+// «estancado». Sin series guardadas (registros antiguos), las de siempre.
+function _recRepsAvg(rec){
+  const n=_recReps(rec);if(!rec||!Array.isArray(rec.sets))return n;
+  const v=+rec.v||0,a=rec.sets.map(x=>x&&(v>0?Math.abs((+x.w||0)-v)<0.01:!(+x.w>0))?_setNumR(x.r):null).filter(x=>x!=null);
+  return a.length?a.reduce((x,y)=>x+y,0)/a.length:n;
+}
 // Registros de un ejercicio para su progresión: los antiguos sin ts (copias de seguridad de formato antiguo) cuentan con
 // el día de su fecha escrita («5 May», _histTs: la misma fecha que ven la ficha, la lista y la recomposición), así el Coach
 // y Progreso los juzgan igual (en copias: lo guardado no cambia). Los que no tienen ni eso (fecha aproximada) siguen
@@ -19114,7 +19122,7 @@ function coach_exerciseProgression(exId,sinceTs){
   const res={trend:'insufficient',change:0,pct:0,pctWeek:0,sessions:n,firstV:n?+data[0].v:0,lastV:n?+data[n-1].v:0,
     data,e1rm:[],weeks:0,repsUp:false,dropPct:0,stagSessions:0,stagWeeks:0,metric:'e1rm',lastre:exLT(ex)==='bw'||data.some(r=>_recLT(r)==='bw')};
   if(n<2)return res;
-  const e=data.map(r=>coach_e1rm(r,ex));
+  const e=data.map(r=>coach_e1rm(r,ex,true)); // (C2) todas las series
   res.e1rm=e;
   res.change=+(res.lastV-res.firstV).toFixed(2);
   // Con peso por tiempo o distancia (plancha con disco, paseo) y el mismo peso en toda la ventana, lo que progresa son
@@ -19137,7 +19145,7 @@ function coach_exerciseProgression(exId,sinceTs){
   res.pct=a>0?(b-a)/a*100:0;
   res.e1From=a;res.e1To=b; // (13b) el 1RM estimado de la tendencia (de donde sale el %), no el peso de trabajo
   res.pctWeek=res.pct/Math.max(1,span);
-  const r1=_recReps(data[n-1]),r2=_recReps(data[n-2]);
+  const r1=_recRepsAvg(data[n-1]),r2=_recRepsAvg(data[n-2]); // (C2)
   res.repsUp=+data[n-1].v===+data[n-2].v&&r1!=null&&r2!=null&&r1>r2;
   // Retroceso: 2 sesiones seguidas claramente por debajo de tu mejor nivel previo
   if(n>=3){
@@ -19148,10 +19156,10 @@ function coach_exerciseProgression(exId,sinceTs){
   let k=-1;
   for(let i=n-STAG_MIN_SESSIONS;i>=0;i--){if(data[n-1].ts-data[i].ts>=STAG_MIN_DAYS*86400000){k=i;break;}}
   if(k>=0){
-    const b0=data[k],eb=e[k],rb=_recReps(b0);
+    const b0=data[k],eb=e[k],rb=_recRepsAvg(b0); // (C2)
     let improved=false;
     for(let i=k+1;i<n&&!improved;i++){
-      const r=data[i],ri=_recReps(r);
+      const r=data[i],ri=_recRepsAvg(r);
       if(e[i]>eb*1.01)improved=true;                                   // más 1RM estimado
       else if(+r.v>=+b0.v&&rb!=null&&ri!=null&&ri>rb)improved=true;     // mismo peso, más reps
       else if(+r.v>+b0.v&&e[i]>=eb*0.97)improved=true;                  // más peso sin hundirse
@@ -21685,6 +21693,12 @@ function _limCase(d,last,w,r,top){
   return p&&Math.abs((+p.v||0)-w)<0.01&&_recReps(p)>=top?'repetido':'hold';
 }
 const LIM_TXT={sobran:', y te sobran repeticiones',repetido:' otra vez: toca subir',ultimas:' en las últimas series'};
+// (C2) Lo que hiciste, como fue: «3×12» si todas las series con el peso de referencia salieron iguales; si no, «12·12·10» (antes el
+// motivo decía «3×10», las más bajas, y no reconocías la sesión)
+function _didTxt(rec,sx,r){
+  const v=+rec.v||0,a=Array.isArray(rec.sets)?rec.sets.map(x=>x&&Math.abs((+x.w||0)-v)<0.01?_setNumR(x.r):null).filter(x=>x!=null):[];
+  return a.length>1&&a.length===sx&&a.some(x=>x!==a[0])?a.join('·'):`${sx}×${r}`;
+}
 function _presKg(exId,ex,opts){
   const rr=repRange(ex);
   if(!rr)return null;
@@ -21710,7 +21724,7 @@ function _presKg(exId,ex,opts){
   const sdj=sdTop!=null?sdTop:sd;
   const setsOk=sdj==null||!(sdj>=0)||sdj>=Math.min(lp.s,baseSets);
   const sx=sd>0?sd:lp.s; // «3×12»
-  const did=r!=null?`${sx}×${r}`:'';
+  const did=r!=null?_didTxt(last,sx,r):''; // (C2)
   const rpeT=rc?' '+RPE_TXT[rc]:'';
   const tr=targetRepsNum(ex),scheme=`${baseSets}×${tr!=null?tr:lo+'-'+hi}`; // «4×8» (solo números)
   const P={exId,eq:cls,step,stepSrc:ls.src,lo,hi,sets:Math.max(1,parseInt(ex.s)||baseSets),last:w,lastR:r,lastRpe:rc,lastSets:sd,lastD:last.d||'',lastTs:last.ts||null};

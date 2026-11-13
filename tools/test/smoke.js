@@ -13267,5 +13267,33 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('coachTodasLasSeries',async()=>{
+// (C2) La tendencia cuenta todas las series con el peso de referencia, no solo la peor: 10·10·10 → 12·12·10 con el mismo peso es
+// progresar (antes, «estancado»). El motivo del objetivo dice lo que hiciste («12·12·10»). Los registros sin series, como siempre.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.planMeta=null;S.appliedProposals=[];S.rpeOn=true;syncActiveWorkout();
+  const ex=Object.values(getPlan()).flatMap(d=>d.ex).find(e=>!e.cardio&&exLT(e)==='w'&&isCompoundEx(e));E(!!ex,'sin multiarticular con kilos');
+  if(ex){const rr=repRange(ex),hi=rr.hi,lo=rr.lo,D=864e5,n=Date.now();
+    const rec=(d,reps,noSets)=>{const o={d:'x',v:60,r:Math.min(...reps),setsDone:reps.length,rpe:2,ts:n-d*D-3600e3,ps:reps.length,pr:ex.r};if(!noSets)o.sets=reps.map(r=>({w:60,r,rpe:2}));return o;};
+    const rows=[[28,[lo,lo,lo]],[21,[lo+1,lo,lo]],[14,[lo+2,lo+1,lo]],[7,[lo+2,lo+2,lo]],[0,[lo+2,lo+2,lo]]];
+    S.strength[ex.id]=rows.map(([d,r])=>rec(d,r));let p=coach_exerciseProgression(ex.id);
+    E(p.trend!=='stagnant'&&p.trend!=='down'&&p.pct>0,'mejora en las primeras series: '+p.trend+' '+p.pct.toFixed(2));
+    E(Math.abs(_recRepsAvg(S.strength[ex.id][4])-(lo+4/3))<1e-9&&_recReps(S.strength[ex.id][4])===lo,'media de reps '+_recRepsAvg(S.strength[ex.id][4]));
+    const pr=coach_prescribe(ex.id);E(pr&&pr.reason.includes([lo+2,lo+2,lo].join('·'))&&pr.reps===lo+1,'motivo con las series reales: '+(pr&&pr.reason)+' → '+(pr&&pr.reps));
+    // los mismos registros sin series (antiguos): como siempre, por las más bajas → estancado
+    S.strength[ex.id]=rows.map(([d,r])=>rec(d,r,true));p=coach_exerciseProgression(ex.id);E(p.trend==='stagnant','sin series, como siempre: '+p.trend);
+    E(coach_prescribe(ex.id).reason.includes('3×'+lo),'sin series, «3×N»: '+coach_prescribe(ex.id).reason);
+    // todo igual de verdad durante 5 semanas: estancado también con series
+    S.strength[ex.id]=rows.map(([d])=>rec(d,[lo+1,lo+1,lo]));p=coach_exerciseProgression(ex.id);E(p.trend==='stagnant','parado de verdad: '+p.trend);
+    // si bajaste el peso en la última serie, solo cuentan las del peso de referencia
+    const mix=rec(0,[lo+2,lo+2]);mix.sets.push({w:55,r:lo+4,rpe:2});mix.setsDone=3;E(Math.abs(_recRepsAvg(mix)-(lo+2))<1e-9,'serie con menos peso: '+_recRepsAvg(mix));
+    // la fuerza estimada de siempre (sin «todas las series») no cambia
+    E(Math.abs(coach_e1rm({v:100,r:10,sets:[{w:100,r:12},{w:100,r:10}]},{})-133.33)<0.01&&Math.abs(coach_e1rm({v:100,r:10,sets:[{w:100,r:12},{w:100,r:10}]},{},true)-136.67)<0.01,'coach_e1rm');}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
