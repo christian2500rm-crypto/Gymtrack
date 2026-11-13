@@ -6,7 +6,7 @@
 //  · Doble progresión en un rango de reps (repRange): mismo peso y +1 rep hasta llegar al tope en todas las series;
 //    entonces sube el salto de tu equipo y vuelve al mínimo del rango.
 //  · RPE medio de la última sesión (1-3, el mismo corte que la etiqueta 😌/💪/🥵): todo fácil → salto doble (si cabe
-//    en el tope del 10 %) o +2 reps; al límite → mismo peso con un objetivo de reps (nunca sube).
+//    en el tope del 10 %) o +2 reps; al límite en TODAS las series y sin reps de sobra → se repite una vez y luego se sube (C1, _limCase).
 //  · Dos sesiones seguidas con el mismo peso claramente por debajo del rango → baja un 5-10 % (al menos un salto).
 //  · Saltos según el equipo (loadStepFor: Ajustes, o el que ya usas en ese ejercicio, o el de su tipo de equipo).
 //    Tope del 10 % por salto: si hasta el salto más pequeño lo supera (1 kg sobre 8.5 kg), antes suma hasta 2 reps
@@ -183,6 +183,20 @@ function _maxLoadOf(ex){
   const P=S.places[dk?placeOfDay(dk):(S.places.main||'g')];
   return P&&+P.dbMax>0&&+P.dbMax<99?+P.dbMax:null;
 }
+// (C1) «Al límite» en lo alto del rango ya no frena la subida sin fin (antes: «repítelo hasta que salga justo», aunque sobraran
+// repeticiones; quien entrena siempre al fallo no subía nunca). Solo se repite, y una sola vez ('hold'), si TODAS las series fueron al
+// límite, no sobran 2 o más repeticiones sobre el tope y la sesión anterior con este peso no estaba ya en el tope. Si no, se sube un
+// salto (nunca el doble): 'sobran' (2+ repeticiones por encima del tope) · 'repetido' (ya lo repetiste) · 'ultimas' (solo costaron
+// las últimas series, lo normal). Los registros sin series (antiguos) cuentan como «todas al límite». Con objetivo «fácil» (65 o más,
+// rutina prudente, empezar de cero) no cambia nada: «al límite» sigue bajando un salto o repitiendo.
+function _limCase(d,last,w,r,top){
+  if(r>=top+2)return'sobran';
+  const ss=Array.isArray(last.sets)?last.sets.filter(x=>x&&x.rpe>=1&&x.rpe<=3):[];
+  if(ss.length&&!ss.every(x=>x.rpe===3))return'ultimas';
+  const p=d.length>1?d[d.length-2]:null;
+  return p&&Math.abs((+p.v||0)-w)<0.01&&_recReps(p)>=top?'repetido':'hold';
+}
+const LIM_TXT={sobran:', y te sobran repeticiones',repetido:' otra vez: toca subir',ultimas:' en las últimas series'};
 function _presKg(exId,ex,opts){
   const rr=repRange(ex);
   if(!rr)return null;
@@ -277,8 +291,10 @@ function _presKg(exId,ex,opts){
   if(bigJ){
     if(r>=hiK){
       if(setsUp)return out('keep',w,hiK,`ahora son ${baseSets} series; complétalas con este peso y luego subes`);
-      const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}`;
-      if(rc===3)return out('keep',w,hiK,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+      const limK=rc===3?(_effortObj()==='facil'?'facil':_limCase(d,last,w,r,hiK)):null; // (C1)
+      const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}${LIM_TXT[limK]||''}`;
+      if(limK==='facil')return out('keep',w,hiK,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+      if(limK==='hold')return out('keep',w,hiK,`${today?'hoy ':''}${did} al límite en todas las series; repítelo una vez más y, si vuelve a salir, subes`);
       const gapD=last.ts?Math.floor((Date.now()-last.ts)/86400000):0;
       if(gapD>=LOAD_GAP_DAYS)return out('keep',w,hiK,`hace ${plural(Math.floor(gapD/7),'semana')} que no lo haces: repite antes de subir`);
       const pct=Math.round(step/w*100);
@@ -298,10 +314,11 @@ function _presKg(exId,ex,opts){
   if(r>=hi){
     // Serie nueva en el plan (Añadir serie / editor): primero todas las series con este peso, luego se sube
     if(setsUp)return out('keep',w,hi,`ahora son ${baseSets} series; complétalas con este peso y luego subes`);
-    const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}`;
-    const eo=_effortObj();
+    const eo=_effortObj(),lim=rc===3&&eo!=='facil'?_limCase(d,last,w,r,hi):null; // (C1)
+    const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}${LIM_TXT[lim]||''}`;
     if(rc===3&&eo==='facil'&&w-step>0)return out('down',w-step,lo,`${today?'hoy ':''}${did} al límite: un salto menos, tu rutina va con margen`);
-    if(rc===3)return out('keep',w,hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+    if(rc===3&&eo==='facil')return out('keep',w,hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+    if(lim==='hold')return out('keep',w,hi,`${today?'hoy ':''}${did} al límite en todas las series; repítelo una vez más y, si vuelve a salir, subes`);
     if(eo==='facil'&&rc===2)return out('keep',w,hi,`${repsTxt}: tu objetivo es que salga «fácil»; repite con este peso`);
     // (M2b) Prudente y con el esfuerzo apagado en Ajustes: sin saber si te sobraba, el tope dos sesiones seguidas con este peso
     if(eo==='facil'&&!_rpeOn()&&!_topTwice(d,ex,w,hi))return out('keep',w,hi,`${repsTxt}: primera vez en el tope con ${kgTxt(w)} kg; repítelo otra sesión y, si sale igual, subes`);
@@ -310,7 +327,7 @@ function _presKg(exId,ex,opts){
     const gapD=last.ts?Math.floor((Date.now()-last.ts)/86400000):0;
     if(gapD>=LOAD_GAP_DAYS)return out('keep',w,hi,`hace ${plural(Math.floor(gapD/7),'semana')} que no lo haces: repite antes de subir`);
     // Salto: doble si fue fácil (o te sobraron 3+ reps), sin pasar del 10 %
-    let k=eo!=='facil'&&(rc===1||r>=hi+3)?2:1; // (E6) con «fácil» de objetivo, nunca el salto doble
+    let k=eo!=='facil'&&rc!==3&&(rc===1||r>=hi+3)?2:1; // (E6) con «fácil» de objetivo, nunca el salto doble; (C1) ni tras una sesión al límite
     while(k>1&&k*step>w*LOAD_CAP+1e-9)k--;
     // Lastre de peso corporal (chaleco, mochila, un disco): el % sobre el lastre no dice nada (de 2.5 a 5 kg es un 100 %
     // más de lastre y muy poco más de carga total): un salto siempre que no pase del lastre que ya llevas (2.5 → 5 → 7.5)
@@ -405,7 +422,9 @@ function _presReps(exId,ex,lt,all,opts){
     return out('keep',v,`completa las ${B.baseSets} series antes de subir; ${when} hiciste ${B.sd}${B.lp.s!==B.baseSets?' de '+B.lp.s:''}`,v>r?`Busca ${v} reps`:'',null,true);}
   if(r>=hi){
     if(B.setsUp)return out('keep',hi,`ahora son ${B.baseSets} series; complétalas y luego subes`);
-    if(rc===3)return out('keep',hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+    {const lim=rc===3?(_effortObj()==='facil'?'facil':_limCase(d,last,0,r,hi)):null; // (C1) también sin kilos
+      if(lim==='facil')return out('keep',hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+      if(lim==='hold')return out('keep',hi,`${today?'hoy ':''}${did} al límite en todas las series; repítelo una vez más antes de pasar a algo más difícil`);}
     if(B.gap>=LOAD_GAP_DAYS)return out('keep',hi,`hace ${plural(Math.floor(B.gap/7),'semana')} que no lo haces: repite antes de subir`);
     const done=`${B.sx}×${hi} completas`,L=exLib(ex);
     if(L&&(L.mat==='banda'||L.mat==='minibanda'))return out('harder',lo,`${done}: banda más dura y vuelve a ${lo} reps`,'Usa una banda más dura',{band:true});
@@ -650,7 +669,7 @@ function presWhyHtml(ex,p){
       <li>Rango <b>${p.lo}-${p.hi} reps</b>: mismo peso y una rep más cada vez. Al hacer ${p.hi} en todas las series, sube un salto y vuelve a ${p.lo}.</li>
       <li>Salto: <b>${esc(src)}</b>. Sube como mucho un 10 % (doble si ${on?'fue fácil':'te sobran 3 reps o más'}). Con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.</li>
       ${!on&&_effortObj()==='facil'?`<li>Tu rutina va con margen: subes solo tras llegar a ${p.hi} reps en todas las series dos sesiones seguidas con el mismo peso.</li>`:''}
-      <li>${on?'«Al límite» no sube peso. ':''}Dos sesiones seguidas por debajo de ${p.lo} reps: baja un 5-10 %, al menos un salto.</li>${p.hiK?`
+      <li>${on?(_effortObj()==='facil'?'«Al límite» no sube peso: un salto menos. ':'Si todas las series salen «al límite» y sin repeticiones de sobra, repite una vez antes de subir. '):''}Dos sesiones seguidas por debajo de ${p.lo} reps: baja un 5-10 %, al menos un salto.</li>${p.hiK?`
       <li>Pesas fijas: +${esc(st)} kg es un ${Math.round(p.step/Math.max(1,p.last)*100)} %. Antes de saltar llegas a ${p.hiK} reps; tras el salto empiezas con menos reps y vuelves a subir.</li>`:''}
     </ul>
     ${LOAD_EQ[p.eq]&&p.weight>0?'<button type="button" class="tgt-set" onclick="openLoadSettings()">Cambiar saltos de peso ›</button>':''}`;
@@ -677,7 +696,7 @@ function _presWhyNoKg(ex,p){
   return`${svg}${on?TGT_LEG_RPE:''}
     <ul class="tgt-rules">
       <li>${rule}</li>
-      <li>${on?'Al límite no sube. ':''}Dos sesiones claramente por debajo: variante más fácil.</li>
+      <li>${on?(_effortObj()==='facil'?'Al límite no sube. ':'Con todas las series al límite, repite una vez antes de subir. '):''}Dos sesiones claramente por debajo: variante más fácil.</li>
     </ul>
     ${LOAD_EQ[p.eq]&&p.weight>0?'<button type="button" class="tgt-set" onclick="openLoadSettings()">Cambiar saltos de peso ›</button>':''}`;
 }

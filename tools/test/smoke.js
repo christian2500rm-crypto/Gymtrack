@@ -12674,7 +12674,7 @@ await safe('b3Progreso',async()=>{
       E(sh&&sh.getAttribute('role')==='dialog'&&sh.getAttribute('aria-modal')==='true'&&tx(document.getElementById(sh.getAttribute('aria-labelledby')))==='Guía de progresión','la guía no es un diálogo con título');
       if(sh){E(sh.querySelectorAll('.pg-r').length===4&&/La regla de oro/.test(sh.textContent)&&new RegExp(getWeeklyTarget()+' días?/semana').test(tx(sh)),'reglas de la guía');
         E(document.activeElement===sh,'el foco no entra en la guía');
-        E(/«Al límite» nunca sube peso/.test(sh.textContent)===_rpeOn(),'la guía no sigue el ajuste del esfuerzo');
+        E(/«Al límite» nunca sube peso|repite una vez antes de subir/.test(sh.textContent)===_rpeOn(),'la guía no sigue el ajuste del esfuerzo');
         const ok=sh.querySelector('.cmod-btns .btn');E(ok&&tx(ok)==='Entendido'&&ok.getBoundingClientRect().height>=44,'sin «Entendido»');
         if(ok)ok.click();await W(5);
         E(!document.querySelector('#cmodal-root .pg-sheet')&&document.activeElement===document.querySelector('#screen .prog-guide'),'«Entendido» no cierra o no devuelve el foco');}
@@ -13225,6 +13225,43 @@ try{
   S.strength={zz_vol:[{d:'x',v:50,r:8,setsDone:3,ts:t0,sets:[{w:50,r:10},{w:50,r:9},{w:50,r:8}]}]};
   E(coach_weekStats(0).totalVolume===1350,'volumen con series: '+coach_weekStats(0).totalVolume);
   S.strength={zz_vol:[{d:'x',v:50,r:8,setsDone:3,ts:t0}]};E(coach_weekStats(0).totalVolume===1200,'volumen sin series: '+coach_weekStats(0).totalVolume);
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('coachAlLimite',async()=>{
+// (C1) «Al límite» en lo alto del rango ya no frena la subida sin fin: con 2 o más repeticiones de sobra se sube (un salto, nunca
+// doble); si solo costaron las últimas series, se sube; con TODAS al límite y sin margen se repite UNA vez y a la siguiente se sube.
+// Los registros sin series (antiguos) repiten una vez. Con objetivo «fácil» (prudentes, 65 o más) no cambia: baja un salto.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.restWeeks=[];S.planMeta=null;S.rpeOn=true;S.loadSteps=_defaultLoadSteps();syncActiveWorkout();
+  const ex=Object.values(getPlan()).flatMap(d=>d.ex).find(e=>!e.cardio&&exLT(e)==='w'&&isCompoundEx(e)&&loadEqClass(e)!=='kb'&&loadEqClass(e)!=='disco');
+  E(!!ex,'sin multiarticular con kilos en la rutina');
+  if(ex){const rr=repRange(ex),hi=rr.hi,lo=rr.lo,D=864e5,n=Date.now(),W0=100;
+    const rec=(d,v,reps,rpe,noSets)=>{const o={d:'x',v,r:Math.min(...reps),setsDone:reps.length,rpe:rpe?+(rpe.reduce((a,b)=>a+b,0)/rpe.length).toFixed(2):null,ts:n-d*D,ps:reps.length,pr:ex.r};
+      if(!noSets)o.sets=reps.map((r,i)=>({w:v,r,rpe:rpe?rpe[i]:null}));return o;};
+    const P=(...rows)=>{S.strength[ex.id]=rows;return coach_prescribe(ex.id);};
+    const st=(()=>{S.strength[ex.id]=[rec(7,W0,[hi,hi,hi],[2,2,2])];return loadStepOf(ex);})();
+    let p=P(rec(7,W0,[hi+4,hi+3,hi+2],[3,3,3]));E(p.kind==='up'&&Math.abs(p.weight-(W0+st))<0.01&&/te sobran repeticiones/.test(p.reason),'al fallo con reps de sobra: '+p.head+' · '+p.reason);
+    p=P(rec(7,W0,[hi,hi,hi],[3,3,3]));E(p.kind==='keep'&&/una vez más/.test(p.reason)&&!/hasta que salga/.test(p.reason),'todas al límite, primera vez: '+p.head+' · '+p.reason);
+    p=P(rec(14,W0,[hi,hi,hi],[3,3,3]),rec(7,W0,[hi,hi,hi],[3,3,3]));E(p.kind==='up'&&Math.abs(p.weight-(W0+st))<0.01&&/otra vez/.test(p.reason),'todas al límite, segunda vez: '+p.head+' · '+p.reason);
+    p=P(rec(7,W0,[hi,hi,hi],[2,3,3]));E(p.kind==='up'&&Math.abs(p.weight-(W0+st))<0.01&&/últimas series/.test(p.reason),'justo · límite · límite: '+p.head+' · '+p.reason);
+    p=P(rec(7,W0,[hi,hi,hi],[3,3,3],true));E(p.kind==='keep'&&/una vez más/.test(p.reason),'registro sin series al límite: '+p.head);
+    // el salto doble sigue siendo solo de «fácil» (o 3+ reps de sobra sin llegar al límite)
+    p=P(rec(7,W0,[hi,hi,hi],[1,1,1]));E(p.kind==='up'&&Math.abs(p.weight-(W0+2*st))<0.01,'fácil → salto doble: '+p.head);
+    p=P(rec(7,W0,[hi+3,hi+3,hi+3],[3,3,3]));E(p.kind==='up'&&Math.abs(p.weight-(W0+st))<0.01,'al límite con 3 de sobra → un solo salto: '+p.head);
+    // por debajo del tope, «al límite» sigue sin subir
+    p=P(rec(7,W0,[hi-1,hi-1,hi-1],[3,3,3]));E(p.kind!=='up'&&Math.abs(p.weight-W0)<0.01,'al límite dentro del rango: '+p.head);
+    // objetivo «fácil»: como siempre (un salto menos)
+    S.planMeta={effort:{obj:'facil'}};p=P(rec(7,W0,[hi+4,hi+3,hi+2],[3,3,3]));
+    E(p.kind==='down'&&Math.abs(p.weight-(W0-st))<0.01&&/un salto menos/.test(p.reason),'objetivo fácil y al límite: '+p.head+' · '+p.reason);S.planMeta=null;
+    // con el esfuerzo apagado no hay «al límite»: sube
+    S.rpeOn=false;p=P(rec(7,W0,[hi,hi,hi],[3,3,3]));E(p.kind==='up','esfuerzo apagado: '+p.head);S.rpeOn=true;
+    // «¿Por qué?» y la guía de Progreso ya no dicen que «al límite» nunca sube
+    p=P(rec(7,W0,[hi,hi,hi],[3,3,3]));E(/repite una vez antes de subir/.test(presWhyHtml(ex,p))&&!/no sube peso/.test(presWhyHtml(ex,p)),'«¿Por qué?»');
+    E(/repite una vez antes de subir/.test(progGuideHtml())&&!/nunca sube peso/.test(progGuideHtml()),'guía de Progreso');}
   if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
 }finally{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
