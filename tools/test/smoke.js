@@ -13133,5 +13133,20 @@ await safe('b3Iconos',async()=>{
     if(bad.length)throw new Error([...new Set(bad)].slice(0,10).join(' | '));
   }finally{if(fr)fr.style.width=fw;try{obSheetClose();closeLibKit();closeExercisePicker();closeMyMaterial();closeSettings();}catch(e){}document.getElementById('cmodal-root').innerHTML='';await _m3Back(full);}
 });
+await safe('p11TironSinTriceps',async()=>{
+// (P11, repaso del reparto) Con prioridad de brazos, el día de tirón lleva su curl y ningún tríceps directo (va con el empuje);
+// la semana sigue con curl y tríceps directos, y la seguridad común (que ya trae la invariante) no encuentra nada.
+const bad=[];const E=(c,m)=>{if(!c)bad.push(m);};
+const B={screen:'nada',zones:{},pref:{},sport:'no',style:'igual',power:false,cardioEnd:'auto',daysOther:0,consec:false};
+for(const d of [5,6]){
+  const g=genRoutineFrom(Object.assign(JSON.parse(JSON.stringify(B)),{goal:'musculo',sex:'h',exp:'6m2a',days:d,min:60,age:'18',prio:['brazos'],places:{v:1,main:'g',g:placeFromPreset('grande'),c:null}}),{},{reparto:'dias'});
+  const str=g.res.det.flatMap(x=>x.rows.filter(r=>r.kind==='str').map(r=>({role:x.role,slot:r.slot,pat:r.pat})));
+  E(g.res.ok&&str.some(r=>/^Ti/.test(r.role)),d+' días: sin día de tirón ('+g.res.meta.split+')');
+  E(!str.some(r=>/^Ti/.test(r.role)&&r.slot==='TR'),d+' días: tríceps en el día de tirón');
+  E(str.some(r=>/^Ti/.test(r.role)&&r.pat==='curl')&&str.some(r=>/^E/.test(r.role)&&r.slot==='TR'),d+' días: falta el curl del tirón o el tríceps del empuje');
+  E(Object.keys(g.E.SEG(g.res,g.inp)).length===0,d+' días: seguridad '+JSON.stringify(g.E.SEG(g.res,g.inp)));
+}
+if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

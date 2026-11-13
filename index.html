@@ -10999,8 +10999,9 @@ return function (K, OPT) {
       if (P.hombroAhora) def = def.map(d => d[0] === 'RA' ? ['RX', d[1]] : d);   // v8 (J-02): rotación externa en lugar de elevaciones laterales
       // v9 (J-08): con prioridad de brazos, un curl y un tríceps directos (huecos 2) en cada día de torso o de cuerpo completo (y el del
       // grupo en empuje o tirón), antes que elevaciones, gemelos o aperturas: con la cuenta indirecta no salía ni un curl (488 de 525)
+      // v14 (P11): «torso» es T1, T2, T3 o TC; antes bastaba con empezar por «T» y el día de tirón (Ti) se llevaba también un tríceps
       if (P.prioG.has('biceps')) {
-        const z = ZONA_TPL[rb], want = z === null || rb[0] === 'T' ? ['CU', 'TR'] : (z || []).includes('biceps') ? ['CU'] : (z || []).includes('triceps') ? ['TR'] : [];
+        const z = ZONA_TPL[rb], want = z === null || /^T(\d|C)$/.test(rb) ? ['CU', 'TR'] : (z || []).includes('biceps') ? ['CU'] : (z || []).includes('triceps') ? ['TR'] : [];
         for (const w of want) { const i = def.findIndex(d => d[0] === w); if (i >= 0) def.splice(i, 1); }
         // (delante de los demás huecos 2, para que se llenen antes: si no, una dominada supina de un remo secundario le quita el curl)
         const i2 = def.findIndex(d => d[1] >= 2); def.splice(i2 < 0 ? def.length : i2, 0, ...want.map(w => [w, 2]));
@@ -12774,6 +12775,8 @@ return function (K, G, X) {
       // (con material = algún ejercicio de su menú —el de la clase de la persona: a inicio, prudentes y 65+, sin fondos en banco ni flexión diamante— posible en sus sitios)
       const hay = menuIds(g === 'biceps' ? 'CU' : 'TR', G.clsOf(P, inp)).some(id => { const L = K.BY.get(id); return L && L.lt !== 'c' && (L.dif <= P.difCap || (P.dif2 && L.dif === 2) || (P.mayorExp && L.dif === 2 && ['maquina', 'smith', 'mancuernas'].includes(L.mat))) && Object.values(m.dayPlace).some(pk => K.placeCan(L, inp.places[pk], pk)) && G.safeL(L, inp); });
       if (hay && !str.some(({ r, L }) => G.mainGroup(L) === g || r.slot === (g === 'biceps' ? 'CU' : 'TR'))) bump('prioridad_sin_directo', g); }   // (los fondos en el hueco de tríceps y las dominadas supinas en el de curl cuentan)
+    // v14 (P11): el día de tirón no lleva tríceps directo (va con el empuje), tampoco con prioridad de brazos
+    for (const { d, r } of str) if (/^Ti\d?$/.test(d.role) && r.slot === 'TR') bump('triceps_en_tiron', d.letra + ':' + r.lib);
     // J-09: con mancuernas de 20 kg o menos, intermedios y avanzados nunca a 8 repeticiones o menos (salvo elevaciones, brazos y gemelos)
     if (LVn(P.level) >= 2 && !P.cauto) for (const { d, r, L } of str) { const Pl = inp.places[d.place] || {}; const rr = G.repRange(L, r.r);
       if (['mancuernas', 'kettlebell'].includes(L.mat) && (Pl.dbMax || 20) <= 20 && !['raise', 'rear', 'curl', 'tri', 'calf', 'raise_f'].includes(L.pat) && rr && rr.hi <= 8) bump('carga_insuficiente', d.letra + ':' + L.id + ' ' + r.reps); }

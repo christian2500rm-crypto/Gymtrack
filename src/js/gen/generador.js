@@ -564,8 +564,9 @@ return function (K, OPT) {
       if (P.hombroAhora) def = def.map(d => d[0] === 'RA' ? ['RX', d[1]] : d);   // v8 (J-02): rotación externa en lugar de elevaciones laterales
       // v9 (J-08): con prioridad de brazos, un curl y un tríceps directos (huecos 2) en cada día de torso o de cuerpo completo (y el del
       // grupo en empuje o tirón), antes que elevaciones, gemelos o aperturas: con la cuenta indirecta no salía ni un curl (488 de 525)
+      // v14 (P11): «torso» es T1, T2, T3 o TC; antes bastaba con empezar por «T» y el día de tirón (Ti) se llevaba también un tríceps
       if (P.prioG.has('biceps')) {
-        const z = ZONA_TPL[rb], want = z === null || rb[0] === 'T' ? ['CU', 'TR'] : (z || []).includes('biceps') ? ['CU'] : (z || []).includes('triceps') ? ['TR'] : [];
+        const z = ZONA_TPL[rb], want = z === null || /^T(\d|C)$/.test(rb) ? ['CU', 'TR'] : (z || []).includes('biceps') ? ['CU'] : (z || []).includes('triceps') ? ['TR'] : [];
         for (const w of want) { const i = def.findIndex(d => d[0] === w); if (i >= 0) def.splice(i, 1); }
         // (delante de los demás huecos 2, para que se llenen antes: si no, una dominada supina de un remo secundario le quita el curl)
         const i2 = def.findIndex(d => d[1] >= 2); def.splice(i2 < 0 ? def.length : i2, 0, ...want.map(w => [w, 2]));

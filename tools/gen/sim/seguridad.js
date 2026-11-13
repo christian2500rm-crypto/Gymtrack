@@ -111,6 +111,8 @@ module.exports = function (K, G, X) {
       // (con material = algún ejercicio de su menú —el de la clase de la persona: a inicio, prudentes y 65+, sin fondos en banco ni flexión diamante— posible en sus sitios)
       const hay = menuIds(g === 'biceps' ? 'CU' : 'TR', G.clsOf(P, inp)).some(id => { const L = K.BY.get(id); return L && L.lt !== 'c' && (L.dif <= P.difCap || (P.dif2 && L.dif === 2) || (P.mayorExp && L.dif === 2 && ['maquina', 'smith', 'mancuernas'].includes(L.mat))) && Object.values(m.dayPlace).some(pk => K.placeCan(L, inp.places[pk], pk)) && G.safeL(L, inp); });
       if (hay && !str.some(({ r, L }) => G.mainGroup(L) === g || r.slot === (g === 'biceps' ? 'CU' : 'TR'))) bump('prioridad_sin_directo', g); }   // (los fondos en el hueco de tríceps y las dominadas supinas en el de curl cuentan)
+    // v14 (P11): el día de tirón no lleva tríceps directo (va con el empuje), tampoco con prioridad de brazos
+    for (const { d, r } of str) if (/^Ti\d?$/.test(d.role) && r.slot === 'TR') bump('triceps_en_tiron', d.letra + ':' + r.lib);
     // J-09: con mancuernas de 20 kg o menos, intermedios y avanzados nunca a 8 repeticiones o menos (salvo elevaciones, brazos y gemelos)
     if (LVn(P.level) >= 2 && !P.cauto) for (const { d, r, L } of str) { const Pl = inp.places[d.place] || {}; const rr = G.repRange(L, r.r);
       if (['mancuernas', 'kettlebell'].includes(L.mat) && (Pl.dbMax || 20) <= 20 && !['raise', 'rear', 'curl', 'tri', 'calf', 'raise_f'].includes(L.pat) && rr && rr.hi <= 8) bump('carga_insuficiente', d.letra + ':' + L.id + ' ' + r.reps); }

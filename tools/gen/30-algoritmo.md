@@ -563,3 +563,13 @@ Orden: **seguridad** (consulta del inactivo con enfermedad, rutina prudente, ten
 | **Tiempo de cálculo de la matriz** | 67 s (`recomendado`) y 91 s (`dias`) en la medición final, las dos a la vez; con el equipo cargado, `dias` llegó a 144 s, por la búsqueda de repeticiones con 4-6 entrenos distintos | — (en la app se calcula una rutina: 4-6 ms de mediana, p95 15-27 ms) |
 | **Juicio independiente** | Las 55 rutinas del juicio se han repasado al arreglarlas (personas con reglas en código y las 31 de la matriz a mano), pero no las ha vuelto a juzgar un entrenador independiente | Un segundo juicio con la misma muestra antes de llevarlo a la app |
 | **Decisiones del usuario** | B-1, J-11, M-4, C-17 y, si no está de acuerdo, J-15 | §16 |
+
+---
+
+## 19. Cambios de noviembre de 2026 (repaso del reparto, elegidos por el usuario el 13 nov)
+
+Cada punto es una propuesta aprobada del repaso del creador de rutinas (P1-P12). Donde contradice a una sección anterior, manda esta.
+
+| Propuesta | Regla | Dónde |
+|---|---|---|
+| **P11** · Tríceps fuera del día de tirón | Con prioridad de brazos, el curl y el tríceps directos (huecos 2) van los dos en los días de **torso** (T1, T2, T3, TC) y de cuerpo completo; en empuje, solo el tríceps; en **tirón, solo el curl**. Antes, la condición «empieza por T» metía también un tríceps en Ti, Ti1 y Ti2. Invariante nueva: `triceps_en_tiron` (ningún hueco TR en un día de tirón) | §3.1, `seguridad.js` |
