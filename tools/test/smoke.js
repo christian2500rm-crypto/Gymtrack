@@ -696,12 +696,12 @@ await safe('fullDeloadBaseSets',async()=>{
   try{
     _clearMarks();S.deload=null;S.appliedProposals=[];S.pendingCoachProposals=[];
     S.restWeeks=[{startTs:_end3-34*_D3,endTs:_end3-27*_D3}];
-    const sb=+findExInPlan('b2').s,sc=+findExInPlan('c3').s,rc=findExInPlan('c3').r,ns=Math.min(6,sb+1);
-    _mk3b('b2',_F3(40,10));_mk3b('c3',[[40,10],[40,11],[40,10],[40,11],[40,10],[40,11]]);_mk3b('a4',_REG3);
+    const sb=+findExInPlan('b2').s,sc=+findExInPlan('a3').s,rc=findExInPlan('a3').r,ns=Math.min(6,sb+1);
+    _mk3b('b2',_F3(40,10));_mk3b('a3',[[40,10],[40,11],[40,10],[40,11],[40,10],[40,11]]);_mk3b('a4',_REG3);
     if(!startDeload('all',null,'x'))throw new Error('sin descarga');
     if(+findExInPlan('b2').s>=sb)throw new Error('la descarga no bajó las series');
     const an=coach_analyze();
-    const rs=an.candidates.find(c=>c.id==='change_rep_scheme_b2'),as=an.candidates.find(c=>c.id==='add_set_c3');
+    const rs=an.candidates.find(c=>c.id==='change_rep_scheme_b2'),as=an.candidates.find(c=>c.id==='add_set_a3');
     if(!rs||rs.to.s!==ns||rs.diff!==`${sb}×10 → ${ns}×8`)throw new Error('esquema calculado con las series a medias: '+(rs&&rs.diff));
     if(!as||as.diff!==`${sc}×${rc} → ${sc+1}×${rc}`)throw new Error('«añadir serie» con las series a medias: '+(as&&as.diff));
     if(an.candidates.some(c=>c.exId==='a4'))throw new Error('propone otra descarga para a4 durante la descarga');
@@ -710,13 +710,13 @@ await safe('fullDeloadBaseSets',async()=>{
     if(!txt.includes(`pasar a ${ns}×8`))throw new Error('insight con las series a medias');
     // Cerrar el ciclo durante la descarga y aplicar al terminar: lo aplicado = lo mostrado
     coach_applyRecommendationsConfirmed();await W(5);
-    const p=S.pendingCoachProposals.find(x=>x.id==='change_rep_scheme_b2'),q=S.pendingCoachProposals.find(x=>x.id==='add_set_c3');
+    const p=S.pendingCoachProposals.find(x=>x.id==='change_rep_scheme_b2'),q=S.pendingCoachProposals.find(x=>x.id==='add_set_a3');
     if(!p||!q||p.diff!==rs.diff||q.diff!==as.diff)throw new Error('propuestas guardadas: '+S.pendingCoachProposals.map(x=>x.id+' '+x.diff));
     _restoreDeload(true);
-    if(+findExInPlan('b2').s!==sb||+findExInPlan('c3').s!==sc)throw new Error('no volvió al plan');
-    applyProposal('change_rep_scheme_b2');applyProposal('add_set_c3');
+    if(+findExInPlan('b2').s!==sb||+findExInPlan('a3').s!==sc)throw new Error('no volvió al plan');
+    applyProposal('change_rep_scheme_b2');applyProposal('add_set_a3');
     if(+findExInPlan('b2').s!==ns||+findExInPlan('b2').r!==8)throw new Error('b2 aplicado '+findExInPlan('b2').s+'x'+findExInPlan('b2').r+' ≠ '+p.diff);
-    if(+findExInPlan('c3').s!==sc+1)throw new Error('c3 aplicado '+findExInPlan('c3').s+' ≠ '+q.diff);
+    if(+findExInPlan('a3').s!==sc+1)throw new Error('a3 aplicado '+findExInPlan('a3').s+' ≠ '+q.diff);
   }finally{_clearMarks();_rest3(j);render();}
 });
 await safe('exDeloadKeepsFullDeload',async()=>{
@@ -13376,6 +13376,63 @@ try{
     const an=coach_analyze();E(an.down.length===0&&an.fatigue.regress===0&&!an.fatigue.deloadNeeded,'tras la vuelta: bajan '+an.down.length+', descarga '+an.fatigue.deloadNeeded);
     const r=coach_deloadReco(an);E(!r||r.src!=='regress','descarga por retroceso al volver: '+pj(r&&r.why));
     E(!an.candidates.some(c=>c.type==='rm_set'||c.type==='deload'),'propuestas de descarga al volver: '+pj(an.candidates.map(c=>c.type)));}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  _coachLvPin=pin0;
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('coachTopesSeries',async()=>{
+// (C4) Topes antes de proponer una serie más: 10 series por grupo muscular y sesión (la cuenta del creador de rutinas), 2 series nuevas
+// por ciclo, un 15 % sobre la rutina sin las que el Coach ya añadió y nada a un ejercicio con 4 series. «Cambiar esquema» solo suma su
+// serie si cabe y «Subir un poco» pasa por los mismos topes. La rampa del primer ciclo (2 → 3 series) no se limita.
+const full=JSON.parse(JSON.stringify(S)),bad=[],pin0=_coachLvPin;const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  _coachLvPin='P';S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.appliedProposals=[];S.pendingCoachProposals=[];syncActiveWorkout();
+  const pl={v:1,main:'g',g:placeFromPreset('grande'),c:null};
+  const a0={mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,consec:false,age:'40',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:pl};
+  E(applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(a0)),{},{reparto:'dias'})),{answers:a0,places:pl}).ok,'aplicar');S.mesocycles=[];S.planMeta.vol={}; // sin el tope semanal de «músculo»: aquí se miran los otros
+  const p=getPlan(),kg=[];liveDayKeys(p).forEach(k=>p[k].ex.forEach(e=>{const x=routineEx(e);if(x&&!x.cardio&&exLT(x)==='w')kg.push({ex:x,k});}));
+  const cand=o=>coach_buildCandidates(Object.assign({fatigue:{deloadNeeded:false},down:[],stagnant:[],flat:[]},o)),flat=q=>({ex:q.ex,dayKey:q.k,p:{sessions:4,pctWeek:0,metric:'e1rm'}});
+  const adds=c=>c.filter(x=>x.type==='add_set').map(x=>x.exId);
+  // la rutina generada ya respeta el tope por sesión
+  E(liveDayKeys(p).every(k=>Object.values(_daySetsByGroup(k)).every(v=>v<=SES_CAP+1e-9)),'la rutina generada pasa de 10 por grupo y sesión');
+  // 1) por sesión: dos ejercicios del mismo día que comparten grupo
+  let A1=null,B1=null,G1=null;for(const x of kg){const gx=_exGroups(x.ex);const y=kg.find(q=>q!==x&&q.k===x.k&&Object.keys(_exGroups(q.ex)).some(g=>gx[g]>=1&&_exGroups(q.ex)[g]>=1));
+    if(y){A1=x;B1=y;G1=Object.keys(gx).find(g=>gx[g]>=1&&_exGroups(y.ex)[g]>=1);break;}}
+  E(!!A1,'sin dos ejercicios del mismo grupo en un día');
+  if(A1){const sA=A1.ex.s,sB=B1.ex.s;A1.ex.s=3;B1.ex.s=3;
+    E(adds(cand({flat:[flat(A1)]})).includes(A1.ex.id)&&!_sesCapFull(A1.ex,A1.k),'con sitio en la sesión no propone la serie');
+    B1.ex.s=Math.ceil(SES_CAP-(_daySetsByGroup(A1.k)[G1]-3))+3; // llena el grupo ese día
+    E(_daySetsByGroup(A1.k)[G1]>=SES_CAP&&_sesCapFull(A1.ex,A1.k)===G1,'día sin llenar: '+_daySetsByGroup(A1.k)[G1]+' '+_sesCapFull(A1.ex,A1.k));
+    E(!adds(cand({flat:[flat(A1)]})).includes(A1.ex.id),'serie de más con el día lleno de '+G1);
+    // «cambiar esquema» (reps sueltas): la serie de más, solo si cabe
+    const r0=A1.ex.r,st={ex:A1.ex,dayKey:A1.k,p:{stagSessions:4,stagWeeks:3,kgTD:false,metric:'e1rm'}};A1.ex.r=12;
+    let c=cand({stagnant:[st]}).find(x=>x.exId===A1.ex.id&&x.type==='rep_scheme');E(c&&c.to.s===3,'esquema con el día lleno: '+pj(c&&c.to));
+    B1.ex.s=3;c=cand({stagnant:[st]}).find(x=>x.exId===A1.ex.id&&x.type==='rep_scheme');E(c&&c.to.s===4,'esquema con sitio: '+pj(c&&c.to));
+    // 2) por ejercicio: con 4 series, ninguna más
+    A1.ex.s=4;E(!adds(cand({flat:[flat(A1)]})).includes(A1.ex.id)&&cand({stagnant:[st]}).find(x=>x.exId===A1.ex.id).to.s===4,'serie de más con 4 series');
+    A1.ex.r=r0;A1.ex.s=sA;B1.ex.s=sB;}
+  // 3) por ciclo: todos estables y con sitio → 2 como mucho; con una ya aceptada en este ciclo, 1; con dos, ninguna
+  kg.forEach(q=>{q.ex.s=Math.min(q.ex.s,3);});const all=kg.map(flat),cyc=n=>[...Array(n)].map((_,i)=>({id:'add_set_zz'+i,type:'add_set',exId:kg[i].ex.id,appliedAt:Date.now()+1}));
+  E(adds(cand({flat:all})).length===ADD_PER_CYCLE,'series nuevas en un ciclo: '+adds(cand({flat:all})).length);
+  S.appliedProposals=cyc(1);E(adds(cand({flat:all})).length===1,'con una aceptada: '+adds(cand({flat:all})).length);
+  S.appliedProposals=cyc(2);E(adds(cand({flat:all})).length===0,'con dos aceptadas: '+adds(cand({flat:all})).length);
+  // 4) sobre la rutina: con el 15 % ya añadido en ciclos anteriores, ninguna más
+  const tot=_planSetsTotal(),N=Math.ceil(tot*(VOL_GROWTH-1));S.mesocycles=[{num:1,startTs:Date.now()-30*864e5,endTs:Date.now(),appliedAt:Date.now()+5000,sessionCount:9,summary:'x',insights:[]}];
+  S.appliedProposals=[...Array(N)].map((_,i)=>({id:'add_set_yy'+i,type:'add_set',exId:kg[i%kg.length].ex.id,appliedAt:S.planMeta.ts+1+i}));
+  E(_addedThisCycle()===0&&_coachAddedSets()===N&&!_volGrowthOk()&&adds(cand({flat:all})).length===0,'tope del 15 %: '+pj([_addedThisCycle(),_coachAddedSets(),N,tot,adds(cand({flat:all})).length]));
+  S.appliedProposals=S.appliedProposals.slice(0,1);E(_volGrowthOk()&&adds(cand({flat:all})).length===ADD_PER_CYCLE,'con una sola añadida vuelve a caber');
+  // la rampa no cuenta ni se limita
+  S.appliedProposals=[...Array(N)].map((_,i)=>({id:'ramp_yy'+i,type:'add_set',exId:kg[i%kg.length].ex.id,appliedAt:S.planMeta.ts+1+i}));E(_coachAddedSets()===0&&_volGrowthOk(),'la rampa cuenta para el tope');
+  S.appliedProposals=[];S.mesocycles=[];
+  // 5) «Subir un poco»: 2 series como mucho y ninguna en un día lleno
+  let up=_cycleUpProposals().filter(x=>x.type==='add_set');E(up.length>0&&up.length<=ADD_PER_CYCLE,'«Subir un poco»: '+up.length+' series');
+  up.forEach(x=>{const e=findExInPlan(x.exId);E(!_sesCapFull(e,x.dayKey),'«Subir un poco» en un día lleno: '+e.n);});
+  if(A1){const sB=B1.ex.s;A1.ex.s=3;B1.ex.s=Math.ceil(SES_CAP-(_daySetsByGroup(A1.k)[G1]-3))+3;E(!_cycleUpProposals().some(x=>x.type==='add_set'&&x.exId===A1.ex.id),'«Subir un poco» añade al día lleno');B1.ex.s=sB;}
+  // 6) la rampa del primer ciclo sigue proponiendo sus series (hasta 6), sin estos topes
+  S.planMeta.rampa={series:3,reps:'8-12',rir:2};kg.forEach(q=>{if(isCompoundEx(q.ex))q.ex.s=2;});const rp=_rampProposals();
+  E(rp.length>ADD_PER_CYCLE&&rp.every(x=>x.type==='add_set'&&/^ramp_/.test(x.id)),'rampa: '+rp.length);
   if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
 }finally{
   _coachLvPin=pin0;

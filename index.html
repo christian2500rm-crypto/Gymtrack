@@ -19841,11 +19841,37 @@ function _cardioWeekMin(){
   ks.forEach(k=>(p[k].ex||[]).forEach(e=>{const ex=routineEx(e);if(ex&&(ex.cardio||exLT(ex)==='c'))m+=(_cardioMin(ex)||0)*per;}));
   return m;
 }
+// ─── (C4) TOPES AL AÑADIR SERIES ───
+// Antes el Coach añadía series ciclo tras ciclo sin mirar cuántas llevaba ya ese músculo en la sesión ni cuánto había crecido la rutina
+// (un intermedio pasaba de 39 a 50 series por vuelta en 24 semanas). Ahora, antes de proponer una serie más:
+//  · SES_CAP: 10 series por grupo muscular y sesión, con la cuenta del creador de rutinas (LIB_K.volV: fraccional por patrón);
+//  · ADD_PER_CYCLE: como mucho 2 series nuevas por ciclo;
+//  · VOL_GROWTH: las series que el Coach lleva añadidas no pasan del 15 % de la rutina sin ellas;
+//  · EX_SETS_MAX: no se propone una serie más a un ejercicio que ya tiene 4.
+// La rampa del primer ciclo (2 → 3 series con 65 o más o al empezar de cero) es parte de la rutina y no cuenta ni se limita aquí.
+const SES_CAP=10,ADD_PER_CYCLE=2,VOL_GROWTH=1.15,EX_SETS_MAX=4;
+// Grupos que trabaja un ejercicio → {grupo: 1 | 0,5}; sin ficha en la biblioteca, su grupo muscular entero
+function _exGroups(ex){const L0=ex&&!ex.cardio?exLib(ex):null,L=L0&&LIB_K&&LIB_K.BY.get(L0.id);return L?LIB_K.volV(L):(ex&&ex.muscle?{[ex.muscle]:1}:{});}
+// Series por grupo de un día de tu rutina (las de verdad: en descarga, las que vuelven)
+function _daySetsByGroup(dk){const d=getPlan()[dk],t={};if(!d||!Array.isArray(d.ex))return t;
+  d.ex.forEach(e=>{const x=routineEx(e);if(!x||x.cardio)return;const v=_exGroups(x),n=_baseSets(x);for(const g in v)t[g]=(t[g]||0)+n*v[g];});return t;}
+// ¿Cabe una serie más de este ejercicio en su día? null si cabe; si no, el grupo que ya está lleno
+function _sesCapFull(ex,dk){const t=_daySetsByGroup(dk),v=_exGroups(ex);return Object.keys(v).find(g=>(t[g]||0)+v[g]>SES_CAP+1e-9)||null;}
+function _isRampProp(a){return !!a&&typeof a.id==='string'&&/^ramp_/.test(a.id);}
+// Series que el Coach te ha añadido y siguen en tu rutina (desde tu rutina generada, si la hay) y total de series por vuelta
+function _coachAddedSets(){const pm=_isPlainObj(S.planMeta)?S.planMeta:null,t0=pm?+pm.ts||0:0;
+  return (S.appliedProposals||[]).filter(a=>a&&a.type==='add_set'&&!_isRampProp(a)&&+a.appliedAt>=t0&&a.exId&&findExInPlan(a.exId)).length;}
+function _planSetsTotal(){let t=0;const p=getPlan();liveDayKeys(p).forEach(k=>p[k].ex.forEach(e=>{const x=routineEx(e);if(x&&!x.cardio)t+=_baseSets(x);}));return t;}
+function _volGrowthOk(extra){const add=_coachAddedSets()+(extra||0),tot=_planSetsTotal()+(extra||0);return add+1<=(tot-add)*(VOL_GROWTH-1)+1e-9;}
+// Series nuevas que ya has aceptado en este ciclo
+function _addedThisCycle(){const cs=coach_cycleStart();return (S.appliedProposals||[]).filter(a=>a&&a.type==='add_set'&&!_isRampProp(a)&&+a.appliedAt>=cs).length;}
 function coach_buildCandidates(an){
   const out=[],now=Date.now(),plan=routinePlan(),f=an.fatigue;
   const goal=_coachGoal(),pm=_isPlainObj(S.planMeta)?S.planMeta:{},lifts=new Set(Array.isArray(pm.lifts)?pm.lifts:[]),minor=!!(S.profile&&S.profile.age==='16'); // (E16d)
   const noScheme=goal==='fuerza'||goal==='aguante'||goal==='grasa'||goal==='salud';let volNow=null; // (E16d) sin «×8 con más peso» ni «×12 con menos»
   const hot=new Set((coach_rpeByMuscle(6)||[]).filter(z=>z.avg>=2.6&&z.samples>=3).map(z=>z.muscle));
+  // (C4) ¿cabe una serie más de este ejercicio? (por ejercicio, por sesión, por ciclo y sobre la rutina); nAdd: las que ya van en esta tanda
+  let nAdd=0;const addOk=(ex,dk,s)=>s<EX_SETS_MAX&&_addedThisCycle()+nAdd<ADD_PER_CYCLE&&_volGrowthOk(nAdd)&&!_sesCapFull(ex,dk||_dayOfEx(ex.id));
   if(f.deloadNeeded){
     out.push({id:'deload_week',type:'deload',basis:'fatigue',prio:0,sev:f.weeks,ic:'🧘',tag:'Descarga',createdAt:now,
       title:'Semana de descarga',diff:'−40 % de series · mismo peso · 7 días',short:'una semana de descarga',
@@ -19878,7 +19904,7 @@ function coach_buildCandidates(an){
         short:`pasar a ${s}×${RA} con algo menos de peso`,description:`${why} Para «Aguantar más»: ${s}×${RA} con algo menos de peso.`});return;
     }
     if(!noScheme&&tr!=null&&tr>=10){
-      const ns=Math.min(6,s+1);
+      const ns=addOk(ex,it.dayKey,s)?s+1:s;if(ns>s)nAdd++; // (C4) la serie de más, solo si cabe
       out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s:ns,r:8},title:`Cambiar esquema en ${ex.n}`,
         diff:`${s}×${tr} → ${ns}×8`,short:`pasar a ${ns}×8 con algo más de peso`,
         description:`${why} Pasa a ${ns}×8 con algo más de peso: misma musculatura, estímulo nuevo.`});
@@ -19905,13 +19931,15 @@ function coach_buildCandidates(an){
         description:`${why} Pasa a ${s}×12 con algo menos de peso para retomar el progreso.`});
     }
   });
-  an.flat.forEach(it=>{
+  an.flat.slice().sort((a,b)=>_baseSets(a.ex)-_baseSets(b.ex)).forEach(it=>{ // (C4) con tope por ciclo, primero los de menos series
     const ex=it.ex,s=_baseSets(ex);
     if(_isBalEx(ex))return; // (C11)
     // Solo si está estable de verdad (no bajando), con datos y sin zona muscular ya «al límite»
-    if(s>=5||it.p.sessions<3||it.p.pctWeek<-0.4||hot.has(ex.muscle))return;
+    if(it.p.sessions<3||it.p.pctWeek<-0.4||hot.has(ex.muscle))return;
+    if(!addOk(ex,it.dayKey,s))return; // (C4)
     if(goal==='musculo'&&_isPlainObj(pm.vol)){const L0=exLib(ex),L=L0&&LIB_K&&LIB_K.BY.get(L0.id),g=L&&LIB_K.mainGroupV(L),vz=g&&pm.vol[g]; // (E16d)
       if(vz){if(!volNow)volNow=_planVolNow();const cap=Math.min(vz.top||99,vz.techo||99);if((volNow[g]||0)+1>cap+1e-9)return;}}
+    nAdd++;
     out.push({id:'add_set_'+ex.id,type:'add_set',basis:'flat',prio:3,sev:-s,ic:'💪',tag:'Progresión',exId:ex.id,dayKey:it.dayKey,createdAt:now,
       title:`Añadir serie a ${ex.n}`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,short:`añadir una serie (${s}→${s+1})`,
       description:`${(w=>w.su[0].toUpperCase()+w.su.slice(1)+' '+w.es)(_progWhat(it.p))} en tus últimas ${it.p.sessions} sesiones. Una serie más (${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}) le da el empujón que necesita.`});
@@ -20503,11 +20531,12 @@ function cycleNextCardHtml(){
     ${gen?`<button type="button" class="btn bp" onclick="cycleNext('nueva')">Rutina nueva con mis respuestas</button>`:''}</div></div>`;
 }
 function _cycleUpProposals(){
-  const p=getPlan(),now=Date.now(),out=[],inPlan=_planLibIds();
+  const p=getPlan(),now=Date.now(),out=[],inPlan=_planLibIds();let nAdd=0; // (C4) las series de «Subir un poco», con los mismos topes
   dayKeys(p).forEach(k=>(p[k].ex||[]).forEach(e=>{const ex=routineEx(e);if(!ex||ex.cardio||out.length>=6||out.some(o=>o.exId===ex.id))return;
     const L=exLib(ex);if(L&&L.pat==='bal')return;
     const base={basis:'cycle',prio:1,ic:'📈',tag:'Subir un poco',exId:ex.id,dayKey:k,createdAt:now},s=_baseSets(ex);
-    if(isCompoundEx(ex)&&s<4){out.push(Object.assign({},base,{id:'up_'+ex.id,type:'add_set',sev:-s,title:`${ex.n}: pasa a ${s+1} series`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,
+    if(isCompoundEx(ex)&&s<EX_SETS_MAX){if(_addedThisCycle()+nAdd>=ADD_PER_CYCLE||!_volGrowthOk(nAdd)||_sesCapFull(ex,k))return;nAdd++;
+      out.push(Object.assign({},base,{id:'up_'+ex.id,type:'add_set',sev:-s,title:`${ex.n}: pasa a ${s+1} series`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,
       short:`pasar a ${s+1} series`,description:`Has elegido subir un poco: una serie más en «${ex.n}», sin llegar al límite.`}));return;}
     const up=L&&L.up?LIB_BY_ID.get(L.up):null;
     if(up&&['bw','r','t'].includes(L.lt)&&!inPlan.has(up.id)&&canDoHere(up,k))out.push(Object.assign({},base,{id:'upv_'+ex.id,type:'swap',sev:0,libExId:up.id,
