@@ -28,7 +28,7 @@ function progStatusMap(list){
   return out;
 }
 // El porqué del estado, con las palabras del Coach («4+ sesiones sin mejorar», «1RM est. +6.2 %»…). Estancado: el Coach
-// mira el tramo final más corto que ya lo demuestra (≥ 4 sesiones en ≥ 3 semanas), así que son «N+» (pueden ser más).
+// mira el tramo final más corto que ya lo demuestra (≥ 4 sesiones en ≥ 3 semanas; más según tu nivel, C3), así que son «N+» (pueden ser más).
 // Sin paréntesis (van dentro del aria-label de la fila, que ya lleva comas) y con espacio duro antes de «%».
 function _plWhy(k,it,pr){
   const p=it.p,pct=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(Math.abs(v)<10?1:0)+NB+'%';

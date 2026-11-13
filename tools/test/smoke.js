@@ -18,6 +18,10 @@ _dashMore=true;
 // (B3-7) Movimiento: las pantallas entran con un fundido y las hojas suben desde abajo. Los pasos de siempre miden unas y otras
 // nada más abrirlas, así que corren con esas entradas apagadas; las cubre (con los gestos) b3Movimiento.
 _motionOn=false;
+// (C3) El Coach mide el progreso según tu nivel (con 6 meses de datos sembrados sería «intermedio»: 6 sesiones y 6 semanas para dar
+// un ejercicio por estancado). Los pasos de siempre montan sus casos con la vara de quien empieza (4 sesiones y 3 semanas), así que
+// corren con el nivel fijado en «Empiezo»; el nivel deducido, el elegido y sus umbrales los cubre coachNivel.
+_coachLvPin='P';
 // (flake) Esperas en tiempo REAL. applaunch.sh corre con --virtual-time-budget: en cuanto la página no tiene trabajo, el
 // reloj virtual salta al siguiente temporizador sin esperar a la E/S del navegador (FileReader) ni dejar pintar (rAF,
 // IntersectionObserver y scroll van con los fotogramas, y en un bucle de W() casi no llegan). Una petición de red pausa el
@@ -13204,7 +13208,7 @@ try{
   S.weights=[wt(90,400),wt(88,300)];w=coach_weightTrend();E(Math.abs(w.change+2)<1e-9&&Math.round(w.days)===100,'con pocas pesadas, las dos últimas '+pj(w));
   {const n0=Date.now(),k0=liveDayKeys()[0];if(S.sessions.length<CYCLE_MIN_SESSIONS)S.sessions=[...Array(8)].map((_,i)=>({day:k0,date:'x',ts:n0-(8-i)*2*864e5,durationMin:50}));} // el Coach enseña propuestas desde la sexta sesión
   go('coach');await W(10);{const mb=[...document.querySelectorAll('#app .metric-box')].find(b=>/Peso corporal/.test(b.textContent));
-    E(!!mb&&/desde el inicio/.test(mb.textContent)&&/2/.test(mb.querySelector('.mv').textContent),'ficha de peso: '+(mb&&mb.textContent.replace(/s+/g,' ')));}
+    E(!!mb&&/desde el inicio/.test(mb.textContent)&&/2/.test(mb.querySelector('.mv').textContent),'ficha de peso: '+(mb&&mb.textContent));}
   // peso ↔ fuerza: ninguno afirma grasa o músculo
   const cx=Object.values(routinePlan()).flatMap(d=>d.ex).find(e=>isCompoundEx(e)&&exLT(e)==='w');
   if(cx){const up=[{d:'x',v:60,r:12,ts:n-20*D,setsDone:3},{d:'x',v:65,r:10,ts:n-2*D,setsDone:3}];S.strength={[cx.id]:up};
@@ -13218,8 +13222,9 @@ try{
   E(ins.some(i=>i.t==='Bajas a buen ritmo')&&!ins.some(i=>/grasa saludable/.test(i.t)),'la bajada de peso: '+pj(ins.map(i=>i.t)));
   E(!ins.some(i=>/como un profesional/.test(i.d)),'«como un profesional»');
   // «Los principiantes…» solo a quien empieza (sin rutina generada: menos de 6 meses desde la primera sesión)
-  S.planMeta=null;S.sessions=[{day:'A',date:'x',ts:n-300*D}];E(!_coachNovato(),'principiante con 300 días');
-  S.sessions=[{day:'A',date:'x',ts:n-30*D}];E(_coachNovato(),'no principiante con 30 días');
+  {const pin=_coachLvPin;_coachLvPin=null;S.coachLevel=null; // sin el nivel fijado de las pruebas (C3)
+    S.planMeta=null;S.sessions=[{day:'A',date:'x',ts:n-300*D}];E(!_coachNovato(),'principiante con 300 días');
+    S.sessions=[{day:'A',date:'x',ts:n-30*D}];E(_coachNovato(),'no principiante con 30 días');_coachLvPin=pin;}
   // volumen de la semana: peso × repeticiones de cada serie; sin series, con sus reps
   const t0=Math.max(coach_weekRange(0).start+1000,n-3600e3);S.sessions=[{day:'A',date:'x',ts:t0}];
   S.strength={zz_vol:[{d:'x',v:50,r:8,setsDone:3,ts:t0,sets:[{w:50,r:10},{w:50,r:9},{w:50,r:8}]}]};
@@ -13292,6 +13297,46 @@ try{
     E(Math.abs(coach_e1rm({v:100,r:10,sets:[{w:100,r:12},{w:100,r:10}]},{})-133.33)<0.01&&Math.abs(coach_e1rm({v:100,r:10,sets:[{w:100,r:12},{w:100,r:10}]},{},true)-136.67)<0.01,'coach_e1rm');}
   if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
 }finally{
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('coachNivel',async()=>{
+// (C3) El progreso se mide según tu nivel. De dónde sale: el que elijas en el Coach («Tu nivel», dentro de «Tu ciclo») > el de tu
+// rutina generada > el tiempo con la app (6 meses → intermedio; con rutina de principiante, 9 meses). «Estancado»: 4 sesiones y 3
+// semanas al empezar, 6 y 6 de intermedio, 8 y 8 de avanzado; «sube» desde 0,4 · 0,15 · 0,08 % por semana.
+const full=JSON.parse(JSON.stringify(S)),bad=[],pin0=_coachLvPin;const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  _coachLvPin=null;S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.planMeta=null;S.coachLevel=null;S.appliedProposals=[];syncActiveWorkout();
+  const D=864e5,n=Date.now(),ses=w=>{S.sessions=[{day:'A',date:'x',ts:n-w*7*D}];},lv=()=>{const c=_coachLevelSrc();return c.l+':'+c.src;};
+  // de dónde sale
+  ses(10);E(lv()==='P:tiempo','10 semanas: '+lv());ses(30);E(lv()==='I:tiempo','30 semanas: '+lv());S.sessions=[];E(lv()==='P:tiempo','sin sesiones: '+lv());
+  ses(30);S.planMeta={level:'P',ts:n-30*7*D};E(lv()==='P:rutina','rutina de principiante, 30 semanas: '+lv());
+  ses(40);E(lv()==='I:tiempo','rutina de principiante, 40 semanas: '+lv());S.planMeta={level:'P0',ts:n-D};ses(2);E(lv()==='P:rutina','empezar de cero: '+lv());
+  S.planMeta={level:'A',ts:n-D};E(lv()==='A:rutina','avanzado de rutina: '+lv());S.planMeta={level:'I',ts:n-D};ses(80);E(lv()==='I:rutina','intermedio de rutina: '+lv());
+  S.coachLevel={l:'A',ts:n};E(lv()==='A:tu'&&coach_level()==='A','elegido después de la rutina: '+lv());
+  S.planMeta={level:'I',ts:n+1000};E(lv()==='I:rutina','una rutina generada después manda: '+lv());S.planMeta=null;E(lv()==='A:tu','sin rutina, el elegido: '+lv());
+  E(_sanitizeCoachLevel({l:'X',ts:1})===null&&_sanitizeCoachLevel({l:'I'})===null&&_sanitizeCoachLevel('I')===null&&pj(_sanitizeCoachLevel({l:'I',ts:5,x:1}))==='{"l":"I","ts":5}','saneado');
+  // umbrales: el mismo historial parado, según el nivel
+  const flat=k=>{S.strength.zz_lv=[...Array(k)].map((_,i)=>({d:'x',v:60,r:10,setsDone:3,rpe:2,ts:n-(k-1-i)*7*D-3600e3,ps:3,pr:12}));return coach_exerciseProgression('zz_lv').trend;};
+  const T=(l,k)=>{S.coachLevel={l,ts:n};return flat(k);};
+  E(T('P',5)==='stagnant'&&T('I',5)!=='stagnant'&&T('I',7)==='stagnant'&&T('A',7)!=='stagnant'&&T('A',9)==='stagnant','parado 5, 7 y 9 semanas: '+pj([T('P',5),T('I',5),T('I',7),T('A',7),T('A',9)]));
+  E(T('P',4)==='stagnant'&&T('I',6)!=='stagnant','justo en el borde: '+pj([T('P',4),T('I',6)]));
+  // subir despacio (un 0,25 % por semana): «estable» al empezar, «sube» de intermedio
+  const slow=l=>{S.coachLevel={l,ts:n};S.strength.zz_lv=[...Array(6)].map((_,i)=>({d:'x',v:100+0.25*i,r:10,setsDone:3,rpe:2,ts:n-(5-i)*7*D-3600e3,ps:3,pr:12}));return coach_exerciseProgression('zz_lv').trend;};
+  E(slow('P')==='flat'&&slow('I')==='up'&&slow('A')==='up','subir despacio: '+pj([slow('P'),slow('I'),slow('A')]));
+  // _coachNovato sigue al nivel
+  S.coachLevel={l:'P',ts:n};E(_coachNovato(),'novato P');S.coachLevel={l:'I',ts:n};E(!_coachNovato(),'novato I');
+  // la fila «Tu nivel» del Coach: marca el que se usa y cambia de un toque
+  S.coachLevel=null;S.sessions=[...Array(8)].map((_,i)=>({day:liveDayKeys()[0],date:'x',ts:n-(8-i)*2*D,durationMin:50}));go('coach');await W(10);
+  let row=document.querySelector('#app #coach-lv');E(!!row,'sin la fila «Tu nivel»');
+  if(row){const on=()=>[...document.querySelectorAll('#app #coach-lv .ls-opt')].filter(b=>b.classList.contains('on')).map(b=>b.dataset.l).join();
+    E(row.querySelectorAll('.ls-opt').length===3&&on()==='P'&&/4.sesiones y 3.semanas/.test(row.textContent)&&/tiempo que llevas/.test(row.textContent),'fila al empezar: '+on()+' '+row.textContent.slice(0,160));
+    row.querySelector('.ls-opt[data-l="I"]').click();await W(10);row=document.querySelector('#app #coach-lv');
+    E(S.coachLevel&&S.coachLevel.l==='I'&&on()==='I'&&/6.sesiones y 6.semanas/.test(row.textContent)&&/Lo elegiste tú/.test(row.textContent),'tras elegir intermedio: '+pj(S.coachLevel)+' '+on());
+    E(row.scrollWidth<=row.clientWidth+1,'la fila se desborda');}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  _coachLvPin=pin0;
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });

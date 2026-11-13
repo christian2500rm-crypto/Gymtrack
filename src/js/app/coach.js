@@ -41,10 +41,46 @@ function coach_cycleData(){
 // Mira las últimas PROG_WINDOW sesiones reales del ejercicio (sin descargas ni semanas de descanso) y no
 // depende del ciclo: cerrar un ciclo no borra lo que sabes de cada ejercicio.
 //  · 'down'      retroceso: las 2 últimas sesiones ≥5% por debajo de tu mejor nivel anterior (una mala no basta)
-//  · 'stagnant'  estancado: ≥4 sesiones y ≥3 semanas sin mejorar el 1RM estimado, ni las reps, ni el peso
+//  · 'stagnant'  estancado: ≥4 sesiones y ≥3 semanas sin mejorar el 1RM estimado, ni las reps, ni el peso (intermedio: 6 y 6; avanzado: 8 y 8; C3)
 //  · 'strong_up' / 'up' / 'flat' según la pendiente (mínimos cuadrados) del 1RM estimado en %/semana
 // Mismo peso con más reps (doble progresión) sube el 1RM estimado: nunca cuenta como estancamiento.
-const PROG_WINDOW=6,STAG_MIN_SESSIONS=4,STAG_MIN_DAYS=21,REG_DROP=0.95;
+const PROG_WINDOW=6,STAG_MIN_SESSIONS=4,STAG_MIN_DAYS=21,REG_DROP=0.95; // los de quien empieza (PROG_LV.P)
+// (C3) El progreso se mide según tu nivel: con experiencia se progresa mucho más despacio, y con la vara de quien empieza (4 sesiones
+// y 3 semanas sin mejorar = «estancado»; menos de un 0,4 % por semana = «estable») a intermedios y avanzados les salía casi todo
+// «estable» o «estancado» progresando bien. win: sesiones que mira · ses y days: sesiones y días sin mejora para «estancado» · up: % por
+// semana a partir del cual «sube».
+const PROG_LV={P:{win:PROG_WINDOW,ses:STAG_MIN_SESSIONS,days:STAG_MIN_DAYS,up:0.4},I:{win:8,ses:6,days:42,up:0.15},A:{win:10,ses:8,days:56,up:0.08}};
+const LV_TXT={P:'Empiezo',I:'Intermedio',A:'Avanzado'};
+let _coachLvPin=null; // solo para pruebas: fija el nivel (como _motionOn o _dashMore)
+function _sanitizeCoachLevel(x){return _isPlainObj(x)&&PROG_LV[x.l]&&typeof x.ts==='number'&&isFinite(x.ts)&&x.ts>0?{l:x.l,ts:x.ts}:null;}
+// Tu nivel y de dónde sale → {l:'P'|'I'|'A', src}: 'tu' lo elegiste en el Coach (S.coachLevel, vale mientras no generes después otra
+// rutina) · 'rutina' el de tu rutina generada · 'tiempo' por el tiempo que llevas con la app (6 meses → intermedio; quien llegó como
+// principiante con su rutina generada, a los 9 meses). Avanzado solo sale de tus respuestas o de elegirlo.
+function _coachLevelSrc(){
+  if(_coachLvPin&&PROG_LV[_coachLvPin])return{l:_coachLvPin,src:'tu'};
+  const pm=_isPlainObj(S.planMeta)?S.planMeta:null,c=_sanitizeCoachLevel(S.coachLevel);
+  if(c&&!(pm&&+pm.ts>c.ts))return{l:c.l,src:'tu'};
+  let t0=Infinity;(S.sessions||[]).forEach(x=>{if(x&&+x.ts>0&&+x.ts<t0)t0=+x.ts;});
+  const wk=isFinite(t0)?(Date.now()-t0)/604800000:0,g=pm&&pm.level?(pm.level==='A'?'A':pm.level==='I'?'I':'P'):null;
+  if(g)return g==='P'&&wk>=39?{l:'I',src:'tiempo'}:{l:g,src:'rutina'};
+  return{l:wk>=26?'I':'P',src:'tiempo'};
+}
+function coach_level(){return _coachLevelSrc().l;}
+function _lvCfg(){return PROG_LV[coach_level()];}
+function setCoachLevel(l){
+  if(!PROG_LV[l])return;
+  S.coachLevel={l,ts:Date.now()};saveState();render();
+  toast(`Nivel: ${LV_TXT[l].toLowerCase()} · el Coach mide tu progreso con ${PROG_LV[l].ses} sesiones y ${PROG_LV[l].days/7} semanas`,3200);
+}
+// La fila «Tu nivel» del Coach (dentro de «Tu ciclo»): lo que se usa, de dónde sale y cambiarlo de un toque
+function coachLevelHtml(){
+  const c=_coachLevelSrc(),g=PROG_LV[c.l];
+  const why=c.src==='tu'?'Lo elegiste tú.':c.src==='rutina'?'Sale de las respuestas de tu rutina.':'Lo deduzco del tiempo que llevas entrenando con la app.';
+  return`<div class="card coach-lv" id="coach-lv"><div class="cyc-next-t">Tu nivel</div>
+    <div class="cyc-next-d">Con más experiencia se progresa más despacio. Con este nivel espero ${g.ses}${NB}sesiones y ${g.days/7}${NB}semanas sin mejora antes de dar un ejercicio por estancado. ${why}</div>
+    <div class="ls-opts" role="radiogroup" aria-label="Tu nivel">${['P','I','A'].map(k=>`<button type="button" class="ls-opt${c.l===k?' on':''}" role="radio" aria-checked="${c.l===k}" data-l="${k}" onclick="setCoachLevel(this.dataset.l)">${LV_TXT[k]}</button>`).join('')}</div>
+    <div class="cyc-next-d">Empiezo: menos de 6${NB}meses · Intermedio: hasta 2${NB}años · Avanzado: más de 2${NB}años.</div></div>`;
+}
 function coach_e1rm(rec,ex,all){ // all (C2): con las repeticiones de TODAS las series (la tendencia del Coach); sin él, las más bajas
   const v=+(rec&&rec.v);
   if(!(v>0)||!isFinite(v))return 0;
@@ -87,7 +123,8 @@ function coach_exerciseProgression(exId,sinceTs){
   {let la=null;for(let i=src.length-1;i>=0;i--){const r=src[i];if(r&&typeof r==='object'&&!r.dl){la=r;break;}}
     if(la&&!(+la.v>0)&&_recLT(la)!=='w')return _progNoKg(exId,ex,_recLT(la),sinceTs);}
   const data=[];
-  for(let i=src.length-1;i>=0&&data.length<PROG_WINDOW;i--){
+  const LV=_lvCfg(); // (C3)
+  for(let i=src.length-1;i>=0&&data.length<LV.win;i--){
     const r=src[i];
     if(!r||!(+r.v>0)||typeof r.ts!=='number'||!isFinite(r.ts))continue;
     if(sinceTs&&r.ts<sinceTs)continue;
@@ -133,7 +170,7 @@ function coach_exerciseProgression(exId,sinceTs){
   }
   // Estancamiento: el tramo final más corto con ≥4 sesiones y ≥3 semanas, sin mejorar a su primera sesión
   let k=-1;
-  for(let i=n-STAG_MIN_SESSIONS;i>=0;i--){if(data[n-1].ts-data[i].ts>=STAG_MIN_DAYS*86400000){k=i;break;}}
+  for(let i=n-LV.ses;i>=0;i--){if(data[n-1].ts-data[i].ts>=LV.days*86400000){k=i;break;}}
   if(k>=0){
     const b0=data[k],eb=e[k],rb=_recRepsAvg(b0); // (C2)
     let improved=false;
@@ -145,7 +182,7 @@ function coach_exerciseProgression(exId,sinceTs){
     }
     if(!improved){res.trend='stagnant';res.stagSessions=n-k;res.stagWeeks=(data[n-1].ts-data[k].ts)/W;return res;}
   }
-  res.trend=res.pctWeek>=1.5?'strong_up':res.pctWeek>=0.4?'up':'flat';
+  res.trend=res.pctWeek>=1.5?'strong_up':res.pctWeek>=LV.up?'up':'flat';
   return res;
 }
 // Puntuación sin dimensiones de una medida sin kilos, con la forma de Epley (así los % se parecen a los del 1RM
@@ -165,7 +202,7 @@ function _progNoKg(exId,ex,lt,sinceTs){
     :((_repRangeBW(ex)||{}).hi||Infinity);
   let k0=0;
   for(let i=1;i<all.length;i++){const a=_recMetric(all[i-1],lt),b=_recMetric(all[i],lt);if(a>=hi&&b<a)k0=i;}
-  const data=all.slice(k0).slice(-PROG_WINDOW),n=data.length,W=7*86400000,mt=lt==='t'?'t':lt==='d'?'d':'reps';
+  const LV=_lvCfg(),data=all.slice(k0).slice(-LV.win),n=data.length,W=7*86400000,mt=lt==='t'?'t':lt==='d'?'d':'reps'; // (C3)
   const m=data.map(r=>_recMetric(r,lt));
   const res={trend:'insufficient',change:0,pct:0,pctWeek:0,sessions:n,firstV:n?m[0]:0,lastV:n?m[n-1]:0,
     data,e1rm:[],weeks:0,repsUp:false,dropPct:0,stagSessions:0,stagWeeks:0,metric:mt};
@@ -190,9 +227,9 @@ function _progNoKg(exId,ex,lt,sinceTs){
     if(ref>0&&e[n-1]<ref*REG_DROP&&e[n-2]<ref*REG_DROP){res.trend='down';res.dropPct=(1-e[n-1]/ref)*100;return res;}
   }
   let k=-1;
-  for(let i=n-STAG_MIN_SESSIONS;i>=0;i--){if(data[n-1].ts-data[i].ts>=STAG_MIN_DAYS*86400000){k=i;break;}}
+  for(let i=n-LV.ses;i>=0;i--){if(data[n-1].ts-data[i].ts>=LV.days*86400000){k=i;break;}}
   if(k>=0&&!e.slice(k+1).some(v=>v>e[k]*1.01)){res.trend='stagnant';res.stagSessions=n-k;res.stagWeeks=(data[n-1].ts-data[k].ts)/W;return res;}
-  res.trend=res.pctWeek>=1.5?'strong_up':res.pctWeek>=0.4?'up':'flat';
+  res.trend=res.pctWeek>=1.5?'strong_up':res.pctWeek>=LV.up?'up':'flat';
   return res;
 }
 // Textos de una progresión según su medida: «tu 1RM estimado sube» / «tus reps suben» / «tu tiempo sube»…
@@ -1045,9 +1082,8 @@ function _holdTxt(it){
   return`acabas de cambiarlo a ${parseInt(ex.s)||ex.s}×${fmtTargetReps(ex).replace(/ reps$/,'')}`;
 }
 
-// (C13) ¿Principiante? El nivel de tu rutina generada; sin ella, menos de 6 meses desde tu primera sesión
-function _coachNovato(){const l=_dlLevel();if(l)return l==='P0'||l==='P';
-  let t0=Infinity;(S.sessions||[]).forEach(s=>{if(s&&+s.ts>0&&+s.ts<t0)t0=+s.ts;});return !isFinite(t0)||Date.now()-t0<182*86400000;}
+// (C13) ¿Principiante?
+function _coachNovato(){return coach_level()==='P';} // (C3) el nivel con el que el Coach mide tu progreso
 function coach_generateInsights(an,pend,resIds){
   const cycle=coach_cycleData();
   an=an||coach_analyze();
@@ -1120,7 +1156,7 @@ function coach_generateInsights(an,pend,resIds){
   if(an.stagnant.length>0){
     const st=byStep(an.stagnant);
     const next=_coachNextStep(st[0],an,pend,resIds);
-    insights.push({type:'warn',ic:'🔀',t:'Estancamiento detectado',d:`${_namesList(st)} ${st.length>1?'llevan':'lleva'} 4+ sesiones (3+ semanas) sin mejorar ${st.every(i=>i.p.metric==='e1rm')?'peso ni reps':st.length===1?_progWhat(st[0].p).su:'su marca'}.${next?` Próximo paso${st.length>1?` en ${esc(st[0].ex.n)}`:''}: ${esc(next)}.`:''}`});
+    insights.push({type:'warn',ic:'🔀',t:'Estancamiento detectado',d:`${_namesList(st)} ${st.length>1?'llevan':'lleva'} ${_lvCfg().ses}+ sesiones (${_lvCfg().days/7}+ semanas) sin mejorar ${st.every(i=>i.p.metric==='e1rm')?'peso ni reps':st.length===1?_progWhat(st[0].p).su:'su marca'}.${next?` Próximo paso${st.length>1?` en ${esc(st[0].ex.n)}`:''}: ${esc(next)}.`:''}`});
   }
 
   if(an.down.length>0){
@@ -1948,7 +1984,7 @@ function renderCoach(){
   ${coachPlanCardHtml()}
 
   <div class="sh cfold-sh">Más detalle</div>
-  ${cfoldHtml('ciclo','Tu ciclo',`${plural(cycle.sessions.length,'sesión','sesiones')} · progresan ${progressing}/${withData||'—'}`,cicloHtml)}
+  ${cfoldHtml('ciclo','Tu ciclo',`${plural(cycle.sessions.length,'sesión','sesiones')} · progresan ${progressing}/${withData||'—'}`,cicloHtml+coachLevelHtml())}
   ${cfoldHtml('fat',_rpeOn()?'Fatiga y esfuerzo':'Fatiga',fat.score==null?'sin datos':`${fat.score} · ${esc(fat.level||'')}`,fatigueCardHtml(an))}
   ${cfoldHtml('ana','Análisis del ciclo',insights.length?plural(insights.length,'observación','observaciones'):'recopilando datos',anaHtml)}
   ${cfoldHtml('mm','Tus músculos',mmK==='7d'?'últimos 7 días':mmK==='cycle'?'este ciclo':'4 semanas',mmCoachCardHtml())}
