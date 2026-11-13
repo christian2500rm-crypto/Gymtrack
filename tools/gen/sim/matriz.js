@@ -15,7 +15,7 @@ const OPT = {}; ['pesos', 'tipo', 'pases', 'reparto'].forEach(k => { if (arg(k))
 // --tope=no: principiantes con 5-6 días hacen todos los días de pesas (decisión D5 del usuario, 6 nov: hay que soportar los dos casos)
 if (arg('tope') === 'no') OPT.topePrincipiante = false;
 // --enfoque=gluteo (D10, 6 nov): todos los perfiles con el enfoque «más glúteo y menos torso» (solo se ofrece a las mujeres)
-const ENFOQUE = arg('enfoque') === 'gluteo' ? 'gluteo' : null;
+const ENFOQUE = arg('enfoque') === 'gluteo' ? 'gluteo' : arg('enfoque') === 'torso' ? 'torso' : null;   // v14 (P2): --enfoque=torso, todos piden «Más torso» (un día de pierna)
 // --plan=rota (v14, P1): cada perfil al que se le ofrecen otros repartos en «Cambiar reparto» (G.planes) pide uno de ellos, rotando;
 // las invariantes son las mismas. La salida lleva `plan`: cuántos lo pidieron y cuántos salieron con él, por reparto
 const PLAN = arg('plan') === 'rota';

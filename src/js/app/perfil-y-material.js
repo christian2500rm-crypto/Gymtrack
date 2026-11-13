@@ -9,7 +9,7 @@ const PROF_MINS=[15,20,30,45,60,75,90],PROF_AGES=['16','18','40','65','75','nd']
 const PROF_PRIO=['pecho','espalda','hombros','brazos','gluteos','piernas','abdomen'],PROF_STYLE=['maq','libre','igual'];
 const PROF_WARM=['normal','corto'],PROF_CARDIO=['auto','si','no'];
 const PROF_PLAN=['cc3','tpc3','tpt3','ppl3','tp4','pplt4','pplc4','grp4','ulppl','tptpt5','pplet5','grp5','ppl6','tp6','pplg6']; // (P1) el reparto que elige la persona en «Cambiar reparto»
-const PROF_SEX=['m','h','nd'],PROF_ENFOQUE=['gluteo','igual']; // (D10) mujer · hombre · prefiero no decirlo; enfoque de la rutina
+const PROF_SEX=['m','h','nd'],PROF_ENFOQUE=['gluteo','torso','igual']; // (D10) mujer · hombre · prefiero no decirlo; enfoque de la rutina
 // Sitios: presets (P5), accesorios (§K.1, con las cosas de casa), familias de máquina (13) y tipos de cardio (9)
 const PLACE_PRESETS=['grande','barrio','hotel','box','nada','basico','mancbanco','casagym','parque','propio'];
 const PLACE_ACC=['mesa','puerta','silla','pared','escalon','banco','banco_inc','banco_dec','scott','ghd','hiper','rack','landmine','hexbar','anclaje','paralelas',
@@ -21,8 +21,8 @@ const PLACE_DBMAX=[10,20,30,99],PLACE_KB=[1,2],PLACE_KBMAX=[8,12,16,24];
 const HEALTH_ZONES=['rodilla','hombro','lumbar','muneca','cadera','otra'],HEALTH_KINDS=['ahora','antigua','op','reciente'],HEALTH_OTRA=['cuello','tobillo','otra'];
 const HEALTH_CONSENT_VER=['1'];
 // Pantallas del cuestionario (para retomar el borrador en la suya)
-const OB_STEPS=['ob-hola','ob-meta','ob-sexo','ob-enfoque','ob-exp','ob-ritmo','ob-paron','ob-tiempo','ob-lugar','ob-material','ob-otro','ob-lugar2','ob-material2',
-  'ob-reparto-sitios','ob-edad','ob-menor','ob-salud','ob-medico','ob-supervision','ob-posparto','ob-embarazo','ob-molestias','ob-deporte','ob-consulta','ob-foco','ob-rutina'];
+const OB_STEPS=['ob-hola','ob-meta','ob-sexo','ob-exp','ob-ritmo','ob-paron','ob-tiempo','ob-lugar','ob-material','ob-otro','ob-lugar2','ob-material2',
+  'ob-reparto-sitios','ob-edad','ob-menor','ob-salud','ob-medico','ob-supervision','ob-posparto','ob-embarazo','ob-molestias','ob-deporte','ob-consulta','ob-enfoque','ob-foco','ob-rutina']; // (P2) la pregunta de torso y pierna, antes de las prioridades
 const _LIBID_RE=/^lib_[a-z0-9_]{2,60}$/;
 const _oneOf=(v,L)=>L.includes(v)?v:null;
 const _num=(v,lo,hi)=>typeof v==='number'&&isFinite(v)&&v>=lo&&v<=hi?v:null;
@@ -52,7 +52,7 @@ function _sanitizeProfile(o){
   p.nr=_oneOf(o.nr,['ent','pro','med']);
   p.warn=_oneOf(o.warn,['consulta','matrona']); // (E11b) aviso fijo de salud (§H.2): solo cuál, no el motivo // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
   p.plan=_oneOf(o.plan,PROF_PLAN); // (P1) reparto elegido (null: el recomendado); el generador lo ignora si ya no se te ofrece
-  p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=p.sex==='m'?_oneOf(o.enfoque,PROF_ENFOQUE):null; // (D10) el enfoque solo se pregunta a las mujeres
+  p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=_oneOf(o.enfoque,PROF_ENFOQUE); // (D10) más glúteo y pierna · (P2 del repaso del reparto) para todos, y «torso» = un solo día de pierna
   return p;
 }
 // Un sitio (gimnasio o casa): material de MAT, accesorios, familias de máquina y tipos de cardio de sus listas; preset desconocido → 'propio'

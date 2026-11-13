@@ -310,7 +310,7 @@ module.exports = function (K, OPT) {
       goal: a.goal, level, modes, days: a.days, min: a.min, consec: !!a.consec, age: a.age, sport: a.sport || 'no', prio: a.enfoque === 'gluteo' ? (a.prio || []).filter(p => p !== 'gluteos').slice(0, 1) : (a.prio || []).slice(0, 2),
       pref, style: a.style || 'igual', warm: a.warm || 'normal', cardioEnd: a.cardioEnd || 'auto', power: !!a.power,
       avoid: a.avoid || [], places: a.places, daysOther: a.daysOther || 0, zones, prudent, keep: null, pins: null, enfoque: a.enfoque === 'gluteo' ? 'gluteo' : null,
-      plan: typeof a.plan === 'string' && SPLITS[a.plan] ? a.plan : null, salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
+      plan: typeof a.plan === 'string' && SPLITS[a.plan] ? a.plan : null, masTorso: a.enfoque === 'torso', salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
     };
   }
 
@@ -359,7 +359,7 @@ module.exports = function (K, OPT) {
         if (!h.x) return;
         if (h.x.pass === 'near') { h1++; score += 5; }
         if (MN.std(h.x.lib) === 'C') { h1++; score += 3; }
-        if (h.x.rep && OPT.reparto === 'dias' && st.T.length >= 4 && st.opt.id !== st.inp.plan) { h1++; score += 3; }   // v8: en 'dias' con 4-6 entrenos (gemelas), repetir en un hueco 1 = no hay K entrenos distintos
+        if (h.x.rep && OPT.reparto === 'dias' && st.T.length >= 4 && (st.opt.id === st.opt.rec || st.opt.id !== st.opt.table)) { h1++; score += 3; }   // v8: en 'dias' con 4-6 entrenos (gemelas), repetir en un hueco 1 = no hay K entrenos distintos
         score += h.x.eff || 0;
       } else if (h.prio === 2) { if (h.empty && !h.sust) score += 2; else if (h.x && h.on) score += 0.3 * (h.x.eff || 0) + (MN.std(h.x.lib) === 'C' ? 1 : 0); }
     }));
@@ -368,7 +368,7 @@ module.exports = function (K, OPT) {
   function seedSrc(inp) {
     const pl = {}; for (const k of ['g', 'c']) { const p = inp.places && inp.places[k]; if (p) pl[k] = { mats: [...p.mats].sort(), acc: [...(p.acc || [])].sort(), mach: p.mach === 'all' ? 'all' : [...(p.mach || [])].sort(), card: p.card === 'all' ? 'all' : [...(p.card || [])].sort(), dbMax: p.dbMax, kb: p.kb }; }
     return { goal: inp.goal, level: inp.level, modes: [...inp.modes].sort(), days: inp.days, min: inp.min, consec: inp.consec, age: inp.age, sport: inp.sport, prio: [...inp.prio].sort(), pref: inp.pref,
-      style: inp.style, warm: inp.warm, cardioEnd: inp.cardioEnd, power: inp.power, avoid: [...inp.avoid].sort(), main: inp.places.main, pl, daysOther: inp.daysOther, zones: inp.zones, prudent: !!inp.prudent, v: GEN_VERSION, cat: CAT_SIG , ...(inp.enfoque ? { enfoque: inp.enfoque } : {}), ...(inp.plan ? { plan: inp.plan } : {}) };
+      style: inp.style, warm: inp.warm, cardioEnd: inp.cardioEnd, power: inp.power, avoid: [...inp.avoid].sort(), main: inp.places.main, pl, daysOther: inp.daysOther, zones: inp.zones, prudent: !!inp.prudent, v: GEN_VERSION, cat: CAT_SIG , ...(inp.enfoque ? { enfoque: inp.enfoque } : {}), ...(inp.plan ? { plan: inp.plan } : {}), ...(inp.masTorso ? { masTorso: 1 } : {}) };
   }
 
   function effective(inp) {
@@ -481,6 +481,9 @@ module.exports = function (K, OPT) {
       // no da (validación dura o hueco principal vacío o de respaldo), la cadena sigue con el reparto de siempre y el texto lo dice
       rec = id;
       if (inp.plan && inp.plan !== id && planesDe(inp, P, id).includes(inp.plan)) { chain = [inp.plan].concat(chain.filter(x => x !== inp.plan)); id = inp.plan; }
+      // v14 (P2): «Más torso» en el cuestionario = el reparto con un solo día de pierna de sus días, si se le ofrece a esta persona (los
+      // mismos límites que un reparto elegido). Lo que elija después en «Cambiar reparto» (inp.plan) manda; el recomendado (rec) no cambia
+      else if (inp.masTorso && !inp.plan && UNA_PIERNA[wd] && planesDe(inp, P, id).includes(UNA_PIERNA[wd])) { const t = UNA_PIERNA[wd]; chain = [t].concat(chain.filter(x => x !== t)); id = t; why.push({ c: 'mas_torso' }); }
     } else {
       if (col65) {
         if (wd <= 2) id = 'cc2';
@@ -504,6 +507,7 @@ module.exports = function (K, OPT) {
   // A nadie con 65 o más, rutina prudente o 16-17 años (siguen con el suyo: sus reglas no se tocan), ni con menos de 30 min (el exprés y
   // el modo corto eligen por familias), ni con «más glúteo» (ya eligió su reparto). «Por músculos» (grp…), ni a quien empieza (aprende
   // antes repitiendo) ni con «Ganar fuerza» (cada levantamiento saldría una vez por semana sin más práctica); cuerpo completo ×3, no con días seguidos
+  const UNA_PIERNA = { 3: 'tpt3', 4: 'pplt4', 5: 'pplet5', 6: 'pplg6' };   // v14 (P2): el reparto de «Más torso» para cada número de días
   const PLANES = { 3: ['cc3', 'tpc3', 'tpt3', 'ppl3'], 4: ['tp4', 'pplt4', 'pplc4', 'grp4'], 5: ['ulppl', 'tptpt5', 'pplet5', 'grp5'], 6: ['ppl6', 'tp6', 'pplg6'] };
   function planesDe(inp, P, rec) {
     if (OPT.reparto !== 'dias' || P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo') return [];
@@ -1925,7 +1929,8 @@ module.exports = function (K, OPT) {
       corto: st.corto || 0,
       ratio: { tiron_empuje: Math.round(pp.ratio * 100) / 100, rodilla_cadera: Math.round(pp.rh * 100) / 100 },
       why: st.why.concat(st.opt.why, why2), warn: st.warn.concat(st.opt.warn, warn2), seed: st.seed, alt: st.ctx.alt, modes: [...P.M], level: P.level, lvS: P.lvS, wd: P.wd, f: st.f, fd: Object.fromEntries(T.map((t, i) => [letters[i], t.f])),
-      validate: st.v, tried, cut: st.cut, removed: st.removed, alternas: st.opt.alternas, table: st.opt.table, rec: st.opt.rec || st.opt.table, plan: inp.plan || null, log: st.log, reparto: OPT.reparto, capP: !!P.capP,
+      validate: st.v, tried, cut: st.cut, removed: st.removed, alternas: st.opt.alternas, table: st.opt.table, rec: st.opt.rec || st.opt.table, plan: inp.plan || (st.opt.rec && st.opt.table !== st.opt.rec && st.opt.why.some(w => w.c === 'mas_torso') ? st.opt.table : null),   // plan: el reparto pedido (en la hoja o con «Más torso»)
+      log: st.log, reparto: OPT.reparto, capP: !!P.capP,
       lifts: Object.fromEntries(T.map((t, i) => [letters[i], (t.lift || []).map(id => { const h = t.slots.find(k => k.id === id && k.prio === 1 && k.on && k.x); return h ? h.x.lib : null; }).filter(Boolean)])) };
     const ok = st.v.hard.length === 0;
     return { ok, reason: ok ? null : st.v.hard, days, weeklyTarget: P.wd, meta, det };
@@ -1954,5 +1959,5 @@ module.exports = function (K, OPT) {
     if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
     return null;
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, SPLITS, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
 };

@@ -185,7 +185,6 @@ function obPick(name,v){
   if(name==='days'||name==='min'||name==='daysOther')v=+v;
   if(name==='tope')v=v==='si';
   if(name==='exp'&&a.exp!==v){delete a.ritmo;delete a.paron;}
-  if(name==='sex'&&v!=='m')delete a.enfoque;
   a[name]=v;_obSaveDraft();
   const auto=OB_AUTO[name];
   if(!auto||_ob.single){obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root [data-v="${CSS.escape(String(name==='tope'?(v?'si':'no'):v))}"]`);if(b)try{b.focus();}catch(e){}return;}
@@ -196,8 +195,8 @@ function obPick(name,v){
 // A dónde lleva cada respuesta de un toque
 const OB_AUTO={
   goal:()=>'ob-sexo',
-  sex:v=>v==='m'?'ob-enfoque':'ob-exp',
-  enfoque:()=>'ob-exp',
+  sex:()=>'ob-exp',
+  enfoque:()=>'ob-foco', // (P2) la pregunta de torso y pierna va antes de las prioridades
   exp:v=>v==='gt2a'?'ob-ritmo':v==='paron'?'ob-paron':'ob-tiempo',
   ritmo:()=>'ob-tiempo'
 };
@@ -209,15 +208,10 @@ OB_SCR['ob-meta']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" ta
     ['aguante','battery','Aguantar más','Resistencia muscular: más repeticiones y descansos cortos.']],_ob.a.goal)}
   <p class="ob-foot">¿Dudas? Elige «Salud y forma».</p>
   ${_obWhy('Decide cuántas repeticiones haces, cuánto descansas y si añado cardio.')}`};
-// P2b · Mujer u hombre (D10): solo sirve para ofrecer el enfoque y para no preguntar por el embarazo a un hombre
+// P2b · Mujer u hombre (D10): solo sirve para no preguntar por el embarazo a un hombre (desde P2 del repaso, el enfoque se pregunta a todos)
 OB_SCR['ob-sexo']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Eres mujer u hombre?</h1>
   ${_obOpts('sex',[['m','','Mujer'],['h','','Hombre'],['nd','','Prefiero no decirlo']],_ob.a.sex)}
-  ${_obWhy('Para ofrecerte cómo enfocar tu rutina. No cambia los pesos ni la seguridad.')}`};
-// P2c · Enfoque (D10, solo «Mujer»)
-OB_SCR['ob-enfoque']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cómo quieres enfocar tu rutina?</h1>
-  <p class="ob-sub">Las dos valen: depende de lo que te apetezca trabajar.</p>
-  ${_obOpts('enfoque',[['gluteo','','Más glúteo y pierna','Más trabajo de glúteo y pierna, y el torso, lo justo para mantenerlo.'],['igual','','Equilibrada','Todo el cuerpo por igual.']],_ob.a.enfoque)}
-  ${_obWhy('Con «Más glúteo y pierna» el glúteo cuenta como una de tus dos prioridades y le doy más series; el torso se queda en lo justo.')}`};
+  ${_obWhy('Solo para no hacerte preguntas que no van contigo. No cambia la rutina, los pesos ni la seguridad.')}`};
 // P3 · Experiencia
 OB_SCR['ob-exp']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cuánta experiencia tienes con las pesas?</h1>
   <p class="ob-sub">Cuenta solo el tiempo entrenando con constancia, al menos dos días por semana. Si dudas, elige la más baja: subir es fácil.</p>
@@ -488,11 +482,22 @@ OB_SCR['ob-deporte']={block:3,auto:true,html:()=>`<h1 class="ob-title" id="ob-h"
   <button type="button" class="ob-link" onclick="obPick('sport','no')">Saltar</button>
   ${_obWhy('Si ya haces cardio, no lo repito; si corres o juegas, te pongo algo menos de pierna.')}`};
 // P10m solo si P8 dijo enfermedad o medicación y ahora no hace ejercicio
-OB_AUTO.sport=v=>{const s=_obScr(),inact=(_ob.a.exp==='cero'||_ob.a.exp==='paron')&&v==='no';return(s.has('enf')||s.has('med'))&&inact?'ob-consulta':'ob-foco';};
+OB_AUTO.sport=v=>{const s=_obScr(),inact=(_ob.a.exp==='cero'||_ob.a.exp==='paron')&&v==='no';return(s.has('enf')||s.has('med'))&&inact?'ob-consulta':'ob-enfoque';};
 OB_SCR['ob-consulta']={block:3,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">Antes de empezar, coméntalo con tu médico</h1>
   <p class="ob-sub">Con lo que marcaste, y como ahora no haces ejercicio, lo recomendable es comentarlo con tu médico antes de empezar, aunque sea suave.</p>
-  <div class="ob-acts"><button type="button" class="btn bp" onclick="_ob.h.consulta='hablado';obGo('ob-foco')">Ya lo he hablado</button>
-  <button type="button" class="btn bs" onclick="_ob.h.consulta='igual';obGo('ob-foco')">Empezar suave igualmente</button><button type="button" class="btn bs" onclick="obBack()">‹ Atrás</button></div>`};
+  <div class="ob-acts"><button type="button" class="btn bp" onclick="_ob.h.consulta='hablado';obGo('ob-enfoque')">Ya lo he hablado</button>
+  <button type="button" class="btn bs" onclick="_ob.h.consulta='igual';obGo('ob-enfoque')">Empezar suave igualmente</button><button type="button" class="btn bs" onclick="obBack()">‹ Atrás</button></div>`};
+// P10b · Reparto entre torso y pierna (P2 del repaso del reparto). Era el «enfoque» de D10, que solo se preguntaba a las mujeres al
+// principio: ahora es para todos y va justo antes de las prioridades, cuando ya se saben los días, la edad y la salud. «Más torso» (un
+// solo día de pierna) solo se ofrece a quien puede elegir reparto: desde 3 días y 30 min, y sin las reglas de prudencia (65 o más,
+// «prefiero no decirlo», 16-17 años, rutina prudente), que siguen con el suyo. El generador vuelve a comprobarlo
+function _obTorsoOk(){const a=_ob.a;return(a.days||3)>=3&&(a.min||60)>=30&&!['65','75','nd','16'].includes(a.age)&&!_obPrudent();}
+OB_SCR['ob-enfoque']={block:3,auto:true,html:()=>{const tor=_obTorsoOk(),cur=_ob.a.enfoque==='torso'&&!tor?'igual':_ob.a.enfoque;
+  return`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cómo repartes la semana entre torso y pierna?</h1>
+  <p class="ob-sub">${tor?'Las tres valen':'Las dos valen'}: depende de lo que te apetezca trabajar.</p>
+  ${_obOpts('enfoque',[['igual','','Equilibrado','Torso y pierna por igual.','Recomendado']].concat(tor?[['torso','','Más torso','Un solo día de pierna y el resto, torso. La pierna, lo justo para mantenerla.']]:[],
+    [['gluteo','','Más glúteo y pierna','Más trabajo de glúteo y pierna, y el torso, lo justo para mantenerlo.']]),cur)}
+  ${_obWhy(tor?'Con esto decido qué va cada día. Con «Más glúteo y pierna», además, el glúteo cuenta como una de tus dos prioridades. Podrás cambiarlo cuando quieras.':'Con «Más glúteo y pierna» el glúteo cuenta como una de tus dos prioridades y le doy más series; el torso se queda en lo justo.')}`;}};
 // P11 · Prioridades (hasta 2; con «más glúteo» de D10, el glúteo ya ocupa una)
 const OB_PRIO=[['pecho','Pecho'],['espalda','Espalda'],['hombros','Hombros'],['brazos','Brazos'],['gluteos','Glúteos'],['piernas','Piernas'],['abdomen','Abdomen']];
 function obPrio(k){
@@ -516,7 +521,7 @@ function _obAnswers(){
   a.screen=scr.length?scr:'nada';a.zones=JSON.parse(JSON.stringify(h.zones||{}));a.huesos=!!h.huesos;if(h.posparto==='alta')a.posparto='alta';
   a.pref=_obPref();a.places=JSON.parse(JSON.stringify(_ob.places||{}));a.sport=a.sport||'no';a.prio=(a.prio||[]).filter(x=>!(a.enfoque==='gluteo'&&x==='gluteos'));
   a.style=a.style||'igual';a.power=!!a.power;a.cardioEnd=a.cardioEnd||'auto';a.daysOther=a.daysOther||0;a.consec=!!a.consec;
-  if(a.enfoque!=='gluteo')delete a.enfoque;
+  if(a.enfoque!=='gluteo'&&a.enfoque!=='torso')delete a.enfoque; // (P2) «Más torso»: un solo día de pierna
   if(_ob.from==='settings'&&!a.levelManual){const ef=_obEfectiva();if(ef)a.efectiva=ef;} // (E11a) el nivel sube solo con lo entrenado
   return a;
 }
@@ -583,6 +588,7 @@ function _obChips(){
   ['g','c'].forEach(k=>{const P=pl[k];if(P)out.push([_placeLbl(P),k===pl.main?'ob-lugar':'ob-lugar2']);});
   if(a.exp)out.push([OB_EXP_LBL[a.exp],'ob-exp']);
   if(a.enfoque==='gluteo')out.push(['Más glúteo','ob-enfoque']);
+  if(a.enfoque==='torso')out.push(['Más torso','ob-enfoque']); // (P2)
   Object.keys(_ob.h.zones||{}).forEach(z=>{const t=(OB_ZONES.find(x=>x[0]===z)||[])[2];if(t)out.push([t,'ob-molestias']);});
   const pr=(a.prio||[]).filter(x=>!(a.enfoque==='gluteo'&&x==='gluteos'));if(pr.length)out.push(['Prioridad: '+pr.map(k=>(OB_PRIO.find(x=>x[0]===k)||['',k])[1].toLowerCase()).join(' y '),'ob-foco']);
   return out;
@@ -952,8 +958,9 @@ function obOther(dir){
 // ── (P1, P4) El reparto de la semana: qué va cada día. El generador dice qué repartos se ofrecen a este perfil (planes: el recomendado
 // y los demás) y aquí se genera cada uno y se enseñan solo los que salen de verdad con tu material; cada ficha dice lo que hay en esa
 // rutina (días por su nombre, días de pierna, veces por semana y lo que se queda corto), no lo que se pidió ──
-function _obGenWith(a,plan,rep,tope){
+function _obGenWith(a,plan,rep,tope,neutro){
   const b=JSON.parse(JSON.stringify(a));if(plan)b.plan=plan;else delete b.plan;b.tope=tope;
+  if(neutro&&b.enfoque==='torso')delete b.enfoque; // (P2) una ficha de la hoja es ese reparto tal cual, sin el «Más torso» de tus respuestas
   const g=genRoutineFrom(b,_obHistCtx(),{reparto:rep,tope});return g&&g.res.ok?g:null;
 }
 function _obRepInfo(g){try{return g.E.X.reparto(g.res,g.inp);}catch(e){return null;}}
@@ -970,8 +977,8 @@ function _obRepOpts(){
   let pl={rec:null,otros:[]};try{pl=E.G.planes(E.G.desdeRespuestas(JSON.parse(JSON.stringify(a))));}catch(e){}
   const add=(id,g,rec)=>{if(!g||g.res.meta.split!==id||planes.some(p=>p.id===id))return;const info=_obRepInfo(g);if(info)planes.push({id,g,info,rec,cur:cur==='dias'&&g0.res.meta.split===id});};
   if(pl.rec&&pl.otros.length){
-    add(pl.rec,cur==='dias'&&g0.res.meta.split===pl.rec?g0:_obGenWith(a,null,'dias',tope),true);
-    pl.otros.forEach(id=>add(id,cur==='dias'&&g0.res.meta.split===id?g0:_obGenWith(a,id,'dias',tope),false));
+    add(pl.rec,cur==='dias'&&g0.res.meta.split===pl.rec?g0:_obGenWith(a,null,'dias',tope,true),true);
+    pl.otros.forEach(id=>add(id,cur==='dias'&&g0.res.meta.split===id?g0:_obGenWith(a,id,'dias',tope,true),false));
   }
   return _ob.ropts={g:g0,planes,rec:pl.rec};
 }
@@ -1005,7 +1012,11 @@ function obSplitSheet(){
 }
 function obSplitPick(k,v){
   if(!_ob)return;const b=_obWeekLine(_ob.g),bn=((_obRepInfo(_ob.g)||{}).dias||[]).join(' · ');
-  if(k==='plan'){const ro=_obRepOpts();if(!ro.planes.some(p=>p.id===v))return;_ob.reparto='dias';if(v===ro.rec)delete _ob.a.plan;else _ob.a.plan=v;}
+  if(k==='plan'){const ro=_obRepOpts();if(!ro.planes.some(p=>p.id===v))return;_ob.reparto='dias';
+    // (P2) el reparto de un solo día de pierna es la respuesta «Más torso» (así sigue si luego cambias de días); elegir otro la quita
+    const una=_ob.g.E.G.UNA_PIERNA[_ob.g.res.meta.wd];
+    if(v===una){_ob.a.enfoque='torso';delete _ob.a.plan;}
+    else{if(_ob.a.enfoque==='torso')_ob.a.enfoque='igual';if(v===ro.rec)delete _ob.a.plan;else _ob.a.plan=v;}}
   else if(k==='rep'){_ob.reparto=v;if(v==='recomendado')delete _ob.a.plan;}
   else _ob.a.tope=v==='si';
   _ob.dirty=true;_obSaveDraft();obSheetClose();_obGenerate();
@@ -1047,11 +1058,10 @@ const OB_SPORT_LBL={no:'No, por ahora no',suave:'Camino o voy en bici',piernas:'
 function _obRespRows(){
   const a=_ob.a,pl=_ob.places||{},pr=(a.prio||[]).filter(x=>!(a.enfoque==='gluteo'&&x==='gluteos'));
   const rows=[['ob-meta','Objetivo',(OB_GOAL_LBL[a.goal]||'—')],['ob-sexo','Mujer u hombre',({m:'Mujer',h:'Hombre',nd:'Prefiero no decirlo'})[a.sex]||'—']];
-  if(a.sex==='m')rows.push(['ob-enfoque','Enfoque',({gluteo:'Más glúteo y pierna',igual:'Equilibrada'})[a.enfoque]||'—']);
   rows.push(['ob-exp','Experiencia',OB_EXP_LBL[a.exp]||'—'],['ob-tiempo','Tu tiempo',a.days?`${plural(a.days,'día')} · ${a.min||60}${NB}min`:'—'],
     ['ob-lugar','Dónde entrenas',['g','c'].filter(k=>pl[k]).map(k=>_placeLbl(pl[k])).join(' · ')||'—'],
     ['ob-edad','Edad',OB_AGE_LBL[a.age]||'—'],['ob-molestias','Molestias',S.health?Object.keys(S.health.zones||{}).map(z=>(OB_ZONES.find(x=>x[0]===z)||['',z])[2]).join(', ')||'Ninguna':'No guardadas'],
-    ['ob-deporte','Otro deporte',OB_SPORT_LBL[a.sport]||'—'],['ob-foco','Prioridades',(a.enfoque==='gluteo'?['Glúteos']:[]).concat(pr.map(k=>(OB_PRIO.find(x=>x[0]===k)||['',k])[1])).join(' y ')||'Todo por igual']);
+    ['ob-deporte','Otro deporte',OB_SPORT_LBL[a.sport]||'—'],['ob-enfoque','Torso y pierna',({gluteo:'Más glúteo y pierna',torso:'Más torso'})[a.enfoque]||'Equilibrado'],['ob-foco','Prioridades',(a.enfoque==='gluteo'?['Glúteos']:[]).concat(pr.map(k=>(OB_PRIO.find(x=>x[0]===k)||['',k])[1])).join(' y ')||'Todo por igual']);
   return rows;
 }
 OB_SCR['ob-resp']={block:0,html:()=>{const ef=_obEfectiva();

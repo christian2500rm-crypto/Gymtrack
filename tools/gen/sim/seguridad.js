@@ -117,7 +117,7 @@ module.exports = function (K, G, X) {
       if (SOLO_ELEGIDOS.includes(m.split)) {
         if (P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo') bump('plan_no_permitido', m.split);
         if (m.split.indexOf('grp') === 0 && (LVn(P.lvS) <= 1 || inp.goal === 'fuerza')) bump('plan_no_permitido', m.split + ' (por músculos)');
-        if (m.split !== inp.plan) bump('plan_sin_pedir', m.split + ' / ' + inp.plan);
+        if (m.split !== m.plan || (m.split !== inp.plan && !(inp.masTorso && !inp.plan && m.split === G.UNA_PIERNA[m.wd]))) bump('plan_sin_pedir', m.split + ' / ' + inp.plan);   // (P2: o lo pidió con «Más torso»)
         if (roles.join(',') !== G.SPLITS[m.split].join(',') && roles.slice().sort().join(',') !== G.SPLITS[m.split].slice().sort().join(',')) bump('plan_dias', roles.join(','));
       }
       // un solo día de pierna: el texto del reparto lo dice (y los avisos dan las series si se quedan cortas)

@@ -10342,7 +10342,7 @@ try{
   // 3. Saneadores
   {const p=_sanitizeProfile({mode:'gen',goal:'x',exp:'gt2a',ritmo:'meses',days:9,min:50,age:'40',ageTs:5,prio:['brazos','gluteos','pecho','zz'],avoid:['lib_squat_smith','<b>'],sex:'m',enfoque:'gluteo',zz:1,pref:{impact:false}});
    E(p.goal===null&&p.days===null&&p.min===45&&p.ritmo==='meses'&&p.prio.join()==='brazos,gluteos'&&p.avoid.join()==='lib_squat_smith'&&!('zz' in p)&&p.enfoque==='gluteo'&&p.pref.impact===false&&p.pref.floor===true,'perfil '+JSON.stringify(p));
-   E(_sanitizeProfile({sex:'h',enfoque:'gluteo'}).enfoque===null&&_sanitizeProfile({exp:'cero',ritmo:'meses'}).ritmo===null,'enfoque sin ser mujer o ritmo sin «Más de 2 años»');
+   E(_sanitizeProfile({sex:'h',enfoque:'gluteo'}).enfoque==='gluteo'&&_sanitizeProfile({enfoque:'torso'}).enfoque==='torso'&&_sanitizeProfile({enfoque:'zz'}).enfoque===null&&_sanitizeProfile({exp:'cero',ritmo:'meses'}).ritmo===null,'enfoque para todos (P2), «torso», uno inventado o ritmo sin «Más de 2 años»');
    E(_sanitizeProfile('x')===null&&_sanitizeProfile(null)===null,'perfil roto');}
   {const pl=_sanitizePlaces({main:'c',g:{preset:'xx',mats:['mancuernas','corporal','nada'],acc:['banco','zz'],mach:['prensa','zz'],card:'all',dbMax:20,kb:5}});
    E(pl&&pl.main==='g'&&pl.g.preset==='propio'&&pl.g.mats.join()==='mancuernas'&&pl.g.acc.join()==='banco'&&pl.g.mach.join()==='prensa'&&pl.g.card==='all'&&pl.g.kb===null&&pl.c===null,'sitios '+JSON.stringify(pl));
@@ -10903,10 +10903,9 @@ try{
   E(_ob.step==='ob-meta'&&$$('[role=radio]')[1].getAttribute('aria-checked')==='true'&&document.activeElement===$$('[role=radio]')[1],'flechas');
   opt('Ganar músculo').click();E(_ob.step==='ob-meta','avanza sin esperar');await wait();
   E(_ob.step==='ob-sexo'&&_ob.a.goal==='musculo'&&S.obDraft&&S.obDraft.a.goal==='musculo'&&S.obDraft.step==='ob-sexo','P2 → P2b y borrador');
-  opt('Mujer').click();await wait();E(_ob.step==='ob-enfoque','«Mujer» → enfoque');
-  opt('Más glúteo y pierna').click();await wait();E(_ob.step==='ob-exp'&&_ob.a.enfoque==='gluteo','enfoque → P3');
-  obBack();await W(3);E(_ob.step==='ob-enfoque'&&opt('Más glúteo y pierna').getAttribute('aria-checked')==='true','Atrás conserva lo respondido');
-  obBack();await W(3);opt('Hombre').click();await wait();E(_ob.step==='ob-exp'&&_ob.a.sex==='h'&&!('enfoque' in _ob.a)&&!('enfoque' in S.obDraft.a&&S.obDraft.a.enfoque),'«Hombre» quita el enfoque '+pj(_ob.a));
+  opt('Mujer').click();await wait();E(_ob.step==='ob-exp'&&_ob.a.sex==='m','«Mujer» → P3 (P2 del repaso: el reparto entre torso y pierna se pregunta a todos, antes de las prioridades)');
+  obBack();await W(3);E(_ob.step==='ob-sexo'&&opt('Mujer').getAttribute('aria-checked')==='true','Atrás conserva lo respondido');
+  opt('Hombre').click();await wait();E(_ob.step==='ob-exp'&&_ob.a.sex==='h','«Hombre» → P3 '+pj(_ob.a));
   opt('Más de 2 años').click();await wait();E(_ob.step==='ob-ritmo','«Más de 2 años» → ritmo');
   opt('Me cuesta semanas o meses').click();await wait();E(_ob.step==='ob-tiempo'&&_ob.a.ritmo==='meses','ritmo → P4');
   // P4 con la recomendación de quien tiene experiencia: 4 días y 60 min
@@ -11060,8 +11059,9 @@ try{
   $('[data-zk="rodilla:ahora"]').click();await W(3);$('[data-zr="rodilla:si"]').click();await W(3);$('#ob-go').click();await W(3);E(_ob.h.zones.rodilla==='reciente','lesión reciente');
   // P10 → P10m: enfermedad o medicación sin hacer ejercicio
   await start({exp:'cero'},'ob-deporte');_obScr().add('enf');opt('No, por ahora no').click();await wait();E(_ob.step==='ob-consulta','→ P10m '+_ob.step);
-  [...document.querySelectorAll('#ob-root button')].find(b=>/Empezar suave igualmente/.test(b.textContent)).click();await W(3);E(_ob.step==='ob-foco'&&_ob.h.consulta==='igual','P10m → P11');
-  await start({exp:'6m2a'},'ob-deporte');opt('Corro o hago deporte de piernas').click();await wait();E(_ob.step==='ob-foco'&&_ob.a.sport==='piernas','P10 → P11 sin P10m');
+  [...document.querySelectorAll('#ob-root button')].find(b=>/Empezar suave igualmente/.test(b.textContent)).click();await W(3);E(_ob.step==='ob-enfoque'&&_ob.h.consulta==='igual','P10m → P10b (torso y pierna)');
+  await start({exp:'6m2a'},'ob-deporte');opt('Corro o hago deporte de piernas').click();await wait();E(_ob.step==='ob-enfoque'&&_ob.a.sport==='piernas','P10 → P10b (torso y pierna) sin P10m');
+  opt('Equilibrado').click();await wait();E(_ob.step==='ob-foco'&&_ob.a.enfoque==='igual','P10b → P11 '+_ob.step);
   // P11: hasta 2
   E(/Todo por igual/.test(tx($('#ob-go'))),'«Todo por igual» sin nada');
   obPrio('pecho');obPrio('espalda');obPrio('brazos');await W(3);E(pj(_ob.a.prio)==='["pecho","espalda"]'&&/Como mucho 2\./.test(tx($('.ob-body'))),'tope de 2 '+pj(_ob.a.prio));
@@ -11089,7 +11089,7 @@ try{
   await click(opt('De 6 meses a 2 años'),'experiencia');await wait();await click($('#ob-go'),'P4 Seguir');
   await click(opt('Gimnasio grande'),'gimnasio');await wait();await click(opt('No, solo aquí'),'otro sitio');await wait();
   await click(opt('18-39'),'edad');await wait();await click(opt('Nada de esto'),'seguridad');await wait();
-  await click($('#ob-go'),'P9 Ninguna');await click(opt('No, por ahora no'),'deporte');await wait();await click($('#ob-go'),'P11');await W(10);
+  await click($('#ob-go'),'P9 Ninguna');await click(opt('No, por ahora no'),'deporte');await wait();await click(opt('Equilibrado'),'P10b torso y pierna');await wait();await click($('#ob-go'),'P11');await W(10);
   E(_ob.step==='ob-rutina'&&/Tu rutina está lista/.test(tx($('#ob-h'))),'P12 '+_ob.step);
   const chips=$$('.ob-ch').map(tx);E(chips.includes('4 días')&&chips.some(c=>/60\s*min/.test(c))&&chips.some(c=>/Gimnasio grande/.test(c))&&chips.some(c=>/Ganar músculo/.test(c)),'chips '+pj(chips));
   E(/^Tu semana: A · B · C · D\.$/.test(tx($('.ob-wk'))),'semana: '+tx($('.ob-wk')));
@@ -13096,7 +13096,7 @@ await safe('b3Iconos',async()=>{
       r=await scr('ob-exp');E([...r.querySelectorAll('.ob-card')].every(c=>c.querySelector('.ob-ci svg.ic'))&&!!r.querySelector('svg.ic-plant'),'experiencia: tarjetas sin icono');
       r=await scr('ob-deporte');E(['sofa','walk','run','waves'].every(n=>r.querySelector('.ob-ci svg.ic-'+n)),'deporte: iconos');
       r=await scr('ob-lugar');E(r.querySelectorAll('.lib-pl svg.ic').length===2&&[...r.querySelectorAll('.ob-card')].every(c=>c.querySelector('.ob-ci svg.ic')),'sitio: iconos');
-      r=await scr('ob-enfoque');E(r.querySelectorAll('.ob-card').length===2&&!r.querySelector('.ob-ci'),'enfoque: icono sin concepto claro');
+      r=await scr('ob-enfoque');E([2,3].includes(r.querySelectorAll('.ob-card').length)&&!r.querySelector('.ob-ci'),'enfoque: icono sin concepto claro');
       r=await scr('ob-salud');E(r.querySelectorAll('.ob-chk').length>=5&&!r.querySelector('.ob-chk .ob-ci')&&!!r.querySelector('.ob-none .ob-ci svg.ic-done'),'seguridad: la lista lleva pictogramas');
       r=await scr('ob-molestias');E(r.querySelectorAll('.ob-zc').length===6&&[...r.querySelectorAll('.ob-zc')].every(c=>!c.querySelector('svg,span'))&&!r.querySelector('.ob-chk .ob-ci'),'molestias: las zonas llevan pictograma');
       // a 320 px no desbordan
@@ -13225,19 +13225,19 @@ try{
   E(f.every(b=>b.getBoundingClientRect().height>=44&&b.getAttribute('role')==='radio')&&cards().some(b=>/2-4 entrenos que se repiten/.test(tx(b))),'fichas: tamaño, papel o la otra forma');
   // elegir «un día de pierna»
   un.click();await W(10);
-  E(_ob.g.res.meta.split==='pplt4'&&_ob.a.plan==='pplt4'&&_ob.reparto==='dias','elegido: '+pj([_ob.g.res.meta.split,_ob.a.plan,_ob.reparto]));
+  E(_ob.g.res.meta.split==='pplt4'&&_ob.a.enfoque==='torso'&&!_ob.a.plan&&_ob.reparto==='dias','elegido (P2: queda como «Más torso»): '+pj([_ob.g.res.meta.split,_ob.a.enfoque,_ob.a.plan,_ob.reparto]));
   E(/Ha cambiado: Torso · Pierna · Torso · Pierna → Empuje · Tirón · Pierna · Torso/.test(tx($('.ob-changed'))),'Ha cambiado: '+tx($('.ob-changed')));
   E(tx($('.ob-wkn'))==='Empuje · Tirón · Pierna · Torso'&&/lo has elegido tú/.test(tx($('.ob-rpq')))&&/torso, pierna, torso y pierna/.test(tx($('.ob-rpq'))),'tarjeta tras elegir: '+tx($('.ob-rpq')));
   E(_ob.t.avisos.some(x=>/menos de lo ideal/.test(x)&&/cuádriceps|isquios|glúteos/.test(x)),'sin aviso del coste de un día de pierna');
-  E(S.obDraft&&S.obDraft.a.plan==='pplt4'&&_obProfileToSave('gen').plan==='pplt4','el reparto elegido no se guarda con tus respuestas');
+  E(S.obDraft&&S.obDraft.a.enfoque==='torso'&&_obProfileToSave('gen').enfoque==='torso','«un día de pierna» no se guarda con tus respuestas');
   obSplitSheet();await W(5);f=rp();E(f.find(b=>b.dataset.plan==='pplt4').getAttribute('aria-checked')==='true'&&f.find(b=>b.dataset.plan==='tp4').getAttribute('aria-checked')==='false'&&/Recomendado/.test(tx(f[0])),'marcas tras elegir');
   // «Otra propuesta» conserva el reparto elegido
   obSheetClose();obOther(1);await W(5);E(_ob.g.res.meta.split==='pplt4','«Otra propuesta» pierde el reparto: '+_ob.g.res.meta.split);obOther(-1);await W(5);
   // volver al recomendado desde su ficha: el plan deja de estar guardado
-  obSplitSheet();await W(5);rp().find(b=>b.dataset.plan==='tp4').click();await W(10);E(_ob.g.res.meta.split==='tp4'&&!_ob.a.plan,'volver al recomendado: '+pj([_ob.g.res.meta.split,_ob.a.plan]));
+  obSplitSheet();await W(5);rp().find(b=>b.dataset.plan==='tp4').click();await W(10);E(_ob.g.res.meta.split==='tp4'&&!_ob.a.plan&&_ob.a.enfoque!=='torso','volver al recomendado: '+pj([_ob.g.res.meta.split,_ob.a.plan,_ob.a.enfoque]));
   // por músculos y, desde ahí, «2-4 entrenos que se repiten» olvida el reparto elegido
   obSplitSheet();await W(5);rp().find(b=>b.dataset.plan==='grp4').click();await W(10);
-  E(_ob.g.res.meta.split==='grp4'&&/^Pecho y tríceps/.test(_ob.g.res.days.A.focus)&&tx($('.ob-wkn'))==='Pecho y tríceps · Espalda y bíceps · Pierna · Hombros y brazos','por músculos: '+tx($('.ob-wkn')));
+  E(_ob.g.res.meta.split==='grp4'&&/^Pecho y tríceps/.test(_ob.g.res.days.A.focus)&&tx($('.ob-wkn'))==='Pecho y tríceps · Espalda y bíceps · Pierna · Hombros y brazos'&&S.obDraft.a.plan==='grp4'&&_obProfileToSave('gen').plan==='grp4','por músculos (y guardado con tus respuestas): '+tx($('.ob-wkn')));
   obSplitSheet();await W(5);cards().find(b=>/2-4 entrenos que se repiten/.test(tx(b))).click();await W(10);E(_ob.reparto==='recomendado'&&!_ob.a.plan&&_ob.g.res.meta.split!=='grp4','2-4 entrenos: '+pj([_ob.reparto,_ob.a.plan,_ob.g.res.meta.split]));
   // un reparto guardado que deja de valer (pasas a 5 días) se olvida; y los de 5 días salen en su hoja
   _ob.reparto='dias';_ob.a.plan='pplt4';_ob.a.days=5;_ob.dirty=true;obRender();await W(5);
@@ -13254,6 +13254,55 @@ try{
   if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
 }finally{
   clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('p2TorsoPierna',async()=>{
+// (P2, repaso del reparto) «¿Cómo repartes la semana entre torso y pierna?» se pregunta a todos justo antes de las prioridades:
+// «Equilibrado», «Más torso» (un solo día de pierna; solo a quien puede elegir reparto) y «Más glúteo y pierna» (ya no solo a
+// mujeres). «Más torso» da el reparto de un día de pierna de tus días, sigue al cambiar de días y va de la mano de la hoja de
+// reparto; con 65 o más no se ofrece y, si estaba guardado, no se aplica.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),$$=q=>[...document.querySelectorAll('#ob-root '+q)];
+const opt=t=>$$('[role=radio]').find(b=>tx(b.querySelector('b'))===t),chips=()=>$$('.ob-ch').map(tx),rp=()=>[...document.querySelectorAll('#ob-sheet-root .ob-rp')];
+const wait=async()=>{for(let i=0;i<40&&_obAdvT;i++)await W(20);await W(20);};
+try{
+  S.onboarded=true;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);_ob.from='first';
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,age:'18',prio:[]});delete _ob.a.plan;delete _ob.a.enfoque;delete _ob.a.sport;
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.hist=[];_ob.step='ob-deporte';obRender();await W(5);
+  // del deporte se pasa a la pregunta nueva, con sus tres respuestas
+  opt('No, por ahora no').click();await wait();
+  E(_ob.step==='ob-enfoque'&&/torso y pierna/.test(tx($('#ob-h')))&&$$('[role=radio]').map(b=>tx(b.querySelector('b'))).join('|')==='Equilibrado|Más torso|Más glúteo y pierna','pregunta: '+_ob.step+' '+$$('[role=radio]').map(b=>tx(b.querySelector('b'))).join('|'));
+  E(/Recomendado/.test(tx(opt('Equilibrado')))&&/Un solo día de pierna/.test(tx(opt('Más torso')))&&$$('[role=radio]').every(b=>b.getBoundingClientRect().height>=44),'textos o tamaño de las respuestas');
+  opt('Más torso').click();await wait();E(_ob.step==='ob-foco'&&_ob.a.enfoque==='torso'&&S.obDraft.a.enfoque==='torso','«Más torso» → prioridades: '+pj([_ob.step,_ob.a.enfoque]));
+  obBack();await W(3);E(_ob.step==='ob-enfoque'&&opt('Más torso').getAttribute('aria-checked')==='true','Atrás conserva lo respondido');opt('Más torso').click();await wait();
+  // la rutina: un solo día de pierna, con su chip, y el recomendado sigue siendo el equilibrado
+  obFinishQs();await W(60);
+  E(_ob.step==='ob-rutina'&&_ob.g.res.meta.split==='pplt4'&&_ob.g.res.meta.rec==='tp4'&&tx($('.ob-wkn'))==='Empuje · Tirón · Pierna · Torso','rutina de «Más torso»: '+pj([_ob.step,_ob.g&&_ob.g.res.meta.split,tx($('.ob-wkn'))]));
+  E(chips().includes('Más torso')&&/lo has elegido tú/.test(tx($('.ob-rpq')))&&_ob.t.avisos.some(x=>/menos de lo ideal/.test(x)),'chip, porqué o aviso: '+chips().join(',')+' / '+tx($('.ob-rpq')));
+  E(Object.keys(_ob.g.E.SEG(_ob.g.res,_ob.g.inp)).length===0,'seguridad');
+  obSplitSheet();await W(5);E(rp().find(b=>b.dataset.plan==='pplt4').getAttribute('aria-checked')==='true'&&/Recomendado/.test(tx(rp()[0]))&&rp()[0].dataset.plan==='tp4','hoja con «Más torso»: '+rp().map(b=>b.dataset.plan+':'+b.getAttribute('aria-checked')).join(' '));obSheetClose();
+  // con 5 días sigue siendo un día de pierna; con 2 no cambia nada
+  _ob.a.days=5;_ob.dirty=true;obRender();await W(5);E(_ob.g.res.meta.split==='pplet5'&&_ob.a.enfoque==='torso','5 días: '+_ob.g.res.meta.split);
+  _ob.a.days=2;_ob.dirty=true;obRender();await W(5);E(_ob.g.res.meta.split==='cc2','2 días: '+_ob.g.res.meta.split);
+  // elegir el recomendado en la hoja quita «Más torso»
+  _ob.a.days=4;_ob.dirty=true;obRender();await W(5);obSplitSheet();await W(5);rp().find(b=>b.dataset.plan==='tp4').click();await W(10);
+  E(_ob.g.res.meta.split==='tp4'&&_ob.a.enfoque==='igual'&&!chips().includes('Más torso'),'recomendado desde la hoja: '+pj([_ob.g.res.meta.split,_ob.a.enfoque,chips()]));
+  // «Más glúteo y pierna» para un hombre: tres días de pierna y el glúteo como prioridad ya puesta
+  obEditFromResult('ob-enfoque');await W(5);E(_ob.step==='ob-enfoque'&&_ob.single,'chip → la pregunta sola');opt('Más glúteo y pierna').click();await W(5);obSingleSave();await W(10);
+  E(_ob.step==='ob-rutina'&&_ob.a.sex==='h'&&_ob.a.enfoque==='gluteo'&&_ob.g.res.meta.split==='p3t1'&&chips().includes('Más glúteo')&&/el enfoque/.test(tx($('.ob-changed'))),'«Más glúteo y pierna» de un hombre: '+pj([_ob.g.res.meta.split,chips(),tx($('.ob-changed'))]));
+  E(_obProfileToSave('gen').enfoque==='gluteo','el enfoque de un hombre no se guarda');
+  // «Tus respuestas»: la fila de torso y pierna, para todos
+  E(_obRespRows().some(r=>r[0]==='ob-enfoque'&&r[1]==='Torso y pierna'&&r[2]==='Más glúteo y pierna'),'fila de «Tus respuestas»: '+pj(_obRespRows().find(r=>r[0]==='ob-enfoque')));
+  // con 65 o más: sin «Más torso» en la pregunta y, si estaba guardado, no se aplica
+  Object.assign(_ob.a,{age:'65',enfoque:'torso',goal:'salud'});_ob.single=false;_ob.step='ob-enfoque';obRender();await W(5);
+  E($$('[role=radio]').map(b=>tx(b.querySelector('b'))).join('|')==='Equilibrado|Más glúteo y pierna'&&/Las dos valen/.test(tx($('.ob-sub'))),'65 o más: '+$$('[role=radio]').map(b=>tx(b.querySelector('b'))).join('|'));
+  _ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);E(_ob.g.res.ok&&_ob.g.res.meta.split==='tp4'&&!$('.ob-rpq')&&Object.keys(_ob.g.E.SEG(_ob.g.res,_ob.g.inp)).length===0,'65 o más con «Más torso» guardado: '+_ob.g.res.meta.split);
+  E(pj(getPlan())===plan0&&!S.planMeta===!full.planMeta,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{document.getElementById('app').style.display='';document.getElementById('toast').classList.remove('show');}catch(e){}
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
