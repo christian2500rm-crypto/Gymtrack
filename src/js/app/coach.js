@@ -761,6 +761,7 @@ function coach_buildCandidates(an){
   }
   an.down.forEach(it=>{
     const ex=it.ex,s=_baseSets(ex);
+    if(_isBalEx(ex))return; // (C11)
     if(f.deloadNeeded&&an.down.length>=2){it.covered='deload';return;} // la descarga ya lo cubre
     if(s<=1)return;
     out.push({id:'rm_set_'+ex.id,type:'rm_set',basis:'down',prio:1,sev:it.p.dropPct,ic:'🧘',tag:'Descarga',exId:ex.id,dayKey:it.dayKey,createdAt:now,
@@ -770,6 +771,7 @@ function coach_buildCandidates(an){
   an.stagnant.forEach(it=>{
     // Cambiar el esquema de reps (con más o menos peso) solo tiene sentido con peso × reps
     const ex=it.ex,s=_baseSets(ex),kg=exLT(ex)==='w',tr=kg?targetRepsNum(ex):null;
+    if(_isBalEx(ex))return; // (C11)
     const why=`${it.p.stagSessions}+ sesiones (${Math.max(3,Math.round(it.p.stagWeeks))}+ semanas) sin mejorar ${(kg&&!it.p.kgTD)||it.p.metric==='e1rm'?'peso ni reps':_progWhat(it.p).su} con ${s}×${fmtTargetReps(ex).replace(/ reps$/,'')}.`;
     const base={basis:'stagnant',prio:2,sev:it.p.stagSessions,ic:'🔄',tag:'Variación',exId:ex.id,dayKey:it.dayKey,createdAt:now};
     const rr=kg?repRange(ex):null; // (E16d) con rutina generada el objetivo es un rango («8-10»): targetRepsNum no lo lee
@@ -813,6 +815,7 @@ function coach_buildCandidates(an){
   });
   an.flat.forEach(it=>{
     const ex=it.ex,s=_baseSets(ex);
+    if(_isBalEx(ex))return; // (C11)
     // Solo si está estable de verdad (no bajando), con datos y sin zona muscular ya «al límite»
     if(s>=5||it.p.sessions<3||it.p.pctWeek<-0.4||hot.has(ex.muscle))return;
     if(goal==='musculo'&&_isPlainObj(pm.vol)){const L0=exLib(ex),L=L0&&LIB_K&&LIB_K.BY.get(L0.id),g=L&&LIB_K.mainGroupV(L),vz=g&&pm.vol[g]; // (E16d)
@@ -912,6 +915,10 @@ function coach_item(ex,dk,c){
   }
   return it;
 }
+// (C11) Los ejercicios de equilibrio (el bloque que el creador de rutinas pone con 65 o más) no se juzgan como los de fuerza: mejorar
+// en ellos no es sumar segundos sin fin, así que nunca salen «estancados», «estables» ni «en retroceso» y el Coach no propone
+// cambiarlos, añadirles series ni descargarlos. Su tendencia se sigue calculando (Progreso la enseña igual).
+function _isBalEx(ex){const L=ex&&!ex.cardio?exLib(ex):null;return !!(L&&L.pat==='bal');}
 function coach_analyze(){
   // (11) la rutina tal cual: un ejercicio sustituido «solo hoy» se juzga por el original (el que vuelve al guardar)
   const plan=routinePlan(),items=[],ctx=coach_itemCtx(plan);
@@ -922,7 +929,7 @@ function coach_analyze(){
       items.push(coach_item(ex,dk,ctx));
     });
   });
-  const act=items.filter(i=>!i.hold);
+  const act=items.filter(i=>!i.hold&&!_isBalEx(i.ex));
   const of=(arr,...t)=>arr.filter(i=>t.includes(i.p.trend));
   const an={items,strong:of(items,'strong_up'),up:of(items,'up','strong_up'),flat:of(act,'flat'),stagnant:of(act,'stagnant'),down:of(act,'down'),
     held:items.filter(i=>i.hold),withData:items.filter(i=>i.p.trend!=='insufficient')};
@@ -1300,7 +1307,8 @@ function coach_suggestAlternative(ex){
   if(!ex||ex.cardio)return null;
   const src=_libIdOf(ex),L=src?LIB_BY_ID.get(src):null,inPlan=_planLibIds(),dk=_dayOfEx(ex.id)||S.day;
   // (E3c) con el material del sitio de ese día (canDoHere); sin tus sitios, como siempre
-  const ok=id=>{const l=LIB_BY_ID.get(id);return l&&!l.cardio&&id!==src&&!inPlan.has(id)&&canDoHere(l,dk)?l:null;};
+  // (C11) a uno de equilibrio solo le vale otro de equilibrio (antes, en un gimnasio sin más, le salía una máquina de su grupo muscular)
+  const ok=id=>{const l=LIB_BY_ID.get(id);return l&&!l.cardio&&id!==src&&!inPlan.has(id)&&canDoHere(l,dk)&&(!L||L.pat!=='bal'||l.pat==='bal')?l:null;};
   const muscle=ex.muscle||(L&&L.muscle),p=L&&L.pat;
   const why=l=>p&&l.pat===p?`mismo patrón (${PAT_LBL[p].toLowerCase()}) ${l.mat!==L.mat?'con otro material':'con otra variante'}`:l.muscle===muscle?'mismo grupo muscular con otro estímulo':'trabaja músculos parecidos con otro ejercicio';
   for(const [id,reason] of libAlts(L)){const l=ok(id);if(l)return{id:l.id,n:l.n,reason:reason||why(l),lib:l};}

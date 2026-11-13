@@ -13157,5 +13157,37 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('coachEquilibrio',async()=>{
+// (C11) Con 65 o más, el bloque de equilibrio no entra en las propuestas del Coach: ni «estancado», ni serie más, ni descarga, ni
+// cambio; y si alguna vez se busca una alternativa a uno de equilibrio (también en «¿Máquina ocupada?»), solo vale otro de equilibrio.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;syncActiveWorkout();
+  const pl={v:1,main:'g',g:placeFromPreset('barrio'),c:null};
+  const a={mode:'gen',goal:'salud',sex:'m',exp:'lt6m',days:2,min:45,consec:false,age:'65',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:pl};
+  E(applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(a)),{},{reparto:'dias'})),{answers:a,places:pl}).ok,'aplicar');S.mesocycles=[];
+  const p=getPlan(),bal=[];liveDayKeys(p).forEach(k=>p[k].ex.forEach(e=>{const x=routineEx(e);if(_isBalEx(x))bal.push({ex:x,k});}));
+  E(bal.length>0,'la rutina de 65 o más no trae equilibrio');
+  if(bal.length){
+    // un diagnóstico hecho a mano con uno de equilibrio en cada lista: ninguna candidata lo toca
+    const b=bal[0],it=q=>({ex:b.ex,dayKey:b.k,p:Object.assign({stagSessions:5,stagWeeks:5,sessions:5,pctWeek:0,dropPct:8,metric:'t'},q)});
+    const c=coach_buildCandidates({fatigue:{deloadNeeded:false},down:[it()],stagnant:[it()],flat:[it()]}).filter(x=>x.exId===b.ex.id);
+    E(c.length===0,'candidatas sobre equilibrio: '+pj(c.map(x=>x.type)));
+    // con historial parado de verdad (6 semanas igual), el análisis no lo da por estancado y no hay propuestas sobre el bloque
+    const D=864e5,now=Date.now(),lt=exLT(b.ex);bal.forEach(x=>{S.strength[x.ex.id]=[5,4,3,2,1,0].map(w=>Object.assign({d:'x',v:0,setsDone:2,ts:now-w*7*D-3600e3,ps:2,pr:x.ex.r,muscle:x.ex.muscle},
+      lt==='t'?{lt:'t',t:20}:lt==='d'?{lt:'d',m:10}:{lt:lt==='w'?'r':lt,r:10}));});
+    const an=coach_analyze(),ids=new Set(bal.map(x=>x.ex.id));
+    E(an.items.some(i=>ids.has(i.ex.id)),'el equilibrio ya no se analiza');
+    E(![...an.stagnant,...an.flat,...an.down].some(i=>ids.has(i.ex.id)),'equilibrio en estancado, estable o retroceso');
+    E(!an.candidates.some(x=>ids.has(x.exId)),'propuestas sobre equilibrio: '+pj(an.candidates.filter(x=>ids.has(x.exId)).map(x=>x.title)));
+    // la alternativa de uno de equilibrio es de equilibrio (o ninguna)
+    bal.forEach(x=>{const alt=coach_suggestAlternative(x.ex);E(!alt||LIB_BY_ID.get(alt.id).pat==='bal',x.ex.n+' → '+(alt&&alt.n));});
+    // y los de fuerza siguen teniendo la suya
+    const str=routineEx(p[liveDayKeys(p)[0]].ex.find(e=>!e.cardio&&!_isBalEx(routineEx(e))));E(!!coach_suggestAlternative(str),'sin alternativa para '+str.n);}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
