@@ -71,6 +71,12 @@
 .card.ob-split{display:flex;flex-direction:column;gap:6px;margin-left:0;margin-right:0}
 .ob-wk{font-family:'DM Sans',sans-serif;font-size:15px;font-weight:600;color:var(--text)}
 .ob-p{font-size:15px;color:var(--text2);line-height:1.55;margin:0}
+/* (P1, P4) el reparto: los días por su nombre bajo la semana, el porqué y las fichas de «Cambiar reparto» */
+.ob-wkn{font-size:15px;color:var(--text);line-height:1.45}
+.ob-rpq{margin:0}
+.ob-rps{display:flex;flex-direction:column;gap:12px}
+.ob-rps .ob-lbl{margin:6px 0 -4px}
+.ob-ct .ob-rp-c{color:var(--amber-hi)}
 .ob-sec{display:flex;flex-direction:column;gap:6px}
 .ob-h2{font-size:17px;font-weight:600;margin:0}
 .ob-ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:15px;line-height:1.55;color:var(--text2)}

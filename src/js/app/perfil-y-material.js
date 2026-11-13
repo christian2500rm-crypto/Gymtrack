@@ -8,6 +8,7 @@ const PROF_PARON_ANTES=['lt6m','6m2a','gt2a'],PROF_PARON_FUERA=['2a6m','gt6m','g
 const PROF_MINS=[15,20,30,45,60,75,90],PROF_AGES=['16','18','40','65','75','nd'],PROF_SPORT=['no','suave','piernas','agua'];
 const PROF_PRIO=['pecho','espalda','hombros','brazos','gluteos','piernas','abdomen'],PROF_STYLE=['maq','libre','igual'];
 const PROF_WARM=['normal','corto'],PROF_CARDIO=['auto','si','no'];
+const PROF_PLAN=['cc3','tpc3','tpt3','ppl3','tp4','pplt4','pplc4','grp4','ulppl','tptpt5','pplet5','grp5','ppl6','tp6','pplg6']; // (P1) el reparto que elige la persona en «Cambiar reparto»
 const PROF_SEX=['m','h','nd'],PROF_ENFOQUE=['gluteo','igual']; // (D10) mujer · hombre · prefiero no decirlo; enfoque de la rutina
 // Sitios: presets (P5), accesorios (§K.1, con las cosas de casa), familias de máquina (13) y tipos de cardio (9)
 const PLACE_PRESETS=['grande','barrio','hotel','box','nada','basico','mancbanco','casagym','parque','propio'];
@@ -50,6 +51,7 @@ function _sanitizeProfile(o){
   const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight','cycle','repaso'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);}); // (E15) cycle: «¿Cómo seguimos?» contestado · (E16c) repaso anual
   p.nr=_oneOf(o.nr,['ent','pro','med']);
   p.warn=_oneOf(o.warn,['consulta','matrona']); // (E11b) aviso fijo de salud (§H.2): solo cuál, no el motivo // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
+  p.plan=_oneOf(o.plan,PROF_PLAN); // (P1) reparto elegido (null: el recomendado); el generador lo ignora si ya no se te ofrece
   p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=p.sex==='m'?_oneOf(o.enfoque,PROF_ENFOQUE):null; // (D10) el enfoque solo se pregunta a las mujeres
   return p;
 }

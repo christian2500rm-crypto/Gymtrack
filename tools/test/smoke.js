@@ -11187,7 +11187,7 @@ try{
   // «Cambiar reparto»: la otra forma de D1
   const sp0=_ob.g.res.meta.split;obSplitSheet();await W(5);const so=shb().filter(b=>b.classList.contains('ob-card'));
   E(so.some(b=>/2-4 entrenos que se repiten/.test(tx(b))),'«Cambiar reparto» sin la otra forma: '+so.map(tx).join(' | '));
-  so[0].click();await W(10);E(_ob.reparto==='recomendado'&&/Ha cambiado/.test(tx($('.ob-changed'))),'reparto cambiado '+pj([sp0,_ob.g.res.meta.split,_ob.reparto]));
+  (so.find(b=>/2-4 entrenos que se repiten/.test(tx(b)))||so[0]).click();await W(10);E(_ob.reparto==='recomendado'&&/Ha cambiado/.test(tx($('.ob-changed'))),'reparto cambiado '+pj([sp0,_ob.g.res.meta.split,_ob.reparto]));
   // «Afinar»: estilo
   obTune();await W(3);obTuneSet('style','maq');await W(3);obTuneClose();await W(5);E(_ob.a.style==='maq'&&_ob.g.inp.style==='maq','afinar el estilo');
   // quien empieza con 5 días y «4 de pesas»: «Cambiar reparto» ofrece los 5
@@ -13200,6 +13200,62 @@ for(const [et,a] of [['65 o más',{age:'65',goal:'salud'}],['prudente',{screen:[
 {const g=run({goal:'fuerza',exp:'gt2a',ritmo:'meses',min:75,plan:'pplt4'}),ids=new Set(g.res.det.flatMap(d=>d.rows.map(r=>r.lib)));
   E(g.res.meta.split==='pplt4'&&['lib_back_squat','lib_deadlift','lib_bench_press','lib_ohp_bb'].every(x=>ids.has(x))&&!g.E.G.planes(g.inp).otros.includes('grp4'),'fuerza con pplt4: '+g.res.meta.split);}
 if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
+});
+await safe('p1HojaReparto',async()=>{
+// (P1 y P4, repaso del reparto) «Cambiar reparto» enseña una ficha por reparto que te vale (el recomendado, marcado, y los demás),
+// con sus días por su nombre, sus días de pierna, las veces por semana y lo que se queda corto. Elegir uno rehace la rutina, dice
+// «Ha cambiado» con los nombres y se guarda con tus respuestas; la tarjeta de la semana explica por qué ese y qué más hay. Quien no
+// puede elegir (rutina prudente) no ve fichas, y un reparto guardado que deja de valer (otros días) se olvida. Nada toca la rutina actual.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),cards=()=>[...document.querySelectorAll('#ob-sheet-root .ob-card')],rp=()=>cards().filter(b=>b.classList.contains('ob-rp'));
+try{
+  S.onboarded=true;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,age:'18',sport:'no',prio:[]});delete _ob.a.plan;delete _ob.a.enfoque;
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h.nada=true;_ob.reparto='dias';_ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);
+  // la tarjeta de la semana: días por su nombre y el porqué del recomendado, con lo que la hoja ofrece de verdad
+  E(_ob.g.res.meta.split==='tp4'&&tx($('.ob-wkn'))==='Torso · Pierna · Torso · Pierna','semana con nombres: '+tx($('.ob-wkn')));
+  E(/Es el reparto que te recomiendo para tus 4 días de pesas/.test(tx($('.ob-rpq')))&&/un solo día de pierna/.test(tx($('.ob-rpq')))&&/tienes 3 más/.test(tx($('.ob-rpq'))),'porqué del recomendado: '+tx($('.ob-rpq')));
+  // la hoja: cuatro fichas, la recomendada marcada y la primera
+  obSplitSheet();await W(5);let f=rp();
+  E(f.length===4&&f[0].dataset.plan==='tp4'&&f[0].getAttribute('aria-checked')==='true'&&/Recomendado · En tu rutina/.test(tx(f[0])),'fichas: '+f.map(b=>b.dataset.plan+':'+b.getAttribute('aria-checked')).join(' '));
+  E(f.map(b=>b.dataset.plan).join(',')==='tp4,pplt4,pplc4,grp4','repartos de 4 días: '+f.map(b=>b.dataset.plan));
+  const un=f.find(b=>b.dataset.plan==='pplt4');
+  E(un&&/^Empuje · Tirón · Pierna · Torso/.test(tx(un))&&/1 día de pierna/.test(tx(un))&&/pierna, 1 vez/.test(tx(un))&&/Por debajo de lo ideal: .*(cuádriceps|isquios|glúteos)/.test(tx(un)),'ficha de un día de pierna: '+tx(un));
+  E(f.every(b=>b.getBoundingClientRect().height>=44&&b.getAttribute('role')==='radio')&&cards().some(b=>/2-4 entrenos que se repiten/.test(tx(b))),'fichas: tamaño, papel o la otra forma');
+  // elegir «un día de pierna»
+  un.click();await W(10);
+  E(_ob.g.res.meta.split==='pplt4'&&_ob.a.plan==='pplt4'&&_ob.reparto==='dias','elegido: '+pj([_ob.g.res.meta.split,_ob.a.plan,_ob.reparto]));
+  E(/Ha cambiado: Torso · Pierna · Torso · Pierna → Empuje · Tirón · Pierna · Torso/.test(tx($('.ob-changed'))),'Ha cambiado: '+tx($('.ob-changed')));
+  E(tx($('.ob-wkn'))==='Empuje · Tirón · Pierna · Torso'&&/lo has elegido tú/.test(tx($('.ob-rpq')))&&/torso, pierna, torso y pierna/.test(tx($('.ob-rpq'))),'tarjeta tras elegir: '+tx($('.ob-rpq')));
+  E(_ob.t.avisos.some(x=>/menos de lo ideal/.test(x)&&/cuádriceps|isquios|glúteos/.test(x)),'sin aviso del coste de un día de pierna');
+  E(S.obDraft&&S.obDraft.a.plan==='pplt4'&&_obProfileToSave('gen').plan==='pplt4','el reparto elegido no se guarda con tus respuestas');
+  obSplitSheet();await W(5);f=rp();E(f.find(b=>b.dataset.plan==='pplt4').getAttribute('aria-checked')==='true'&&f.find(b=>b.dataset.plan==='tp4').getAttribute('aria-checked')==='false'&&/Recomendado/.test(tx(f[0])),'marcas tras elegir');
+  // «Otra propuesta» conserva el reparto elegido
+  obSheetClose();obOther(1);await W(5);E(_ob.g.res.meta.split==='pplt4','«Otra propuesta» pierde el reparto: '+_ob.g.res.meta.split);obOther(-1);await W(5);
+  // volver al recomendado desde su ficha: el plan deja de estar guardado
+  obSplitSheet();await W(5);rp().find(b=>b.dataset.plan==='tp4').click();await W(10);E(_ob.g.res.meta.split==='tp4'&&!_ob.a.plan,'volver al recomendado: '+pj([_ob.g.res.meta.split,_ob.a.plan]));
+  // por músculos y, desde ahí, «2-4 entrenos que se repiten» olvida el reparto elegido
+  obSplitSheet();await W(5);rp().find(b=>b.dataset.plan==='grp4').click();await W(10);
+  E(_ob.g.res.meta.split==='grp4'&&/^Pecho y tríceps/.test(_ob.g.res.days.A.focus)&&tx($('.ob-wkn'))==='Pecho y tríceps · Espalda y bíceps · Pierna · Hombros y brazos','por músculos: '+tx($('.ob-wkn')));
+  obSplitSheet();await W(5);cards().find(b=>/2-4 entrenos que se repiten/.test(tx(b))).click();await W(10);E(_ob.reparto==='recomendado'&&!_ob.a.plan&&_ob.g.res.meta.split!=='grp4','2-4 entrenos: '+pj([_ob.reparto,_ob.a.plan,_ob.g.res.meta.split]));
+  // un reparto guardado que deja de valer (pasas a 5 días) se olvida; y los de 5 días salen en su hoja
+  _ob.reparto='dias';_ob.a.plan='pplt4';_ob.a.days=5;_ob.dirty=true;obRender();await W(5);
+  E(!_ob.a.plan&&_ob.g.res.meta.split==='ulppl','plan de 4 días con 5: '+pj([_ob.a.plan,_ob.g.res.meta.split]));
+  obSplitSheet();await W(5);E(rp().map(b=>b.dataset.plan).join(',')==='ulppl,tptpt5,pplet5,grp5','repartos de 5 días: '+rp().map(b=>b.dataset.plan));obSheetClose();
+  // quien empieza: sin «por músculos» (como en el primer arranque: desde Ajustes, lo ya entrenado sube el nivel solo)
+  Object.assign(_ob.a,{exp:'lt6m',days:4});_ob.from='first';_ob.dirty=true;obRender();await W(5);obSplitSheet();await W(5);
+  E(rp().length>=2&&!rp().some(b=>/^grp/.test(b.dataset.plan)),'quien empieza: '+rp().map(b=>b.dataset.plan));obSheetClose();_ob.from='settings';
+  // rutina prudente: ni fichas ni promesa en la tarjeta; el plan guardado no se aplica
+  Object.assign(_ob.a,{exp:'6m2a',days:4,plan:'pplt4'});_ob.h.nada=false;_ob.h.scr=new Set(['med']);_ob.dirty=true;obRender();await W(5);
+  E(_ob.g.res.weeklyTarget===3&&!['pplt4','tpt3','ppl3'].includes(_ob.g.res.meta.split)&&!_ob.a.plan&&!$('.ob-rpq'),'prudente: '+pj([_ob.g.res.meta.split,_ob.a.plan,tx($('.ob-rpq'))]));
+  obSplitSheet();await W(5);E(rp().length===0,'prudente con fichas: '+rp().map(b=>b.dataset.plan));obSheetClose();
+  E(pj(getPlan())===plan0&&!S.planMeta===!full.planMeta,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

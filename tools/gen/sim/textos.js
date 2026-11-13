@@ -94,7 +94,8 @@ module.exports = function (K, G) {
     else if (m.split === 'cc2' && m.wd === 3) out.push('Dos entrenos de cuerpo completo que se alternan (A, B, A…): cada músculo trabaja 3 veces por semana y repites cada ejercicio a menudo.');
     else if (m.split === 'cc2' || m.split === 'cc3') out.push(`Cuerpo completo en ${m.K} entrenos: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana.`);
     else if (m.split === 'tp2') out.push(`Torso y pierna: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana y las sesiones no se alargan.`);
-    else if (m.split === 'tp4') out.push(P.level === 'I' || P.level === 'A' ? 'Torso y pierna en 4 entrenos: para cada zona, un día más pesado y otro más ligero.' : `Torso y pierna en 4 entrenos: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana.`);
+    else if (m.split === 'tp4') out.push(P.level === 'I' || P.level === 'A' ? `Torso y pierna en 4 entrenos: cada músculo trabaja ${num(f)} veces por semana, con un día más pesado y otro más ligero para cada zona.` :   // v14 (P4): con el motivo (las veces por semana)
+ `Torso y pierna en 4 entrenos: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana.`);
     else if (ELEGIDO[m.split]) { out.push(ELEGIDO[m.split]);
       // «por músculos»: por qué los días de un solo grupo salen más cortos (el tope de 10 series por músculo y sesión, V9)
       if (m.split.indexOf('grp') === 0 && res.det.some(dd => inp.min - dd.minutos >= 10)) out.push('Los días de un solo grupo salen más cortos: pasadas unas 10 series de un músculo en la misma sesión, las siguientes aportan poco.'); }
@@ -338,5 +339,18 @@ module.exports = function (K, G) {
   // v12: y las frases rotas (una plantilla sin rellenar, undefined, NaN, un objeto): las caza la matriz en todos los perfiles
   const ROTAS = [/\$\{/, /\bundefined\b/, /\bNaN\b/, /\[object /];
   const prohibidas = frases => { const out = []; for (const s of frases || []) for (const re of PROHIBIDAS.concat(ROTAS)) if (re.test(s)) out.push(String(re) + ' → ' + s.slice(0, 80)); return out; };
-  return { porque, avisos, GOAL, compra, prohibidas, AVISOS_VISIBLES, rangoDe };
+  // v14 (P1, P4): la ficha de un reparto para «Cambiar reparto» y para la tarjeta de la semana, sacada de la rutina ya generada (dice lo
+  // que hay, no lo que se pidió): los días por su nombre, cuántos días por semana son solo de pierna, cuántas veces por semana trabajan el
+  // torso (lo que menos de pecho y espalda) y la pierna, y los músculos grandes que se quedan por debajo de su objetivo
+  const GRANDES = [['pecho', 'pecho'], ['espalda', 'espalda'], ['cuads', 'cuádriceps'], ['isquios', 'isquios'], ['gluteos', 'glúteos']];
+  function reparto(res, inp) {
+    const m = res.meta, det = res.det, f = d => (m.fd && m.fd[d.letra]) || 1, r1 = x => Math.round(x * 10) / 10;
+    const veces = pats => r1(det.reduce((a, d) => a + (d.rows.some(r => r.kind === 'str' && pats.includes(r.pat)) ? f(d) : 0), 0));
+    const dias = det.map(d => G.NOMBRE_DIA[d.role] || d.role);
+    return { split: m.split, K: m.K, wd: m.wd, dias, completo: dias.every(n => n === 'Cuerpo completo'),
+      pierna: r1(det.reduce((a, d) => a + (/^(P\d|Pi\d?|PU|PC)$/.test(d.role) ? f(d) : 0), 0)),
+      vTorso: Math.min(veces(['push_h', 'fly']), veces(['pull_h', 'pull_v'])), vPierna: veces(['squat', 'lunge', 'hinge', 'hip_ext']),
+      cortos: GRANDES.filter(([g]) => m.vol[g] && m.vol[g].obj && m.vol[g].v < m.vol[g].obj - 0.75 - 1e-9).map(([, l]) => l) };
+  }
+  return { porque, avisos, GOAL, compra, prohibidas, AVISOS_VISIBLES, rangoDe, reparto };
 };

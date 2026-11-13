@@ -556,6 +556,8 @@ function _obGenerate(){
   const a=_obAnswers(),o={reparto:_ob.reparto||'dias',tope:a.tope!==false};
   const g=genRoutineFrom(a,_obHistCtx(),o);if(!g)return null;
   const c=genCandidate(g);_obApplyPins(c,g);
+  // (P1) el reparto que elegiste deja de estar guardado si ya no se te ofrece (cambiaste los días, la edad, pasaste a 2-4 entrenos…)
+  if(_ob.a.plan){let ok=false;try{ok=(_ob.reparto||'dias')==='dias'&&g.E.G.planes(g.inp).otros.includes(_ob.a.plan);}catch(e){}if(!ok)delete _ob.a.plan;}
   _ob.g=g;_ob.c=c;_ob.t=genTexts(g);_ob.dirty=false;
   if(!_ob.tab||!c.days[_ob.tab])_ob.tab='A';
   return g;
@@ -669,7 +671,7 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   if(!_ob.g||_ob.dirty)_obGenerate();
   const g=_ob.g;if(!g)return`<h1 class="ob-title" id="ob-h" tabindex="-1">No he podido preparar tu rutina</h1>`;
   const r=g.res,t=_ob.t,pq=_obPorque(),c=_ob.c,P=g.E.G.effective(g.inp),cauto=!!P.cauto,more=_ob.more||{};
-  const ks=Object.keys(r.days);
+  const ks=Object.keys(r.days),ri=typeof _obRepInfo==='function'?_obRepInfo(g):null; // (P1) los días por su nombre
   const av=t.avisos.slice();if(_ob.h.consulta==='igual'){const i=av.findIndex(x=>/médico/.test(x));if(i>0)av.unshift(av.splice(i,1)[0]);}
   const kg=r.det.some(x=>x.rows.some(y=>y.kind==='str'&&(LIB_K.BY.get(y.lib)||{}).lt==='w'));
   // «A tener en cuenta»: va después de la rutina, salvo con el aviso de consultar con tu médico (med), que se queda delante
@@ -685,7 +687,8 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   <div class="ob-chips">${_obChips().map(([l,st])=>`<button type="button" class="lib-chip ob-ch" onclick="obEditFromResult('${st}')">${esc(l).replace(/&nbsp;/g,NB)}</button>`).join('')}</div>${changed}
   ${med?avHtml:''}
   ${_obDaysHtml()}
-  <section class="card ob-split"><div class="ob-wk">${esc(_obWeekLine(g))}</div><p class="ob-p">${esc(pq[0]||'')}</p>
+  <section class="card ob-split"><div class="ob-wk">${esc(_obWeekLine(g))}</div>${ri&&!ri.completo?`<div class="ob-wkn">${esc(ri.dias.join(' · '))}</div>`:''}<p class="ob-p">${esc(pq[0]||'')}</p>
+    ${typeof _obRepWhy==='function'?_obRepWhy(g):''}
     ${typeof obSplitSheet==='function'?'<button type="button" class="ob-link" onclick="obSplitSheet()">Cambiar reparto ›</button>':''}</section>
   <section class="ob-sec"><h2 class="ob-h2">¿Por qué esta rutina?</h2><ul class="ob-ul">${pq.slice(1,4).map(x=>`<li>${icEsf(esc(x))}</li>`).join('')}</ul>
     ${pq.length>4?'<button type="button" class="ob-link" onclick="obWhyAll()">Ver todo ›</button>':''}</section>
@@ -946,19 +949,69 @@ function obOther(dir){
   _ob.alt=n;_ob.dirty=true;_obSaveDraft();obRender({keepFocus:true});
   if(dir>0&&Object.keys(_ob.pins||{}).length)toast(`Mantengo ${plural(Object.keys(_ob.pins).length,'ejercicio que elegiste','ejercicios que elegiste')}`,2600);
 }
-// «Cambiar reparto»: la otra forma de D1 y, con un tope de días, quitarlo; solo opciones que pasan las reglas duras
-function obSplitSheet(){
-  if(!_ob||!_ob.g)return;const a=_obAnswers(),cur=_ob.reparto||'dias',tope=a.tope!==false,opts=[];
-  const test=(rep,tp)=>{const g=genRoutineFrom(JSON.parse(JSON.stringify(Object.assign({},a,{tope:tp}))),_obHistCtx(),{reparto:rep,tope:tp});return g&&g.res.ok?g:null;};
-  const alt=cur==='dias'?'recomendado':'dias',ga=test(alt,tope);
-  if(ga)opts.push(['rep',alt,alt==='recomendado'?'2-4 entrenos que se repiten':'Un entreno distinto cada día',alt==='recomendado'?'Repites cada ejercicio más a menudo y aprendes antes.':'Más variedad: cada ejercicio, una vez por semana.',ga.res.meta.split]);
-  const beg=_obBeginner(_ob.a);
-  if(beg&&a.days>=5&&tope){const gt=test(cur,false);if(gt)opts.push(['tope','no',`Quiero pesas los ${a.days} días`,'Más días con menos trabajo en cada uno. Si te notas cansado, el Coach te propone descargar.',gt.res.meta.split]);}
-  if(beg&&a.days>=5&&!tope){const gt=test(cur,true);if(gt)opts.push(['tope','si','4 de pesas y el resto, cardio suave','Al empezar, 4 días de pesas rinden casi igual y recuperas mejor.',gt.res.meta.split]);}
-  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Cambiar reparto</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
-  <div class="hist-sheet-body"><p class="ob-p">Ahora: ${esc(_obWeekLine(_ob.g))}</p><div class="ob-acts">${opts.length?opts.map(([k,v,t,d])=>`<button type="button" class="ob-card" onclick="obSplitPick('${k}','${v}')"><span class="ob-ct"><b>${esc(t)}</b><span>${esc(d)}</span></span></button>`).join(''):'<p class="ob-foot">Con lo que me has contado, no hay otro reparto que cumpla todas las reglas.</p>'}</div></div>`,'Cambiar reparto');
+// ── (P1, P4) El reparto de la semana: qué va cada día. El generador dice qué repartos se ofrecen a este perfil (planes: el recomendado
+// y los demás) y aquí se genera cada uno y se enseñan solo los que salen de verdad con tu material; cada ficha dice lo que hay en esa
+// rutina (días por su nombre, días de pierna, veces por semana y lo que se queda corto), no lo que se pidió ──
+function _obGenWith(a,plan,rep,tope){
+  const b=JSON.parse(JSON.stringify(a));if(plan)b.plan=plan;else delete b.plan;b.tope=tope;
+  const g=genRoutineFrom(b,_obHistCtx(),{reparto:rep,tope});return g&&g.res.ok?g:null;
 }
-function obSplitPick(k,v){if(!_ob)return;const b=_obWeekLine(_ob.g);if(k==='rep')_ob.reparto=v;else _ob.a.tope=v==='si';_ob.dirty=true;_obSaveDraft();obSheetClose();_obGenerate();_ob.changed=`${b.replace(/\.$/,'')} → ${_obWeekLine(_ob.g).replace(/^Tu semana: |^Esta semana: /,'')}`;obRender({keepFocus:true});}
+function _obRepInfo(g){try{return g.E.X.reparto(g.res,g.inp);}catch(e){return null;}}
+function _obRepLine(i){
+  const v=n=>`${String(n).replace('.',',')}${NB}${n===1?'vez':'veces'}`;
+  return i.completo?`Todo el cuerpo cada día · cada músculo, ${v(Math.min(i.vTorso,i.vPierna))} por semana`
+    :`${i.pierna===1?'1 día':String(i.pierna).replace('.',',')+' días'} de pierna · torso, ${v(i.vTorso)} por semana; pierna, ${v(i.vPierna)}`;
+}
+// Los repartos que te valen ahora mismo, el recomendado el primero. Se calculan una vez por rutina generada (_ob.g)
+function _obRepOpts(){
+  if(!_ob||!_ob.g)return{planes:[],rec:null};
+  if(_ob.ropts&&_ob.ropts.g===_ob.g)return _ob.ropts;
+  const g0=_ob.g,a=_obAnswers(),tope=a.tope!==false,cur=_ob.reparto||'dias',E=genEngine({reparto:'dias',tope}),planes=[];
+  let pl={rec:null,otros:[]};try{pl=E.G.planes(E.G.desdeRespuestas(JSON.parse(JSON.stringify(a))));}catch(e){}
+  const add=(id,g,rec)=>{if(!g||g.res.meta.split!==id||planes.some(p=>p.id===id))return;const info=_obRepInfo(g);if(info)planes.push({id,g,info,rec,cur:cur==='dias'&&g0.res.meta.split===id});};
+  if(pl.rec&&pl.otros.length){
+    add(pl.rec,cur==='dias'&&g0.res.meta.split===pl.rec?g0:_obGenWith(a,null,'dias',tope),true);
+    pl.otros.forEach(id=>add(id,cur==='dias'&&g0.res.meta.split===id?g0:_obGenWith(a,id,'dias',tope),false));
+  }
+  return _ob.ropts={g:g0,planes,rec:pl.rec};
+}
+// (P4) Por qué este reparto y qué más hay, bajo la semana. Solo promete lo que la hoja enseña de verdad
+function _obRepWhy(g){
+  const ro=_obRepOpts(),m=g.res.meta,cur=ro.planes.find(p=>p.cur),rec=ro.planes.find(p=>p.rec),otros=ro.planes.filter(p=>!p.cur);
+  if(!rec||ro.planes.length<2||!cur)return'';
+  if(cur.rec){const ej=[];if(rec.info.pierna!==1&&otros.some(p=>p.info.pierna===1))ej.push('un solo día de pierna');if(otros.some(p=>/^grp/.test(p.id)))ej.push('un día para cada grupo de músculos');
+    return`<p class="ob-foot ob-rpq">Es el reparto que te recomiendo para tus ${plural(m.wd,'día')} de pesas. Si prefieres otro${ej.length?' ('+ej.join(' o ')+')':''}, en «Cambiar reparto» tienes ${otros.length===1?'uno más que también te vale':otros.length+' más que también te valen'}.</p>`;}
+  return`<p class="ob-foot ob-rpq">Este reparto lo has elegido tú. El que te recomiendo para tus ${plural(m.wd,'día')} de pesas es ${esc(_joinY(rec.info.dias).toLowerCase())}.</p>`;
+}
+// «Cambiar reparto»: qué va cada día (P1) y, debajo, las otras formas de siempre (2-4 entrenos que se repiten, D1; el tope de quien
+// empieza, D5). Solo opciones que pasan las reglas duras
+function obSplitSheet(){
+  if(!_ob||!_ob.g)return;const a=_obAnswers(),cur=_ob.reparto||'dias',tope=a.tope!==false,ro=_obRepOpts(),otras=[];
+  if(cur==='dias'&&_obGenWith(a,null,'recomendado',tope))otras.push(['rep','recomendado','2-4 entrenos que se repiten','Repites cada ejercicio más a menudo y aprendes antes.']);
+  if(cur==='recomendado'&&ro.planes.length<2&&_obGenWith(a,null,'dias',tope))otras.push(['rep','dias','Un entreno distinto cada día','Más variedad: cada ejercicio, una vez por semana.']);
+  const beg=_obBeginner(_ob.a);
+  if(beg&&a.days>=5&&tope&&_obGenWith(a,a.plan,cur,false))otras.push(['tope','no',`Quiero pesas los ${a.days} días`,'Más días con menos trabajo en cada uno. Si te notas cansado, el Coach te propone descargar.']);
+  if(beg&&a.days>=5&&!tope&&_obGenWith(a,a.plan,cur,true))otras.push(['tope','si','4 de pesas y el resto, cardio suave','Al empezar, 4 días de pesas rinden casi igual y recuperas mejor.']);
+  const tag=p=>[p.rec?'Recomendado':'',p.cur?'En tu rutina':''].filter(Boolean).join(' · ');
+  const card=p=>`<button type="button" class="ob-card ob-rp" role="radio" aria-checked="${p.cur}" data-plan="${p.id}" onclick="obSplitPick('plan','${p.id}')"><span class="ob-ct"><b>${esc(p.info.dias.join(' · '))}</b><span>${esc(_obRepLine(p.info))}</span>${p.info.cortos.length?`<span class="ob-rp-c">Por debajo de lo ideal: ${esc(_joinY(p.info.cortos))}.</span>`:''}${tag(p)?`<em class="ob-tag">${tag(p)}</em>`:''}</span></button>`;
+  const hayPlanes=ro.planes.length>1;
+  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Cambiar reparto</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+  <div class="hist-sheet-body ob-rps"><p class="ob-p">Ahora: ${esc(_obWeekLine(_ob.g))}</p>
+  ${hayPlanes?`<div class="ob-lbl" id="ob-rp-l">Qué va cada día</div>${cur==='recomendado'?'<p class="ob-foot">Ahora repites 2-4 entrenos. Estos llevan un entreno distinto cada día:</p>':''}
+    <div class="ob-acts" role="radiogroup" aria-labelledby="ob-rp-l">${ro.planes.map(card).join('')}</div>
+    <p class="ob-foot">Con el mismo trabajo a la semana se progresa parecido con cualquiera: elige el que más te apetezca cumplir. Solo salen los que caben con tu material.</p>`:''}
+  ${otras.length?`${hayPlanes?'<div class="ob-lbl">Otras formas</div>':''}<div class="ob-acts">${otras.map(([k,v,t,d])=>`<button type="button" class="ob-card" onclick="obSplitPick('${k}','${v}')"><span class="ob-ct"><b>${esc(t)}</b><span>${esc(d)}</span></span></button>`).join('')}</div>`:''}
+  ${!hayPlanes&&!otras.length?'<p class="ob-foot">Con lo que me has contado, no hay otro reparto que cumpla todas las reglas.</p>':''}</div>`,'Cambiar reparto');
+}
+function obSplitPick(k,v){
+  if(!_ob)return;const b=_obWeekLine(_ob.g),bn=((_obRepInfo(_ob.g)||{}).dias||[]).join(' · ');
+  if(k==='plan'){const ro=_obRepOpts();if(!ro.planes.some(p=>p.id===v))return;_ob.reparto='dias';if(v===ro.rec)delete _ob.a.plan;else _ob.a.plan=v;}
+  else if(k==='rep'){_ob.reparto=v;if(v==='recomendado')delete _ob.a.plan;}
+  else _ob.a.tope=v==='si';
+  _ob.dirty=true;_obSaveDraft();obSheetClose();_obGenerate();
+  const an=((_obRepInfo(_ob.g)||{}).dias||[]).join(' · '),l2=_obWeekLine(_ob.g).replace(/^Tu semana: |^Esta semana: /,'').replace(/\.$/,'');
+  _ob.changed=k==='plan'&&bn&&an&&bn!==an?`${bn} → ${an}`:`${b.replace(/\.$/,'')} → ${l2}`;obRender({keepFocus:true});
+}
 // «Afinar mi rutina»: estilo, calentamiento, cardio al terminar, explosivos, nivel y los ejercicios que no quieres
 function obTune(){
   if(!_ob)return;const a=_ob.a,P=_ob.g?_ob.g.E.G.effective(_ob.g.inp):{},noPow=!!(P.prud||P.mayor||P.segM||P.huesos||P.inicio||Object.values(_ob.h.zones||{}).some(v=>['ahora','op','reciente'].includes(v)));
