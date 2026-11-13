@@ -19255,9 +19255,13 @@ function coach_consistencyWindow(){
 
 function coach_weightTrend(){
   if(!S.weights||S.weights.length<2)return{trend:'insufficient',change:0};
-  const first=S.weights[0].v,last=S.weights[S.weights.length-1].v;
-  const change=last-first;
-  const days=(S.weights[S.weights.length-1].ts-S.weights[0].ts)/86400000||1;
+  // (C13) La tendencia es la de las últimas 8 semanas (antes, la primera pesada de siempre contra la última: quien bajó 6 kg el año
+  // pasado y lleva 3 meses subiendo salía «estable»). Con menos de dos pesadas en ese tiempo, las dos últimas. changeAll: el cambio
+  // desde tu primera pesada, que es lo que enseña la ficha «Peso corporal» del Coach («desde el inicio»).
+  const W=S.weights,lw=W[W.length-1];let win=W.filter(w=>w&&+w.ts>=+lw.ts-56*86400000);if(win.length<2)win=W.slice(-2);
+  const first=win[0].v,last=lw.v;
+  const change=last-first,changeAll=last-W[0].v;
+  const days=(lw.ts-win[0].ts)/86400000||1;
   const perWeek=(change/days)*7;
   let trend='flat';
   if(Math.abs(perWeek)<0.1)trend='flat';
@@ -19265,7 +19269,7 @@ function coach_weightTrend(){
   else if(perWeek<0)trend='losing';
   else if(perWeek>0.3)trend='gaining_fast';
   else trend='gaining';
-  return{trend,change,perWeek:perWeek.toFixed(2),first,last,days};
+  return{trend,change,changeAll,perWeek:perWeek.toFixed(2),first,last,days};
 }
 
 function coach_balance(){
@@ -20054,6 +20058,9 @@ function _holdTxt(it){
   return`acabas de cambiarlo a ${parseInt(ex.s)||ex.s}×${fmtTargetReps(ex).replace(/ reps$/,'')}`;
 }
 
+// (C13) ¿Principiante? El nivel de tu rutina generada; sin ella, menos de 6 meses desde tu primera sesión
+function _coachNovato(){const l=_dlLevel();if(l)return l==='P0'||l==='P';
+  let t0=Infinity;(S.sessions||[]).forEach(s=>{if(s&&+s.ts>0&&+s.ts<t0)t0=+s.ts;});return !isFinite(t0)||Date.now()-t0<182*86400000;}
 function coach_generateInsights(an,pend,resIds){
   const cycle=coach_cycleData();
   an=an||coach_analyze();
@@ -20070,7 +20077,7 @@ function coach_generateInsights(an,pend,resIds){
     insights.push({type:'info',ic:'🌱',t:'Empezando',d:`Necesitas <strong>${CYCLE_MIN_SESSIONS-(S.sessions||[]).length}</strong> ${CYCLE_MIN_SESSIONS-(S.sessions||[]).length===1?'sesión':'sesiones'} más para tu primer análisis completo. Sigue así.`});
   }else{
     if(consistency.rate>=0.95){
-      insights.push({type:'good',ic:'🎯',t:'Constancia impecable',d:`Llevas <strong>${consistency.perWeek}</strong>${NB}sesiones/semana (objetivo: ${consistency.target}). Estás entrenando como un profesional.`});
+      insights.push({type:'good',ic:'🎯',t:'Constancia impecable',d:`Llevas <strong>${consistency.perWeek}</strong>${NB}sesiones/semana (objetivo: ${consistency.target}).`});
     }else if(consistency.rate>=0.75){
       insights.push({type:'good',ic:'✓',t:'Buena constancia',d:`Vas a <strong>${consistency.perWeek}</strong>${NB}sesiones/semana. Si llegas a ${consistency.target} consistentes vas a ver cambios importantes.`});
     }else if(consistency.rate>=0.5){
@@ -20084,7 +20091,7 @@ function coach_generateInsights(an,pend,resIds){
   if(weight.trend!=='insufficient'){
     const abs=Math.abs(parseFloat(weight.perWeek));
     if(weight.trend==='losing'&&abs>=0.2&&abs<=0.8){
-      insights.push({type:'good',ic:'🔥',t:'Pérdida de grasa saludable',d:`Bajas <strong>${abs} kg/semana</strong> de media (cambio total: ${kgSign(weight.change)}${NB}kg). Es un ritmo moderado: así es más fácil conservar la fuerza.`});
+      insights.push({type:'good',ic:'🔥',t:'Bajas a buen ritmo',d:`Bajas <strong>${abs} kg/semana</strong> de media (${kgSign(weight.change)}${NB}kg en ${plural(Math.round(weight.days),'día')}). Es un ritmo moderado: así es más fácil conservar la fuerza.`});
     }else if(weight.trend==='losing_fast'){
       insights.push({type:'warn',ic:'⚡',t:'Bajas rápido',d:`Pierdes <strong>${abs} kg/semana</strong>. Si va acompañado de debilidad en el gym, podrías estar perdiendo músculo también. La pérdida de peso depende sobre todo de lo que comes: para eso, un dietista-nutricionista.`});
     }else if(weight.trend==='flat'){
@@ -20092,7 +20099,7 @@ function coach_generateInsights(an,pend,resIds){
         insights.push({type:'info',ic:'⚖️',t:'Peso estable',d:`Tu peso lleva ${plural(Math.round(weight.days),'día')} estable. Si buscas perder grasa, lo que más influye es lo que comes: para eso, un dietista-nutricionista. Si no es tu prioridad, es normal mientras ganas fuerza.`});
       }
     }else if(weight.trend==='gaining'&&weight.change>0.5){
-      insights.push({type:'info',ic:'📈',t:'Has ganado peso',d:`Subiste <strong>${kgTxt(Math.round(weight.change*10)/10)}${NB}kg</strong>. Si entrenas constante, parte puede ser músculo. Si buscas perder grasa, revisa tu alimentación.`});
+      insights.push({type:'info',ic:'📈',t:'Has ganado peso',d:`Subiste <strong>${kgTxt(Math.round(weight.change*10)/10)}${NB}kg</strong> en ${plural(Math.round(weight.days),'día')}. Si entrenas constante, parte puede ser músculo. Si buscas perder grasa, revisa tu alimentación.`});
     }
   }
 
@@ -20110,8 +20117,9 @@ function coach_generateInsights(an,pend,resIds){
   if(an.strong.length>0){
     // (los de lastre, detrás: su % es solo del lastre; si es el único, en kilos de lastre)
     const top=an.strong.slice().sort((a,b)=>(a.p.lastre?1:0)-(b.p.lastre?1:0)||b.p.pct-a.p.pct)[0];
-    if(top.p.lastre)insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${top.p.lastV>top.p.firstV?`llevas más lastre: de ${esc(kgTxt(top.p.firstV))} a <strong>${esc(kgTxt(top.p.lastV))} kg</strong>`:`haces más con <strong>${esc(kgTxt(top.p.lastV))} kg</strong> de lastre`} en tus últimas ${top.p.sessions} sesiones. Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
-    else insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${_progWhat(top.p).su} ${_progWhat(top.p).v} un <strong>${pctTxt(top.p.pct)}</strong> en tus últimas ${top.p.sessions} sesiones (${esc(_progExcRange(top.p))}). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
+    const nov=_coachNovato()?' Los principiantes ganan fuerza rápido — aprovecha esta ventana.':''; // (C13) solo a quien empieza
+    if(top.p.lastre)insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${top.p.lastV>top.p.firstV?`llevas más lastre: de ${esc(kgTxt(top.p.firstV))} a <strong>${esc(kgTxt(top.p.lastV))} kg</strong>`:`haces más con <strong>${esc(kgTxt(top.p.lastV))} kg</strong> de lastre`} en tus últimas ${top.p.sessions} sesiones.${nov}`});
+    else insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${_progWhat(top.p).su} ${_progWhat(top.p).v} un <strong>${pctTxt(top.p.pct)}</strong> en tus últimas ${top.p.sessions} sesiones (${esc(_progExcRange(top.p))}).${nov}`});
   }
 
   if(an.up.length>=2){
@@ -20473,7 +20481,7 @@ function coach_weekRange(offsetWeeks){
 function coach_weekStats(offsetWeeks){
   const r=coach_weekRange(offsetWeeks);
   const sessions=S.sessions.filter(s=>s.ts>=r.start&&s.ts<=r.end);
-  // Volumen total: suma de (peso × series completadas) en esa semana
+  // Volumen total: kilos movidos en esa semana (peso × repeticiones de cada serie; C13)
   // Match preciso: registro de fuerza cuyo ts cae dentro de ±2h de la sesión (evita colisiones del mismo día con otra rutina)
   let totalVolume=0,avgRpe=0,rpeCount=0;
   // (E1a) Los registros de cada sesión se buscan en todo tu historial, no en los ejercicios de la rutina de ahora: al
@@ -20490,7 +20498,10 @@ function coach_weekStats(offsetWeeks){
         if(diff<7200000&&diff<bestDiff){best=rec;bestDiff=diff;}
       }
       if(best){
-        totalVolume+=(best.v||0)*(best.setsDone||1);
+        // (C13) kilos movidos: peso × repeticiones de cada serie (antes, peso × series: pasar de 12 a 8 repeticiones con más peso
+        // salía como «más volumen»). Los registros sin series, con sus reps; sin reps apuntadas (antiguos, o por tiempo), 10 por serie
+        {const ss=Array.isArray(best.sets)?best.sets.filter(x=>x&&+x.w>0&&+x.r>0):[];
+          totalVolume+=ss.length?ss.reduce((t,x)=>t+(+x.w)*(+x.r),0):(+best.v||0)*(parseInt(best.setsDone)||1)*(parseInt(best.r)>0?parseInt(best.r):10);}
         if(best.rpe&&(+best.v>0||!best.lt)){avgRpe+=best.rpe;rpeCount++;}
       }
     });
@@ -20648,8 +20659,8 @@ function coach_bodyweightPerformanceInsight(){
     return{
       type:'good',
       ic:'🎯',
-      title:'Recomposición corporal',
-      description:`Has bajado ${Math.abs(bwDelta).toFixed(1)} kg de peso pero mantienes o subes fuerza en ejercicios compuestos. Esto es exactamente lo que buscas: estás perdiendo grasa conservando músculo. Sigue así.`,
+      title:'Bajas de peso y mantienes la fuerza',
+      description:`Has bajado ${Math.abs(bwDelta).toFixed(1)} kg y mantienes o subes la fuerza en tus ejercicios multiarticulares: buena señal de que conservas músculo. Sigue así.`,
       bw:bwTxt
     };
   }
@@ -20666,8 +20677,8 @@ function coach_bodyweightPerformanceInsight(){
     return{
       type:'info',
       ic:'💪',
-      title:'Fase de volumen efectiva',
-      description:`Has ganado ${bwDelta.toFixed(1)} kg y la fuerza sube proporcionalmente. Buena ganancia. Si tu objetivo es otro, lo que comes es lo que más influye: para eso, un dietista-nutricionista.`,
+      title:'Subes de peso y de fuerza',
+      description:`Has ganado ${bwDelta.toFixed(1)} kg y tu fuerza sube. Si tu objetivo es otro, lo que comes es lo que más influye: para eso, un dietista-nutricionista.`,
       bw:bwTxt
     };
   }
@@ -20684,8 +20695,8 @@ function coach_bodyweightPerformanceInsight(){
     return{
       type:'good',
       ic:'⚡',
-      title:'Recomposición lenta',
-      description:`Tu peso se mantiene pero la fuerza sube. Estás cambiando músculo por grasa silenciosamente. La báscula no es el mejor indicador en esta fase — fíate del espejo y la fuerza.`,
+      title:'Peso estable y más fuerza',
+      description:`Tu peso se mantiene y tu fuerza sube: buena señal. La báscula sola no dice si es músculo o grasa.`,
       bw:bwTxt
     };
   }
@@ -20889,7 +20900,7 @@ function renderCoach(){
     </div>
     <div class="metric-box">
       <div class="ml">Peso corporal</div>
-      <div class="mv" style="color:${weight.trend==='insufficient'?'var(--text3)':parseFloat(weight.change)<=0?'var(--green)':'var(--red)'}">${weight.trend==='insufficient'?'—':kgSign(weight.change)}</div>
+      <div class="mv" style="color:${weight.trend==='insufficient'?'var(--text3)':parseFloat(weight.changeAll)<=0?'var(--green)':'var(--red)'}">${weight.trend==='insufficient'?'—':kgSign(weight.changeAll)}</div>
       <div class="md">kg ${weight.trend==='insufficient'?'sin datos':'desde el inicio'}</div>
     </div>
   </div>`;

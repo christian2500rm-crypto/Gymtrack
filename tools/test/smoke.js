@@ -13189,5 +13189,46 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('coachTextos',async()=>{
+// (C13) Textos del Coach que afirmaban de más: la báscula sola no dice si lo que cambia es grasa o músculo («Estás cambiando músculo
+// por grasa», «Pérdida de grasa saludable», «Recomposición»); «Los principiantes ganan fuerza rápido» solo a quien empieza; la
+// tendencia de tu peso es la de las últimas 8 semanas (la ficha «Peso corporal» sigue siendo desde el inicio) y el «Volumen» de la
+// semana cuenta las repeticiones (peso × reps de cada serie).
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;syncActiveWorkout();
+  const D=864e5,n=Date.now(),wt=(v,d)=>({d:'x',v,ts:n-d*D});
+  // tendencia de peso: bajó 6 kg hace un año y lleva 3 meses subiendo 2 → «sube», no «estable»
+  S.weights=[wt(90,400),wt(84,200),wt(84,90),wt(85,45),wt(86,0)];let w=coach_weightTrend();
+  E(w.trend==='gaining'&&Math.abs(w.change-1)<1e-9&&Math.abs(w.changeAll+4)<1e-9&&Math.round(w.days)===45,'tendencia de 8 semanas '+pj(w));
+  S.weights=[wt(90,400),wt(88,300)];w=coach_weightTrend();E(Math.abs(w.change+2)<1e-9&&Math.round(w.days)===100,'con pocas pesadas, las dos últimas '+pj(w));
+  {const n0=Date.now(),k0=liveDayKeys()[0];if(S.sessions.length<CYCLE_MIN_SESSIONS)S.sessions=[...Array(8)].map((_,i)=>({day:k0,date:'x',ts:n0-(8-i)*2*864e5,durationMin:50}));} // el Coach enseña propuestas desde la sexta sesión
+  go('coach');await W(10);{const mb=[...document.querySelectorAll('#app .metric-box')].find(b=>/Peso corporal/.test(b.textContent));
+    E(!!mb&&/desde el inicio/.test(mb.textContent)&&/2/.test(mb.querySelector('.mv').textContent),'ficha de peso: '+(mb&&mb.textContent.replace(/s+/g,' ')));}
+  // peso ↔ fuerza: ninguno afirma grasa o músculo
+  const cx=Object.values(routinePlan()).flatMap(d=>d.ex).find(e=>isCompoundEx(e)&&exLT(e)==='w');
+  if(cx){const up=[{d:'x',v:60,r:12,ts:n-20*D,setsDone:3},{d:'x',v:65,r:10,ts:n-2*D,setsDone:3}];S.strength={[cx.id]:up};
+    const tx=k=>{S.weights=k;const i=coach_bodyweightPerformanceInsight();return i?i.title+' · '+i.description:'';};
+    const all=[tx([wt(80,30),wt(80.1,15),wt(80,0)]),tx([wt(82,30),wt(81,15),wt(80,0)]),tx([wt(78,30),wt(79,15),wt(80,0)])];
+    E(all.every(Boolean),'peso y fuerza sin texto: '+pj(all.map(x=>x.slice(0,20))));
+    const mal=all.find(x=>/músculo por grasa|perdiendo grasa|Recomposición|proporcionalmente/.test(x));E(!mal,'afirma de más: '+mal);
+    E(/Peso estable y más fuerza/.test(all[0])&&/no dice si es músculo o grasa/.test(all[0])&&/Bajas de peso y mantienes la fuerza/.test(all[1])&&/Subes de peso y de fuerza/.test(all[2]),'títulos: '+pj(all.map(x=>x.split(' · ')[0])));}
+  // la bajada de peso, sin llamarla «grasa»; y nadie «entrena como un profesional»
+  S.weights=[wt(81,28),wt(80,0)];let ins=coach_generateInsights();
+  E(ins.some(i=>i.t==='Bajas a buen ritmo')&&!ins.some(i=>/grasa saludable/.test(i.t)),'la bajada de peso: '+pj(ins.map(i=>i.t)));
+  E(!ins.some(i=>/como un profesional/.test(i.d)),'«como un profesional»');
+  // «Los principiantes…» solo a quien empieza (sin rutina generada: menos de 6 meses desde la primera sesión)
+  S.planMeta=null;S.sessions=[{day:'A',date:'x',ts:n-300*D}];E(!_coachNovato(),'principiante con 300 días');
+  S.sessions=[{day:'A',date:'x',ts:n-30*D}];E(_coachNovato(),'no principiante con 30 días');
+  // volumen de la semana: peso × repeticiones de cada serie; sin series, con sus reps
+  const t0=Math.max(coach_weekRange(0).start+1000,n-3600e3);S.sessions=[{day:'A',date:'x',ts:t0}];
+  S.strength={zz_vol:[{d:'x',v:50,r:8,setsDone:3,ts:t0,sets:[{w:50,r:10},{w:50,r:9},{w:50,r:8}]}]};
+  E(coach_weekStats(0).totalVolume===1350,'volumen con series: '+coach_weekStats(0).totalVolume);
+  S.strength={zz_vol:[{d:'x',v:50,r:8,setsDone:3,ts:t0}]};E(coach_weekStats(0).totalVolume===1200,'volumen sin series: '+coach_weekStats(0).totalVolume);
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
