@@ -41,6 +41,7 @@ function coach_cycleData(){
 // Mira las últimas PROG_WINDOW sesiones reales del ejercicio (sin descargas ni semanas de descanso) y no
 // depende del ciclo: cerrar un ciclo no borra lo que sabes de cada ejercicio.
 //  · 'down'      retroceso: las 2 últimas sesiones ≥5% por debajo de tu mejor nivel anterior (una mala no basta)
+//                (C7) «anterior» = desde tu último parón de 3+ semanas o tu última bajada de peso con ese ejercicio
 //  · 'stagnant'  estancado: ≥4 sesiones y ≥3 semanas sin mejorar el 1RM estimado, ni las reps, ni el peso (intermedio: 6 y 6; avanzado: 8 y 8; C3)
 //  · 'strong_up' / 'up' / 'flat' según la pendiente (mínimos cuadrados) del 1RM estimado en %/semana
 // Mismo peso con más reps (doble progresión) sube el 1RM estimado: nunca cuenta como estancamiento.
@@ -116,6 +117,19 @@ function _progSrc(exId){
   const t=_histTs(src);
   return src.map((r,i)=>!has(r)&&t.est&&t.est[i]===1?Object.assign({},r,{ts:t[i]}):r);
 }
+// (C7) ¿La sesión i es un «reinicio» del ejercicio? Tras un parón de 3 semanas o más sin hacerlo, o cuando el peso baja porque lo
+// manda el propio Coach: al volver de ese parón, tras dos sesiones fallidas seguidas con ese peso, o el «un salto menos» de una rutina
+// con margen (objetivo «fácil») tras una sesión al límite. Una bajada de peso por tu cuenta no reinicia (si rindes menos, es retroceso),
+// y la del Coach tampoco si con el peso nuevo sigues claramente por debajo del rango.
+function _progRestart(data,i,ex){
+  const a=data[i-1],b=data[i];
+  if(b.ts-a.ts>=LOAD_GAP_DAYS*86400000)return true;
+  if(!(+b.v<+a.v-1e-9))return false;
+  const lo=r=>{const q=ex&&ex.r!=null?(_recRange(r,ex)||repRange(ex)):null;return q?q.lo:null;},la=lo(a),lb=lo(b)||la,p=i>1?data[i-2]:null;
+  if(lb!=null&&_loadFail(b,lb))return false; // con menos peso sigues fallando: la bajada no lo arregló y el retroceso continúa
+  if(_effortObj()==='facil'&&rpeCat(a.rpe)===3)return true;
+  return la!=null&&_loadFail(a,la)&&!!p&&Math.abs(+p.v-+a.v)<0.01&&_loadFail(p,lo(p)||la);
+}
 function coach_exerciseProgression(exId,sinceTs){
   const ex=findExInPlan(exId)||{id:exId};
   const src=_progSrc(exId);
@@ -165,7 +179,11 @@ function coach_exerciseProgression(exId,sinceTs){
   res.repsUp=+data[n-1].v===+data[n-2].v&&r1!=null&&r2!=null&&r1>r2;
   // Retroceso: 2 sesiones seguidas claramente por debajo de tu mejor nivel previo
   if(n>=3){
-    const ref=Math.max(...e.slice(0,n-2));
+    // (C7) Tu «mejor nivel» es el de después del último reinicio de ese ejercicio (_progRestart): un parón de 3 semanas o más, o una
+    // bajada de peso que manda el propio Coach. Antes se comparaba con lo de antes: el Coach bajaba el peso y dos sesiones después lo
+    // leía como «retroceso» y pedía una descarga.
+    let k0=0;for(let i=n-1;i>0;i--){if(_progRestart(data,i,ex)){k0=i;break;}}
+    const prev=e.slice(k0,n-2),ref=prev.length?Math.max(...prev):0;
     if(ref>0&&e[n-1]<ref*REG_DROP&&e[n-2]<ref*REG_DROP){res.trend='down';res.dropPct=(1-e[n-1]/ref)*100;return res;}
   }
   // Estancamiento: el tramo final más corto con ≥4 sesiones y ≥3 semanas, sin mejorar a su primera sesión
@@ -223,7 +241,9 @@ function _progNoKg(exId,ex,lt,sinceTs){
   res.e1From=a;res.e1To=b; // (13b) el 1RM estimado de la tendencia (de donde sale el %), no el peso de trabajo
   res.pctWeek=res.pct/Math.max(1,span);
   if(n>=3){
-    const ref=Math.max(...e.slice(0,n-2));
+    // (C7) como con kilos: tras un parón de 3 semanas o más con ese ejercicio, el «mejor nivel» es el de después
+    let g0=0;for(let i=n-1;i>0;i--){if(data[i].ts-data[i-1].ts>=LOAD_GAP_DAYS*86400000){g0=i;break;}}
+    const prev=e.slice(g0,n-2),ref=prev.length?Math.max(...prev):0;
     if(ref>0&&e[n-1]<ref*REG_DROP&&e[n-2]<ref*REG_DROP){res.trend='down';res.dropPct=(1-e[n-1]/ref)*100;return res;}
   }
   let k=-1;

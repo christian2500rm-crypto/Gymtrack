@@ -13340,5 +13340,47 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('coachVueltaParon',async()=>{
+// (C7) Volver de un parón (o bajar el peso, también cuando lo baja el propio Coach) no es «retroceso»: la comparación empieza de
+// nuevo con ese ejercicio. Antes, dos sesiones después de volver salía «N ejercicios por debajo de tu nivel: es fatiga acumulada» y
+// una semana de descarga. Un retroceso de verdad (mismo peso, menos repeticiones; o tras la vuelta, peor que al volver) se sigue viendo.
+const full=JSON.parse(JSON.stringify(S)),bad=[],pin0=_coachLvPin;const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  _coachLvPin='P';S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.planMeta=null;S.appliedProposals=[];S.pendingCoachProposals=[];S.dlRecoSnoozeTs=null;S.rpeOn=true;syncActiveWorkout();
+  const D=864e5,n=Date.now(),R=(d,v,r)=>({d:'x',v,r,setsDone:3,rpe:2,ts:n-d*D-3600e3,ps:3,pr:12,sets:[{w:v,r,rpe:2},{w:v,r,rpe:2},{w:v,r,rpe:2}]});
+  const T=rows=>{S.strength.zz_p=rows.map(x=>R(...x));return coach_exerciseProgression('zz_p').trend;};
+  // 4 semanas a 60×12, 5 semanas parado y la vuelta con un 10 % menos: no es retroceso
+  const antes=[[77,60,12],[70,60,12],[63,60,12],[56,60,12]];
+  E(T(antes.concat([[14,54,10],[7,54,11],[0,54,12]]))!=='down','la vuelta de un parón sale como retroceso');
+  // …pero si tras volver vas a peor que al volver, sí
+  E(T(antes.concat([[21,54,12],[14,54,12],[7,54,9],[0,54,9]]))==='down','un retroceso después de la vuelta no se ve');
+  // la bajada de prudencia («un salto menos» tras una sesión al límite, con objetivo «fácil») tampoco es retroceso
+  {const lim=rows=>{S.strength.zz_p=rows.map((x,i)=>Object.assign(R(...x),i<rows.length-2?{rpe:3}:{}));return coach_exerciseProgression('zz_p').trend;};S.planMeta={effort:{obj:'facil'}};
+    E(lim([[21,30,10],[14,27.5,10],[7,27.5,11]])!=='down'&&lim([[28,30,10],[21,30,10],[14,27.5,10],[7,27.5,11]])!=='down','la bajada de un salto sale como retroceso');S.planMeta=null;}
+  // pero bajar el peso por tu cuenta y rendir menos sí lo es
+  E(T([[21,60,12],[14,60,12],[7,55,9],[0,55,9]])==='down','bajar el peso por tu cuenta tapa el retroceso');
+  // y la bajada tras dos sesiones fallidas (la manda el Coach) no: en un ejercicio de la rutina, con su rango
+  {const x=Object.values(getPlan()).flatMap(d=>d.ex).find(e=>!e.cardio&&exLT(e)==='w'&&isCompoundEx(e));
+    if(x){const r0=x.r,keep=S.strength[x.id];x.r=12;S.strength[x.id]=[[28,60,12],[21,62.5,7],[14,62.5,7],[7,57.5,10],[0,57.5,10]].map(q=>Object.assign(R(...q),{pr:12}));
+      E(coach_exerciseProgression(x.id).trend!=='down','la bajada tras dos fallos sale como retroceso: '+coach_exerciseProgression(x.id).trend);x.r=r0;if(keep)S.strength[x.id]=keep;else delete S.strength[x.id];}}
+  // el de siempre: mismo peso y menos repeticiones dos sesiones seguidas
+  E(T([[21,60,12],[14,60,12],[7,60,9],[0,60,9]])==='down','retroceso con el mismo peso');
+  // sin kilos: tras un parón, igual
+  const Tn=rows=>{S.strength.zz_n=rows.map(([d,r])=>({d:'x',v:0,lt:'bw',r,setsDone:3,rpe:2,ts:n-d*D-3600e3,ps:3,pr:'8-12'}));return coach_exerciseProgression('zz_n').trend;};
+  E(Tn([[70,12],[63,12],[56,12],[14,9],[7,10],[0,10]])!=='down'&&Tn([[21,12],[14,12],[7,9],[0,9]])==='down','sin kilos: '+pj([Tn([[70,12],[63,12],[56,12],[14,9],[7,10],[0,10]]),Tn([[21,12],[14,12],[7,9],[0,9]])]));
+  // en la rutina: dos ejercicios que vuelven del parón, 8 sesiones desde la vuelta → ni «bajan» ni semana de descarga
+  const exs=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio&&exLT(e)==='w').slice(0,2);E(exs.length===2,'sin dos ejercicios con kilos');
+  if(exs.length===2){S.strength={};exs.forEach(x=>{S.strength[x.id]=antes.concat([[14,54,10],[7,54,11],[0,54,12]]).map(q=>Object.assign(R(...q),{pr:x.r,muscle:x.muscle}));});
+    const k0=liveDayKeys()[0];S.sessions=antes.map(q=>({day:k0,date:'x',ts:n-q[0]*D-3600e3,durationMin:50})).concat([...Array(8)].map((_,i)=>({day:k0,date:'x',ts:n-(15-i*2)*D-3600e3,durationMin:50})));
+    S.coachStart=S.sessions[0].ts;S.mesocycles=[];
+    const an=coach_analyze();E(an.down.length===0&&an.fatigue.regress===0&&!an.fatigue.deloadNeeded,'tras la vuelta: bajan '+an.down.length+', descarga '+an.fatigue.deloadNeeded);
+    const r=coach_deloadReco(an);E(!r||r.src!=='regress','descarga por retroceso al volver: '+pj(r&&r.why));
+    E(!an.candidates.some(c=>c.type==='rm_set'||c.type==='deload'),'propuestas de descarga al volver: '+pj(an.candidates.map(c=>c.type)));}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  _coachLvPin=pin0;
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
