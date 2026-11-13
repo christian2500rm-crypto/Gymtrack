@@ -267,7 +267,7 @@ const REGLAS = {
     ['Prudente + filtros de 65+ sin su tope de nivel (C-14): nivel I, A/B/C con 3 días de pesas', R => R.P.prud && R.P.segM && R.m.lvS === 'I' && R.m.split === 'cc3' && R.m.wd === 3, R => R.m.lvS + ' ' + R.m.split + ' ' + R.m.wd],
     ['Equilibrio de 5 min tras el calentamiento', R => balance(R).every(x => x.b >= 5 && x.orden), R => JSON.stringify(balance(R))],
     ['Unilateral de pierna con apoyo', R => uniApoyo(R).length > 0, R => uniApoyo(R).join(',')],
-    ['El tope de días se explica con su motivo y cómo cambiarlo (I-12)', R => T(R, /como no sé tu edad, mejor 3 de pesas/) && T(R, /Cambiar reparto/)],
+    ['El tope de días se explica con su motivo (I-12) y no promete «Cambiar reparto» (P12)', R => T(R, /como no sé tu edad, mejor 3 de pesas/) && !T(R, /Cambiar reparto/)],
     ['Texto de C-14 («Si me dices tu edad, la ajusto»)', R => T(R, /Si me dices tu edad/)]],
     noDebe: [
     ['Flexión o giro de columna con carga, impacto o hip thrust con barra', R => COLUMNA(R).length > 0 || tiene(R, 'hip_thrust_bb') || R.rows.some(r => (K.TAGS.lim[r.lib] || {}).impacto === 2), R => COLUMNA(R).join(',')],

@@ -13148,5 +13148,17 @@ for(const d of [5,6]){
 }
 if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
 });
+await safe('p12SinPromesa',async()=>{
+// (P12, repaso del reparto) El tope de días de la rutina prudente y de 16-17 años se explica con su motivo y ya no dice
+// «cámbialo en "Cambiar reparto"» (esa hoja no les ofrece quitarlo); a quien empieza con 5 días sí, porque la hoja lo ofrece.
+const bad=[];const E=(c,m)=>{if(!c)bad.push(m);};
+const B={zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,consec:false,min:60,days:5,places:{v:1,main:'g',g:placeFromPreset('grande'),c:null}};
+const tope=a=>{const g=genRoutineFrom(Object.assign(JSON.parse(JSON.stringify(B)),a),{},{reparto:'dias'});return{g,t:genTexts(g).porque.find(x=>/^Has dicho 5 días/.test(x))||''};};
+{const {g,t}=tope({goal:'salud',sex:'h',exp:'6m2a',age:'40',screen:['med']});E(g.res.ok&&g.res.weeklyTarget===3&&/mejor 3 de pesas/.test(t)&&!/Cambiar reparto/.test(t),'prudente: '+t);
+  E(Object.keys(g.E.SEG(g.res,g.inp)).length===0,'prudente: seguridad');}
+{const {g,t}=tope({goal:'musculo',sex:'h',exp:'6m2a',age:'16',screen:'nada'});E(g.res.ok&&g.res.weeklyTarget===3&&/16-17 años/.test(t)&&!/Cambiar reparto/.test(t),'16-17: '+t);}
+{const {g,t}=tope({goal:'musculo',sex:'h',exp:'cero',age:'18',screen:'nada'});E(g.res.ok&&g.res.weeklyTarget===4&&/Cambiar reparto/.test(t),'quien empieza: '+t);}
+if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
