@@ -562,8 +562,10 @@ await safe('coachNoOverflowSwap',async()=>{
     const F=[[20,8],[20,8],[20,8],[20,8],[20,8],[20,8]];
     findExInPlan('b5').r=8;findExInPlan('a3').r=8;_mk3('b5',F);_mk3('a3',F.map(([v,r])=>[v+15,r]));
     const now=Date.now();
+    [['b5',20],['a3',35]].forEach(([id,v])=>{S.strength[id].unshift({d:'x',v,r:8,setsDone:3,rpe:2,muscle:null,ts:now-100*_D3});}); // (C6) llevan 14 semanas en la rutina
     S.deloadHistory=[...(S.deloadHistory||[]),{id:'h_f1',kind:'all',startTs:now-45*_D3,endTs:now-38*_D3,plannedEndTs:now-38*_D3,early:false,exIds:null}];
-    S.coachStart=S.sessions[0].ts;S.mesocycles=[];S.pendingCoachProposals=[];S.appliedProposals=[];
+    S.coachStart=S.sessions[0].ts;S.mesocycles=[];S.pendingCoachProposals=[];
+    S.appliedProposals=['b5','a3'].map(id=>({id:'change_rep_scheme_'+id,type:'rep_scheme',exId:id,appliedAt:now-40*_D3})); // (C5) ya se les cambió el rango: toca otro ejercicio
     go('coach');await W(10);
     if(!coach_cycleData().readyForReview)throw new Error('sin análisis detallado');
     if(!coach_analyze().candidates.some(c=>c.type==='swap'))throw new Error('sin candidata swap');
@@ -664,9 +666,9 @@ await safe('heldAfterApply',async()=>{
     _mk3b('b2',_F3(40,10));_mk3b('c3',_REG3);
     coach_applyRecommendationsConfirmed();await W(10);
     const ids=S.pendingCoachProposals.map(p=>p.id);
-    if(!ids.includes('change_rep_scheme_b2')||!ids.includes('rm_set_c3'))throw new Error('propuestas '+ids.join());
-    applyProposal('change_rep_scheme_b2');applyProposal('rm_set_c3');
-    if(findExInPlan('b2').s!==4||findExInPlan('b2').r!==8||!S.deload||S.deload.kind!=='ex')throw new Error('no se aplicaron');
+    if(!ids.includes('add_set_b2')||!ids.includes('rm_set_c3'))throw new Error('propuestas '+ids.join());
+    applyProposal('add_set_b2');applyProposal('rm_set_c3'); // (C5) estancado → primero una serie más
+    if(findExInPlan('b2').s!==4||!S.deload||S.deload.kind!=='ex')throw new Error('no se aplicaron');
     const touched=p=>p.exId==='b2'||p.exId==='c3';
     const check=when=>{
       const an=coach_analyze(),pv=coach_pendingView(an);
@@ -696,27 +698,29 @@ await safe('fullDeloadBaseSets',async()=>{
   try{
     _clearMarks();S.deload=null;S.appliedProposals=[];S.pendingCoachProposals=[];
     S.restWeeks=[{startTs:_end3-34*_D3,endTs:_end3-27*_D3}];
-    const sb=+findExInPlan('b2').s,sc=+findExInPlan('a3').s,rc=findExInPlan('a3').r,ns=Math.min(6,sb+1);
-    _mk3b('b2',_F3(40,10));_mk3b('a3',[[40,10],[40,11],[40,10],[40,11],[40,10],[40,11]]);_mk3b('a4',_REG3);
+    // (C5, C4, C9) b2 estancado y con sitio en su día → una serie más (escalera, paso 2); c3 estancado en un día ya lleno de espalda →
+    // otro rango (×8, sin serie de más). Las dos, calculadas con las series de verdad y no con las de la descarga.
+    const sb=+findExInPlan('b2').s,sc=+findExInPlan('c3').s,rc=findExInPlan('c3').r;
+    _mk3b('b2',_F3(40,10));_mk3b('c3',_F3(40,10));_mk3b('a4',_REG3);
     if(!startDeload('all',null,'x'))throw new Error('sin descarga');
     if(+findExInPlan('b2').s>=sb)throw new Error('la descarga no bajó las series');
     const an=coach_analyze();
-    const rs=an.candidates.find(c=>c.id==='change_rep_scheme_b2'),as=an.candidates.find(c=>c.id==='add_set_a3');
-    if(!rs||rs.to.s!==ns||rs.diff!==`${sb}×10 → ${ns}×8`)throw new Error('esquema calculado con las series a medias: '+(rs&&rs.diff));
-    if(!as||as.diff!==`${sc}×${rc} → ${sc+1}×${rc}`)throw new Error('«añadir serie» con las series a medias: '+(as&&as.diff));
+    const as=an.candidates.find(c=>c.id==='add_set_b2'),rs=an.candidates.find(c=>c.id==='change_rep_scheme_c3');
+    if(!as||as.diff!==`${sb}×10 → ${sb+1}×10`)throw new Error('«añadir serie» con las series a medias: '+(as&&as.diff));
+    if(!rs||rs.to.s!==sc||rs.diff!==`${sc}×${rc} → ${sc}×8`)throw new Error('esquema calculado con las series a medias: '+(rs&&rs.diff));
     if(an.candidates.some(c=>c.exId==='a4'))throw new Error('propone otra descarga para a4 durante la descarga');
     const a4=an.items.find(i=>i.ex.id==='a4');if(!a4.hold||a4.hold.kind!=='recovery')throw new Error('a4 sin «lo cubre la descarga»');
     const txt=coach_generateInsights(an,[]).map(i=>i.d).join(' ');
-    if(!txt.includes(`pasar a ${ns}×8`))throw new Error('insight con las series a medias');
+    if(!txt.includes(`añadir una serie (${sb}→${sb+1})`)&&!txt.includes(`pasar a ${sc}×8`))throw new Error('insight con las series a medias');
     // Cerrar el ciclo durante la descarga y aplicar al terminar: lo aplicado = lo mostrado
     coach_applyRecommendationsConfirmed();await W(5);
-    const p=S.pendingCoachProposals.find(x=>x.id==='change_rep_scheme_b2'),q=S.pendingCoachProposals.find(x=>x.id==='add_set_a3');
+    const p=S.pendingCoachProposals.find(x=>x.id==='change_rep_scheme_c3'),q=S.pendingCoachProposals.find(x=>x.id==='add_set_b2');
     if(!p||!q||p.diff!==rs.diff||q.diff!==as.diff)throw new Error('propuestas guardadas: '+S.pendingCoachProposals.map(x=>x.id+' '+x.diff));
     _restoreDeload(true);
-    if(+findExInPlan('b2').s!==sb||+findExInPlan('a3').s!==sc)throw new Error('no volvió al plan');
-    applyProposal('change_rep_scheme_b2');applyProposal('add_set_a3');
-    if(+findExInPlan('b2').s!==ns||+findExInPlan('b2').r!==8)throw new Error('b2 aplicado '+findExInPlan('b2').s+'x'+findExInPlan('b2').r+' ≠ '+p.diff);
-    if(+findExInPlan('a3').s!==sc+1)throw new Error('a3 aplicado '+findExInPlan('a3').s+' ≠ '+q.diff);
+    if(+findExInPlan('b2').s!==sb||+findExInPlan('c3').s!==sc)throw new Error('no volvió al plan');
+    applyProposal('change_rep_scheme_c3');applyProposal('add_set_b2');
+    if(+findExInPlan('b2').s!==sb+1)throw new Error('b2 aplicado '+findExInPlan('b2').s+' ≠ '+q.diff);
+    if(+findExInPlan('c3').s!==sc||+findExInPlan('c3').r!==8)throw new Error('c3 aplicado '+findExInPlan('c3').s+'x'+findExInPlan('c3').r+' ≠ '+p.diff);
   }finally{_clearMarks();_rest3(j);render();}
 });
 await safe('exDeloadKeepsFullDeload',async()=>{
@@ -11622,7 +11626,7 @@ try{
   const RR=e=>repRange(e)||{lo:0,hi:0};const findKg=pred=>{const p=getPlan();for(const k of liveDayKeys(p))for(const e of p[k].ex){const ex=routineEx(e);if(ex&&!ex.cardio&&exLT(ex)==='w'&&pred(ex))return ex;}return null;};
   const an0={fatigue:{deloadNeeded:false},down:[],stagnant:[],flat:[]},cand=o=>coach_buildCandidates(Object.assign({},an0,o));
   // fuerza: un básico estancado con 8 o más → ×5 con más peso; con todos los de un día estancados, nunca ×12
-  gen('fuerza');{const ex=findKg(e=>isCompoundEx(e)&&RR(e).lo>5);
+  gen('fuerza');{const lf=new Set(S.planMeta.lifts||[]),ex=findKg(e=>lf.has((exLib(e)||{}).id)&&RR(e).lo>5);E(lf.size>0,'fuerza sin levantamientos');
     if(ex){const c=cand({stagnant:[stag(ex)]}).filter(p=>p.exId===ex.id);E(c.length===1&&c[0].type==='rep_scheme'&&c[0].to.r==='4-6','fuerza: '+pj(c.map(p=>[p.type,p.to])));}
     const all=cand({stagnant:getPlan()[liveDayKeys()[0]].ex.map(routineEx).filter(e=>e&&!e.cardio&&exLT(e)==='w').map(stag)});
     E(!all.some(p=>p.type==='rep_scheme'&&p.to&&p.to.r===12),'fuerza con ×12');}
@@ -11640,7 +11644,7 @@ try{
     if(vol){const flat={ex,dayKey:_dayOfEx(ex.id),p:{sessions:4,pctWeek:0,metric:'e1rm'}},keep=pj(vol);vol.top=1;vol.techo=1;
       const c=cand({flat:[flat]}).filter(p=>p.type==='add_set'&&p.exId===ex.id);Object.assign(vol,JSON.parse(keep));E(c.length===0,'músculo en su techo con serie más');}}
   // 16-17 con fuerza: ×6
-  gen('fuerza',{age:'16'});{const ex=findKg(e=>isCompoundEx(e)&&RR(e).lo>7);
+  gen('fuerza',{age:'16'});{const lf=new Set(S.planMeta.lifts||[]),ex=findKg(e=>lf.has((exLib(e)||{}).id)&&RR(e).lo>7);
     if(ex){const c=cand({stagnant:[stag(ex)]}).filter(p=>p.exId===ex.id);E(c.length===1&&c[0].to&&c[0].to.r==='6-8','16-17: '+pj(c.map(p=>p.to)));}}
   if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
 }finally{
@@ -13391,9 +13395,9 @@ try{
   _coachLvPin='P';S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.appliedProposals=[];S.pendingCoachProposals=[];syncActiveWorkout();
   const pl={v:1,main:'g',g:placeFromPreset('grande'),c:null};
   const a0={mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,consec:false,age:'40',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:pl};
-  E(applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(a0)),{},{reparto:'dias'})),{answers:a0,places:pl}).ok,'aplicar');S.mesocycles=[];S.planMeta.vol={}; // sin el tope semanal de «músculo»: aquí se miran los otros
+  E(applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(a0)),{},{reparto:'dias'})),{answers:a0,places:pl}).ok,'aplicar');S.mesocycles=[];S.planMeta.vol={};S.strength={}; // sin el tope semanal de «músculo»: aquí se miran los otros
   const p=getPlan(),kg=[];liveDayKeys(p).forEach(k=>p[k].ex.forEach(e=>{const x=routineEx(e);if(x&&!x.cardio&&exLT(x)==='w')kg.push({ex:x,k});}));
-  const cand=o=>coach_buildCandidates(Object.assign({fatigue:{deloadNeeded:false},down:[],stagnant:[],flat:[]},o)),flat=q=>({ex:q.ex,dayKey:q.k,p:{sessions:4,pctWeek:0,metric:'e1rm'}});
+  const cand=o=>coach_buildCandidates(Object.assign({fatigue:{deloadNeeded:false},down:[],stagnant:[],flat:[]},o)),flat=q=>({ex:q.ex,dayKey:q.k,p:{stagSessions:4,stagWeeks:3,kgTD:false,metric:'e1rm'}});
   const adds=c=>c.filter(x=>x.type==='add_set').map(x=>x.exId);
   // la rutina generada ya respeta el tope por sesión
   E(liveDayKeys(p).every(k=>Object.values(_daySetsByGroup(k)).every(v=>v<=SES_CAP+1e-9)),'la rutina generada pasa de 10 por grupo y sesión');
@@ -13402,27 +13406,27 @@ try{
     if(y){A1=x;B1=y;G1=Object.keys(gx).find(g=>gx[g]>=1&&_exGroups(y.ex)[g]>=1);break;}}
   E(!!A1,'sin dos ejercicios del mismo grupo en un día');
   if(A1){const sA=A1.ex.s,sB=B1.ex.s;A1.ex.s=3;B1.ex.s=3;
-    E(adds(cand({flat:[flat(A1)]})).includes(A1.ex.id)&&!_sesCapFull(A1.ex,A1.k),'con sitio en la sesión no propone la serie');
+    E(adds(cand({stagnant:[flat(A1)]})).includes(A1.ex.id)&&!_sesCapFull(A1.ex,A1.k),'con sitio en la sesión no propone la serie');
     B1.ex.s=Math.ceil(SES_CAP-(_daySetsByGroup(A1.k)[G1]-3))+3; // llena el grupo ese día
     E(_daySetsByGroup(A1.k)[G1]>=SES_CAP&&_sesCapFull(A1.ex,A1.k)===G1,'día sin llenar: '+_daySetsByGroup(A1.k)[G1]+' '+_sesCapFull(A1.ex,A1.k));
-    E(!adds(cand({flat:[flat(A1)]})).includes(A1.ex.id),'serie de más con el día lleno de '+G1);
+    E(!adds(cand({stagnant:[flat(A1)]})).includes(A1.ex.id),'serie de más con el día lleno de '+G1);
     // «cambiar esquema» (reps sueltas): la serie de más, solo si cabe
     const r0=A1.ex.r,st={ex:A1.ex,dayKey:A1.k,p:{stagSessions:4,stagWeeks:3,kgTD:false,metric:'e1rm'}};A1.ex.r=12;
-    let c=cand({stagnant:[st]}).find(x=>x.exId===A1.ex.id&&x.type==='rep_scheme');E(c&&c.to.s===3,'esquema con el día lleno: '+pj(c&&c.to));
-    B1.ex.s=3;c=cand({stagnant:[st]}).find(x=>x.exId===A1.ex.id&&x.type==='rep_scheme');E(c&&c.to.s===4,'esquema con sitio: '+pj(c&&c.to));
+    let c=cand({stagnant:[st]}).find(x=>x.exId===A1.ex.id&&x.type==='rep_scheme');E(!c||c.to.s===3,'esquema con el día lleno: '+pj(c&&c.to));
+    B1.ex.s=3;c=cand({stagnant:[st]}).find(x=>x.exId===A1.ex.id&&x.type==='rep_scheme');E(!c||c.to.s===3,'(C9) el esquema ya no suma serie: '+pj(c&&c.to));
     // 2) por ejercicio: con 4 series, ninguna más
-    A1.ex.s=4;E(!adds(cand({flat:[flat(A1)]})).includes(A1.ex.id)&&cand({stagnant:[st]}).find(x=>x.exId===A1.ex.id).to.s===4,'serie de más con 4 series');
+    A1.ex.s=4;E(!adds(cand({stagnant:[flat(A1)]})).includes(A1.ex.id),'serie de más con 4 series');
     A1.ex.r=r0;A1.ex.s=sA;B1.ex.s=sB;}
   // 3) por ciclo: todos estables y con sitio → 2 como mucho; con una ya aceptada en este ciclo, 1; con dos, ninguna
   kg.forEach(q=>{q.ex.s=Math.min(q.ex.s,3);});const all=kg.map(flat),cyc=n=>[...Array(n)].map((_,i)=>({id:'add_set_zz'+i,type:'add_set',exId:kg[i].ex.id,appliedAt:Date.now()+1}));
-  E(adds(cand({flat:all})).length===ADD_PER_CYCLE,'series nuevas en un ciclo: '+adds(cand({flat:all})).length);
-  S.appliedProposals=cyc(1);E(adds(cand({flat:all})).length===1,'con una aceptada: '+adds(cand({flat:all})).length);
-  S.appliedProposals=cyc(2);E(adds(cand({flat:all})).length===0,'con dos aceptadas: '+adds(cand({flat:all})).length);
+  E(adds(cand({stagnant:all})).length===ADD_PER_CYCLE,'series nuevas en un ciclo: '+adds(cand({stagnant:all})).length);
+  S.appliedProposals=cyc(1);E(adds(cand({stagnant:all})).length===1,'con una aceptada: '+adds(cand({stagnant:all})).length);
+  S.appliedProposals=cyc(2);E(adds(cand({stagnant:all})).length===0,'con dos aceptadas: '+adds(cand({stagnant:all})).length);
   // 4) sobre la rutina: con el 15 % ya añadido en ciclos anteriores, ninguna más
   const tot=_planSetsTotal(),N=Math.ceil(tot*(VOL_GROWTH-1));S.mesocycles=[{num:1,startTs:Date.now()-30*864e5,endTs:Date.now(),appliedAt:Date.now()+5000,sessionCount:9,summary:'x',insights:[]}];
   S.appliedProposals=[...Array(N)].map((_,i)=>({id:'add_set_yy'+i,type:'add_set',exId:kg[i%kg.length].ex.id,appliedAt:S.planMeta.ts+1+i}));
-  E(_addedThisCycle()===0&&_coachAddedSets()===N&&!_volGrowthOk()&&adds(cand({flat:all})).length===0,'tope del 15 %: '+pj([_addedThisCycle(),_coachAddedSets(),N,tot,adds(cand({flat:all})).length]));
-  S.appliedProposals=S.appliedProposals.slice(0,1);E(_volGrowthOk()&&adds(cand({flat:all})).length===ADD_PER_CYCLE,'con una sola añadida vuelve a caber');
+  E(_addedThisCycle()===0&&_coachAddedSets()===N&&!_volGrowthOk()&&adds(cand({stagnant:all})).length===0,'tope del 15 %: '+pj([_addedThisCycle(),_coachAddedSets(),N,tot,adds(cand({stagnant:all})).length]));
+  S.appliedProposals=S.appliedProposals.slice(0,1);E(_volGrowthOk()&&adds(cand({stagnant:all})).length===ADD_PER_CYCLE,'con una sola añadida vuelve a caber');
   // la rampa no cuenta ni se limita
   S.appliedProposals=[...Array(N)].map((_,i)=>({id:'ramp_yy'+i,type:'add_set',exId:kg[i%kg.length].ex.id,appliedAt:S.planMeta.ts+1+i}));E(_coachAddedSets()===0&&_volGrowthOk(),'la rampa cuenta para el tope');
   S.appliedProposals=[];S.mesocycles=[];
@@ -13433,6 +13437,134 @@ try{
   // 6) la rampa del primer ciclo sigue proponiendo sus series (hasta 6), sin estos topes
   S.planMeta.rampa={series:3,reps:'8-12',rir:2};kg.forEach(q=>{if(isCompoundEx(q.ex))q.ex.s=2;});const rp=_rampProposals();
   E(rp.length>ADD_PER_CYCLE&&rp.every(x=>x.type==='add_set'&&/^ramp_/.test(x.id)),'rampa: '+rp.length);
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  _coachLvPin=pin0;
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('coachEsquema',async()=>{
+// (C9) «Cambiar esquema» con criterio y sin sumar series: multiarticular → menos repeticiones con algo más de peso (×8 con reps
+// sueltas de 10 o más; con rango, dos menos, nunca por debajo de 6); de un solo músculo → más repeticiones (12-15, luego 15-20) y nunca
+// ×8. Con «Ganar fuerza», 4-6 solo en los levantamientos declarados. «Perder grasa» y «Salud», sin esquemas, como siempre.
+const full=JSON.parse(JSON.stringify(S)),bad=[],pin0=_coachLvPin;const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  _coachLvPin='P';S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.appliedProposals=[];S.pendingCoachProposals=[];syncActiveWorkout();
+  const pl={v:1,main:'g',g:placeFromPreset('grande'),c:null};
+  const gen=(goal,extra)=>{const a=Object.assign({mode:'gen',goal,sex:'h',exp:'6m2a',days:4,min:60,consec:false,age:'40',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:pl},extra||{});
+    E(applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(a)),{},{reparto:'dias'})),{answers:a,places:pl}).ok,'aplicar '+goal);S.mesocycles=[];};
+  const kgs=()=>{const p=getPlan(),o=[];liveDayKeys(p).forEach(k=>p[k].ex.forEach(e=>{const x=routineEx(e);if(x&&!x.cardio&&exLT(x)==='w')o.push(x);}));return o;};
+  const sch=ex=>(S.strength={},S.appliedProposals=[{id:'add_set_'+ex.id,type:'add_set',exId:ex.id,appliedAt:Date.now()-40*864e5}],0)||coach_buildCandidates({fatigue:{deloadNeeded:false},down:[],flat:[],stagnant:[{ex,dayKey:_dayOfEx(ex.id),p:{stagSessions:4,stagWeeks:3,kgTD:false,metric:'e1rm'}}]}).find(x=>x.exId===ex.id&&x.type==='rep_scheme');
+  gen('musculo');let K=kgs();
+  // multiarticular con rango de 8 o más: dos repeticiones menos, mismas series
+  const cp=K.find(e=>isCompoundEx(e)&&repRange(e).lo>=8),iso=K.find(e=>!isCompoundEx(e)&&repRange(e).hi<=15);E(!!cp&&!!iso,'sin ejercicios para la prueba');
+  if(cp){const rr=repRange(cp),s=_baseSets(cp),c=sch(cp);E(c&&c.to.r===(rr.lo-2)+'-'+(rr.hi-2)&&c.to.s===s&&/más de peso/.test(c.short),'multiarticular '+cp.r+': '+pj(c&&c.to));
+    cp.r='6-8';E(!sch(cp),'multiarticular ya en 6-8: '+pj(sch(cp)&&sch(cp).to));
+    cp.r=12;let d=sch(cp);E(d&&d.to.r===8&&d.to.s===s,'multiarticular con 12 sueltas: '+pj(d&&d.to));cp.r=8;E(!sch(cp),'multiarticular con 8 sueltas');}
+  // de un solo músculo: más repeticiones, nunca ×8, y sin sumar serie
+  if(iso){const s=_baseSets(iso);iso.r='10-12';let c=sch(iso);E(c&&c.to.r==='15-20'&&c.to.s===s&&/menos de peso/.test(c.short)&&/Más repeticiones/.test(c.title),'un solo músculo 10-12: '+pj(c&&c.to));
+    iso.r='8-10';c=sch(iso);E(c&&c.to.r==='12-15','un solo músculo 8-10: '+pj(c&&c.to));
+    iso.r=15;c=sch(iso);E(c&&c.to.r==='15-20'&&c.to.s===s,'un solo músculo con 15 sueltas: '+pj(c&&c.to));
+    iso.r=12;c=sch(iso);E(c&&c.to.r!==8&&c.to.s===s,'un solo músculo con 12 sueltas a ×8: '+pj(c&&c.to));
+    iso.r='15-20';E(!sch(iso),'un solo músculo ya en 15-20: '+pj(sch(iso)&&sch(iso).to));
+    // al aplicarla cambia las repeticiones y deja las series
+    iso.r='12-15';c=sch(iso);const q=_sanitizeProposals([c])[0],r=_applyProposalByData(q),e2=findExInPlan(iso.id);
+    E(r.ok&&String(e2.r)==='15-20'&&_baseSets(e2)===s,'aplicar: '+pj(r)+' '+e2.s+'×'+e2.r);}
+  // «Ganar fuerza»: 4-6 solo en los levantamientos declarados
+  gen('fuerza');K=kgs();{const lifts=new Set(S.planMeta.lifts||[]);E(lifts.size>0,'fuerza sin levantamientos declarados');
+    const lf=K.find(e=>lifts.has((exLib(e)||{}).id)&&repRange(e).lo>5),no=K.find(e=>isCompoundEx(e)&&!lifts.has((exLib(e)||{}).id));
+    if(lf){const c=sch(lf);E(c&&c.to.r==='4-6'&&c.to.s===_baseSets(lf),'levantamiento: '+pj(c&&c.to));}
+    if(no){const c=sch(no);E(!c||c.to.r!=='4-6','multiarticular que no es levantamiento a 4-6: '+no.n);
+      no.r='6-8';E(!sch(no),'zancadas y similares en 6-8 se quedan: '+pj(sch(no)&&sch(no).to));}}
+  // «Salud y forma»: sin esquemas
+  gen('salud');K=kgs();E(!K.some(e=>sch(e)),'salud con esquema');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  _coachLvPin=pin0;
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('coachSinCarrusel',async()=>{
+// (C6) Cambios de ejercicio sin carrusel: no antes de 12 semanas con el ejercicio; no se vuelve a uno hecho en los últimos 6 meses;
+// a quien se estanca sin kilos no se le propone la versión más difícil; los levantamientos de «Ganar fuerza» no se cambian; y dos
+// ejercicios no reciben el mismo sustituto. «¿Máquina ocupada?» sigue ofreciendo cualquier alternativa.
+const full=JSON.parse(JSON.stringify(S)),bad=[],pin0=_coachLvPin;const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  _coachLvPin='P';S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.appliedProposals=[];S.pendingCoachProposals=[];S.strength={};syncActiveWorkout();
+  const pl={v:1,main:'g',g:placeFromPreset('grande'),c:null},D=864e5,n=Date.now();
+  const gen=goal=>{const a={mode:'gen',goal,sex:'h',exp:'6m2a',days:4,min:60,consec:false,age:'40',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:pl};
+    E(applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(a)),{},{reparto:'dias'})),{answers:a,places:pl}).ok,'aplicar '+goal);S.mesocycles=[];S.strength={};};
+  const kgs=()=>{const p=getPlan(),o=[];liveDayKeys(p).forEach(k=>p[k].ex.forEach(e=>{const x=routineEx(e);if(x&&!x.cardio&&exLT(x)==='w')o.push(x);}));return o;};
+  const cands=ex=>(S.appliedProposals=[{id:'change_rep_scheme_'+ex.id,type:'rep_scheme',exId:ex.id,appliedAt:Date.now()-40*864e5}],0)||coach_buildCandidates({fatigue:{deloadNeeded:false},down:[],flat:[],stagnant:[{ex,dayKey:_dayOfEx(ex.id),p:{stagSessions:4,stagWeeks:3,kgTD:false,metric:exLT(ex)==='w'?'e1rm':'reps'}}]}).filter(x=>x.exId===ex.id);
+  const sw=ex=>cands(ex).find(x=>x.type==='swap'),edad=(id,w)=>{S.strength[id]=[{d:'x',v:50,r:10,setsDone:3,ts:n-w*7*D},{d:'x',v:50,r:10,setsDone:3,ts:n-D}];};
+  gen('musculo');const X=kgs().find(e=>coach_suggestAlternative(e));E(!!X,'sin ejercicio con alternativa');
+  if(X){X.r=isCompoundEx(X)?'6-8':'15-20'; // sin otro rango que proponer: lo siguiente sería cambiar de ejercicio
+    const alt0=coach_suggestAlternative(X);
+    edad(X.id,4);E(!sw(X)&&_exAgeWeeks(X.id)>3.9&&_exAgeWeeks(X.id)<4.2,'cambio con 4 semanas: '+pj(sw(X)&&sw(X).title));
+    E(cands(X).length===0,'a las 4 semanas, otra salida: '+pj(cands(X).map(x=>x.type+' '+x.diff)));
+    edad(X.id,13);let c=sw(X);E(c&&c.libExId===alt0.id,'cambio con 13 semanas: '+pj(c&&c.title));
+    // no se vuelve a uno hecho hace un mes; sí a uno de hace 7 meses
+    S.strength[alt0.id]=[{d:'x',v:40,r:10,setsDone:3,ts:n-30*D}];c=sw(X);E(!c||c.libExId!==alt0.id,'vuelve a uno de hace un mes: '+pj(c&&c.title));
+    E(coach_suggestAlternative(X).id===alt0.id,'«¿Máquina ocupada?» pierde la alternativa reciente');
+    S.strength[alt0.id]=[{d:'x',v:40,r:10,setsDone:3,ts:n-210*D}];c=sw(X);E(c&&c.libExId===alt0.id,'no vuelve a uno de hace 7 meses: '+pj(c&&c.title));delete S.strength[alt0.id];
+    // el mismo sustituto no sale para dos ejercicios
+    const a2=coach_suggestAlternative(X,{skip:new Set([alt0.id])});E(!a2||a2.id!==alt0.id,'sustituto repetido');}
+  // sin kilos y estancado: nunca la versión más difícil
+  {const p=getPlan(),k=liveDayKeys(p)[0],L=EXERCISE_DB.find(l=>l.up&&['bw','r'].includes(l.lt)&&!l.cardio&&LIB_BY_ID.get(l.up)&&canDoHere(l,k)&&canDoHere(LIB_BY_ID.get(l.up),k)&&!_planLibIds().has(l.id)&&!_planLibIds().has(l.up));
+    E(!!L,'sin ejercicio sin kilos con versión más difícil');
+    if(L){const ex=libExToEx(L);p[k].ex.push(ex);S.strength[ex.id]=[{d:'x',v:0,lt:L.lt,r:8,setsDone:3,ts:n-13*7*D},{d:'x',v:0,lt:L.lt,r:8,setsDone:3,ts:n-D}];
+      const c=cands(ex);E(!c.some(x=>x.type==='swap'&&x.libExId===L.up),'estancado en '+L.n+' → la versión más difícil: '+pj(c.map(x=>x.title)));}}
+  // «Ganar fuerza»: un levantamiento declarado no se cambia
+  gen('fuerza');{const lifts=new Set(S.planMeta.lifts||[]),lf=kgs().find(e=>lifts.has((exLib(e)||{}).id));E(!!lf,'fuerza sin levantamiento en la rutina');
+    if(lf){lf.r='4-6';edad(lf.id,20);E(!sw(lf)&&cands(lf).length===0,'levantamiento cambiado: '+pj(cands(lf).map(x=>x.title)));
+      const otro=kgs().find(e=>!lifts.has((exLib(e)||{}).id)&&coach_suggestAlternative(e));if(otro){otro.r=isCompoundEx(otro)?'6-8':'15-20';edad(otro.id,20);E(!!sw(otro),'los demás sí se pueden cambiar');}}}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  _coachLvPin=pin0;
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('coachEscalera',async()=>{
+// (C5) Lo «estable» no se toca (ya no recibe «una serie más») y, ante un estancamiento, una escalera de un paso por ciclo: si tus series
+// salen «fáciles», apretar (sin propuesta: se dice); una serie más, si cabe; otro rango de repeticiones; otro ejercicio. La memoria de
+// la escalera son las propuestas aplicadas en las últimas 16 semanas.
+const full=JSON.parse(JSON.stringify(S)),bad=[],pin0=_coachLvPin;const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  _coachLvPin='P';S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.appliedProposals=[];S.pendingCoachProposals=[];S.strength={};S.rpeOn=true;syncActiveWorkout();
+  const pl={v:1,main:'g',g:placeFromPreset('grande'),c:null},D=864e5,n=Date.now();
+  const a0={mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,consec:false,age:'40',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:pl};
+  E(applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(a0)),{},{reparto:'dias'})),{answers:a0,places:pl}).ok,'aplicar');S.mesocycles=[];S.planMeta.vol={};S.strength={};
+  const p=getPlan(),kg=[];liveDayKeys(p).forEach(k=>p[k].ex.forEach(e=>{const x=routineEx(e);if(x&&!x.cardio&&exLT(x)==='w')kg.push({ex:x,k});}));
+  const X=kg.find(q=>isCompoundEx(q.ex)&&repRange(q.ex).lo>=8&&coach_suggestAlternative(q.ex));E(!!X,'sin multiarticular para la prueba');
+  if(X){X.ex.s=3;
+    const item=()=>({ex:X.ex,dayKey:X.k,p:{stagSessions:4,stagWeeks:3,kgTD:false,metric:'e1rm'}});
+    const run=o=>{const it=item(),c=coach_buildCandidates(Object.assign({fatigue:{deloadNeeded:false},down:[],flat:[],stagnant:[it]},o||{})).filter(x=>x.exId===X.ex.id);return{it,c,t:c.map(x=>x.type).join()};};
+    const hecho=(type,dias)=>{S.appliedProposals=type?[{id:(type==='add_set'?'add_set_':'change_rep_scheme_')+X.ex.id,type,exId:X.ex.id,appliedAt:n-dias*D}]:[];};
+    const edad=w=>{S.strength[X.ex.id]=[{d:'x',v:50,r:10,setsDone:3,rpe:2,ts:n-w*7*D},{d:'x',v:50,r:10,setsDone:3,rpe:2,ts:n-8*D},{d:'x',v:50,r:10,setsDone:3,rpe:2,ts:n-D}];};
+    // lo estable no recibe nada
+    E(coach_buildCandidates({fatigue:{deloadNeeded:false},down:[],stagnant:[],flat:[{ex:X.ex,dayKey:X.k,p:{sessions:5,pctWeek:0,metric:'e1rm'}}]}).length===0,'lo estable recibe una propuesta');
+    // paso 2: una serie más
+    edad(20);hecho(null);let r=run();E(r.t==='add_set'&&r.c[0].basis==='stagnant'&&r.c[0].description.includes('antes de cambiar nada')&&r.c[0].description.includes('otro rango'),'primero, una serie: '+r.t);
+    // paso 3: otro rango (ya se le añadió una serie hace 6 semanas)
+    hecho('add_set',40);r=run();E(r.t==='rep_scheme'&&r.c[0].to.s===3&&r.c[0].description.includes('otro ejercicio'),'después, otro rango: '+r.t+' '+pj(r.c[0]&&r.c[0].to));
+    // paso 4: otro ejercicio (ya se le cambió el rango); con poco tiempo en la rutina, nada y se dice
+    hecho('rep_scheme',40);r=run();E(r.t==='swap','después, otro ejercicio: '+r.t);
+    edad(4);r=run();E(r.t===''&&r.it.note==='young','con 4 semanas: '+r.t+' '+r.it.note);edad(20);
+    // lo aplicado hace más de 16 semanas ya no cuenta: vuelve al principio
+    hecho('rep_scheme',120);r=run();E(r.t==='add_set','con el cambio de hace 17 semanas: '+r.t);hecho(null);
+    // paso 1: si tus series salen «fáciles», nada que aplicar y se dice
+    S.strength[X.ex.id]=[21,14,7].map(d=>({d:'x',v:50,r:10,setsDone:3,rpe:1,ts:n-d*D}));r=run();
+    E(r.t===''&&r.it.note==='effort'&&_coachNextStep(r.it,{candByEx:{}},[],null).includes('acércate más al límite'),'series fáciles: '+r.t+' '+r.it.note);
+    S.rpeOn=false;E(run().t==='add_set','con el esfuerzo apagado no hay paso 1: '+run().t);S.rpeOn=true;edad(20);
+    // el día lleno: sin serie, pasa al rango y se apunta el motivo
+    const B=kg.find(q=>q!==X&&q.k===X.k&&Object.keys(_exGroups(X.ex)).some(g=>_exGroups(X.ex)[g]>=1&&_exGroups(q.ex)[g]>=1));
+    if(B){const sB=B.ex.s,G=Object.keys(_exGroups(X.ex)).find(g=>_exGroups(X.ex)[g]>=1&&_exGroups(B.ex)[g]>=1);B.ex.s=Math.ceil(SES_CAP-(_daySetsByGroup(X.k)[G]-B.ex.s))+1;
+      r=run();E(r.t==='rep_scheme'&&r.it.note==='full','con el día lleno: '+r.t+' '+r.it.note);B.ex.s=sB;}
+    // en el análisis de verdad: estancado con series fáciles sale en «Vigilar» con su motivo y sin propuesta
+    S.strength={};S.strength[X.ex.id]=[28,21,14,7,0].map(d=>({d:'x',v:50,r:10,setsDone:3,rpe:1,ts:n-d*D-3600e3,ps:3,pr:X.ex.r}));
+    const an=coach_analyze(),it=an.items.find(i=>i.ex.id===X.ex.id);
+    E(it&&it.p.trend==='stagnant'&&it.note==='effort'&&!an.candByEx[X.ex.id],'análisis: '+(it&&it.p.trend)+' '+(it&&it.note));
+    E(coach_detailHtml(an,coach_pendingView(an)).includes('acércate más al límite'),'el análisis detallado no dice el motivo');}
   if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
 }finally{
   _coachLvPin=pin0;
