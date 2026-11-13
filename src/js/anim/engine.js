@@ -576,8 +576,9 @@ function compileTL(spec){
   return{steps:out,total:t0};}
 function evalTL(tl,spec,t){const T=tl.total;let tt=((t%T)+T)%T;let st=tl.steps[tl.steps.length-1];
   for(const s of tl.steps){if(tt<s.t0+s.dur){st=s;break;}}
-  const u=clamp((tt-st.t0)/st.dur,0,1),e=st.ease(u),c={};
-  for(const k in st.to){const a=st.from[k],b=st.to[k];c[k]=(typeof a==='number'&&typeof b==='number')?a+(b-a)*e:b;}
+  const u=st.dur>0?clamp((tt-st.t0)/st.dur,0,1):1,e=clamp(st.ease(u),0,1),c={};
+  for(const k in st.to){const a=st.from[k],b=st.to[k];
+    if(typeof a==='number'&&typeof b==='number'){const v=e>=1?b:e<=0?a:a+(b-a)*e;c[k]=a<=b?clamp(v,a,b):clamp(v,b,a);}else c[k]=b;}
   c.t=t;c.u=u;c.step=st;c.stepIdx=tl.steps.indexOf(st);
   if(spec.cycle){const per=spec.cycle.period||1;c.cyc=((t/per)%1+1)%1;}
   return c;}
@@ -734,7 +735,11 @@ function loop(){raf=0;if(document.hidden){kick();return;}
     if(moving&&!inst.drag&&inst.cost>12&&(inst.skip=(inst.skip+1)%2))continue;
     const w=inst.el.clientWidth,h=inst.el.clientHeight;if((w&&w!==inst.W)||(h&&h!==inst.H))resize(inst);
     const t=((inst.paused?inst.pausedAt:n)-inst.pauseAcc)/1000-t0s[inst.key];
-    const a=NOW();frame(inst,t);inst.dirty=0;if(moving)inst.cost=inst.cost*.9+(NOW()-a)*.1;}
+    const a=NOW();
+    try{frame(inst,t);inst.bad=0;}
+    catch(err){try{inst.cv.width=inst.cv.width;}catch(_){}
+      if(!inst.bad){inst.bad=1;setTimeout(()=>{throw err;},0);}}
+    inst.dirty=0;if(moving)inst.cost=inst.cost*.9+(NOW()-a)*.1;}
   if(mapTick(n))any=true;
   if(any)kick();}
 function mountAll(root){(root||document).querySelectorAll('[data-gym-anim]').forEach(el=>{if(!el._gaMounted){el._gaMounted=1;mount(el,el.getAttribute('data-gym-anim'));}else if(el._ga)revive(el._ga);});}

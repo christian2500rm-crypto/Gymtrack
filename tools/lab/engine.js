@@ -661,8 +661,13 @@ function compileTL(spec){
   return{steps:out,total:t0};}
 function evalTL(tl,spec,t){const T=tl.total;let tt=((t%T)+T)%T;let st=tl.steps[tl.steps.length-1];
   for(const s of tl.steps){if(tt<s.t0+s.dur){st=s;break;}}
-  const u=clamp((tt-st.t0)/st.dur,0,1),e=st.ease(u),c={};
-  for(const k in st.to){const a=st.from[k],b=st.to[k];c[k]=(typeof a==='number'&&typeof b==='number')?a+(b-a)*e:b;}
+  // Cada canal queda SIEMPRE entre el valor de salida y el de llegada de su paso. Sin acotarlo, a unos microsegundos del final de
+  // un paso la curva daba por redondeo 1.0000000000000002 (o a+(b−a)·e se pasaba de b en la última cifra): nada que se vea, pero una
+  // postura apoyada justo en su límite (un arcoseno en 1, una raíz en 0, un índice entero) daba NaN o un índice de más y el
+  // fotograma reventaba al dibujar («createLinearGradient: non-finite» en la mancuerna de row_db; 17 ejercicios en total).
+  const u=st.dur>0?clamp((tt-st.t0)/st.dur,0,1):1,e=clamp(st.ease(u),0,1),c={};
+  for(const k in st.to){const a=st.from[k],b=st.to[k];
+    if(typeof a==='number'&&typeof b==='number'){const v=e>=1?b:e<=0?a:a+(b-a)*e;c[k]=a<=b?clamp(v,a,b):clamp(v,b,a);}else c[k]=b;}
   c.t=t;c.u=u;c.step=st;c.stepIdx=tl.steps.indexOf(st);
   if(spec.cycle){const per=spec.cycle.period||1;c.cyc=((t/per)%1+1)%1;}
   return c;}
@@ -842,7 +847,14 @@ function loop(){raf=0;if(document.hidden){kick();return;}
     if(moving&&!inst.drag&&inst.cost>12&&(inst.skip=(inst.skip+1)%2))continue;
     const w=inst.el.clientWidth,h=inst.el.clientHeight;if((w&&w!==inst.W)||(h&&h!==inst.H))resize(inst);
     const t=((inst.paused?inst.pausedAt:n)-inst.pauseAcc)/1000-t0s[inst.key];
-    const a=NOW();frame(inst,t);inst.dirty=0;if(moving)inst.cost=inst.cost*.9+(NOW()-a)*.1;}
+    // Un fotograma que falla no puede parar el bucle (dejaría quietas TODAS las animaciones hasta el siguiente toque): se suelta el
+    // estado del lienzo (un recorte a medias mancharía los siguientes), el error se avisa una vez por vista, fuera del bucle (para
+    // que se siga viendo en la consola y en las pruebas), y la vista lo vuelve a intentar en el fotograma siguiente.
+    const a=NOW();
+    try{frame(inst,t);inst.bad=0;}
+    catch(err){try{inst.cv.width=inst.cv.width;}catch(_){}
+      if(!inst.bad){inst.bad=1;setTimeout(()=>{throw err;},0);}}
+    inst.dirty=0;if(moving)inst.cost=inst.cost*.9+(NOW()-a)*.1;}
   if(mapTick(n))any=true;
   if(any)kick();}
 function mountAll(root){(root||document).querySelectorAll('[data-gym-anim]').forEach(el=>{if(!el._gaMounted){el._gaMounted=1;mount(el,el.getAttribute('data-gym-anim'));}else if(el._ga)revive(el._ga);});}

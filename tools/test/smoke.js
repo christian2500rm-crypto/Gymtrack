@@ -13021,5 +13021,49 @@ await safe('b3Movimiento',async()=>{
   }finally{_rm=rm0;_motionOn=mo0;_shDrag=null;if(fr){fr.style.width=fw;fr.style.height=fh;}sc.classList.remove('tab-in');
     try{closeProgGuide();}catch(e){}document.getElementById('cmodal-root').innerHTML='';_cmodalState=null;try{closeLoadSheet();closeMyMaterial();closeWDetail();closeHist();}catch(e){}S.wmodal=false;renderWmodal();closeSettings();_rest11(j);saveState();render();await W(40);}
 });
+await safe('b3Motor',async()=>{
+  // (B3-8) Motor 3D: a unos microsegundos del final de un paso, la curva de movimiento se pasaba de su valor final por redondeo y
+  // 17 ejercicios daban una postura imposible (NaN → «createLinearGradient: non-finite» en la mancuerna, o un índice de más). Ahora
+  // cada canal queda siempre entre su valor de salida y el de llegada; y si un fotograma falla, el bucle sigue con las demás vistas.
+  const bad=[],E=(c,m)=>{if(!c)bad.push(m);},_=GymAnim._,st0=window.setTimeout,els=[];
+  const fin=v=>typeof v!=='number'||Number.isFinite(v);
+  const mal=it=>{for(const k in it){const v=it[k];if(k[0]==='_')continue;if(typeof v==='number'){if(!Number.isFinite(v))return k;}else if(Array.isArray(v)){for(const x of v){if(Array.isArray(x)){if(!x.every(fin))return k;}else if(!fin(x))return k;}}}return null;};
+  // los bordes de cada paso de una animación: n muestras pegadas al final (y al principio) de cada uno
+  const bordes=(key,n)=>{const spec=GymAnim.get(key),tl=spec._tl;let fuera=0,roto='';
+    for(const s of tl.steps)for(let j=1;j<=n;j++)for(const fin1 of [1,0]){
+      const u=fin1?1-j*2.5e-8*(1+(j%7)/7):j*2.5e-8,c=_.evalTL(tl,spec,s.t0+s.dur*u);
+      for(const k in s.to){const a=s.from[k],b=s.to[k];if(typeof a==='number'&&typeof b==='number'&&(c[k]<Math.min(a,b)||c[k]>Math.max(a,b)||!Number.isFinite(c[k])))fuera++;}
+      if(roto)continue;
+      try{const sc=_.buildFrame(spec,c).sc;for(const it of sc.items){const k=mal(it);if(k){roto='NaN en '+it.k+'.'+k;break;}}}catch(e){roto='EXC '+e.message.slice(0,60);}}
+    return{fuera,roto};};
+  try{
+    // ── los 17 que fallaban, a fondo; y todos los demás, con unas pocas muestras por borde
+    const MALOS=['lib_row_db','lib_power_clean','lib_power_snatch','lib_thruster_bb','lib_thruster_db','lib_kb_thruster','lib_kb_clean','lib_kb_clean_press','lib_kb_snatch','lib_snatch_db','lib_clean_press_db','lib_press_decline_db','lib_floor_press_db','lib_close_press_db','lib_kb_floor_press','lib_kb_row','lib_ytw_prone'];
+    for(const k of MALOS){if(!GymAnim.has(k)){E(false,'falta la animación '+k);continue;}const r=bordes(k,40);E(!r.fuera&&!r.roto,k+': '+r.fuera+' canales fuera de su tramo · '+r.roto);}
+    {let n=0,f=0;const rotos=[];for(const k of GymAnim.keys()){if(MALOS.includes(k))continue;const r=bordes(k,3);n++;f+=r.fuera;if(r.roto)rotos.push(k+' '+r.roto);}
+      E(n>=400&&!f&&!rotos.length,'bordes de las demás ('+n+'): '+f+' canales fuera · '+rotos.slice(0,4).join(' | '));}
+    // el valor final de cada paso es exacto (el siguiente arranca desde él) y el ciclo cierra sin salto
+    {const spec=GymAnim.get('lib_row_db'),tl=spec._tl,s=tl.steps[tl.steps.length-1],c1=_.evalTL(tl,spec,tl.total-1e-13),c0=_.evalTL(tl,spec,0);
+      E(Object.keys(s.to).every(k=>typeof s.to[k]!=='number'||Math.abs(c1[k]-s.to[k])<1e-9)&&Object.keys(s.to).every(k=>typeof c0[k]!=='number'||Math.abs(c0[k]-tl.steps[0].from[k])<1e-12),'el final de un paso no da su valor');
+      const cm=_.evalTL(tl,spec,tl.steps[0].t0+tl.steps[0].dur/2),k0=Object.keys(tl.steps[0].to).find(k=>typeof tl.steps[0].to[k]==='number'&&tl.steps[0].to[k]!==tl.steps[0].from[k]);
+      if(k0)E(cm[k0]>Math.min(tl.steps[0].from[k0],tl.steps[0].to[k0])&&cm[k0]<Math.max(tl.steps[0].from[k0],tl.steps[0].to[k0]),'a mitad de paso el canal no va entre los dos valores');}
+    // ── un fotograma que falla no para el bucle: la otra vista sigue animándose, el error se avisa una vez y la vista se recupera
+    const mk=key=>{const el=document.createElement('div');el.style.cssText='position:fixed;left:0;top:0;width:200px;height:140px;z-index:1';document.body.appendChild(el);els.push(el);return GymAnim.mount(el,key);};
+    const a=mk('lib_row_db'),b=mk('lib_floor_press_db');
+    if(!a||!b||a.rm){E(!!(a&&b),'no se montan las vistas de prueba');}
+    else{
+      let nb=0;const sb=b.ctx.setTransform.bind(b.ctx);b.ctx.setTransform=(...x)=>{nb++;return sb(...x);};
+      E(await _untilRT(()=>nb>=2,300),'las vistas de prueba no se animan');
+      const avisos=[];window.setTimeout=(f,ms,...r)=>{if(!ms&&/throw/.test(String(f))){avisos.push(f);return 0;}return st0(f,ms,...r);};
+      const spec0=a.spec;a.spec=Object.assign({},spec0,{build(){throw new Error('b3Motor: fotograma roto a propósito');}});
+      const n1=nb;E(await _untilRT(()=>a.bad===1&&nb>=n1+3,300),'con un fotograma roto se paran las demás vistas (bad '+a.bad+', '+(nb-n1)+' fotogramas)');
+      await _untilRT(()=>nb>=n1+8,200);
+      E(avisos.length===1,'el error no se avisa una sola vez: '+avisos.length);
+      if(avisos.length){let msg='';try{avisos[0]();}catch(e){msg=e.message;}E(/fotograma roto a propósito/.test(msg),'el aviso no lleva el error: '+msg);}
+      a.spec=spec0;a.dirty=1;E(await _untilRT(()=>a.bad===0,300),'la vista no se recupera al fotograma siguiente');
+      window.setTimeout=st0;}
+    if(bad.length)throw new Error(bad.slice(0,8).join(' | '));
+  }finally{window.setTimeout=st0;els.forEach(el=>{try{GymAnim.unmount(el);}catch(e){}el.remove();});await W(20);}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
