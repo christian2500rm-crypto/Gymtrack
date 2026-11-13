@@ -13306,5 +13306,54 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('p5RepartoAjustes',async()=>{
+// (P5, repaso del reparto) Ajustes › Tu entrenamiento › «Cambiar reparto»: con la rutina ya aceptada, la hoja de repartos se abre
+// sobre «Qué cambia en tu rutina» sin repetir el cuestionario; elegir otro enseña qué cambia; «Aplicar cambios» lo aplica, guarda tus
+// respuestas y deja la rutina de antes para volver; «Cancelar» no toca nada. Respeta la forma de la rutina (2-4 entrenos que se
+// repiten) y, sin consentimiento de salud guardado, antes repasa P8 y P9 como cualquier otro cambio. El historial no se toca.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),$$=q=>[...document.querySelectorAll('#ob-root '+q)];
+const btn=t=>$$('button').find(b=>tx(b)===t),rp=()=>[...document.querySelectorAll('#ob-sheet-root .ob-rp')],focos=()=>dayKeys().map(k=>String(getPlan()[k].focus).split(/\s+[—–-]\s+/)[0]).join(' · ');
+try{
+  S.open=null;S.sets={};S.reopenedSession=null;syncActiveWorkout();S.obDraft=null;
+  S.health=_sanitizeHealth({v:1,ts:Date.now(),consent:{ts:Date.now(),ver:'1'},zones:{},huesos:false,posparto:false,prudent:false,screenTs:Date.now()});
+  const ans={mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,consec:false,age:'40',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:{main:'g',g:placeFromPreset('grande'),c:null}};
+  const r0=applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(ans)),{},{reparto:'dias'})),{answers:ans,places:ans.places});
+  E(r0.ok&&S.health&&S.planMeta.split==='tp4'&&focos()==='Torso · Pierna · Torso · Pierna','partida: '+pj([r0.ok,!!S.health,S.planMeta&&S.planMeta.split,focos()]));
+  const nSes=(S.sessions||[]).length,st0=pj(S.strength||{});
+  // la fila de Ajustes abre «Qué cambia» con la hoja encima
+  openSettings();await W(5);const row=[...document.querySelectorAll('#set-train .set-row')].find(r=>/^Cambiar reparto/.test(tx(r)));
+  E(row&&/Qué va cada día de tu semana/.test(tx(row)),'fila de Ajustes: '+tx(document.getElementById('set-train')).slice(0,200));
+  if(row)row.click();else openSplitChange();await W(20);
+  E(_obOpen()&&_ob.step==='ob-resp-qc'&&_ob.splitFlow&&rp().length===4&&rp()[0].dataset.plan==='tp4'&&/Recomendado · En tu rutina/.test(tx(rp()[0])),'hoja sobre «Qué cambia»: '+pj([_ob&&_ob.step,rp().map(b=>b.dataset.plan)]));
+  E(!btn('Solo guardar la respuesta')&&btn('Aplicar cambios')&&$('.ob-qc-rp'),'botones de «Qué cambia»');
+  // elegir un día de pierna: se ve qué cambia
+  rp().find(b=>b.dataset.plan==='pplt4').click();await W(20);
+  E(_ob.step==='ob-resp-qc'&&_ob.g.res.meta.split==='pplt4'&&/Ha cambiado: Torso · Pierna · Torso · Pierna → Empuje · Tirón · Pierna · Torso/.test(tx($('.ob-qc')))&&/Se quedan \d+ · cambian \d+ · nuevos \d+ · salen \d+/.test(tx($('.ob-qc')))&&/Empuje · Tirón · Pierna · Torso\./.test(tx($('.ob-qc'))),'qué cambia: '+tx($('.ob-qc')).slice(0,260));
+  E(S.planMeta.split==='tp4'&&focos()==='Torso · Pierna · Torso · Pierna','cambió la rutina antes de aplicar');
+  // aplicar: rutina nueva, respuestas guardadas, la de antes para volver y el historial intacto
+  btn('Aplicar cambios').click();await W(20);
+  E(!_obOpen()&&S.planMeta.split==='pplt4'&&focos()==='Empuje · Tirón · Pierna · Torso'&&S.profile.enfoque==='torso'&&!!S.planPrev,'aplicar: '+pj([_obOpen(),S.planMeta&&S.planMeta.split,focos(),S.profile&&S.profile.enfoque,!!S.planPrev]));
+  E((S.sessions||[]).length===nSes&&pj(S.strength||{})===st0,'aplicar tocó el historial');
+  try{document.getElementById('toast').classList.remove('show');}catch(e){}
+  // de nuevo: marca el de ahora; «Cancelar» no cambia nada y vuelve a Ajustes
+  openSplitChange();await W(20);E(_ob.step==='ob-resp-qc'&&rp().find(b=>b.dataset.plan==='pplt4').getAttribute('aria-checked')==='true','segunda vez: '+rp().map(b=>b.dataset.plan+':'+b.getAttribute('aria-checked')).join(' '));
+  rp().find(b=>b.dataset.plan==='grp4').click();await W(20);obRespCancel();await W(10);
+  E(!_obOpen()&&S.planMeta.split==='pplt4'&&S.profile.enfoque==='torso'&&!S.profile.plan&&!!document.getElementById('settings-root').innerHTML,'cancelar: '+pj([S.planMeta.split,S.profile.enfoque,S.profile.plan]));closeSettings();
+  // «Volver a mi rutina anterior» deshace el cambio de reparto
+  {const u=restorePlanPrev();E(u.ok&&S.planMeta.split==='tp4'&&focos()==='Torso · Pierna · Torso · Pierna','volver: '+pj([u.ok,S.planMeta&&S.planMeta.split,focos()]));}
+  // una rutina de 2-4 entrenos que se repiten conserva su forma al abrir la hoja
+  {const a2=Object.assign(JSON.parse(pj(ans)),{goal:'fuerza',days:4}),g2=genRoutineFrom(JSON.parse(pj(a2)),{},{reparto:'recomendado'});
+    const r2=applyGeneratedPlan(genCandidate(g2),{answers:a2,places:a2.places});E(r2.ok&&S.planMeta.reparto==='recomendado'&&S.planMeta.split==='tp2','partida de 2 entrenos: '+pj([r2.ok,S.planMeta&&S.planMeta.reparto,S.planMeta&&S.planMeta.split]));
+    openSplitChange();await W(20);E(_ob.step==='ob-resp-qc'&&_ob.reparto==='recomendado'&&_ob.g.res.meta.split==='tp2'&&rp().length>=2&&rp().every(b=>b.getAttribute('aria-checked')==='false'),'forma conservada: '+pj([_ob.reparto,_ob.g.res.meta.split,rp().map(b=>b.dataset.plan+':'+b.getAttribute('aria-checked'))]));
+    obSheetClose();obRespCancel();await W(10);closeSettings();}
+  // sin consentimiento de salud: primero P8, como en cualquier cambio
+  S.health=null;openSplitChange();await W(20);E(_obOpen()&&_ob.step==='ob-salud'&&!document.getElementById('ob-sheet-root').innerHTML,'sin consentimiento: '+(_ob&&_ob.step));
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

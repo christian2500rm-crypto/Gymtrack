@@ -1050,6 +1050,8 @@ function _obPrefill(){
   if(h){_ob.h.zones=JSON.parse(JSON.stringify(h.zones||{}));_ob.h.zrec={};Object.keys(_ob.h.zones).forEach(z=>{if(_ob.h.zones[z]==='reciente'||_ob.h.zones[z]==='ahora')_ob.h.zrec[z]=_ob.h.zones[z]==='reciente'?'si':'no';});
     _ob.h.huesos=!!h.huesos;if(h.posparto)_ob.h.posparto='alta';if(h.otraTxt)_ob.h.otraTxt=h.otraTxt;_ob.h.consent=true;if(h.prudent)_ob.h.visto=true;}
   if(p&&p.pref){_ob.h.prefU={floor:p.pref.floor,impact:p.pref.impact};}
+  // (P5) la forma de reparto de tu rutina de ahora (antes, al rehacerla desde Ajustes se perdía «2-4 entrenos que se repiten»)
+  _ob.reparto=_isPlainObj(S.planMeta)&&S.planMeta.reparto==='recomendado'?'recomendado':'dias';
 }
 // Nivel efectivo al regenerar (43 I-3): con lo que has entrenado, sube solo
 function _obEfectiva(){const L=(S.sessions||[]).filter(s=>s&&s.ts);if(!L.length)return null;return{sesiones:L.length,semanas:Math.max(0,Math.floor((Date.now()-L[0].ts)/(7*864e5)))};}
@@ -1077,28 +1079,38 @@ function obRespReview(){if(!_ob)return;if(!S.health&&!_ob.healthAsked){_ob.healt
 // «Qué cambia en tu rutina»: con la rutina regenerada; aplicar, solo guardar la respuesta o cancelar
 OB_SCR['ob-resp-qc']={block:0,html:()=>{
   _ob.dirty=true;_obGenerate();const c=_ob.c;if(!c)return`<h1 class="ob-title" id="ob-h" tabindex="-1">No he podido preparar tu rutina</h1>`;
-  const d=_obDiff(c);let cy=0;try{cy=coach_cycleData().sessions.length;}catch(e){}
+  const d=_obDiff(c),ri=typeof _obRepInfo==='function'?_obRepInfo(_ob.g):null;let cy=0;try{cy=coach_cycleData().sessions.length;}catch(e){} // (P5) los días por su nombre
   return`<h1 class="ob-title" id="ob-h" tabindex="-1">Qué cambia en tu rutina</h1>
   <div class="ob-qc"><p class="ob-qc-n">Se quedan <b>${d.keep}</b> · cambian <b>${d.chg}</b> · nuevos <b>${d.add}</b> · salen <b>${d.out}</b></p>
-  <p>${esc(_obWeekLine(_ob.g))}</p>
+  <p>${esc(_obWeekLine(_ob.g))}${ri&&!ri.completo?' '+esc(ri.dias.join(' · '))+'.':''}</p>
+  ${_ob.changed?`<div class="ob-changed" aria-live="polite">Ha cambiado: ${esc(_ob.changed)}</div>`:''}
+  ${typeof obSplitSheet==='function'?'<button type="button" class="ob-link ob-qc-rp" onclick="obSplitSheet()">Cambiar reparto ›</button>':''}
   <p>Tu historial no se toca: lo que sale sigue en Progreso › Fuera de tu rutina y, si vuelve, retoma su historial. Guardo tu rutina actual por si quieres volver.</p>
   ${cy?`<p>Cierro tu ciclo actual (${plural(cy,'sesión','sesiones')}): lo verás en tu resumen.</p>`:''}</div>
   <section class="ob-sec ob-qc-days"><h2 class="ob-h2">Tu rutina nueva</h2><p class="ob-foot">Toca una imagen para ver el ejercicio o cambiarlo antes de aplicar.</p></section>
   ${_obDaysHtml()}
   <div class="ob-next ob-res"><button type="button" class="btn bp" id="ob-go" onclick="obRespApply()">Aplicar cambios</button>
-  ${_ob.fromCycle?'':'<button type="button" class="btn bs" onclick="obRespSaveOnly()">Solo guardar la respuesta</button>'}<button type="button" class="ob-link" onclick="obRespCancel()">Cancelar</button></div>`;}};
+  ${_ob.fromCycle||_ob.splitFlow?'':'<button type="button" class="btn bs" onclick="obRespSaveOnly()">Solo guardar la respuesta</button>'}<button type="button" class="ob-link" onclick="obRespCancel()">Cancelar</button></div>`;}};
 function obRespApply(){if(!_ob||!_ob.c)return;const bl=_applyGuard();if(bl){toast(bl.msg,3600);return;}_obDoApply();}
 function obRespSaveOnly(){if(!_ob)return;S.profile=Object.assign(_obProfileToSave(S.profile&&S.profile.mode||'gen'),{dismiss:(S.profile&&S.profile.dismiss)||{}});S.profile=_sanitizeProfile(S.profile);
   if(_ob.places){S.places=_sanitizePlaces(_ob.places);try{_syncLibKit();}catch(e){}}const h=_obHealthObj();if(h)S.health=h;
   const rp=!!_ob.repaso;saveState();hideOnboarding();if(rp){go('dash');toast('Repaso hecho: tu rutina no cambia',3000);}else{openSettings();toast('Guardé tu respuesta; tu rutina no cambia',3000);}}
 function obRespCancel(){if(!_ob)return;const fc=!!_ob.fromCycle,rp=!!_ob.repaso;hideOnboarding();if(fc)go('coach');else if(rp)go('dash');else openSettings();}
 function openAnswers(){closeSettings();showOnboarding({from:'settings',step:'ob-resp'});_obPrefill();_ob.hist=[];obRender();}
+// (P5, repaso del reparto) «Cambiar reparto» con la rutina ya aceptada: tus respuestas tal cual, «Qué cambia en tu rutina» y, encima,
+// la hoja de repartos. Sin consentimiento de salud guardado, antes se repasan P8 y P9, como en cualquier cambio (43 I-9); al llegar a
+// «Qué cambia», el enlace «Cambiar reparto ›» abre la hoja. Aplicar guarda la rutina de ahora para poder volver
+function openSplitChange(){
+  closeSettings();showOnboarding({from:'settings',step:'ob-resp'});_obPrefill();_ob.hist=[];_ob.splitFlow=true;obRespReview();
+  if(_ob&&_ob.step==='ob-resp-qc'&&_ob.g)obSplitSheet();
+}
 // La sección de Ajustes
 function trainSectionHtml(){
   const p=S.profile,d=S.obDraft,acc=acceptedPending(),rows=[];
   if(acc)rows.push(['Tienes una rutina nueva sin aplicar','La que aceptaste mientras entrenabas: la aplico tal cual.','applyAcceptedUI()']);
   else if(d&&d.step&&!['ob-hola','ob-resp','ob-resp-qc'].includes(d.step)&&!(p&&p.mode==='gen'))rows.push(['Seguir creando mi rutina','Seguimos donde lo dejaste.',"closeSettings();showOnboarding({from:'settings',step:S.obDraft.step})"]);
   if(p&&p.mode==='gen')rows.push(['Tus respuestas','Cambia una y te enseño qué cambia en tu rutina.','openAnswers()']);
+  if(p&&p.mode==='gen'&&typeof openSplitChange==='function')rows.push(['Cambiar reparto','Qué va cada día de tu semana. Elige otro y te enseño qué cambia.','openSplitChange()']); // (P5)
   if(typeof repeatQuestionnaire==='function')rows.push(['Repetir el cuestionario',p&&p.mode==='gen'?'Con tus respuestas puestas: cambia solo lo que quieras.':'Te preparo una rutina a medida en 2-3 minutos.','repeatQuestionnaire()']);
   if(typeof restorePlanPrevUI==='function'&&S.planPrev)rows.push(['Volver a mi rutina anterior','La de antes del último cambio, con su objetivo y su día.','restorePlanPrevUI()']);
   if(typeof openMyHealth==='function')rows.push(['Mis molestias',S.health?'Guardadas en este móvil · Ver o borrar':'No guardo ninguna','openMyHealth()']);
