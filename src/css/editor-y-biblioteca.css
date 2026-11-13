@@ -160,7 +160,6 @@
 .lib-kit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .lib-kt{display:flex;align-items:center;gap:8px;min-width:0;min-height:48px;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);color:var(--text);font-size:14px;font-weight:500;text-align:left;cursor:pointer}
 .lib-kt[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--accent-ink);font-weight:600}
-.lib-kt-e{font-size:20px;line-height:1}
 .lib-kt-n{flex:1;min-width:0;line-height:1.25;overflow-wrap:break-word}
 .lib-kt-c{display:block;font:500 12px 'DM Sans',sans-serif;color:var(--text2)} /* el número, bajo el nombre (a 320 px no caben juntos) */
 .lib-kt[aria-pressed="true"] .lib-kt-c{color:inherit}

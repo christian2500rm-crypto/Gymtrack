@@ -3,14 +3,14 @@
 // mundo, desde Ajustes y desde el buscador. Se edita una copia (borrador) y se guarda con «Guardar»; ✕, fuera o Escape la
 // descartan. La rejilla (matGridHtml) es la misma que usa el cuestionario.
 // ══════════════════════════════════════════════════════════
-const PRESET_INFO={grande:{ic:'🏢',t:'Gimnasio grande',d:'De cadena: máquinas, poleas, barras y mancuernas de sobra.'},
-  barrio:{ic:'🏬',t:'Gimnasio pequeño o de barrio',d:'Pesos libres, poleas y algunas máquinas.'},
-  hotel:{ic:'🏨',t:'Gimnasio de hotel o de comunidad',d:'Mancuernas ligeras, una polea y alguna máquina.'},
-  box:{ic:'🤸',t:'Box o gimnasio funcional',d:'Barras, kettlebells, anillas, cajones y cuerdas.'},
-  nada:{ic:'🧍',t:'Sin material',d:'Tu cuerpo y cosas de casa: silla, pared, mesa, puerta, escalón.'},
-  basico:{ic:'➰',t:'Lo básico',d:'Mancuernas y bandas elásticas.'},mancbanco:{ic:'🛋️',t:'Mancuernas y banco',d:'Mancuernas ajustables y un banco.'},
-  casagym:{ic:'🏗️',t:'Gimnasio en casa',d:'Rack, barra, discos, banco y mancuernas.'},parque:{ic:'🌳',t:'Parque de calistenia',d:'Barras de dominadas, paralelas y bancos.'},
-  propio:{ic:'✏️',t:'Otra cosa',d:'Lo marco yo.'}};
+const PRESET_INFO={grande:{ic:'building',t:'Gimnasio grande',d:'De cadena: máquinas, poleas, barras y mancuernas de sobra.'},
+  barrio:{ic:'store',t:'Gimnasio pequeño o de barrio',d:'Pesos libres, poleas y algunas máquinas.'},
+  hotel:{ic:'bed',t:'Gimnasio de hotel o de comunidad',d:'Mancuernas ligeras, una polea y alguna máquina.'},
+  box:{ic:'kettlebell',t:'Box o gimnasio funcional',d:'Barras, kettlebells, anillas, cajones y cuerdas.'},
+  nada:{ic:'person',t:'Sin material',d:'Tu cuerpo y cosas de casa: silla, pared, mesa, puerta, escalón.'},
+  basico:{ic:'dumbbell',t:'Lo básico',d:'Mancuernas y bandas elásticas.'},mancbanco:{ic:'bench',t:'Mancuernas y banco',d:'Mancuernas ajustables y un banco.'},
+  casagym:{ic:'rack',t:'Gimnasio en casa',d:'Rack, barra, discos, banco y mancuernas.'},parque:{ic:'tree',t:'Parque de calistenia',d:'Barras de dominadas, paralelas y bancos.'},
+  propio:{ic:'pencil',t:'Otra cosa',d:'Lo marco yo.'}};
 const PRESETS_OF={g:['grande','barrio','hotel','box'],c:['nada','basico','mancbanco','casagym','parque','propio']};
 // (E15b) Nombre de un sitio: el de su tipo y, si has marcado material que el tipo no trae, «+ ese material» o «+ N materiales»
 // (al marcar en la rejilla el tipo no cambia: «Sin material» con una mochila es «Sin material + mochila»)
@@ -22,21 +22,20 @@ function _placeLbl(P){
 // Cosas de la rejilla: m material (MAT) · a accesorio · f familia de máquina · c tipo de cardio. d: la línea que explica lo que no es obvio
 const MAT_SECTIONS=[
   {k:'libres',t:'Pesas libres',items:[{m:'mancuernas'},{m:'barra',l:'Barra y discos'},{m:'barraz',d:'Barra corta con curvas, para curl y tríceps'},{m:'kettlebell',l:'Kettlebells'},{m:'disco',l:'Discos sueltos'},{m:'balon'}]},
-  {k:'bancos',t:'Bancos y soportes',items:[{a:'banco',ic:'🛋️',l:'Banco'},{a:'banco_inc',ic:'📐',l:'Banco que se inclina'},{a:'rack',ic:'🏗️',l:'Rack o soportes'},{a:'landmine',ic:'📐',l:'Landmine',d:'Barra con un extremo anclado al suelo'},
-    {m:'dominadas'},{a:'paralelas',ic:'🤸',l:'Paralelas para fondos'},{a:'hexbar',ic:'⬡',l:'Barra hexagonal'},{a:'banco_dec',ic:'📉',l:'Banco declinable'},{a:'scott',ic:'💪',l:'Banco Scott'},
-    {a:'ghd',ic:'🦵',l:'GHD'},{a:'hiper',ic:'🔙',l:'Banco de hiperextensiones'}]},
-  {k:'bandas',t:'Bandas y accesorios',items:[{m:'banda',l:'Bandas elásticas'},{a:'anclaje',ic:'🚪',l:'Anclaje de puerta',d:'Una pieza en la puerta para enganchar la banda'},{m:'minibanda'},
-    {m:'trx',d:'Cintas o anillas para colgar de una puerta o un soporte'},{a:'anillas',ic:'⭕',l:'Anillas'},{m:'fitball',d:'Pelota grande de ejercicio'},{m:'rueda'},{m:'comba'},{m:'step'},{m:'otro',l:'Otro material'}]},
-  {k:'casa',t:'Cosas de casa',home:1,items:[{a:'silla',ic:'🪑',l:'Silla o banco bajo'},{a:'pared',ic:'🧱',l:'Pared'},{a:'mesa',ic:'🍽️',l:'Mesa firme',d:'Para el remo bajo una mesa'},
-    {a:'puerta',ic:'🚪',l:'Puerta que cierra bien',d:'Para el remo con toalla'},{a:'escalon',ic:'🪜',l:'Escalón'},
+  {k:'bancos',t:'Bancos y soportes',items:[{a:'banco',l:'Banco'},{a:'banco_inc',l:'Banco que se inclina'},{a:'rack',l:'Rack o soportes'},{a:'landmine',l:'Landmine',d:'Barra con un extremo anclado al suelo'},
+    {m:'dominadas'},{a:'paralelas',l:'Paralelas para fondos'},{a:'hexbar',l:'Barra hexagonal'},{a:'banco_dec',l:'Banco declinable'},{a:'scott',l:'Banco Scott'},
+    {a:'ghd',l:'GHD'},{a:'hiper',l:'Banco de hiperextensiones'}]},
+  {k:'bandas',t:'Bandas y accesorios',items:[{m:'banda',l:'Bandas elásticas'},{a:'anclaje',l:'Anclaje de puerta',d:'Una pieza en la puerta para enganchar la banda'},{m:'minibanda'},
+    {m:'trx',d:'Cintas o anillas para colgar de una puerta o un soporte'},{a:'anillas',l:'Anillas'},{m:'fitball',d:'Pelota grande de ejercicio'},{m:'rueda'},{m:'comba'},{m:'step'},{m:'otro',l:'Otro material'}]},
+  {k:'casa',t:'Cosas de casa',home:1,items:[{a:'silla',l:'Silla o banco bajo'},{a:'pared',l:'Pared'},{a:'mesa',l:'Mesa firme',d:'Para el remo bajo una mesa'},
+    {a:'puerta',l:'Puerta que cierra bien',d:'Para el remo con toalla'},{a:'escalon',l:'Escalón'},
     {m:'mochila',d:'Para hacer con peso sentadilla, peso muerto, press y curl'}]},
-  {k:'poleas',t:'Poleas y Smith',gym:1,items:[{m:'polea'},{a:'poleas2',ic:'⚡',l:'Dos poleas enfrentadas'},{m:'smith',d:'Barra guiada en raíles (multipower)'}]},
+  {k:'poleas',t:'Poleas y Smith',gym:1,items:[{m:'polea'},{a:'poleas2',l:'Dos poleas enfrentadas'},{m:'smith',d:'Barra guiada en raíles (multipower)'}]},
   {k:'maq',t:'Máquinas',gym:1,items:MACH_FAMS.map(f=>({f}))},
   {k:'cardio',t:'Cardio',gym:1,items:CARD_KINDS.map(c=>({c}))},
-  {k:'box',t:'Box',gym:1,items:[{a:'trineo',ic:'🛷',l:'Trineo'},{a:'cuerdas',ic:'〰️',l:'Cuerdas de batida'},{a:'llanta',ic:'🛞',l:'Llanta'},{a:'saco',ic:'🥊',l:'Saco de boxeo'},{a:'kb2',ic:'🔔',l:'Dos kettlebells iguales'}]}];
+  {k:'box',t:'Box',gym:1,items:[{a:'trineo',l:'Trineo'},{a:'cuerdas',l:'Cuerdas de batida'},{a:'llanta',l:'Llanta'},{a:'saco',l:'Saco de boxeo'},{a:'kb2',l:'Dos kettlebells iguales'}]}];
 const _matItemKey=it=>it.m?'m:'+it.m:it.a?'a:'+it.a:it.f?'f:'+it.f:'c:'+it.c;
 function _matItemLbl(it){const cap=t=>t[0].toUpperCase()+t.slice(1);return it.l||(it.m?MAT[it.m].l:it.f?cap(MACH_FAM_LBL[it.f]):it.c?cap(CARD_KIND_LBL[it.c]):cap(ACC_LBL[it.a]||it.a));}
-function _matItemIc(it){return it.ic||(it.m?MAT[it.m].ic:it.f?'⚙️':it.c?'🏃':'•');}
 function _matHas(P,it){
   if(it.m)return P.mats.includes(it.m);if(it.a)return(P.acc||[]).includes(it.a);
   if(it.f)return P.mats.includes('maquina')&&(P.mach==='all'||(P.mach||[]).includes(it.f));
@@ -63,9 +62,9 @@ function matGridHtml(P,kind,open){
     return'';};
   const sec=S0=>{const fold=kind==='c'&&S0.gym&&!(open&&open[S0.k]),hide=kind==='g'&&S0.home;if(hide)return'';
     const items=S0.items.map(it=>{const on=_matHas(P,it),k=_matItemKey(it),p=plus(it);
-      return`<button type="button" class="lib-kt mat-it" aria-pressed="${on}" data-k="${esc(k)}" onclick="matToggle(this.dataset.k)"><span class="lib-kt-e" aria-hidden="true">${esc(_matItemIc(it))}</span><span class="lib-kt-n">${esc(_matItemLbl(it))}${it.d?`<small class="mat-d">${esc(it.d)}</small>`:''}${p?`<span class="lib-kt-c">${p}</span>`:''}</span></button>${det(it)}`;}).join('');
+      return`<button type="button" class="lib-kt mat-it" aria-pressed="${on}" data-k="${esc(k)}" onclick="matToggle(this.dataset.k)"><span class="lib-kt-n">${esc(_matItemLbl(it))}${it.d?`<small class="mat-d">${esc(it.d)}</small>`:''}${p?`<span class="lib-kt-c">${p}</span>`:''}</span></button>${det(it)}`;}).join('');
     return`<section class="mat-sec" aria-labelledby="mat-s-${S0.k}"><h3 class="mat-sh" id="mat-s-${S0.k}">${esc(S0.t)}</h3>${fold?`<button type="button" class="mat-more" onclick="matOpenSec('${S0.k}')">Mostrar ${esc(S0.t.toLowerCase())} de gimnasio ›</button>`:`<div class="lib-kit mat-kit">${items}</div>`}</section>`;};
-  return`<div class="mat-grid"><div class="mat-body-ic"><span aria-hidden="true">🤸</span> Tu cuerpo siempre cuenta</div>${MAT_SECTIONS.map(sec).join('')}</div>`;
+  return`<div class="mat-grid"><div class="mat-body-ic">${ic('person')} Tu cuerpo siempre cuenta</div>${MAT_SECTIONS.map(sec).join('')}</div>`;
 }
 function _matSegHtml(t,f,opts,cur){
   return`<div class="mat-seg" role="radiogroup" aria-label="${esc(t)}"><span class="mat-seg-t">${esc(t)}</span><span class="mat-seg-b">${opts.map(([v,l])=>`<button type="button" role="radio" aria-checked="${cur===v}" class="mat-sb${cur===v?' on':''}" onclick="matDetail('${f}',${v===null?'null':v})">${esc(l)}</button>`).join('')}</span></div>`;
@@ -86,13 +85,13 @@ function closeMyMaterial(){
 function renderMyMaterial(fresh){
   const r=document.getElementById('mat-root');if(!r||!_myMat)return;
   const m=_myMat,k=m.kind,P=m.draft[k],both=!!(m.draft.g&&m.draft.c),sc=r.querySelector('.hist-sheet'),keep=sc&&!fresh?sc.scrollTop:0;
-  const seg=['g','c'].map(x=>`<button type="button" class="lib-pl" role="radio" aria-checked="${k===x}" onclick="matKind('${x}')">${x==='g'?'🏋️ Gimnasio':'🏠 Casa o aire libre'}</button>`).join('');
+  const seg=['g','c'].map(x=>`<button type="button" class="lib-pl" role="radio" aria-checked="${k===x}" onclick="matKind('${x}')">${ic(x==='g'?'dumbbell':'home')} ${x==='g'?'Gimnasio':'Casa o aire libre'}</button>`).join('');
   let body;
   if(m.choose||!P){
     body=`<p class="mat-q">${P?'¿Qué tipo de sitio es?':k==='g'?'¿Cómo es tu gimnasio?':'¿Qué tienes en casa o al aire libre?'}</p>
       ${P?'<p class="mat-warn">Cambiar de tipo vuelve a marcar lo típico de ese sitio.</p>':''}
       <div class="mat-presets" role="radiogroup" aria-label="Tipo de sitio">${PRESETS_OF[k].map(p=>{const I=PRESET_INFO[p],pl=p==='propio'?null:placeFromPreset(p);
-        return`<button type="button" class="dlr-opt mat-pre" role="radio" aria-checked="${!!P&&P.preset===p}" onclick="matPreset('${p}')"><span class="mat-pre-ic" aria-hidden="true">${I.ic}</span><span class="mat-pre-i"><b>${esc(I.t)}</b><small>${esc(I.d)}</small></span>${pl?`<span class="mat-pre-n">${plural(_matCount(pl,k),'ejercicio')}</span>`:''}</button>`;}).join('')}</div>
+        return`<button type="button" class="dlr-opt mat-pre" role="radio" aria-checked="${!!P&&P.preset===p}" onclick="matPreset('${p}')"><span class="mat-pre-ic" aria-hidden="true">${ic(I.ic)}</span><span class="mat-pre-i"><b>${esc(I.t)}</b><small>${esc(I.d)}</small></span>${pl?`<span class="mat-pre-n">${plural(_matCount(pl,k),'ejercicio')}</span>`:''}</button>`;}).join('')}</div>
       ${P?`<button type="button" class="btn bs mat-back" onclick="matChoose(false)">Mantener ${esc(PRESET_INFO[P.preset]?PRESET_INFO[P.preset].t:'mi material')}</button>`:''}`;
   }else{
     const n=_matCount(P,k),I=PRESET_INFO[P.preset]||PRESET_INFO.propio;
@@ -477,7 +476,7 @@ function _libFigStyle(e){
 // Miniatura de una fila (72×48): la 3D encima (si tiene) y debajo, de respaldo, la figura teñida y su emoji (cardio: solo
 // el emoji, grande)
 function _libThumbHtml(e){
-  return`<span class="lib-th${e.cardio?' cardio':''}" aria-hidden="true">${thumbImgHtml(e.id,TH_CARD,1)}${e.cardio?'':`<svg class="lib-fig" viewBox="0 0 60 40" style="${_libFigStyle(e)}"><use href="#lib-fig"/></svg>`}<span class="lib-th-e">${esc(e.ic||matOf(_mat(e)).ic)}</span></span>`;
+  return`<span class="lib-th${e.cardio?' cardio':''}" aria-hidden="true">${thumbImgHtml(e.id,TH_CARD,1)}${e.cardio?'':`<svg class="lib-fig" viewBox="0 0 60 40" style="${_libFigStyle(e)}"><use href="#lib-fig"/></svg>`}<span class="lib-th-e">${e.cardio?ic('run'):''}</span></span>`;
 }
 // Lo último que hiciste de un ejercicio, en su medida («80 kg × 10», «45 s», «12 reps»…); '' sin historial o en cardio
 function _libLastTxt(e,h){
@@ -507,13 +506,13 @@ function _pickerChipsHtml(){
 }
 function _pickerPlaceHtml(){
   const p=_pickerPlace();
-  return[['g','🏋️ Gimnasio'],['c','🏠 Casa']].map(([k,l])=>`<button type="button" class="lib-pl" role="radio" data-pl="${k}" aria-checked="${p===k}" tabindex="${p===k?0:-1}" onclick="pickerSetPlace(this.dataset.pl)" onkeydown="pickerPlaceKey(event)">${l}</button>`).join('');
+  return[['g',ic('dumbbell')+' Gimnasio'],['c',ic('home')+' Casa']].map(([k,l])=>`<button type="button" class="lib-pl" role="radio" data-pl="${k}" aria-checked="${p===k}" tabindex="${p===k?0:-1}" onclick="pickerSetPlace(this.dataset.pl)" onkeydown="pickerPlaceKey(event)">${l}</button>`).join('');
 }
 // Mosaico de zonas del inicio: figura, nombre y cuántos hay (sin ninguno, desactivada)
 function _pickerTilesHtml(R){
   return`<div class="lib-tiles">${MUSCLE_GROUPS.map(g=>{const n=R.counts.zone[g.id]||0,l=_zoneLbl(g);
     return`<button type="button" class="lib-tile" data-z="${g.id}" onclick="pickerSetMuscle(this.dataset.z)" aria-label="${esc(l)}: ${plural(n,'ejercicio')}"${n?'':' disabled'}>`
-      +`${g.id==='cardio'?'<span class="lib-tile-e" aria-hidden="true">🏃</span>':`<svg class="lib-fig" viewBox="0 0 60 40" aria-hidden="true" style="${_zoneFigStyle(g.id)}"><use href="#lib-fig"/></svg>`}`
+      +`${g.id==='cardio'?'<span class="lib-tile-e" aria-hidden="true">'+ic('run')+'</span>':`<svg class="lib-fig" viewBox="0 0 60 40" aria-hidden="true" style="${_zoneFigStyle(g.id)}"><use href="#lib-fig"/></svg>`}`
       +`<span class="lib-tile-n" aria-hidden="true">${esc(l)}</span><span class="lib-tile-c" aria-hidden="true">${n}</span></button>`;}).join('')}</div>`;
 }
 // Tiras que bajan con la lista: subzonas de la zona (tocar la elegida la quita) y material (Todo, «Sin material» en casa o «Sin máquina» si está
@@ -540,7 +539,7 @@ function _pickerRelaxOpt(){
 }
 function _pickerEmptyHtml(){
   const q=_pickerState.search.trim(),r=_pickerRelaxOpt();
-  return`<div class="empty lib-empty"><div class="eic" aria-hidden="true">🔍</div><p>${q?`Sin resultados para «${esc(q)}».`:'Ningún ejercicio con estos filtros.'}</p>${r?`<button type="button" class="btn bs lib-relax" onclick="pickerRelax()">${esc(r.l)}</button>`:''}</div>`;
+  return`<div class="empty lib-empty"><div class="eic" aria-hidden="true">${ic('search')}</div><p>${q?`Sin resultados para «${esc(q)}».`:'Ningún ejercicio con estos filtros.'}</p>${r?`<button type="button" class="btn bs lib-relax" onclick="pickerRelax()">${esc(r.l)}</button>`:''}</div>`;
 }
 // La lista en piezas, en orden: filas {e, g, o} y trozos de HTML {h} (encabezados, tiras, mosaico, avisos)
 function _pickerSeq(R){
@@ -660,7 +659,7 @@ function _pickerRefresh(keep){
   set('lib-chips',_pickerChipsHtml());set('lib-place',_pickerPlaceHtml());set('lib-count',_pickerCountHtml(R));
   const cn=document.getElementById('lib-count');if(cn)cn.classList.toggle('more',!!cn.querySelector('.lib-cmore'));
   const kb=document.getElementById('lib-kitbtn'),kit=st.ctx.kit,kn=kit&&kit.length;
-  if(kb){kb.hidden=_pickerPlace()!=='c';kb.innerHTML=`<span aria-hidden="true">🎒</span><span class="lib-wd"> Mi material</span>${kn?`<span class="lib-cn"><span class="lib-wd">· </span>${kn}</span>`:''}`;
+  if(kb){kb.hidden=_pickerPlace()!=='c';kb.innerHTML=`${ic('dumbbell')}<span class="lib-wd"> Mi material</span>${kn?`<span class="lib-cn"><span class="lib-wd">· </span>${kn}</span>`:''}`;
     kb.setAttribute('aria-label','Mi material'+(kn?': '+plural(kn,'elegido'):''));}
   const x=document.getElementById('lib-clear');if(x)x.hidden=!st.search;
   st.seq=_pickerSeq(R);st.pos=0;_pkThReset();
@@ -888,10 +887,10 @@ function _libKitHtml(){
   const kit=Array.isArray(S.libKit)?S.libKit:[],N=_libKitN(),ks=Object.keys(MAT).filter(k=>MAT[k].home&&N[k]).sort((a,b)=>(a==='otro')-(b==='otro')||N[b]-N[a]);
   return`<div class="hist-over" onclick="if(event.target===this)closeLibKit()" style="z-index:520"><div class="hist-sheet" id="lib-ksheet" role="dialog" aria-modal="true" aria-labelledby="lib-k-title">
     <div class="hist-sheet-head" style="padding-right:60px"><div class="hist-sheet-hdl"></div>
-      <div class="hist-sheet-title" id="lib-k-title">🎒 Mi material</div><div class="hist-sheet-sub">Marca lo que tienes en casa y verás lo que puedes hacer con ello. Sin material siempre cuenta.</div>
+      <div class="hist-sheet-title" id="lib-k-title">Mi material</div><div class="hist-sheet-sub">Marca lo que tienes en casa y verás lo que puedes hacer con ello. Sin material siempre cuenta.</div>
       <button type="button" class="hist-sheet-close x44" onclick="closeLibKit()" aria-label="Cerrar">✕</button></div>
     <div class="hist-sheet-body">
-      <div class="lib-kit" role="group" aria-label="Tu material">${ks.map(k=>`<button type="button" class="lib-kt" data-k="${k}" aria-pressed="${kit.includes(k)}" aria-label="${esc(MAT[k].l)}: ${plural(N[k],'ejercicio')}" onclick="libKitToggle(this.dataset.k)"><span class="lib-kt-e" aria-hidden="true">${MAT[k].ic}</span><span class="lib-kt-n">${esc(MAT[k].l)}<span class="lib-kt-c" aria-hidden="true">+${N[k]}</span></span></button>`).join('')}</div>
+      <div class="lib-kit" role="group" aria-label="Tu material">${ks.map(k=>`<button type="button" class="lib-kt" data-k="${k}" aria-pressed="${kit.includes(k)}" aria-label="${esc(MAT[k].l)}: ${plural(N[k],'ejercicio')}" onclick="libKitToggle(this.dataset.k)"><span class="lib-kt-n">${esc(MAT[k].l)}<span class="lib-kt-c" aria-hidden="true">+${N[k]}</span></span></button>`).join('')}</div>
       <button type="button" class="btn bp lib-kit-ok" onclick="closeLibKit(1)">Listo · ver ${plural(_pickerShown(),'ejercicio')}</button>
       <button type="button" class="mat-link lib-kit-all" onclick="closeLibKit(1);openMyMaterial(_pickerPlace(),{from:'picker'})">Tu gimnasio y el tipo de sitio ›</button>
     </div></div></div>`;

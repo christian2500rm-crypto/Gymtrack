@@ -107,3 +107,19 @@
   #screen.tab-in,.sheet-in,.sheet-in>.hist-sheet,.sheet-in>.cmod,.sheet-in>.modal{animation:none}
   .btn:active,.icon-btn:active,.tab:active,.wc-rg:active,.lib-pl:active,.edit-day-btn:active{transform:none}
 }
+
+/* ── Iconos de línea del onboarding, de «Mi material» y de los respaldos de imagen (antes, emojis) ── */
+.ob-ci{display:flex;align-items:center;justify-content:center;width:28px;color:var(--green)}
+.ob-ci .ic{width:26px;height:26px;vertical-align:0;color:inherit}
+.mat-pre-ic{display:flex;align-items:center;color:var(--green)}
+.mat-pre-ic .ic{width:26px;height:26px;vertical-align:0}
+.lib-tile-e{display:flex;align-items:center;justify-content:center;height:36px;color:var(--green)}
+.lib-tile-e .ic{width:28px;height:28px;vertical-align:0}
+.lib-tile:disabled .lib-tile-e{color:var(--text3)}
+.exic-e,.lib-th-e{color:var(--text3)}
+.exic-e .ic{width:22px;height:22px;vertical-align:0}
+.lib-th.cardio .lib-th-e .ic{width:28px;height:28px;vertical-align:0}
+.lib-pl .ic{width:17px;height:17px;vertical-align:-3px;margin-right:2px}
+.lib-kitbtn .ic{width:18px;height:18px;vertical-align:-3px}
+.ob-link .ic{width:17px;height:17px;vertical-align:-3px;margin-right:2px}
+.ob-own-t .ic{color:var(--amber)}

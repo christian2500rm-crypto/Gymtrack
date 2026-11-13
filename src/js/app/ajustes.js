@@ -263,7 +263,6 @@ function settingsChangeStartDay(){
     <div class="ob-days ob-days3" role="group" aria-label="Días de tu rutina" style="margin-bottom:14px">
       ${(()=>{const p=getPlan(),cur=hoyDayKey();return dayKeys(p).map(d=>{const live=_dayLive(p[d]),f=String(p[d].focus||'').split(/\s*[—–]\s*/)[0].trim();
         return`<button type="button" class="ob-day ${cur===d?'sel':''}" aria-pressed="${cur===d}"${live?` onclick="pickNextDay('${d}')"`:' disabled'}>
-        <div class="di" aria-hidden="true">${dayEmoji(p[d])}</div>
         <div class="dn">${esc(dayLabel(d,p))}</div>
         <div class="df">${live?esc(f):'Sin ejercicios'}</div>
       </button>`;}).join('');})()}
@@ -272,14 +271,6 @@ function settingsChangeStartDay(){
       <button class="btn bs" onclick="document.getElementById('cmodal-root').innerHTML=''">Cerrar</button>
     </div>
   </div></div>`;
-}
-// (E1a) Emoji de un día según su grupo principal (el que más ejercicios de fuerza tiene; a igualdad, el primero), no
-// según su letra: con el plan de fábrica sale lo de siempre (A 🦵, B 🏋️, C 🚣)
-const DAY_EMOJI={piernas:'🦵',pecho:'🏋️',espalda:'🚣',hombros:'🏋️',biceps:'💪',triceps:'💪',core:'⚡'};
-function dayEmoji(day){
-  const str=_isPlanDay(day)?day.ex.filter(e=>_isPlainObj(e)&&!e.cardio):[],cnt={};let best=null;
-  str.forEach(e=>{const m=e.muscle;if(!m)return;cnt[m]=(cnt[m]||0)+1;if(!best||cnt[m]>cnt[best])best=m;});
-  return DAY_EMOJI[best]||(str.length?'🏋️':_isPlanDay(day)&&day.ex.length?'🏃':'📝');
 }
 function pickNextDay(d){
   if(!_dayLive(getPlan()[d]))return; // (E1a) un día vacío no entra en la rotación

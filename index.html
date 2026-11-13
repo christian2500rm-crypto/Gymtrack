@@ -382,7 +382,6 @@ input{font-family:inherit}
 .ob-day{padding:16px 8px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);cursor:pointer;text-align:center;transition:all .2s}
 .ob-day:active{transform:scale(.97)}
 .ob-day.sel{border-color:var(--green);background:var(--green-bg2)}
-.ob-day .di{font-size:24px;margin-bottom:6px}
 .ob-day .dn{font-size:15px;font-weight:600;color:var(--text2)}
 .ob-day .df{font-size:12px;margin-top:3px;font-weight:400;color:var(--text3);line-height:1.3}
 .ob-day.sel .dn{color:var(--green)}
@@ -911,7 +910,6 @@ button.rt-ring:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .lib-kit{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .lib-kt{display:flex;align-items:center;gap:8px;min-width:0;min-height:48px;padding:6px 10px;border:1px solid var(--border2);border-radius:var(--rsm);background:var(--bg3);color:var(--text);font-size:14px;font-weight:500;text-align:left;cursor:pointer}
 .lib-kt[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:var(--accent-ink);font-weight:600}
-.lib-kt-e{font-size:20px;line-height:1}
 .lib-kt-n{flex:1;min-width:0;line-height:1.25;overflow-wrap:break-word}
 .lib-kt-c{display:block;font:500 12px 'DM Sans',sans-serif;color:var(--text2)} /* el número, bajo el nombre (a 320 px no caben juntos) */
 .lib-kt[aria-pressed="true"] .lib-kt-c{color:inherit}
@@ -2121,6 +2119,22 @@ input[type=number]{-moz-appearance:textfield}
   #screen.tab-in,.sheet-in,.sheet-in>.hist-sheet,.sheet-in>.cmod,.sheet-in>.modal{animation:none}
   .btn:active,.icon-btn:active,.tab:active,.wc-rg:active,.lib-pl:active,.edit-day-btn:active{transform:none}
 }
+
+/* ── Iconos de línea del onboarding, de «Mi material» y de los respaldos de imagen (antes, emojis) ── */
+.ob-ci{display:flex;align-items:center;justify-content:center;width:28px;color:var(--green)}
+.ob-ci .ic{width:26px;height:26px;vertical-align:0;color:inherit}
+.mat-pre-ic{display:flex;align-items:center;color:var(--green)}
+.mat-pre-ic .ic{width:26px;height:26px;vertical-align:0}
+.lib-tile-e{display:flex;align-items:center;justify-content:center;height:36px;color:var(--green)}
+.lib-tile-e .ic{width:28px;height:28px;vertical-align:0}
+.lib-tile:disabled .lib-tile-e{color:var(--text3)}
+.exic-e,.lib-th-e{color:var(--text3)}
+.exic-e .ic{width:22px;height:22px;vertical-align:0}
+.lib-th.cardio .lib-th-e .ic{width:28px;height:28px;vertical-align:0}
+.lib-pl .ic{width:17px;height:17px;vertical-align:-3px;margin-right:2px}
+.lib-kitbtn .ic{width:18px;height:18px;vertical-align:-3px}
+.ob-link .ic{width:17px;height:17px;vertical-align:-3px;margin-right:2px}
+.ob-own-t .ic{color:var(--amber)}
 </style>
 </head>
 <body>
@@ -2134,10 +2148,10 @@ input[type=number]{-moz-appearance:textfield}
     <p class="ob-sub">Tu entrenamiento, ordenado y a tu ritmo. Sin cuenta y sin conexión: lo que respondas se queda en este móvil.</p>
     <h2 class="ob-q">¿Cómo quieres empezar?</h2>
     <div class="ob-acts">
-      <button type="button" class="ob-card" onclick="obStart('gen')"><span class="ob-ci" aria-hidden="true">✨</span><span class="ob-ct"><b>Créame una rutina</b><span>Te hago unas preguntas y te preparo una rutina completa con tu material.</span><em class="ob-tag">Unos 2-3 min</em></span></button>
-      <button type="button" class="ob-card" onclick="obStart('own')"><span class="ob-ci" aria-hidden="true">📋</span><span class="ob-ct"><b>Ya tengo una rutina</b><span>Entras directo a la app. Puedes meter tu rutina o pedirme una cuando quieras.</span></span></button>
+      <button type="button" class="ob-card" onclick="obStart('gen')"><span class="ob-ci" aria-hidden="true"><svg class="ic ic-sparkles" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m11 4.5 1.7 4.3 4.3 1.7-4.3 1.7-1.7 4.3-1.7-4.3L5 10.5l4.3-1.7z"/><path d="m18.5 15 .7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7z"/></svg></span><span class="ob-ct"><b>Créame una rutina</b><span>Te hago unas preguntas y te preparo una rutina completa con tu material.</span><em class="ob-tag">Unos 2-3 min</em></span></button>
+      <button type="button" class="ob-card" onclick="obStart('own')"><span class="ob-ci" aria-hidden="true"><svg class="ic ic-clipboard" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5.5" y="4.5" width="13" height="16" rx="2.5"/><path d="M9.5 4.5v-1h5v1M9 10h6M9 13.5h6M9 17h3.5"/></svg></span><span class="ob-ct"><b>Ya tengo una rutina</b><span>Entras directo a la app. Puedes meter tu rutina o pedirme una cuando quieras.</span></span></button>
     </div>
-    <button type="button" class="ob-link" onclick="obRestore()">💾 ¿Tienes una copia de seguridad? Restaurar</button>
+    <button type="button" class="ob-link" onclick="obRestore()"><svg class="ic ic-upload" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 15.5V4.5M7.5 9 12 4.5 16.5 9M5 19.5h14"/></svg> ¿Tienes una copia de seguridad? Restaurar</button>
     <p class="ob-foot">Podrás cambiar esto cuando quieras en Ajustes.</p>
   </div></div>
 </div>
@@ -13879,7 +13893,7 @@ _sanitizePlanSubs(S.currentPlan);
 // ═══════════════════════════════════════════════════════════
 // Un solo juego de iconos (24×24, trazo de 1,9 px, extremos redondos) que toma el color del texto. Sustituye a los emojis que
 // hacían de icono: cada móvil los dibuja distinto y no siguen la paleta. Los emojis se quedan donde son contenido (frases del
-// «Wrapped», pictograma de cada ejercicio y de cada material, opciones del cuestionario).
+// «Wrapped» y lo que escribes tú). Donde un concepto no tiene un icono que se entienda sin leer, no lleva ninguno.
 //   ic('trophy')        → el icono, para escribirlo en una plantilla
 //   icE('🏆')           → el icono de un emoji que viene en los datos (propuestas e ideas del Coach guardan su emoji); si no
 //                         tiene icono, devuelve el propio carácter escapado
@@ -13917,6 +13931,29 @@ const ICONOS={
   sun:'<circle cx="12" cy="12" r="3.8"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"/>',
   dumbbell:'<path d="M6.5 6v12M17.5 6v12M3.5 9v6M20.5 9v6M6.5 12h11"/>',
   expand:'<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>',
+  // Onboarding y «Mi material»: opciones del cuestionario, tipos de sitio y estados vacíos
+  clipboard:'<rect x="5.5" y="4.5" width="13" height="16" rx="2.5"/><path d="M9.5 4.5v-1h5v1M9 10h6M9 13.5h6M9 17h3.5"/>',
+  upload:'<path d="M12 15.5V4.5M7.5 9 12 4.5 16.5 9M5 19.5h14"/>',
+  heart:'<path d="M12 19.5S4.8 15.3 4.8 9.8A3.9 3.9 0 0 1 12 7.7a3.9 3.9 0 0 1 7.2 2.1c0 5.500-7.200 9.700-7.200 9.700z"/>',
+  battery:'<rect x="3.500" y="8" width="15.500" height="8" rx="2.200"/><path d="M21.200 11v2M7.200 11v2M10.700 11v2M14.200 11v2"/>',
+  kettlebell:'<path d="M8 10V8.300a4 4 0 0 1 8 0V10"/><path d="M7 10h10a6.500 6.500 0 0 1 1.800 4.500 6.800 6 0 0 1-13.600 0A6.500 6.500 0 0 1 7 10z"/>',
+  balance:'<path d="M12 4.500v15M8.500 19.500h7M5.500 7.500h13M5.500 7.500 3.200 13a2.500 2.500 0 0 0 4.600 0zM18.500 7.500 16.200 13a2.500 2.500 0 0 0 4.600 0z"/>',
+  plant:'<path d="M12 20.500V8M12 14.200c0-2.600-1.900-4.200-5-4.200 0 2.600 1.900 4.200 5 4.200zM12 16.800c0-2.400 1.800-3.800 4.800-3.800 0 2.400-1.800 3.800-4.800 3.800zM12 8c0-2.200 1.300-3.700 3.600-4.200.1 2.400-1.200 3.800-3.600 4.200z"/>',
+  question:'<circle cx="12" cy="12" r="8.500"/><path d="M9.600 9.700a2.500 2.500 0 1 1 3.700 2.200c-.8.500-1.300 1-1.300 1.900M12 16.700v.200"/>',
+  sofa:'<path d="M6 11V8.500A2.500 2.500 0 0 1 8.500 6h7A2.500 2.500 0 0 1 18 8.500V11"/><path d="M3.500 13a2 2 0 0 1 4 0v2h9v-2a2 2 0 0 1 4 0v4.500h-17zM6 17.500V19.500M18 17.500V19.500"/>',
+  walk:'<circle cx="12.500" cy="4.500" r="1.700"/><path d="M12.500 8.500 11 14l-2.500 6M11 14l3 2.200 1 4.300M12.500 8.500 9.200 10.300 8.500 13.500M12.500 8.500l2.300 3 2.700.800"/>',
+  run:'<circle cx="15" cy="4.500" r="1.700"/><path d="m13.500 8-2.700 5 3.700 2.500-1 5M10.800 13 8.500 16.500H4.500M13.500 8l-3.700.500L7.500 11.500M13.500 8l2.500 3.200h3.500"/>',
+  waves:'<path d="M3 8c1.500-1.500 3-1.500 4.500 0s3 1.500 4.500 0 3-1.500 4.500 0 3 1.500 4.500 0M3 12.500c1.500-1.500 3-1.500 4.500 0s3 1.500 4.500 0 3-1.500 4.500 0 3 1.500 4.500 0M3 17c1.500-1.500 3-1.500 4.500 0s3 1.500 4.500 0 3-1.500 4.500 0 3 1.500 4.500 0"/>',
+  home:'<path d="M4 11.500 12 4.500l8 7M6 10v9.500h12V10M10 19.500v-5h4v5"/>',
+  building:'<rect x="5" y="3.500" width="14" height="17" rx="1.800"/><path d="M9 7.500h1.500M13.500 7.500H15M9 11h1.500M13.500 11H15M9 14.500h1.500M13.500 14.500H15M10.500 20.500V18h3v2.500"/>',
+  store:'<path d="M4.500 9.500 6 4.500h12l1.500 5M4.500 9.500a2.500 2.500 0 0 0 5 0 2.500 2.500 0 0 0 5 0 2.500 2.500 0 0 0 5 0M6 12v7.500h12V12M10 19.500v-4h4v4"/>',
+  bed:'<path d="M3.500 18.500V6M3.500 14.500h17v4M20.500 14.500v-2a3 3 0 0 0-3-3h-6v5"/><circle cx="7.500" cy="11.500" r="1.600"/>',
+  person:'<circle cx="12" cy="5" r="2"/><path d="M12 9v6.500M7.500 11.500h9M12 15.500 9 20.500M12 15.500l3 5"/>',
+  bench:'<rect x="3.500" y="9" width="17" height="3.500" rx="1.500"/><path d="M7 12.500V19M17 12.500V19M5 19h4M15 19h4"/>',
+  rack:'<path d="M6.500 3.500v17M17.500 3.500v17M4.500 20.500h4M15.500 20.500h4M6.500 9h11M3.500 7v4M20.500 7v4"/>',
+  tree:'<path d="M12 20.500v-6M12 14.500c-3.200 0-5.500-2.300-5.500-5.300S8.800 3.500 12 3.500s5.500 2.700 5.500 5.700-2.300 5.300-5.500 5.300zM9 20.500h6"/>',
+  pencil:'<path d="m4.500 19.500 1-4L16 5a2.100 2.100 0 0 1 3 3L8.500 18.500zM14.500 6.500l3 3"/>',
+  search:'<circle cx="11" cy="11" r="6.500"/><path d="m16 16 4 4"/>',
   // Esfuerzo de la serie: una, dos o tres barras (fácil, justo, al límite)
   e1:'<path d="M6 18v-3"/><path d="M12 18v-7.5" opacity=".28"/><path d="M18 18V6" opacity=".28"/>',
   e2:'<path d="M6 18v-3"/><path d="M12 18v-7.5"/><path d="M18 18V6" opacity=".28"/>',
@@ -13970,15 +14007,15 @@ const LT=['w','bw','r','t','d','c'];
 // («¿Máquina ocupada?») · home sale en «Mi material» (sin material siempre está) · ic su emoji (selector) · mach es una
 // máquina del gimnasio (el filtro «Sin máquina» la quita)
 const MAT={
-  barra:{l:'Barra',ic:'🏋️',cls:'barra'},barraz:{l:'Barra Z',ic:'🏋️',cls:'barra',free:1},smith:{l:'Smith',ic:'🏗️',cls:'barra',mach:1},
-  mancuernas:{l:'Mancuernas',ic:'💪',cls:'manc',free:1,home:1},kettlebell:{l:'Kettlebell',ic:'🔔',cls:'kb',free:1,home:1},
-  disco:{l:'Disco',ic:'💿',cls:'disco',free:1},balon:{l:'Balón medicinal',ic:'🏐',cls:'disco',free:1,home:1},otro:{l:'Otro material',ic:'🧰',cls:'disco',home:1},
-  mochila:{l:'Mochila, garrafas o chaleco',ic:'🎒',cls:'disco',free:1,home:1}, // (E14b, §K.3) carga en casa sin comprar nada
-  maquina:{l:'Máquina',ic:'⚙️',cls:'maq',mach:1},polea:{l:'Polea',ic:'⚡',cls:'polea',mach:1},
-  corporal:{l:'Sin material',ic:'🤸',eq:'Peso corporal',cls:'bw',free:1},dominadas:{l:'Barra de dominadas',ic:'🧗',cls:'bw',home:1},
-  banda:{l:'Banda elástica',ic:'➰',cls:'banda',free:1,home:1},minibanda:{l:'Minibanda',ic:'⭕',cls:'banda',free:1,home:1},
-  trx:{l:'TRX o anillas',ic:'🔗',cls:'none',free:1,home:1},fitball:{l:'Fitball',ic:'🔵',cls:'none',free:1,home:1},rueda:{l:'Rueda abdominal',ic:'🛞',cls:'none',free:1,home:1},
-  comba:{l:'Comba',ic:'🪢',cls:'none',free:1,home:1},step:{l:'Step o cajón',ic:'📦',cls:'none',free:1,home:1},cardio:{l:'Máquina de cardio',ic:'🏃',cls:'none',mach:1}};
+  barra:{l:'Barra',cls:'barra'},barraz:{l:'Barra Z',cls:'barra',free:1},smith:{l:'Smith',cls:'barra',mach:1},
+  mancuernas:{l:'Mancuernas',cls:'manc',free:1,home:1},kettlebell:{l:'Kettlebell',cls:'kb',free:1,home:1},
+  disco:{l:'Disco',cls:'disco',free:1},balon:{l:'Balón medicinal',cls:'disco',free:1,home:1},otro:{l:'Otro material',cls:'disco',home:1},
+  mochila:{l:'Mochila, garrafas o chaleco',cls:'disco',free:1,home:1}, // (E14b, §K.3) carga en casa sin comprar nada
+  maquina:{l:'Máquina',cls:'maq',mach:1},polea:{l:'Polea',cls:'polea',mach:1},
+  corporal:{l:'Sin material',eq:'Peso corporal',cls:'bw',free:1},dominadas:{l:'Barra de dominadas',cls:'bw',home:1},
+  banda:{l:'Banda elástica',cls:'banda',free:1,home:1},minibanda:{l:'Minibanda',cls:'banda',free:1,home:1},
+  trx:{l:'TRX o anillas',cls:'none',free:1,home:1},fitball:{l:'Fitball',cls:'none',free:1,home:1},rueda:{l:'Rueda abdominal',cls:'none',free:1,home:1},
+  comba:{l:'Comba',cls:'none',free:1,home:1},step:{l:'Step o cajón',cls:'none',free:1,home:1},cardio:{l:'Máquina de cardio',cls:'none',mach:1}};
 // Patrón de movimiento (alternativas de «¿Máquina ocupada?» y del Coach): nombre y patrones cercanos
 const PAT_LBL={squat:'Sentadilla',lunge:'Zancada',knee_ext:'Extensión de rodilla',knee_flex:'Flexión de rodilla',hinge:'Bisagra de cadera',
   hip_ext:'Extensión de cadera',hip_abd:'Abducción',hip_add:'Aducción',calf:'Gemelo',push_h:'Empuje horizontal',fly:'Aperturas',pull_v:'Jalón vertical',
@@ -14921,10 +14958,10 @@ OB_SCR['ob-hola']={block:0,html:()=>`<svg class="ob-teca" viewBox="0 0 468 638" 
   <p class="ob-sub">Tu entrenamiento, ordenado y a tu ritmo. Sin cuenta y sin conexión: lo que respondas se queda en este móvil.</p>
   <h2 class="ob-q">¿Cómo quieres empezar?</h2>
   <div class="ob-acts">
-    <button type="button" class="ob-card" onclick="obStart('gen')"><span class="ob-ci" aria-hidden="true">✨</span><span class="ob-ct"><b>Créame una rutina</b><span>Te hago unas preguntas y te preparo una rutina completa con tu material.</span><em class="ob-tag">Unos 2-3 min</em></span></button>
-    <button type="button" class="ob-card" onclick="obStart('own')"><span class="ob-ci" aria-hidden="true">📋</span><span class="ob-ct"><b>Ya tengo una rutina</b><span>Entras directo a la app. Puedes meter tu rutina o pedirme una cuando quieras.</span></span></button>
+    <button type="button" class="ob-card" onclick="obStart('gen')"><span class="ob-ci" aria-hidden="true">${ic('sparkles')}</span><span class="ob-ct"><b>Créame una rutina</b><span>Te hago unas preguntas y te preparo una rutina completa con tu material.</span><em class="ob-tag">Unos 2-3 min</em></span></button>
+    <button type="button" class="ob-card" onclick="obStart('own')"><span class="ob-ci" aria-hidden="true">${ic('clipboard')}</span><span class="ob-ct"><b>Ya tengo una rutina</b><span>Entras directo a la app. Puedes meter tu rutina o pedirme una cuando quieras.</span></span></button>
   </div>
-  <button type="button" class="ob-link" onclick="obRestore()">💾 ¿Tienes una copia de seguridad? Restaurar</button>
+  <button type="button" class="ob-link" onclick="obRestore()">${ic('upload')} ¿Tienes una copia de seguridad? Restaurar</button>
   <p class="ob-foot">Podrás cambiar esto cuando quieras en Ajustes.</p>`};
 // Inicio: «Pon tu rutina en Gymteca» (quien eligió «Ya tengo una») y, una vez, «Si algo duele»
 let _ownPick=null;
@@ -14935,7 +14972,7 @@ function ownCardHtml(){
     <div class="ob-own-l" id="own-dl">¿Cuántos días entrenas a la semana?</div>
     <div class="ob-days" role="radiogroup" aria-labelledby="own-dl">${[2,3,4,5,6].map(n=>`<button type="button" class="ob-dn${st.n===n?' on':''}" role="radio" aria-checked="${st.n===n}" onclick="ownPick('n',${n})">${n}</button>`).join('')}</div>
     <div class="ob-own-l" id="own-pl">¿Dónde entrenas?</div>
-    <div class="lib-place" role="radiogroup" aria-labelledby="own-pl">${[['g','🏋️ Gimnasio'],['c','🏠 Casa o aire libre']].map(([k,t])=>`<button type="button" class="lib-pl${st.pl===k?' on':''}" role="radio" aria-checked="${st.pl===k}" onclick="ownPick('pl','${k}')">${t}</button>`).join('')}</div>
+    <div class="lib-place" role="radiogroup" aria-labelledby="own-pl">${[['g',ic('dumbbell')+' Gimnasio'],['c',ic('home')+' Casa o aire libre']].map(([k,t])=>`<button type="button" class="lib-pl${st.pl===k?' on':''}" role="radio" aria-checked="${st.pl===k}" onclick="ownPick('pl','${k}')">${t}</button>`).join('')}</div>
     <button type="button" class="btn bp" onclick="ownStart()">Empezar con ${plural(st.n,'día vacío','días vacíos')}</button>
     <button type="button" class="btn bs" onclick="ownKeep()">Partir de la de ejemplo</button></div>`;
 }
@@ -14960,8 +14997,8 @@ function safetyOk(){if(!S.profile)return;S.profile.dismiss.safety=Date.now();S.p
 // la vista), pasan a la siguiente; las flechas solo mueven el foco y marcan, sin avanzar. Desde Ajustes (una pantalla suelta) no avanzan.
 function _obOpts(name,opts,cur,o){
   o=o||{};const ci=opts.findIndex(x=>String(x[0])===String(cur));
-  return`<div class="ob-acts${o.grid?' ob-grid':''}" role="radiogroup" aria-labelledby="ob-h">${opts.map(([v,ic,t,d,tag],i)=>{const on=String(cur)===String(v);
-    return`<button type="button" class="ob-card${on?' on':''}" role="radio" aria-checked="${on}" tabindex="${on||(ci<0&&i===0)?0:-1}" data-v="${esc(String(v))}" onclick="obPick('${name}',this.dataset.v)" onkeydown="_obKey(event)">${ic?`<span class="ob-ci" aria-hidden="true">${ic}</span>`:''}<span class="ob-ct"><b>${esc(t)}</b>${d?`<span>${esc(d)}</span>`:''}${tag?`<em class="ob-tag">${esc(tag)}</em>`:''}</span></button>`;}).join('')}</div>${o.noAuto||(_ob&&_ob.single)?'':'<p class="ob-hint">Al tocar, pasas a la siguiente.</p>'}`;
+  return`<div class="ob-acts${o.grid?' ob-grid':''}" role="radiogroup" aria-labelledby="ob-h">${opts.map(([v,icn,t,d,tag],i)=>{const on=String(cur)===String(v);
+    return`<button type="button" class="ob-card${on?' on':''}" role="radio" aria-checked="${on}" tabindex="${on||(ci<0&&i===0)?0:-1}" data-v="${esc(String(v))}" onclick="obPick('${name}',this.dataset.v)" onkeydown="_obKey(event)">${ICONOS[icn]?`<span class="ob-ci" aria-hidden="true">${ic(icn)}</span>`:''}<span class="ob-ct"><b>${esc(t)}</b>${d?`<span>${esc(d)}</span>`:''}${tag?`<em class="ob-tag">${esc(tag)}</em>`:''}</span></button>`;}).join('')}</div>${o.noAuto||(_ob&&_ob.single)?'':'<p class="ob-hint">Al tocar, pasas a la siguiente.</p>'}`;
 }
 function _obKey(ev){
   const k=ev.key,g=ev.currentTarget.closest('[role=radiogroup]');if(!g)return;
@@ -14999,9 +15036,9 @@ const OB_AUTO={
 // P2 · Objetivo
 OB_SCR['ob-meta']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Qué quieres conseguir?</h1>
   <p class="ob-sub">${_ob.repeat?'Tus respuestas ya están puestas: cambia solo lo que quieras. Tu historial se conserva y, antes de cambiar nada, te enseño qué cambia.':'Elige lo que más te importa ahora. Podrás cambiarlo cuando quieras.'}</p>
-  ${_obOpts('goal',[['musculo','💪','Ganar músculo','Más músculo, con pesas y descansos medios.'],['fuerza','🏋️','Ganar fuerza','Mover más peso en los básicos, como la sentadilla o el press. Pocas repeticiones y más descanso.'],
-    ['grasa','🔥','Perder grasa','Pesas para conservar el músculo y algo de cardio. Lo que comes manda; yo me ocupo del entreno.'],['salud','❤️','Salud y forma','Moverte mejor y sentirte bien, sin complicarte.'],
-    ['aguante','🔋','Aguantar más','Resistencia muscular: más repeticiones y descansos cortos.']],_ob.a.goal)}
+  ${_obOpts('goal',[['musculo','dumbbell','Ganar músculo','Más músculo, con pesas y descansos medios.'],['fuerza','kettlebell','Ganar fuerza','Mover más peso en los básicos, como la sentadilla o el press. Pocas repeticiones y más descanso.'],
+    ['grasa','flame','Perder grasa','Pesas para conservar el músculo y algo de cardio. Lo que comes manda; yo me ocupo del entreno.'],['salud','heart','Salud y forma','Moverte mejor y sentirte bien, sin complicarte.'],
+    ['aguante','battery','Aguantar más','Resistencia muscular: más repeticiones y descansos cortos.']],_ob.a.goal)}
   <p class="ob-foot">¿Dudas? Elige «Salud y forma».</p>
   ${_obWhy('Decide cuántas repeticiones haces, cuánto descansas y si añado cardio.')}`};
 // P2b · Mujer u hombre (D10): solo sirve para ofrecer el enfoque y para no preguntar por el embarazo a un hombre
@@ -15011,19 +15048,19 @@ OB_SCR['ob-sexo']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" ta
 // P2c · Enfoque (D10, solo «Mujer»)
 OB_SCR['ob-enfoque']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cómo quieres enfocar tu rutina?</h1>
   <p class="ob-sub">Las dos valen: depende de lo que te apetezca trabajar.</p>
-  ${_obOpts('enfoque',[['gluteo','🍑','Más glúteo y pierna','Más trabajo de glúteo y pierna, y el torso, lo justo para mantenerlo.'],['igual','⚖️','Equilibrada','Todo el cuerpo por igual.']],_ob.a.enfoque)}
+  ${_obOpts('enfoque',[['gluteo','','Más glúteo y pierna','Más trabajo de glúteo y pierna, y el torso, lo justo para mantenerlo.'],['igual','','Equilibrada','Todo el cuerpo por igual.']],_ob.a.enfoque)}
   ${_obWhy('Con «Más glúteo y pierna» el glúteo cuenta como una de tus dos prioridades y le doy más series; el torso se queda en lo justo.')}`};
 // P3 · Experiencia
 OB_SCR['ob-exp']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cuánta experiencia tienes con las pesas?</h1>
   <p class="ob-sub">Cuenta solo el tiempo entrenando con constancia, al menos dos días por semana. Si dudas, elige la más baja: subir es fácil.</p>
-  ${_obOpts('exp',[['cero','🌱','Empiezo de cero','Nunca he entrenado con pesas, o casi nada.'],['lt6m','🌿','Menos de 6 meses','Conozco algunos ejercicios, pero aún estoy aprendiendo.'],
-    ['6m2a','📈','De 6 meses a 2 años','Entreno con constancia y hago bien los básicos.'],['gt2a','🏆','Más de 2 años','Entreno con constancia desde hace tiempo.'],
-    ['paron','🔄','Vuelvo tras un parón','Entrenaba, pero llevo más de 2 meses sin hacerlo.']],_ob.a.exp)}
+  ${_obOpts('exp',[['cero','sprout','Empiezo de cero','Nunca he entrenado con pesas, o casi nada.'],['lt6m','plant','Menos de 6 meses','Conozco algunos ejercicios, pero aún estoy aprendiendo.'],
+    ['6m2a','trend','De 6 meses a 2 años','Entreno con constancia y hago bien los básicos.'],['gt2a','trophy','Más de 2 años','Entreno con constancia desde hace tiempo.'],
+    ['paron','refresh','Vuelvo tras un parón','Entrenaba, pero llevo más de 2 meses sin hacerlo.']],_ob.a.exp)}
   ${_obWhy('Con esto elijo ejercicios de tu nivel, cuántas series haces y cómo reparto los días.')}`};
 // P3a · Ritmo (solo «Más de 2 años»)
 OB_SCR['ob-ritmo']={block:1,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cada cuánto consigues subir de peso en los básicos?</h1>
   <p class="ob-sub">En sentadilla, press o remo, por ejemplo.</p>
-  ${_obOpts('ritmo',[['semanas','📈','Casi cada semana'],['meses','🐢','Me cuesta semanas o meses'],['nose','🤷','No lo sé']],_ob.a.ritmo)}
+  ${_obOpts('ritmo',[['semanas','trend','Casi cada semana'],['meses','hourglass','Me cuesta semanas o meses'],['nose','question','No lo sé']],_ob.a.ritmo)}
   ${_obWhy('Separa a quien aún progresa rápido de quien necesita más volumen y variedad.')}`};
 // P3b · El parón (dos segmentados; «Seguir» con los dos)
 function _obSeg(name,opts,cur,lbl){
@@ -15087,7 +15124,7 @@ function obPlKind(k){if(!_ob||(k!=='g'&&k!=='c'))return;_ob.plKind=k;obRender({k
 // P5 y P5': tipo de sitio con la cifra en vivo (placeCan sobre la biblioteca)
 function _obLugarHtml(second){
   const kind=second?_obKindOf('ob-lugar2'):_obKindOf('ob-lugar'),pl=_ob.places||{},cur=pl[kind]&&pl[kind].preset;
-  const seg=second?'':`<div class="lib-place ob-seg" role="radiogroup" aria-label="Tipo de sitio">${[['g','🏋️ Gimnasio'],['c','🏠 Casa o aire libre']].map(([k,t])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${kind===k}" onclick="obPlKind('${k}')">${t}</button>`).join('')}</div>`;
+  const seg=second?'':`<div class="lib-place ob-seg" role="radiogroup" aria-label="Tipo de sitio">${[['g',ic('dumbbell')+' Gimnasio'],['c',ic('home')+' Casa o aire libre']].map(([k,t])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${kind===k}" onclick="obPlKind('${k}')">${t}</button>`).join('')}</div>`;
   const opts=PRESETS_OF[kind].map(p=>{const I=PRESET_INFO[p],n=p==='propio'?null:_matCount(placeFromPreset(p),kind);
     return[p,I.ic,I.t,p==='propio'?'Lo marco yo en el paso siguiente.':I.d,n!=null?plural(n,'ejercicio'):''];});
   return`<h1 class="ob-title" id="ob-h" tabindex="-1">${second?'¿Y el otro sitio?':'¿Dónde vas a entrenar?'}</h1>
@@ -15168,12 +15205,12 @@ OB_SCR['ob-menor']={block:3,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-
   <p class="ob-sub">Entrenar fuerza a tu edad es buena idea, pero con alguien que te enseñe la técnica: un entrenador o tu profe de Educación Física. No te preparo una rutina automática; puedes usar Gymteca para apuntar lo que hagas con esa persona.</p>
   <div class="ob-acts"><button type="button" class="btn bp" onclick="_obNoRoutine('ent')">Entrar en la app</button><button type="button" class="btn bs" onclick="obBack()">‹ Atrás</button></div>`};
 // P8 · Antes de empezar, tu seguridad. Redacción propia; los conceptos vienen del criterio ACSM 2015 (no copia el PAR-Q+, 41 C-30).
-const OB_SCREEN=[['sint','🫀','En reposo o con un esfuerzo ligero (subir un piso, caminar deprisa) noto dolor u opresión en el pecho, me falta el aire mucho más que a otras personas, me mareo o noto el corazón muy acelerado o irregular'],
-  ['desm','💫','Me he desmayado o he perdido el conocimiento en el último año sin una causa clara (no cuentes al sacarte sangre)'],
-  ['enf','🩺','Un médico me ha dicho que tengo algo de corazón, tensión alta, diabetes o riñón'],
-  ['med','💊','Tomo medicación a diario para el corazón, la tensión o el azúcar'],
-  ['superv','🧑‍⚕️','Me han indicado que haga ejercicio solo con un profesional delante o que evite ciertos esfuerzos'],
-  ['emb','🤰','Estoy embarazada'],['post','👶','He dado a luz hace menos de un año']];
+const OB_SCREEN=[['sint','','En reposo o con un esfuerzo ligero (subir un piso, caminar deprisa) noto dolor u opresión en el pecho, me falta el aire mucho más que a otras personas, me mareo o noto el corazón muy acelerado o irregular'],
+  ['desm','','Me he desmayado o he perdido el conocimiento en el último año sin una causa clara (no cuentes al sacarte sangre)'],
+  ['enf','','Un médico me ha dicho que tengo algo de corazón, tensión alta, diabetes o riñón'],
+  ['med','','Tomo medicación a diario para el corazón, la tensión o el azúcar'],
+  ['superv','','Me han indicado que haga ejercicio solo con un profesional delante o que evite ciertos esfuerzos'],
+  ['emb','','Estoy embarazada'],['post','','He dado a luz hace menos de un año']];
 function _obScr(){if(!(_ob.h.scr instanceof Set))_ob.h.scr=new Set(Array.isArray(_ob.h.scr)?_ob.h.scr:[]);return _ob.h.scr;}
 function obScreen(k){
   if(!_ob)return;const s=_obScr();
@@ -15184,11 +15221,11 @@ function obScreen(k){
 }
 OB_SCR['ob-salud']={block:3,html:()=>{const s=_obScr(),man=_ob.a.sex==='h';
   const rows=OB_SCREEN.filter(r=>!(man&&(r[0]==='emb'||r[0]==='post'))).map(([k,ic,t])=>{const on=s.has(k);
-    return`<button type="button" class="ob-chk${on?' on':''}" role="checkbox" aria-checked="${on}" data-scr="${k}" onclick="obScreen('${k}')"><span class="ob-cb" aria-hidden="true">${on?'✓':''}</span><span class="ob-ci" aria-hidden="true">${ic}</span><span class="ob-ct"><span>${esc(t)}</span></span></button>`;}).join('');
+    return`<button type="button" class="ob-chk${on?' on':''}" role="checkbox" aria-checked="${on}" data-scr="${k}" onclick="obScreen('${k}')"><span class="ob-cb" aria-hidden="true">${on?'✓':''}</span><span class="ob-ct"><span>${esc(t)}</span></span></button>`;}).join('');
   return`<h1 class="ob-title" id="ob-h" tabindex="-1">Antes de empezar, tu seguridad</h1>
   <p class="ob-sub">Marca lo que te pase. No guardo qué marcas: como mucho, que conviene ir con calma, y solo si me dejas.</p>
   <div class="ob-acts">${rows}
-    <button type="button" class="ob-card ob-none${_ob.h.nada?' on':''}" role="checkbox" aria-checked="${!!_ob.h.nada}" data-scr="nada" onclick="obScreen('nada')"><span class="ob-ci" aria-hidden="true">✅</span><span class="ob-ct"><b>Nada de esto</b></span></button></div>
+    <button type="button" class="ob-card ob-none${_ob.h.nada?' on':''}" role="checkbox" aria-checked="${!!_ob.h.nada}" data-scr="nada" onclick="obScreen('nada')"><span class="ob-ci" aria-hidden="true">${ic('done')}</span><span class="ob-ct"><b>Nada de esto</b></span></button></div>
   <p class="ob-foot">No es un diagnóstico. Gymteca no sustituye a un profesional sanitario.</p>
   ${_obWhy('Entrenar fuerza es seguro para casi todo el mundo, pero con algunas condiciones conviene ir con más calma o consultarlo antes.')}
   ${s.size?_obNextBtn('obScreenNext()'):''}`;}};
@@ -15226,7 +15263,7 @@ function noRoutineCardHtml(){
     ${p.nr==='med'?`<button type="button" class="btn bp" onclick="showOnboarding({from:'first',step:'ob-salud'})">Ya tengo su visto bueno ›</button>`:`<button type="button" class="btn bs" onclick="openRoutineEditor('A')">Editar rutina</button>`}</div>`;
 }
 // ── (E9b) Molestias, deporte y prioridades (§C P9, P10, P10m, P11; §I.2) ──
-const OB_ZONES=[['rodilla','🦵','Rodilla'],['hombro','💪','Hombro'],['lumbar','🔙','Espalda baja'],['muneca','✋','Muñeca o codo'],['cadera','🦴','Cadera'],['otra','➕','Otra zona']];
+const OB_ZONES=[['rodilla','','Rodilla'],['hombro','','Hombro'],['lumbar','','Espalda baja'],['muneca','','Muñeca o codo'],['cadera','','Cadera'],['otra','','Otra zona']];
 const OB_ZKIND=[['ahora','Me duele ahora'],['antigua','Lesión antigua'],['op','Me operaron hace menos de un año']];
 // ¿Hay que pedir el consentimiento? (zonas, huesos frágiles, «ir con calma» de P8 o el posparto con el alta)
 function _obNeedConsent(){const h=_ob.h;return Object.keys(h.zones||{}).length>0||!!h.huesos||_obPrudent()||h.posparto==='alta';}
@@ -15246,7 +15283,7 @@ function obPrefT(k){if(!_ob)return;const p=_obPref();_ob.h.prefU=Object.assign({
 function obConsent(){if(!_ob)return;_ob.h.consent=!_ob.h.consent;obRender({keepFocus:true,keepScroll:true});}
 const _obChk=(on,attr,fn,ic,t,d)=>`<button type="button" class="ob-chk${on?' on ok':''}" role="checkbox" aria-checked="${on}" ${attr} onclick="${fn}"><span class="ob-cb" aria-hidden="true">${on?'✓':''}</span>${ic?`<span class="ob-ci" aria-hidden="true">${ic}</span>`:''}<span class="ob-ct"><span>${esc(t)}</span>${d?`<span class="ob-chk-d">${esc(d)}</span>`:''}</span></button>`;
 OB_SCR['ob-molestias']={block:3,html:()=>{const h=_ob.h,z=h.zones||{},p=_obPref(),any=Object.keys(z).length||h.huesos,need=_obNeedConsent();
-  const zone=([k,ic,t])=>{const on=k in z;return`<button type="button" class="lib-chip ob-zc" aria-pressed="${on}" data-z="${k}" onclick="obZone('${k}')"><span aria-hidden="true">${ic}</span> ${esc(t)}</button>`;};
+  const zone=([k,ic,t])=>{const on=k in z;return`<button type="button" class="lib-chip ob-zc" aria-pressed="${on}" data-z="${k}" onclick="obZone('${k}')">${esc(t)}</button>`;};
   const det=Object.keys(z).map(k=>{const t=(OB_ZONES.find(x=>x[0]===k)||[])[2]||k,kind=z[k]==='reciente'?'ahora':z[k];
     return`<div class="ob-zd"><div class="ob-lbl">${esc(t)}: ¿cómo es?</div><div class="lib-place ob-seg" role="radiogroup" aria-label="${esc(t)}: ¿cómo es?">${OB_ZKIND.map(([v,l])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${kind===v}" data-zk="${k}:${v}" onclick="obZoneKind('${k}','${v}')">${esc(l)}</button>`).join('')}</div>
       ${kind==='ahora'?`<div class="ob-lbl">¿Es por un golpe, una caída o un tirón de las últimas 6 semanas, o la zona está hinchada?</div><div class="lib-place ob-seg" role="radiogroup">${[['si','Sí'],['no','No']].map(([v,l])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${(h.zrec||{})[k]===v}" data-zr="${k}:${v}" onclick="obZoneRec('${k}','${v}')">${l}</button>`).join('')}</div>`:''}
@@ -15256,10 +15293,10 @@ OB_SCR['ob-molestias']={block:3,html:()=>{const h=_ob.h,z=h.zones||{},p=_obPref(
   <div class="ob-zones">${OB_ZONES.map(zone).join('')}</div>${det}
   ${h.err?`<p class="ob-err" role="alert">${esc(h.err)}</p>`:''}
   <div class="ob-lbl">Tus huesos</div>
-  ${_obChk(!!h.huesos,'data-k="huesos"','obHuesos()','🦴','Huesos frágiles (osteoporosis o una fractura por un golpe leve)')}
+  ${_obChk(!!h.huesos,'data-k="huesos"','obHuesos()','','Huesos frágiles (osteoporosis o una fractura por un golpe leve)')}
   <div class="ob-lbl">Y para que estés a gusto</div>
-  ${_obChk(!p.impact,'data-k="impact"',"obPrefT('impact')",'🔇','Prefiero sin saltos ni impacto')}
-  ${_obChk(!p.floor,'data-k="floor"',"obPrefT('floor')",'🧘','Mejor sin tumbarme en el suelo')}
+  ${_obChk(!p.impact,'data-k="impact"',"obPrefT('impact')",'','Prefiero sin saltos ni impacto')}
+  ${_obChk(!p.floor,'data-k="floor"',"obPrefT('floor')",'','Mejor sin tumbarme en el suelo')}
   ${need?`${_obChk(!!h.consent,'data-k="consent"','obConsent()','','Guardar en este móvil mis molestias y lo que marqué de mi salud (sin el detalle), para tenerlo en cuenta cuando cambie mi rutina. Puedo borrarlo cuando quiera.')}
     <button type="button" class="ob-link" onclick="obPrivacy()">Qué guardo y cómo borrarlo</button>
     ${h.consent?'':'<p class="ob-foot">Las usaré solo para esta rutina y no las guardo.</p>'}`:''}
@@ -15279,7 +15316,7 @@ function obPainSkip(){if(!_ob)return;_ob.h.zones={};_ob.h.huesos=false;_ob.h.err
 // P10 · Otro deporte o cardio (opcional)
 OB_SCR['ob-deporte']={block:3,auto:true,html:()=>`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Haces otro deporte o cardio?</h1>
   <p class="ob-sub">Para no pasarme con las piernas y decidir si añado cardio a tu rutina.</p>
-  ${_obOpts('sport',[['no','🛋️','No, por ahora no'],['suave','🚶','Camino o voy en bici, tranquilo'],['piernas','🏃','Corro o hago deporte de piernas','Fútbol, pádel, baloncesto…'],['agua','🏊','Nado, remo o algo parecido']],_ob.a.sport)}
+  ${_obOpts('sport',[['no','sofa','No, por ahora no'],['suave','walk','Camino o voy en bici, tranquilo'],['piernas','run','Corro o hago deporte de piernas','Fútbol, pádel, baloncesto…'],['agua','waves','Nado, remo o algo parecido']],_ob.a.sport)}
   <button type="button" class="ob-link" onclick="obPick('sport','no')">Saltar</button>
   ${_obWhy('Si ya haces cardio, no lo repito; si corres o juegas, te pongo algo menos de pierna.')}`};
 // P10m solo si P8 dijo enfermedad o medicación y ahora no hace ejercicio
@@ -15367,15 +15404,15 @@ function _obApplyPins(c,g){
       rest:e=>{const j=c.days[d.letra].ex.findIndex(y=>y.lib===e.lib);const y=c.days[d.letra].ex[j];return y&&y.rest||90;}});});
 }
 // Etiquetas de los chips (respuestas) y a qué pantalla lleva cada uno
-const OB_GOAL_LBL={musculo:'💪 Ganar músculo',fuerza:'🏋️ Ganar fuerza',grasa:'🔥 Perder grasa',salud:'❤️ Salud y forma',aguante:'🔋 Aguantar más'};
-const OB_EXP_LBL={cero:'🌱 Empiezo de cero',lt6m:'🌿 Menos de 6 meses',['6m2a']:'📈 6 meses-2 años',gt2a:'🏆 Más de 2 años',paron:'🔄 Vuelvo tras un parón'};
+const OB_GOAL_LBL={musculo:'Ganar músculo',fuerza:'Ganar fuerza',grasa:'Perder grasa',salud:'Salud y forma',aguante:'Aguantar más'};
+const OB_EXP_LBL={cero:'Empiezo de cero',lt6m:'Menos de 6 meses',['6m2a']:'6 meses-2 años',gt2a:'Más de 2 años',paron:'Vuelvo tras un parón'};
 function _obChips(){
   const a=_ob.a,pl=_ob.places||{},out=[];
   if(a.goal)out.push([OB_GOAL_LBL[a.goal],'ob-meta']);
   out.push([plural(a.days||3,'día'),'ob-tiempo'],[(a.min||60)+NB+'min','ob-tiempo']);
-  ['g','c'].forEach(k=>{const P=pl[k];if(P)out.push([(PRESET_INFO[P.preset]||PRESET_INFO.propio).ic+' '+_placeLbl(P),k===pl.main?'ob-lugar':'ob-lugar2']);});
+  ['g','c'].forEach(k=>{const P=pl[k];if(P)out.push([_placeLbl(P),k===pl.main?'ob-lugar':'ob-lugar2']);});
   if(a.exp)out.push([OB_EXP_LBL[a.exp],'ob-exp']);
-  if(a.enfoque==='gluteo')out.push(['🍑 Más glúteo','ob-enfoque']);
+  if(a.enfoque==='gluteo')out.push(['Más glúteo','ob-enfoque']);
   Object.keys(_ob.h.zones||{}).forEach(z=>{const t=(OB_ZONES.find(x=>x[0]===z)||[])[2];if(t)out.push([t,'ob-molestias']);});
   const pr=(a.prio||[]).filter(x=>!(a.enfoque==='gluteo'&&x==='gluteos'));if(pr.length)out.push(['Prioridad: '+pr.map(k=>(OB_PRIO.find(x=>x[0]===k)||['',k])[1].toLowerCase()).join(' y '),'ob-foco']);
   return out;
@@ -15405,7 +15442,7 @@ function _obWeekLine(g){
 const TH_OB={w:88,h:66,fit:'scene',bg:'scene'};
 function _obThumbHtml(e,P){
   if(typeof _libSpriteOnce==='function')_libSpriteOnce();
-  return`<span class="lib-th${e.cardio?' cardio':''}" aria-hidden="true">${thumbImgHtml(e.id,P)}${e.cardio?'':`<svg class="lib-fig" viewBox="0 0 60 40" style="${_libFigStyle(e)}"><use href="#lib-fig"/></svg>`}<span class="lib-th-e">${esc(e.ic||matOf(_mat(e)).ic)}</span></span>`;
+  return`<span class="lib-th${e.cardio?' cardio':''}" aria-hidden="true">${thumbImgHtml(e.id,P)}${e.cardio?'':`<svg class="lib-fig" viewBox="0 0 60 40" style="${_libFigStyle(e)}"><use href="#lib-fig"/></svg>`}<span class="lib-th-e">${e.cardio?ic('run'):''}</span></span>`;
 }
 // La imagen de la fila j del día (índice en d.rows, con el equilibrio): un botón que abre la hoja (obSee). chg: se puede cambiar
 function _obThumbBtn(d,j,L,chg){
@@ -15421,7 +15458,7 @@ function _obRowPin(d,row){
 function _obRowTgt(row,pin){return pin?`${pin.s} × ${String(pin.r).replace(/^(\d+)\s*s$/,'$1'+NB+'s')}`:`${row.series} × ${row.reps}`;}
 function _obRowHtml(d,row,i){
   const pin=_obRowPin(d,row),L=LIB_BY_ID.get(pin?pin.lib:row.lib),j=d.rows.indexOf(row);
-  const th=L?_obThumbBtn(d,j,L,row.kind==='str'):`<span class="ob-ri" aria-hidden="true">${row.kind==='warm'?'🚶':row.kind==='cardio'?'🏃':row.kind==='bal'?'⚖️':'💪'}</span>`;
+  const th=L?_obThumbBtn(d,j,L,row.kind==='str'):`<span class="ob-ri" aria-hidden="true">${ic(row.kind==='warm'?'walk':row.kind==='cardio'?'run':row.kind==='bal'?'balance':'dumbbell')}</span>`;
   if(row.kind==='warm'||row.kind==='cardio')return`<div class="ob-row ob-row-c" data-j="${j}">${th}<span class="ob-rt"><b>${(n=>row.kind==='warm'?(/^calentamiento/i.test(n)?n:'Calentamiento — '+n):(/^cardio/i.test(n)?n.replace(/^Cardio\b/,'Cardio final'):'Cardio final — '+n))(esc(L?L.n:row.n))}</b><span class="nw">${esc(row.reps)}</span></span></div>`;
   if(row.kind==='bal'){ // (E14a) ejercicios del catálogo: el primero lleva la cabecera del bloque y el último, cómo progresar
     const bs=d.rows.filter(x=>x.kind==='bal'),first=bs[0]===row,last=bs[bs.length-1]===row,min=bs.reduce((t,x)=>t+(+x.min||0),0),u=!!(L&&/U/.test(L.x||''));
@@ -15455,7 +15492,7 @@ function _obDaysHtml(){
   const ks=Object.keys(r.days),tab=ks.includes(_ob.tab)?_ob.tab:ks[0],d=r.det.find(x=>x.letra===tab),rows=d.rows,nStr=rows.filter(x=>x.kind==='str').length;
   return`<div class="tabs ob-tabs" role="tablist" aria-label="Días de tu rutina">${ks.map(k=>{const on=k===tab,dd=r.det.find(x=>x.letra===k);return`<button type="button" class="tab ob-tab${on?' on':''}" role="tab" aria-selected="${on}" tabindex="${on?0:-1}" data-k="${k}" onclick="obTab('${k}')"><span class="pill p${k.toLowerCase()}">${k}</span>${on?' · '+esc(String(r.days[k].focus).split(/\s+[—–-]\s+/)[0]):''}</button>`;}).join('')}</div>
   <section class="ob-dpanel" role="tabpanel" aria-label="Día ${tab}">
-    <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?(d.place==='c'?'🏠 ':'🏋️ '):''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
+    <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?ic(d.place==='c'?'home':'dumbbell')+' ':''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
     ${rows.map((x,i)=>_obRowHtml(d,x,rows.filter(y=>y.kind!=='bal').indexOf(x))).join('')}
     ${P.inicio||P.cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
   </section>`;
@@ -15485,9 +15522,9 @@ OB_SCR['ob-rutina']={block:4,html:()=>{
   <section class="ob-sec"><h2 class="ob-h2">¿Por qué esta rutina?</h2><ul class="ob-ul">${pq.slice(1,4).map(x=>`<li>${icEsf(esc(x))}</li>`).join('')}</ul>
     ${pq.length>4?'<button type="button" class="ob-link" onclick="obWhyAll()">Ver todo ›</button>':''}</section>
   ${med?'':avHtml}
-  <section class="ob-sec"><h2 class="ob-h2">📈 Cómo vas a avanzar</h2><ul class="ob-ul">${cauto?'<li>Las primeras 4 semanas, 2 series y subidas pequeñas; después te propongo pasar a 3.</li>':''}
+  <section class="ob-sec"><h2 class="ob-h2">Cómo vas a avanzar</h2><ul class="ob-ul">${cauto?'<li>Las primeras 4 semanas, 2 series y subidas pequeñas; después te propongo pasar a 3.</li>':''}
     <li>Cada sesión: el Coach te dice cuánto poner (primero más repeticiones, luego más peso).</li><li>Cada 4 semanas: revisas tu ciclo y te propongo hasta 3 cambios.</li><li>Si te notas cansado o te estancas: una semana suave.</li></ul></section>
-  <section class="ob-sec"><h2 class="ob-h2">🧭 Tu primera semana</h2><ul class="ob-ul"><li>La primera vez que hagas cada ejercicio, elige ${kg?'un peso':'la variante'} con ${kg?'el':'la'} que te sobren ${cauto?'unas 3':'2-3'} repeticiones. Desde la segunda sesión, el Coach te dice cuánto poner.</li>
+  <section class="ob-sec"><h2 class="ob-h2">Tu primera semana</h2><ul class="ob-ul"><li>La primera vez que hagas cada ejercicio, elige ${kg?'un peso':'la variante'} con ${kg?'el':'la'} que te sobren ${cauto?'unas 3':'2-3'} repeticiones. Desde la segunda sesión, el Coach te dice cuánto poner.</li>
     ${_rpeOn()?`<li>${ic('e2')} Justo = te sobran 1-2. ${ic('e1')} Fácil = 3 o más. ${ic('e3')} Al límite = ninguna.</li>`:''}<li>Si algo duele más de 3 sobre 10 o empeora al día siguiente, cámbialo con ⇄.</li></ul></section>
   <section class="ob-sec"><button type="button" class="ob-fold" aria-expanded="${mmOpen}" onclick="obMore('mm')">Tu semana por músculo <span aria-hidden="true">${mmOpen?'▾':'›'}</span></button>
     ${mmOpen?`<div class="mm-bars">${mmBarsHtml(mmPlanStats(tmp,r.weeklyTarget),{})}</div>`:''}</section>
@@ -15514,7 +15551,7 @@ function obAvoided(){
 // «Ha cambiado: …» tras tocar un chip (fija hasta la siguiente interacción)
 function _obChangedTxt(){
   const b=_ob.before;if(!b)return null;const A=JSON.parse(b.a),a=_ob.a,out=[];
-  if(A.goal!==a.goal&&a.goal)out.push((OB_GOAL_LBL[a.goal]||'').replace(/^\S+\s/,'').toLowerCase());
+  if(A.goal!==a.goal&&a.goal)out.push((OB_GOAL_LBL[a.goal]||'').toLowerCase());
   if(A.days!==a.days)out.push(`${A.days} → ${plural(a.days,'día')}`);
   if(A.min!==a.min)out.push(`${A.min} → ${a.min} min`);
   if(A.exp!==a.exp)out.push('tu experiencia');if(A.enfoque!==a.enfoque)out.push('el enfoque');
@@ -15656,7 +15693,7 @@ function _obxSubHtml(x,d,row){
 function _obxInfoHtml(L){
   const mus=_libMusLbl(L,3),eq=L.eq||matLabel(_mat(L));
   return`<div class="obx-n">${esc(L.n)}</div><div class="obx-mus"><span class="sr-only">Trabaja: </span>${mus.map(l=>`<span class="mchip">${esc(l)}</span>`).join(' ')}</div>
-    <div class="obx-eq"><span aria-hidden="true">${esc(matOf(_mat(L)).ic)}</span> <span class="sr-only">Material: </span>${esc(eq)}</div>`;
+    <div class="obx-eq"><span class="sr-only">Material: </span>${esc(eq)}</div>`;
 }
 function _obxAltHtml(x,id){
   const A=LIB_BY_ID.get(id),on=id===x.sel,cur=id===x.cur;
@@ -15874,7 +15911,7 @@ function myMatAdapt(){
 function healthWarnHtml(){
   const w=S.profile&&S.profile.warn;if(!w)return'';
   const t=w==='consulta'?'Consulta antes de seguir entrenando con esfuerzo':'Tu rutina no está adaptada al embarazo: revísala con tu matrona';
-  return`<div class="card ob-own ob-hw" role="status"><div class="ob-own-t">⚠️ ${esc(t)}</div><button type="button" class="btn bs" onclick="healthWarnOk()">${w==='consulta'?'Ya lo he consultado':'Ya la he revisado'}</button></div>`;
+  return`<div class="card ob-own ob-hw" role="status"><div class="ob-own-t">${ic('alert')} ${esc(t)}</div><button type="button" class="btn bs" onclick="healthWarnOk()">${w==='consulta'?'Ya lo he consultado':'Ya la he revisado'}</button></div>`;
 }
 function healthWarnOk(){if(!S.profile)return;S.profile.warn=null;S.profile=_sanitizeProfile(S.profile);saveState();render();}
 // ── (E12) Lugar por día y semana en Inicio (§G.8, §G.12; D8: dos sitios desde la primera versión) ──
@@ -15885,7 +15922,7 @@ function otherPlaceSheet(){
   const dk=S.nextDay,here=placeOfDay(dk),ks=otherPlaceDays(),P=getPlan(),nm=k=>`${dayLabel(k)}${P[k]&&P[k].focus?' · '+String(P[k].focus).split(/\s+[—–]\s+/)[0]:''}`;
   obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">¿Hoy en otro sitio?</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
   <div class="hist-sheet-body"><p class="ob-p">Te tocaba el ${esc(nm(dk))} (${here==='c'?'casa':'gimnasio'}). Elige el que haces hoy ${here==='c'?'en el gimnasio':'en casa'}; el ${esc(dayLabel(dk))} vuelve justo después.</p>
-    <div class="ob-acts">${ks.map(k=>`<button type="button" class="ob-card" onclick="otherPlacePick('${k}')"><span class="ob-ci" aria-hidden="true">${placeOfDay(k)==='c'?'🏠':'🏋️'}</span><span class="ob-ct"><b>${esc(nm(k))}</b></span></button>`).join('')}</div></div>`,'¿Hoy en otro sitio?');
+    <div class="ob-acts">${ks.map(k=>`<button type="button" class="ob-card" onclick="otherPlacePick('${k}')"><span class="ob-ci" aria-hidden="true">${ic(placeOfDay(k)==='c'?'home':'dumbbell')}</span><span class="ob-ct"><b>${esc(nm(k))}</b></span></button>`).join('')}</div></div>`,'¿Hoy en otro sitio?');
 }
 function otherPlacePick(k){if(!_dayLive(getPlan()[k]))return;if(getActiveWorkout()){toast('Termina o descarta el entreno de hoy antes',3000);return;}
   S.rotBack=S.nextDay;S.nextDay=k;S.day=k;saveState();obSheetClose();render();toast(`Hoy: ${dayLabel(k)}. Después vuelve el ${dayLabel(S.rotBack)}`,3000);}
@@ -25897,7 +25934,7 @@ function thumbImgHtml(x,P,own){
   return`<img class="ga-th${src?' ga-on':''}" alt="" aria-hidden="true" draggable="false" decoding="async" data-ga-thumb="${esc(k)}" data-gw="${P.w}" data-gh="${P.h}"${P.fit==='body'?' data-gfit="body"':''}${P.bg?` data-gbg="${esc(P.bg)}"`:''}${src?` src="${esc(src)}" data-ga-st="ok"`:own&&_pkThOk()?' data-ga-st="w" data-pk-th=""':''}>`;
 }
 // Icono de un ejercicio (dentro de un .exic): miniatura 3D encima del emoji
-function exIconHtml(ex){return`${thumbImgHtml(ex,TH_IC)}<span class="exic-e">${esc(ex&&ex.ic||'💪')}</span>`;}
+function exIconHtml(ex){return`${thumbImgHtml(ex,TH_IC)}<span class="exic-e">${ic(ex&&ex.cardio?'run':'dumbbell')}</span>`;}
 // Solo si hay alguna por empezar: así la caché de IndexedDB no se lee al arrancar en Inicio (que no tiene miniaturas),
 // sino al abrir lo primero que las usa (Entreno, editor, selector), cuando «HOY TOCA» ya no ocupa el hilo principal
 function thumbsIn(root){if(root&&typeof GymAnim!=='undefined'&&GymAnim.thumbLazy&&root.querySelector('img[data-ga-thumb]:not([data-ga-st])')){try{GymAnim.thumbLazy(root);}catch(e){console.error(e);}}}
@@ -26259,7 +26296,7 @@ function renderBusy(){
   const orig=routineEx(ex),isSub=ex!==orig,A=_busy.alts,sel=A.find(a=>a.lib.id===_busy.sel)||A[0]||null;
   const rows=A.map(a=>{const last=a.lib.cardio?esc(String(a.lib.eq)):_histNoKg(a.hist)?esc(_recValTxt(a.hist.lastAny)):a.hist&&a.hist.last?esc(kgTxt(a.hist.last.v))+' kg':'nuevo';
     return`<button type="button" class="busy-alt" role="radio" aria-checked="${a===sel}" tabindex="${a===sel?0:-1}" data-lib="${esc(a.lib.id)}" onclick="busySelect(this.dataset.lib)" onkeydown="busyKey(event)" aria-label="${esc(a.lib.n)}: ${a.pct} % de músculos en común${a.lib.cardio?'':_histNoKg(a.hist)?', último '+esc(_recValTxt(a.hist.lastAny)):a.hist&&a.hist.last?', último '+esc(kgTxt(a.hist.last.v))+' kilos':''}">
-      <span class="exic" aria-hidden="true">${thumbImgHtml(a.lib.id,TH_IC)}<span class="exic-e">${esc(a.lib.ic||'💪')}</span></span>
+      <span class="exic" aria-hidden="true">${thumbImgHtml(a.lib.id,TH_IC)}<span class="exic-e">${ic(a.lib.cardio?'run':'dumbbell')}</span></span>
       <span class="busy-alt-i"><span class="busy-alt-n">${esc(a.lib.n)}</span><span class="busy-alt-m">${esc(a.lib.eq)}${a.pat&&!a.lib.cardio?' · '+esc(PAT_LBL[a.pat]||''):''}</span></span>
       <span class="busy-alt-r" aria-hidden="true"><span class="pct">${a.pct} %</span><b>${last}</b></span></button>`;}).join('');
   root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeBusy()" style="z-index:500"><div class="hist-sheet" id="busy-sheet" role="dialog" aria-modal="true" aria-labelledby="busy-t" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">
@@ -26372,14 +26409,14 @@ function busyOpenLibrary(){
 // mundo, desde Ajustes y desde el buscador. Se edita una copia (borrador) y se guarda con «Guardar»; ✕, fuera o Escape la
 // descartan. La rejilla (matGridHtml) es la misma que usa el cuestionario.
 // ══════════════════════════════════════════════════════════
-const PRESET_INFO={grande:{ic:'🏢',t:'Gimnasio grande',d:'De cadena: máquinas, poleas, barras y mancuernas de sobra.'},
-  barrio:{ic:'🏬',t:'Gimnasio pequeño o de barrio',d:'Pesos libres, poleas y algunas máquinas.'},
-  hotel:{ic:'🏨',t:'Gimnasio de hotel o de comunidad',d:'Mancuernas ligeras, una polea y alguna máquina.'},
-  box:{ic:'🤸',t:'Box o gimnasio funcional',d:'Barras, kettlebells, anillas, cajones y cuerdas.'},
-  nada:{ic:'🧍',t:'Sin material',d:'Tu cuerpo y cosas de casa: silla, pared, mesa, puerta, escalón.'},
-  basico:{ic:'➰',t:'Lo básico',d:'Mancuernas y bandas elásticas.'},mancbanco:{ic:'🛋️',t:'Mancuernas y banco',d:'Mancuernas ajustables y un banco.'},
-  casagym:{ic:'🏗️',t:'Gimnasio en casa',d:'Rack, barra, discos, banco y mancuernas.'},parque:{ic:'🌳',t:'Parque de calistenia',d:'Barras de dominadas, paralelas y bancos.'},
-  propio:{ic:'✏️',t:'Otra cosa',d:'Lo marco yo.'}};
+const PRESET_INFO={grande:{ic:'building',t:'Gimnasio grande',d:'De cadena: máquinas, poleas, barras y mancuernas de sobra.'},
+  barrio:{ic:'store',t:'Gimnasio pequeño o de barrio',d:'Pesos libres, poleas y algunas máquinas.'},
+  hotel:{ic:'bed',t:'Gimnasio de hotel o de comunidad',d:'Mancuernas ligeras, una polea y alguna máquina.'},
+  box:{ic:'kettlebell',t:'Box o gimnasio funcional',d:'Barras, kettlebells, anillas, cajones y cuerdas.'},
+  nada:{ic:'person',t:'Sin material',d:'Tu cuerpo y cosas de casa: silla, pared, mesa, puerta, escalón.'},
+  basico:{ic:'dumbbell',t:'Lo básico',d:'Mancuernas y bandas elásticas.'},mancbanco:{ic:'bench',t:'Mancuernas y banco',d:'Mancuernas ajustables y un banco.'},
+  casagym:{ic:'rack',t:'Gimnasio en casa',d:'Rack, barra, discos, banco y mancuernas.'},parque:{ic:'tree',t:'Parque de calistenia',d:'Barras de dominadas, paralelas y bancos.'},
+  propio:{ic:'pencil',t:'Otra cosa',d:'Lo marco yo.'}};
 const PRESETS_OF={g:['grande','barrio','hotel','box'],c:['nada','basico','mancbanco','casagym','parque','propio']};
 // (E15b) Nombre de un sitio: el de su tipo y, si has marcado material que el tipo no trae, «+ ese material» o «+ N materiales»
 // (al marcar en la rejilla el tipo no cambia: «Sin material» con una mochila es «Sin material + mochila»)
@@ -26391,21 +26428,20 @@ function _placeLbl(P){
 // Cosas de la rejilla: m material (MAT) · a accesorio · f familia de máquina · c tipo de cardio. d: la línea que explica lo que no es obvio
 const MAT_SECTIONS=[
   {k:'libres',t:'Pesas libres',items:[{m:'mancuernas'},{m:'barra',l:'Barra y discos'},{m:'barraz',d:'Barra corta con curvas, para curl y tríceps'},{m:'kettlebell',l:'Kettlebells'},{m:'disco',l:'Discos sueltos'},{m:'balon'}]},
-  {k:'bancos',t:'Bancos y soportes',items:[{a:'banco',ic:'🛋️',l:'Banco'},{a:'banco_inc',ic:'📐',l:'Banco que se inclina'},{a:'rack',ic:'🏗️',l:'Rack o soportes'},{a:'landmine',ic:'📐',l:'Landmine',d:'Barra con un extremo anclado al suelo'},
-    {m:'dominadas'},{a:'paralelas',ic:'🤸',l:'Paralelas para fondos'},{a:'hexbar',ic:'⬡',l:'Barra hexagonal'},{a:'banco_dec',ic:'📉',l:'Banco declinable'},{a:'scott',ic:'💪',l:'Banco Scott'},
-    {a:'ghd',ic:'🦵',l:'GHD'},{a:'hiper',ic:'🔙',l:'Banco de hiperextensiones'}]},
-  {k:'bandas',t:'Bandas y accesorios',items:[{m:'banda',l:'Bandas elásticas'},{a:'anclaje',ic:'🚪',l:'Anclaje de puerta',d:'Una pieza en la puerta para enganchar la banda'},{m:'minibanda'},
-    {m:'trx',d:'Cintas o anillas para colgar de una puerta o un soporte'},{a:'anillas',ic:'⭕',l:'Anillas'},{m:'fitball',d:'Pelota grande de ejercicio'},{m:'rueda'},{m:'comba'},{m:'step'},{m:'otro',l:'Otro material'}]},
-  {k:'casa',t:'Cosas de casa',home:1,items:[{a:'silla',ic:'🪑',l:'Silla o banco bajo'},{a:'pared',ic:'🧱',l:'Pared'},{a:'mesa',ic:'🍽️',l:'Mesa firme',d:'Para el remo bajo una mesa'},
-    {a:'puerta',ic:'🚪',l:'Puerta que cierra bien',d:'Para el remo con toalla'},{a:'escalon',ic:'🪜',l:'Escalón'},
+  {k:'bancos',t:'Bancos y soportes',items:[{a:'banco',l:'Banco'},{a:'banco_inc',l:'Banco que se inclina'},{a:'rack',l:'Rack o soportes'},{a:'landmine',l:'Landmine',d:'Barra con un extremo anclado al suelo'},
+    {m:'dominadas'},{a:'paralelas',l:'Paralelas para fondos'},{a:'hexbar',l:'Barra hexagonal'},{a:'banco_dec',l:'Banco declinable'},{a:'scott',l:'Banco Scott'},
+    {a:'ghd',l:'GHD'},{a:'hiper',l:'Banco de hiperextensiones'}]},
+  {k:'bandas',t:'Bandas y accesorios',items:[{m:'banda',l:'Bandas elásticas'},{a:'anclaje',l:'Anclaje de puerta',d:'Una pieza en la puerta para enganchar la banda'},{m:'minibanda'},
+    {m:'trx',d:'Cintas o anillas para colgar de una puerta o un soporte'},{a:'anillas',l:'Anillas'},{m:'fitball',d:'Pelota grande de ejercicio'},{m:'rueda'},{m:'comba'},{m:'step'},{m:'otro',l:'Otro material'}]},
+  {k:'casa',t:'Cosas de casa',home:1,items:[{a:'silla',l:'Silla o banco bajo'},{a:'pared',l:'Pared'},{a:'mesa',l:'Mesa firme',d:'Para el remo bajo una mesa'},
+    {a:'puerta',l:'Puerta que cierra bien',d:'Para el remo con toalla'},{a:'escalon',l:'Escalón'},
     {m:'mochila',d:'Para hacer con peso sentadilla, peso muerto, press y curl'}]},
-  {k:'poleas',t:'Poleas y Smith',gym:1,items:[{m:'polea'},{a:'poleas2',ic:'⚡',l:'Dos poleas enfrentadas'},{m:'smith',d:'Barra guiada en raíles (multipower)'}]},
+  {k:'poleas',t:'Poleas y Smith',gym:1,items:[{m:'polea'},{a:'poleas2',l:'Dos poleas enfrentadas'},{m:'smith',d:'Barra guiada en raíles (multipower)'}]},
   {k:'maq',t:'Máquinas',gym:1,items:MACH_FAMS.map(f=>({f}))},
   {k:'cardio',t:'Cardio',gym:1,items:CARD_KINDS.map(c=>({c}))},
-  {k:'box',t:'Box',gym:1,items:[{a:'trineo',ic:'🛷',l:'Trineo'},{a:'cuerdas',ic:'〰️',l:'Cuerdas de batida'},{a:'llanta',ic:'🛞',l:'Llanta'},{a:'saco',ic:'🥊',l:'Saco de boxeo'},{a:'kb2',ic:'🔔',l:'Dos kettlebells iguales'}]}];
+  {k:'box',t:'Box',gym:1,items:[{a:'trineo',l:'Trineo'},{a:'cuerdas',l:'Cuerdas de batida'},{a:'llanta',l:'Llanta'},{a:'saco',l:'Saco de boxeo'},{a:'kb2',l:'Dos kettlebells iguales'}]}];
 const _matItemKey=it=>it.m?'m:'+it.m:it.a?'a:'+it.a:it.f?'f:'+it.f:'c:'+it.c;
 function _matItemLbl(it){const cap=t=>t[0].toUpperCase()+t.slice(1);return it.l||(it.m?MAT[it.m].l:it.f?cap(MACH_FAM_LBL[it.f]):it.c?cap(CARD_KIND_LBL[it.c]):cap(ACC_LBL[it.a]||it.a));}
-function _matItemIc(it){return it.ic||(it.m?MAT[it.m].ic:it.f?'⚙️':it.c?'🏃':'•');}
 function _matHas(P,it){
   if(it.m)return P.mats.includes(it.m);if(it.a)return(P.acc||[]).includes(it.a);
   if(it.f)return P.mats.includes('maquina')&&(P.mach==='all'||(P.mach||[]).includes(it.f));
@@ -26432,9 +26468,9 @@ function matGridHtml(P,kind,open){
     return'';};
   const sec=S0=>{const fold=kind==='c'&&S0.gym&&!(open&&open[S0.k]),hide=kind==='g'&&S0.home;if(hide)return'';
     const items=S0.items.map(it=>{const on=_matHas(P,it),k=_matItemKey(it),p=plus(it);
-      return`<button type="button" class="lib-kt mat-it" aria-pressed="${on}" data-k="${esc(k)}" onclick="matToggle(this.dataset.k)"><span class="lib-kt-e" aria-hidden="true">${esc(_matItemIc(it))}</span><span class="lib-kt-n">${esc(_matItemLbl(it))}${it.d?`<small class="mat-d">${esc(it.d)}</small>`:''}${p?`<span class="lib-kt-c">${p}</span>`:''}</span></button>${det(it)}`;}).join('');
+      return`<button type="button" class="lib-kt mat-it" aria-pressed="${on}" data-k="${esc(k)}" onclick="matToggle(this.dataset.k)"><span class="lib-kt-n">${esc(_matItemLbl(it))}${it.d?`<small class="mat-d">${esc(it.d)}</small>`:''}${p?`<span class="lib-kt-c">${p}</span>`:''}</span></button>${det(it)}`;}).join('');
     return`<section class="mat-sec" aria-labelledby="mat-s-${S0.k}"><h3 class="mat-sh" id="mat-s-${S0.k}">${esc(S0.t)}</h3>${fold?`<button type="button" class="mat-more" onclick="matOpenSec('${S0.k}')">Mostrar ${esc(S0.t.toLowerCase())} de gimnasio ›</button>`:`<div class="lib-kit mat-kit">${items}</div>`}</section>`;};
-  return`<div class="mat-grid"><div class="mat-body-ic"><span aria-hidden="true">🤸</span> Tu cuerpo siempre cuenta</div>${MAT_SECTIONS.map(sec).join('')}</div>`;
+  return`<div class="mat-grid"><div class="mat-body-ic">${ic('person')} Tu cuerpo siempre cuenta</div>${MAT_SECTIONS.map(sec).join('')}</div>`;
 }
 function _matSegHtml(t,f,opts,cur){
   return`<div class="mat-seg" role="radiogroup" aria-label="${esc(t)}"><span class="mat-seg-t">${esc(t)}</span><span class="mat-seg-b">${opts.map(([v,l])=>`<button type="button" role="radio" aria-checked="${cur===v}" class="mat-sb${cur===v?' on':''}" onclick="matDetail('${f}',${v===null?'null':v})">${esc(l)}</button>`).join('')}</span></div>`;
@@ -26455,13 +26491,13 @@ function closeMyMaterial(){
 function renderMyMaterial(fresh){
   const r=document.getElementById('mat-root');if(!r||!_myMat)return;
   const m=_myMat,k=m.kind,P=m.draft[k],both=!!(m.draft.g&&m.draft.c),sc=r.querySelector('.hist-sheet'),keep=sc&&!fresh?sc.scrollTop:0;
-  const seg=['g','c'].map(x=>`<button type="button" class="lib-pl" role="radio" aria-checked="${k===x}" onclick="matKind('${x}')">${x==='g'?'🏋️ Gimnasio':'🏠 Casa o aire libre'}</button>`).join('');
+  const seg=['g','c'].map(x=>`<button type="button" class="lib-pl" role="radio" aria-checked="${k===x}" onclick="matKind('${x}')">${ic(x==='g'?'dumbbell':'home')} ${x==='g'?'Gimnasio':'Casa o aire libre'}</button>`).join('');
   let body;
   if(m.choose||!P){
     body=`<p class="mat-q">${P?'¿Qué tipo de sitio es?':k==='g'?'¿Cómo es tu gimnasio?':'¿Qué tienes en casa o al aire libre?'}</p>
       ${P?'<p class="mat-warn">Cambiar de tipo vuelve a marcar lo típico de ese sitio.</p>':''}
       <div class="mat-presets" role="radiogroup" aria-label="Tipo de sitio">${PRESETS_OF[k].map(p=>{const I=PRESET_INFO[p],pl=p==='propio'?null:placeFromPreset(p);
-        return`<button type="button" class="dlr-opt mat-pre" role="radio" aria-checked="${!!P&&P.preset===p}" onclick="matPreset('${p}')"><span class="mat-pre-ic" aria-hidden="true">${I.ic}</span><span class="mat-pre-i"><b>${esc(I.t)}</b><small>${esc(I.d)}</small></span>${pl?`<span class="mat-pre-n">${plural(_matCount(pl,k),'ejercicio')}</span>`:''}</button>`;}).join('')}</div>
+        return`<button type="button" class="dlr-opt mat-pre" role="radio" aria-checked="${!!P&&P.preset===p}" onclick="matPreset('${p}')"><span class="mat-pre-ic" aria-hidden="true">${ic(I.ic)}</span><span class="mat-pre-i"><b>${esc(I.t)}</b><small>${esc(I.d)}</small></span>${pl?`<span class="mat-pre-n">${plural(_matCount(pl,k),'ejercicio')}</span>`:''}</button>`;}).join('')}</div>
       ${P?`<button type="button" class="btn bs mat-back" onclick="matChoose(false)">Mantener ${esc(PRESET_INFO[P.preset]?PRESET_INFO[P.preset].t:'mi material')}</button>`:''}`;
   }else{
     const n=_matCount(P,k),I=PRESET_INFO[P.preset]||PRESET_INFO.propio;
@@ -26846,7 +26882,7 @@ function _libFigStyle(e){
 // Miniatura de una fila (72×48): la 3D encima (si tiene) y debajo, de respaldo, la figura teñida y su emoji (cardio: solo
 // el emoji, grande)
 function _libThumbHtml(e){
-  return`<span class="lib-th${e.cardio?' cardio':''}" aria-hidden="true">${thumbImgHtml(e.id,TH_CARD,1)}${e.cardio?'':`<svg class="lib-fig" viewBox="0 0 60 40" style="${_libFigStyle(e)}"><use href="#lib-fig"/></svg>`}<span class="lib-th-e">${esc(e.ic||matOf(_mat(e)).ic)}</span></span>`;
+  return`<span class="lib-th${e.cardio?' cardio':''}" aria-hidden="true">${thumbImgHtml(e.id,TH_CARD,1)}${e.cardio?'':`<svg class="lib-fig" viewBox="0 0 60 40" style="${_libFigStyle(e)}"><use href="#lib-fig"/></svg>`}<span class="lib-th-e">${e.cardio?ic('run'):''}</span></span>`;
 }
 // Lo último que hiciste de un ejercicio, en su medida («80 kg × 10», «45 s», «12 reps»…); '' sin historial o en cardio
 function _libLastTxt(e,h){
@@ -26876,13 +26912,13 @@ function _pickerChipsHtml(){
 }
 function _pickerPlaceHtml(){
   const p=_pickerPlace();
-  return[['g','🏋️ Gimnasio'],['c','🏠 Casa']].map(([k,l])=>`<button type="button" class="lib-pl" role="radio" data-pl="${k}" aria-checked="${p===k}" tabindex="${p===k?0:-1}" onclick="pickerSetPlace(this.dataset.pl)" onkeydown="pickerPlaceKey(event)">${l}</button>`).join('');
+  return[['g',ic('dumbbell')+' Gimnasio'],['c',ic('home')+' Casa']].map(([k,l])=>`<button type="button" class="lib-pl" role="radio" data-pl="${k}" aria-checked="${p===k}" tabindex="${p===k?0:-1}" onclick="pickerSetPlace(this.dataset.pl)" onkeydown="pickerPlaceKey(event)">${l}</button>`).join('');
 }
 // Mosaico de zonas del inicio: figura, nombre y cuántos hay (sin ninguno, desactivada)
 function _pickerTilesHtml(R){
   return`<div class="lib-tiles">${MUSCLE_GROUPS.map(g=>{const n=R.counts.zone[g.id]||0,l=_zoneLbl(g);
     return`<button type="button" class="lib-tile" data-z="${g.id}" onclick="pickerSetMuscle(this.dataset.z)" aria-label="${esc(l)}: ${plural(n,'ejercicio')}"${n?'':' disabled'}>`
-      +`${g.id==='cardio'?'<span class="lib-tile-e" aria-hidden="true">🏃</span>':`<svg class="lib-fig" viewBox="0 0 60 40" aria-hidden="true" style="${_zoneFigStyle(g.id)}"><use href="#lib-fig"/></svg>`}`
+      +`${g.id==='cardio'?'<span class="lib-tile-e" aria-hidden="true">'+ic('run')+'</span>':`<svg class="lib-fig" viewBox="0 0 60 40" aria-hidden="true" style="${_zoneFigStyle(g.id)}"><use href="#lib-fig"/></svg>`}`
       +`<span class="lib-tile-n" aria-hidden="true">${esc(l)}</span><span class="lib-tile-c" aria-hidden="true">${n}</span></button>`;}).join('')}</div>`;
 }
 // Tiras que bajan con la lista: subzonas de la zona (tocar la elegida la quita) y material (Todo, «Sin material» en casa o «Sin máquina» si está
@@ -26909,7 +26945,7 @@ function _pickerRelaxOpt(){
 }
 function _pickerEmptyHtml(){
   const q=_pickerState.search.trim(),r=_pickerRelaxOpt();
-  return`<div class="empty lib-empty"><div class="eic" aria-hidden="true">🔍</div><p>${q?`Sin resultados para «${esc(q)}».`:'Ningún ejercicio con estos filtros.'}</p>${r?`<button type="button" class="btn bs lib-relax" onclick="pickerRelax()">${esc(r.l)}</button>`:''}</div>`;
+  return`<div class="empty lib-empty"><div class="eic" aria-hidden="true">${ic('search')}</div><p>${q?`Sin resultados para «${esc(q)}».`:'Ningún ejercicio con estos filtros.'}</p>${r?`<button type="button" class="btn bs lib-relax" onclick="pickerRelax()">${esc(r.l)}</button>`:''}</div>`;
 }
 // La lista en piezas, en orden: filas {e, g, o} y trozos de HTML {h} (encabezados, tiras, mosaico, avisos)
 function _pickerSeq(R){
@@ -27029,7 +27065,7 @@ function _pickerRefresh(keep){
   set('lib-chips',_pickerChipsHtml());set('lib-place',_pickerPlaceHtml());set('lib-count',_pickerCountHtml(R));
   const cn=document.getElementById('lib-count');if(cn)cn.classList.toggle('more',!!cn.querySelector('.lib-cmore'));
   const kb=document.getElementById('lib-kitbtn'),kit=st.ctx.kit,kn=kit&&kit.length;
-  if(kb){kb.hidden=_pickerPlace()!=='c';kb.innerHTML=`<span aria-hidden="true">🎒</span><span class="lib-wd"> Mi material</span>${kn?`<span class="lib-cn"><span class="lib-wd">· </span>${kn}</span>`:''}`;
+  if(kb){kb.hidden=_pickerPlace()!=='c';kb.innerHTML=`${ic('dumbbell')}<span class="lib-wd"> Mi material</span>${kn?`<span class="lib-cn"><span class="lib-wd">· </span>${kn}</span>`:''}`;
     kb.setAttribute('aria-label','Mi material'+(kn?': '+plural(kn,'elegido'):''));}
   const x=document.getElementById('lib-clear');if(x)x.hidden=!st.search;
   st.seq=_pickerSeq(R);st.pos=0;_pkThReset();
@@ -27257,10 +27293,10 @@ function _libKitHtml(){
   const kit=Array.isArray(S.libKit)?S.libKit:[],N=_libKitN(),ks=Object.keys(MAT).filter(k=>MAT[k].home&&N[k]).sort((a,b)=>(a==='otro')-(b==='otro')||N[b]-N[a]);
   return`<div class="hist-over" onclick="if(event.target===this)closeLibKit()" style="z-index:520"><div class="hist-sheet" id="lib-ksheet" role="dialog" aria-modal="true" aria-labelledby="lib-k-title">
     <div class="hist-sheet-head" style="padding-right:60px"><div class="hist-sheet-hdl"></div>
-      <div class="hist-sheet-title" id="lib-k-title">🎒 Mi material</div><div class="hist-sheet-sub">Marca lo que tienes en casa y verás lo que puedes hacer con ello. Sin material siempre cuenta.</div>
+      <div class="hist-sheet-title" id="lib-k-title">Mi material</div><div class="hist-sheet-sub">Marca lo que tienes en casa y verás lo que puedes hacer con ello. Sin material siempre cuenta.</div>
       <button type="button" class="hist-sheet-close x44" onclick="closeLibKit()" aria-label="Cerrar">✕</button></div>
     <div class="hist-sheet-body">
-      <div class="lib-kit" role="group" aria-label="Tu material">${ks.map(k=>`<button type="button" class="lib-kt" data-k="${k}" aria-pressed="${kit.includes(k)}" aria-label="${esc(MAT[k].l)}: ${plural(N[k],'ejercicio')}" onclick="libKitToggle(this.dataset.k)"><span class="lib-kt-e" aria-hidden="true">${MAT[k].ic}</span><span class="lib-kt-n">${esc(MAT[k].l)}<span class="lib-kt-c" aria-hidden="true">+${N[k]}</span></span></button>`).join('')}</div>
+      <div class="lib-kit" role="group" aria-label="Tu material">${ks.map(k=>`<button type="button" class="lib-kt" data-k="${k}" aria-pressed="${kit.includes(k)}" aria-label="${esc(MAT[k].l)}: ${plural(N[k],'ejercicio')}" onclick="libKitToggle(this.dataset.k)"><span class="lib-kt-n">${esc(MAT[k].l)}<span class="lib-kt-c" aria-hidden="true">+${N[k]}</span></span></button>`).join('')}</div>
       <button type="button" class="btn bp lib-kit-ok" onclick="closeLibKit(1)">Listo · ver ${plural(_pickerShown(),'ejercicio')}</button>
       <button type="button" class="mat-link lib-kit-all" onclick="closeLibKit(1);openMyMaterial(_pickerPlace(),{from:'picker'})">Tu gimnasio y el tipo de sitio ›</button>
     </div></div></div>`;
@@ -27884,7 +27920,6 @@ function settingsChangeStartDay(){
     <div class="ob-days ob-days3" role="group" aria-label="Días de tu rutina" style="margin-bottom:14px">
       ${(()=>{const p=getPlan(),cur=hoyDayKey();return dayKeys(p).map(d=>{const live=_dayLive(p[d]),f=String(p[d].focus||'').split(/\s*[—–]\s*/)[0].trim();
         return`<button type="button" class="ob-day ${cur===d?'sel':''}" aria-pressed="${cur===d}"${live?` onclick="pickNextDay('${d}')"`:' disabled'}>
-        <div class="di" aria-hidden="true">${dayEmoji(p[d])}</div>
         <div class="dn">${esc(dayLabel(d,p))}</div>
         <div class="df">${live?esc(f):'Sin ejercicios'}</div>
       </button>`;}).join('');})()}
@@ -27893,14 +27928,6 @@ function settingsChangeStartDay(){
       <button class="btn bs" onclick="document.getElementById('cmodal-root').innerHTML=''">Cerrar</button>
     </div>
   </div></div>`;
-}
-// (E1a) Emoji de un día según su grupo principal (el que más ejercicios de fuerza tiene; a igualdad, el primero), no
-// según su letra: con el plan de fábrica sale lo de siempre (A 🦵, B 🏋️, C 🚣)
-const DAY_EMOJI={piernas:'🦵',pecho:'🏋️',espalda:'🚣',hombros:'🏋️',biceps:'💪',triceps:'💪',core:'⚡'};
-function dayEmoji(day){
-  const str=_isPlanDay(day)?day.ex.filter(e=>_isPlainObj(e)&&!e.cardio):[],cnt={};let best=null;
-  str.forEach(e=>{const m=e.muscle;if(!m)return;cnt[m]=(cnt[m]||0)+1;if(!best||cnt[m]>cnt[best])best=m;});
-  return DAY_EMOJI[best]||(str.length?'🏋️':_isPlanDay(day)&&day.ex.length?'🏃':'📝');
 }
 function pickNextDay(d){
   if(!_dayLive(getPlan()[d]))return; // (E1a) un día vacío no entra en la rotación

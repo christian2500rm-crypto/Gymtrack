@@ -24,15 +24,15 @@ const LT=['w','bw','r','t','d','c'];
 // («¿Máquina ocupada?») · home sale en «Mi material» (sin material siempre está) · ic su emoji (selector) · mach es una
 // máquina del gimnasio (el filtro «Sin máquina» la quita)
 const MAT={
-  barra:{l:'Barra',ic:'🏋️',cls:'barra'},barraz:{l:'Barra Z',ic:'🏋️',cls:'barra',free:1},smith:{l:'Smith',ic:'🏗️',cls:'barra',mach:1},
-  mancuernas:{l:'Mancuernas',ic:'💪',cls:'manc',free:1,home:1},kettlebell:{l:'Kettlebell',ic:'🔔',cls:'kb',free:1,home:1},
-  disco:{l:'Disco',ic:'💿',cls:'disco',free:1},balon:{l:'Balón medicinal',ic:'🏐',cls:'disco',free:1,home:1},otro:{l:'Otro material',ic:'🧰',cls:'disco',home:1},
-  mochila:{l:'Mochila, garrafas o chaleco',ic:'🎒',cls:'disco',free:1,home:1}, // (E14b, §K.3) carga en casa sin comprar nada
-  maquina:{l:'Máquina',ic:'⚙️',cls:'maq',mach:1},polea:{l:'Polea',ic:'⚡',cls:'polea',mach:1},
-  corporal:{l:'Sin material',ic:'🤸',eq:'Peso corporal',cls:'bw',free:1},dominadas:{l:'Barra de dominadas',ic:'🧗',cls:'bw',home:1},
-  banda:{l:'Banda elástica',ic:'➰',cls:'banda',free:1,home:1},minibanda:{l:'Minibanda',ic:'⭕',cls:'banda',free:1,home:1},
-  trx:{l:'TRX o anillas',ic:'🔗',cls:'none',free:1,home:1},fitball:{l:'Fitball',ic:'🔵',cls:'none',free:1,home:1},rueda:{l:'Rueda abdominal',ic:'🛞',cls:'none',free:1,home:1},
-  comba:{l:'Comba',ic:'🪢',cls:'none',free:1,home:1},step:{l:'Step o cajón',ic:'📦',cls:'none',free:1,home:1},cardio:{l:'Máquina de cardio',ic:'🏃',cls:'none',mach:1}};
+  barra:{l:'Barra',cls:'barra'},barraz:{l:'Barra Z',cls:'barra',free:1},smith:{l:'Smith',cls:'barra',mach:1},
+  mancuernas:{l:'Mancuernas',cls:'manc',free:1,home:1},kettlebell:{l:'Kettlebell',cls:'kb',free:1,home:1},
+  disco:{l:'Disco',cls:'disco',free:1},balon:{l:'Balón medicinal',cls:'disco',free:1,home:1},otro:{l:'Otro material',cls:'disco',home:1},
+  mochila:{l:'Mochila, garrafas o chaleco',cls:'disco',free:1,home:1}, // (E14b, §K.3) carga en casa sin comprar nada
+  maquina:{l:'Máquina',cls:'maq',mach:1},polea:{l:'Polea',cls:'polea',mach:1},
+  corporal:{l:'Sin material',eq:'Peso corporal',cls:'bw',free:1},dominadas:{l:'Barra de dominadas',cls:'bw',home:1},
+  banda:{l:'Banda elástica',cls:'banda',free:1,home:1},minibanda:{l:'Minibanda',cls:'banda',free:1,home:1},
+  trx:{l:'TRX o anillas',cls:'none',free:1,home:1},fitball:{l:'Fitball',cls:'none',free:1,home:1},rueda:{l:'Rueda abdominal',cls:'none',free:1,home:1},
+  comba:{l:'Comba',cls:'none',free:1,home:1},step:{l:'Step o cajón',cls:'none',free:1,home:1},cardio:{l:'Máquina de cardio',cls:'none',mach:1}};
 // Patrón de movimiento (alternativas de «¿Máquina ocupada?» y del Coach): nombre y patrones cercanos
 const PAT_LBL={squat:'Sentadilla',lunge:'Zancada',knee_ext:'Extensión de rodilla',knee_flex:'Flexión de rodilla',hinge:'Bisagra de cadera',
   hip_ext:'Extensión de cadera',hip_abd:'Abducción',hip_add:'Aducción',calf:'Gemelo',push_h:'Empuje horizontal',fly:'Aperturas',pull_v:'Jalón vertical',

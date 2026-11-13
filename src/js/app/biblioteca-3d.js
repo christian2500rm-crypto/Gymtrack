@@ -21,7 +21,7 @@ function thumbImgHtml(x,P,own){
   return`<img class="ga-th${src?' ga-on':''}" alt="" aria-hidden="true" draggable="false" decoding="async" data-ga-thumb="${esc(k)}" data-gw="${P.w}" data-gh="${P.h}"${P.fit==='body'?' data-gfit="body"':''}${P.bg?` data-gbg="${esc(P.bg)}"`:''}${src?` src="${esc(src)}" data-ga-st="ok"`:own&&_pkThOk()?' data-ga-st="w" data-pk-th=""':''}>`;
 }
 // Icono de un ejercicio (dentro de un .exic): miniatura 3D encima del emoji
-function exIconHtml(ex){return`${thumbImgHtml(ex,TH_IC)}<span class="exic-e">${esc(ex&&ex.ic||'💪')}</span>`;}
+function exIconHtml(ex){return`${thumbImgHtml(ex,TH_IC)}<span class="exic-e">${ic(ex&&ex.cardio?'run':'dumbbell')}</span>`;}
 // Solo si hay alguna por empezar: así la caché de IndexedDB no se lee al arrancar en Inicio (que no tiene miniaturas),
 // sino al abrir lo primero que las usa (Entreno, editor, selector), cuando «HOY TOCA» ya no ocupa el hilo principal
 function thumbsIn(root){if(root&&typeof GymAnim!=='undefined'&&GymAnim.thumbLazy&&root.querySelector('img[data-ga-thumb]:not([data-ga-st])')){try{GymAnim.thumbLazy(root);}catch(e){console.error(e);}}}
@@ -383,7 +383,7 @@ function renderBusy(){
   const orig=routineEx(ex),isSub=ex!==orig,A=_busy.alts,sel=A.find(a=>a.lib.id===_busy.sel)||A[0]||null;
   const rows=A.map(a=>{const last=a.lib.cardio?esc(String(a.lib.eq)):_histNoKg(a.hist)?esc(_recValTxt(a.hist.lastAny)):a.hist&&a.hist.last?esc(kgTxt(a.hist.last.v))+' kg':'nuevo';
     return`<button type="button" class="busy-alt" role="radio" aria-checked="${a===sel}" tabindex="${a===sel?0:-1}" data-lib="${esc(a.lib.id)}" onclick="busySelect(this.dataset.lib)" onkeydown="busyKey(event)" aria-label="${esc(a.lib.n)}: ${a.pct} % de músculos en común${a.lib.cardio?'':_histNoKg(a.hist)?', último '+esc(_recValTxt(a.hist.lastAny)):a.hist&&a.hist.last?', último '+esc(kgTxt(a.hist.last.v))+' kilos':''}">
-      <span class="exic" aria-hidden="true">${thumbImgHtml(a.lib.id,TH_IC)}<span class="exic-e">${esc(a.lib.ic||'💪')}</span></span>
+      <span class="exic" aria-hidden="true">${thumbImgHtml(a.lib.id,TH_IC)}<span class="exic-e">${ic(a.lib.cardio?'run':'dumbbell')}</span></span>
       <span class="busy-alt-i"><span class="busy-alt-n">${esc(a.lib.n)}</span><span class="busy-alt-m">${esc(a.lib.eq)}${a.pat&&!a.lib.cardio?' · '+esc(PAT_LBL[a.pat]||''):''}</span></span>
       <span class="busy-alt-r" aria-hidden="true"><span class="pct">${a.pct} %</span><b>${last}</b></span></button>`;}).join('');
   root.innerHTML=`<div class="hist-over" onclick="if(event.target===this)closeBusy()" style="z-index:500"><div class="hist-sheet" id="busy-sheet" role="dialog" aria-modal="true" aria-labelledby="busy-t" style="max-height:calc(92vh - var(--kb));max-height:calc(92dvh - var(--kb))">

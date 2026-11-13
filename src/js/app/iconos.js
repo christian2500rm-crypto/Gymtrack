@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════
 // Un solo juego de iconos (24×24, trazo de 1,9 px, extremos redondos) que toma el color del texto. Sustituye a los emojis que
 // hacían de icono: cada móvil los dibuja distinto y no siguen la paleta. Los emojis se quedan donde son contenido (frases del
-// «Wrapped», pictograma de cada ejercicio y de cada material, opciones del cuestionario).
+// «Wrapped» y lo que escribes tú). Donde un concepto no tiene un icono que se entienda sin leer, no lleva ninguno.
 //   ic('trophy')        → el icono, para escribirlo en una plantilla
 //   icE('🏆')           → el icono de un emoji que viene en los datos (propuestas e ideas del Coach guardan su emoji); si no
 //                         tiene icono, devuelve el propio carácter escapado
@@ -41,6 +41,29 @@ const ICONOS={
   sun:'<circle cx="12" cy="12" r="3.8"/><path d="M12 3.5v2M12 18.5v2M3.5 12h2M18.5 12h2M6 6l1.4 1.4M16.6 16.6 18 18M18 6l-1.4 1.4M7.4 16.6 6 18"/>',
   dumbbell:'<path d="M6.5 6v12M17.5 6v12M3.5 9v6M20.5 9v6M6.5 12h11"/>',
   expand:'<path d="M14 4h6v6M10 20H4v-6M20 4l-7 7M4 20l7-7"/>',
+  // Onboarding y «Mi material»: opciones del cuestionario, tipos de sitio y estados vacíos
+  clipboard:'<rect x="5.5" y="4.5" width="13" height="16" rx="2.5"/><path d="M9.5 4.5v-1h5v1M9 10h6M9 13.5h6M9 17h3.5"/>',
+  upload:'<path d="M12 15.5V4.5M7.5 9 12 4.5 16.5 9M5 19.5h14"/>',
+  heart:'<path d="M12 19.5S4.8 15.3 4.8 9.8A3.9 3.9 0 0 1 12 7.7a3.9 3.9 0 0 1 7.2 2.1c0 5.500-7.200 9.700-7.200 9.700z"/>',
+  battery:'<rect x="3.500" y="8" width="15.500" height="8" rx="2.200"/><path d="M21.200 11v2M7.200 11v2M10.700 11v2M14.200 11v2"/>',
+  kettlebell:'<path d="M8 10V8.300a4 4 0 0 1 8 0V10"/><path d="M7 10h10a6.500 6.500 0 0 1 1.800 4.500 6.800 6 0 0 1-13.600 0A6.500 6.500 0 0 1 7 10z"/>',
+  balance:'<path d="M12 4.500v15M8.500 19.500h7M5.500 7.500h13M5.500 7.500 3.200 13a2.500 2.500 0 0 0 4.600 0zM18.500 7.500 16.200 13a2.500 2.500 0 0 0 4.600 0z"/>',
+  plant:'<path d="M12 20.500V8M12 14.200c0-2.600-1.900-4.200-5-4.200 0 2.600 1.900 4.200 5 4.200zM12 16.800c0-2.400 1.800-3.800 4.800-3.800 0 2.400-1.800 3.800-4.800 3.800zM12 8c0-2.200 1.300-3.700 3.600-4.200.1 2.400-1.200 3.800-3.600 4.200z"/>',
+  question:'<circle cx="12" cy="12" r="8.500"/><path d="M9.600 9.700a2.500 2.500 0 1 1 3.700 2.200c-.8.500-1.300 1-1.300 1.900M12 16.700v.200"/>',
+  sofa:'<path d="M6 11V8.500A2.500 2.500 0 0 1 8.500 6h7A2.500 2.500 0 0 1 18 8.500V11"/><path d="M3.500 13a2 2 0 0 1 4 0v2h9v-2a2 2 0 0 1 4 0v4.500h-17zM6 17.500V19.500M18 17.500V19.500"/>',
+  walk:'<circle cx="12.500" cy="4.500" r="1.700"/><path d="M12.500 8.500 11 14l-2.500 6M11 14l3 2.200 1 4.300M12.500 8.500 9.200 10.300 8.500 13.500M12.500 8.500l2.300 3 2.700.800"/>',
+  run:'<circle cx="15" cy="4.500" r="1.700"/><path d="m13.500 8-2.700 5 3.700 2.500-1 5M10.800 13 8.500 16.500H4.500M13.500 8l-3.700.500L7.500 11.500M13.500 8l2.500 3.200h3.500"/>',
+  waves:'<path d="M3 8c1.500-1.500 3-1.500 4.500 0s3 1.500 4.500 0 3-1.500 4.500 0 3 1.500 4.500 0M3 12.500c1.500-1.500 3-1.500 4.500 0s3 1.500 4.500 0 3-1.500 4.500 0 3 1.500 4.500 0M3 17c1.500-1.500 3-1.500 4.500 0s3 1.500 4.500 0 3-1.500 4.500 0 3 1.500 4.500 0"/>',
+  home:'<path d="M4 11.500 12 4.500l8 7M6 10v9.500h12V10M10 19.500v-5h4v5"/>',
+  building:'<rect x="5" y="3.500" width="14" height="17" rx="1.800"/><path d="M9 7.500h1.500M13.500 7.500H15M9 11h1.500M13.500 11H15M9 14.500h1.500M13.500 14.500H15M10.500 20.500V18h3v2.500"/>',
+  store:'<path d="M4.500 9.500 6 4.500h12l1.500 5M4.500 9.500a2.500 2.500 0 0 0 5 0 2.500 2.500 0 0 0 5 0 2.500 2.500 0 0 0 5 0M6 12v7.500h12V12M10 19.500v-4h4v4"/>',
+  bed:'<path d="M3.500 18.500V6M3.500 14.500h17v4M20.500 14.500v-2a3 3 0 0 0-3-3h-6v5"/><circle cx="7.500" cy="11.500" r="1.600"/>',
+  person:'<circle cx="12" cy="5" r="2"/><path d="M12 9v6.500M7.500 11.500h9M12 15.500 9 20.500M12 15.500l3 5"/>',
+  bench:'<rect x="3.500" y="9" width="17" height="3.500" rx="1.500"/><path d="M7 12.500V19M17 12.500V19M5 19h4M15 19h4"/>',
+  rack:'<path d="M6.500 3.500v17M17.500 3.500v17M4.500 20.500h4M15.500 20.500h4M6.500 9h11M3.500 7v4M20.500 7v4"/>',
+  tree:'<path d="M12 20.500v-6M12 14.500c-3.200 0-5.500-2.300-5.500-5.300S8.800 3.500 12 3.500s5.500 2.700 5.500 5.700-2.300 5.300-5.500 5.300zM9 20.500h6"/>',
+  pencil:'<path d="m4.500 19.500 1-4L16 5a2.100 2.100 0 0 1 3 3L8.500 18.500zM14.500 6.500l3 3"/>',
+  search:'<circle cx="11" cy="11" r="6.500"/><path d="m16 16 4 4"/>',
   // Esfuerzo de la serie: una, dos o tres barras (fácil, justo, al límite)
   e1:'<path d="M6 18v-3"/><path d="M12 18v-7.5" opacity=".28"/><path d="M18 18V6" opacity=".28"/>',
   e2:'<path d="M6 18v-3"/><path d="M12 18v-7.5"/><path d="M18 18V6" opacity=".28"/>',

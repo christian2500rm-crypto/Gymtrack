@@ -3214,14 +3214,14 @@ await safe('workoutThumbs',async()=>{
     _prep11();go('workout');
     for(const d of Object.keys(getPlan())){S.day=d;S.open=null;render();
       for(const ex of getPlan()[d].ex){const c=document.querySelector(`.excard[data-ex="${ex.id}"] .exic`);
-        if(!c||!c.querySelector('.exic-e')||c.querySelector('.exic-e').textContent!==(ex.ic||'💪'))throw new Error('sin emoji de respaldo '+ex.id);
+        if(!c||!(x=>!!x&&!!x.querySelector('svg.ic-dumbbell,svg.ic-run')&&!/\p{Extended_Pictographic}/u.test(x.textContent))(c.querySelector('.exic-e'))||!c.querySelector('.exic-e svg.ic-'+(ex.cardio?'run':'dumbbell')))throw new Error('sin icono de respaldo '+ex.id);
         const im=c.querySelector('img[data-ga-thumb]');if(!im||im.getAttribute('data-ga-thumb')!==exAnimKey(ex))throw new Error('sin miniatura '+ex.id);}}
     // con la caché llena, el siguiente pintado trae las miniaturas puestas
     getPlan()[S.day].ex.forEach(e=>GymAnim.thumb(exAnimKey(e),TH_IC.w,TH_IC.h,TH_IC));render();
     if([...document.querySelectorAll('.excard .exic img')].some(i=>i.getAttribute('data-ga-st')!=='ok'||!i.classList.contains('ga-on')))throw new Error('no se ponen al pintar');
     // un ejercicio sin animación conocida se queda con el emoji
     S.currentPlan=JSON.parse(JSON.stringify(getPlan()));getPlan()[S.day].ex.push({id:'zz11',n:'Raro',ic:'🧪',eq:'x',s:3,r:10});render();
-    const z=document.querySelector('.excard[data-ex="zz11"] .exic');if(!z||z.querySelector('img')||!/🧪/.test(z.textContent))throw new Error('sin animación: '+(z&&z.innerHTML));
+    const z=document.querySelector('.excard[data-ex="zz11"] .exic');if(!z||z.querySelector('img')||!z.querySelector('.exic-e svg.ic-dumbbell')||/🧪/.test(z.textContent))throw new Error('sin animación: '+(z&&z.innerHTML));
     getPlan()[S.day].ex.pop();
     // editor de rutina: icono 3D en cada fila (sin el emoji delante del nombre)
     openRoutineEditor();editorSetDay('B');
@@ -3256,7 +3256,7 @@ await safe('pickerList',async()=>{
       for(const c of rows()){const e=LIB_BY_ID.get(c.dataset.lib),im=c.querySelector('.lib-th img[data-ga-thumb]');
         if(!e)throw new Error('fila sin ejercicio '+c.dataset.lib);
         if(!GymAnim.has(e.id))nf++;
-        if(GymAnim.has(e.id)?(!im||im.getAttribute('data-ga-thumb')!==e.id||im.getAttribute('data-gbg')!=='scene'):(c.querySelector('.lib-th img')||c.querySelector('.lib-th-e').textContent!==e.ic||(!e.cardio&&!c.querySelector('.lib-th svg.lib-fig use'))))throw new Error('miniatura '+e.id);
+        if(GymAnim.has(e.id)?(!im||im.getAttribute('data-ga-thumb')!==e.id||im.getAttribute('data-gbg')!=='scene'):(c.querySelector('.lib-th img')||!c.querySelector('.lib-th-e')||(e.cardio?!c.querySelector('.lib-th-e svg.ic-run'):!!c.querySelector('.lib-th-e').textContent.trim())||(!e.cardio&&!c.querySelector('.lib-th svg.lib-fig use'))))throw new Error('miniatura '+e.id);
         if(c.querySelector('.lib-item-n').textContent.replace(/^★ /,'')!==e.n||c.querySelector('.lib-eqt').textContent!==matLabel(_mat(e)))throw new Error('nombre/material '+e.id);
         const sp=GymAnim.get(e.id),ml=(sp?sp.labels:Object.entries(e.mus).sort((a,b)=>b[1]-a[1]).map(([k])=>MUS_LBL[k])).slice(0,2);
         if(c.querySelector('.lib-meta').textContent!==matLabel(_mat(e))+(ml.length?' · '+ml.map((l,i)=>i?l.charAt(0).toLowerCase()+l.slice(1):l).join(', '):''))throw new Error('músculos '+e.id+' '+c.querySelector('.lib-meta').textContent);
@@ -3706,7 +3706,7 @@ await safe('animKeyNoBorrow',async()=>{
     const L=EXERCISE_DB.find(e=>!e.cardio&&!_A46.has(e.id)&&e.mus.quads),cp=libExToEx(L);un=_hideAnim(L.id);
     // de la biblioteca sin animación: ninguna (nunca la de su grupo), su emoji y sus músculos del catálogo
     if(exAnimKey(cp)!==''||exAnimKey({id:'zz',n:L.n,muscle:L.muscle})!==''||exAnimKey(L)!=='')throw new Error('clave '+exAnimKey(cp));
-    if(thumbImgHtml(cp,TH_IC)!==''||thumbImgHtml(L.id,TH_CARD)!==''||!exIconHtml(cp).includes(esc(L.ic)))throw new Error('icono');
+    if(thumbImgHtml(cp,TH_IC)!==''||thumbImgHtml(L.id,TH_CARD)!==''||!/class="exic-e"><svg class="ic ic-(dumbbell|run)"/.test(exIconHtml(cp))||exIconHtml(cp).includes(L.ic))throw new Error('icono');
     if(JSON.stringify(mmExMuscles(cp))!==JSON.stringify(L.mus)||JSON.stringify(mmExMuscles(L))!==JSON.stringify(L.mus))throw new Error('músculos '+JSON.stringify(mmExMuscles(cp)));
     // personalizado (sin biblioteca): la de su grupo, como siempre; los del plan original y su cardio: la suya
     if(exAnimKey({id:'zz',n:'Mi press',muscle:'pecho'})!==MUSCLE_ANIM.pecho||!mmExMuscles({id:'zz',n:'Mi press',muscle:'pecho'}))throw new Error('respaldo del personalizado');
@@ -3714,7 +3714,7 @@ await safe('animKeyNoBorrow',async()=>{
     // en Entreno: su emoji, sin miniatura ni animación prestadas; en el mapa planificado, sus músculos
     S.currentPlan=JSON.parse(JSON.stringify(getPlan()));getPlan().A.ex.splice(1,0,cp);go('workout');S.day='A';S.open=cp.id;render();await W(10);
     const card=document.querySelector(`.excard[data-ex="${cp.id}"]`);
-    if(!card||card.querySelector('.exic img')||card.querySelector('[data-gym-anim]')||card.querySelector('.exic-e').textContent!==L.ic)throw new Error('tarjeta');
+    if(!card||card.querySelector('.exic img')||card.querySelector('[data-gym-anim]')||!(x=>!!x&&!!x.querySelector('svg.ic-dumbbell,svg.ic-run')&&!/\p{Extended_Pictographic}/u.test(x.textContent))(card.querySelector('.exic-e')))throw new Error('tarjeta');
     if(!mmPlanStats().groups.find(g=>g.id==='cuads').ex.some(e=>e.id===cp.id))throw new Error('volumen planificado');
     openRoutineEditor();editorSetDay('A');const row=document.querySelector('#routine-ed #edi_1');
     if(!row||row.querySelector('img')||!row.textContent.includes(L.n))throw new Error('editor');closeRoutineEditor();
@@ -3754,9 +3754,9 @@ await safe('busyNoAnim',async()=>{
     if(!pv||!pv._ga||pv._gm||pv._ga.key!==A3[2]||pv.querySelectorAll('canvas').length!==1)throw new Error('mapa → 3D: '+A3[2]);
     const na=_busy.alts[1];busySelect(na.lib.id);await W(5);
     pv=document.getElementById('busy-pv');const row=document.querySelector(`#busy-sheet .busy-alt[data-lib="${na.lib.id}"]`);
-    if(!pv||!pv._gm||pv._ga||pv.querySelectorAll('canvas').length!==1||!row||row.querySelector('img')||row.querySelector('.exic-e').textContent!==na.lib.ic)throw new Error('hoja '+na.lib.id);
+    if(!pv||!pv._gm||pv._ga||pv.querySelectorAll('canvas').length!==1||!row||row.querySelector('img')||!(x=>!!x&&!!x.querySelector('svg.ic-dumbbell,svg.ic-run')&&!/\p{Extended_Pictographic}/u.test(x.textContent))(row.querySelector('.exic-e')))throw new Error('hoja '+na.lib.id);
     {const r0=document.querySelector(`#busy-sheet .busy-alt[data-lib="${A3[0]}"]`),r2=document.querySelector(`#busy-sheet .busy-alt[data-lib="${A3[2]}"]`);
-      if(!r0||r0.querySelector('img')||r0.querySelector('.exic-e').textContent!==LIB_BY_ID.get(A3[0]).ic||!r2||!r2.querySelector(`img[data-ga-thumb="${A3[2]}"]`))throw new Error('filas');}
+      if(!r0||r0.querySelector('img')||!(x=>!!x&&!!x.querySelector('svg.ic-dumbbell,svg.ic-run')&&!/\p{Extended_Pictographic}/u.test(x.textContent))(r0.querySelector('.exic-e'))||!r2||!r2.querySelector(`img[data-ga-thumb="${A3[2]}"]`))throw new Error('filas');}
     if(!document.getElementById('busy-info').textContent.includes(MUS_LBL[Object.keys(na.lib.mus).sort((a,b)=>na.lib.mus[b]-na.lib.mus[a])[0]]))throw new Error('músculos de la ficha');
     busySoloHoy();const sb=getPlan()[dk].ex.find(e=>e.sub);if(!sb||sb.lib!==na.lib.id||exAnimKey(sb)!=='')throw new Error('solo hoy sin animación');
     // sin esconderla, «Solo hoy» trae la suya
@@ -5094,12 +5094,12 @@ await safe('pickerNoAnim',async()=>{
     const e=EXERCISE_DB.find(x=>x.pl!=='c'&&!x.cardio&&!_A46.has(x.id)&&Object.keys(x.mus||{}).length),c=EXERCISE_DB.find(x=>x.pl!=='c'&&x.cardio);
     un=_hideAnim(e.id);
     openRoutineEditor();editorSetDay('A');addExerciseUI('A');await W(5);
-    // fila sin 3D: figura teñida y su emoji, sin imagen; cardio: solo el emoji
+    // fila sin 3D: su figura teñida, sin imagen ni emoji; cardio: un icono de línea
     const th=_pkRow(e.id).querySelector('.lib-th');
-    if(th.querySelector('img')||!th.querySelector('.lib-fig use')||th.querySelector('.lib-th-e').textContent!==(e.ic||matOf(_mat(e)).ic)||!/--f-\w+:var\(--green\)/.test(th.querySelector('.lib-fig').getAttribute('style')))throw new Error('fila sin 3D');
+    if(th.querySelector('img')||!th.querySelector('.lib-fig use')||!th.querySelector('.lib-th-e')||th.querySelector('.lib-th-e').textContent.trim()||!/--f-\w+:var\(--green\)/.test(th.querySelector('.lib-fig').getAttribute('style')))throw new Error('fila sin 3D');
     // el emoji, arriba entre las dos figuras (abajo a la derecha tapaba las piernas de la de espaldas)
-    {const r=th.getBoundingClientRect(),m=th.querySelector('.lib-th-e').getBoundingClientRect();if(Math.abs(m.left+m.width/2-(r.left+r.width/2))>2||m.top<r.top||m.bottom>r.top+r.height*.4||m.width>18)throw new Error('emoji tapa la figura');}
-    const tc=_pkRow(c.id).querySelector('.lib-th');if(!tc.classList.contains('cardio')||tc.querySelector('.lib-fig')||!tc.querySelector('.lib-th-e'))throw new Error('fila cardio');
+    {const f=th.querySelector('.lib-fig').getBoundingClientRect(),r=th.getBoundingClientRect();if(f.width<r.width*.8||f.height<r.height*.8)throw new Error('la figura de respaldo no llena la miniatura');}
+    const tc=_pkRow(c.id).querySelector('.lib-th');if(!tc.classList.contains('cardio')||tc.querySelector('.lib-fig')||!tc.querySelector('.lib-th-e svg.ic-run'))throw new Error('fila cardio');
     // ficha sin 3D: su mapa muscular (montado y desmontado al cerrar), nunca un hueco
     _pkRow(e.id).click();await W(10);
     let d=document.getElementById('lib-detail'),mp=d.querySelector('.lib-d-map');
@@ -13064,6 +13064,74 @@ await safe('b3Motor',async()=>{
       window.setTimeout=st0;}
     if(bad.length)throw new Error(bad.slice(0,8).join(' | '));
   }finally{window.setTimeout=st0;els.forEach(el=>{try{GymAnim.unmount(el);}catch(e){}el.remove();});await W(20);}
+});
+await safe('b3Iconos',async()=>{
+  // (B3-9) Iconos de línea en todo el onboarding y en «Mi material»: ninguna pantalla del cuestionario, ni sus hojas, ni «Mi
+  // material», ni el selector, ni las cuatro pestañas enseñan un emoji haciendo de icono. Donde el concepto se entiende sin leer
+  // hay un icono del juego; donde no (lista de seguridad, zonas del cuerpo, cada material suelto), nada.
+  const full=_m3Full(),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const fr=window.frameElement,fw=fr&&fr.style.width,$=s=>document.querySelector(s);
+  // emoji = pictograma de Unicode, salvo los signos que la app usa como letra (flechas, estrellas de favorito, marcas)
+  const EMO=/(?![↔↩↪↗↘↖↙▶◀★☆✔✖✓✕])\p{Extended_Pictographic}/u;
+  const emo=(el,quita)=>{if(!el)return null;const c=el.cloneNode(true);if(quita)c.querySelectorAll(quita).forEach(x=>x.remove());const t=c.textContent,m=EMO.exec(t);return m?t.slice(Math.max(0,m.index-18),m.index+14).replace(/\s+/g,' '):null;};
+  const sin=(name,el,quita)=>{const m=emo(el,quita);E(!m,name+': queda un emoji «'+m+'»');};
+  try{
+    // ── el juego: los iconos nuevos existen y se pintan como los demás
+    const NUEVOS=['clipboard','upload','heart','battery','kettlebell','balance','plant','question','sofa','walk','run','waves','home','building','store','bed','person','bench','rack','tree','pencil','search'];
+    E(NUEVOS.every(n=>/^<svg class="ic ic-/.test(ic(n)))&&Object.keys(ICONOS).length>=52,'faltan iconos nuevos: '+NUEVOS.filter(n=>!ICONOS[n]));
+    E(Object.values(ICONOS).every(p=>!/fill="(?!currentColor|none)/.test(p)&&!/stroke-width/.test(p)),'un icono no sigue el trazo común');
+    // ── bienvenida y todas las pantallas del cuestionario
+    _m3New();await _m3Open('first');
+    E(_ob.step==='ob-rutina','no llega a la rutina propuesta: '+_ob.step);
+    const visto=[],roto=[];
+    for(const k of Object.keys(OB_SCR)){const st=_ob.step;
+      try{_ob.step=k;obRender();await W(3);visto.push(k);sin('pantalla '+k,$('#ob-root'));}catch(e){roto.push(k);}
+      _ob.step=st;}
+    E(visto.length>=18&&['ob-hola','ob-meta','ob-enfoque','ob-exp','ob-lugar','ob-salud','ob-molestias','ob-deporte','ob-rutina'].every(k=>visto.includes(k)),'pantallas del cuestionario repasadas: '+visto.length+' (sin pintar: '+roto+')');
+    // las tarjetas de opción llevan su icono de línea; la lista de seguridad y las zonas, ninguno
+    const scr=async k=>{_ob.step=k;obRender();await W(3);return $('#ob-root');};
+    {let r=await scr('ob-hola');E(r.querySelectorAll('.ob-card .ob-ci svg.ic').length===2&&!!r.querySelector('.ob-link svg.ic-upload'),'bienvenida sin sus iconos');
+      r=await scr('ob-meta');E(r.querySelectorAll('.ob-card').length===5&&[...r.querySelectorAll('.ob-card')].every(c=>c.querySelector('.ob-ci svg.ic'))&&!!r.querySelector('svg.ic-kettlebell')&&!!r.querySelector('svg.ic-heart'),'objetivo: tarjetas sin icono');
+      {const v=r.querySelector('.ob-ci svg.ic').getBoundingClientRect();E(v.width>=22&&v.width<=30,'icono de tarjeta de '+v.width+' px');}
+      E(new Set([...r.querySelectorAll('.ob-ci svg.ic')].map(v=>getComputedStyle(v).color)).size===1,'los iconos de las tarjetas no van del mismo color');
+      r=await scr('ob-exp');E([...r.querySelectorAll('.ob-card')].every(c=>c.querySelector('.ob-ci svg.ic'))&&!!r.querySelector('svg.ic-plant'),'experiencia: tarjetas sin icono');
+      r=await scr('ob-deporte');E(['sofa','walk','run','waves'].every(n=>r.querySelector('.ob-ci svg.ic-'+n)),'deporte: iconos');
+      r=await scr('ob-lugar');E(r.querySelectorAll('.lib-pl svg.ic').length===2&&[...r.querySelectorAll('.ob-card')].every(c=>c.querySelector('.ob-ci svg.ic')),'sitio: iconos');
+      r=await scr('ob-enfoque');E(r.querySelectorAll('.ob-card').length===2&&!r.querySelector('.ob-ci'),'enfoque: icono sin concepto claro');
+      r=await scr('ob-salud');E(r.querySelectorAll('.ob-chk').length>=5&&!r.querySelector('.ob-chk .ob-ci')&&!!r.querySelector('.ob-none .ob-ci svg.ic-done'),'seguridad: la lista lleva pictogramas');
+      r=await scr('ob-molestias');E(r.querySelectorAll('.ob-zc').length===6&&[...r.querySelectorAll('.ob-zc')].every(c=>!c.querySelector('svg,span'))&&!r.querySelector('.ob-chk .ob-ci'),'molestias: las zonas llevan pictograma');
+      // a 320 px no desbordan
+      if(fr){fr.style.width='320px';await W(40);for(const k of ['ob-hola','ob-meta','ob-lugar','ob-deporte']){await scr(k);E($('#onboarding').scrollWidth<=innerWidth+1,'320: '+k+' desborda');}fr.style.width=fw;await W(40);}}
+    // la rutina propuesta y sus hojas
+    {const r=await scr('ob-rutina');sin('rutina propuesta',r);
+      E([...r.querySelectorAll('.ob-ch')].length>=4&&!r.querySelector('.ob-h2 svg'),'rutina: chips o rótulos');
+      for(const [n,f] of [['ver y cambiar',()=>obSee(_ob.tab,1,'th')],['cambiar reparto',()=>obSplitSheet()],['afinar',()=>obTune()],['por qué',()=>obWhyAll()],['lo evitado',()=>obAvoided()],['privacidad',()=>obPrivacy()]]){
+        try{f();await W(5);const sh=$('#ob-sheet-root .ob-sheet');if(sh)sin('hoja «'+n+'»',sh);else if(n==='ver y cambiar')E(false,'no se abre «Ver y cambiar»');}catch(e){E(false,'hoja «'+n+'»: '+e.message);}
+        try{obSheetClose();}catch(e){}}}
+    await _m3Back(full);
+    // ── «Mi material»: los dos sitios, sus tipos con icono y la lista de material sin pictogramas
+    go('dash');openSettings();openMyMaterial();await W(10);
+    for(const k of ['g','c']){matKind(k);await W(5);const m=$('#mat-root');sin('Mi material ('+k+')',m);
+      if(m.querySelector('.mat-pre'))E([...m.querySelectorAll('.mat-pre')].every(b=>b.querySelector('.mat-pre-ic svg.ic'))&&m.querySelectorAll('.lib-pl svg.ic').length===2,'Mi material ('+k+'): tipos de sitio sin icono');
+      else{E(!m.querySelector('.lib-kt-e'),'Mi material ('+k+'): material con pictograma');
+        const b=m.querySelector('.mat-back,[onclick*="matChoose(true)"]');}}
+    {matKind('g');await W(3);try{matChoose(true);}catch(e){}await W(3);if($('#mat-root .mat-pre')){matPreset('propio');await W(5);}
+      const m=$('#mat-root');sin('Mi material, lista',m);E(m.querySelectorAll('.mat-it').length>=10&&!m.querySelector('.lib-kt-e')&&[...m.querySelectorAll('.mat-it')].every(b=>b.querySelector('.lib-kt-n').textContent.trim().length>2),'la lista de material: '+m.querySelectorAll('.mat-it').length);
+      E(document.documentElement.scrollWidth<=innerWidth,'Mi material desborda');}
+    closeMyMaterial();closeSettings();await _m3Back(full);
+    // ── el selector: sitio, zonas, «Mi material» y el vacío
+    showExercisePicker({title:'Añadir ejercicio',muscle:null,onPick:()=>{}});await W(10);
+    {const sh=$('#lib-sheet');sin('selector',sh);
+      E(sh.querySelectorAll('#lib-place .lib-pl svg.ic').length===2&&!!sh.querySelector('.lib-tile[data-z="cardio"] .lib-tile-e svg.ic-run'),'selector: sitio o zona de cardio sin icono');
+      pickerSetPlace('c');await W(5);{const kb=$('#lib-kitbtn');E(kb&&!kb.hidden&&!!kb.querySelector('svg.ic'),'botón «Mi material» sin icono');openLibKit();await W(5);const ks=$('#lib-ksheet');E(ks&&!ks.querySelector('.lib-kt-e')&&ks.querySelectorAll('.lib-kt').length>=5,'hoja de material del selector');sin('hoja de material',ks);closeLibKit();}
+      pickerSetPlace('g');_typ(sh.querySelector('input'),'zzzzqq');await W(5);E(!!sh.querySelector('.lib-empty .eic svg.ic-search'),'búsqueda sin resultados sin su icono');sin('selector vacío',sh);}
+    closeExercisePicker();
+    // ── «Próxima sesión» (Ajustes) y las cuatro pestañas
+    settingsChangeStartDay();await W(5);{const m=$('#cmodal-root');sin('Próxima sesión',m);E(m.querySelectorAll('.ob-day').length>=1&&!m.querySelector('.ob-day .di'),'Próxima sesión: días');}document.getElementById('cmodal-root').innerHTML='';
+    for(const t of ['dash','workout','coach','prog']){go(t);await W(5);sin('pestaña '+t,document.getElementById('screen'),'.wro,.wrp-card');}
+    {const d=getPlan()[S.day],e=d&&d.ex.find(x=>!x.cardio);if(e){go('workout');S.open=e.id;render();await W(10);sin('ejercicio abierto',document.getElementById('screen'));S.open=null;render();}}
+    openSettings();await W(5);sin('Ajustes',$('#settings-root'));closeSettings();
+    if(bad.length)throw new Error([...new Set(bad)].slice(0,10).join(' | '));
+  }finally{if(fr)fr.style.width=fw;try{obSheetClose();closeLibKit();closeExercisePicker();closeMyMaterial();closeSettings();}catch(e){}document.getElementById('cmodal-root').innerHTML='';await _m3Back(full);}
 });
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
