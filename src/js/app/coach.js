@@ -939,6 +939,10 @@ function _basisHolds(p,an){
   if(!p.basis)return true; // propuestas de versiones anteriores: se muestran tal cual
   if(p.basis==='fatigue')return an.fatigue.lastRecoveryTs<(+p.createdAt||0);
   if(p.basis==='volume'){const d=getPlan()[p.dayKey];return !!(d&&Array.isArray(d.ex)&&d.ex.filter(e=>!e.cardio).length<3);}
+  // (C12) «Más minutos de cardio»: el cardio no está entre los ejercicios que se analizan (antes caía en «ese ejercicio no está» y la
+  // propuesta, guardada, no se veía nunca). Vale mientras ese cardio siga por debajo de lo propuesto y no llegues a 150 min a la semana.
+  if(p.basis==='cardio'){const ex=p.exId?findExInPlan(p.exId):null;
+    return !!(ex&&(ex.cardio||exLT(ex)==='c')&&p.to&&(_cardioMin(ex)||0)<p.to.min&&_cardioWeekMin()<150);}
   const it=an.items.find(i=>i.ex.id===p.exId);
   if(!it)return false;
   if(it.hold)return false; // recién cambiado / en descarga / recuperándose: primero sus próximas sesiones

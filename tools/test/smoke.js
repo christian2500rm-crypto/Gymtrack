@@ -13133,5 +13133,29 @@ await safe('b3Iconos',async()=>{
     if(bad.length)throw new Error([...new Set(bad)].slice(0,10).join(' | '));
   }finally{if(fr)fr.style.width=fw;try{obSheetClose();closeLibKit();closeExercisePicker();closeMyMaterial();closeSettings();}catch(e){}document.getElementById('cmodal-root').innerHTML='';await _m3Back(full);}
 });
+await safe('coachCardioVisible',async()=>{
+// (C12) «Más minutos de cardio» (objetivo «Salud y forma» o «Perder grasa») se ve y se aplica: antes se generaba y se guardaba, pero
+// el Coach la daba por caducada (el cardio no está entre los ejercicios que analiza) y nunca salía en la lista. Ya aplicada, deja de valer.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;syncActiveWorkout();
+  const pl={v:1,main:'g',g:placeFromPreset('grande'),c:null};
+  const a={mode:'gen',goal:'salud',sex:'h',exp:'6m2a',days:3,min:60,consec:false,age:'40',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:pl};
+  E(applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(a)),{},{reparto:'dias'})),{answers:a,places:pl}).ok,'aplicar');S.mesocycles=[];
+  const cm=coach_analyze().candidates.find(p=>p.type==='cardio_min');E(!!cm,'sin candidata de cardio');
+  if(cm){S.pendingCoachProposals=_sanitizeProposals([cm]);
+    E(coach_livePending(coach_analyze()).some(p=>p.id===cm.id),'guardada pero no vigente');
+    {const n0=Date.now(),k0=liveDayKeys()[0];if(S.sessions.length<CYCLE_MIN_SESSIONS)S.sessions=[...Array(8)].map((_,i)=>({day:k0,date:'x',ts:n0-(8-i)*2*864e5,durationMin:50}));} // el Coach enseña propuestas desde la sexta sesión
+    go('coach');await W(10);E(!!document.querySelector('#app .proposal-card[data-pid="'+cm.id+'"]'),'sin tarjeta en el Coach');
+    const wk=_cardioWeekMin();applyProposal(cm.id);await W(5);const ex=findExInPlan(cm.exId);
+    E(ex&&_cardioMin(ex)===cm.to.min&&_cardioWeekMin()>wk&&!S.pendingCoachProposals.some(p=>p.id===cm.id),'no se aplica: '+(ex&&ex.r));
+    S.pendingCoachProposals=_sanitizeProposals([cm]);E(!coach_livePending(coach_analyze()).some(p=>p.id===cm.id),'sigue vigente una vez aplicada');
+    // una de un ejercicio que ya no es cardio (o que no está) tampoco vale
+    S.pendingCoachProposals=_sanitizeProposals([Object.assign({},cm,{id:'cardio_min_zz',exId:'zz_no_esta'})]);E(!coach_livePending(coach_analyze()).length,'vigente sin su ejercicio');}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
