@@ -111,6 +111,17 @@ return function (K, G, X) {
       // (con material = algún ejercicio de su menú —el de la clase de la persona: a inicio, prudentes y 65+, sin fondos en banco ni flexión diamante— posible en sus sitios)
       const hay = menuIds(g === 'biceps' ? 'CU' : 'TR', G.clsOf(P, inp)).some(id => { const L = K.BY.get(id); return L && L.lt !== 'c' && (L.dif <= P.difCap || (P.dif2 && L.dif === 2) || (P.mayorExp && L.dif === 2 && ['maquina', 'smith', 'mancuernas'].includes(L.mat))) && Object.values(m.dayPlace).some(pk => K.placeCan(L, inp.places[pk], pk)) && G.safeL(L, inp); });
       if (hay && !str.some(({ r, L }) => G.mainGroup(L) === g || r.slot === (g === 'biceps' ? 'CU' : 'TR'))) bump('prioridad_sin_directo', g); }   // (los fondos en el hueco de tríceps y las dominadas supinas en el de curl cuentan)
+    // v14 (P1): los repartos que elige la persona. Nunca con 65 o más, rutina prudente, 16-17 años, menos de 30 min ni «más glúteo»; «por
+    // músculos», ni a quien empieza ni con «Ganar fuerza»; y si salió el que pidió, es de los que se le ofrecen y la semana lleva sus días
+    { const SOLO_ELEGIDOS = ['tpt3', 'pplt4', 'pplc4', 'grp4', 'pplet5', 'grp5', 'tptpt5', 'pplg6'], roles = Object.values(m.tpl || {});
+      if (SOLO_ELEGIDOS.includes(m.split)) {
+        if (P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo') bump('plan_no_permitido', m.split);
+        if (m.split.indexOf('grp') === 0 && (LVn(P.lvS) <= 1 || inp.goal === 'fuerza')) bump('plan_no_permitido', m.split + ' (por músculos)');
+        if (m.split !== inp.plan) bump('plan_sin_pedir', m.split + ' / ' + inp.plan);
+        if (roles.join(',') !== G.SPLITS[m.split].join(',') && roles.slice().sort().join(',') !== G.SPLITS[m.split].slice().sort().join(',')) bump('plan_dias', roles.join(','));
+      }
+      // un solo día de pierna: el texto del reparto lo dice (y los avisos dan las series si se quedan cortas)
+      if (['tpt3', 'pplt4', 'pplet5', 'pplg6'].includes(m.split) && !textos.some(t => /pierna, 1|un solo día de pierna/.test(t))) bump('plan_texto', m.split); }
     // v14 (P12): «cámbialo en Cambiar reparto» solo se dice a quien la hoja se lo ofrece: nunca con el tope de 65+, de rutina prudente o de 16-17
     if ((P.mayor || P.prud || P.menor) && textos.some(t => /Has dicho \d+ días/.test(t) && /Cambiar reparto/.test(t))) bump('promesa_cambiar_reparto', true);
     // v14 (P11): el día de tirón no lleva tríceps directo (va con el empuje), tampoco con prioridad de brazos

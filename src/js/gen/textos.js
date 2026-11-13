@@ -60,14 +60,32 @@ return function (K, G) {
     const txt = partes.map((p, k) => p.tx + (k === 0 ? ' repeticiones' : '') + ' en ' + joinY(p.q));
     return `${GOAL[inp.goal]}: ${joinY(txt)}${tB && tB !== tP ? `; con tu peso, ${tB}` : ''}.`;
   }
+  // v14 (P1): la frase del reparto cuando es uno de los que elige la persona en «Cambiar reparto» (dice la verdad de cada uno: cuántos días
+  // de pierna y cuántas veces por semana trabaja cada zona)
+  const ELEGIDO = {
+    tpt3: 'Torso, pierna y torso: el torso trabaja 2 veces por semana; la pierna, 1, con su día entero.',
+    pplt4: 'Empuje, tirón, pierna y torso: un solo día de pierna, y cada músculo del torso trabaja 2 veces por semana.',
+    pplc4: 'Empuje, tirón, pierna y un día de cuerpo completo: un día entero de pierna y un repaso el cuarto día; cada músculo trabaja 2 veces por semana.',
+    grp4: 'Un día por grupo de músculos: pecho y tríceps, espalda y bíceps, pierna, y hombros y brazos. Cada músculo trabaja a fondo 1 vez por semana.',
+    pplet5: 'Empuje y tirón dos veces y un día de pierna: el torso trabaja 2 veces por semana; la pierna, 1.',
+    grp5: 'Un día por músculo: pecho, espalda, pierna, hombros y brazos. Cada uno trabaja a fondo 1 vez por semana.',
+    tptpt5: 'Torso tres veces y pierna dos, alternando: el torso recibe más trabajo y la pierna sigue 2 veces por semana.',
+    pplg6: 'Empuje y tirón dos veces, un día de pierna y uno de hombros y brazos: el torso trabaja 2 veces por semana o más; la pierna, 1.',
+  };
   function porque(res, inp) {
     // v3: veces por semana que trabaja cada músculo con cada reparto (con K entrenos que rotan por turnos)
     const m = res.meta, out = [], P = G.effective(inp), d = inp.days, fr = x => Math.round(x * 10) / 10;
     const f = fr({ cc2: m.wd, cc3: m.wd, tp2: m.wd / 2, tp4: m.wd / 2, ppl3: m.wd / 3, tp4cc: 3 * m.wd / 5, ppl6: 2 * m.wd / 6, tpc3: 2 * m.wd / 3, ulppl: 2 * m.wd / 5, tp6: m.wd / 2, fz2: m.wd, pgp3: 2 * m.wd / 3, p3t1: 3 * m.wd / 4, tp5g: 3 * m.wd / 5, tp6g: 4 * m.wd / 6 }[m.split]);
-    const NOMBRE = { tp4: 'torso y pierna en 4 entrenos', tp2: 'torso y pierna en 2 entrenos', cc3: 'cuerpo completo en 3 entrenos', cc2: 'cuerpo completo en 2 entrenos', ppl3: 'empuje, tirón y pierna en 3 entrenos', tpc3: 'torso, pierna y cuerpo completo', pgp3: 'pierna, torso y pierna', p3t1: 'tres días de pierna y uno de torso', tp5g: 'tres días de pierna y dos de torso', tp6g: 'cuatro días de pierna y dos de torso' };
+    const NOMBRE = { tp4: 'torso y pierna en 4 entrenos', tp2: 'torso y pierna en 2 entrenos', cc3: 'cuerpo completo en 3 entrenos', cc2: 'cuerpo completo en 2 entrenos', ppl3: 'empuje, tirón y pierna en 3 entrenos', tpc3: 'torso, pierna y cuerpo completo', pgp3: 'pierna, torso y pierna', p3t1: 'tres días de pierna y uno de torso', tp5g: 'tres días de pierna y dos de torso', tp6g: 'cuatro días de pierna y dos de torso',
+      // v14 (P1): los que faltaban y los repartos que elige la persona
+      ulppl: 'torso, pierna, empuje, tirón y pierna', ppl6: 'empuje, tirón y pierna dos veces', tp6: 'torso y pierna tres veces', tp4cc: 'torso y pierna dos veces y un día de cuerpo completo',
+      tpt3: 'torso, pierna y torso', pplt4: 'empuje, tirón, pierna y torso', pplc4: 'empuje, tirón, pierna y cuerpo completo', grp4: 'un día por grupo de músculos', pplet5: 'empuje y tirón dos veces y un día de pierna',
+      grp5: 'un día por músculo', tptpt5: 'torso tres veces y pierna dos', pplg6: 'empuje y tirón dos veces, pierna, y hombros y brazos' };
     // reparto
     if (m.split !== m.table && m.split !== 'fz2' && !(m.table === 'cc2' && m.split === 'cc3' && inp.daysOther) && !(inp.daysOther && m.K === m.wd)) {
-      if (m.reparto === 'dias' && m.K < m.wd) out.push(`Con tu material no salen ${m.wd} entrenos distintos sin repetir ejercicios ni usar variantes raras: te propongo ${NOMBRE[m.split] || m.K + ' entrenos'} que se repiten.`);   // k_material
+      // v14 (P1): la persona eligió un reparto en «Cambiar reparto» y con su material (o sus molestias) no sale
+      if (m.plan && m.table === m.plan) out.push(`${P.zonaActiva ? 'Con tu material y tus molestias' : 'Con tu material'} no sale bien el reparto que elegiste (${NOMBRE[m.plan] || m.plan}): te propongo ${NOMBRE[m.split] || m.K + ' entrenos'}${m.K < m.wd ? ' que se repiten' : ''}.`);
+      else if (m.reparto === 'dias' && m.K < m.wd) out.push(`Con tu material no salen ${m.wd} entrenos distintos sin repetir ejercicios ni usar variantes raras: te propongo ${NOMBRE[m.split] || m.K + ' entrenos'} que se repiten.`);   // k_material
       else { const conZ = P.zonaActiva ? 'Con tu material y tus molestias' : 'Con tu material';   // v10: con el hombro doliendo no hay dominadas: no es solo el material
         out.push(m.table === 'ppl3' ? `${conZ} no sale bien un día solo de tirón: te propongo torso y pierna.` : `${conZ} no salía bien el reparto habitual: te propongo ${NOMBRE[m.split] || m.split}.`); }
     }
@@ -77,6 +95,10 @@ return function (K, G) {
     else if (m.split === 'cc2' || m.split === 'cc3') out.push(`Cuerpo completo en ${m.K} entrenos: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana.`);
     else if (m.split === 'tp2') out.push(`Torso y pierna: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana y las sesiones no se alargan.`);
     else if (m.split === 'tp4') out.push(P.level === 'I' || P.level === 'A' ? 'Torso y pierna en 4 entrenos: para cada zona, un día más pesado y otro más ligero.' : `Torso y pierna en 4 entrenos: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana.`);
+    else if (ELEGIDO[m.split]) { out.push(ELEGIDO[m.split]);
+      // «por músculos»: por qué los días de un solo grupo salen más cortos (el tope de 10 series por músculo y sesión, V9)
+      if (m.split.indexOf('grp') === 0 && res.det.some(dd => inp.min - dd.minutos >= 10)) out.push('Los días de un solo grupo salen más cortos: pasadas unas 10 series de un músculo en la misma sesión, las siguientes aportan poco.'); }
+    else if (m.split === 'ppl3' && m.wd === 3) out.push('Empuje, tirón y pierna: cada zona tiene su día y trabaja 1 vez por semana, con la sesión entera para ella.');
     else if (m.split === 'ppl3') out.push(`Empuje, tirón y pierna: con ${m.wd} días, cada músculo ${num(f)} veces por semana sin repetir dos días seguidos.`);
     else if (m.split === 'ppl6') out.push('Empuje, tirón y pierna dos veces, con ejercicios distintos cada vez: 6 entrenos, uno por día; cada músculo trabaja 2 veces por semana.');
     else if (m.split === 'ulppl') out.push('Torso, pierna, empuje, tirón y pierna: 5 entrenos distintos, uno por día; cada músculo trabaja 2 veces por semana.');

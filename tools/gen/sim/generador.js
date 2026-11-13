@@ -108,6 +108,16 @@ const TPL = {
   // v9 (J-10): «Ganar fuerza» con dos sitios: los días de casa son de accesorios (los básicos, en el gimnasio): torso y, si hay 2, pierna
   TC: [['TH', 1], ['PI', 1, ['push_v']], ['TV', 2], ['RE', 2], ['PV', 2], ['RA', 3], ['CU', 3], ['TR', 3]],
   PC: [['LU', 1], ['HE', 1], ['KF', 2], ['HI', 2], ['CA', 2], ['CO', 2]],
+  // v14 (P1, repaso del reparto): tipos de día para los repartos que elige la persona. PU = el único día de pierna de la semana (completo);
+  // PT, EB y HB = «por músculos» con 4 días (pecho y tríceps, espalda y bíceps, hombros y brazos); PE, ES, HO y BR = con 5 (uno por músculo)
+  PU: [['SQ', 1], ['HI', 1], ['LU', 2], ['KF', 2], ['HE', 2], ['CO', 2], ['CA', 2], ['KE', 3]],
+  PT: [['PH', 1], ['PI', 1], ['FL', 2], ['TR', 2], ['TR', 2], ['CO', 2], ['FL', 3]],
+  EB: [['TV', 1], ['TH', 1], ['TH', 2], ['RE', 2], ['CU', 2], ['CU', 2], ['CA', 3]],
+  HB: [['PV', 1], ['RA', 2], ['RE', 2], ['CU', 2], ['TR', 2], ['CO', 2], ['RA', 3]],
+  PE: [['PH', 1], ['PI', 1], ['FL', 2], ['FL', 2], ['CO', 2], ['CA', 3]],
+  ES: [['TV', 1], ['TH', 1], ['TH', 2], ['TV', 2], ['RE', 2], ['CO', 3]],
+  HO: [['PV', 1], ['RA', 2], ['RE', 2], ['RA', 2], ['CO', 2], ['CA', 2]],
+  BR: [['CU', 2], ['TR', 2], ['CU', 2], ['TR', 2], ['CO', 2], ['CU', 3], ['TR', 3]],
 };
 // «Ganar fuerza» (§E.2): A sentadilla + banca · B peso muerto + militar · C variante de sentadilla + inclinado · P2 peso muerto · T2 press militar
 const TPL_FUERZA = {
@@ -127,7 +137,8 @@ const TPL_FUERZA_K2 = {
 const LIFT_ID = { SQ: 'lib_back_squat', PH: 'lib_bench_press', HI: 'lib_deadlift', PV: 'lib_ohp_bb' };
 // «Levantamiento objetivo» por plantilla (§E.2: A sentadilla + banca, B peso muerto + militar, C variantes; P1 sentadilla, P2 peso muerto; T1 banca, T2 militar)
 const LIFT = { CCA: ['SQ', 'PH'], CCB: ['HI', 'PV'], CCC: [], T1: ['PH'], T2: ['PV'], P1: ['SQ'], P2: ['HI'], E: ['PH'], Ti: [], Pi: ['SQ', 'HI'],
-  E1: ['PH'], E2: ['PV'], Ti1: [], Ti2: [], Pi1: ['SQ'], Pi2: ['HI'], T3: [], P3: [], TC: [], PC: [] };
+  E1: ['PH'], E2: ['PV'], Ti1: [], Ti2: [], Pi1: ['SQ'], Pi2: ['HI'], T3: [], P3: [], TC: [], PC: [],
+  PU: ['SQ', 'HI'], PT: ['PH'], EB: [], HB: ['PV'], PE: ['PH'], ES: [], HO: ['PV'], BR: [] };   // v14 (P1): PU lleva sentadilla y peso muerto, como Pi
 const LIFT_K2 = { T1: ['PH', 'PV'], P1: ['SQ', 'HI'], E: ['PH', 'PV'], Pi: ['SQ', 'HI'], CCA: ['SQ', 'PH'], CCB: ['HI', 'PV'] };
 const SPLITS = {
   cc2: ['CCA', 'CCB'], cc3: ['CCA', 'CCB', 'CCC'], tp2: ['T1', 'P1'], tp4: ['T1', 'P1', 'T2', 'P2'], ppl3: ['E', 'Ti', 'Pi'],
@@ -135,16 +146,25 @@ const SPLITS = {
   // v3: reparto 'dias' (D-09; 05 §2.2): torso/pierna/cuerpo completo (3 días seguidos), «ULPPL» (5), torso/pierna ×3 (6, principiantes sin C-21)
   tpc3: ['T1', 'P1', 'CCB'], ulppl: ['T1', 'P1', 'E', 'Ti', 'P2'], tp6: ['T1', 'P1', 'T2', 'P2', 'T3', 'P3'],
   // v13 (D10, E16e): «más glúteo y pierna» con un entreno por día: más días de pierna que de torso
+  // v14 (P1): repartos que la persona puede elegir en «Cambiar reparto» (además de cc3, tpc3, ppl3, tp4, ulppl, ppl6 y tp6): con un solo día
+  // de pierna (tpt3, pplt4, pplet5, pplg6), con un día entero de pierna y un repaso (pplc4), con más torso (tptpt5) y «por músculos» (grp4, grp5)
+  tpt3: ['T1', 'PU', 'T2'], pplt4: ['E', 'Ti', 'PU', 'T2'], pplc4: ['E', 'Ti', 'Pi', 'CCB'], grp4: ['PT', 'EB', 'PU', 'HB'],
+  pplet5: ['E1', 'Ti1', 'PU', 'E2', 'Ti2'], grp5: ['PE', 'ES', 'PU', 'HO', 'BR'], tptpt5: ['T1', 'P1', 'T2', 'P2', 'T3'], pplg6: ['E1', 'Ti1', 'PU', 'E2', 'Ti2', 'HB'],
   pgp3: ['P1', 'T1', 'P2'], p3t1: ['P1', 'T1', 'P2', 'P3'], tp5g: ['P1', 'T1', 'P2', 'T2', 'P3'], tp6g: ['P1', 'T1', 'P2', 'T2', 'P3', 'Pi2'],
 };
 const CHAIN = ['ppl3', 'tp4', 'tp2', 'cc3', 'cc2'];
 const TWINS = [['CCA', 'CCB'], ['T1', 'T2'], ['P1', 'P2'], ['E1', 'E2'], ['Ti1', 'Ti2'], ['Pi1', 'Pi2']];
 const LIGHT = ['T2', 'P2', 'CCB', 'E2', 'Ti2', 'Pi2', 'T3', 'P3'];
 const ZT = ['pecho', 'espalda', 'hombros', 'biceps', 'triceps', 'abdomen'], ZP = ['cuads', 'isquios', 'gluteos', 'gemelos', 'abdomen'], ZE = ['pecho', 'hombros', 'triceps', 'abdomen'], ZTi = ['espalda', 'biceps', 'hombros', 'abdomen', 'gemelos'];   // v9 (J-15): core y gemelos en el día de tirón
-const ZONA_TPL = { CCA: null, CCB: null, CCC: null, T1: ZT, T2: ZT, T3: ZT, P1: ZP, P2: ZP, P3: ZP, E: ZE, E1: ZE, E2: ZE, Ti: ZTi, Ti1: ZTi, Ti2: ZTi, Pi: ZP, Pi1: ZP, Pi2: ZP, TC: ZT, PC: ZP };
-const LEG_TPL = ['CCA', 'CCB', 'CCC', 'P1', 'P2', 'P3', 'Pi', 'Pi1', 'Pi2', 'PC'];
+const ZPT = ['pecho', 'triceps', 'abdomen'], ZEB = ['espalda', 'biceps', 'hombro_post', 'abdomen', 'gemelos'], ZHB = ['hombros', 'biceps', 'triceps', 'abdomen'];   // v14 (P1)
+const ZONA_TPL = { PU: ZP, PT: ZPT, EB: ZEB, HB: ZHB, PE: ['pecho', 'abdomen', 'gemelos'], ES: ['espalda', 'hombro_post', 'abdomen'], HO: ['hombros', 'abdomen', 'gemelos'], BR: ['biceps', 'triceps', 'abdomen'], CCA: null, CCB: null, CCC: null, T1: ZT, T2: ZT, T3: ZT, P1: ZP, P2: ZP, P3: ZP, E: ZE, E1: ZE, E2: ZE, Ti: ZTi, Ti1: ZTi, Ti2: ZTi, Pi: ZP, Pi1: ZP, Pi2: ZP, TC: ZT, PC: ZP };
+const DIA_ELEGIDO = ['PU', 'PT', 'EB', 'HB', 'PE', 'ES', 'HO', 'BR'];   // v14 (P1): los tipos de día que solo salen en un reparto elegido
+const LEG_TPL = ['PU', 'CCA', 'CCB', 'CCC', 'P1', 'P2', 'P3', 'Pi', 'Pi1', 'Pi2', 'PC'];
 const RESERVA = { pecho: ['PI', 'PH', 'FL'], espalda: ['TH', 'TV'], cuads: ['KE', 'SQ', 'LU'], gluteos: ['HE', 'AB'], isquios: ['KF'], hombro_lat: ['RA'], hombro_post: ['RE'], biceps: ['CU'], triceps: ['TR'], gemelos: ['CA'], abdomen: ['CO'] };
 const ROLE_BASE = r => r.replace(/#\d+$/, '');
+// nombre de cada tipo de día (lo que ve la persona)
+const NOMBRE_DIA = { CCA: 'Cuerpo completo', CCB: 'Cuerpo completo', CCC: 'Cuerpo completo', T1: 'Torso', T2: 'Torso', T3: 'Torso', P1: 'Pierna', P2: 'Pierna', P3: 'Pierna', E: 'Empuje', E1: 'Empuje', E2: 'Empuje', Ti: 'Tirón', Ti1: 'Tirón', Ti2: 'Tirón', Pi: 'Pierna', Pi1: 'Pierna', Pi2: 'Pierna', TC: 'Torso', PC: 'Pierna',
+  PU: 'Pierna', PT: 'Pecho y tríceps', EB: 'Espalda y bíceps', HB: 'Hombros y brazos', PE: 'Pecho', ES: 'Espalda', HO: 'Hombros', BR: 'Brazos' };   // v14 (P1)
 // v8 (J-12, J-22): repetir en la semana el mejor ejercicio cuesta 1,25 escalones (gana a una variante 2 escalones peor, al suelo con «sin
 // suelo» y a lo «con cuidado» de una zona que duele; pierde ante otra igual de buena: variación moderada, Kassiano 2022)
 const REP_PEN = 1.25;
@@ -290,7 +310,7 @@ module.exports = function (K, OPT) {
       goal: a.goal, level, modes, days: a.days, min: a.min, consec: !!a.consec, age: a.age, sport: a.sport || 'no', prio: a.enfoque === 'gluteo' ? (a.prio || []).filter(p => p !== 'gluteos').slice(0, 1) : (a.prio || []).slice(0, 2),
       pref, style: a.style || 'igual', warm: a.warm || 'normal', cardioEnd: a.cardioEnd || 'auto', power: !!a.power,
       avoid: a.avoid || [], places: a.places, daysOther: a.daysOther || 0, zones, prudent, keep: null, pins: null, enfoque: a.enfoque === 'gluteo' ? 'gluteo' : null,
-      salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
+      plan: typeof a.plan === 'string' && SPLITS[a.plan] ? a.plan : null, salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
     };
   }
 
@@ -339,7 +359,7 @@ module.exports = function (K, OPT) {
         if (!h.x) return;
         if (h.x.pass === 'near') { h1++; score += 5; }
         if (MN.std(h.x.lib) === 'C') { h1++; score += 3; }
-        if (h.x.rep && OPT.reparto === 'dias' && st.T.length >= 4) { h1++; score += 3; }   // v8: en 'dias' con 4-6 entrenos (gemelas), repetir en un hueco 1 = no hay K entrenos distintos
+        if (h.x.rep && OPT.reparto === 'dias' && st.T.length >= 4 && st.opt.id !== st.inp.plan) { h1++; score += 3; }   // v8: en 'dias' con 4-6 entrenos (gemelas), repetir en un hueco 1 = no hay K entrenos distintos
         score += h.x.eff || 0;
       } else if (h.prio === 2) { if (h.empty && !h.sust) score += 2; else if (h.x && h.on) score += 0.3 * (h.x.eff || 0) + (MN.std(h.x.lib) === 'C' ? 1 : 0); }
     }));
@@ -348,7 +368,7 @@ module.exports = function (K, OPT) {
   function seedSrc(inp) {
     const pl = {}; for (const k of ['g', 'c']) { const p = inp.places && inp.places[k]; if (p) pl[k] = { mats: [...p.mats].sort(), acc: [...(p.acc || [])].sort(), mach: p.mach === 'all' ? 'all' : [...(p.mach || [])].sort(), card: p.card === 'all' ? 'all' : [...(p.card || [])].sort(), dbMax: p.dbMax, kb: p.kb }; }
     return { goal: inp.goal, level: inp.level, modes: [...inp.modes].sort(), days: inp.days, min: inp.min, consec: inp.consec, age: inp.age, sport: inp.sport, prio: [...inp.prio].sort(), pref: inp.pref,
-      style: inp.style, warm: inp.warm, cardioEnd: inp.cardioEnd, power: inp.power, avoid: [...inp.avoid].sort(), main: inp.places.main, pl, daysOther: inp.daysOther, zones: inp.zones, prudent: !!inp.prudent, v: GEN_VERSION, cat: CAT_SIG , ...(inp.enfoque ? { enfoque: inp.enfoque } : {}) };
+      style: inp.style, warm: inp.warm, cardioEnd: inp.cardioEnd, power: inp.power, avoid: [...inp.avoid].sort(), main: inp.places.main, pl, daysOther: inp.daysOther, zones: inp.zones, prudent: !!inp.prudent, v: GEN_VERSION, cat: CAT_SIG , ...(inp.enfoque ? { enfoque: inp.enfoque } : {}), ...(inp.plan ? { plan: inp.plan } : {}) };
   }
 
   function effective(inp) {
@@ -434,7 +454,7 @@ module.exports = function (K, OPT) {
     const d = inp.days, wd = P.wd, beginner = LV[P.lvS] <= LV.P, col65 = P.mayor || P.prud, warn = [], why = [];
     const fuerzaIA = inp.goal === 'fuerza' && LV[P.level] >= LV.I && !P.cauto;
     const exp = LV[P.level] >= LV.I;
-    let id, chain, kMotivo = null;
+    let id, chain, kMotivo = null, rec = null;
     if (P.capP) why.push({ c: 'cap_principiante', p: { dias: d, pesas: wd } });
     // v7 (I-12, C-23): el tope de días de 65+ y el de rutina prudente, cada uno con su texto y su motivo
     if (col65 && d > wd) why.push({ c: P.mayor ? 'cap65' : 'capPrudent', p: { dias: d, pesas: wd, motivo: P.mayor ? 'edad' : inp.age === '16' && LV[P.level] < LV.I ? 'menor' : inp.age === 'nd' ? 'nd' : P.posparto ? 'posparto' : 'salud' } });   // v10: a 16-17 con experiencia y prudente por su salud, el motivo es la salud
@@ -457,6 +477,10 @@ module.exports = function (K, OPT) {
         if (g) { id = g; chain = { pgp3: ['pgp3', 'cc3', 'cc2'], p3t1: ['p3t1', 'tp4', 'tp2', 'cc3', 'cc2'], tp5g: ['tp5g', 'ulppl', 'tp4', 'tp2', 'cc3', 'cc2'],
           tp6g: ['tp6g', 'ppl6', 'tp6', 'tp4', 'tp2', 'cc3', 'cc2'] }[g]; }
       }
+      // v14 (P1): el reparto que eligió la persona en «Cambiar reparto» (inp.plan), si es de los que se le ofrecen (planesDe). Si su material
+      // no da (validación dura o hueco principal vacío o de respaldo), la cadena sigue con el reparto de siempre y el texto lo dice
+      rec = id;
+      if (inp.plan && inp.plan !== id && planesDe(inp, P, id).includes(inp.plan)) { chain = [inp.plan].concat(chain.filter(x => x !== inp.plan)); id = inp.plan; }
     } else {
       if (col65) {
         if (wd <= 2) id = 'cc2';
@@ -474,8 +498,20 @@ module.exports = function (K, OPT) {
       }
       chain = CHAIN.slice(CHAIN.indexOf(id));
     }
-    return { id, warn, why, chain, kMotivo };
+    return { id, warn, why, chain, kMotivo, rec: rec || id };
   }
+  // v14 (P1): los repartos que se ofrecen a esta persona además del recomendado (rec), todos con un entreno distinto por día de pesas.
+  // A nadie con 65 o más, rutina prudente o 16-17 años (siguen con el suyo: sus reglas no se tocan), ni con menos de 30 min (el exprés y
+  // el modo corto eligen por familias), ni con «más glúteo» (ya eligió su reparto). «Por músculos» (grp…), ni a quien empieza (aprende
+  // antes repitiendo) ni con «Ganar fuerza» (cada levantamiento saldría una vez por semana sin más práctica); cuerpo completo ×3, no con días seguidos
+  const PLANES = { 3: ['cc3', 'tpc3', 'tpt3', 'ppl3'], 4: ['tp4', 'pplt4', 'pplc4', 'grp4'], 5: ['ulppl', 'tptpt5', 'pplet5', 'grp5'], 6: ['ppl6', 'tp6', 'pplg6'] };
+  function planesDe(inp, P, rec) {
+    if (OPT.reparto !== 'dias' || P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo') return [];
+    const beginner = LV[P.lvS] <= LV.P;
+    return (PLANES[P.wd] || []).filter(id => id !== rec && !(/^grp/.test(id) && (beginner || inp.goal === 'fuerza')) && !(id === 'cc3' && inp.consec));
+  }
+  // lo que usa la app para montar «Cambiar reparto»: el recomendado y los demás (ella genera cada uno y enseña solo los que salen)
+  function planes(inp) { const P = effective(inp), rec = tableSplit(Object.assign({}, inp, { plan: null }), P).rec; return { rec, otros: planesDe(inp, P, rec) }; }
   function splitOptions(inp, P) {
     const tb = tableSplit(inp, P);
     let ids = tb.chain.filter(id => SPLITS[id].length <= P.wd);
@@ -493,7 +529,7 @@ module.exports = function (K, OPT) {
       const gymDays = inp.places.main === 'g' ? P.wd - dOther : dOther, homeDays = P.wd - gymDays;
       if (gymDays >= 2 && homeDays >= 1) {
         const casa = homeDays === 1 ? ['TC'] : ['TC', 'PC'];
-        out.push({ id: 'fz2', roles: ['CCA', 'CCB'].concat(casa), K: 2 + casa.length, table: tb.id, warn: tb.warn, why: tb.why.concat([{ c: 'fuerza_2sitios', p: { gym: gymDays, casa: homeDays } }]), dOther, kMotivo: null,
+        out.push({ id: 'fz2', roles: ['CCA', 'CCB'].concat(casa), K: 2 + casa.length, table: tb.id, rec: tb.rec, warn: tb.warn, why: tb.why.concat([{ c: 'fuerza_2sitios', p: { gym: gymDays, casa: homeDays } }]), dOther, kMotivo: null,
           alternas: gymDays % 2 === 1, sitios: ['g', 'g'].concat(casa.map(() => 'c')), freq: [gymDays / 2, gymDays / 2].concat(casa.map(() => homeDays / casa.length)) });
       }
     }
@@ -504,7 +540,7 @@ module.exports = function (K, OPT) {
         if (!(Number.isInteger(m) && m >= 1 && m <= K0 - 1)) { sid = { 2: 'cc2', 3: (inp.consec && !(P.mayor || P.prud)) ? 'tpc3' : 'cc3', 4: 'tp4', 5: beginner ? 'tp4cc' : 'ulppl', 6: beginner ? 'tp6' : 'ppl6' }[P.wd]; roles = SPLITS[sid].slice(); }
       }
       if (out.some(o => o.id === sid)) continue;
-      out.push({ id: sid, roles, K: roles.length, table: tb.id, warn: tb.warn, why: tb.why, dOther, kMotivo: tb.kMotivo, alternas: sid === 'cc2' && P.wd === 3 || sid === 'tp2' && P.wd === 3 });
+      out.push({ id: sid, roles, K: roles.length, table: tb.id, rec: tb.rec, warn: tb.warn, why: tb.why, dOther, kMotivo: tb.kMotivo, alternas: sid === 'cc2' && P.wd === 3 || sid === 'tp2' && P.wd === 3 });
     }
     return out;
   }
@@ -547,8 +583,8 @@ module.exports = function (K, OPT) {
       def = def.slice();
       // v7 (D-03): un levantamiento que es «con cuidado» de una zona que duele ahora deja de ser levantamiento objetivo (se elige la variante amable)
       const lift = ((fz && !P.cauto) ? ((k2 && LIFT_K2[rb]) || LIFT[rb] || []) : []).filter(id => !ahoraCuidado(P, LIFT_ID[id]));
-      if (P.powerOk && ['CCA', 'P1', 'Pi', 'Pi1'].includes(rb)) def = [['PW', 2]].concat(def);
-      if (P.prioG.has('gluteos') && ['P1', 'P2', 'P3', 'Pi', 'Pi1', 'Pi2'].includes(rb)) def = def.concat([['AB', P.enfoque ? 2 : 3]]);   // v2: abductores con prioridad glúteos (v12: secundario con «más glúteo»)
+      if (P.powerOk && ['CCA', 'P1', 'Pi', 'Pi1', 'PU'].includes(rb)) def = [['PW', 2]].concat(def);
+      if (P.prioG.has('gluteos') && ['P1', 'P2', 'P3', 'Pi', 'Pi1', 'Pi2', 'PU'].includes(rb)) def = def.concat([['AB', P.enfoque ? 2 : 3]]);   // v2: abductores con prioridad glúteos (v12: secundario con «más glúteo»)
       // v12 (D10): con «más glúteo», el hip thrust o el puente va justo tras el primero en los días de pierna (secundario, pero de lo último
       // en recortarse: h.glu) y los de cuerpo completo llevan uno
       // (si la plantilla ya lo tiene como principal —P2, Pi2, P3, PC—, se queda como está)
@@ -596,6 +632,8 @@ module.exports = function (K, OPT) {
     // queda el primer día que tenga una bisagra); después los huecos 1 y por último los 2 (§E.8)
     const isLift = (t, h) => h.prio === 1 && t.lift.includes(h.id);
     for (const pr of [0, 1, 2]) T.forEach(t => t.slots.filter(h => !h.x && !h.empty && (pr === 0 ? isLift(t, h) : h.prio === pr)).forEach(h => { const x = fill(h, t, st); if (x) { h.x = x; h.on = true; } else h.empty = true; }));
+    // v14 (P3): un extra de brazos que no encontró su aislamiento vuelve a ser el accesorio de siempre (entra solo si falta volumen): no es un hueco vacío
+    T.forEach(t => t.slots.forEach(h => { if (h.xbr && h.empty) { h.prio = 3; h.empty = false; delete h.xbr; } }));
     // 65+: al menos un unilateral de pierna a la semana (si ninguna plantilla tiene LU, se añade a la primera de pierna)
     // v2: un hueco de press de hombros que el material o la seguridad dejan vacío se sustituye por otro press (inclinado o, si no, plano):
     // sin esto, en casa sin material el día de torso se queda con un solo empuje y falla la cobertura (V5)
@@ -857,6 +895,7 @@ module.exports = function (K, OPT) {
       if (st.P.noFloor && TAGS.suelo.has(L.id) && h.prio >= 2 && !h.prot && !h.obl && !h.fijo && !['CO', 'RE'].includes(h.id)) continue;
       if ((SLOT[h.id].tipo === 'multi' || h.prio === 1) && !L.c) continue;     // aislamientos nunca en un hueco multiarticular ni como principal
       if (!musOk(L, h.id)) continue;                                          // D-04: músculo objetivo
+      if (h.xbr && !['curl', 'tri'].includes(L.pat)) continue;                // v14 (P3): el extra de brazos es un aislamiento (unos fondos son otro empuje y descuadran tirón:empuje)
       if (!CORE_PATS.includes(L.pat) && (pc[L.pat] || 0) >= 2) continue;     // como mucho 2 del mismo patrón en el día
       // v7: en cuerpo completo, un hueco de reserva o un accesorio no repite un patrón que ya está en el día (dos hip thrust o dos elevaciones
       // laterales en un CC: mejor una serie más del que ya está; medida patron_x2_cc del diagnóstico, objetivo ≤ 2 %)
@@ -1626,7 +1665,10 @@ module.exports = function (K, OPT) {
     const tolG = (g, t) => admite(g, t) ? tol : Math.max(tol, 2 * t.f);
     // (o, si el relleno de ese día ya no encontró nada que cupiera en los rangos, en lo alto del rango de siempre —objetivo × 1,3—: un
     // ejercicio que carga dos grupos no sube si uno de ellos ya está arriba)
-    const full = (g, t) => v[g] >= topU(g) - tolG(g, t) - 1e-9 || (t.rellenoLleno && v[g] >= st.tgt.top[g] - tolG(g, t) - 1e-9) || v[g] >= st.tgt.ceil[g] - tol || !hayMat(st, g) || (g === 'pecho' && teLleno) || (g === 'hombro_post' && espTop);
+    const full = (g, t) => v[g] >= topU(g) - tolG(g, t) - 1e-9 || (t.rellenoLleno && v[g] >= st.tgt.top[g] - tolG(g, t) - 1e-9) || v[g] >= st.tgt.ceil[g] - tol || !hayMat(st, g) || (g === 'pecho' && teLleno) || (g === 'hombro_post' && espTop)
+      // v14 (P1): en un día de un solo grupo o en el único día de pierna, el músculo que ya toca el tope de 10 series por sesión (V9) no admite más ese día
+      // (y el hombro posterior tampoco, si la espalda de ese día ya está en el tope: sus ejercicios también la cargan)
+      || (DIA_ELEGIDO.includes(t.rb) && (sessVol(t, g) >= 10 - 1 - 1e-9 || (g === 'hombro_post' && sessVol(t, 'espalda') >= 10 - 1 - 1e-9)));
     // por día: un día corto con todos los grupos de su zona llenos tiene motivo («rango») aunque otro grupo de otro día esté corto
     st.T.forEach(t => { const spr = st.inp.min - dayMinutes(t, st); t.sobraMotivo = spr >= 1 ? (PBIG.filter(g => zoneOk(t, g) && st.tgt.t[g]).every(g => full(g, t)) ? 'rango' : 'tope') : null; });
     const lleno = st.T.filter(t => t.spare >= 8).every(t => t.sobraMotivo === 'rango');   // (el texto: solo los días con 8 min o más)
@@ -1802,7 +1844,7 @@ module.exports = function (K, OPT) {
   const zLbl = z => ({ rodilla: 'rodilla', hombro: 'hombro', lumbar: 'espalda baja', muneca: 'muñeca o codo', cadera: 'cadera', otra: 'otra zona' })[z] || z;
   function focusOf(t, st) {
     const seq = t.seq || sessionSeq(t, st);
-    const nm = { CCA: 'Cuerpo completo', CCB: 'Cuerpo completo', CCC: 'Cuerpo completo', T1: 'Torso', T2: 'Torso', T3: 'Torso', P1: 'Pierna', P2: 'Pierna', P3: 'Pierna', E: 'Empuje', E1: 'Empuje', E2: 'Empuje', Ti: 'Tirón', Ti1: 'Tirón', Ti2: 'Tirón', Pi: 'Pierna', Pi1: 'Pierna', Pi2: 'Pierna', TC: 'Torso', PC: 'Pierna' }[t.rb];
+    const nm = NOMBRE_DIA[t.rb];
     if (nm === 'Cuerpo completo') {
       const w = h => { const L = BY.get(h.x.lib); const p = L.pat;
         if (p === 'squat') return 'sentadilla'; if (p === 'lunge') return 'zancada'; if (p === 'hinge') return /good_morning/.test(L.id) ? 'bisagra' : 'peso muerto'; if (p === 'hip_ext') return /thrust/.test(L.id) ? 'hip thrust' : 'puente';
@@ -1883,7 +1925,7 @@ module.exports = function (K, OPT) {
       corto: st.corto || 0,
       ratio: { tiron_empuje: Math.round(pp.ratio * 100) / 100, rodilla_cadera: Math.round(pp.rh * 100) / 100 },
       why: st.why.concat(st.opt.why, why2), warn: st.warn.concat(st.opt.warn, warn2), seed: st.seed, alt: st.ctx.alt, modes: [...P.M], level: P.level, lvS: P.lvS, wd: P.wd, f: st.f, fd: Object.fromEntries(T.map((t, i) => [letters[i], t.f])),
-      validate: st.v, tried, cut: st.cut, removed: st.removed, alternas: st.opt.alternas, table: st.opt.table, log: st.log, reparto: OPT.reparto, capP: !!P.capP,
+      validate: st.v, tried, cut: st.cut, removed: st.removed, alternas: st.opt.alternas, table: st.opt.table, rec: st.opt.rec || st.opt.table, plan: inp.plan || null, log: st.log, reparto: OPT.reparto, capP: !!P.capP,
       lifts: Object.fromEntries(T.map((t, i) => [letters[i], (t.lift || []).map(id => { const h = t.slots.find(k => k.id === id && k.prio === 1 && k.on && k.x); return h ? h.x.lib : null; }).filter(Boolean)])) };
     const ok = st.v.hard.length === 0;
     return { ok, reason: ok ? null : st.v.hard, days, weeklyTarget: P.wd, meta, det };
@@ -1912,5 +1954,5 @@ module.exports = function (K, OPT) {
     if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
     return null;
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, SPLITS, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
 };

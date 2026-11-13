@@ -16,6 +16,12 @@ const OPT = {}; ['pesos', 'tipo', 'pases', 'reparto'].forEach(k => { if (arg(k))
 if (arg('tope') === 'no') OPT.topePrincipiante = false;
 // --enfoque=gluteo (D10, 6 nov): todos los perfiles con el enfoque «más glúteo y menos torso» (solo se ofrece a las mujeres)
 const ENFOQUE = arg('enfoque') === 'gluteo' ? 'gluteo' : null;
+// --plan=rota (v14, P1): cada perfil al que se le ofrecen otros repartos en «Cambiar reparto» (G.planes) pide uno de ellos, rotando;
+// las invariantes son las mismas. La salida lleva `plan`: cuántos lo pidieron y cuántos salieron con él, por reparto
+const PLAN = arg('plan') === 'rota';
+const planStat = { pedidos: 0, salen: 0, por: {} };
+const conPlan = pr => { if (!PLAN) return; const o = G.planes(G.desdeRespuestas(pr.a)).otros; if (o.length) pr.a.plan = o[pr.id % o.length]; };
+const cuentaPlan = (pr, res) => { if (!pr.a.plan) return; const p = planStat.por[pr.a.plan] = planStat.por[pr.a.plan] || { pedidos: 0, salen: 0 }; planStat.pedidos++; p.pedidos++; if (res.meta.split === pr.a.plan) { planStat.salen++; p.salen++; } };
 // --cat=N carga versiones/catalogo-vN.js (para reproducir una versión vieja con su catálogo: p. ej. --ver=6 --cat=4)
 const K = require(arg('cat') ? './versiones/catalogo-v' + arg('cat') + '.js' : './catalogo.js')(null, { basic: arg('basic') || undefined });
 const VER = arg('ver');
@@ -56,7 +62,10 @@ function objetivosV(inp, P) {
 }
 // zona de cada plantilla (como ZONA_TPL del generador, con el hombro por cabezas)
 const HO = ['hombro_ant', 'hombro_lat', 'hombro_post'];
-const ZONA_V = r => /^T\d$/.test(r) ? ['pecho', 'espalda', ...HO, 'biceps', 'triceps', 'abdomen'] : /^(P\d|Pi)/.test(r) ? ['cuads', 'isquios', 'gluteos', 'gemelos', 'abdomen'] :
+// v14 (P1): los tipos de día de los repartos que elige la persona (pierna única, por músculos)
+const ZONA_P1 = { PU: ['cuads', 'isquios', 'gluteos', 'gemelos', 'abdomen'], PT: ['pecho', 'triceps', 'abdomen'], EB: ['espalda', 'biceps', 'hombro_post', 'abdomen', 'gemelos'], HB: [...HO, 'biceps', 'triceps', 'abdomen'],
+  PE: ['pecho', 'abdomen', 'gemelos'], ES: ['espalda', 'hombro_post', 'abdomen'], HO: [...HO, 'abdomen', 'gemelos'], BR: ['biceps', 'triceps', 'abdomen'] };
+const ZONA_V = r => ZONA_P1[r] ? ZONA_P1[r] : /^T\d$/.test(r) ? ['pecho', 'espalda', ...HO, 'biceps', 'triceps', 'abdomen'] : /^(P\d|Pi)/.test(r) ? ['cuads', 'isquios', 'gluteos', 'gemelos', 'abdomen'] :
   /^E/.test(r) ? ['pecho', ...HO, 'triceps', 'abdomen'] : /^Ti/.test(r) ? ['espalda', 'biceps', ...HO, 'abdomen', 'gemelos'] : /^TC$/.test(r) ? ['pecho', 'espalda', ...HO, 'biceps', 'triceps', 'abdomen'] : /^PC$/.test(r) ? ['cuads', 'isquios', 'gluteos', 'gemelos', 'abdomen'] : K.PG;
 // ¿hay con qué entrenar el grupo (ejercicio cuyo grupo principal es ese) en los sitios de la rutina? (caché por material y seguridad)
 const matC = new Map();
@@ -403,8 +412,9 @@ const verUno = (pr, inp, res, f, q) => { console.log(`\n#${pr.id} · ${resumen(p
   for (const d of res.det) { console.log(`  ${d.nombre} [${d.role} · ${d.place}/${d.preset}] ≈ ${d.minExact.toFixed(1)} min`); d.rows.forEach(r => console.log(`     ${(r.lib || '—').padEnd(30)} ${String(r.series || '').padStart(2)} × ${String(r.reps).padEnd(7)} ${r.descanso_s != null ? r.descanso_s + 's' : ''} ${r.slot ? '[' + r.slot + r.prio + (r.pass === 'near' ? '~' : r.oi > 0 ? '*' : '') + ']' : ''} ${r.kind === 'bal' ? r.min + ' min' : ''}`)); } };
 for (const pr of profs) {
   if (SOLO && !SOLO.has(pr.id)) continue;
+  conPlan(pr);
   const inp = G.desdeRespuestas(pr.a);
-  const a0 = Date.now(); const res = G.genRoutine(inp); agg.ms.push(Date.now() - a0);
+  const a0 = Date.now(); const res = G.genRoutine(inp); agg.ms.push(Date.now() - a0); cuentaPlan(pr, res);
   const { f, q, ex } = analizar(res, inp, pr);
   if (SOLO) verUno(pr, inp, res, f, q);
   agg.n++;
@@ -446,8 +456,9 @@ const aggS = { n: 0, f: {}, ej: {}, q: {}, porCaso: {}, det: 0, detN: 0, ms: [] 
 const muestrasS = [];
 if (arg('seg') !== '0') for (const pr of perfilesSeguridad()) {
   if (SOLO && !SOLO.has(pr.id)) continue;
+  conPlan(pr);
   const inp = G.desdeRespuestas(pr.a);
-  const a0 = Date.now(); const res = G.genRoutine(inp); aggS.ms.push(Date.now() - a0);
+  const a0 = Date.now(); const res = G.genRoutine(inp); aggS.ms.push(Date.now() - a0); cuentaPlan(pr, res);
   const { f, q } = analizar(res, inp, pr);
   if (SOLO) verUno(pr, inp, res, f, q);
   aggS.n++; const c = aggS.porCaso[pr.especial] = aggS.porCaso[pr.especial] || { perfiles: 0, con_fallo: 0, claves: {} }; c.perfiles++;
@@ -461,7 +472,7 @@ const ms = agg.ms.slice().sort((a, b) => a - b);
 const pct = (a, b) => b ? Math.round(1000 * a / b) / 10 + ' %' : '—';
 const salida = {
   modo: TAG, perfiles: agg.n, segundos: Math.round((Date.now() - t0) / 100) / 10, ms_mediana: ms[Math.floor(ms.length / 2)], ms_p95: ms[Math.floor(ms.length * 0.95)],
-  ok_false: agg.okFalse, repartos: agg.splits,
+  ok_false: agg.okFalse, repartos: agg.splits, ...(PLAN ? { plan: planStat } : {}),
   invariantes: Object.fromEntries(Object.entries(agg.f).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, { n: v, tasa: pct(v, agg.n), ejemplo: agg.ej[k] }])),
   calidad: Object.fromEntries(Object.entries(agg.q).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, { n: v, tasa: pct(v, agg.n), ejemplo: agg.ejq[k] }])),
   volumen_grupos_en_objetivo: pct(agg.volOk, agg.volTot), tiron_empuje_ge1_con_material: pct(agg.tironOk, agg.tironPerf) + ` (${agg.tironOk}/${agg.tironPerf})`,

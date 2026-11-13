@@ -13175,5 +13175,31 @@ const run=a=>{const g=genRoutineFrom(Object.assign(JSON.parse(JSON.stringify(B))
 {const r=run({screen:['med'],days:3});E(r.g.res.ok&&r.g.res.det.every(x=>!x.rows.some(y=>y.kind==='str'&&(y.pat==='curl'||y.pat==='tri'))),'rutina prudente con brazos directos');}
 if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
 });
+await safe('p1RepartoElegido',async()=>{
+// (P1, repaso del reparto) El creador de rutinas admite el reparto que elige la persona (a.plan): con 4 días, empuje, tirón, pierna
+// y torso (un solo día de pierna, con su aviso), por músculos, o con un día de cuerpo completo; dice qué repartos ofrece a cada
+// perfil (GymGen…planes) y no aplica ninguno a 65 o más, rutina prudente, 16-17 años ni sesiones de menos de 30 min.
+const bad=[];const E=(c,m)=>{if(!c)bad.push(m);};
+const B={screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,consec:false,goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,age:'18',places:{v:1,main:'g',g:placeFromPreset('grande'),c:null}};
+const run=a=>genRoutineFrom(Object.assign(JSON.parse(JSON.stringify(B)),a),{},{reparto:'dias'}),roles=g=>Object.values(g.res.meta.tpl).join(','),seg=g=>Object.keys(g.E.SEG(g.res,g.inp));
+const NEW=['tpt3','pplt4','pplc4','grp4','pplet5','grp5','tptpt5','pplg6'];
+{const g=run({});E(g.res.meta.split==='tp4'&&g.res.meta.rec==='tp4','sin plan: '+g.res.meta.split);
+  const pl=g.E.G.planes(g.inp);E(pl.rec==='tp4'&&pl.otros.join(',')==='pplt4,pplc4,grp4','planes de 4 días: '+JSON.stringify(pl));}
+{const g=run({plan:'pplt4'}),t=genTexts(g);E(g.res.ok&&g.res.meta.split==='pplt4'&&roles(g)==='E,Ti,PU,T2','pplt4: '+g.res.meta.split+' '+roles(g));
+  E(/un solo día de pierna/.test(t.porque[0])&&t.avisos.some(x=>/cuádriceps|isquios|glúteos/.test(x)&&/menos de lo ideal/.test(x)),'pplt4: porqué o aviso '+t.porque[0]);
+  E(g.res.det.filter(d=>d.rows.some(r=>r.pat==='squat'||r.pat==='hinge')).length===1&&!seg(g).length,'pplt4: días de pierna o seguridad '+seg(g));
+  E(g.res.det.every(d=>d.minutos<=63)&&g.res.meta.ratio.tiron_empuje>=1,'pplt4: minutos o equilibrio');}
+{const g=run({plan:'grp4'});E(g.res.ok&&g.res.meta.split==='grp4'&&/^Pecho y tríceps/.test(g.res.days.A.focus)&&/^Espalda y bíceps/.test(g.res.days.B.focus)&&/^Hombros y brazos/.test(g.res.days.D.focus)&&!seg(g).length,'grp4: '+roles(g)+' '+seg(g));}
+{const g=run({plan:'pplc4'});E(g.res.ok&&g.res.meta.split==='pplc4'&&/^Cuerpo completo/.test(g.res.days.D.focus)&&!seg(g).length,'pplc4: '+roles(g));}
+for(const [d,p] of [[3,'tpt3'],[3,'ppl3'],[5,'pplet5'],[5,'grp5'],[5,'tptpt5'],[6,'pplg6'],[6,'tp6']]){const g=run({days:d,plan:p});E(g.res.ok&&g.res.meta.split===p&&!seg(g).length,d+' días '+p+': '+g.res.meta.split+' '+seg(g));}
+// quien no puede elegir: se ignora el plan guardado y no se le ofrece ninguno
+for(const [et,a] of [['65 o más',{age:'65',goal:'salud'}],['prudente',{screen:['med'],goal:'salud'}],['16-17',{age:'16'}],['20 min',{min:20}],['más glúteo',{sex:'m',enfoque:'gluteo'}]]){
+  const g=run(Object.assign({plan:'pplt4'},a));E(g.res.ok&&!NEW.includes(g.res.meta.split)&&g.E.G.planes(g.inp).otros.length===0&&!seg(g).length,et+': '+g.res.meta.split+' '+JSON.stringify(g.E.G.planes(g.inp)));}
+// «por músculos», ni a quien empieza ni con «Ganar fuerza»; con fuerza y un día de pierna, los cuatro levantamientos siguen
+{const g=run({exp:'lt6m',plan:'grp4'});E(g.res.meta.split==='tp4'&&!g.E.G.planes(g.inp).otros.includes('grp4'),'quien empieza con grp4: '+g.res.meta.split);}
+{const g=run({goal:'fuerza',exp:'gt2a',ritmo:'meses',min:75,plan:'pplt4'}),ids=new Set(g.res.det.flatMap(d=>d.rows.map(r=>r.lib)));
+  E(g.res.meta.split==='pplt4'&&['lib_back_squat','lib_deadlift','lib_bench_press','lib_ohp_bb'].every(x=>ids.has(x))&&!g.E.G.planes(g.inp).otros.includes('grp4'),'fuerza con pplt4: '+g.res.meta.split);}
+if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

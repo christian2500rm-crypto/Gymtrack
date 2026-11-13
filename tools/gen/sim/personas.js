@@ -129,6 +129,26 @@ const PERSONAS = [
   { key: 'jorge', nombre: 'Jorge', edad: 45, grupo: 'seguridad', motivo: 'J-04, J-08: espalda baja operada, «Ganar fuerza» en un gimnasio en casa, prioridad brazos y pecho',
     a: { goal: 'fuerza', exp: '6m2a', days: 4, min: 75, age: '40', screen: 'nada', zones: { lumbar: 'op' }, sport: 'no', prio: ['brazos', 'pecho'], places: { main: 'c', g: null, c: K.place('casagym') } },
     resumen: 'Créame una rutina · Ganar fuerza · De 6 meses a 2 años · 4 días, 75 min · Casa: «Gimnasio en casa» · 40-64 · Seguridad: nada de esto · Espalda baja: «Me operaron» · Deporte: no · Prioridades: brazos y pecho', esp: null },
+  // v14 (P1, repaso del reparto): personas que eligen su reparto en «Cambiar reparto» (a.plan). Solo vale con un entreno distinto por día
+  // ('dias'): sus reglas van en debeAlt; con 'recomendado' el plan no se aplica (debe)
+  { key: 'dani', nombre: 'Dani', edad: 30, grupo: 'reparto elegido', motivo: 'P1: el caso que pidió el usuario: 4 días con un solo día de pierna (empuje, tirón, pierna y torso)',
+    a: { goal: 'musculo', exp: '6m2a', days: 4, min: 60, age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null }, plan: 'pplt4' },
+    resumen: 'Ganar músculo · De 6 meses a 2 años · 4 días, 60 min · Gimnasio grande · «Cambiar reparto»: empuje, tirón, pierna y torso', esp: null },
+  { key: 'nerea', nombre: 'Nerea', edad: 27, grupo: 'reparto elegido', motivo: 'P1: «por músculos» con 4 días en un gimnasio de barrio (pecho y espalda en días distintos)',
+    a: { goal: 'musculo', exp: 'gt2a', ritmo: 'meses', days: 4, min: 75, age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('barrio'), c: null }, plan: 'grp4' },
+    resumen: 'Ganar músculo · Más de 2 años, le cuesta meses · 4 días, 75 min · Gimnasio de barrio · «Cambiar reparto»: por músculos', esp: null },
+  { key: 'hugo', nombre: 'Hugo', edad: 35, grupo: 'reparto elegido', motivo: 'P1: «Ganar fuerza» con un solo día de pierna: los cuatro levantamientos siguen en la semana',
+    a: { goal: 'fuerza', exp: 'gt2a', ritmo: 'meses', days: 4, min: 75, age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null }, plan: 'pplt4' },
+    resumen: 'Ganar fuerza · Más de 2 años, le cuesta meses · 4 días, 75 min · Gimnasio grande · «Cambiar reparto»: empuje, tirón, pierna y torso', esp: null },
+  { key: 'paco', nombre: 'Paco', edad: 68, grupo: 'reparto elegido', motivo: 'P1: 65 o más con experiencia que llega con un reparto elegido guardado: no se le aplica (sus reglas no se tocan)',
+    a: { goal: 'salud', exp: 'gt2a', ritmo: 'meses', days: 4, min: 60, age: '65', screen: 'nada', zones: {}, sport: 'suave', prio: [], places: { main: 'g', g: K.place('grande'), c: null }, plan: 'pplt4' },
+    resumen: 'Salud y forma · Más de 2 años · 4 días, 60 min · Gimnasio grande · 65-74 · con un reparto elegido guardado de antes', esp: null },
+  { key: 'iker', nombre: 'Iker', edad: 33, grupo: 'reparto elegido', motivo: 'P1: un solo día de pierna en casa con lo básico (mancuernas de 20 kg y bandas), 5 días de 45 min',
+    a: { goal: 'musculo', exp: '6m2a', days: 5, min: 45, age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'c', g: null, c: K.place('basico') }, plan: 'pplet5' },
+    resumen: 'Ganar músculo · De 6 meses a 2 años · 5 días, 45 min · Casa: «Lo básico» · «Cambiar reparto»: empuje y tirón dos veces y un día de pierna', esp: null },
+  { key: 'lola', nombre: 'Lola', edad: 41, grupo: 'reparto elegido', motivo: 'P1: empieza de cero y elige empuje, tirón, pierna y cuerpo completo: se le permite, con sus series y su esfuerzo de inicio',
+    a: { goal: 'salud', exp: 'cero', days: 4, min: 45, age: '40', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('barrio'), c: null }, plan: 'pplc4' },
+    resumen: 'Salud y forma · Empiezo de cero · 4 días, 45 min · Gimnasio de barrio · 40-64 · «Cambiar reparto»: empuje, tirón, pierna y cuerpo completo', esp: null },
 ];
 
 // ── v7 (paso 4): lo que DEBE y lo que NO DEBE salir, por persona, comprobado en código. R = rutina analizada (mkR). Cada regla: [texto, (R) → bien?, (R) → detalle] ──
@@ -148,6 +168,10 @@ const COLUMNA = R => R.rows.filter(r => K.TAGS.spine.has(r.lib) || K.TAGS.spineF
 // E14a: el bloque de equilibrio son varias filas «bal»: sus minutos son la suma
 const balance = R => R.det.map(d => { const w = d.rows.find(r => r.kind === 'warm'), b = d.rows.find(r => r.kind === 'bal'), bm = d.rows.filter(r => r.kind === 'bal').reduce((t, r) => t + (+r.min || 0), 0); return { d: d.letra, w: w ? w.min : 0, b: bm, orden: !b || !w || d.rows.indexOf(b) > d.rows.indexOf(w) }; });
 const T = (R, re) => re.test(R.txt);
+// v14 (P1): los días de la semana por su tipo y la regla común de la variante 'recomendado' (y de quien no puede elegir): el plan no se aplica
+const roles = R => Object.values(R.m.tpl).join(',');
+const ELEGIDOS = ['tpt3', 'pplt4', 'pplc4', 'grp4', 'pplet5', 'grp5', 'tptpt5', 'pplg6'];
+const SIN_PLAN = ['El reparto elegido no se aplica aquí (solo vale con un entreno distinto por día y con quien puede elegir)', R => !ELEGIDOS.includes(R.m.split), R => R.m.split];
 const REGLAS = {
   lucia: { debe: [
     ['Cuerpo completo A/B que se alternan (inicio con 3 días)', R => R.m.split === 'cc2' && R.m.wd === 3, R => R.m.split],
@@ -350,6 +374,44 @@ Object.assign(REGLAS, {
     ['El press de hombros con peso libre, sentado con respaldo y a 8 o más', R => R.rows.filter(r => r.L.pat === 'push_v' && ['mancuernas', 'kettlebell', 'barra'].includes(r.L.mat)).every(r => /respaldo/.test(r.nota) && rrOf(r).lo >= 8)],
     ['Sentadillas y zancadas sin peso en las manos (prensa no hay): unilaterales sin carga', R => R.rows.filter(r => ['squat', 'lunge'].includes(r.L.pat)).every(r => !K.TAGS.axialManos.has(r.lib)), R => R.rows.filter(r => K.TAGS.axialManos.has(r.lib)).map(r => r.lib).join(',')]],
     noDebe: [['Peso muerto, sentadilla con barra, hack, Smith o press militar de pie', R => hay(R, 'deadlift', 'rdl_bb', 'back_squat', 'front_squat', 'hack_squat', 'squat_smith', 'ohp_bb').length > 0, R => hay(R, 'deadlift', 'rdl_bb', 'back_squat', 'front_squat', 'hack_squat', 'squat_smith', 'ohp_bb').join(',')]] },
+  // ── v14 (P1): reparto elegido. debe = variante 'recomendado' (el plan no se aplica) · debeAlt = variante 'dias' (la de la app) ──
+  dani: { debe: [SIN_PLAN],
+    debeAlt: [
+    ['Sale el reparto elegido: empuje, tirón, pierna y torso', R => R.m.split === 'pplt4' && roles(R) === 'E,Ti,PU,T2', R => R.m.split + ' ' + roles(R)],
+    ['Un solo día de pierna: los ejercicios de pierna, todos en ese día', R => R.rows.filter(r => ['squat', 'lunge', 'hinge', 'hip_ext', 'knee_flex', 'knee_ext'].includes(r.L.pat)).every(r => r.dia === 'C'), R => R.rows.filter(r => ['squat', 'hinge'].includes(r.L.pat)).map(r => r.dia + ':' + r.lib).join(',')],
+    ['El día de pierna lleva sentadilla y bisagra principales', R => R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'squat') && R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'hinge')],
+    ['Pecho y espalda llegan a su objetivo (el torso trabaja 2 veces)', R => R.m.vol.pecho.v >= R.m.vol.pecho.obj && R.m.vol.espalda.v >= R.m.vol.espalda.obj, R => JSON.stringify([R.m.vol.pecho, R.m.vol.espalda])],
+    ['El porqué dice que hay un solo día de pierna', R => T(R, /un solo día de pierna/)],
+    ['El coste se dice: aviso de volumen con cuádriceps, isquios o glúteos', R => R.avisos.some(t => /cuádriceps|isquios|glúteos/.test(t) && /menos de lo ideal/.test(t)), R => R.avisos.join(' | ')],
+    ['Sesiones de 51-63 min', R => enRango(R, 0.85, 1.05), mins]],
+    noDebeAlt: [['«Con tu material no sale bien el reparto que elegiste»', R => T(R, /no sale bien el reparto que elegiste/)]] },
+  nerea: { debe: [SIN_PLAN],
+    debeAlt: [
+    ['Sale «por músculos»: pecho y tríceps, espalda y bíceps, pierna, hombros y brazos', R => R.m.split === 'grp4' && roles(R) === 'PT,EB,PU,HB', R => R.m.split + ' ' + roles(R)],
+    ['Pecho y espalda, en días distintos (lo que pidió el usuario)', R => R.rows.filter(r => r.L.pat === 'push_h').every(r => r.dia === 'A') && R.rows.filter(r => ['pull_h', 'pull_v'].includes(r.L.pat)).every(r => r.dia === 'B'), R => R.rows.filter(r => ['push_h', 'pull_h', 'pull_v'].includes(r.L.pat)).map(r => r.dia + ':' + r.L.pat).join(',')],
+    ['El día de pecho lleva al menos tres ejercicios de pecho y un tríceps', R => R.rows.filter(r => r.dia === 'A' && ['push_h', 'fly'].includes(r.L.pat)).length >= 3 && R.rows.some(r => r.dia === 'A' && r.L.pat === 'tri')],
+    ['Curl en el día de espalda y curl y tríceps en el de hombros', R => R.rows.some(r => r.dia === 'B' && r.L.pat === 'curl') && R.rows.some(r => r.dia === 'D' && r.L.pat === 'curl') && R.rows.some(r => r.dia === 'D' && r.L.pat === 'tri')],
+    ['Tirón y empuje equilibrados (≥ 1)', R => R.m.ratio.tiron_empuje >= 1 - 1e-9, R => R.m.ratio.tiron_empuje],
+    ['El porqué dice que cada músculo trabaja 1 vez por semana', R => T(R, /1 vez por semana/)]] },
+  hugo: { debe: [SIN_PLAN],
+    debeAlt: [
+    ['Sale el reparto elegido (empuje, tirón, pierna y torso)', R => R.m.split === 'pplt4', R => R.m.split],
+    ['Los cuatro levantamientos de fuerza siguen en la semana: sentadilla, peso muerto, banca y militar', R => hay(R, 'back_squat', 'deadlift', 'bench_press', 'ohp_bb').length === 4, R => hay(R, 'back_squat', 'deadlift', 'bench_press', 'ohp_bb').join(',')],
+    ['Sentadilla y peso muerto, los dos en el día de pierna', R => R.rows.filter(r => ['lib_back_squat', 'lib_deadlift'].includes(r.lib)).every(r => r.dia === 'C')],
+    ['A quien busca fuerza no se le ofrece «por músculos»', R => !G.planes(R.inp).otros.some(x => /^grp/.test(x)), R => G.planes(R.inp).otros.join(',')]] },
+  paco: { debe: [SIN_PLAN, ['Torso y pierna (su reparto de 65 o más con experiencia)', R => ['tp2', 'tp4'].includes(R.m.split), R => R.m.split]],
+    debeAlt: [SIN_PLAN, ['Torso y pierna en 4 entrenos (su reparto de 65 o más con experiencia)', R => R.m.split === 'tp4', R => R.m.split],
+    ['No se le ofrece ningún otro reparto', R => G.planes(R.inp).otros.length === 0, R => G.planes(R.inp).otros.join(',')]] },
+  iker: { debe: [SIN_PLAN],
+    debeAlt: [
+    ['Sale el reparto elegido o el texto dice que con su material no sale', R => R.m.split === 'pplet5' || T(R, /no sale bien el reparto que elegiste/), R => R.m.split],
+    ['Si sale: un solo día de pierna y el coste dicho en un aviso', R => R.m.split !== 'pplet5' || (roles(R).split(',').filter(x => x === 'PU').length === 1 && R.avisos.some(t => /cuádriceps|isquios|glúteos/.test(t))), R => roles(R) + ' · ' + R.avisos.join(' | ')],
+    ['Con mancuernas de 20 kg, nada a 8 repeticiones o menos en pierna', R => R.rows.filter(r => ['squat', 'lunge', 'hinge'].includes(r.L.pat) && rrOf(r)).every(r => rrOf(r).lo >= 8), R => R.rows.filter(r => ['squat', 'lunge', 'hinge'].includes(r.L.pat)).map(r => r.lib + ' ' + r.reps).join(',')]] },
+  lola: { debe: [SIN_PLAN],
+    debeAlt: [
+    ['Sale el reparto elegido (empuje, tirón, pierna y cuerpo completo)', R => R.m.split === 'pplc4', R => R.m.split],
+    ['Sigue en modo inicio: 2 series en todo y esfuerzo «Fácil»', R => R.rows.every(r => r.series === 2) && R.m.effort.obj === 'facil', R => R.rows.map(r => r.series).join('')],
+    ['A quien empieza no se le ofrece «por músculos»', R => !G.planes(R.inp).otros.some(x => /^grp/.test(x)), R => G.planes(R.inp).otros.join(',')]] },
 });
 function mkR(res, inp, Xx) {
   const P = G.effective(inp);
@@ -367,7 +429,10 @@ function evalReglas(R, debe, noDebe) {
 }
 
 const SPLIT_TXT = { cc2: 'Cuerpo completo A/B', cc3: 'Cuerpo completo A/B/C', tp2: 'Torso/Pierna (2 entrenos)', tp4: 'Torso/Pierna ×2 (4 entrenos)', ppl3: 'Empuje/Tirón/Pierna ×2 (3 entrenos)', tp4cc: 'Torso/Pierna ×2 + cuerpo completo (5 entrenos)',
-  ppl6: 'Empuje/Tirón/Pierna ×2 con gemelas distintas (6 entrenos)', tpc3: 'Torso/Pierna/Cuerpo completo (3 entrenos)', ulppl: 'Torso/Pierna/Empuje/Tirón/Pierna (5 entrenos)', tp6: 'Torso/Pierna ×3 (6 entrenos)', fz2: 'Fuerza en dos sitios: A/B de fuerza en el gimnasio y accesorios en casa' };
+  ppl6: 'Empuje/Tirón/Pierna ×2 con gemelas distintas (6 entrenos)', tpc3: 'Torso/Pierna/Cuerpo completo (3 entrenos)', ulppl: 'Torso/Pierna/Empuje/Tirón/Pierna (5 entrenos)', tp6: 'Torso/Pierna ×3 (6 entrenos)', fz2: 'Fuerza en dos sitios: A/B de fuerza en el gimnasio y accesorios en casa',
+  pgp3: 'Pierna/Torso/Pierna (más glúteo)', p3t1: 'Tres de pierna y uno de torso (más glúteo)', tp5g: 'Tres de pierna y dos de torso (más glúteo)', tp6g: 'Cuatro de pierna y dos de torso (más glúteo)',
+  tpt3: 'Torso/Pierna/Torso (elegido)', pplt4: 'Empuje/Tirón/Pierna/Torso (elegido)', pplc4: 'Empuje/Tirón/Pierna/Cuerpo completo (elegido)', grp4: 'Por músculos, 4 días (elegido)',
+  pplet5: 'Empuje/Tirón/Pierna/Empuje/Tirón (elegido)', grp5: 'Por músculos, 5 días (elegido)', tptpt5: 'Torso/Pierna/Torso/Pierna/Torso (elegido)', pplg6: 'Empuje/Tirón/Pierna/Empuje/Tirón/Hombros y brazos (elegido)' };
 function repartoTxt(res, inp) {
   const m = res.meta, letras = Object.keys(res.days);
   let s = SPLIT_TXT[m.split] + ` (K=${m.K})`;
