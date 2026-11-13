@@ -161,6 +161,8 @@ const REGLAS = {
     ['Torso/pierna ×2 (K=4)', R => R.m.split === 'tp4', R => R.m.split],
     ['Pierna con básicos de barra o máquina en el hueco 1 (sentadilla, prensa, hack, rumano, peso muerto, hip thrust)', R => R.rows.filter(r => r.prio === 1 && ['squat', 'hinge', 'hip_ext', 'lunge'].includes(r.L.pat)).every(r => ['back_squat', 'leg_press', 'hack_squat', 'rdl_bb', 'deadlift', 'hip_thrust_bb', 'hip_thrust_machine', 'front_squat', 'squat_smith'].includes(r.lib.replace('lib_', ''))), R => R.rows.filter(r => r.prio === 1).map(r => r.lib).join(',')],
     ['Hip thrust (barra o máquina) por su prioridad de glúteos', R => tiene(R, 'hip_thrust_bb', 'hip_thrust_machine')],
+    ['«Ganar músculo» con días de torso de 60 min: curl y tríceps directos sin pedir prioridad de brazos (P3)', R => R.rows.some(r => r.L.pat === 'curl') && R.rows.some(r => r.L.pat === 'tri'), R => R.rows.map(r => r.L.pat).join(',')],
+    ['Los brazos extra no dejan la semana sin hombro posterior directo (P3)', R => R.rows.some(r => r.L.pat === 'rear')],
     ['Principales con 3 o más series', R => prin(R).every(r => r.series >= 3), R => prin(R).map(r => r.lib.replace('lib_', '') + '×' + r.series).join(',')],
     ['Sesiones de 51-63 min (85-105 % de 60)', R => enRango(R, 0.85, 1.05), mins]],
     noDebe: [

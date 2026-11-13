@@ -11010,7 +11010,16 @@ return function (K, OPT) {
       // (búlgara: con 2 × 20 kg sí cuesta a 8-10; una goblet con 20 kg, no)
       if (fz && !P.cauto && cargaLigera(Pl)) def = def.map(d => d[0] === 'SQ' && d[1] === 1 ? ['LU', 1] : d);
       if (P.huesos && inp.min > 20) def = def.concat([['EX', 2]]);               // v8 (J-07): extensores de la espalda cada día (Sinaki 2002); con 15-20 min, en casa (aviso)
+      // v14 (P3): «Ganar músculo» sin precaución y con 45 min o más: en los días de torso, el curl y el tríceps dejan de ser accesorios que
+      // solo entran si falta volumen (con la cuenta indirecta de remos y presses no faltaba nunca: 0 series directas con 3-4 días) y pasan a
+      // secundarios, detrás de los demás. Son un extra (h.xbr): lo primero que sale si el día no cabe; nunca desplazan a otro ejercicio.
+      // (empuje y tirón ya llevan el suyo como secundario; con prioridad de brazos manda J-08; con «más glúteo», el torso va en lo justo)
+      const xbr = new Set();
+      if (inp.goal === 'musculo' && !P.cauto && inp.min >= 45 && !P.prioG.has('biceps') && !P.enfoque && /^(T\d|TC)$/.test(rb)) {
+        for (const w of ['CU', 'TR']) { if (def.some(d => d[0] === w && d[1] <= 2)) continue; const i = def.findIndex(d => d[0] === w && d[1] === 3); if (i >= 0) { def[i] = [w, 2].concat(def[i].slice(2)); xbr.add(i); } }
+      }
       const slots = def.map((d, i) => mkSlot(d[0], d[1], d[2], role + '#' + n + ':' + d[0] + ':' + i));
+      xbr.forEach(i => { slots[i].xbr = 1; });
       if (P.segM) slots.forEach(h => { if (h.id === 'LU') { h.prio = Math.min(h.prio, 2); h.obl = 1; h.uni = 1; } });   // LU obligatorio con apoyo (65+; v7: y «Prefiero no decirlo», C-14)
       slots.forEach(h => { if (h.id === 'EX') h.fijo = 1; if (P.enfoque && h.id === 'HE') h.glu = 1; if (P.prioG.has('biceps') && ['CU', 'TR'].includes(h.id) && h.prio === 2) h.brazo = 1; });   // v8: no lo quitan los topes ni los recortes (salvo el exprés) · v9 (J-08)
       // v9 (J-10): veces por semana que se hace ESTE entreno (con un solo sitio, días de pesas ÷ K en todos)
@@ -11074,6 +11083,7 @@ return function (K, OPT) {
           let s = (h.prio === 3 ? 100 : 0) + (elsewhere(h) ? 20 : 0) + (20 - CUT_ORDER.indexOf(h.id)) / 2;
           if (h.id === 'CO' && !elsewhere(h) && st.inp.min > 20) continue;  // v5: el último core de la semana no sale (V5; con 20 min o menos es aviso)
           if (h.id === 'RE' && !elsewhere(h) && pushW >= 6) s -= 50;      // hombro posterior protegido con 6+ series de empuje
+          if (h.xbr) s += 60;   // v14 (P3): los brazos de «Ganar músculo» son un extra: lo primero que sale
           if (h.brazo) s -= 60; if (h.glu) s -= 50;   // v12 (D10): el glúteo de quien lo pidió, de lo último en irse (tras una prioridad de brazos elegida)                                            // v9 (J-08): el trabajo directo de la prioridad, lo último que sale
           if (fam(h) === 'rodilla' && kn <= hp) s -= 30;                   // no desequilibrar rodilla:cadera dentro del día
           if (fam(h) === 'cadera' && hp <= kn) s -= 30;
@@ -11885,7 +11895,7 @@ return function (K, OPT) {
       else if (R.comp - 15 >= R.floor.comp && act(t).some(h => { const L = BY.get(h.x.lib); return L.c && L.lt !== 'r' && L.lt !== 't' && restOf(L, h.x, st) === R.comp; })) { R.comp -= 15; did = 'comp'; }
       else if (R.heavy - 15 >= R.floor.heavy && act(t).some(h => { const L = BY.get(h.x.lib); return L.c && restOf(L, h.x, st) === R.heavy; })) { R.heavy -= 15; did = 'heavy'; }
       // 6. quitar accesorios, el último primero
-      else { const seq = sessionSeq(t, st).filter(h => (h.prio === 3 || h.id === 'PW') && canRemove(t, h));   // v10: los explosivos son un extra: salen como un accesorio si el día no cabe
+      else { const seq = sessionSeq(t, st).filter(h => (h.prio === 3 || h.id === 'PW' || h.xbr) && canRemove(t, h));   // v14 (P3): y los brazos extra   // v10: los explosivos son un extra: salen como un accesorio si el día no cabe
         if (seq.length) { const h = seq[seq.length - 1]; h.on = false; st.used.delete(h.x.lib); removed.push({ t: t.n, lib: h.x.lib }); h.x = null; h.cut = 1; did = 'acc_fuera'; }
         // 7. calentamiento de 5 a 3 min (nunca con 65 o más)
         else if (t.warm && t.warm.min > 3 && !P.mayor && !P.corto) {   // v7 (C-17): ni en el modo corto (los 5 min son la condición para cargar)

@@ -13160,5 +13160,20 @@ const tope=a=>{const g=genRoutineFrom(Object.assign(JSON.parse(JSON.stringify(B)
 {const {g,t}=tope({goal:'musculo',sex:'h',exp:'cero',age:'18',screen:'nada'});E(g.res.ok&&g.res.weeklyTarget===4&&/Cambiar reparto/.test(t),'quien empieza: '+t);}
 if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
 });
+await safe('p3BrazosDirectos',async()=>{
+// (P3, repaso del reparto) «Ganar músculo» sin precaución y con 45 min o más: los días de torso llevan un curl y un tríceps
+// directos sin pedir prioridad de brazos; no con «más glúteo» (el torso va en lo justo), ni con 30 min, ni en una rutina prudente.
+const bad=[];const E=(c,m)=>{if(!c)bad.push(m);};
+const B={screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,consec:false,goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,age:'18',places:{v:1,main:'g',g:placeFromPreset('grande'),c:null}};
+const run=a=>{const g=genRoutineFrom(Object.assign(JSON.parse(JSON.stringify(B)),a),{},{reparto:'dias'});
+  const torso=g.res.det.filter(x=>/^T\d$/.test(x.role)).map(x=>x.rows.filter(r=>r.kind==='str'));return{g,torso,n:p=>torso.reduce((t,rows)=>t+rows.filter(r=>r.pat===p).length,0)};};
+{const r=run({});E(r.g.res.ok&&r.torso.length===2&&r.n('curl')>=1&&r.n('tri')>=1,'4 días, 60 min: curl '+r.n('curl')+' · tríceps '+r.n('tri'));
+  E(r.torso.some(rows=>rows.some(x=>x.pat==='rear')),'sin hombro posterior en los días de torso');
+  E(r.g.res.det.every(x=>x.minutos<=63),'algún día se pasa de tiempo');E(Object.keys(r.g.E.SEG(r.g.res,r.g.inp)).length===0,'seguridad');}
+{const r=run({min:30});E(r.g.res.ok&&r.n('curl')===0&&r.n('tri')===0,'30 min: no debería haber brazos directos');}
+{const r=run({sex:'m',enfoque:'gluteo'});E(r.g.res.ok&&r.n('curl')===0,'«más glúteo»: curl en el día de torso');}
+{const r=run({screen:['med'],days:3});E(r.g.res.ok&&r.g.res.det.every(x=>!x.rows.some(y=>y.kind==='str'&&(y.pat==='curl'||y.pat==='tri'))),'rutina prudente con brazos directos');}
+if(bad.length)throw new Error(bad.slice(0,6).join(' | '));
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
