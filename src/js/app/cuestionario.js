@@ -1003,7 +1003,7 @@ function obSplitSheet(){
   const card=p=>`<button type="button" class="ob-card ob-rp" role="radio" aria-checked="${p.cur}" data-plan="${p.id}" onclick="obSplitPick('plan','${p.id}')"><span class="ob-ct"><b>${esc(p.info.dias.join(' · '))}</b><span>${esc(_obRepLine(p.info))}</span>${p.info.cortos.length?`<span class="ob-rp-c">Por debajo de lo ideal: ${esc(_joinY(p.info.cortos))}.</span>`:''}${tag(p)?`<em class="ob-tag">${tag(p)}</em>`:''}</span></button>`;
   const hayPlanes=ro.planes.length>1;
   obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Cambiar reparto</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
-  <div class="hist-sheet-body ob-rps"><p class="ob-p">Ahora: ${esc(_obWeekLine(_ob.g))}</p>
+  <div class="hist-sheet-body ob-rps"><p class="ob-p ob-rps-now">${esc(_obWeekLine(_ob.g).replace(/^Tu semana: /,'Ahora: ').replace(/^Esta semana: /,'Ahora, esta semana: '))}</p>
   ${hayPlanes?`<div class="ob-lbl" id="ob-rp-l">Qué va cada día</div>${cur==='recomendado'?'<p class="ob-foot">Ahora repites 2-4 entrenos. Estos llevan un entreno distinto cada día:</p>':''}
     <div class="ob-acts" role="radiogroup" aria-labelledby="ob-rp-l">${ro.planes.map(card).join('')}</div>
     <p class="ob-foot">Con el mismo trabajo a la semana se progresa parecido con cualquiera: elige el que más te apetezca cumplir. Solo salen los que caben con tu material.</p>`:''}
@@ -1082,7 +1082,7 @@ OB_SCR['ob-resp-qc']={block:0,html:()=>{
   const d=_obDiff(c),ri=typeof _obRepInfo==='function'?_obRepInfo(_ob.g):null;let cy=0;try{cy=coach_cycleData().sessions.length;}catch(e){} // (P5) los días por su nombre
   return`<h1 class="ob-title" id="ob-h" tabindex="-1">Qué cambia en tu rutina</h1>
   <div class="ob-qc"><p class="ob-qc-n">Se quedan <b>${d.keep}</b> · cambian <b>${d.chg}</b> · nuevos <b>${d.add}</b> · salen <b>${d.out}</b></p>
-  <p>${esc(_obWeekLine(_ob.g))}${ri&&!ri.completo?' '+esc(ri.dias.join(' · '))+'.':''}</p>
+  <p>${esc(_obWeekLine(_ob.g))}${ri&&!ri.completo?'<br>'+esc(ri.dias.join(' · '))+'.':''}</p>
   ${_ob.changed?`<div class="ob-changed" aria-live="polite">Ha cambiado: ${esc(_ob.changed)}</div>`:''}
   ${typeof obSplitSheet==='function'?'<button type="button" class="ob-link ob-qc-rp" onclick="obSplitSheet()">Cambiar reparto ›</button>':''}
   <p>Tu historial no se toca: lo que sale sigue en Progreso › Fuera de tu rutina y, si vuelve, retoma su historial. Guardo tu rutina actual por si quieres volver.</p>

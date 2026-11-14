@@ -13228,6 +13228,7 @@ try{
   obSplitSheet();await W(5);let f=rp();
   E(f.length===4&&f[0].dataset.plan==='tp4'&&f[0].getAttribute('aria-checked')==='true'&&/Recomendado · En tu rutina/.test(tx(f[0])),'fichas: '+f.map(b=>b.dataset.plan+':'+b.getAttribute('aria-checked')).join(' '));
   E(f.map(b=>b.dataset.plan).join(',')==='tp4,pplt4,pplc4,grp4','repartos de 4 días: '+f.map(b=>b.dataset.plan));
+  E(tx(document.querySelector('#ob-sheet-root .ob-rps-now'))==='Ahora: A · B · C · D.','la semana de ahora, sin rótulo doble: '+tx(document.querySelector('#ob-sheet-root .ob-rps-now')));
   const un=f.find(b=>b.dataset.plan==='pplt4');
   E(un&&/^Empuje · Tirón · Pierna · Torso/.test(tx(un))&&/1 día de pierna/.test(tx(un))&&/pierna, 1 vez/.test(tx(un))&&/Por debajo de lo ideal: .*(cuádriceps|isquios|glúteos)/.test(tx(un)),'ficha de un día de pierna: '+tx(un));
   E(f.every(b=>b.getBoundingClientRect().height>=44&&b.getAttribute('role')==='radio')&&cards().some(b=>/2-4 entrenos que se repiten/.test(tx(b))),'fichas: tamaño, papel o la otra forma');
