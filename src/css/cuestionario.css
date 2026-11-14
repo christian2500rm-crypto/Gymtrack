@@ -1,10 +1,13 @@
 /* ONBOARDING */
 #onboarding{position:fixed;inset:0;background:var(--bg);z-index:390;display:flex;flex-direction:column;overflow-y:auto;padding:calc(var(--st) + 24px) 20px calc(var(--sb) + 28px);max-width:480px;margin:0 auto}
 /* (E7) Cuestionario: capa a 390 (encima: confirmModal 400, Wrapped, toast, selector, ficha y «Mi material»; debajo: Ajustes y editor) */
-#ob-root{display:flex;flex-direction:column;gap:18px;min-height:100%}
+#ob-root{display:flex;flex-direction:column;gap:18px;min-height:100%;flex:none} /* flex:none: sin él, #ob-root se encogía al alto de la pantalla y la cabecera fija se iba con el contenido en las pantallas largas */
 .ob-body{display:flex;flex-direction:column;gap:16px;animation:fu .3s ease}
 .ob-body.ob-still{animation:none} /* (M3) repintar sin moverse de sitio («¿Por qué?», otro día, un cambio con ⇄) no repite la entrada */
-.ob-head{position:sticky;top:calc(-1*(var(--st) + 24px));z-index:3;display:flex;align-items:center;gap:6px;min-height:56px;margin:calc(-1*(var(--st) + 24px)) -20px 0;padding:var(--st) 8px 0;background:var(--bg)}
+/* Alto fijo: antes dependía de cuánto se encogía #ob-root (con zona segura arriba, la cabecera cambiaba de alto de una pantalla a otra) */
+.ob-head{position:sticky;top:calc(-1*(var(--st) + 24px));z-index:3;display:flex;align-items:center;gap:6px;flex:none;height:max(56px,var(--st));margin:calc(-1*(var(--st) + 24px)) -20px 0;padding:var(--st) 8px 0;background:var(--bg)}
+/* La cabecera fija tapa hasta donde empieza el contenido (--st + 18px): con zona segura arriba (iPhone), su caja acaba en --st y los botones quedan centrados en esa línea */
+.ob-head::after{content:'';position:absolute;left:0;right:0;top:100%;height:clamp(0px,calc(var(--st) - 38px),18px);background:var(--bg);pointer-events:none;z-index:-1}
 .ob-hb{width:44px;height:44px;flex:none;border:0;border-radius:12px;background:none;color:var(--text);font-size:24px;line-height:1;cursor:pointer}
 .ob-hb:focus-visible,.ob-card:focus-visible,.ob-link:focus-visible,.ob-dn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ob-prog{flex:1;display:flex;flex-direction:column;gap:5px;align-items:stretch}
@@ -179,7 +182,8 @@
 .ob-other{margin:-4px 16px 6px}
 .ob-wkl{margin-top:8px;font-size:13px;color:var(--text2);font-family:'DM Sans',sans-serif}
 .ob-inl{min-height:44px;padding:0;font-size:13px}
-.ob-matn{position:sticky;top:56px;z-index:2;padding:8px 0;background:var(--bg);font-size:15px;color:var(--text2)}
+/* Pegada bajo la cabecera, sin hueco: top cuenta desde la caja de contenido de #onboarding (ya por debajo de --st + 24px), no desde el borde de la pantalla */
+.ob-matn{position:sticky;top:max(calc(32px - var(--st)),-6px);z-index:2;padding:8px 0;background:var(--bg);font-size:15px;color:var(--text2)}
 .ob-matn b{color:var(--green);font-family:'DM Sans',sans-serif}
 .ob-mat .mat-grid{margin:0}
 @keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}

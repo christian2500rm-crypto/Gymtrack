@@ -13396,6 +13396,38 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('obBarraMaterial',async()=>{
+// En el material del cuestionario, al deslizar, la cabecera (atrás, progreso y ✕) se queda fija arriba durante toda la pantalla y la
+// barra «Con esto: N ejercicios» va pegada justo debajo, sin hueco por el que se vea pasar el material. Antes la barra quedaba 24 px
+// más abajo (y unos 80 px con la zona segura de un iPhone) y la cabecera se iba con el contenido pasado el primer tramo. También con
+// zona segura arriba (--st), donde la cabecera mide lo mismo en todas las pantallas, quepa o no el contenido.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const de=document.documentElement,st0=de.style.getPropertyValue('--st'),quieta=()=>{const b=document.querySelector('#ob-root .ob-body');if(b)b.style.animation='none';};
+const rc=q=>{const e=document.querySelector('#ob-root '+q);if(!e)return null;const b=e.getBoundingClientRect();return[Math.round(b.top),Math.round(b.bottom)];};
+try{
+  S.onboarded=true;saveState();
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:3,min:60,age:'18',sport:'no',prio:[]});
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h.nada=true;
+  const sc=document.getElementById('onboarding');
+  for(const st of [0,47,59]){
+    de.style.setProperty('--st',st+'px');_ob.step='ob-material';obRender();await W(5);quieta(); // sin la entrada animada: desplaza el cuerpo 18 px mientras dura
+    const hasta=Math.max(56,st+18); // hasta dónde tapa la cabecera: su caja y, con zona segura, la franja hasta el contenido
+    const fondo=()=>{const h=document.querySelector('#ob-root .ob-head');return Math.round(h.getBoundingClientRect().bottom+parseFloat(getComputedStyle(h,'::after').height));};
+    sc.scrollTop=0;await W(3);const cab0=rc('.ob-head'),tit0=rc('#ob-h');
+    E(cab0[0]===0&&cab0[1]===Math.max(56,st)&&tit0[0]===Math.max(56,st)+18,'st '+st+' en reposo: '+pj([cab0,tit0]));
+    for(const y of [600,99999]){sc.scrollTop=y;await W(3);const cab=rc('.ob-head'),bar=rc('.ob-matn');
+      E(sc.scrollTop>300&&cab[0]===0&&fondo()===hasta&&bar[0]===hasta,'st '+st+' deslizado '+y+': '+pj([Math.round(sc.scrollTop),cab,fondo(),bar]));}
+    // la cabecera mide lo mismo en una pantalla corta
+    _ob.step='ob-enfoque';obRender();await W(5);quieta();const cabC=rc('.ob-head');E(cabC[0]===0&&cabC[1]===Math.max(56,st),'st '+st+' pantalla corta: '+pj(cabC));
+  }
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  if(st0)de.style.setProperty('--st',st0);else de.style.removeProperty('--st');
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('coachCardioVisible',async()=>{
 // (C12) «Más minutos de cardio» (objetivo «Salud y forma» o «Perder grasa») se ve y se aplica: antes se generaba y se guardaba, pero
 // el Coach la daba por caducada (el cardio no está entre los ejercicios que analiza) y nunca salía en la lista. Ya aplicada, deja de valer.
