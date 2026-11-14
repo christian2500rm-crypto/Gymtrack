@@ -514,6 +514,12 @@ module.exports = function (K, OPT) {
     const beginner = LV[P.lvS] <= LV.P;
     return (PLANES[P.wd] || []).filter(id => id !== rec && !(/^grp/.test(id) && (beginner || inp.goal === 'fuerza')) && !(id === 'cc3' && inp.consec));
   }
+  // v14 (P9): la forma de reparto de salida, que la app usa para elegir la opción `reparto` cuando la persona no ha elegido ninguna. D1
+  // (6 nov) puso «un entreno distinto cada día» ('dias') para todo el mundo; el 13 nov el usuario aprobó que quien EMPIEZA DE CERO (modo
+  // inicio) salga con 2 entrenos que se alternan ('recomendado'): con 'dias' le salían 15 ejercicios distintos con 3 días y 20 con 4, cada
+  // uno una vez por semana, y al empezar se aprende repitiendo. No si pidió una estructura que solo existe con un entreno por día (un
+  // reparto elegido, «Más torso» o «Más glúteo y pierna»): lo pedido manda
+  function formaInicial(inp) { return (inp.modes || []).includes('inicio') && !inp.plan && !inp.masTorso && inp.enfoque !== 'gluteo' ? 'recomendado' : 'dias'; }
   // lo que usa la app para montar «Cambiar reparto»: el recomendado y los demás (ella genera cada uno y enseña solo los que salen)
   function planes(inp) { const P = effective(inp), rec = tableSplit(Object.assign({}, inp, { plan: null }), P).rec; return { rec, otros: planesDe(inp, P, rec) }; }
   function splitOptions(inp, P) {
@@ -1959,5 +1965,5 @@ module.exports = function (K, OPT) {
     if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
     return null;
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
 };

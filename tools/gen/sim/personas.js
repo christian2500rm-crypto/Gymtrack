@@ -180,6 +180,7 @@ const ELEGIDOS = ['tpt3', 'pplt4', 'pplc4', 'grp4', 'pplet5', 'grp5', 'tptpt5', 
 const SIN_PLAN = ['El reparto elegido no se aplica aquí (solo vale con un entreno distinto por día y con quien puede elegir)', R => !ELEGIDOS.includes(R.m.split), R => R.m.split];
 const REGLAS = {
   lucia: { debe: [
+    ['Empieza de cero: la forma de salida son 2 entrenos que se alternan (P9; cambia D1 para quien empieza)', R => G.formaInicial(R.inp) === 'recomendado' && G.formaInicial(Object.assign({}, R.inp, { masTorso: true })) === 'dias' && G.formaInicial(Object.assign({}, R.inp, { enfoque: 'gluteo' })) === 'dias'],
     ['Cuerpo completo A/B que se alternan (inicio con 3 días)', R => R.m.split === 'cc2' && R.m.wd === 3, R => R.m.split],
     ['Primer escalón en casa: sentadilla a la silla y flexiones inclinadas o de rodillas', R => tiene(R, 'chair_squat') && tiene(R, 'pushup_incline', 'pushup_knee'), R => [...R.ids].join(',')],
     ['Modo inicio: 2 series y 4-5 ejercicios por día', R => R.rows.every(r => r.series <= 2) && R.det.every(d => { const n = d.rows.filter(r => r.kind === 'str').length; return n >= 4 && n <= 5; }), R => R.det.map(d => d.rows.filter(r => r.kind === 'str').length).join('/')],
@@ -188,6 +189,7 @@ const REGLAS = {
     ['Flexiones completas, sentadilla libre o fondos (variantes duras para empezar)', R => hay(R, 'pushup', 'air_squat', 'bench_dip', 'pushup_wide').length > 0, R => hay(R, 'pushup', 'air_squat', 'bench_dip', 'pushup_wide').join(',')],
     ['Pasarse de 45 min', R => !enRango(R, 0, 1.05), mins]] },
   marta: { debe: [
+    ['Con experiencia, la forma de salida es un entreno distinto cada día (P9 solo cambia a quien empieza de cero)', R => G.formaInicial(R.inp) === 'dias'],
     ['Torso/pierna ×2 (K=4)', R => R.m.split === 'tp4', R => R.m.split],
     ['Pierna con básicos de barra o máquina en el hueco 1 (sentadilla, prensa, hack, rumano, peso muerto, hip thrust)', R => R.rows.filter(r => r.prio === 1 && ['squat', 'hinge', 'hip_ext', 'lunge'].includes(r.L.pat)).every(r => ['back_squat', 'leg_press', 'hack_squat', 'rdl_bb', 'deadlift', 'hip_thrust_bb', 'hip_thrust_machine', 'front_squat', 'squat_smith'].includes(r.lib.replace('lib_', ''))), R => R.rows.filter(r => r.prio === 1).map(r => r.lib).join(',')],
     ['Hip thrust (barra o máquina) por su prioridad de glúteos', R => tiene(R, 'hip_thrust_bb', 'hip_thrust_machine')],
@@ -424,7 +426,7 @@ Object.assign(REGLAS, {
     ['Tres días de pierna y uno de torso', R => R.m.split === 'p3t1', R => R.m.split],
     ['Hip thrust o puente en la semana', R => R.rows.some(r => r.L.pat === 'hip_ext')],
     ['Con «más glúteo» no se ofrecen otros repartos', R => G.planes(R.inp).otros.length === 0, R => G.planes(R.inp).otros.join(',')]] },
-  lola: { debe: [SIN_PLAN],
+  lola: { debe: [SIN_PLAN, ['Empieza de cero pero eligió su reparto: la forma de salida es un entreno distinto cada día (lo pedido manda, P9)', R => G.formaInicial(R.inp) === 'dias']],
     debeAlt: [
     ['Sale el reparto elegido (empuje, tirón, pierna y cuerpo completo)', R => R.m.split === 'pplc4', R => R.m.split],
     ['Sigue en modo inicio: 2 series en todo y esfuerzo «Fácil»', R => R.rows.every(r => r.series === 2) && R.m.effort.obj === 'facil', R => R.rows.map(r => r.series).join('')],

@@ -51,6 +51,7 @@ function _sanitizeProfile(o){
   const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight','cycle','repaso'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);}); // (E15) cycle: «¿Cómo seguimos?» contestado · (E16c) repaso anual
   p.nr=_oneOf(o.nr,['ent','pro','med']);
   p.warn=_oneOf(o.warn,['consulta','matrona']); // (E11b) aviso fijo de salud (§H.2): solo cuál, no el motivo // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
+  p.forma=_oneOf(o.forma,['dias','recomendado']); // (P9) la forma de reparto elegida a mano en «Cambiar reparto» (null: la de salida de tu nivel)
   p.plan=_oneOf(o.plan,PROF_PLAN); // (P1) reparto elegido (null: el recomendado); el generador lo ignora si ya no se te ofrece
   p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=_oneOf(o.enfoque,PROF_ENFOQUE); // (D10) más glúteo y pierna · (P2 del repaso del reparto) para todos, y «torso» = un solo día de pierna
   return p;

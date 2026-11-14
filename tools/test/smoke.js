@@ -10928,8 +10928,8 @@ try{
   opt('Empiezo de cero').click();await wait();E(_ob.step==='ob-tiempo'&&!('ritmo' in _ob.a),'«Empiezo de cero» → P4 y fuera el ritmo');
   E(/Recomendado/.test(tx($('[data-k=days][data-v="3"]')))&&/Recomendado/.test(tx($('[data-k=min][data-v="45"]'))),'recomendación de quien empieza');
   obTimeSet('days',5);await W(3);
-  E($('[data-k=tope][data-v=si]')&&$('[data-k=tope][data-v=si]').getAttribute('aria-checked')==='true'&&_ob.a.tope===true&&/4 días de pesas \(A · B · C · D\) y 1 de cardio suave/.test(tx($('.ob-week'))),'D5 con 5 días: '+tx($('.ob-week')));
-  $('[data-k=tope][data-v=no]').click();await W(3);E(_ob.a.tope===false&&/A · B · C · D · E\./.test(tx($('.ob-week'))),'D5: los 5 de pesas');
+  E($('[data-k=tope][data-v=si]')&&$('[data-k=tope][data-v=si]').getAttribute('aria-checked')==='true'&&_ob.a.tope===true&&/4 días de pesas \(A · B · A · B\) y 1 de cardio suave/.test(tx($('.ob-week'))),'D5 con 5 días (P9: quien empieza de cero, 2 entrenos que se alternan): '+tx($('.ob-week')));
+  $('[data-k=tope][data-v=no]').click();await W(3);E(_ob.a.tope===false&&/A · B · A · B · A\./.test(tx($('.ob-week'))),'D5: los 5 de pesas '+tx($('.ob-week')));
   // El parón: «Seguir» solo con las dos respuestas
   obBack();await W(3);opt('Vuelvo tras un parón').click();await wait();E(_ob.step==='ob-paron'&&$('#ob-go').disabled,'P3b sin respuestas');
   obSeg('antes','6m2a');await W(3);E($('#ob-go').disabled,'P3b con una');obSeg('fuera','2a6m');await W(3);E(!$('#ob-go').disabled,'P3b con las dos');
@@ -13891,6 +13891,54 @@ try{
   if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
 }finally{
   _coachLvPin=pin0;
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('p9QuienEmpieza',async()=>{
+// (P9, repaso del reparto; cambia D1 para quien empieza) Quien empieza de cero sale con 2 entrenos que se alternan (10 ejercicios que
+// se repiten, no 15-20 distintos), lo ve ya en «¿Cuánto tiempo tienes?» y la tarjeta de la semana dice por qué; «Cambiar reparto»
+// sigue ofreciendo un entreno distinto cada día y lo elegido se guarda con sus respuestas. Con experiencia no cambia nada; quien pidió
+// «Más torso» conserva su reparto; y quien ya tenía su rutina generada la conserva al rehacerla desde Ajustes.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),cards=()=>[...document.querySelectorAll('#ob-sheet-root .ob-card')],rp=()=>cards().filter(b=>b.classList.contains('ob-rp'));
+const dist=()=>new Set(_ob.g.res.det.flatMap(d=>d.rows.filter(r=>r.kind==='str').map(r=>r.lib))).size;
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);_ob.from='first';
+  Object.assign(_ob.a,{mode:'gen',goal:'salud',sex:'h',exp:'cero',days:3,min:45,age:'18',sport:'no',prio:[]});['plan','enfoque','forma','consec','tope'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto=null;
+  // la vista previa de la semana ya lo dice
+  _ob.step='ob-tiempo';obRender();await W(5);E(/Esta semana: A · B · A; la siguiente: B · A · B\. Dos entrenos de todo el cuerpo que se alternan/.test(tx($('.ob-week'))),'vista previa de 3 días: '+tx($('.ob-week')));
+  obTimeSet('days',4);await W(3);E(/Tu semana: A · B · A · B\. Torso y pierna que se alternan/.test(tx($('.ob-week'))),'vista previa de 4 días: '+tx($('.ob-week')));
+  obTimeSet('days',5);await W(3);E(/4 días de pesas \(A · B · A · B\) y 1 de cardio suave/.test(tx($('.ob-week'))),'vista previa de 5 días: '+tx($('.ob-week')));
+  obTimeSet('days',3);await W(3);
+  // la rutina: 2 entrenos que se alternan, con su porqué
+  _ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);
+  E(_ob.g.E.reparto==='recomendado'&&_ob.g.res.meta.split==='cc2'&&_ob.g.res.meta.K===2&&_ob.g.res.weeklyTarget===3&&dist()<=12,'3 días de cero: '+pj([_ob.g.E.reparto,_ob.g.res.meta.split,_ob.g.res.meta.K,dist()]));
+  E(/Esta semana: A · B · A; la siguiente: B · A · B/.test(tx($('.ob-wk')))&&/Para empezar, pocos ejercicios que se repiten/.test(tx($('.ob-rpq'))),'tarjeta de la semana: '+tx($('.ob-split')));
+  E(Object.keys(_ob.g.E.SEG(_ob.g.res,_ob.g.inp)).length===0,'seguridad');
+  _ob.a.days=4;_ob.dirty=true;obRender();await W(5);E(_ob.g.res.meta.split==='tp2'&&_ob.g.res.meta.K===2&&/Tu semana: A · B · A · B\./.test(tx($('.ob-wk')))&&dist()<=12,'4 días de cero: '+pj([_ob.g.res.meta.split,tx($('.ob-wk')),dist()]));
+  // «Cambiar reparto» sigue ofreciendo un entreno distinto cada día; lo elegido se guarda con las respuestas
+  obSplitSheet();await W(5);E(rp().length>=2&&rp().every(b=>b.getAttribute('aria-checked')==='false')&&/Ahora repites 2-4 entrenos/.test(tx(document.getElementById('ob-sheet-root'))),'hoja de quien empieza: '+rp().map(b=>b.dataset.plan+':'+b.getAttribute('aria-checked')).join(' '));
+  rp().find(b=>b.dataset.plan==='tp4').click();await W(10);
+  E(_ob.reparto==='dias'&&_ob.g.res.meta.split==='tp4'&&_ob.g.res.meta.K===4&&S.obDraft.a.forma==='dias'&&_obProfileToSave('gen').forma==='dias'&&!/Para empezar, pocos/.test(tx($('.ob-split'))),'un entreno distinto cada día: '+pj([_ob.reparto,_ob.g.res.meta.split,S.obDraft.a.forma]));
+  obSplitSheet();await W(5);cards().find(b=>/2-4 entrenos que se repiten/.test(tx(b))).click();await W(10);E(_ob.reparto==='recomendado'&&_ob.g.res.meta.K===2&&S.obDraft.a.forma==='recomendado','vuelta a 2 entrenos: '+pj([_ob.reparto,_ob.g.res.meta.K]));
+  // el borrador recuerda la forma elegida al volver a abrir
+  {_ob.reparto='dias';_obSaveDraft();hideOnboarding();showOnboarding({from:'settings'});await W(3);E(_ob.reparto==='dias','la forma elegida no vuelve con el borrador: '+_ob.reparto);_ob.from='first';_ob.h={nada:true};}
+  // quien pidió «Más torso» conserva su reparto aunque empiece de cero (lo pedido manda)
+  _ob.reparto=null;_ob.a.enfoque='torso';_ob.a.days=4;_ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);E(_ob.g.E.reparto==='dias'&&_ob.g.res.meta.split==='pplt4','«Más torso» de cero: '+pj([_ob.g.E.reparto,_ob.g.res.meta.split]));
+  // con experiencia, como siempre
+  delete _ob.a.enfoque;_ob.a.exp='6m2a';_ob.dirty=true;obRender();await W(5);E(_ob.g.E.reparto==='dias'&&_ob.g.res.meta.split==='tp4'&&_ob.g.res.meta.K===4,'con experiencia: '+pj([_ob.g.E.reparto,_ob.g.res.meta.split]));
+  _ob.step='ob-tiempo';obRender();await W(5);E(/Tu semana: A · B · C · D\. Torso y pierna/.test(tx($('.ob-week'))),'vista previa con experiencia: '+tx($('.ob-week')));
+  E(pj(getPlan())===plan0,'tocó la rutina actual');hideOnboarding();
+  // quien ya tenía su rutina de cero con un entreno distinto cada día la conserva al rehacerla desde Ajustes
+  {S.health=_sanitizeHealth({v:1,ts:Date.now(),consent:{ts:Date.now(),ver:'1'},zones:{},huesos:false,posparto:false,prudent:false,screenTs:Date.now()});
+    const ans={mode:'gen',goal:'salud',sex:'h',exp:'cero',days:3,min:45,consec:false,age:'40',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:{main:'g',g:placeFromPreset('grande'),c:null}};
+    const r0=applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(ans)),{},{reparto:'dias'})),{answers:ans,places:ans.places});E(r0.ok&&S.planMeta.reparto==='dias'&&S.planMeta.K===3,'partida antigua: '+pj([r0.ok,S.planMeta&&S.planMeta.K]));
+    openSplitChange();await W(20);E(_ob.step==='ob-resp-qc'&&_ob.reparto==='dias'&&_ob.g.res.meta.K===3,'rutina antigua de cero al rehacerla: '+pj([_ob.step,_ob.reparto,_ob.g&&_ob.g.res.meta.K]));obSheetClose();obRespCancel();await W(10);closeSettings();}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('app').style.display='';document.getElementById('toast').classList.remove('show');}catch(e){}
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
