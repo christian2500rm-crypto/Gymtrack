@@ -21800,8 +21800,9 @@ function coach_prescribe(exId,opts){
 }
 // Con pesas fijas (kettlebell) un salto de más del 50 % no se da: antes, la variante más difícil
 const KB_MAX=0.5;
-// (C10) Con objetivo «fácil», un salto de más de un 5 % del peso pide antes 2 repeticiones por encima del rango
-const LOAD_FACIL_STEP=0.05;
+// (C10) Con objetivo «fácil», un salto de más de un 7,5 % del peso pide antes 2 repeticiones por encima del rango (2,5 kg por
+// debajo de 33 kg; 1 kg por debajo de 13). Con un 5 % frenaba casi todo lo que hay por debajo de 50 kg sin cambiar apenas el resultado.
+const LOAD_FACIL_STEP=0.075;
 // Reps con las que empezar tras un salto de pesa fija: las que dan el mismo 1RM estimado con el peso nuevo (Epley), entre
 // loE y lo (16 kg × 14 → 20 kg × 6)
 function _kbReps(w,r,step,lo,loE){
@@ -21986,7 +21987,7 @@ function _presKg(exId,ex,opts){
     // (M2b) Prudente y con el esfuerzo apagado en Ajustes: sin saber si te sobraba, el tope dos sesiones seguidas con este peso
     if(eo==='facil'&&!_rpeOn()&&!_topTwice(d,ex,w,hi))return out('keep',w,hi,`${repsTxt}: primera vez en el tope con ${kgTxt(w)} kg; repítelo otra sesión y, si sale igual, subes`);
     if(eo==='facil'&&_upThisWeek(d))return out('keep',w,hi,`${repsTxt}; ya subiste esta semana: como mucho una subida por semana`);
-    // (C10) Con objetivo «fácil» y un salto grande para ese peso (más de un 5 %: 2,5 kg sobre 27,5), antes de subir se llega a 2
+    // (C10) Con objetivo «fácil» y un salto grande para ese peso (más de un 7,5 %: 2,5 kg sobre 27,5), antes de subir se llega a 2
     // repeticiones por encima del rango. Sin esto, 12 «fáciles» → +9 % → sale al límite → un salto menos → vuelta a subir, sin avanzar.
     if(eo==='facil'&&step>w*LOAD_FACIL_STEP+1e-9&&r<hi+2)return out('reps',w,r+1,`${repsTxt}; +${kgTxt(step)} kg sería un ${Math.round(step/w*100)} % más: antes llega a ${hi+2} repeticiones`);
     // Pausa larga: repetir antes de subir

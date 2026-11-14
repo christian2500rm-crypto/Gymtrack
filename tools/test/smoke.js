@@ -11927,8 +11927,8 @@ await safe('rpeOffCoach',async()=>{
     S.planMeta=_sanitizePlanMeta({id:'p_m2',ts:now-30*D,effort:{obj:'facil',rir:3,subidas:'lenta'},level:'P',modes:['prudente'],rest:{iso:75,comp:120,heavy:150,bw:90}},getPlan());
     if(_effortObj()!=='facil')throw new Error('perfil');
     const rec=(v,r,rpe,ts)=>({d:'x',v,r,rpe,ts,setsDone:3});
-    S.strength={m2_kg:[rec(60,10,1,now-40*D)]};
-    const ups=[];let w=60;for(let i=0;i<6;i++){const ts=now-8*D+i*1.4*D,p=coach_prescribe('m2_kg');
+    S.strength={m2_kg:[rec(40,10,1,now-40*D)]};
+    const ups=[];let w=40;for(let i=0;i<6;i++){const ts=now-8*D+i*1.4*D,p=coach_prescribe('m2_kg');
       if(p&&_effHit(p.reason||''))throw new Error('texto: '+p.reason);
       const nw=p&&p.weight>0?p.weight:w;if(nw>w+1e-9)ups.push({ts,d:nw-w});w=nw;S.strength.m2_kg.push(rec(w,10,1,ts));}
     if(!ups.length||ups.some(u=>u.d>loadStepOf(getPlan().A.ex[0])+1e-9))throw new Error('salto doble '+JSON.stringify(ups));
@@ -12253,30 +12253,30 @@ await safe('coachCautiousNoRpe',async()=>{
     const meta=obj=>{S.planMeta=_sanitizePlanMeta({id:'p_m2b',ts:now-60*D,effort:obj==='facil'?{obj:'facil',rir:3,subidas:'lenta'}:{obj:'justo',rir:2,subidas:'normal'},level:obj==='facil'?'P':'I',modes:obj==='facil'?['prudente']:[],rest:{iso:75,comp:120,heavy:150,bw:90}},getPlan());};
     const rec=(v,r,rpe,ts,sd)=>({d:'x',v,r,rpe,ts,setsDone:sd==null?3:sd,ps:3,pr:'8-10'});
     const ex=()=>getPlan().A.ex[0],step=loadStepOf(ex()),P=()=>coach_prescribe('m2b_kg'),eff=/esfuerzo|al límite|«justo»|«fácil»|fue fácil/i;
-    // 1. Cauto, esfuerzo apagado: primera sesión en el tope → mantiene 60 kg y busca 10, y lo explica
+    // 1. Cauto, esfuerzo apagado: primera sesión en el tope → mantiene 40 kg y busca 10, y lo explica
     S.rpeOn=false;meta('facil');
-    S.strength={m2b_kg:[rec(60,8,null,now-20*D),rec(60,10,null,now-10*D)]};
-    {const p=P();E(p&&p.kind==='keep'&&p.weight===60&&p.reps===10&&/Mantén 60 kg y busca 10 reps/.test(p.head),'1.ª vez en el tope: '+pj(p&&[p.kind,p.weight,p.reps,p.head]));
+    S.strength={m2b_kg:[rec(40,8,null,now-20*D),rec(40,10,null,now-10*D)]};
+    {const p=P();E(p&&p.kind==='keep'&&p.weight===40&&p.reps===10&&/Mantén 40 kg y busca 10 reps/.test(p.head),'1.ª vez en el tope: '+pj(p&&[p.kind,p.weight,p.reps,p.head]));
      E(p&&/primera vez en el tope/.test(p.reason)&&/otra sesión/.test(p.reason)&&!eff.test(p.reason),'1.ª vez: texto «'+(p&&p.reason)+'»');
      const w=p?presWhyHtml(ex(),p).replace(/<[^>]+>/g,' '):'';E(/dos sesiones seguidas/.test(w)&&!eff.test(w),'1.ª vez: «¿Por qué?» '+w.slice(0,300));
      const tg=presTargetHtml(ex(),p).replace(/<[^>]+>/g,' ');E(/primera vez en el tope/.test(tg),'1.ª vez: objetivo de la tarjeta «'+tg.slice(0,200)+'»');}
     // 2. Segunda seguida en el tope con el mismo peso → sube un salto (nunca doble)
-    S.strength.m2b_kg.push(rec(60,10,null,now-2*D));
-    {const p=P();E(p&&p.kind==='up'&&Math.abs(p.weight-(60+step))<1e-9,'2.ª seguida: '+pj(p&&[p.kind,p.weight]));}
+    S.strength.m2b_kg.push(rec(40,10,null,now-2*D));
+    {const p=P();E(p&&p.kind==='up'&&Math.abs(p.weight-(40+step))<1e-9,'2.ª seguida: '+pj(p&&[p.kind,p.weight]));}
     // 3. Sin las series completas en la anterior, o con otro peso, no cuenta como «dos seguidas»
-    S.strength={m2b_kg:[rec(60,8,null,now-20*D),rec(60,10,null,now-10*D,2),rec(60,10,null,now-2*D)]};
-    {const p=P();E(p&&p.kind==='keep'&&p.weight===60,'anterior incompleta: '+pj(p&&[p.kind,p.weight]));}
-    S.strength={m2b_kg:[rec(57.5,10,null,now-20*D),rec(60,10,null,now-2*D)]};
-    {const p=P();E(p&&p.kind==='keep'&&p.weight===60,'anterior con otro peso: '+pj(p&&[p.kind,p.weight]));}
+    S.strength={m2b_kg:[rec(40,8,null,now-20*D),rec(40,10,null,now-10*D,2),rec(40,10,null,now-2*D)]};
+    {const p=P();E(p&&p.kind==='keep'&&p.weight===40,'anterior incompleta: '+pj(p&&[p.kind,p.weight]));}
+    S.strength={m2b_kg:[rec(37.5,10,null,now-20*D),rec(40,10,null,now-2*D)]};
+    {const p=P();E(p&&p.kind==='keep'&&p.weight===40,'anterior con otro peso: '+pj(p&&[p.kind,p.weight]));}
     // 4. Dentro del rango: una rep más, como antes
-    S.strength={m2b_kg:[rec(60,8,null,now-10*D),rec(60,9,null,now-2*D)]};
+    S.strength={m2b_kg:[rec(40,8,null,now-10*D),rec(40,9,null,now-2*D)]};
     {const p=P();E(p&&p.kind==='reps'&&p.reps===10,'dentro del rango: '+pj(p&&[p.kind,p.reps]));}
     // 5. Cauto con el esfuerzo encendido: como antes (sube a la primera, «fácil»)
-    S.rpeOn=true;S.strength={m2b_kg:[rec(60,8,1,now-20*D),rec(60,10,1,now-10*D)]};
-    {const p=P();E(p&&p.kind==='up'&&Math.abs(p.weight-(60+step))<1e-9,'cauto con esfuerzo: '+pj(p&&[p.kind,p.weight,p.reason]));}
+    S.rpeOn=true;S.strength={m2b_kg:[rec(40,8,1,now-20*D),rec(40,10,1,now-10*D)]};
+    {const p=P();E(p&&p.kind==='up'&&Math.abs(p.weight-(40+step))<1e-9,'cauto con esfuerzo: '+pj(p&&[p.kind,p.weight,p.reason]));}
     // 6. No cauto con el esfuerzo apagado: como antes (sube a la primera)
-    S.rpeOn=false;meta('justo');S.strength={m2b_kg:[rec(60,8,null,now-20*D),rec(60,10,null,now-10*D)]};
-    {const p=P();E(p&&p.kind==='up'&&p.weight>60,'no cauto sin esfuerzo: '+pj(p&&[p.kind,p.weight,p.reason]));
+    S.rpeOn=false;meta('justo');S.strength={m2b_kg:[rec(40,8,null,now-20*D),rec(40,10,null,now-10*D)]};
+    {const p=P();E(p&&p.kind==='up'&&p.weight>40,'no cauto sin esfuerzo: '+pj(p&&[p.kind,p.weight,p.reason]));
      const w=p?presWhyHtml(ex(),p).replace(/<[^>]+>/g,' '):'';E(!/dos sesiones seguidas/.test(w),'no cauto: la regla de dos sesiones en «¿Por qué?»');}
     if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
   }finally{Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);}
@@ -13604,7 +13604,7 @@ try{
 }
 });
 await safe('coachSaltoGrande',async()=>{
-// (C10) Con objetivo «fácil» (65 o más, rutina prudente, empezar de cero) y un salto grande para el peso que mueves (más de un 5 %),
+// (C10) Con objetivo «fácil» (65 o más, rutina prudente, empezar de cero) y un salto grande para el peso que mueves (más de un 7,5 %),
 // antes de subir se llega a 2 repeticiones por encima del rango: así el peso nuevo no sale al límite y no hay sube y baja. Con saltos
 // pequeños, o sin objetivo «fácil», como siempre. «Justo» en el tope sigue repitiendo y «al límite» sigue bajando un salto.
 const full=JSON.parse(JSON.stringify(S)),bad=[],pin0=_coachLvPin;const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
@@ -13614,12 +13614,13 @@ try{
   if(ex){const hi=repRange(ex).hi,D=864e5,n=Date.now(),A=v=>Array(_baseSets(ex)).fill(v);
     const rec=(d,v,reps,rpe)=>({d:'x',v,r:Math.min(...reps),setsDone:reps.length,rpe:+(rpe.reduce((a,b)=>a+b,0)/rpe.length).toFixed(2),ts:n-d*D,ps:reps.length,pr:ex.r,sets:reps.map((r,i)=>({w:v,r,rpe:rpe[i]}))});
     const P=(...rows)=>{S.strength[ex.id]=rows;return coach_prescribe(ex.id);};
-    const st=(()=>{S.strength[ex.id]=[rec(7,100,A(hi),A(2))];return loadStepOf(ex);})(),W1=st*11,W2=st*40; // el salto es un 9 % de W1 y un 2,5 % de W2
+    const st=(()=>{S.strength[ex.id]=[rec(7,100,A(hi),A(2))];return loadStepOf(ex);})(),W1=st*11,W2=st*40,W3=st*16; // el salto es un 9 % de W1, un 2,5 % de W2 y un 6 % de W3 (40 kg con saltos de 2,5)
     S.planMeta={effort:{obj:'facil'}};
     let p=P(rec(7,W1,A(hi),A(1)));E(p.kind==='reps'&&p.reps===hi+1&&Math.abs(p.weight-W1)<0.01&&p.reason.includes('antes llega a '+(hi+2)),'salto grande, en el tope: '+p.head+' · '+p.reason);
     p=P(rec(14,W1,A(hi),A(1)),rec(7,W1,A(hi+1),A(1)));E(p.kind==='reps'&&p.reps===hi+2,'salto grande, una por encima: '+p.head);
     p=P(rec(21,W1,A(hi),A(1)),rec(14,W1,A(hi+1),A(1)),rec(7,W1,A(hi+2),A(1)));E(p.kind==='up'&&Math.abs(p.weight-(W1+st))<0.01,'salto grande, dos por encima: '+p.head);
     p=P(rec(7,W2,A(hi),A(1)));E(p.kind==='up'&&Math.abs(p.weight-(W2+st))<0.01,'salto pequeño: '+p.head);
+    p=P(rec(7,W3,A(hi),A(1)));E(p.kind==='up'&&Math.abs(p.weight-(W3+st))<0.01,'salto del 6 %, por debajo del umbral: '+p.head);
     // lo aprobado no cambia: «justo» en el tope repite y «al límite» baja un salto
     p=P(rec(7,W1,A(hi),A(2)));E(p.kind==='keep'&&Math.abs(p.weight-W1)<0.01,'justo en el tope: '+p.head);
     p=P(rec(7,W1,A(hi),A(3)));E(p.kind==='down'&&Math.abs(p.weight-(W1-st))<0.01,'al límite en el tope: '+p.head);
