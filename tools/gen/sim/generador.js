@@ -728,6 +728,26 @@ module.exports = function (K, OPT) {
     for (const pr of [0, 1, 2]) T.forEach(t => t.slots.filter(h => !h.x && !h.empty && (pr === 0 ? isLift(t, h) : h.prio === pr)).forEach(h => { const x = fill(h, t, st); if (x) { h.x = x; h.on = true; } else h.empty = true; }));
     // v14 (P3): un extra de brazos que no encontró su aislamiento vuelve a ser el accesorio de siempre (entra solo si falta volumen): no es un hueco vacío
     T.forEach(t => t.slots.forEach(h => { if (h.xbr && h.empty) { h.prio = 3; h.empty = false; delete h.xbr; } }));
+    // v15 (T2): bíceps y tríceps directos asegurados en «Completa» y «A fondo», con todos los objetivos: al menos un ejercicio de cada
+    // uno a la semana (2 series). Con los huecos ya llenos: si la semana lleva uno directo como secundario (empuje, tirón, «por músculos»,
+    // prioridad de brazos) o como extra de «Ganar músculo», es ese (h.gar); si no, su accesorio sube a secundario —o se añade el hueco— en
+    // el primer día de su zona donde de verdad hay con qué hacerlo (por orden de menos ejercicios, uno en cada día si se puede; solo curl
+    // o extensión: garUp). Asegurado = de lo último que quita el tope de ejercicios y no sale por tiempo: cae antes otro accesorio.
+    // No se aplica a 65 o más, «Prefiero no decirlo», huesos frágiles ni rutina prudente (sus huecos de seguridad y su core van antes);
+    // ni a «Lo esencial» ni al exprés, que no llevan brazos directos (la tarjeta lo dice).
+    if ((inp.sesion === 'completa' || inp.sesion === 'fondo') && !P.segM && !P.huesos && !P.prud) for (const w of ['TR', 'CU']) {
+      const g = w === 'CU' ? 'biceps' : 'triceps', directo = h => h.id === w && h.x && h.on && fracV(BY.get(h.x.lib), g) === 1, nGar = t => t.slots.filter(h => h.gar).length;
+      const ya = T.slice().sort((a, b) => nGar(a) - nGar(b) || a.n - b.n).map(t => t.slots.find(h => directo(h) && h.prio <= 2)).find(Boolean);
+      if (ya) { ya.gar = 1; delete ya.xbr; continue; }
+      const n2 = t => t.slots.filter(h => h.on && h.x && h.prio <= 2).length + 10 * nGar(t);
+      const cs = T.filter(t => { const z = ZONA_TPL[t.rb]; return !z || z.includes(g); }).sort((a, b) => n2(a) - n2(b) || a.n - b.n);
+      for (const t of cs) { let h = t.slots.find(k => k.id === w && !k.x), nuevo = false;
+        if (!h) { h = mkSlot(w, 2, null, t.role + '#' + t.n + ':' + w + ':g'); nuevo = true; }
+        const antes = { prio: h.prio, empty: h.empty }; h.prio = 2; h.gar = 1; h.garUp = 1; h.empty = false;
+        const x = fill(h, t, st);
+        if (x) { h.x = x; h.on = true; if (nuevo) t.slots.push(h); break; }
+        h.prio = antes.prio; h.empty = antes.empty; delete h.gar; delete h.garUp; }
+    }
     // 65+: al menos un unilateral de pierna a la semana (si ninguna plantilla tiene LU, se añade a la primera de pierna)
     // v2: un hueco de press de hombros que el material o la seguridad dejan vacío se sustituye por otro press (inclinado o, si no, plano):
     // sin esto, en casa sin material el día de torso se queda con un solo empuje y falla la cobertura (V5)
@@ -781,6 +801,7 @@ module.exports = function (K, OPT) {
           if (h.id === 'CO' && !elsewhere(h) && st.inp.min > 20) continue;  // v5: el último core de la semana no sale (V5; con 20 min o menos es aviso)
           if (h.id === 'RE' && !elsewhere(h) && pushW >= 6) s -= 50;      // hombro posterior protegido con 6+ series de empuje
           if (h.xbr) s += 60;   // v14 (P3): los brazos de «Ganar músculo» son un extra: lo primero que sale
+          if (h.gar) s -= 60;   // v15 (T2): el bíceps y el tríceps asegurados, de lo último en irse
           if (h.brazo) s -= 60; if (h.glu) s -= 50;   // v12 (D10): el glúteo de quien lo pidió, de lo último en irse (tras una prioridad de brazos elegida)                                            // v9 (J-08): el trabajo directo de la prioridad, lo último que sale
           if (fam(h) === 'rodilla' && kn <= hp) s -= 30;                   // no desequilibrar rodilla:cadera dentro del día
           if (fam(h) === 'cadera' && hp <= kn) s -= 30;
@@ -993,7 +1014,7 @@ module.exports = function (K, OPT) {
       if (st.P.noFloor && TAGS.suelo.has(L.id) && h.prio >= 2 && !h.prot && !h.obl && !h.fijo && !['CO', 'RE'].includes(h.id)) continue;
       if ((SLOT[h.id].tipo === 'multi' || h.prio === 1) && !L.c) continue;     // aislamientos nunca en un hueco multiarticular ni como principal
       if (!musOk(L, h.id)) continue;                                          // D-04: músculo objetivo
-      if (h.xbr && !['curl', 'tri'].includes(L.pat)) continue;                // v14 (P3): el extra de brazos es un aislamiento (unos fondos son otro empuje y descuadran tirón:empuje)
+      if ((h.xbr || h.garUp) && !['curl', 'tri'].includes(L.pat)) continue;                // v14 (P3): el extra de brazos es un aislamiento (unos fondos son otro empuje y descuadran tirón:empuje)
       if (!CORE_PATS.includes(L.pat) && (pc[L.pat] || 0) >= 2) continue;     // como mucho 2 del mismo patrón en el día
       // v7: en cuerpo completo, un hueco de reserva o un accesorio no repite un patrón que ya está en el día (dos hip thrust o dos elevaciones
       // laterales en un CC: mejor una serie más del que ya está; medida patron_x2_cc del diagnóstico, objetivo ≤ 2 %)
@@ -1567,7 +1588,7 @@ module.exports = function (K, OPT) {
       const L = BY.get(h.x.lib), fam = famOf(L);
       if (fam && weekFam(fam, h) === 0) return false;
       if (fam && fam !== 'core' && weekFam(fam, h) + 1e-9 < v5need(st, fam)) return false;   // v2: el recorte no rompe V5 (D-17)
-      if (h.obl) return false;
+      if (h.obl || h.gar) return false;   // v15 (T2): ni el bíceps o el tríceps asegurados
       if (h.fijo && !st.T.some(o => act(o).some(k => k !== h && k.fijo))) return false;   // v8: queda al menos un extensor en la semana
       if (h.prot && h.id === 'CO' && weekFam('core', h) === 0) return false;
       if (h.prot && h.id === 'RE' && !st.T.some(tt => act(tt).some(k => k !== h && BY.get(k.x.lib).pat === 'rear'))) return false;
@@ -1990,10 +2011,10 @@ module.exports = function (K, OPT) {
       det.push({ letra: k, role: t.rb, place: t.place, preset: t.P && t.P.preset, ligero: !!t.light, nombre: label + ' · ' + focus, minutos: Math.round(dayMinutes(t, st)), minExact: dayMinutes(t, st), sobraMotivo: t.sobraMotivo || null, rows, empty: t.slots.filter(h => h.empty && !h.sust && h.prio <= 2).map(h => h.id) });
     });
     const vol = volume(st), pp = pushPull(st);
-    // v15 (T1): el resumen de la sesión, con la rutina final: lo que enseña la tarjeta del tipo es esto mismo (minutos del día más largo,
+    // v15 (T1): el resumen de la sesión, con la rutina final: lo que enseña la tarjeta del tipo es esto mismo (minutos de un día medio,
     // redondeados a 5; ejercicios de fuerza por día; si hay bíceps y tríceps directos, abdominales y cardio final)
     const nEj = det.map(d => d.rows.filter(r => r.kind === 'str').length), filas = det.flatMap(d => d.rows);
-    const sesion = { tipo: inp.sesion || null, min: Math.round(Math.max(...det.map(d => d.minutos)) / 5) * 5, ej: nEj, ejMin: Math.min(...nEj), ejMax: Math.max(...nEj),
+    const sesion = { tipo: inp.sesion || null, min: Math.round(det.reduce((x, d) => x + d.minutos, 0) / det.length / 5) * 5, ej: nEj, ejMin: Math.min(...nEj), ejMax: Math.max(...nEj),
       biceps: vol.dir.biceps > 0, triceps: vol.dir.triceps > 0, abs: filas.some(r => r.kind === 'str' && CORE_PATS.includes(r.pat)), cardio: Math.max(0, ...filas.filter(r => r.kind === 'cardio').map(r => r.min)) };
     // ── v7 (paso 4): por qué y avisos de seguridad y modos, con la rutina final ──
     const why2 = [], warn2 = [];

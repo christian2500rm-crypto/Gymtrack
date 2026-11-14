@@ -172,10 +172,22 @@ return function (K, G, X) {
     if (P.cauto && textos.some(s => /sobren 2-3/.test(s))) bump('texto_no_cuadra', 'cauto con 2-3');
     if (textos.some(s => /\d\.\d/.test(s))) bump('texto_no_cuadra', 'punto decimal: ' + textos.find(s => /\d\.\d/.test(s)).slice(0, 50));
     // v15 (T1, tipo de sesión): con un tipo elegido la persona no dijo minutos: ningún texto habla de «los que dijiste» ni de «los que te
-    // sobran»; y el resumen que pintan las tarjetas (meta.sesion) es el de la rutina que sale (minutos del día más largo, ejercicios por día)
+    // sobran»; y el resumen que pintan las tarjetas (meta.sesion) es el de la rutina que sale (minutos de un día medio, ejercicios por día)
     if (inp.sesion) { const malo = textos.concat(X.avisos(res, inp)).find(s => /dijiste|Te sobran|\b(Con|En) \d+ minutos\b|sesiones de \d+ minutos|quepa en \d+ min|días de \d+ minutos/.test(s)); if (malo) bump('sesion_texto_minutos', malo.slice(0, 70)); }
+    // v15 (T2): en «Completa» y «A fondo», bíceps y tríceps con series directas (2 o más por semana), salvo 65 o más, huesos frágiles y rutina
+    // prudente, y salvo que ningún día de la semana sea de su zona o que el material o las molestias no dejen ningún curl o extensión
+    if ((inp.sesion === 'completa' || inp.sesion === 'fondo') && !P.segM && !P.huesos && !P.prud) {
+      const zona = { biceps: /^(CC|T\d|TC|Ti|EB|HB|BR)/, triceps: /^(CC|T\d|TC|E\d?$|PT|HB|BR)/ }, pat = { biceps: 'curl', triceps: 'tri' };
+      // (en el modo inicio —5 ejercicios por sesión— con 2 entrenos que se alternan solo cabe uno de los dos sin dejar la semana sin core
+      // o sin cadera, que es regla dura, V5: ahí basta con uno)
+      // (y si los 5 de cada día ya son los de la cobertura mínima, ninguno)
+      const uno = P.inicio && (['biceps', 'triceps'].some(g => (m.vol[g] || {}).dir >= 2) || days.every(d => d.rows.filter(r => r.kind === 'str').length >= 5));
+      for (const g of ['biceps', 'triceps']) { if ((m.vol[g] || {}).dir >= 2 || uno) continue;
+        const ds = days.filter(d => zona[g].test(d.role)); if (!ds.length) continue;
+        const hay = K.C.some(L => L.pat === pat[g] && L.lt !== 'c' && L.dif <= P.difCap && G.safeL(L, inp) && ds.some(d => K.placeCan(L, inp.places[d.place], d.place)));
+        if (hay) bump('sesion_brazos', g + ': ' + ((m.vol[g] || {}).dir || 0) + ' directas'); } }
     { const sm = m.sesion, nEj = days.map(d => d.rows.filter(r => r.kind === 'str').length);
-      if (!sm || sm.tipo !== (inp.sesion || null) || sm.min !== Math.round(Math.max(...days.map(d => d.minutos)) / 5) * 5 || sm.ej.join() !== nEj.join()) bump('sesion_resumen', JSON.stringify(sm)); }
+      if (!sm || sm.tipo !== (inp.sesion || null) || sm.min !== Math.round(days.reduce((x, d) => x + d.minutos, 0) / days.length / 5) * 5 || sm.ej.join() !== nEj.join()) bump('sesion_resumen', JSON.stringify(sm)); }
     return f;
   };
 };

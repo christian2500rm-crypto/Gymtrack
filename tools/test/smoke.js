@@ -14243,5 +14243,37 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('t2BrazosAsegurados',async()=>{
+// (T2, tipo de sesión) «Completa» y «A fondo» llevan bíceps y tríceps directos (2 series o más por semana de cada uno) con cualquier
+// objetivo y también en días de cuerpo completo; «Lo esencial» no, y su tarjeta lo dice. Las tarjetas hablan de «bíceps y tríceps»
+// (nunca de «curl»), y solo si de verdad salen: a 65 o más no se fuerzan (sus ejercicios de seguridad van antes).
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),card=id=>document.querySelector('#ob-root .ob-se[data-v="'+id+'"]');
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:3,age:'18',sport:'no',prio:[],sesion:'completa',min:60});['plan','enfoque','forma','roles','abs','cardio'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.dia=null;_ob.pins={};_ob.alt=0;_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
+  const I=_obSesInfo();
+  E(!I.esencial.biceps&&!I.esencial.triceps&&I.completa.biceps&&I.completa.triceps&&I.fondo.biceps&&I.fondo.triceps,'brazos por tipo: '+pj([I.esencial,I.completa,I.fondo].map(x=>[x.biceps,x.triceps])));
+  E(/bíceps y tríceps/.test(tx(card('completa')))&&!/curl/i.test(tx($('.ob-ses')))&&/Los brazos trabajan con los presses y los remos/.test(tx(card('esencial'))),'tarjetas: '+tx(card('completa'))+' / '+tx(card('esencial')));
+  // la rutina: series directas de los dos, con cada objetivo, en cuerpo completo (3 días) y en torso/pierna (4), sin pasar del tope de «Completa»
+  for(const [goal,days] of [['musculo',3],['salud',3],['fuerza',3],['grasa',4],['aguante',4]]){
+    Object.assign(_ob.a,{goal,days,sesion:'completa',min:60});_ob.step='ob-rutina';_ob.dirty=true;obRender();await W(6);
+    const m=_ob.g.res.meta,pats=_ob.g.res.det.flatMap(d=>d.rows.filter(r=>r.kind==='str').map(r=>r.pat));
+    E(m.vol.biceps.dir>=2&&m.vol.triceps.dir>=2&&pats.includes('curl')&&pats.includes('tri')&&m.sesion.ejMax<=7&&_ob.g.res.ok,goal+' '+days+' días: '+pj([m.vol.biceps.dir,m.vol.triceps.dir,m.sesion.ej]));}
+  // «Lo esencial»: ni un curl ni una extensión
+  Object.assign(_ob.a,{goal:'musculo',days:3,sesion:'esencial',min:30});_ob.dirty=true;obRender();await W(6);
+  E(_ob.g.res.meta.vol.biceps.dir===0&&_ob.g.res.meta.vol.triceps.dir===0,'«Lo esencial» con brazos directos');
+  // a 65 o más no se fuerzan, y la tarjeta solo los nombra si salen
+  Object.assign(_ob.a,{goal:'salud',age:'65',sesion:'completa',min:60});_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
+  {const J=_obSesInfo(),c=J.completa;E(c&&/bíceps y tríceps/.test(tx(card('completa')))===!!(c.biceps&&c.triceps),'65 o más: la tarjeta no cuadra con la rutina: '+tx(card('completa'))+' / '+pj(c));}
+  E(pj(getPlan())===plan0,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

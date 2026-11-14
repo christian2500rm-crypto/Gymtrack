@@ -32,8 +32,10 @@ const SES = process.argv.includes('--sesion');
 const conSesion = pr => { if (SES) pr.a.sesion = G.sesionDe(pr.a.min); };
 const ordenSesion = (pr, inp, res, f) => { if (!SES || inp.sesion !== 'completa') return;
   const de = s => { const m = G.genRoutine(G.desdeRespuestas(Object.assign({}, pr.a, { sesion: s }))).meta; return Object.assign({ split: m.split }, m.sesion); }, e = de('esencial'), c = Object.assign({ split: res.meta.split }, res.meta.sesion), fo = de('fondo'), med = s => s.ej.reduce((x, y) => x + y, 0) / s.ej.length;
-  const mal = (a, b) => !(med(a) <= med(b) + 1e-9 && a.min <= b.min), txt = `${e.ej.join('/')} ≈${e.min} · ${c.ej.join('/')} ≈${c.min} · ${fo.ej.join('/')} ≈${fo.min}`;
-  if ((e.split === c.split && mal(e, c)) || (c.split === fo.split && mal(c, fo))) f.sesion_orden = txt; else if (mal(e, c) || mal(c, fo)) f._otroReparto = txt; };
+  // (holgura: los minutos van redondeados a 5 y dos rutinas casi iguales pueden caer a un lado y a otro; un ejercicio menos en un solo día
+  // tampoco es «dar menos». Lo que queda dentro de la holgura se cuenta aparte: sesion_orden_casi)
+  const casi = (a, b) => !(med(a) <= med(b) + 1e-9 && a.min <= b.min), mal = (a, b) => !(med(a) <= med(b) + 0.34 && a.min <= b.min + 5), txt = `${e.ej.join('/')} ≈${e.min} · ${c.ej.join('/')} ≈${c.min} · ${fo.ej.join('/')} ≈${fo.min}`;
+  if ((e.split === c.split && mal(e, c)) || (c.split === fo.split && mal(c, fo))) f.sesion_orden = txt; else if (mal(e, c) || mal(c, fo)) f._otroReparto = txt; else if (casi(e, c) || casi(c, fo)) f._casi = txt; };
 const planStat = { pedidos: 0, salen: 0, por: {} };
 const conPlan = pr => { if (!PLAN) return; const o = G.planes(G.desdeRespuestas(pr.a)).otros; if (o.length) pr.a.plan = o[pr.id % o.length]; };
 const cuentaPlan = (pr, res) => { if (!pr.a.plan) return; const p = planStat.por[pr.a.plan] = planStat.por[pr.a.plan] || { pedidos: 0, salen: 0 }; planStat.pedidos++; p.pedidos++; if (res.meta.split === pr.a.plan) { planStat.salen++; p.salen++; } };
@@ -432,7 +434,7 @@ for (const pr of profs) {
   const inp = G.desdeRespuestas(pr.a);
   const a0 = Date.now(); const res = G.genRoutine(inp); agg.ms.push(Date.now() - a0); cuentaPlan(pr, res);
   if (ROLES && pr.a.roles) { planStat.pedidos++; if (res.meta.roles) { planStat.salen++; const z = (res.meta.warn.find(w => w.c === 'semana_sin') || { p: { z: [] } }).p.z.join('+') || 'completa'; planStat.por[z] = (planStat.por[z] || 0) + 1; } }
-  const { f, q, ex } = analizar(res, inp, pr); ordenSesion(pr, inp, res, f); if (f._otroReparto) { q.sesion_orden_otro_reparto = f._otroReparto; delete f._otroReparto; }
+  const { f, q, ex } = analizar(res, inp, pr); ordenSesion(pr, inp, res, f); if (f._otroReparto) { q.sesion_orden_otro_reparto = f._otroReparto; delete f._otroReparto; } if (f._casi) { q.sesion_orden_casi = f._casi; delete f._casi; }
   if (SOLO) verUno(pr, inp, res, f, q);
   agg.n++;
   // medición 2: agregados nuevos y segmentos
@@ -476,7 +478,7 @@ if (arg('seg') !== '0') for (const pr of perfilesSeguridad()) {
   conSesion(pr); conPlan(pr); conRoles(pr);
   const inp = G.desdeRespuestas(pr.a);
   const a0 = Date.now(); const res = G.genRoutine(inp); aggS.ms.push(Date.now() - a0); cuentaPlan(pr, res);
-  const { f, q } = analizar(res, inp, pr); ordenSesion(pr, inp, res, f); if (f._otroReparto) { q.sesion_orden_otro_reparto = f._otroReparto; delete f._otroReparto; }
+  const { f, q } = analizar(res, inp, pr); ordenSesion(pr, inp, res, f); if (f._otroReparto) { q.sesion_orden_otro_reparto = f._otroReparto; delete f._otroReparto; } if (f._casi) { q.sesion_orden_casi = f._casi; delete f._casi; }
   if (SOLO) verUno(pr, inp, res, f, q);
   aggS.n++; const c = aggS.porCaso[pr.especial] = aggS.porCaso[pr.especial] || { perfiles: 0, con_fallo: 0, claves: {} }; c.perfiles++;
   if (Object.keys(f).length) c.con_fallo++;

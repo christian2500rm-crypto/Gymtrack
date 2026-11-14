@@ -189,6 +189,10 @@ const roles = R => Object.values(R.m.tpl).join(',');
 const ELEGIDOS = ['tpt3', 'pplt4', 'pplc4', 'grp4', 'pplet5', 'grp5', 'tptpt5', 'pplg6'];
 // v15 (tipo de sesión): el resumen (meta.sesion) de lo que saldría con cada tipo, para las mismas respuestas
 const TIPOS_SES = R => Object.fromEntries(['expres', 'esencial', 'completa', 'fondo'].map(s => [s, G.genRoutine(Object.assign({}, R.inp, { sesion: s, min: G.SESION[s] })).meta.sesion]));
+// v15 (T2): series directas de bíceps y de tríceps por tipo de sesión, para cada objetivo, 3 y 4 días y tres niveles (gimnasio grande)
+const BRAZOS_T2 = R => { const out = []; for (const goal of ['musculo', 'fuerza', 'grasa', 'salud', 'aguante']) for (const days of [3, 4]) for (const exp of ['cero', 'lt6m', '6m2a']) for (const sesion of ['esencial', 'completa', 'fondo']) {
+  const v = G.genRoutine(G.desdeRespuestas({ goal, exp, days, sesion, age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: R.inp.places })).meta.vol, b = v.biceps.dir, t = v.triceps.dir;
+  out.push({ et: `${goal} ${exp} ${days}d ${sesion}: ${b}/${t}`, ok: sesion === 'esencial' ? b === 0 && t === 0 : exp === 'cero' ? b >= 2 || t >= 2 : b >= 2 && t >= 2 }); } return out; };   // (modo inicio: al menos uno de los dos; ver seguridad.js)
 const SIN_PLAN = ['El reparto elegido no se aplica aquí (solo vale con un entreno distinto por día y con quien puede elegir)', R => !ELEGIDOS.includes(R.m.split), R => R.m.split];
 const REGLAS = {
   lucia: { debe: [
@@ -479,10 +483,12 @@ Object.assign(REGLAS, {
     ['Sigue en modo inicio: 2 series en todo y esfuerzo «Fácil»', R => R.rows.every(r => r.series === 2) && R.m.effort.obj === 'facil', R => R.rows.map(r => r.series).join('')],
     ['A quien empieza no se le ofrece «por músculos»', R => !G.planes(R.inp).otros.some(x => /^grp/.test(x)), R => G.planes(R.inp).otros.join(',')]] },
   tina: (() => { const reglas = [
-    ['La sesión es «Completa» y su resumen (minutos y ejercicios por día) es el de la rutina', R => R.m.sesion.tipo === 'completa' && R.m.sesion.min === Math.round(Math.max(...R.det.map(d => d.minutos)) / 5) * 5 && R.m.sesion.ej.join() === R.det.map(d => d.rows.filter(r => r.kind === 'str').length).join(), R => JSON.stringify(R.m.sesion)],
+    ['La sesión es «Completa» y su resumen (minutos y ejercicios por día) es el de la rutina', R => R.m.sesion.tipo === 'completa' && R.m.sesion.min === Math.round(R.det.reduce((x, d) => x + d.minutos, 0) / R.det.length / 5) * 5 && R.m.sesion.ej.join() === R.det.map(d => d.rows.filter(r => r.kind === 'str').length).join(), R => JSON.stringify(R.m.sesion)],
     ['Como mucho 7 ejercicios de fuerza por día (el tope de «Completa»)', R => R.m.sesion.ejMax <= 7 && R.m.sesion.ejMin >= 6, R => R.m.sesion.ej.join('/')],
     ['Exprés ≤ Lo esencial ≤ Completa ≤ A fondo, en ejercicios y en minutos; «Lo esencial» son 5 ejercicios y «A fondo» llega a 8', R => { const s = TIPOS_SES(R); return s.expres.ejMax <= s.esencial.ejMin && s.esencial.ejMax <= s.completa.ejMin && s.completa.ejMax <= s.fondo.ejMax && s.expres.min <= s.esencial.min && s.esencial.min <= s.completa.min && s.completa.min <= s.fondo.min && s.esencial.ejMax === 5 && s.fondo.ejMax === 8; },
       R => JSON.stringify(Object.fromEntries(Object.entries(TIPOS_SES(R)).map(([k, s]) => [k, s.ej.join('/') + ' ≈' + s.min])))],
+    ['«Completa» y «A fondo» llevan bíceps y tríceps directos (2 series o más por semana de cada uno) con todos los objetivos, con 3 y con 4 días y también con menos de 6 meses (T2); quien empieza de cero, al menos uno de los dos; «Lo esencial», ninguno',
+      R => BRAZOS_T2(R).every(x => x.ok), R => BRAZOS_T2(R).filter(x => !x.ok).map(x => x.et).join(' · ')],
     ['Ningún texto habla de minutos que la persona no dijo; dice lo que dura', R => !T(R, /dijiste|Te sobran|Con \d+ minutos/) && T(R, /Cada día dura unos \d+ min\.|Los días duran entre \d+ y \d+ min\./)],
     ['Sin tipo guardado, se deduce de los minutos de antes (T7): 15-20 exprés, 30 lo esencial, 45-60 completa, 75-90 a fondo', () => [15, 20, 30, 45, 60, 75, 90].map(G.sesionDe).join() === 'expres,expres,esencial,completa,completa,fondo,fondo'],
     ['Sin tipo de sesión, los minutos mandan como siempre (las rutinas de antes no cambian)', R => { const a = Object.assign({}, R.inp, { sesion: null, min: 60 }); const r = G.genRoutine(a); return r.meta.sesion.tipo === null && r.det.every(d => d.minExact <= 60 * 1.05); }]];
