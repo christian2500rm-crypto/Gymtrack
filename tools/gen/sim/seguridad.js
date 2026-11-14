@@ -107,7 +107,11 @@ module.exports = function (K, G, X) {
     // ── v9 (paso 6): selección y prescripción ──
     // J-08: con prioridad de brazos y material, trabajo directo (curl y tríceps) cada semana (con sesiones de 45 min o más)
     // (con 30 min o menos no se exige: el tiempo pide antes los básicos, el core y el tirón que equilibra el hombro; el texto lo dice)
-    if (inp.min > 30 && !P.corto) for (const g of ['biceps', 'triceps']) { if (!P.prioG.has(g)) continue;
+    // (v14, P6: con la semana montada día a día, solo si hay un día de su familia: de tirón, torso, cuerpo completo, espalda y bíceps o brazos
+    // para el curl; de empuje, torso, cuerpo completo, pecho y tríceps o brazos para el tríceps. En una semana sin esos días, el hueco del
+    // día de hombros y brazos puede ceder su sitio al ejercicio que equilibra tirón y empuje, y el porqué lo dice: «no caben ejercicios directos»)
+    const cabeBrazo = g => !m.roles || m.roles.some(t => ['torso', 'completo', 'brazos'].concat(g === 'biceps' ? ['tiron', 'espalda_biceps'] : ['empuje', 'pecho_triceps']).includes(t));
+    if (inp.min > 30 && !P.corto) for (const g of ['biceps', 'triceps']) { if (!P.prioG.has(g) || !cabeBrazo(g)) continue;
       // (con material = algún ejercicio de su menú —el de la clase de la persona: a inicio, prudentes y 65+, sin fondos en banco ni flexión diamante— posible en sus sitios)
       const hay = menuIds(g === 'biceps' ? 'CU' : 'TR', G.clsOf(P, inp)).some(id => { const L = K.BY.get(id); return L && L.lt !== 'c' && (L.dif <= P.difCap || (P.dif2 && L.dif === 2) || (P.mayorExp && L.dif === 2 && ['maquina', 'smith', 'mancuernas'].includes(L.mat))) && Object.values(m.dayPlace).some(pk => K.placeCan(L, inp.places[pk], pk)) && G.safeL(L, inp); });
       if (hay && !str.some(({ r, L }) => G.mainGroup(L) === g || r.slot === (g === 'biceps' ? 'CU' : 'TR'))) bump('prioridad_sin_directo', g); }   // (los fondos en el hueco de tríceps y las dominadas supinas en el de curl cuentan)
@@ -117,9 +121,18 @@ module.exports = function (K, G, X) {
       if (SOLO_ELEGIDOS.includes(m.split)) {
         if (P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo') bump('plan_no_permitido', m.split);
         if (m.split.indexOf('grp') === 0 && (LVn(P.lvS) <= 1 || inp.goal === 'fuerza')) bump('plan_no_permitido', m.split + ' (por músculos)');
-        if (m.split !== m.plan || (m.split !== inp.plan && !(inp.masTorso && !inp.plan && m.split === G.UNA_PIERNA[m.wd]))) bump('plan_sin_pedir', m.split + ' / ' + inp.plan);   // (P2: o lo pidió con «Más torso»)
+        if (m.split !== m.plan || (m.split !== inp.plan && !m.roles && !(inp.masTorso && !inp.plan && m.split === G.UNA_PIERNA[m.wd]))) bump('plan_sin_pedir', m.split + ' / ' + inp.plan);   // (P2: o lo pidió con «Más torso»)
         if (roles.join(',') !== G.SPLITS[m.split].join(',') && roles.slice().sort().join(',') !== G.SPLITS[m.split].slice().sort().join(',')) bump('plan_dias', roles.join(','));
       }
+      // v14 (P6): reparto a medida («x:…» o uno con nombre montado día a día): solo a quien puede elegir, con tirón y empuje equilibrados, y
+      // la semana que se queda sin pierna, sin empuje o sin tirón lleva su aviso (y solo ella)
+      { const xm = String(m.split).indexOf('x:') === 0, pat = ps => str.some(({ L }) => ps.includes(L.pat));
+        if (xm && (P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo' || !inp.roles)) bump('plan_no_permitido', m.split + ' (a medida)');
+        if (xm && pat(['push_h', 'push_v']) && m.ratio.tiron_empuje < 1 - 1e-9) bump('medida_tiron_empuje', m.ratio.tiron_empuje);
+        if (m.roles) { const sin = [['pierna', ['squat', 'lunge', 'hinge', 'hip_ext']], ['empuje', ['push_h', 'push_v']], ['tirón', ['pull_h', 'pull_v']]].filter(([, ps]) => !pat(ps)).map(([z]) => z);
+          const dicho = textos.some(t => /^Tu semana se queda sin /.test(t));
+          if (sin.length && !sin.every(z => textos.some(t => /^Tu semana se queda sin /.test(t) && t.includes(z)))) bump('semana_sin_aviso', sin.join(','));
+          if (!sin.length && dicho) bump('semana_sin_aviso', 'aviso de más'); } }
       // un solo día de pierna: el texto del reparto lo dice (y los avisos dan las series si se quedan cortas)
       if (['tpt3', 'pplt4', 'pplet5', 'pplg6'].includes(m.split) && !textos.some(t => /pierna, 1|un solo día de pierna/.test(t))) bump('plan_texto', m.split); }
     // v14 (P12): «cámbialo en Cambiar reparto» solo se dice a quien la hoja se lo ofrece: nunca con el tope de 65+, de rutina prudente o de 16-17

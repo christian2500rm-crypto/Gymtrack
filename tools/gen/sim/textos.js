@@ -96,6 +96,7 @@ module.exports = function (K, G) {
     else if (m.split === 'tp2') out.push(`Torso y pierna: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana y las sesiones no se alargan.`);
     else if (m.split === 'tp4') out.push(P.level === 'I' || P.level === 'A' ? `Torso y pierna en 4 entrenos: cada músculo trabaja ${num(f)} veces por semana, con un día más pesado y otro más ligero para cada zona.` :   // v14 (P4): con el motivo (las veces por semana)
  `Torso y pierna en 4 entrenos: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana.`);
+    else if (m.split.indexOf('x:') === 0) out.push(`Un reparto a tu medida, día a día: ${joinY(res.det.map(dd => (G.NOMBRE_DIA[dd.role] || dd.role).toLowerCase()))}. Yo pongo los ejercicios, las series y el equilibrio de la semana.`);   // v14 (P6)
     else if (ELEGIDO[m.split]) { out.push(ELEGIDO[m.split]);
       // «por músculos»: por qué los días de un solo grupo salen más cortos (el tope de 10 series por músculo y sesión, V9)
       if (m.split.indexOf('grp') === 0 && res.det.some(dd => inp.min - dd.minutos >= 10)) out.push('Los días de un solo grupo salen más cortos: pasadas unas 10 series de un músculo en la misma sesión, las siguientes aportan poco.'); }
@@ -273,9 +274,14 @@ module.exports = function (K, G) {
     // v10 (J-18): para quien empieza, prudentes, 65+ y «Salud y forma», los avisos de volumen solo de los grupos grandes (sin cabezas del
     // deltoides ni bíceps, tríceps, gemelos o abdomen): son detalles que no puede usar; el hombro, como «hombro»
     const simple = P.inicio || P.cauto || LV_[P.level] <= 1 || inp.goal === 'salud';
+    // v14 (P6): la semana montada día a día que se queda sin una zona, lo primero de su grupo y sin rodeos
+    { const ss = m.warn.find(w => w.c === 'semana_sin'); if (ss) { const Z = { pierna: 'pierna', empuje: 'empuje (pecho, hombros y tríceps)', tiron: 'tirón (espalda y bíceps)' }, zs = ss.p.z.map(z => Z[z] || z);
+      add(`Tu semana se queda sin ${joinY(zs)}: ningún día ${zs.length === 1 ? 'la trabaja' : 'las trabaja'}. Si no es lo que querías, cambia el foco de un día.`.replace('sin empuje (pecho, hombros y tríceps): ningún día la trabaja', 'sin empuje (pecho, hombros y tríceps): ningún día lo trabaja').replace('sin tirón (espalda y bíceps): ningún día la trabaja', 'sin tirón (espalda y bíceps): ningún día lo trabaja')); } }
     const VL = g => ((K.PLBL || GLBL)[g] || GLBL[g] || g);
     // (sin cabezas del deltoides ni pequeños para quien empieza, cautos y «Salud y forma»; a los demás, los pequeños solo si son su prioridad)
-    const volW = m.warn.filter(w => w.c === 'vol_corto' && !(simple && ['hombro_lat', 'hombro_post'].includes(w.p.g)) && !((K.PSMALL || []).includes(w.p.g) && (simple || !P.prioV.has(w.p.g))));
+    // v14 (P6): los músculos de una zona que la semana no trabaja ya van en «Tu semana se queda sin…»: fuera del aviso de volumen
+    const gSin = new Set(((m.warn.find(w => w.c === 'semana_sin') || { p: { z: [] } }).p.z).flatMap(z => ({ pierna: ['cuads', 'isquios', 'gluteos', 'gemelos'], empuje: ['pecho', 'hombro_lat', 'triceps'], tiron: ['espalda', 'biceps', 'hombro_post'] })[z] || []));
+    const volW = m.warn.filter(w => w.c === 'vol_corto' && !gSin.has(w.p.g) && !(simple && ['hombro_lat', 'hombro_post'].includes(w.p.g)) && !((K.PSMALL || []).includes(w.p.g) && (simple || !P.prioV.has(w.p.g))));
     const vT = volW.filter(w => w.p.motivo === 'tiempo').map(w => VL(w.p.g).toLowerCase());
     if (vT.length) add(`Con ${inp.min} minutos, ${joinY([...new Set(vT)])} ${vT.length === 1 ? 'se queda' : 'se quedan'} por debajo de lo ideal: con más tiempo o más días se completa${vT.length === 1 ? '' : 'n'}.`);
     const vP = volW.filter(w => w.p.motivo === 'tope').map(w => VL(w.p.g).toLowerCase());
@@ -294,7 +300,7 @@ module.exports = function (K, G) {
         if (nD.length >= 4) add(`Con ${res.weeklyTarget} días de ${inp.min} minutos, cada músculo recibe unas ${media} series por semana, menos de lo ideal para tu nivel${inp.goal === 'grasa' ? '; para perder grasa conservando el músculo, está bien' : ''}. Si un día tienes más tiempo, el Coach lo aprovecha.`);
         else add(`Con ${res.weeklyTarget} días de ${inp.min} minutos, ${joinY(nD)} ${nD.length === 1 ? 'recibe' : 'reciben'} ${Math.min(...vs) >= 2 ? rg(vs) + ' series por semana, algo menos de lo ideal (' + rg(os) + ')' : 'menos series de lo ideal'}. Si un día tienes más tiempo, el Coach lo aprovecha.`); } }
     for (const w of m.warn) {
-      if (w.c === 'vol_corto') continue;
+      if (w.c === 'vol_corto' || w.c === 'semana_sin') continue;
       else if (w.c === 'equilibrio_casa') add(`Con ${inp.min} minutos no cabe el equilibrio: hazlo en casa cualquier día, 2-5 minutos, apoyándote en una pared o una silla.`);   // v5 (C-17, C-09); v8 (J-19): los minutos de la persona
       else if (w.c === 'extensores_casa') add(`Con ${inp.min} minutos no caben los extensores de la espalda: 2 días por semana, en casa, 2 series de bird dog o de Y-T-W boca abajo.`);   // v8 (J-07)
       else if (w.c === 'no_cabe') add(`Tu Día ${'ABCDEF'[w.p.dia]} dura unos ${w.p.m} min (dijiste ${w.p.min}). ¿Subimos el tiempo o quito un ejercicio?`);
@@ -311,7 +317,7 @@ module.exports = function (K, G) {
       else if (w.c === 'reciente') add(`Antes de volver a cargar tu ${zl(w.p.z)}, que la valore tu fisio o tu médico: es una lesión de las últimas semanas.`);   // C-16
       else if (w.c === 'otra_zona' && ['ahora', 'op', 'reciente'].includes(w.p.tipo)) add('Si esa molestia es por una operación o por un golpe reciente, consúltalo antes de entrenar la zona.');   // C-15
     }
-    if (res.meta.validate.soft.includes('tiron_empuje')) add(`Tirón y empuje no quedan equilibrados (${m.ratio.tiron_empuje}): con tu material no hay más tirón.`);
+    if (res.meta.validate.soft.includes('tiron_empuje')) add(`Tirón y empuje no quedan equilibrados (${num(m.ratio.tiron_empuje)}): con tu material no hay más tirón.`);   // v14: con coma decimal
     if (res.det.some(d => d.rows.some(r => r.lib === 'lib_inverted_row_table'))) add('Usa una mesa firme y estable. Con una banda y anclaje de puerta tendrías remos más seguros.');
     const ops = Object.keys(inp.zones || {}).filter(z => inp.zones[z] === 'op'); if (ops.length) add('Antes de cargar esa zona, consulta a quien te operó o a tu fisio.');
     if (Object.keys(inp.zones || {}).length >= 4) add('Con tantas molestias, te recomiendo que un fisioterapeuta revise tu rutina.');

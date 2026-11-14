@@ -273,6 +273,8 @@ input{font-family:inherit}
 .ob-wkn{font-size:15px;color:var(--text);line-height:1.45}
 .ob-rpq{margin:0}
 /* (P8) mover el día abierto antes o después */
+.ob-fo{margin-top:6px;padding-bottom:0}
+.ob-fo+.ob-od{margin-top:0;padding-top:4px}
 .ob-od{margin-top:6px;padding-bottom:0}
 .ob-od+.ob-mv{margin-top:2px}
 .ob-mv{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
@@ -10764,7 +10766,7 @@ return function (K, OPT) {
       goal: a.goal, level, modes, days: a.days, min: a.min, consec: !!a.consec, age: a.age, sport: a.sport || 'no', prio: a.enfoque === 'gluteo' ? (a.prio || []).filter(p => p !== 'gluteos').slice(0, 1) : (a.prio || []).slice(0, 2),
       pref, style: a.style || 'igual', warm: a.warm || 'normal', cardioEnd: a.cardioEnd || 'auto', power: !!a.power,
       avoid: a.avoid || [], places: a.places, daysOther: a.daysOther || 0, zones, prudent, keep: null, pins: null, enfoque: a.enfoque === 'gluteo' ? 'gluteo' : null,
-      plan: typeof a.plan === 'string' && SPLITS[a.plan] ? a.plan : null, masTorso: a.enfoque === 'torso', salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
+      plan: typeof a.plan === 'string' && SPLITS[a.plan] ? a.plan : null, masTorso: a.enfoque === 'torso', roles: Array.isArray(a.roles) && a.roles.length >= 3 && a.roles.length <= 6 && a.roles.every(t => typeof t === 'string') ? a.roles.slice() : null, salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
     };
   }
 
@@ -10814,7 +10816,9 @@ return function (K, OPT) {
       // v3 (D-12): el reparto de la tabla solo se cambia por una validación dura; con 'dias', también si el material no da para K entrenos
       // distintos (huecos 1 vacíos, con respaldo de otro patrón o con una rareza): entonces K baja y se explica (k_material)
       // (en 'recomendado', un hueco 1 que se queda vacío también es «el material no da»: §E.2, «no llena un día entero de tirón»)
-      if (bo.v.hard.length === 0 && bo.q.h1v === 0 && (OPT.reparto !== 'dias' || bo.q.h1 === 0)) return finish(bo, tried);
+      // v14 (P6): un reparto a medida («x:…») solo vale si tirón y empuje quedan equilibrados (la regla que cuida el hombro); si no, la cadena sigue
+      const teOk = opt.id.indexOf('x:') !== 0 || pushPull(bo).ps === 0 || pushPull(bo).ratio >= 1 - 1e-9;
+      if (bo.v.hard.length === 0 && bo.q.h1v === 0 && teOk && (OPT.reparto !== 'dias' || bo.q.h1 === 0)) return finish(bo, tried);
       if (!best || better(bo, best)) best = bo;
     }
     return finish(best, tried);
@@ -10845,7 +10849,7 @@ return function (K, OPT) {
   function seedSrc(inp) {
     const pl = {}; for (const k of ['g', 'c']) { const p = inp.places && inp.places[k]; if (p) pl[k] = { mats: [...p.mats].sort(), acc: [...(p.acc || [])].sort(), mach: p.mach === 'all' ? 'all' : [...(p.mach || [])].sort(), card: p.card === 'all' ? 'all' : [...(p.card || [])].sort(), dbMax: p.dbMax, kb: p.kb }; }
     return { goal: inp.goal, level: inp.level, modes: [...inp.modes].sort(), days: inp.days, min: inp.min, consec: inp.consec, age: inp.age, sport: inp.sport, prio: [...inp.prio].sort(), pref: inp.pref,
-      style: inp.style, warm: inp.warm, cardioEnd: inp.cardioEnd, power: inp.power, avoid: [...inp.avoid].sort(), main: inp.places.main, pl, daysOther: inp.daysOther, zones: inp.zones, prudent: !!inp.prudent, v: GEN_VERSION, cat: CAT_SIG , ...(inp.enfoque ? { enfoque: inp.enfoque } : {}), ...(inp.plan ? { plan: inp.plan } : {}), ...(inp.masTorso ? { masTorso: 1 } : {}) };
+      style: inp.style, warm: inp.warm, cardioEnd: inp.cardioEnd, power: inp.power, avoid: [...inp.avoid].sort(), main: inp.places.main, pl, daysOther: inp.daysOther, zones: inp.zones, prudent: !!inp.prudent, v: GEN_VERSION, cat: CAT_SIG , ...(inp.enfoque ? { enfoque: inp.enfoque } : {}), ...(inp.plan ? { plan: inp.plan } : {}), ...(inp.masTorso ? { masTorso: 1 } : {}), ...(inp.roles ? { roles: inp.roles } : {}) };
   }
 
   function effective(inp) {
@@ -10957,10 +10961,14 @@ return function (K, OPT) {
       // v14 (P1): el reparto que eligió la persona en «Cambiar reparto» (inp.plan), si es de los que se le ofrecen (planesDe). Si su material
       // no da (validación dura o hueco principal vacío o de respaldo), la cadena sigue con el reparto de siempre y el texto lo dice
       rec = id;
-      if (inp.plan && inp.plan !== id && planesDe(inp, P, id).includes(inp.plan)) { chain = [inp.plan].concat(chain.filter(x => x !== inp.plan)); id = inp.plan; }
+      // v14 (P6): el reparto montado día a día (el tipo de cada día) manda sobre el elegido y sobre «Más torso», con los mismos límites
+      const medida = inp.roles && inp.roles.length === wd && puedeElegir(inp, P) ? repartoDeTipos(inp.roles) : null;
+      if (medida && medida.id !== id) { chain = [medida.id].concat(chain.filter(x => x !== medida.id)); id = medida.id; why.push({ c: 'a_medida' }); }
+      else if (medida) why.push({ c: 'a_medida' });
+      else if (inp.plan && inp.plan !== id && planesDe(inp, P, id).includes(inp.plan)) { chain = [inp.plan].concat(chain.filter(x => x !== inp.plan)); id = inp.plan; }
       // v14 (P2): «Más torso» en el cuestionario = el reparto con un solo día de pierna de sus días, si se le ofrece a esta persona (los
       // mismos límites que un reparto elegido). Lo que elija después en «Cambiar reparto» (inp.plan) manda; el recomendado (rec) no cambia
-      else if (inp.masTorso && !inp.plan && UNA_PIERNA[wd] && planesDe(inp, P, id).includes(UNA_PIERNA[wd])) { const t = UNA_PIERNA[wd]; chain = [t].concat(chain.filter(x => x !== t)); id = t; why.push({ c: 'mas_torso' }); }
+      else if (inp.masTorso && !inp.plan && !medida && UNA_PIERNA[wd] && planesDe(inp, P, id).includes(UNA_PIERNA[wd])) { const t = UNA_PIERNA[wd]; chain = [t].concat(chain.filter(x => x !== t)); id = t; why.push({ c: 'mas_torso' }); }
     } else {
       if (col65) {
         if (wd <= 2) id = 'cc2';
@@ -10984,10 +10992,34 @@ return function (K, OPT) {
   // A nadie con 65 o más, rutina prudente o 16-17 años (siguen con el suyo: sus reglas no se tocan), ni con menos de 30 min (el exprés y
   // el modo corto eligen por familias), ni con «más glúteo» (ya eligió su reparto). «Por músculos» (grp…), ni a quien empieza (aprende
   // antes repitiendo) ni con «Ganar fuerza» (cada levantamiento saldría una vez por semana sin más práctica); cuerpo completo ×3, no con días seguidos
+  // v14 (P6): el reparto montado día a día. La persona elige el TIPO de cada día (inp.roles) y aquí se pasa a plantillas: si la semana es la
+  // de un reparto con nombre, ese (con sus textos); si no, uno a medida («x:…») con una plantilla distinta por cada repetición del tipo (el
+  // único día de pierna de la semana es el completo, PU). Como mucho 3 de torso, de pierna o de cuerpo completo, 2 de empuje o de tirón y 1
+  // de cada día «por músculos»
+  const TIPO_TPL = { torso: ['T1', 'T2', 'T3'], pierna: ['P1', 'P2', 'P3'], empuje: ['E1', 'E2'], tiron: ['Ti1', 'Ti2'], completo: ['CCA', 'CCB', 'CCC'], pecho_triceps: ['PT'], espalda_biceps: ['EB'],
+    hombros_brazos: ['HB'], pecho: ['PE'], espalda: ['ES'], hombros: ['HO'], brazos: ['BR'] };
+  const tipoDe = r => { const b = ROLE_BASE(r); return /^T(\d|C)$/.test(b) ? 'torso' : /^(PU|P\d|Pi\d?|PC)$/.test(b) ? 'pierna' : /^E\d?$/.test(b) ? 'empuje' : /^Ti\d?$/.test(b) ? 'tiron' : /^CC[A-C]$/.test(b) ? 'completo' :
+    ({ PT: 'pecho_triceps', EB: 'espalda_biceps', HB: 'hombros_brazos', PE: 'pecho', ES: 'espalda', HO: 'hombros', BR: 'brazos' })[b] || null; };
+  const NOMBRADOS = ['cc3', 'tpc3', 'tpt3', 'ppl3', 'tp4', 'pplt4', 'pplc4', 'grp4', 'ulppl', 'tptpt5', 'pplet5', 'grp5', 'tp4cc', 'ppl6', 'tp6', 'pplg6'];
+  function repartoDeTipos(tipos) {
+    if (!Array.isArray(tipos) || tipos.length < 3 || tipos.length > 6 || !tipos.every(t => TIPO_TPL[t])) return null;
+    // una semana con días de empuje (o de pecho, o de hombros) necesita algún día que tire (torso, tirón, cuerpo completo o espalda): es la
+    // regla que cuida el hombro (tirón:empuje ≥ 1). Sin él, el equilibrio tendría que quitar empujes y meter remos donde no tocan
+    if (tipos.some(t => ['empuje', 'pecho_triceps', 'pecho', 'hombros', 'hombros_brazos'].includes(t)) && !tipos.some(t => ['torso', 'tiron', 'completo', 'espalda_biceps', 'espalda'].includes(t))) return null;
+    const nom = NOMBRADOS.find(id => SPLITS[id].length === tipos.length && SPLITS[id].every((r, i) => tipoDe(r) === tipos[i]));
+    if (nom) return { id: nom, roles: SPLITS[nom].slice() };
+    const n = {}, k = {}; tipos.forEach(t => { n[t] = (n[t] || 0) + 1; });
+    const tpl = tipos.map(t => { const i = k[t] = (k[t] || 0) + 1; return n[t] === 1 ? (t === 'pierna' ? 'PU' : t === 'empuje' ? 'E' : t === 'tiron' ? 'Ti' : TIPO_TPL[t][0]) : (TIPO_TPL[t][i - 1] || null); });
+    if (!tpl.every(Boolean)) return null;
+    const id = 'x:' + tpl.join(''); SPLITS[id] = tpl; return { id, roles: tpl };
+  }
+  // quién puede elegir reparto (uno con nombre, «Más torso» o día a día): nadie con 65 o más, rutina prudente o 16-17 años, ni con menos de
+  // 30 min, ni con «más glúteo»; y siempre con un entreno distinto por día
+  const puedeElegir = (inp, P) => OPT.reparto === 'dias' && !P.mayor && !P.prud && !P.menor && inp.min >= 30 && inp.enfoque !== 'gluteo' && P.wd >= 3;
   const UNA_PIERNA = { 3: 'tpt3', 4: 'pplt4', 5: 'pplet5', 6: 'pplg6' };   // v14 (P2): el reparto de «Más torso» para cada número de días
   const PLANES = { 3: ['cc3', 'tpc3', 'tpt3', 'ppl3'], 4: ['tp4', 'pplt4', 'pplc4', 'grp4'], 5: ['ulppl', 'tptpt5', 'pplet5', 'grp5'], 6: ['ppl6', 'tp6', 'pplg6'] };
   function planesDe(inp, P, rec) {
-    if (OPT.reparto !== 'dias' || P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo') return [];
+    if (!puedeElegir(inp, P)) return [];
     const beginner = LV[P.lvS] <= LV.P;
     return (PLANES[P.wd] || []).filter(id => id !== rec && !(/^grp/.test(id) && (beginner || inp.goal === 'fuerza')) && !(id === 'cc3' && inp.consec));
   }
@@ -12418,6 +12450,11 @@ return function (K, OPT) {
     if (P.zones.otra) warn2.push({ c: 'otra_zona', p: { tipo: P.zones.otra } });                         // C-15
     // (con días seguidos y cuerpo completo al final —65+ o prudente por material—, el aviso de días alternos)
     if (inp.consec && ['cc2', 'cc3'].includes(st.opt.id) && P.wd >= 3 && !st.opt.warn.some(w => w.c === 'alternos')) warn2.push({ c: 'alternos' });
+    // v14 (P6): una semana montada día a día que se queda sin una zona (ningún ejercicio de pierna, de empuje o de tirón): no se impide, se dice
+    const aMedida = st.opt.why.some(w => w.c === 'a_medida') && st.opt.id === st.opt.table;
+    if (aMedida) { const hay = pats => T.some(t => act(t).some(h => pats.includes(BY.get(h.x.lib).pat)));
+      const sin = [['pierna', ['squat', 'lunge', 'hinge', 'hip_ext']], ['empuje', ['push_h', 'push_v']], ['tiron', ['pull_h', 'pull_v']]].filter(([, p]) => !hay(p)).map(([z]) => z);
+      if (sin.length) warn2.push({ c: 'semana_sin', p: { z: sin } }); }
     // C-01: objetivo de esfuerzo por modo, para que el Coach lea las caritas RESPECTO de él (ver 40-simulacion.md, cambio 42)
     const effort = P.cauto ? { obj: 'facil', rir: '3 o más', subidas: 'lenta', ultimaAlLimite: false } : { obj: 'justo', rir: LV[P.level] <= LV.P || P.menor ? '2-3' : '1-2', subidas: 'normal', ultimaAlLimite: false };   // v9 (J-11): 16-17, dejando 2 o más
     // C-07, C-08, §G.5: lo que el Coach propone al cerrar el primer ciclo (no se aplica solo)
@@ -12435,7 +12472,8 @@ return function (K, OPT) {
       corto: st.corto || 0,
       ratio: { tiron_empuje: Math.round(pp.ratio * 100) / 100, rodilla_cadera: Math.round(pp.rh * 100) / 100 },
       why: st.why.concat(st.opt.why, why2), warn: st.warn.concat(st.opt.warn, warn2), seed: st.seed, alt: st.ctx.alt, modes: [...P.M], level: P.level, lvS: P.lvS, wd: P.wd, f: st.f, fd: Object.fromEntries(T.map((t, i) => [letters[i], t.f])),
-      validate: st.v, tried, cut: st.cut, removed: st.removed, alternas: st.opt.alternas, table: st.opt.table, rec: st.opt.rec || st.opt.table, plan: inp.plan || (st.opt.rec && st.opt.table !== st.opt.rec && st.opt.why.some(w => w.c === 'mas_torso') ? st.opt.table : null),   // plan: el reparto pedido (en la hoja o con «Más torso»)
+      validate: st.v, tried, cut: st.cut, removed: st.removed, alternas: st.opt.alternas, table: st.opt.table, rec: st.opt.rec || st.opt.table, roles: aMedida ? T.map(t => tipoDe(t.rb)) : null,   // (P6) el tipo de cada día, si la semana se montó día a día
+      plan: st.opt.why.some(w => w.c === 'a_medida') ? st.opt.table : inp.plan || (st.opt.rec && st.opt.table !== st.opt.rec && st.opt.why.some(w => w.c === 'mas_torso') ? st.opt.table : null),   // plan: el reparto pedido (en la hoja o con «Más torso»)
       log: st.log, reparto: OPT.reparto, capP: !!P.capP,
       lifts: Object.fromEntries(T.map((t, i) => [letters[i], (t.lift || []).map(id => { const h = t.slots.find(k => k.id === id && k.prio === 1 && k.on && k.x); return h ? h.x.lib : null; }).filter(Boolean)])) };
     const ok = st.v.hard.length === 0;
@@ -12465,7 +12503,7 @@ return function (K, OPT) {
     if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
     return null;
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, tipoDe, repartoDeTipos, TIPO_TPL, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
 };
 
 })();
@@ -12567,6 +12605,7 @@ return function (K, G) {
     else if (m.split === 'tp2') out.push(`Torso y pierna: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana y las sesiones no se alargan.`);
     else if (m.split === 'tp4') out.push(P.level === 'I' || P.level === 'A' ? `Torso y pierna en 4 entrenos: cada músculo trabaja ${num(f)} veces por semana, con un día más pesado y otro más ligero para cada zona.` :   // v14 (P4): con el motivo (las veces por semana)
  `Torso y pierna en 4 entrenos: con ${m.wd} días, cada músculo trabaja ${num(f)} veces por semana.`);
+    else if (m.split.indexOf('x:') === 0) out.push(`Un reparto a tu medida, día a día: ${joinY(res.det.map(dd => (G.NOMBRE_DIA[dd.role] || dd.role).toLowerCase()))}. Yo pongo los ejercicios, las series y el equilibrio de la semana.`);   // v14 (P6)
     else if (ELEGIDO[m.split]) { out.push(ELEGIDO[m.split]);
       // «por músculos»: por qué los días de un solo grupo salen más cortos (el tope de 10 series por músculo y sesión, V9)
       if (m.split.indexOf('grp') === 0 && res.det.some(dd => inp.min - dd.minutos >= 10)) out.push('Los días de un solo grupo salen más cortos: pasadas unas 10 series de un músculo en la misma sesión, las siguientes aportan poco.'); }
@@ -12744,9 +12783,14 @@ return function (K, G) {
     // v10 (J-18): para quien empieza, prudentes, 65+ y «Salud y forma», los avisos de volumen solo de los grupos grandes (sin cabezas del
     // deltoides ni bíceps, tríceps, gemelos o abdomen): son detalles que no puede usar; el hombro, como «hombro»
     const simple = P.inicio || P.cauto || LV_[P.level] <= 1 || inp.goal === 'salud';
+    // v14 (P6): la semana montada día a día que se queda sin una zona, lo primero de su grupo y sin rodeos
+    { const ss = m.warn.find(w => w.c === 'semana_sin'); if (ss) { const Z = { pierna: 'pierna', empuje: 'empuje (pecho, hombros y tríceps)', tiron: 'tirón (espalda y bíceps)' }, zs = ss.p.z.map(z => Z[z] || z);
+      add(`Tu semana se queda sin ${joinY(zs)}: ningún día ${zs.length === 1 ? 'la trabaja' : 'las trabaja'}. Si no es lo que querías, cambia el foco de un día.`.replace('sin empuje (pecho, hombros y tríceps): ningún día la trabaja', 'sin empuje (pecho, hombros y tríceps): ningún día lo trabaja').replace('sin tirón (espalda y bíceps): ningún día la trabaja', 'sin tirón (espalda y bíceps): ningún día lo trabaja')); } }
     const VL = g => ((K.PLBL || GLBL)[g] || GLBL[g] || g);
     // (sin cabezas del deltoides ni pequeños para quien empieza, cautos y «Salud y forma»; a los demás, los pequeños solo si son su prioridad)
-    const volW = m.warn.filter(w => w.c === 'vol_corto' && !(simple && ['hombro_lat', 'hombro_post'].includes(w.p.g)) && !((K.PSMALL || []).includes(w.p.g) && (simple || !P.prioV.has(w.p.g))));
+    // v14 (P6): los músculos de una zona que la semana no trabaja ya van en «Tu semana se queda sin…»: fuera del aviso de volumen
+    const gSin = new Set(((m.warn.find(w => w.c === 'semana_sin') || { p: { z: [] } }).p.z).flatMap(z => ({ pierna: ['cuads', 'isquios', 'gluteos', 'gemelos'], empuje: ['pecho', 'hombro_lat', 'triceps'], tiron: ['espalda', 'biceps', 'hombro_post'] })[z] || []));
+    const volW = m.warn.filter(w => w.c === 'vol_corto' && !gSin.has(w.p.g) && !(simple && ['hombro_lat', 'hombro_post'].includes(w.p.g)) && !((K.PSMALL || []).includes(w.p.g) && (simple || !P.prioV.has(w.p.g))));
     const vT = volW.filter(w => w.p.motivo === 'tiempo').map(w => VL(w.p.g).toLowerCase());
     if (vT.length) add(`Con ${inp.min} minutos, ${joinY([...new Set(vT)])} ${vT.length === 1 ? 'se queda' : 'se quedan'} por debajo de lo ideal: con más tiempo o más días se completa${vT.length === 1 ? '' : 'n'}.`);
     const vP = volW.filter(w => w.p.motivo === 'tope').map(w => VL(w.p.g).toLowerCase());
@@ -12765,7 +12809,7 @@ return function (K, G) {
         if (nD.length >= 4) add(`Con ${res.weeklyTarget} días de ${inp.min} minutos, cada músculo recibe unas ${media} series por semana, menos de lo ideal para tu nivel${inp.goal === 'grasa' ? '; para perder grasa conservando el músculo, está bien' : ''}. Si un día tienes más tiempo, el Coach lo aprovecha.`);
         else add(`Con ${res.weeklyTarget} días de ${inp.min} minutos, ${joinY(nD)} ${nD.length === 1 ? 'recibe' : 'reciben'} ${Math.min(...vs) >= 2 ? rg(vs) + ' series por semana, algo menos de lo ideal (' + rg(os) + ')' : 'menos series de lo ideal'}. Si un día tienes más tiempo, el Coach lo aprovecha.`); } }
     for (const w of m.warn) {
-      if (w.c === 'vol_corto') continue;
+      if (w.c === 'vol_corto' || w.c === 'semana_sin') continue;
       else if (w.c === 'equilibrio_casa') add(`Con ${inp.min} minutos no cabe el equilibrio: hazlo en casa cualquier día, 2-5 minutos, apoyándote en una pared o una silla.`);   // v5 (C-17, C-09); v8 (J-19): los minutos de la persona
       else if (w.c === 'extensores_casa') add(`Con ${inp.min} minutos no caben los extensores de la espalda: 2 días por semana, en casa, 2 series de bird dog o de Y-T-W boca abajo.`);   // v8 (J-07)
       else if (w.c === 'no_cabe') add(`Tu Día ${'ABCDEF'[w.p.dia]} dura unos ${w.p.m} min (dijiste ${w.p.min}). ¿Subimos el tiempo o quito un ejercicio?`);
@@ -12782,7 +12826,7 @@ return function (K, G) {
       else if (w.c === 'reciente') add(`Antes de volver a cargar tu ${zl(w.p.z)}, que la valore tu fisio o tu médico: es una lesión de las últimas semanas.`);   // C-16
       else if (w.c === 'otra_zona' && ['ahora', 'op', 'reciente'].includes(w.p.tipo)) add('Si esa molestia es por una operación o por un golpe reciente, consúltalo antes de entrenar la zona.');   // C-15
     }
-    if (res.meta.validate.soft.includes('tiron_empuje')) add(`Tirón y empuje no quedan equilibrados (${m.ratio.tiron_empuje}): con tu material no hay más tirón.`);
+    if (res.meta.validate.soft.includes('tiron_empuje')) add(`Tirón y empuje no quedan equilibrados (${num(m.ratio.tiron_empuje)}): con tu material no hay más tirón.`);   // v14: con coma decimal
     if (res.det.some(d => d.rows.some(r => r.lib === 'lib_inverted_row_table'))) add('Usa una mesa firme y estable. Con una banda y anclaje de puerta tendrías remos más seguros.');
     const ops = Object.keys(inp.zones || {}).filter(z => inp.zones[z] === 'op'); if (ops.length) add('Antes de cargar esa zona, consulta a quien te operó o a tu fisio.');
     if (Object.keys(inp.zones || {}).length >= 4) add('Con tantas molestias, te recomiendo que un fisioterapeuta revise tu rutina.');
@@ -12936,7 +12980,11 @@ return function (K, G, X) {
     // ── v9 (paso 6): selección y prescripción ──
     // J-08: con prioridad de brazos y material, trabajo directo (curl y tríceps) cada semana (con sesiones de 45 min o más)
     // (con 30 min o menos no se exige: el tiempo pide antes los básicos, el core y el tirón que equilibra el hombro; el texto lo dice)
-    if (inp.min > 30 && !P.corto) for (const g of ['biceps', 'triceps']) { if (!P.prioG.has(g)) continue;
+    // (v14, P6: con la semana montada día a día, solo si hay un día de su familia: de tirón, torso, cuerpo completo, espalda y bíceps o brazos
+    // para el curl; de empuje, torso, cuerpo completo, pecho y tríceps o brazos para el tríceps. En una semana sin esos días, el hueco del
+    // día de hombros y brazos puede ceder su sitio al ejercicio que equilibra tirón y empuje, y el porqué lo dice: «no caben ejercicios directos»)
+    const cabeBrazo = g => !m.roles || m.roles.some(t => ['torso', 'completo', 'brazos'].concat(g === 'biceps' ? ['tiron', 'espalda_biceps'] : ['empuje', 'pecho_triceps']).includes(t));
+    if (inp.min > 30 && !P.corto) for (const g of ['biceps', 'triceps']) { if (!P.prioG.has(g) || !cabeBrazo(g)) continue;
       // (con material = algún ejercicio de su menú —el de la clase de la persona: a inicio, prudentes y 65+, sin fondos en banco ni flexión diamante— posible en sus sitios)
       const hay = menuIds(g === 'biceps' ? 'CU' : 'TR', G.clsOf(P, inp)).some(id => { const L = K.BY.get(id); return L && L.lt !== 'c' && (L.dif <= P.difCap || (P.dif2 && L.dif === 2) || (P.mayorExp && L.dif === 2 && ['maquina', 'smith', 'mancuernas'].includes(L.mat))) && Object.values(m.dayPlace).some(pk => K.placeCan(L, inp.places[pk], pk)) && G.safeL(L, inp); });
       if (hay && !str.some(({ r, L }) => G.mainGroup(L) === g || r.slot === (g === 'biceps' ? 'CU' : 'TR'))) bump('prioridad_sin_directo', g); }   // (los fondos en el hueco de tríceps y las dominadas supinas en el de curl cuentan)
@@ -12946,9 +12994,18 @@ return function (K, G, X) {
       if (SOLO_ELEGIDOS.includes(m.split)) {
         if (P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo') bump('plan_no_permitido', m.split);
         if (m.split.indexOf('grp') === 0 && (LVn(P.lvS) <= 1 || inp.goal === 'fuerza')) bump('plan_no_permitido', m.split + ' (por músculos)');
-        if (m.split !== m.plan || (m.split !== inp.plan && !(inp.masTorso && !inp.plan && m.split === G.UNA_PIERNA[m.wd]))) bump('plan_sin_pedir', m.split + ' / ' + inp.plan);   // (P2: o lo pidió con «Más torso»)
+        if (m.split !== m.plan || (m.split !== inp.plan && !m.roles && !(inp.masTorso && !inp.plan && m.split === G.UNA_PIERNA[m.wd]))) bump('plan_sin_pedir', m.split + ' / ' + inp.plan);   // (P2: o lo pidió con «Más torso»)
         if (roles.join(',') !== G.SPLITS[m.split].join(',') && roles.slice().sort().join(',') !== G.SPLITS[m.split].slice().sort().join(',')) bump('plan_dias', roles.join(','));
       }
+      // v14 (P6): reparto a medida («x:…» o uno con nombre montado día a día): solo a quien puede elegir, con tirón y empuje equilibrados, y
+      // la semana que se queda sin pierna, sin empuje o sin tirón lleva su aviso (y solo ella)
+      { const xm = String(m.split).indexOf('x:') === 0, pat = ps => str.some(({ L }) => ps.includes(L.pat));
+        if (xm && (P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo' || !inp.roles)) bump('plan_no_permitido', m.split + ' (a medida)');
+        if (xm && pat(['push_h', 'push_v']) && m.ratio.tiron_empuje < 1 - 1e-9) bump('medida_tiron_empuje', m.ratio.tiron_empuje);
+        if (m.roles) { const sin = [['pierna', ['squat', 'lunge', 'hinge', 'hip_ext']], ['empuje', ['push_h', 'push_v']], ['tirón', ['pull_h', 'pull_v']]].filter(([, ps]) => !pat(ps)).map(([z]) => z);
+          const dicho = textos.some(t => /^Tu semana se queda sin /.test(t));
+          if (sin.length && !sin.every(z => textos.some(t => /^Tu semana se queda sin /.test(t) && t.includes(z)))) bump('semana_sin_aviso', sin.join(','));
+          if (!sin.length && dicho) bump('semana_sin_aviso', 'aviso de más'); } }
       // un solo día de pierna: el texto del reparto lo dice (y los avisos dan las series si se quedan cortas)
       if (['tpt3', 'pplt4', 'pplet5', 'pplg6'].includes(m.split) && !textos.some(t => /pierna, 1|un solo día de pierna/.test(t))) bump('plan_texto', m.split); }
     // v14 (P12): «cámbialo en Cambiar reparto» solo se dice a quien la hoja se lo ofrece: nunca con el tope de 65+, de rutina prudente o de 16-17
@@ -14709,6 +14766,7 @@ const PROF_PARON_ANTES=['lt6m','6m2a','gt2a'],PROF_PARON_FUERA=['2a6m','gt6m','g
 const PROF_MINS=[15,20,30,45,60,75,90],PROF_AGES=['16','18','40','65','75','nd'],PROF_SPORT=['no','suave','piernas','agua'];
 const PROF_PRIO=['pecho','espalda','hombros','brazos','gluteos','piernas','abdomen'],PROF_STYLE=['maq','libre','igual'];
 const PROF_WARM=['normal','corto'],PROF_CARDIO=['auto','si','no'];
+const PROF_TIPOS=['torso','pierna','empuje','tiron','completo','pecho_triceps','espalda_biceps','hombros_brazos','pecho','espalda','hombros','brazos']; // (P6) tipos de día
 const PROF_PLAN=['cc3','tpc3','tpt3','ppl3','tp4','pplt4','pplc4','grp4','ulppl','tptpt5','pplet5','grp5','ppl6','tp6','pplg6']; // (P1) el reparto que elige la persona en «Cambiar reparto»
 const PROF_SEX=['m','h','nd'],PROF_ENFOQUE=['gluteo','torso','igual']; // (D10) mujer · hombre · prefiero no decirlo; enfoque de la rutina
 // Sitios: presets (P5), accesorios (§K.1, con las cosas de casa), familias de máquina (13) y tipos de cardio (9)
@@ -14752,6 +14810,7 @@ function _sanitizeProfile(o){
   const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight','cycle','repaso'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);}); // (E15) cycle: «¿Cómo seguimos?» contestado · (E16c) repaso anual
   p.nr=_oneOf(o.nr,['ent','pro','med']);
   p.warn=_oneOf(o.warn,['consulta','matrona']); // (E11b) aviso fijo de salud (§H.2): solo cuál, no el motivo // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
+  p.roles=Array.isArray(o.roles)&&o.roles.length>=3&&o.roles.length<=6&&o.roles.every(t=>PROF_TIPOS.includes(t))?o.roles.slice():null; // (P6) la semana montada día a día: el tipo de cada día
   p.forma=_oneOf(o.forma,['dias','recomendado']); // (P9) la forma de reparto elegida a mano en «Cambiar reparto» (null: la de salida de tu nivel)
   p.plan=_oneOf(o.plan,PROF_PLAN); // (P1) reparto elegido (null: el recomendado); el generador lo ignora si ya no se te ofrece
   p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=_oneOf(o.enfoque,PROF_ENFOQUE); // (D10) más glúteo y pierna · (P2 del repaso del reparto) para todos, y «torso» = un solo día de pierna
@@ -14850,7 +14909,7 @@ function _sanitizeObDraft(o){
   if(_isPlainObj(o.dia)&&_isPlainObj(o.dia.altDia)&&_isPlainObj(o.dia.fijos)){ // (P7) «Otro entreno para este día»: vez por día, anclas (clave de hueco → ejercicio) y lo que llevaba
     const ad={},fj={};Object.keys(o.dia.altDia).slice(0,6).forEach(k=>{const n=_num(o.dia.altDia[k],1,99);if(/^[0-5]$/.test(k)&&n!=null)ad[k]=n;});
     Object.keys(o.dia.fijos).slice(0,80).forEach(k=>{if(/^[A-Za-z0-9#:]{1,40}$/.test(k)&&_LIBID_RE.test(o.dia.fijos[k]))fj[k]=o.dia.fijos[k];});
-    if(Object.keys(ad).length)d.dia={altDia:ad,fijos:fj,prev:_ids(o.dia.prev,16,_LIBID_RE)};}
+    if(Object.keys(ad).length||Object.keys(fj).length)d.dia={altDia:ad,fijos:fj,prev:_ids(o.dia.prev,16,_LIBID_RE)};} // (P6) o solo anclas, tras cambiar el foco de un día
   if(_isPlainObj(o.accepted)){const days=_sanitizePlanCopy(o.accepted.days,null);
     if(days){dayKeys(days).forEach(k=>{if(!days[k].did)days[k].did=newDayId(days);});const meta=_sanitizePlanMeta(o.accepted.meta,days);
       if(meta){meta.why=meta.why.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));meta.warn=meta.warn.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));}
@@ -15217,6 +15276,7 @@ function obPick(name,v){
   if(name==='days'||name==='min'||name==='daysOther')v=+v;
   if(name==='tope')v=v==='si';
   if(name==='exp'&&a.exp!==v){delete a.ritmo;delete a.paron;}
+  if(name==='enfoque'&&a.enfoque!==v)delete a.roles; // (P6) cambiar la respuesta de torso y pierna quita la semana montada día a día
   a[name]=v;_obSaveDraft();
   const auto=OB_AUTO[name];
   if(!auto||_ob.single){obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root [data-v="${CSS.escape(String(name==='tope'?(v?'si':'no'):v))}"]`);if(b)try{b.focus();}catch(e){}return;}
@@ -15606,6 +15666,7 @@ function _obGenerate(){
   if(_ob.dia&&_ob.diaDe!==g.res.meta.split+':'+g.res.det.length){_ob.dia=null;_ob.diaDe=null;g=genRoutineFrom(a,_obHistCtx(),o);if(!g)return null;}
   const c=genCandidate(g);_obApplyPins(c,g);
   // (P1) el reparto que elegiste deja de estar guardado si ya no se te ofrece (cambiaste los días, la edad, pasaste a 2-4 entrenos…)
+  if(_ob.a.roles&&!g.res.meta.roles)delete _ob.a.roles; // (P6) la semana a tu medida, si ya no se te aplica
   if(_ob.a.plan){let ok=false;try{ok=_obForma()==='dias'&&g.E.G.planes(g.inp).otros.includes(_ob.a.plan);}catch(e){}if(!ok)delete _ob.a.plan;}
   _ob.g=g;_ob.c=c;_ob.t=genTexts(g);_ob.dirty=false;
   if(!_ob.tab||!c.days[_ob.tab])_ob.tab='A';
@@ -15668,6 +15729,57 @@ function _obZonasDias(g){return g.res.det.map(d=>_zonasDe(d.rows.filter(r=>r.kin
 // ── (P7, repaso del reparto) «Otro entreno para este día»: cambia los ejercicios del día abierto y deja los demás como están. Lo hace el
 // generador (otroDia: sorteo solo en ese día, los demás anclados a lo que tienen; las series de la semana se vuelven a cuadrar y pasan
 // las mismas reglas). _ob.dia guarda el contexto que reproduce la rutina que ves; lo que fijaste con ⇄ se vuelve a aplicar ──
+// ── (P6, repaso del reparto) «Cambiar el foco de este día»: la semana a tu medida, día a día. Eliges el tipo del día abierto y el
+// generador rehace la semana con ese tipo de días (a.roles), con las mismas reglas; los demás días conservan sus ejercicios mientras su
+// tipo no cambie (anclas de P7). Solo se ofrecen los focos que salen de verdad; el que deja la semana sin pierna (o sin empuje) se
+// avisa antes de aplicarlo y la rutina lo dice en su primer aviso. Solo para quien puede elegir reparto ──
+const OB_TIPOS=[['torso','Torso','Pecho, espalda, hombros y brazos.'],['pierna','Pierna','Cuádriceps, isquios, glúteos y gemelos.'],['empuje','Empuje','Pecho, hombros y tríceps.'],['tiron','Tirón','Espalda y bíceps.'],
+  ['completo','Cuerpo completo','Un poco de todo.'],['pecho_triceps','Pecho y tríceps',''],['espalda_biceps','Espalda y bíceps',''],['hombros_brazos','Hombros y brazos',''],
+  ['pecho','Pecho',''],['espalda','Espalda',''],['hombros','Hombros',''],['brazos','Brazos','Bíceps y tríceps.']];
+const _obTipoLbl=t=>(OB_TIPOS.find(x=>x[0]===t)||['',t])[1];
+const OB_ZONA_SIN={pierna:'pierna',empuje:'empuje (pecho, hombros y tríceps)',tiron:'tirón (espalda y bíceps)'};
+function _obPuedeFoco(g){try{return g.res.det.length>=3&&(g.E.G.planes(g.inp).otros.length>0||!!g.res.meta.roles);}catch(e){return false;}}
+// Los tipos de la semana en el orden del generador y el índice (en ese orden) del día que se ve en la posición pos
+function _obTiposGen(g){const K=g.res.det.length,ord=Array.isArray(g.res.meta.orden)&&g.res.meta.orden.length===K?g.res.meta.orden:Array.from({length:K},(_,i)=>i),t=[];
+  g.res.det.forEach((d,i)=>{t[ord[i]]=g.E.G.tipoDe(d.role);});return{tipos:t,ord};}
+// Los focos que puede tomar ese día: se genera cada semana candidata y se quedan las que salen tal cual
+function _obFocoOpts(letra){
+  const g=_ob.g,ks=Object.keys(g.res.days),pos=ks.indexOf(letra);if(pos<0)return null;
+  const {tipos,ord}=_obTiposGen(g),src=ord[pos],cur=tipos[src],a=_obAnswers(),tope=a.tope!==false,out=[];
+  const mus=tipos.some(t=>['pecho','espalda','hombros','brazos'].includes(t))||ks.length>=5;
+  OB_TIPOS.filter(x=>mus||!['pecho','espalda','hombros','brazos'].includes(x[0])).forEach(([t,lbl,desc])=>{
+    if(t===cur){out.push({t,lbl,desc,cur:true});return;}
+    const nt=tipos.slice();nt[src]=t;const b=JSON.parse(JSON.stringify(a));b.roles=nt;delete b.plan;if(b.enfoque==='torso')delete b.enfoque;b.tope=tope;
+    const g2=genRoutineFrom(b,Object.assign(_obHistCtx(),{orden:null,altDia:null,fijos:null,prev:null}),{reparto:'dias',tope});
+    if(!g2||!g2.res.ok||!g2.res.meta.roles||g2.res.meta.roles.join()!==nt.join())return;
+    const sin=((g2.res.meta.warn||[]).find(w=>w.c==='semana_sin')||{p:{z:[]}}).p.z;
+    out.push({t,lbl,desc,cur:false,tipos:nt,sin,split:g2.res.meta.split});});
+  return{pos,src,cur,opts:out};
+}
+function obFocusSheet(letra){
+  if(!_ob||!_ob.g||!_obPuedeFoco(_ob.g))return;const F=_obFocoOpts(letra);if(!F)return;_ob.foco={letra,F};
+  const sinTxt=o=>o.sin&&o.sin.length?`<span class="ob-rp-c">Tu semana se quedaría sin ${esc(_joinY(o.sin.map(z=>OB_ZONA_SIN[z]||z)))}.</span>`:'';
+  obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Cambiar el foco del Día ${esc(letra)}</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+  <div class="hist-sheet-body ob-rps"><p class="ob-p">Elige qué se trabaja ese día. Rehago la semana para que siga equilibrada; los demás días conservan sus ejercicios mientras no cambien de foco.</p>
+  <div class="ob-acts" role="radiogroup" aria-label="Foco del Día ${esc(letra)}">${F.opts.map(o=>`<button type="button" class="ob-card ob-fc" role="radio" aria-checked="${o.cur}" data-t="${o.t}" onclick="obFocusPick('${o.t}')"><span class="ob-ct"><b>${esc(o.lbl)}</b>${o.desc?`<span>${esc(o.desc)}</span>`:''}${sinTxt(o)}${o.cur?'<em class="ob-tag">Ahora</em>':''}</span></button>`).join('')}</div>
+  ${F.opts.length<2?'<p class="ob-foot">Con tu material y lo que me contaste, ese día no admite otro foco.</p>':'<p class="ob-foot">Solo salen los focos con los que la semana cumple todas las reglas.</p>'}</div>`,'Cambiar el foco del Día '+letra);
+}
+// Elegir un foco: si deja la semana sin una zona, antes se avisa sin rodeos
+function obFocusPick(t,seguro){
+  if(!_ob||!_ob.foco||!_ob.g)return;const {letra,F}=_ob.foco,o=F.opts.find(x=>x.t===t);if(!o)return;if(o.cur){obSheetClose();return;}
+  if(o.sin&&o.sin.length&&!seguro){const z=_joinY(o.sin.map(x=>OB_ZONA_SIN[x]||x));
+    obSheet(`<div class="hist-sheet-head"><div class="hist-sheet-hdl"></div><div class="hist-sheet-title">Tu semana se quedaría sin ${esc(z)}</div><button class="hist-sheet-close" onclick="obSheetClose()" aria-label="Cerrar">✕</button></div>
+    <div class="hist-sheet-body ob-rps"><p class="ob-p">Con el Día ${esc(letra)} de ${esc(o.lbl.toLowerCase())}, ningún día de tu semana trabajaría ${o.sin.length===1&&o.sin[0]==='pierna'?'la pierna':esc(z)}. Puedes hacerlo si es lo que quieres: la rutina lo dirá en sus avisos.</p>
+    <div class="ob-acts"><button type="button" class="btn bp" id="ob-fc-si" onclick="obFocusPick('${t}',1)">Cambiar igualmente</button><button type="button" class="btn bs" onclick="obFocusSheet('${letra}')">Elegir otro foco</button></div></div>`,'Tu semana se quedaría sin '+z);return;}
+  const g=_ob.g,ks=Object.keys(g.res.days),K=ks.length,antes=_obTipoLbl(F.cur),fij={};
+  // los demás días conservan sus ejercicios (las anclas de P7 valen mientras su tipo de día no cambie)
+  g.res.det.forEach((d,i)=>{if(i!==F.pos)d.rows.forEach(r=>{if(r.kind==='str'&&r.key)fij[r.key]=r.lib;});});
+  _ob.a.roles=o.tipos.slice();delete _ob.a.plan;if(_ob.a.enfoque==='torso')_ob.a.enfoque='igual';_ob.reparto='dias';
+  _ob.dia={altDia:{},fijos:fij,prev:[]};_ob.diaDe=o.split+':'+K;if(_ob.orden)_ob.ordenDe=o.split+':'+K;
+  _ob.foco=null;_ob.why=null;_ob.dirty=true;_obSaveDraft();obSheetClose();_obGenerate();
+  _ob.changed=`el foco del Día ${letra}: ${antes} → ${o.lbl}`;obRender({keepFocus:true,keepScroll:true});
+  toast(`Día ${letra}: ${o.lbl}`+(o.sin&&o.sin.length?`. Tu semana se queda sin ${_joinY(o.sin.map(x=>OB_ZONA_SIN[x]||x))}`:''),o.sin&&o.sin.length?4600:2600);
+}
 function obOtherDay(letra){
   if(!_ob||!_ob.g)return;const g=_ob.g,ks=Object.keys(g.res.days),pos=ks.indexOf(letra);if(pos<0)return;
   let o=null;try{o=g.E.G.otroDia(g.inp,_obHistCtx(),g.res,pos);}catch(e){}
@@ -15748,6 +15860,7 @@ function _obDaysHtml(){
     <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?ic(d.place==='c'?'home':'dumbbell')+' ':''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
     ${rows.map((x,i)=>_obRowHtml(d,x,rows.filter(y=>y.kind!=='bal').indexOf(x))).join('')}
     ${P.inicio||P.cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
+    ${typeof obFocusSheet==='function'&&_obPuedeFoco(g)?`<button type="button" class="ob-link ob-fo" aria-haspopup="dialog" onclick="obFocusSheet('${tab}')">Cambiar el foco de este día ›</button>`:''}
     ${nStr&&typeof obOtherDay==='function'?`<button type="button" class="ob-link ob-od" onclick="obOtherDay('${tab}')">Otro entreno para este día ›</button>`:''}
     ${ks.length>1&&typeof obMoveDay==='function'?`<div class="ob-mv" role="group" aria-label="Mover el Día ${tab}"><span>Mover este día</span><button type="button" class="ob-mvb" data-d="-1" onclick="obMoveDay('${tab}',-1)" aria-label="Mover el Día ${tab} antes"${ks.indexOf(tab)===0?' disabled':''}>‹ Antes</button><button type="button" class="ob-mvb" data-d="1" onclick="obMoveDay('${tab}',1)" aria-label="Mover el Día ${tab} después"${ks.indexOf(tab)===ks.length-1?' disabled':''}>Después ›</button></div>`:''}
   </section>`;
@@ -16038,7 +16151,7 @@ function obOther(dir){
 // y los demás) y aquí se genera cada uno y se enseñan solo los que salen de verdad con tu material; cada ficha dice lo que hay en esa
 // rutina (días por su nombre, días de pierna, veces por semana y lo que se queda corto), no lo que se pidió ──
 function _obGenWith(a,plan,rep,tope,neutro){
-  const b=JSON.parse(JSON.stringify(a));if(plan)b.plan=plan;else delete b.plan;b.tope=tope;
+  const b=JSON.parse(JSON.stringify(a));if(plan)b.plan=plan;else delete b.plan;b.tope=tope;if(neutro)delete b.roles; // (P6)
   if(neutro&&b.enfoque==='torso')delete b.enfoque; // (P2) una ficha de la hoja es ese reparto tal cual, sin el «Más torso» de tus respuestas
   const g=genRoutineFrom(b,Object.assign(_obHistCtx(),{orden:null,altDia:null,fijos:null,prev:null}),{reparto:rep,tope});return g&&g.res.ok?g:null; // (P8) sin tu orden de días: es otro reparto
 }
@@ -16066,6 +16179,7 @@ function _obRepWhy(g){
   const ro=_obRepOpts(),m=g.res.meta,cur=ro.planes.find(p=>p.cur),rec=ro.planes.find(p=>p.rec),otros=ro.planes.filter(p=>!p.cur);
   // (P9) quien empieza de cero sale con 2 entrenos que se alternan: se dice por qué (la hoja ofrece un entreno distinto cada día)
   if(!_ob.reparto&&_obForma()==='recomendado'&&m.K<m.wd)return'<p class="ob-foot ob-rpq">Para empezar, pocos ejercicios que se repiten: así se aprenden antes. Cuando quieras más variedad, en «Cambiar reparto» tienes un entreno distinto cada día.</p>';
+  if(m.roles&&rec)return`<p class="ob-foot ob-rpq">Esta semana la has montado tú, día a día. El reparto que te recomiendo para tus ${plural(m.wd,'día')} de pesas es ${esc(_joinY(rec.info.dias).toLowerCase())}: lo tienes en «Cambiar reparto».</p>`; // (P6)
   if(!rec||ro.planes.length<2||!cur)return'';
   if(cur.rec){const ej=[];if(rec.info.pierna!==1&&otros.some(p=>p.info.pierna===1))ej.push('un solo día de pierna');if(otros.some(p=>/^grp/.test(p.id)))ej.push('un día para cada grupo de músculos');
     return`<p class="ob-foot ob-rpq">Es el reparto que te recomiendo para tus ${plural(m.wd,'día')} de pesas. Si prefieres otro${ej.length?' ('+ej.join(' o ')+')':''}, en «Cambiar reparto» tienes ${otros.length===1?'uno más que también te vale':otros.length+' más que también te valen'}.</p>`;}
@@ -16093,6 +16207,7 @@ function obSplitSheet(){
 }
 function obSplitPick(k,v){
   if(!_ob)return;const b=_obWeekLine(_ob.g),bn=((_obRepInfo(_ob.g)||{}).dias||[]).join(' · ');
+  if(k==='plan'||k==='rep')delete _ob.a.roles; // (P6) un reparto de la hoja sustituye a la semana montada día a día
   if(k==='plan'){const ro=_obRepOpts();if(!ro.planes.some(p=>p.id===v))return;_ob.reparto='dias';
     // (P2) el reparto de un solo día de pierna es la respuesta «Más torso» (así sigue si luego cambias de días); elegir otro la quita
     const una=_ob.g.E.G.UNA_PIERNA[_ob.g.res.meta.wd];
