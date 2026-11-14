@@ -14383,5 +14383,46 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('t8TiemposTarjetas',async()=>{
+// (T8, tipo de sesión) Las tarjetas no enseñan el mismo tiempo a dos tipos que dan rutinas distintas por culpa del redondeo a 5: la
+// captura del 13 nov (menos de 6 meses, 4 días, gimnasio, un entreno distinto cada día, 20 min de cardio) daba «≈ 60 min» a «Completa» y a
+// «A fondo». Ahora pasan a minutos sueltos, de menos a más; la rutina que sale, el total y el chip dicen lo mismo que su tarjeta. Si el
+// mayor no dura de verdad más, el mismo tiempo y la tarjeta lo dice; si sale la misma rutina, como antes.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),card=id=>document.querySelector('#ob-root .ob-se[data-v="'+id+'"]');
+const minC=id=>{const m=tx(card(id)).match(/≈\s*(\d+)\s*min/);return m?+m[1]:null;};
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  _ob.from='first';
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'lt6m',days:4,age:'18',sport:'no',prio:[],sesion:'completa',min:60,abs:true,cardio:20});['plan','enfoque','forma','roles','cardioEnd','tope'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.dia=null;_ob.pins={};_ob.alt=0;_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
+  {const I=_obSesInfo(),R=_ob.sesRaw,M=['expres','esencial','completa','fondo'].map(minC);
+    // (como usuario nuevo es la captura: las dos a 60 redondeadas a 5; con historial, los ejercicios y los minutos pueden cambiar algo)
+    E(R.completa.firma!==R.fondo.firma&&R.esencial.firma!==R.completa.firma,'rutinas iguales: '+pj([R.completa,R.fondo]));
+    E(M.every((m,i)=>m!=null&&(!i||m>M[i-1]||(i===3&&m===M[2]&&R.fondo.minX-R.completa.minX<1))),'tarjetas no van de menos a más: '+pj([M,R]));
+    E(['expres','esencial','completa','fondo'].every(id=>minC(id)===I[id].min&&(Math.abs(I[id].min-R[id].minX)<=0.5||I[id].min===R[id].min)),'tarjeta ≠ minutos de su rutina: '+pj([M,R]));
+    E(new RegExp('Unos '+I.completa.min+'\\s*min por sesión').test(tx($('.ob-tot'))),'total: '+tx($('.ob-tot')));
+    E(M[3]>M[2]?/más series y un ejercicio propio/.test(tx(card('fondo'))):/en el mismo tiempo que «Completa»/.test(tx(card('fondo'))),'tarjeta a fondo: '+tx(card('fondo')));
+    card('fondo').click();await W(4);
+    E(new RegExp('Unos '+I.fondo.min+'\\s*min por sesión').test(tx($('.ob-tot'))),'total a fondo: '+tx($('.ob-tot')));
+    _ob.step='ob-rutina';obRender();await W(6);
+    const m=_ob.g.res.meta.sesion,chips=[...document.querySelectorAll('#ob-root .ob-ch')].map(tx);
+    E(m.tipo==='fondo'&&m.firma===R.fondo.firma&&_obSesMin(m)===I.fondo.min,'la rutina no es la de la tarjeta: '+pj([m,I.fondo]));
+    E(chips.some(c=>new RegExp('^A fondo · ≈\\s*'+I.fondo.min+'\\s*min$').test(c)),'chips: '+pj(chips));}
+  // con «2-4 entrenos que se repiten», «A fondo» reparte las mismas series en más ejercicios: el mismo tiempo, y lo dice
+  _ob.reparto='recomendado';_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
+  {const I=_obSesInfo(),R=_ob.sesRaw;
+    E(R.fondo.firma!==R.completa.firma&&R.fondo.minX-R.completa.minX<1&&I.fondo.min===I.completa.min&&minC('fondo')===minC('completa')&&minC('esencial')<minC('completa')&&/en el mismo tiempo que «Completa»/.test(tx(card('fondo'))),'mismo tiempo: '+pj([R.completa,R.fondo])+' '+tx(card('fondo')));}
+  // quien empieza de cero: la misma rutina, el mismo tiempo, como antes
+  _ob.a.exp='cero';_ob.reparto=null;_ob.dirty=true;obRender();await W(5);
+  {const I=_obSesInfo();E(I.fondo.firma===I.completa.firma&&minC('fondo')===minC('completa')&&/sale igual que «Completa»/.test(tx(card('fondo'))),'empieza de cero: '+pj([I.completa,I.fondo])+' '+tx(card('fondo')));}
+  E(pj(getPlan())===plan0,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

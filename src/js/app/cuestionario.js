@@ -277,8 +277,17 @@ function _obSesInfo(){
   const rep=_ob.reparto==='dias'||_ob.reparto==='recomendado'?_ob.reparto:_obFormaDef(a),base=Object.assign({},a);delete base.sesion;delete base.min;
   let key='';try{key=JSON.stringify([base,rep,_ob.alt||0,_ob.orden||null,_ob.dia||null]);}catch(e){}
   if(key&&_ob.sesK===key&&_ob.ses)return _ob.ses;
-  const out={};OB_SES.forEach(([id])=>{try{const g=genRoutineFrom(Object.assign(JSON.parse(JSON.stringify(a)),{sesion:id}),_obHistCtx(),{reparto:rep,tope:a.tope!==false});if(g&&g.res&&g.res.ok)out[id]=g.res.meta.sesion;}catch(e){}});
-  _ob.sesK=key;_ob.ses=out;return out;
+  const raw={};OB_SES.forEach(([id])=>{try{const g=genRoutineFrom(Object.assign(JSON.parse(JSON.stringify(a)),{sesion:id}),_obHistCtx(),{reparto:rep,tope:a.tope!==false});if(g&&g.res&&g.res.ok)raw[id]=g.res.meta.sesion;}catch(e){}});
+  // (T8) los minutos de cada tarjeta, mirando los cuatro tipos a la vez: dos rutinas distintas no salen con el mismo tiempo por el redondeo
+  const D=_obSesMins(raw),out={};Object.keys(raw).forEach(id=>{out[id]=Object.assign({},raw[id],{min:D[id]!=null?D[id]:raw[id].min});});
+  _ob.sesK=key;_ob.ses=out;_ob.sesRaw=raw;return out;
+}
+function _obSesMins(raw){try{const G=genEngine().G;if(typeof G.tiemposSesion==='function')return G.tiemposSesion(raw);}catch(e){}return{};}
+// (T8) Los minutos que se enseñan de una rutina ya hecha (el chip, «Preparando tu rutina»): los de su tarjeta, con la misma regla
+function _obSesMin(m){
+  if(!m)return null;
+  try{if(m.tipo){_obSesInfo();const R=_ob.sesRaw;if(R&&R[m.tipo]){const D=_obSesMins(Object.assign({},R,{[m.tipo]:m}));if(D[m.tipo]!=null)return D[m.tipo];}}}catch(e){}
+  return m.min;
 }
 function _obSesN(s){return s.ejMin===s.ejMax?plural(s.ejMax,'ejercicio'):s.ejMax-s.ejMin===1?`${s.ejMin} o ${s.ejMax} ejercicios`:`De ${s.ejMin} a ${s.ejMax} ejercicios`;}
 function _obSesDesc(id,I){
@@ -286,7 +295,8 @@ function _obSesDesc(id,I){
   if(id==='expres')return cap('lo básico, para los días sin tiempo.');
   if(id==='esencial')return cap('los que mueven más músculo a la vez.')+(s&&(s.biceps||s.triceps)?'':' Los brazos trabajan con los presses y los remos.');
   if(id==='completa')return cap(br?'lo esencial más hombros, bíceps y tríceps.':'lo esencial y algo más de trabajo para cada zona.');
-  const c=I.completa;if(s&&c&&s.min===c.min&&s.ej.join()===c.ej.join())return'Con tus respuestas sale igual que «Completa»: por ahora, ese es tu tope.';
+  const c=I.completa;if(s&&c&&(s.firma!=null&&c.firma!=null?s.firma===c.firma:s.min===c.min&&s.ej.join()===c.ej.join()))return'Con tus respuestas sale igual que «Completa»: por ahora, ese es tu tope.';
+  if(s&&c&&s.min===c.min)return cap('un ejercicio propio para cada músculo, en el mismo tiempo que «Completa».'); // (T8) otra rutina, pero no más larga
   return cap('más series y un ejercicio propio para cada músculo.');
 }
 // (T3) Los dos interruptores de la sesión: abdominales (sí o no) y cardio al terminar (no, 10 o 20 min), ya marcados según el objetivo.
@@ -595,7 +605,7 @@ function _obGenAnimShow(){
   const g=_ob&&_ob.g,host=document.getElementById('onboarding');if(!g||!host)return;
   const pl=_ob.places||{},P=pl[pl.main],n=P?_matCount(P,pl.main):0;
   let vol=null;try{vol=((genTexts(g).porque||[]).join(' ').match(/Unas \d+ series por semana para cada músculo grande/)||[])[0]||null;}catch(e){}
-  const L=[n?`${n} ejercicios posibles con tu material`:null,_obWeekLine(g).replace(/[;.].*$/,'').replace(/^Esta semana/,'Tu semana'),vol,`Cada día, unos ${g.res.meta.sesion.min}${NB}min`].filter(Boolean);
+  const L=[n?`${n} ejercicios posibles con tu material`:null,_obWeekLine(g).replace(/[;.].*$/,'').replace(/^Esta semana/,'Tu semana'),vol,`Cada día, unos ${_obSesMin(g.res.meta.sesion)}${NB}min`].filter(Boolean);
   const red=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches),old=document.getElementById('ob-gen');if(old)old.remove();
   const el=document.createElement('div');el.className='ob-gen';el.id='ob-gen';el.setAttribute('role','status');el.setAttribute('aria-live','polite');
   el.innerHTML=`<div class="ob-gen-t">Preparando tu rutina</div>${L.map((x,i)=>`<div class="ob-gen-l" style="animation-delay:${i*200}ms">✓ ${esc(x)}</div>`).join('')}`;
@@ -653,7 +663,7 @@ function _obChips(){
   const a=_ob.a,pl=_ob.places||{},out=[];
   if(a.goal)out.push([OB_GOAL_LBL[a.goal],'ob-meta']);
   {const s=_obSesOf(a),m=_ob.g&&_ob.g.res.meta.sesion; // (T1) el tipo de sesión y lo que dura la rutina que hay en pantalla
-    out.push([plural(a.days||3,'día'),'ob-tiempo'],[s?SES_LBL[s]+(m&&m.tipo===s?` · ≈${NB}${m.min}${NB}min`:''):(a.min||60)+NB+'min','ob-tiempo']);
+    out.push([plural(a.days||3,'día'),'ob-tiempo'],[s?SES_LBL[s]+(m&&m.tipo===s?` · ≈${NB}${_obSesMin(m)}${NB}min`:''):(a.min||60)+NB+'min','ob-tiempo']);
     if(m&&m.sinAbs)out.push(['Sin abdominales','ob-tiempo']);if(m&&m.cardio&&s)out.push([`Cardio ${m.cardio}${NB}min`,'ob-tiempo']);} // (T3)
   ['g','c'].forEach(k=>{const P=pl[k];if(P)out.push([_placeLbl(P),k===pl.main?'ob-lugar':'ob-lugar2']);});
   if(a.exp)out.push([OB_EXP_LBL[a.exp],'ob-exp']);
