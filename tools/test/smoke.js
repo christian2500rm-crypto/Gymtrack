@@ -11049,6 +11049,10 @@ const start=async(o,step)=>{Object.keys(S).forEach(k=>{if(!(k in full))delete S[
 try{
   await start({},'ob-molestias');
   E(/Ninguna/.test(tx($('#ob-go')))&&/Prefiero no decirlo/.test(tx($('.ob-next'))),'«Ninguna» mientras no hay nada');
+  // marcar solo una preferencia («sin tumbarme en el suelo», «sin saltos») ya no deja el botón en «Ninguna»
+  for(const k of ['floor','impact']){$('[data-k='+k+']').click();await W(3);E(/Seguir/.test(tx($('#ob-go')))&&$('[data-k='+k+']').getAttribute('aria-checked')==='true','«Seguir» con la preferencia '+k+': '+tx($('#ob-go')));
+    $('[data-k='+k+']').click();await W(3);E(/Ninguna/.test(tx($('#ob-go'))),'«Ninguna» al desmarcar '+k);}
+  delete _ob.h.prefU;obRender();await W(3); // sin lo tocado a mano: lo que sigue prueba las preferencias por defecto
   $('[data-z=rodilla]').click();await W(3);E(/Seguir/.test(tx($('#ob-go'))),'«Seguir» con una zona');
   $('#ob-go').click();await W(3);E(/Dime cómo es la molestia de la rodilla/.test(tx($('.ob-err'))),'error sin tipo: '+tx($('.ob-err')));
   $('[data-zk="rodilla:ahora"]').click();await W(3);E($('[data-k=impact]').getAttribute('aria-checked')==='true','«sin saltos» en vivo con la rodilla que duele');
@@ -13400,7 +13404,8 @@ await safe('obBarraMaterial',async()=>{
 // En el material del cuestionario, al deslizar, la cabecera (atrás, progreso y ✕) se queda fija arriba durante toda la pantalla y la
 // barra «Con esto: N ejercicios» va pegada justo debajo, sin hueco por el que se vea pasar el material. Antes la barra quedaba 24 px
 // más abajo (y unos 80 px con la zona segura de un iPhone) y la cabecera se iba con el contenido pasado el primer tramo. También con
-// zona segura arriba (--st), donde la cabecera mide lo mismo en todas las pantallas, quepa o no el contenido.
+// zona segura arriba (--st), donde la cabecera mide lo mismo en todas las pantallas, quepa o no el contenido, y sus botones quedan
+// enteros por debajo de esa zona (encogida, quedaban medio metidos bajo la barra de estado del iPhone: ni se veían bien ni se podían tocar).
 const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
 const de=document.documentElement,st0=de.style.getPropertyValue('--st'),quieta=()=>{const b=document.querySelector('#ob-root .ob-body');if(b)b.style.animation='none';};
 const rc=q=>{const e=document.querySelector('#ob-root '+q);if(!e)return null;const b=e.getBoundingClientRect();return[Math.round(b.top),Math.round(b.bottom)];};
@@ -13412,14 +13417,15 @@ try{
   const sc=document.getElementById('onboarding');
   for(const st of [0,47,59]){
     de.style.setProperty('--st',st+'px');_ob.step='ob-material';obRender();await W(5);quieta(); // sin la entrada animada: desplaza el cuerpo 18 px mientras dura
-    const hasta=Math.max(56,st+18); // hasta dónde tapa la cabecera: su caja y, con zona segura, la franja hasta el contenido
-    const fondo=()=>{const h=document.querySelector('#ob-root .ob-head');return Math.round(h.getBoundingClientRect().bottom+parseFloat(getComputedStyle(h,'::after').height));};
+    const hasta=Math.max(56,st+44); // alto de la cabecera: nunca encogida, con sus botones enteros por debajo de la zona segura
+    const bot=()=>[...document.querySelectorAll('#ob-root .ob-hb')].map(b=>{const q=b.getBoundingClientRect();return[Math.round(q.top),Math.round(q.bottom)];});
+    const botOk=()=>bot().length===2&&bot().every(q=>q[0]>=st&&q[1]<=hasta&&q[1]-q[0]===44);
     sc.scrollTop=0;await W(3);const cab0=rc('.ob-head'),tit0=rc('#ob-h');
-    E(cab0[0]===0&&cab0[1]===Math.max(56,st)&&tit0[0]===Math.max(56,st)+18,'st '+st+' en reposo: '+pj([cab0,tit0]));
+    E(cab0[0]===0&&cab0[1]===hasta&&tit0[0]===hasta+18&&botOk(),'st '+st+' en reposo: '+pj([cab0,tit0,bot()]));
     for(const y of [600,99999]){sc.scrollTop=y;await W(3);const cab=rc('.ob-head'),bar=rc('.ob-matn');
-      E(sc.scrollTop>300&&cab[0]===0&&fondo()===hasta&&bar[0]===hasta,'st '+st+' deslizado '+y+': '+pj([Math.round(sc.scrollTop),cab,fondo(),bar]));}
+      E(sc.scrollTop>300&&cab[0]===0&&cab[1]===hasta&&botOk()&&bar[0]===hasta,'st '+st+' deslizado '+y+': '+pj([Math.round(sc.scrollTop),cab,bot(),bar]));}
     // la cabecera mide lo mismo en una pantalla corta
-    _ob.step='ob-enfoque';obRender();await W(5);quieta();const cabC=rc('.ob-head');E(cabC[0]===0&&cabC[1]===Math.max(56,st),'st '+st+' pantalla corta: '+pj(cabC));
+    _ob.step='ob-enfoque';obRender();await W(5);quieta();const cabC=rc('.ob-head');E(cabC[0]===0&&cabC[1]===hasta&&botOk(),'st '+st+' pantalla corta: '+pj([cabC,bot()]));
   }
   if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
 }finally{

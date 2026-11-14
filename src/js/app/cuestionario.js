@@ -444,7 +444,8 @@ function obHuesos(){if(!_ob)return;_ob.h.huesos=!_ob.h.huesos;obRender({keepFocu
 function obPrefT(k){if(!_ob)return;const p=_obPref();_ob.h.prefU=Object.assign({},_ob.h.prefU||{});_ob.h.prefU[k]=!p[k];obRender({keepFocus:true,keepScroll:true});}
 function obConsent(){if(!_ob)return;_ob.h.consent=!_ob.h.consent;obRender({keepFocus:true,keepScroll:true});}
 const _obChk=(on,attr,fn,ic,t,d)=>`<button type="button" class="ob-chk${on?' on ok':''}" role="checkbox" aria-checked="${on}" ${attr} onclick="${fn}"><span class="ob-cb" aria-hidden="true">${on?'✓':''}</span>${ic?`<span class="ob-ci" aria-hidden="true">${ic}</span>`:''}<span class="ob-ct"><span>${esc(t)}</span>${d?`<span class="ob-chk-d">${esc(d)}</span>`:''}</span></button>`;
-OB_SCR['ob-molestias']={block:3,html:()=>{const h=_ob.h,z=h.zones||{},p=_obPref(),any=Object.keys(z).length||h.huesos,need=_obNeedConsent();
+// El botón dice «Ninguna» solo mientras no hay nada marcado en la pantalla: tampoco «sin saltos» ni «sin tumbarme en el suelo» (antes solo miraba las zonas y los huesos)
+OB_SCR['ob-molestias']={block:3,html:()=>{const h=_ob.h,z=h.zones||{},p=_obPref(),any=Object.keys(z).length||h.huesos||!p.impact||!p.floor,need=_obNeedConsent();
   const zone=([k,ic,t])=>{const on=k in z;return`<button type="button" class="lib-chip ob-zc" aria-pressed="${on}" data-z="${k}" onclick="obZone('${k}')">${esc(t)}</button>`;};
   const det=Object.keys(z).map(k=>{const t=(OB_ZONES.find(x=>x[0]===k)||[])[2]||k,kind=z[k]==='reciente'?'ahora':z[k];
     return`<div class="ob-zd"><div class="ob-lbl">${esc(t)}: ¿cómo es?</div><div class="lib-place ob-seg" role="radiogroup" aria-label="${esc(t)}: ¿cómo es?">${OB_ZKIND.map(([v,l])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${kind===v}" data-zk="${k}:${v}" onclick="obZoneKind('${k}','${v}')">${esc(l)}</button>`).join('')}</div>

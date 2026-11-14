@@ -202,10 +202,9 @@ input{font-family:inherit}
 #ob-root{display:flex;flex-direction:column;gap:18px;min-height:100%;flex:none} /* flex:none: sin él, #ob-root se encogía al alto de la pantalla y la cabecera fija se iba con el contenido en las pantallas largas */
 .ob-body{display:flex;flex-direction:column;gap:16px;animation:fu .3s ease}
 .ob-body.ob-still{animation:none} /* (M3) repintar sin moverse de sitio («¿Por qué?», otro día, un cambio con ⇄) no repite la entrada */
-/* Alto fijo: antes dependía de cuánto se encogía #ob-root (con zona segura arriba, la cabecera cambiaba de alto de una pantalla a otra) */
-.ob-head{position:sticky;top:calc(-1*(var(--st) + 24px));z-index:3;display:flex;align-items:center;gap:6px;flex:none;height:max(56px,var(--st));margin:calc(-1*(var(--st) + 24px)) -20px 0;padding:var(--st) 8px 0;background:var(--bg)}
-/* La cabecera fija tapa hasta donde empieza el contenido (--st + 18px): con zona segura arriba (iPhone), su caja acaba en --st y los botones quedan centrados en esa línea */
-.ob-head::after{content:'';position:absolute;left:0;right:0;top:100%;height:clamp(0px,calc(var(--st) - 38px),18px);background:var(--bg);pointer-events:none;z-index:-1}
+/* flex:none: la cabecera no se encoge nunca. Encogida (pasaba en las pantallas largas, con #ob-root encogido), con zona segura arriba (iPhone) su caja acababa en --st y
+   los botones quedaban centrados en esa línea, medio metidos bajo la barra de estado: allí no se ven bien ni se pueden tocar. Sin encoger mide --st + 44px. */
+.ob-head{position:sticky;top:calc(-1*(var(--st) + 24px));z-index:3;display:flex;align-items:center;gap:6px;flex:none;min-height:56px;margin:calc(-1*(var(--st) + 24px)) -20px 0;padding:var(--st) 8px 0;background:var(--bg)}
 .ob-hb{width:44px;height:44px;flex:none;border:0;border-radius:12px;background:none;color:var(--text);font-size:24px;line-height:1;cursor:pointer}
 .ob-hb:focus-visible,.ob-card:focus-visible,.ob-link:focus-visible,.ob-dn:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ob-prog{flex:1;display:flex;flex-direction:column;gap:5px;align-items:stretch}
@@ -380,8 +379,8 @@ input{font-family:inherit}
 .ob-other{margin:-4px 16px 6px}
 .ob-wkl{margin-top:8px;font-size:13px;color:var(--text2);font-family:'DM Sans',sans-serif}
 .ob-inl{min-height:44px;padding:0;font-size:13px}
-/* Pegada bajo la cabecera, sin hueco: top cuenta desde la caja de contenido de #onboarding (ya por debajo de --st + 24px), no desde el borde de la pantalla */
-.ob-matn{position:sticky;top:max(calc(32px - var(--st)),-6px);z-index:2;padding:8px 0;background:var(--bg);font-size:15px;color:var(--text2)}
+/* Pegada bajo la cabecera (que mide max(56px, --st + 44px)), sin hueco: top cuenta desde la caja de contenido de #onboarding (ya por debajo de --st + 24px), no desde el borde de la pantalla */
+.ob-matn{position:sticky;top:max(calc(32px - var(--st)),20px);z-index:2;padding:8px 0;background:var(--bg);font-size:15px;color:var(--text2)}
 .ob-matn b{color:var(--green);font-family:'DM Sans',sans-serif}
 .ob-mat .mat-grid{margin:0}
 @keyframes fu{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
@@ -15402,7 +15401,8 @@ function obHuesos(){if(!_ob)return;_ob.h.huesos=!_ob.h.huesos;obRender({keepFocu
 function obPrefT(k){if(!_ob)return;const p=_obPref();_ob.h.prefU=Object.assign({},_ob.h.prefU||{});_ob.h.prefU[k]=!p[k];obRender({keepFocus:true,keepScroll:true});}
 function obConsent(){if(!_ob)return;_ob.h.consent=!_ob.h.consent;obRender({keepFocus:true,keepScroll:true});}
 const _obChk=(on,attr,fn,ic,t,d)=>`<button type="button" class="ob-chk${on?' on ok':''}" role="checkbox" aria-checked="${on}" ${attr} onclick="${fn}"><span class="ob-cb" aria-hidden="true">${on?'✓':''}</span>${ic?`<span class="ob-ci" aria-hidden="true">${ic}</span>`:''}<span class="ob-ct"><span>${esc(t)}</span>${d?`<span class="ob-chk-d">${esc(d)}</span>`:''}</span></button>`;
-OB_SCR['ob-molestias']={block:3,html:()=>{const h=_ob.h,z=h.zones||{},p=_obPref(),any=Object.keys(z).length||h.huesos,need=_obNeedConsent();
+// El botón dice «Ninguna» solo mientras no hay nada marcado en la pantalla: tampoco «sin saltos» ni «sin tumbarme en el suelo» (antes solo miraba las zonas y los huesos)
+OB_SCR['ob-molestias']={block:3,html:()=>{const h=_ob.h,z=h.zones||{},p=_obPref(),any=Object.keys(z).length||h.huesos||!p.impact||!p.floor,need=_obNeedConsent();
   const zone=([k,ic,t])=>{const on=k in z;return`<button type="button" class="lib-chip ob-zc" aria-pressed="${on}" data-z="${k}" onclick="obZone('${k}')">${esc(t)}</button>`;};
   const det=Object.keys(z).map(k=>{const t=(OB_ZONES.find(x=>x[0]===k)||[])[2]||k,kind=z[k]==='reciente'?'ahora':z[k];
     return`<div class="ob-zd"><div class="ob-lbl">${esc(t)}: ¿cómo es?</div><div class="lib-place ob-seg" role="radiogroup" aria-label="${esc(t)}: ¿cómo es?">${OB_ZKIND.map(([v,l])=>`<button type="button" class="lib-pl" role="radio" aria-checked="${kind===v}" data-zk="${k}:${v}" onclick="obZoneKind('${k}','${v}')">${esc(l)}</button>`).join('')}</div>
