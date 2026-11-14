@@ -13942,5 +13942,58 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('p8MoverDias',async()=>{
+// (P8, repaso del reparto) Mover los días de orden. En la rutina propuesta, «‹ Antes» y «Después ›» cambian el día abierto de sitio:
+// es la misma rutina con otras letras (ejercicios, series, lo fijado con ⇄ y los textos van con su día), avisa si deja la misma zona
+// dos días seguidos, se guarda en el borrador y se olvida al cambiar de reparto. En el editor, lo mismo con la rutina ya aceptada: el
+// historial no se toca y el día que toca sigue siendo el mismo entreno. Con el orden marcado por los sitios, no se ofrece.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),$$=q=>[...document.querySelectorAll('#ob-root '+q)],tt=()=>tx(document.getElementById('toast'));
+const libs=k=>_ob.c.days[k].ex.map(x=>x.lib).join(','),mv=d=>$$('.ob-mvb').find(b=>b.dataset.d===String(d));
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,age:'18',sport:'no',prio:[]});['plan','enfoque','forma'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.pins={};_ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);
+  const L0={A:libs('A'),B:libs('B'),C:libs('C'),D:libs('D')},t0=_ob.t.porque.concat(_ob.t.avisos).length;
+  E(_ob.g.res.meta.split==='tp4'&&mv(-1)&&mv(1)&&mv(-1).disabled&&!mv(1).disabled&&mv(1).getBoundingClientRect().height>=44,'botones del Día A: '+pj([!!mv(-1),mv(-1)&&mv(-1).disabled]));
+  // fijar un ejercicio del Día B y moverlo después: B ↔ C
+  obTab('B');await W(5);const i=_ob.c.days.B.ex.findIndex(x=>!x.cardio);obSwap('B',i);await W(5);
+  {const o=[...document.querySelectorAll('#ob-sheet-root .obx-alt')].filter(b=>b.dataset.lib!==_ob.c.days.B.ex[i].lib);if(o.length){o[0].click();await W(5);document.getElementById('obx-go').click();await W(5);}}
+  const pin=_ob.c.days.B.ex[i].lib,LB=libs('B');E(Object.keys(_ob.pins).some(k=>/^B\|/.test(k)),'no hay nada fijado en el Día B');
+  mv(1).click();await W(10);
+  E(pj(_ob.orden)==='[0,2,1,3]'&&_ob.tab==='C'&&Object.values(_ob.g.res.meta.tpl).join(',')==='T1,T2,P1,P2'&&tx($('.ob-wkn'))==='Torso · Torso · Pierna · Pierna','orden tras mover: '+pj([_ob.orden,_ob.tab,Object.values(_ob.g.res.meta.tpl),tx($('.ob-wkn'))]));
+  E(libs('A')===L0.A&&libs('B')===L0.C&&libs('C')===LB&&libs('D')===L0.D&&_ob.c.days.C.ex[i].lib===pin&&Object.keys(_ob.pins).every(k=>!/^B\|/.test(k))&&Object.keys(_ob.pins).some(k=>/^C\|/.test(k)),'los ejercicios o lo fijado no van con su día');
+  E(/^Pierna/.test(_ob.g.res.days.C.focus)&&_ob.g.res.days.C.label==='Día C'&&/Día C · Pierna/.test(tx($('.ob-dh')))&&/Ha cambiado: el orden de los días: Torso · Torso · Pierna · Pierna/.test(tx($('.ob-changed'))),'día C y «Ha cambiado»: '+tx($('.ob-changed')));
+  E(/Ahora es el Día C/.test(tt())&&/Ojo: el Día [A-D] y el Día [A-D] trabajan .* seguidos/.test(tt()),'aviso de zonas seguidas: '+tt());
+  E(_ob.t.porque.concat(_ob.t.avisos).length===t0&&Object.keys(_ob.g.E.SEG(_ob.g.res,_ob.g.inp)).length===0&&pj(S.obDraft.orden)==='[0,2,1,3]','textos, seguridad o borrador: '+pj(S.obDraft&&S.obDraft.orden));
+  // «Otra propuesta» conserva el orden; volver a moverlo lo deja como estaba; cambiar de reparto lo olvida
+  obOther(1);await W(5);E(Object.values(_ob.g.res.meta.tpl).join(',')==='T1,T2,P1,P2','«Otra propuesta» pierde el orden');obOther(-1);await W(5);
+  obTab('C');await W(5);mv(-1).click();await W(10);E(!_ob.orden&&Object.values(_ob.g.res.meta.tpl).join(',')==='T1,P1,T2,P2'&&libs('B')===LB&&!/Ojo/.test(tt()),'vuelta al orden de partida: '+pj([_ob.orden,tt()]));
+  obTab('D');await W(5);E(mv(1).disabled&&!mv(-1).disabled,'botones del último día');mv(-1).click();await W(10);E(pj(_ob.orden)==='[0,1,3,2]','mover el último: '+pj(_ob.orden));
+  obSplitSheet();await W(5);[...document.querySelectorAll('#ob-sheet-root .ob-rp')].find(b=>b.dataset.plan==='pplc4').click();await W(10);
+  E(!_ob.orden&&Object.values(_ob.g.res.meta.tpl).join(',')==='E,Ti,Pi,CCB','otro reparto conserva un orden que no es suyo: '+pj([_ob.orden,Object.values(_ob.g.res.meta.tpl)]));
+  E(pj(getPlan())===plan0,'tocó la rutina actual');hideOnboarding();try{document.getElementById('toast').classList.remove('show');}catch(e){}
+  // el editor, con la rutina ya aceptada
+  S.open=null;S.sets={};S.reopenedSession=null;syncActiveWorkout();
+  const ans={mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,consec:false,age:'40',screen:'nada',zones:{},pref:{},sport:'no',prio:[],style:'igual',power:false,cardioEnd:'auto',daysOther:0,places:{main:'g',g:placeFromPreset('grande'),c:null}};
+  const r0=applyGeneratedPlan(genCandidate(genRoutineFrom(JSON.parse(pj(ans)),{},{reparto:'dias'})),{answers:ans,places:ans.places});E(r0.ok,'partida del editor');
+  const ids=k=>getPlan()[k].ex.map(e=>e.id).join(','),P0={A:ids('A'),B:ids('B'),C:ids('C'),D:ids('D')},didB=getPlan().B.did,nSes=(S.sessions||[]).length,st0=pj(S.strength||{});S.nextDay='B';S.day='B';
+  openRoutineEditor('B');await W(10);const em=()=>[...document.querySelectorAll('#settings-root .ed-move button')];
+  E(em().length===2&&!em()[0].disabled&&!em()[1].disabled&&em().every(b=>b.getBoundingClientRect().height>=44)&&/Mover el Día B/.test(tx(document.querySelector('#settings-root .ed-move'))),'botones del editor: '+em().length);
+  em()[1].click();await W(10);
+  E(ids('C')===P0.B&&ids('B')===P0.C&&ids('A')===P0.A&&ids('D')===P0.D&&getPlan().C.did===didB&&getPlan().C.label==='Día C'&&/^Pierna/.test(getPlan().C.focus),'editor: el Día B no pasa a ser el C');
+  E(S.nextDay==='C'&&S.planMeta&&S.planMeta.edited===true&&S.planMeta.tpl[didB]==='P1'&&(S.sessions||[]).length===nSes&&pj(S.strength||{})===st0,'editor: el que toca, la rutina generada o el historial: '+pj([S.nextDay,S.planMeta&&S.planMeta.edited]));
+  E(/Ahora es el Día C/.test(tt())&&/Ojo/.test(tt())&&/Mover el Día C/.test(tx(document.querySelector('#settings-root .ed-move'))),'editor: aviso y día abierto: '+tt());
+  editorSetDay('A');await W(5);E(em()[0].disabled&&!em()[1].disabled,'editor: «Antes» en el primer día');
+  // con el orden marcado por los sitios (planMeta.seq), no se ofrece
+  S.planMeta.seq=[getPlan().A.did,getPlan().B.did];renderRoutineEditor();await W(5);E(em().length===0,'editor: mover con el orden de los sitios');moveDayUI('A',1);E(ids('A')===P0.A,'moveDayUI con el orden de los sitios');
+  closeRoutineEditor();
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeRoutineEditor();closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

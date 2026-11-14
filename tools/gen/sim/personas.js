@@ -390,6 +390,9 @@ Object.assign(REGLAS, {
     ['El día de pierna lleva sentadilla y bisagra principales', R => R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'squat') && R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'hinge')],
     ['Pecho y espalda llegan a su objetivo (el torso trabaja 2 veces)', R => R.m.vol.pecho.v >= R.m.vol.pecho.obj && R.m.vol.espalda.v >= R.m.vol.espalda.obj, R => JSON.stringify([R.m.vol.pecho, R.m.vol.espalda])],
     ['El porqué dice que hay un solo día de pierna', R => T(R, /un solo día de pierna/)],
+    ['Mover los días (P8): la misma rutina con las letras cambiadas, y un orden que no es de sus días se ignora', R => { const o = [2, 0, 1, 3], L = 'ABCD', r2 = G.genRoutine(R.inp, { orden: o }), fila = d => JSON.stringify(d.rows.map(x => [x.lib, x.series, x.reps]));
+      return r2.ok && r2.det.map(d => d.letra).join('') === L && o.every((src, i) => fila(r2.det[i]) === fila(R.res.det[src]) && r2.meta.tpl[L[i]] === R.m.tpl[L[src]] && r2.days[L[i]].focus === R.res.days[L[src]].focus && r2.days[L[i]].label === 'Día ' + L[i])
+        && Object.keys(SEG(r2, R.inp)).length === 0 && !G.genRoutine(R.inp, { orden: [1, 0, 2] }).meta.orden && !G.genRoutine(R.inp, { orden: [0, 0, 1, 2] }).meta.orden; }],
     ['El coste se dice: aviso de volumen con cuádriceps, isquios o glúteos', R => R.avisos.some(t => /cuádriceps|isquios|glúteos/.test(t) && /menos de lo ideal/.test(t)), R => R.avisos.join(' | ')],
     ['Sesiones de 51-63 min', R => enRango(R, 0.85, 1.05), mins]],
     noDebeAlt: [['«Con tu material no sale bien el reparto que elegiste»', R => T(R, /no sale bien el reparto que elegiste/)]] },

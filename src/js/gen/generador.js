@@ -315,7 +315,30 @@ return function (K, OPT) {
   }
 
   // ════════ genRoutine (E.16) ════════
-  function genRoutine(inp, ctx) {
+  // v14 (P8): mover los días de orden. ctx.orden = para cada posición nueva, el índice del día en el orden del generador ([1, 0, 2, 3] = el
+  // segundo pasa a ser el Día A). Es solo un cambio de letras: la rutina es la misma (misma semilla, mismos ejercicios y series); se remapea
+  // todo lo que nombra un día en la salida (days, det, los mapas de meta, time_spare.dias, no_cabe.dia, cut, removed y las validaciones).
+  // Un orden que no es una permutación de sus días (p. ej. porque cambió el número de días) se ignora
+  function reordenar(res, orden) {
+    const L = 'ABCDEF', K = res.det.length;
+    if (!Array.isArray(orden) || orden.length !== K || orden.slice().sort().join() !== [...Array(K).keys()].join() || orden.every((x, i) => x === i)) return res;
+    const pos = {}; orden.forEach((src, i) => { pos[src] = i; });   // índice de antes → índice nuevo
+    const lt = l => L[pos[L.indexOf(l)]], mapa = o => o ? Object.fromEntries(orden.map((src, i) => [L[i], o[L[src]]])) : o;
+    const days = {}; orden.forEach((src, i) => { days[L[i]] = Object.assign({}, res.days[L[src]], { label: 'Día ' + L[i] }); });
+    const det = orden.map((src, i) => Object.assign({}, res.det[src], { letra: L[i], nombre: 'Día ' + L[i] + ' · ' + days[L[i]].focus }));
+    const m = res.meta, fix = w => { if (!w || !w.p) return w; const p = Object.assign({}, w.p);
+      if (w.c === 'time_spare' && Array.isArray(p.dias)) p.dias = p.dias.map(lt).sort();
+      if (w.c === 'no_cabe' && typeof p.dia === 'number' && pos[p.dia] != null) p.dia = pos[p.dia];
+      return Object.assign({}, w, { p }); };
+    const val = s => String(s).split(':').map(tk => /^[A-F]$/.test(tk) && lt(tk) ? lt(tk) : tk).join(':');
+    const meta = Object.assign({}, m, { tpl: mapa(m.tpl), dayPlace: mapa(m.dayPlace), fd: mapa(m.fd), est: mapa(m.est), lifts: mapa(m.lifts), why: (m.why || []).map(fix), warn: (m.warn || []).map(fix),
+      cut: (m.cut || []).map(c => { const a = String(c).split(':'); return a.length === 2 && pos[+a[1]] != null ? a[0] + ':' + pos[+a[1]] : c; }),
+      removed: (m.removed || []).map(r => Object.assign({}, r, { t: pos[r.t] != null ? pos[r.t] : r.t })),
+      validate: m.validate ? Object.assign({}, m.validate, { hard: (m.validate.hard || []).map(val), softAll: (m.validate.softAll || []).map(val) }) : m.validate, orden: orden.slice() });
+    return Object.assign({}, res, { days, det, meta, reason: res.reason ? res.reason.map(val) : res.reason });
+  }
+  function genRoutine(inp, ctx) { const r = genRoutineBase(inp, ctx); return ctx && ctx.orden ? reordenar(r, ctx.orden) : r; }
+  function genRoutineBase(inp, ctx) {
     ctx = Object.assign({ hist: {}, fav: new Set(), alt: 0, prev: null }, ctx || {});
     const P = effective(inp);
     const seed0 = ctx.seed != null ? ctx.seed : fnv1a(canon(seedSrc(inp)));
@@ -1965,7 +1988,7 @@ return function (K, OPT) {
     if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
     return null;
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
 };
 
 })();

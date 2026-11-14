@@ -15,6 +15,9 @@
 .ed-days-h{font-size:14px;font-weight:600;color:var(--text2);display:flex;justify-content:space-between;gap:8px}
 .ed-days-h span{font-weight:400;color:var(--text3)}
 .ed-days .btn{min-height:44px}
+.ed-move{display:flex;align-items:center;gap:8px}
+.ed-move span{flex:1;min-width:0;font-size:14px;color:var(--text2)}
+.ed-move .btn{flex:none;width:auto;padding:0 14px}
 .ed-days-n{font-size:13px;color:var(--text3);line-height:1.45}
 .ed-acts .btn:disabled,.ed-days .btn:disabled{opacity:.5;cursor:default}
 .sc-days{display:flex;gap:8px;justify-content:center;margin-bottom:16px}

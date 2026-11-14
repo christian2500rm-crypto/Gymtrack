@@ -144,7 +144,8 @@ function _sanitizeObDraft(o){
   const a=_sanitizeProfile(Object.assign({},_isPlainObj(o.a)?o.a:{},{mode:'gen'}));
   const pins={};if(_isPlainObj(o.pins))Object.keys(o.pins).slice(0,40).forEach(k=>{if(/^[A-Za-z0-9:_-]{1,40}$/.test(k)&&_LIBID_RE.test(o.pins[k]))pins[k]=o.pins[k];});
   const d={v:1,ts:o.ts,from:_oneOf(o.from,['first','settings'])||'first',step:_oneOf(o.step,OB_STEPS)||'ob-meta',a,alt:_num(o.alt,0,99)||0,pins,
-    places:_sanitizePlaces(o.places),accepted:null};
+    places:_sanitizePlaces(o.places),accepted:null,
+    orden:Array.isArray(o.orden)&&o.orden.length>=2&&o.orden.length<=6&&o.orden.slice().sort().join()===o.orden.map((_,i)=>i).join()?o.orden.slice():null,ordenDe:typeof o.ordenDe==='string'?o.ordenDe.slice(0,30):null}; // (P8) el orden de los días de la rutina propuesta
   if(_isPlainObj(o.accepted)){const days=_sanitizePlanCopy(o.accepted.days,null);
     if(days){dayKeys(days).forEach(k=>{if(!days[k].did)days[k].did=newDayId(days);});const meta=_sanitizePlanMeta(o.accepted.meta,days);
       if(meta){meta.why=meta.why.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));meta.warn=meta.warn.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));}

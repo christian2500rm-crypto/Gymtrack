@@ -16,6 +16,7 @@ function showOnboarding(o){
   _ob={from:o.from==='settings'?'settings':'first',step:'ob-hola',hist:[],a,h:{},alt:d?d.alt||0:0,pins:d&&d.pins?Object.assign({},d.pins):{},
     places:d&&d.places?JSON.parse(JSON.stringify(d.places)):null,resumed:false};
   if(a.forma==='dias'||a.forma==='recomendado')_ob.reparto=a.forma; // (P9) la forma que ya habías elegido
+  if(d&&Array.isArray(d.orden)){_ob.orden=d.orden.slice();_ob.ordenDe=d.ordenDe||null;} // (P8) el orden que le diste a los días
   let st=o.step||(d&&OB_STEPS.includes(d.step)?d.step:null);
   // (§C.0) los pasos de salud nunca se retoman desde el borrador: se vuelven a preguntar
   if(!o.step&&st&&['ob-salud','ob-medico','ob-supervision','ob-posparto','ob-embarazo','ob-molestias','ob-consulta'].includes(st))st='ob-salud'; // (solo al retomar el borrador)
@@ -75,7 +76,7 @@ function _obSaveDraft(){
   if(!_ob)return;
   if(_ob.reparto)_ob.a.forma=_ob.reparto;else delete _ob.a.forma; // (P9)
   const a=JSON.parse(JSON.stringify(_ob.a));['screen','zones','huesos','posparto','otraTxt'].forEach(k=>{delete a[k];});
-  S.obDraft=_sanitizeObDraft({v:1,ts:Date.now(),from:_ob.from,step:_ob.step,a,alt:_ob.alt||0,pins:_ob.pins||{},places:_ob.places,
+  S.obDraft=_sanitizeObDraft({v:1,ts:Date.now(),from:_ob.from,step:_ob.step,a,alt:_ob.alt||0,pins:_ob.pins||{},places:_ob.places,orden:_ob.orden||null,ordenDe:_ob.ordenDe||null,
     accepted:S.obDraft&&S.obDraft.accepted||null});
   saveState();
 }
@@ -569,11 +570,13 @@ function _privacyTxtHtml(){return`<p>Todo se queda en este móvil: no hay cuenta
 function _obHistCtx(){
   const h={},m=_libHistMap(),now=Date.now();
   Object.keys(m).forEach(lib=>{const x=m[lib];h[lib]={n:x.n,recent:!!(x.ts&&now-x.ts<60*86400000)};});
-  return{hist:h,fav:new Set(Array.isArray(S.libFav)?S.libFav:[]),alt:_ob.alt||0};
+  return{hist:h,fav:new Set(Array.isArray(S.libFav)?S.libFav:[]),alt:_ob.alt||0,orden:_ob.orden||null}; // (P8) el orden que le diste a los días
 }
 function _obGenerate(){
   const a=_obAnswers(),o={reparto:_obForma(),tope:a.tope!==false};
-  const g=genRoutineFrom(a,_obHistCtx(),o);if(!g)return null;
+  let g=genRoutineFrom(a,_obHistCtx(),o);if(!g)return null;
+  // (P8) el orden que le diste a los días vale para ese reparto y ese número de días: con otro, se olvida
+  if(_ob.orden&&(!g.res.meta.orden||_ob.ordenDe!==g.res.meta.split+':'+g.res.det.length)){_ob.orden=null;_ob.ordenDe=null;g=genRoutineFrom(a,_obHistCtx(),o);if(!g)return null;}
   const c=genCandidate(g);_obApplyPins(c,g);
   // (P1) el reparto que elegiste deja de estar guardado si ya no se te ofrece (cambiaste los días, la edad, pasaste a 2-4 entrenos…)
   if(_ob.a.plan){let ok=false;try{ok=_obForma()==='dias'&&g.E.G.planes(g.inp).otros.includes(_ob.a.plan);}catch(e){}if(!ok)delete _ob.a.plan;}
@@ -625,6 +628,27 @@ function _obWeekLine(g){
   else t='Tu semana: '+Array.from({length:wd},(_,i)=>L[i%K]).join(' · ');
   if(days>wd)t+=` + ${plural(days-wd,'día')} de caminar o cardio suave`;
   return t+'.';
+}
+// ── (P8, repaso del reparto) Mover los días de orden. Es un cambio de letras: la rutina es la misma. En la rutina propuesta lo hace el
+// generador (ctx.orden: remapea también los textos que nombran un día); en el editor, el re-letrado de siempre (_reletter). Si el orden
+// nuevo deja la misma zona en dos días seguidos, se avisa sin impedirlo ──
+// Zonas que un día trabaja de verdad (2 ejercicios o más de pierna, de empuje o de tirón), por los patrones de sus ejercicios
+function _zonasDe(pats){const n={pierna:0,empuje:0,'tirón':0};pats.forEach(p=>{if(['squat','lunge','hinge','hip_ext'].includes(p))n.pierna++;else if(p==='push_h'||p==='push_v')n.empuje++;else if(p==='pull_h'||p==='pull_v')n['tirón']++;});
+  return Object.keys(n).filter(k=>n[k]>=2);}
+// Parejas de días seguidos que repiten zona: [[i, zona]…] (i = el primero de la pareja)
+function _zonasSeguidas(dias){const out=[];for(let i=0;i+1<dias.length;i++){const z=dias[i].filter(x=>dias[i+1].includes(x));if(z.length)out.push([i,z[0]]);}return out;}
+function _obZonasDias(g){return g.res.det.map(d=>_zonasDe(d.rows.filter(r=>r.kind==='str').map(r=>r.pat)));}
+function obMoveDay(letra,dir){
+  if(!_ob||!_ob.g)return;const ks=Object.keys(_ob.g.res.days),K=ks.length,i=ks.indexOf(letra),j=i+(dir<0?-1:1);if(i<0||j<0||j>=K)return;
+  const cur=Array.isArray(_ob.g.res.meta.orden)&&_ob.g.res.meta.orden.length===K?_ob.g.res.meta.orden.slice():Array.from({length:K},(_,n)=>n);
+  const antes=_zonasSeguidas(_obZonasDias(_ob.g)).length;[cur[i],cur[j]]=[cur[j],cur[i]];
+  // lo que fijaste con ⇄ va con su día (la clave lleva la letra)
+  const P={};Object.keys(_ob.pins||{}).forEach(k=>{const a=k.split('|');if(a[0]===ks[i])a[0]=ks[j];else if(a[0]===ks[j])a[0]=ks[i];P[a.join('|')]=_ob.pins[k];});_ob.pins=P;
+  _ob.orden=cur.every((x,n)=>x===n)?null:cur;_ob.ordenDe=_ob.g.res.meta.split+':'+K;_ob.tab=ks[j];_ob.why=null;_ob.dirty=true;_obSaveDraft();_obGenerate();
+  const zs=_zonasSeguidas(_obZonasDias(_ob.g)),ri=_obRepInfo(_ob.g);
+  _ob.changed='el orden de los días'+(ri&&!ri.completo?': '+ri.dias.join(' · '):'');
+  obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root .ob-mvb[data-d="${dir<0?-1:1}"]:not([disabled])`)||document.querySelector('#ob-root .ob-mvb:not([disabled])');if(b)try{b.focus({preventScroll:true});}catch(e){}
+  toast(`Ahora es el Día ${ks[j]}`+(zs.length>antes?`. Ojo: el Día ${ks[zs[0][0]]} y el Día ${ks[zs[0][0]+1]} trabajan ${zs[0][1]==='pierna'?'la pierna':'el '+zs[0][1]} seguidos; si entrenas dos días seguidos, deja uno en medio`:''),zs.length>antes?5200:2400);
 }
 // (M3) Imagen de un ejercicio de la biblioteca: el fotograma 3D del motor (thumbsIn lo dibuja en tiempo libre y lo guarda) encima
 // de su respaldo, la figura teñida con su emoji (cardio: solo el emoji), como en el selector. TH_OB: la de las filas de la rutina
@@ -685,6 +709,7 @@ function _obDaysHtml(){
     <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?ic(d.place==='c'?'home':'dumbbell')+' ':''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
     ${rows.map((x,i)=>_obRowHtml(d,x,rows.filter(y=>y.kind!=='bal').indexOf(x))).join('')}
     ${P.inicio||P.cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
+    ${ks.length>1&&typeof obMoveDay==='function'?`<div class="ob-mv" role="group" aria-label="Mover el Día ${tab}"><span>Mover este día</span><button type="button" class="ob-mvb" data-d="-1" onclick="obMoveDay('${tab}',-1)" aria-label="Mover el Día ${tab} antes"${ks.indexOf(tab)===0?' disabled':''}>‹ Antes</button><button type="button" class="ob-mvb" data-d="1" onclick="obMoveDay('${tab}',1)" aria-label="Mover el Día ${tab} después"${ks.indexOf(tab)===ks.length-1?' disabled':''}>Después ›</button></div>`:''}
   </section>`;
 }
 OB_SCR['ob-rutina']={block:4,html:()=>{
@@ -975,7 +1000,7 @@ function obOther(dir){
 function _obGenWith(a,plan,rep,tope,neutro){
   const b=JSON.parse(JSON.stringify(a));if(plan)b.plan=plan;else delete b.plan;b.tope=tope;
   if(neutro&&b.enfoque==='torso')delete b.enfoque; // (P2) una ficha de la hoja es ese reparto tal cual, sin el «Más torso» de tus respuestas
-  const g=genRoutineFrom(b,_obHistCtx(),{reparto:rep,tope});return g&&g.res.ok?g:null;
+  const g=genRoutineFrom(b,Object.assign(_obHistCtx(),{orden:null}),{reparto:rep,tope});return g&&g.res.ok?g:null; // (P8) sin tu orden de días: es otro reparto
 }
 function _obRepInfo(g){try{return g.E.X.reparto(g.res,g.inp);}catch(e){return null;}}
 function _obRepLine(i){
