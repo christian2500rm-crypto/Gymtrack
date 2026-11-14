@@ -37,7 +37,7 @@ bash tools/test/smoke.sh
 ```
 
 Con Node y Chrome basta (ruta de Chrome en la variable `CHROME` si no está en el sitio habitual). Comprueba el montaje,
-arranca su propio servidor, pasa el smoke con datos sembrados y como usuario nuevo, y resume. Línea base: 306 pasos por
+arranca su propio servidor, pasa el smoke con datos sembrados y como usuario nuevo, y resume. Línea base: 307 pasos por
 pasada y fallos conocidos de «Wrapped» que dependen de la fecha (ver `tools/test/README.md`). Toda mejora añade sus
 pasos a `tools/test/smoke.js` y deja el smoke en la línea base antes del commit.
 

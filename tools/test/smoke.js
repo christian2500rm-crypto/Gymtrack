@@ -13364,6 +13364,38 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('obAtrasRehace',async()=>{
+// Con la rutina ya en pantalla, volver atrás, cambiar una respuesta y seguir rehace la rutina con la respuesta nueva. Antes salía la
+// de antes: la pantalla reutilizaba la rutina calculada y contestar una pregunta no la daba por caducada. Probado con «torso y pierna»
+// (3 días: todo el cuerpo → torso, pierna, torso) y con los días (3 → 4); volver sin cambiar nada deja la misma rutina.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q);
+const foto=()=>pj([_ob.step,_ob.g&&_ob.g.res.meta.split,_ob.g?Object.keys(_ob.g.res.days).length:0,tx($('.ob-wk')),tx($('.ob-wkn'))]);
+try{
+  S.onboarded=true;saveState();
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:3,min:60,age:'18',sport:'no',prio:[],enfoque:'igual'});delete _ob.a.plan;
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h.nada=true;_ob.reparto='dias';_ob.pins={};_ob.g=null;
+  _ob.hist=['ob-tiempo','ob-enfoque'];_ob.step='ob-foco';_ob.dirty=false;obRender();await W(3);
+  obFinishQs();await W(5);const uno=foto();
+  E(_ob.step==='ob-rutina'&&_ob.g.res.meta.split==='cc3'&&tx($('.ob-wk'))==='Tu semana: A · B · C.','primera rutina: '+uno);
+  // atrás y adelante sin cambiar nada: la misma
+  obBack();await W(3);E(_ob.step==='ob-foco','atrás: '+_ob.step);obFinishQs();await W(5);E(foto()===uno,'sin cambios cambia: '+foto());
+  // atrás hasta «torso y pierna», «Más torso» y adelante
+  obBack();await W(3);obBack();await W(3);E(_ob.step==='ob-enfoque','atrás dos veces: '+_ob.step);
+  obPick('enfoque','torso');clearTimeout(_obAdvT);obGo('ob-foco');await W(3);obFinishQs();await W(5);
+  E(_ob.g.res.meta.split==='tpt3'&&tx($('.ob-wkn'))==='Torso · Pierna · Torso','tras «Más torso»: '+foto());
+  // atrás hasta los días: de 3 a 4
+  obBack();await W(3);obBack();await W(3);obBack();await W(3);E(_ob.step==='ob-tiempo','atrás tres veces: '+_ob.step);
+  obPick('days',4);clearTimeout(_obAdvT);_ob.hist.push(_ob.step);_ob.step='ob-foco';obRender();await W(3);obFinishQs();await W(5);
+  E(_ob.g.res.meta.split==='pplt4'&&Object.keys(_ob.g.res.days).length===4&&tx($('.ob-wk'))==='Tu semana: A · B · C · D.'&&tx($('.ob-wkn'))==='Empuje · Tirón · Pierna · Torso','tras pasar a 4 días: '+foto());
+  E(/Tu semana: A · B · C · D/.test(tx(document.getElementById('ob-gen'))),'«Preparando tu rutina» con la semana de antes: '+tx(document.getElementById('ob-gen')));
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);const og=document.getElementById('ob-gen');if(og)og.remove();try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('coachCardioVisible',async()=>{
 // (C12) «Más minutos de cardio» (objetivo «Salud y forma» o «Perder grasa») se ve y se aplica: antes se generaba y se guardaba, pero
 // el Coach la daba por caducada (el cardio no está entre los ejercicios que analiza) y nunca salía en la lista. Ya aplicada, deja de valer.

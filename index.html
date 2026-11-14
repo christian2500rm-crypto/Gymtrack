@@ -15511,13 +15511,17 @@ function _obHistCtx(){
   Object.keys(m).forEach(lib=>{const x=m[lib];h[lib]={n:x.n,recent:!!(x.ts&&now-x.ts<60*86400000)};});
   return{hist:h,fav:new Set(Array.isArray(S.libFav)?S.libFav:[]),alt:_ob.alt||0};
 }
+// Con qué respuestas se calculó la rutina que hay en pantalla. Volver atrás, cambiar una respuesta (los días, «torso y pierna»…) y
+// seguir enseñaba la rutina de antes: solo la daban por caducada las hojas de la propia pantalla de la rutina. Ahora se rehace
+// siempre que las respuestas ya no son las suyas.
+function _obGenKey(){try{return JSON.stringify([_obAnswers(),_ob.reparto||'dias']);}catch(e){return'';}}
 function _obGenerate(){
   const a=_obAnswers(),o={reparto:_ob.reparto||'dias',tope:a.tope!==false};
   const g=genRoutineFrom(a,_obHistCtx(),o);if(!g)return null;
   const c=genCandidate(g);_obApplyPins(c,g);
   // (P1) el reparto que elegiste deja de estar guardado si ya no se te ofrece (cambiaste los días, la edad, pasaste a 2-4 entrenos…)
   if(_ob.a.plan){let ok=false;try{ok=(_ob.reparto||'dias')==='dias'&&g.E.G.planes(g.inp).otros.includes(_ob.a.plan);}catch(e){}if(!ok)delete _ob.a.plan;}
-  _ob.g=g;_ob.c=c;_ob.t=genTexts(g);_ob.dirty=false;
+  _ob.g=g;_ob.c=c;_ob.t=genTexts(g);_ob.dirty=false;_ob.gk=_obGenKey();
   if(!_ob.tab||!c.days[_ob.tab])_ob.tab='A';
   return g;
 }
@@ -15628,7 +15632,7 @@ function _obDaysHtml(){
   </section>`;
 }
 OB_SCR['ob-rutina']={block:4,html:()=>{
-  if(!_ob.g||_ob.dirty)_obGenerate();
+  if(!_ob.g||_ob.dirty||_ob.gk!==_obGenKey())_obGenerate();
   const g=_ob.g;if(!g)return`<h1 class="ob-title" id="ob-h" tabindex="-1">No he podido preparar tu rutina</h1>`;
   const r=g.res,t=_ob.t,pq=_obPorque(),c=_ob.c,P=g.E.G.effective(g.inp),cauto=!!P.cauto,more=_ob.more||{};
   const ks=Object.keys(r.days),ri=typeof _obRepInfo==='function'?_obRepInfo(g):null; // (P1) los días por su nombre
