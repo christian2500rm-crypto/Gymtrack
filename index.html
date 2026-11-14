@@ -12578,6 +12578,13 @@ return function (K, OPT) {
     const ok = st.v.hard.length === 0;
     return { ok, reason: ok ? null : st.v.hard, days, weeklyTarget: P.wd, meta, det };
   }
+  // v16: qué aporta un ejercicio secundario o accesorio, por su patrón (los que no están aquí dicen a qué músculos suman series)
+  const POR_PAT = { lunge: 'Una pierna cada vez: iguala la fuerza entre los dos lados.', knee_flex: 'Isquios doblando la rodilla: lo que no hacen el peso muerto ni el hip thrust.',
+    knee_ext: 'Cuádriceps aislado, sin cargar la espalda.', hip_ext: 'Glúteo directo, con poca carga en la espalda.', hip_abd: 'Glúteo medio: abre la cadera, algo que no hacen sentadillas ni bisagras.',
+    hip_add: 'Aductores: la cara interna del muslo.', push_v: 'Hombros: empuje por encima de la cabeza.', fly: 'Pecho sin tríceps: suma series de pecho sin cansar más los brazos.',
+    pull_v: 'Espalda tirando desde arriba: sobre todo, dorsales.', pull_h: 'Espalda tirando hacia ti: sobre todo, la zona media.', raise: 'Hombro lateral: los presses casi no lo trabajan.',
+    raise_f: 'Hombro anterior, aislado.', rear: 'Hombro posterior: compensa el trabajo de empuje.', curl: 'Bíceps directo: remos y jalones solo lo trabajan en parte.',
+    tri: 'Tríceps directo: los presses solo lo trabajan en parte.', shrug: 'Trapecio, aislado.', forearm: 'Antebrazo y agarre.', carry: 'Agarre y tronco: cargar peso andando.' };
   function porQue(L, h, x, st) {
     const tm = x.tm || {}; const P = st.P;
     // v2: la zona del texto es la de la lista «amable» que contiene el ejercicio (antes, la primera zona marcada: D-22)
@@ -12599,8 +12606,17 @@ return function (K, OPT) {
     if (tm.prioridad) return 'Para tu prioridad: ' + K.GLBL[mainGroup(L)].toLowerCase() + '.';
     if (tm.levantamiento && tm.levantamiento > 0) return 'Levantamiento básico de fuerza.';
     if (tm.estabilidad > 0) return 'Estable y fácil de aprender.';
-    if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
-    return null;
+    const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase());
+    if (h.prio === 1) return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.';
+    // v16: «¿Por qué?» nunca se queda en blanco. Antes, casi la mitad de los ejercicios (secundarios y accesorios sin etiqueta) no decían
+    // nada al tocarlo. Ahora dicen qué añaden: lo que aporta su patrón o, si no, a qué músculos suman series. Los gemelos fuera del día
+    // de pierna explican además por qué están ahí (J-15: del día de pierna, el único que se llena, al de tirón, el más corto). El core
+    // ya lleva su etiqueta. Solo cambia el texto de la fila: la rutina es la misma
+    if (h.id === 'CO') return null;
+    if (L.pat === 'calf') { const t = st.T.find(tt => tt.slots.includes(h));
+      return 'Gemelos: el resto de ejercicios casi no los trabaja.' + (!t || LEG_TPL.includes(t.rb) ? '' : /^Ti/.test(t.rb) ? ' Van en este día porque el de pierna ya va lleno y este es el más corto.' : ' Van en este día para no alargar el de pierna.'); }
+    const g1 = joinY(gs.slice(0, 2)) || (K.GLBL[mainGroup(L)] || '').toLowerCase();
+    return POR_PAT[L.pat] || (g1 ? 'Suma series de ' + g1 + '.' : null);
   }
   return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, tipoDe, repartoDeTipos, TIPO_TPL, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT, SESION, sesionDe, cardioDef };
 };

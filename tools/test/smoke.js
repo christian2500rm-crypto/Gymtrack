@@ -13434,6 +13434,33 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('obPorqueSiempre',async()=>{
+// «¿Por qué?» nunca se queda en blanco. Antes, casi la mitad de los ejercicios de la rutina propuesta (secundarios y accesorios sin
+// etiqueta) no enseñaban nada al tocarlo: el botón se marcaba y no salía texto. Y el gemelo que va en el día de tirón dice por qué está ahí.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};
+try{
+  S.onboarded=true;saveState();
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'gt2a',days:6,sesion:'completa',min:60,age:'18',sport:'no',prio:[],enfoque:'igual'});delete _ob.a.plan;delete _ob.a.abs;delete _ob.a.cardio;
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h.nada=true;_ob.reparto='dias';_ob.pins={};_ob.g=null;
+  _ob.hist=['ob-tiempo','ob-enfoque'];_ob.step='ob-foco';_ob.dirty=false;obRender();await W(3);
+  obFinishQs();await W(5);
+  E(_ob.step==='ob-rutina'&&_ob.g&&_ob.g.res.ok,'no hay rutina: '+_ob.step);
+  let n=0,gem=0;
+  for(const d of (_ob.g?_ob.g.res.det:[])){obTab(d.letra);await W(2);const vis=d.rows.filter(y=>y.kind!=='bal');
+    for(const r of d.rows.filter(y=>y.kind==='str')){const k=d.letra+':'+vis.indexOf(r),j=d.rows.indexOf(r);obWhy(k);await W(1);n++;
+      const w=document.querySelector('#ob-root .ob-row[data-j="'+j+'"] .ob-rwhy'),t=w?w.textContent.trim():'';
+      E(t.length>=4,'«¿Por qué?» vacío: '+d.letra+' '+r.n);
+      if(r.pat==='calf'&&/· Tirón/.test(d.nombre||'')){gem++;E(/^Gemelos: .* Van en este día porque el de pierna ya va lleno y este es el más corto.$/.test(t),'gemelo en el día de tirón, sin su motivo: '+t);}
+      if(r.pat==='calf'&&/· Pierna/.test(d.nombre||''))E(!/Van en este día/.test(t),'gemelo en el día de pierna con el motivo de otro día: '+t);
+      obWhy(k);await W(1);}}
+  E(n>=30,'pocas filas de fuerza: '+n);E(gem>=1,'la rutina de prueba no lleva gemelo en el día de tirón');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);const og=document.getElementById('ob-gen');if(og)og.remove();try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('coachCardioVisible',async()=>{
 // (C12) «Más minutos de cardio» (objetivo «Salud y forma» o «Perder grasa») se ve y se aplica: antes se generaba y se guardaba, pero
 // el Coach la daba por caducada (el cardio no está entre los ejercicios que analiza) y nunca salía en la lista. Ya aplicada, deja de valer.

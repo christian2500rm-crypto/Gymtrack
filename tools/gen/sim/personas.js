@@ -599,6 +599,7 @@ function chequeos(res, inp) {
   res.det.forEach(d => { const ses = {};
     d.rows.filter(r => r.kind === 'str' && r.slot !== 'PW').forEach(r => { const o = K.volV(K.BY.get(r.lib)); for (const g in o) { ses[g] = (ses[g] || 0) + r.series * o[g]; sem[g] += r.series * o[g] * ((m.fd || {})[d.letra] || m.f); } });
     Object.entries(ses).forEach(([g, v]) => { if (v > 10 + 1e-9) out.push(`V9 ${d.letra}: ${g} ${v} > 10`); });
+    d.rows.filter(r => r.kind === 'str' && !r.nota).forEach(r => out.push(`sin explicación ${d.letra}: ${r.lib}`));   // v16: «¿Por qué?» nunca en blanco
     if (d.minExact > inp.min * 1.05 + 1e-9) out.push(`minutos ${d.letra}: ${Math.round(d.minExact)} > ${inp.min} × 1,05`);
     const IA = ['I', 'A'].includes(P.level) && !P.cauto;
     if (IA && inp.min >= 45 && !inp.sesion && d.minExact < 0.85 * inp.min && d.sobraMotivo !== 'rango') out.push(`minutos ${d.letra}: ${Math.round(d.minExact)} < 85 % de ${inp.min} sin motivo`);
