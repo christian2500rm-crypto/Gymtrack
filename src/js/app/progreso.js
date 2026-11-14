@@ -28,7 +28,7 @@ function progStatusMap(list){
   return out;
 }
 // El porqué del estado, con las palabras del Coach («4+ sesiones sin mejorar», «1RM est. +6.2 %»…). Estancado: el Coach
-// mira el tramo final más corto que ya lo demuestra (≥ 4 sesiones en ≥ 3 semanas), así que son «N+» (pueden ser más).
+// mira el tramo final más corto que ya lo demuestra (≥ 4 sesiones en ≥ 3 semanas; más según tu nivel, C3), así que son «N+» (pueden ser más).
 // Sin paréntesis (van dentro del aria-label de la fila, que ya lleva comas) y con espacio duro antes de «%».
 function _plWhy(k,it,pr){
   const p=it.p,pct=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(Math.abs(v)<10?1:0)+NB+'%';
@@ -499,7 +499,7 @@ function progJump(id){
 // Guía de progresión: las cuatro reglas, en una hoja de ayuda (antes ocupaban el final de la pantalla)
 function progGuideHtml(){
   const R=[['var(--green)','↑','¿Llegaste al tope del rango en todas las series?','Sube un salto de tu equipo (2.5 kg en Smith, 1 kg en polea o mancuerna…) y vuelve al mínimo del rango. '+(_rpeOn()?'Si fue fácil':'Si te sobran 3 reps o más')+', puede ser doble. Como mucho un 10 %: con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.'],
-    _rpeOn()?['var(--blue)','+','¿Dentro del rango, o al límite?','Mismo peso y una rep más la próxima vez. «Al límite» nunca sube peso.']:['var(--blue)','+','¿Dentro del rango?','Mismo peso y una rep más la próxima vez.'], // (M2)
+    _rpeOn()?['var(--blue)','+','¿Dentro del rango, o al límite?','Mismo peso y una rep más la próxima vez. '+(_effortObj()==='facil'?'«Al límite» nunca sube peso.':'Si llegas al tope con todas las series «al límite», repite una vez antes de subir.')]:['var(--blue)','+','¿Dentro del rango?','Mismo peso y una rep más la próxima vez.'], // (M2)
     ['var(--amber)','↓','¿Dos sesiones seguidas por debajo del rango?','Baja un 5–10 % (al menos un salto) y vuelve a subir desde ahí. No pasa nada.'],
     ['var(--blue)','→','La regla de oro',`${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}/semana durante meses = resultados reales. La constancia lo es todo.`],
   ];

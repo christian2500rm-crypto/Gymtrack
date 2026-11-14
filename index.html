@@ -14003,6 +14003,8 @@ if(typeof S.keepAwake!=='boolean')S.keepAwake=true;
 if(typeof S.restOn!=='boolean')S.restOn=true;
 // (M2) Esfuerzo de cada serie (Ajustes → «Esfuerzo de cada serie»): igual, encendido salvo que lo apagues
 if(typeof S.rpeOn!=='boolean')S.rpeOn=true;
+// (C3) Tu nivel para el Coach, si lo elegiste: {l:'P'|'I'|'A', ts}; cualquier otra cosa, sin elegir (se deduce)
+S.coachLevel=_isPlainObj(S.coachLevel)&&['P','I','A'].includes(S.coachLevel.l)&&typeof S.coachLevel.ts==='number'&&isFinite(S.coachLevel.ts)&&S.coachLevel.ts>0?{l:S.coachLevel.l,ts:S.coachLevel.ts}:null;
 // «Solo hoy» (v20): sustituciones con forma válida (las caducadas vuelven en el primer render, subTick)
 _sanitizePlanSubs(S.currentPlan);
 
@@ -19257,11 +19259,48 @@ function coach_cycleData(){
 // Mira las últimas PROG_WINDOW sesiones reales del ejercicio (sin descargas ni semanas de descanso) y no
 // depende del ciclo: cerrar un ciclo no borra lo que sabes de cada ejercicio.
 //  · 'down'      retroceso: las 2 últimas sesiones ≥5% por debajo de tu mejor nivel anterior (una mala no basta)
-//  · 'stagnant'  estancado: ≥4 sesiones y ≥3 semanas sin mejorar el 1RM estimado, ni las reps, ni el peso
+//                (C7) «anterior» = desde tu último parón de 3+ semanas o tu última bajada de peso con ese ejercicio
+//  · 'stagnant'  estancado: ≥4 sesiones y ≥3 semanas sin mejorar el 1RM estimado, ni las reps, ni el peso (intermedio: 6 y 6; avanzado: 8 y 8; C3)
 //  · 'strong_up' / 'up' / 'flat' según la pendiente (mínimos cuadrados) del 1RM estimado en %/semana
 // Mismo peso con más reps (doble progresión) sube el 1RM estimado: nunca cuenta como estancamiento.
-const PROG_WINDOW=6,STAG_MIN_SESSIONS=4,STAG_MIN_DAYS=21,REG_DROP=0.95;
-function coach_e1rm(rec,ex){
+const PROG_WINDOW=6,STAG_MIN_SESSIONS=4,STAG_MIN_DAYS=21,REG_DROP=0.95; // los de quien empieza (PROG_LV.P)
+// (C3) El progreso se mide según tu nivel: con experiencia se progresa mucho más despacio, y con la vara de quien empieza (4 sesiones
+// y 3 semanas sin mejorar = «estancado»; menos de un 0,4 % por semana = «estable») a intermedios y avanzados les salía casi todo
+// «estable» o «estancado» progresando bien. win: sesiones que mira · ses y days: sesiones y días sin mejora para «estancado» · up: % por
+// semana a partir del cual «sube».
+const PROG_LV={P:{win:PROG_WINDOW,ses:STAG_MIN_SESSIONS,days:STAG_MIN_DAYS,up:0.4},I:{win:8,ses:6,days:42,up:0.15},A:{win:10,ses:8,days:56,up:0.08}};
+const LV_TXT={P:'Empiezo',I:'Intermedio',A:'Avanzado'};
+let _coachLvPin=null; // solo para pruebas: fija el nivel (como _motionOn o _dashMore)
+function _sanitizeCoachLevel(x){return _isPlainObj(x)&&PROG_LV[x.l]&&typeof x.ts==='number'&&isFinite(x.ts)&&x.ts>0?{l:x.l,ts:x.ts}:null;}
+// Tu nivel y de dónde sale → {l:'P'|'I'|'A', src}: 'tu' lo elegiste en el Coach (S.coachLevel, vale mientras no generes después otra
+// rutina) · 'rutina' el de tu rutina generada · 'tiempo' por el tiempo que llevas con la app (6 meses → intermedio; quien llegó como
+// principiante con su rutina generada, a los 9 meses). Avanzado solo sale de tus respuestas o de elegirlo.
+function _coachLevelSrc(){
+  if(_coachLvPin&&PROG_LV[_coachLvPin])return{l:_coachLvPin,src:'tu'};
+  const pm=_isPlainObj(S.planMeta)?S.planMeta:null,c=_sanitizeCoachLevel(S.coachLevel);
+  if(c&&!(pm&&+pm.ts>c.ts))return{l:c.l,src:'tu'};
+  let t0=Infinity;(S.sessions||[]).forEach(x=>{if(x&&+x.ts>0&&+x.ts<t0)t0=+x.ts;});
+  const wk=isFinite(t0)?(Date.now()-t0)/604800000:0,g=pm&&pm.level?(pm.level==='A'?'A':pm.level==='I'?'I':'P'):null;
+  if(g)return g==='P'&&wk>=39?{l:'I',src:'tiempo'}:{l:g,src:'rutina'};
+  return{l:wk>=26?'I':'P',src:'tiempo'};
+}
+function coach_level(){return _coachLevelSrc().l;}
+function _lvCfg(){return PROG_LV[coach_level()];}
+function setCoachLevel(l){
+  if(!PROG_LV[l])return;
+  S.coachLevel={l,ts:Date.now()};saveState();render();
+  toast(`Nivel: ${LV_TXT[l].toLowerCase()} · el Coach mide tu progreso con ${PROG_LV[l].ses} sesiones y ${PROG_LV[l].days/7} semanas`,3200);
+}
+// La fila «Tu nivel» del Coach (dentro de «Tu ciclo»): lo que se usa, de dónde sale y cambiarlo de un toque
+function coachLevelHtml(){
+  const c=_coachLevelSrc(),g=PROG_LV[c.l];
+  const why=c.src==='tu'?'Lo elegiste tú.':c.src==='rutina'?'Sale de las respuestas de tu rutina.':'Lo deduzco del tiempo que llevas entrenando con la app.';
+  return`<div class="card coach-lv" id="coach-lv"><div class="cyc-next-t">Tu nivel</div>
+    <div class="cyc-next-d">Con más experiencia se progresa más despacio. Con este nivel espero ${g.ses}${NB}sesiones y ${g.days/7}${NB}semanas sin mejora antes de dar un ejercicio por estancado. ${why}</div>
+    <div class="ls-opts" role="radiogroup" aria-label="Tu nivel">${['P','I','A'].map(k=>`<button type="button" class="ls-opt${c.l===k?' on':''}" role="radio" aria-checked="${c.l===k}" data-l="${k}" onclick="setCoachLevel(this.dataset.l)">${LV_TXT[k]}</button>`).join('')}</div>
+    <div class="cyc-next-d">Empiezo: menos de 6${NB}meses · Intermedio: hasta 2${NB}años · Avanzado: más de 2${NB}años.</div></div>`;
+}
+function coach_e1rm(rec,ex,all){ // all (C2): con las repeticiones de TODAS las series (la tendencia del Coach); sin él, las más bajas
   const v=+(rec&&rec.v);
   if(!(v>0)||!isFinite(v))return 0;
   // Con peso por tiempo o distancia (un paseo con mancuernas, una plancha con disco): el peso por su medida, sin tope
@@ -19273,11 +19312,19 @@ function coach_e1rm(rec,ex){
   // con el tiempo o la distancia de su plan, la misma escala que los nuevos (por reps saldría un falso retroceso)
   const xl=lt==='w'&&ex?exLT(ex):'w';
   if(xl==='t'||xl==='d'){const q={r:_recPlan(rec,ex).r},x=xl==='t'?_tgtSecs(q):_tgtMetres(q);if(x!=null)return v*(1+x/(xl==='t'?120:100));}
-  let r=parseInt(rec.r);
+  let r=all?_recRepsAvg(rec):parseInt(rec.r);
   if(!(r>0))r=targetRepsNum(ex)||10; // registros antiguos sin reps: las del objetivo
   return v*(1+Math.min(r,30)/30);
 }
 function _recReps(r){const n=parseInt(r&&r.r);return n>0?n:null;}
+// (C2) Repeticiones de un registro contando TODAS las series hechas con su peso de referencia (la media): mejorar en las dos
+// primeras series y repetir la tercera es progresar. El registro guarda en r las más bajas, y con ellas 10·10·10 → 12·12·10 era
+// «estancado». Sin series guardadas (registros antiguos), las de siempre.
+function _recRepsAvg(rec){
+  const n=_recReps(rec);if(!rec||!Array.isArray(rec.sets))return n;
+  const v=+rec.v||0,a=rec.sets.map(x=>x&&(v>0?Math.abs((+x.w||0)-v)<0.01:!(+x.w>0))?_setNumR(x.r):null).filter(x=>x!=null);
+  return a.length?a.reduce((x,y)=>x+y,0)/a.length:n;
+}
 // Registros de un ejercicio para su progresión: los antiguos sin ts (copias de seguridad de formato antiguo) cuentan con
 // el día de su fecha escrita («5 May», _histTs: la misma fecha que ven la ficha, la lista y la recomposición), así el Coach
 // y Progreso los juzgan igual (en copias: lo guardado no cambia). Los que no tienen ni eso (fecha aproximada) siguen
@@ -19288,14 +19335,56 @@ function _progSrc(exId){
   const t=_histTs(src);
   return src.map((r,i)=>!has(r)&&t.est&&t.est[i]===1?Object.assign({},r,{ts:t[i]}):r);
 }
+// (C7) ¿La sesión i es un «reinicio» del ejercicio? Tras un parón de 3 semanas o más sin hacerlo, o cuando el peso baja porque lo
+// manda el propio Coach: al volver de ese parón, tras dos sesiones fallidas seguidas con ese peso, o el «un salto menos» de una rutina
+// con margen (objetivo «fácil») tras una sesión al límite. Una bajada de peso por tu cuenta no reinicia (si rindes menos, es retroceso),
+// y la del Coach tampoco si con el peso nuevo sigues claramente por debajo del rango.
+function _progRestart(data,i,ex){
+  const a=data[i-1],b=data[i];
+  if(b.ts-a.ts>=LOAD_GAP_DAYS*86400000)return true;
+  if(!(+b.v<+a.v-1e-9))return false;
+  const lo=r=>{const q=ex&&ex.r!=null?(_recRange(r,ex)||repRange(ex)):null;return q?q.lo:null;},la=lo(a),lb=lo(b)||la,p=i>1?data[i-2]:null;
+  if(lb!=null&&_loadFail(b,lb))return false; // con menos peso sigues fallando: la bajada no lo arregló y el retroceso continúa
+  if(_effortObj()==='facil'&&rpeCat(a.rpe)===3)return true;
+  return la!=null&&_loadFail(a,la)&&!!p&&Math.abs(+p.v-+a.v)<0.01&&_loadFail(p,lo(p)||la);
+}
+// ─── (C14) EL MISMO EJERCICIO EN DOS DÍAS ───
+// Una rutina puede repetir un ejercicio en dos días (sentadilla el día B y el D): cada uno tiene su id y su historial, y antes el Coach
+// los llevaba como dos ejercicios distintos (el jueves no sabía lo que hiciste el lunes). Lo guardado no cambia: el Coach LEE juntos
+// los registros de los «hermanos» (los ejercicios de tu rutina con la misma ficha de la biblioteca).
+//  · El objetivo del día (peso y repeticiones) solo se comparte entre hermanos con las mismas series y el mismo rango: un día pesado y
+//    otro ligero siguen cada uno su progresión.
+//  · La tendencia (progresa, estancado, retroceso) y el parón se miran siempre sobre el conjunto.
+// Ids de los hermanos de un ejercicio de tu rutina, él incluido (null si no tiene). same: solo los de sus mismas series y rango
+function _sibIds(ex,same){
+  const lib=ex&&!ex.cardio?_libIdOf(ex):null;if(!lib)return null;
+  const key=e=>_baseSets(e)+'|'+String(e.r==null?'':e.r).trim(),k0=same?key(ex):null,p=routinePlan(),out=[];
+  Object.keys(p).forEach(dk=>{const d=p[dk];if(!d||!Array.isArray(d.ex))return;
+    d.ex.forEach(e=>{if(!e||e.cardio||out.includes(e.id)||_libIdOf(e)!==lib)return;if(same&&e.id!==ex.id&&key(e)!==k0)return;out.push(e.id);});});
+  return out.length>1&&out.includes(ex.id)?out:null;
+}
+// Registros de un ejercicio para el Coach: los suyos (la misma lista de siempre) o, con hermanos, los de todos por fecha
+function _coachRecs(exId,same,ex){
+  const own=_isPlainObj(S.strength)&&Array.isArray(S.strength[exId])?S.strength[exId]:[];
+  ex=ex||findExInPlan(exId);const ids=ex&&ex.id===exId?_sibIds(ex,same):null;if(!ids)return own;
+  const all=[];ids.forEach(id=>{(Array.isArray(S.strength[id])?S.strength[id]:[]).forEach(r=>{if(r&&typeof r==='object')all.push(r);});});
+  return all.sort((a,b)=>(+a.ts||0)-(+b.ts||0));
+}
+// Como _progSrc, con los registros de los hermanos (para la tendencia; la fatiga sigue contando cada registro una vez con _progSrc)
+function _progSrcAll(exId){
+  const ex=findExInPlan(exId),ids=ex&&ex.id===exId?_sibIds(ex,false):null;if(!ids)return _progSrc(exId);
+  const all=[];ids.forEach(id=>{_progSrc(id).forEach(r=>{if(r&&typeof r==='object')all.push(r);});});
+  return all.sort((a,b)=>(+a.ts||0)-(+b.ts||0));
+}
 function coach_exerciseProgression(exId,sinceTs){
   const ex=findExInPlan(exId)||{id:exId};
-  const src=_progSrc(exId);
+  const src=_progSrcAll(exId); // (C14)
   // Sin kilos (su último registro es de peso corporal, solo reps, tiempo o distancia sin peso): su propia medida
   {let la=null;for(let i=src.length-1;i>=0;i--){const r=src[i];if(r&&typeof r==='object'&&!r.dl){la=r;break;}}
     if(la&&!(+la.v>0)&&_recLT(la)!=='w')return _progNoKg(exId,ex,_recLT(la),sinceTs);}
   const data=[];
-  for(let i=src.length-1;i>=0&&data.length<PROG_WINDOW;i--){
+  const LV=_lvCfg(); // (C3)
+  for(let i=src.length-1;i>=0&&data.length<LV.win;i--){
     const r=src[i];
     if(!r||!(+r.v>0)||typeof r.ts!=='number'||!isFinite(r.ts))continue;
     if(sinceTs&&r.ts<sinceTs)continue;
@@ -19309,7 +19398,7 @@ function coach_exerciseProgression(exId,sinceTs){
   const res={trend:'insufficient',change:0,pct:0,pctWeek:0,sessions:n,firstV:n?+data[0].v:0,lastV:n?+data[n-1].v:0,
     data,e1rm:[],weeks:0,repsUp:false,dropPct:0,stagSessions:0,stagWeeks:0,metric:'e1rm',lastre:exLT(ex)==='bw'||data.some(r=>_recLT(r)==='bw')};
   if(n<2)return res;
-  const e=data.map(r=>coach_e1rm(r,ex));
+  const e=data.map(r=>coach_e1rm(r,ex,true)); // (C2) todas las series
   res.e1rm=e;
   res.change=+(res.lastV-res.firstV).toFixed(2);
   // Con peso por tiempo o distancia (plancha con disco, paseo) y el mismo peso en toda la ventana, lo que progresa son
@@ -19332,28 +19421,32 @@ function coach_exerciseProgression(exId,sinceTs){
   res.pct=a>0?(b-a)/a*100:0;
   res.e1From=a;res.e1To=b; // (13b) el 1RM estimado de la tendencia (de donde sale el %), no el peso de trabajo
   res.pctWeek=res.pct/Math.max(1,span);
-  const r1=_recReps(data[n-1]),r2=_recReps(data[n-2]);
+  const r1=_recRepsAvg(data[n-1]),r2=_recRepsAvg(data[n-2]); // (C2)
   res.repsUp=+data[n-1].v===+data[n-2].v&&r1!=null&&r2!=null&&r1>r2;
   // Retroceso: 2 sesiones seguidas claramente por debajo de tu mejor nivel previo
   if(n>=3){
-    const ref=Math.max(...e.slice(0,n-2));
+    // (C7) Tu «mejor nivel» es el de después del último reinicio de ese ejercicio (_progRestart): un parón de 3 semanas o más, o una
+    // bajada de peso que manda el propio Coach. Antes se comparaba con lo de antes: el Coach bajaba el peso y dos sesiones después lo
+    // leía como «retroceso» y pedía una descarga.
+    let k0=0;for(let i=n-1;i>0;i--){if(_progRestart(data,i,ex)){k0=i;break;}}
+    const prev=e.slice(k0,n-2),ref=prev.length?Math.max(...prev):0;
     if(ref>0&&e[n-1]<ref*REG_DROP&&e[n-2]<ref*REG_DROP){res.trend='down';res.dropPct=(1-e[n-1]/ref)*100;return res;}
   }
   // Estancamiento: el tramo final más corto con ≥4 sesiones y ≥3 semanas, sin mejorar a su primera sesión
   let k=-1;
-  for(let i=n-STAG_MIN_SESSIONS;i>=0;i--){if(data[n-1].ts-data[i].ts>=STAG_MIN_DAYS*86400000){k=i;break;}}
+  for(let i=n-LV.ses;i>=0;i--){if(data[n-1].ts-data[i].ts>=LV.days*86400000){k=i;break;}}
   if(k>=0){
-    const b0=data[k],eb=e[k],rb=_recReps(b0);
+    const b0=data[k],eb=e[k],rb=_recRepsAvg(b0); // (C2)
     let improved=false;
     for(let i=k+1;i<n&&!improved;i++){
-      const r=data[i],ri=_recReps(r);
+      const r=data[i],ri=_recRepsAvg(r);
       if(e[i]>eb*1.01)improved=true;                                   // más 1RM estimado
       else if(+r.v>=+b0.v&&rb!=null&&ri!=null&&ri>rb)improved=true;     // mismo peso, más reps
       else if(+r.v>+b0.v&&e[i]>=eb*0.97)improved=true;                  // más peso sin hundirse
     }
     if(!improved){res.trend='stagnant';res.stagSessions=n-k;res.stagWeeks=(data[n-1].ts-data[k].ts)/W;return res;}
   }
-  res.trend=res.pctWeek>=1.5?'strong_up':res.pctWeek>=0.4?'up':'flat';
+  res.trend=res.pctWeek>=1.5?'strong_up':res.pctWeek>=LV.up?'up':'flat';
   return res;
 }
 // Puntuación sin dimensiones de una medida sin kilos, con la forma de Epley (así los % se parecen a los del 1RM
@@ -19365,7 +19458,7 @@ function _noKgScore(v,lt){return lt==='t'?1+v/120:lt==='d'?1+v/100:1+v/30;}
 // metros) de los registros sin peso. Empieza después del último reinicio: tras llegar al tope y bajar (banda más dura,
 // variante nueva…) bajar no es un retroceso. metric: 'reps' | 't' | 'd'; firstV/lastV en esa medida.
 function _progNoKg(exId,ex,lt,sinceTs){
-  const src=_progSrc(exId);
+  const src=_progSrcAll(exId); // (C14)
   let all=src.filter(r=>r&&typeof r==='object'&&!(+r.v>0)&&typeof r.ts==='number'&&isFinite(r.ts)&&!r.dl&&!_lightAt(exId,r.ts)&&_recMetric(r,lt)!=null);
   if(sinceTs)all=all.filter(r=>r.ts>=sinceTs);
   all.sort((a,b)=>a.ts-b.ts);
@@ -19373,7 +19466,7 @@ function _progNoKg(exId,ex,lt,sinceTs){
     :((_repRangeBW(ex)||{}).hi||Infinity);
   let k0=0;
   for(let i=1;i<all.length;i++){const a=_recMetric(all[i-1],lt),b=_recMetric(all[i],lt);if(a>=hi&&b<a)k0=i;}
-  const data=all.slice(k0).slice(-PROG_WINDOW),n=data.length,W=7*86400000,mt=lt==='t'?'t':lt==='d'?'d':'reps';
+  const LV=_lvCfg(),data=all.slice(k0).slice(-LV.win),n=data.length,W=7*86400000,mt=lt==='t'?'t':lt==='d'?'d':'reps'; // (C3)
   const m=data.map(r=>_recMetric(r,lt));
   const res={trend:'insufficient',change:0,pct:0,pctWeek:0,sessions:n,firstV:n?m[0]:0,lastV:n?m[n-1]:0,
     data,e1rm:[],weeks:0,repsUp:false,dropPct:0,stagSessions:0,stagWeeks:0,metric:mt};
@@ -19394,13 +19487,15 @@ function _progNoKg(exId,ex,lt,sinceTs){
   res.e1From=a;res.e1To=b; // (13b) el 1RM estimado de la tendencia (de donde sale el %), no el peso de trabajo
   res.pctWeek=res.pct/Math.max(1,span);
   if(n>=3){
-    const ref=Math.max(...e.slice(0,n-2));
+    // (C7) como con kilos: tras un parón de 3 semanas o más con ese ejercicio, el «mejor nivel» es el de después
+    let g0=0;for(let i=n-1;i>0;i--){if(data[i].ts-data[i-1].ts>=LOAD_GAP_DAYS*86400000){g0=i;break;}}
+    const prev=e.slice(g0,n-2),ref=prev.length?Math.max(...prev):0;
     if(ref>0&&e[n-1]<ref*REG_DROP&&e[n-2]<ref*REG_DROP){res.trend='down';res.dropPct=(1-e[n-1]/ref)*100;return res;}
   }
   let k=-1;
-  for(let i=n-STAG_MIN_SESSIONS;i>=0;i--){if(data[n-1].ts-data[i].ts>=STAG_MIN_DAYS*86400000){k=i;break;}}
+  for(let i=n-LV.ses;i>=0;i--){if(data[n-1].ts-data[i].ts>=LV.days*86400000){k=i;break;}}
   if(k>=0&&!e.slice(k+1).some(v=>v>e[k]*1.01)){res.trend='stagnant';res.stagSessions=n-k;res.stagWeeks=(data[n-1].ts-data[k].ts)/W;return res;}
-  res.trend=res.pctWeek>=1.5?'strong_up':res.pctWeek>=0.4?'up':'flat';
+  res.trend=res.pctWeek>=1.5?'strong_up':res.pctWeek>=LV.up?'up':'flat';
   return res;
 }
 // Textos de una progresión según su medida: «tu 1RM estimado sube» / «tus reps suben» / «tu tiempo sube»…
@@ -19450,9 +19545,13 @@ function coach_consistencyWindow(){
 
 function coach_weightTrend(){
   if(!S.weights||S.weights.length<2)return{trend:'insufficient',change:0};
-  const first=S.weights[0].v,last=S.weights[S.weights.length-1].v;
-  const change=last-first;
-  const days=(S.weights[S.weights.length-1].ts-S.weights[0].ts)/86400000||1;
+  // (C13) La tendencia es la de las últimas 8 semanas (antes, la primera pesada de siempre contra la última: quien bajó 6 kg el año
+  // pasado y lleva 3 meses subiendo salía «estable»). Con menos de dos pesadas en ese tiempo, las dos últimas. changeAll: el cambio
+  // desde tu primera pesada, que es lo que enseña la ficha «Peso corporal» del Coach («desde el inicio»).
+  const W=S.weights,lw=W[W.length-1];let win=W.filter(w=>w&&+w.ts>=+lw.ts-56*86400000);if(win.length<2)win=W.slice(-2);
+  const first=win[0].v,last=lw.v;
+  const change=last-first,changeAll=last-W[0].v;
+  const days=(lw.ts-win[0].ts)/86400000||1;
   const perWeek=(change/days)*7;
   let trend='flat';
   if(Math.abs(perWeek)<0.1)trend='flat';
@@ -19460,7 +19559,7 @@ function coach_weightTrend(){
   else if(perWeek<0)trend='losing';
   else if(perWeek>0.3)trend='gaining_fast';
   else trend='gaining';
-  return{trend,change,perWeek:perWeek.toFixed(2),first,last,days};
+  return{trend,change,changeAll,perWeek:perWeek.toFixed(2),first,last,days};
 }
 
 function coach_balance(){
@@ -19669,15 +19768,15 @@ function coach_fatigueMeter(an){
   const why=score==null?(!hasSess?(on?'Entrena y marca el esfuerzo de tus series: con 2 semanas de datos verás tu fatiga.':'Entrena: con 2 semanas de datos verás tu fatiga.')
       :!recent?`No has entrenado en las 2${NB}últimas semanas: no hay fatiga que medir.`
       :on?'Aún faltan datos: marca el esfuerzo de tus series (Fácil, Justo o Al límite) un par de semanas más.':'Aún faltan datos: entrena un par de semanas más.')
-    :_fatWhyCtx(level,an);
+    :_fatWhyCtx(level,an,_fatNoWeeks(factors));
   // dlGo: con la recomendación pospuesta y la línea pidiendo descarga, el medidor ofrece empezarla (botón)
-  const dlGo=score!=null&&!!_fatDlAsk(level,an)&&_dlSnoozedOffer();
+  const dlGo=score!=null&&!!_fatDlAsk(level,an,_fatNoWeeks(factors))&&_dlSnoozedOffer();
   return{score,level,factors,main,why,enough,dlGo,days:FATIGUE_DAYS};
 }
 // (13 r1) La línea del medidor no contradice al resto del Coach: en descarga o descanso toca recuperar, y si la semana de
 // descarga se recomienda por semanas sin descanso o por ejercicios que bajan, se dice aunque la nota sea baja.
 // ¿Pide la línea una semana de descarga? 'alta' | 'weeks' | 'regress' | null
-function _fatDlAsk(level,an){
+function _fatDlAsk(level,an,sw){ // sw (C8): la nota sin el factor de las semanas
   const dl=getActiveDeload();
   if((dl&&dl.kind==='all')||getActiveRest())return null;
   // (16b) Las mismas reglas que coach_deloadReco (salvo «Ahora no», que decide quien llama): con la fatiga alta solo
@@ -19685,17 +19784,17 @@ function _fatDlAsk(level,an){
   const f=an&&(an.fatigue||coach_fatigue(an));
   if(f&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS){
     if(level==='alta'&&f.weeks>=2)return'alta';
-    if(_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS)return'weeks';
+    if(_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS&&_dlCalOk(f,sw))return'weeks';
     if(f.deloadNeeded&&f.regress>=2)return'regress';
   }
   return null;
 }
-function _fatWhyCtx(level,an){
+function _fatWhyCtx(level,an,sw){
   const dl=getActiveDeload();
   if(dl&&dl.kind==='all')return level==='alta'?'Fatiga alta: bien hecho, estás en tu semana de descarga. Toca recuperar, no apretar.'
     :'Estás en tu semana de descarga: toca recuperar, no apretar.';
   if(getActiveRest())return'Estás en tu semana de descanso: toca recuperar.';
-  const ask=_fatDlAsk(level,an);
+  const ask=_fatDlAsk(level,an,sw);
   if(ask==='alta')return'Fatiga alta: tu cuerpo pide bajar el ritmo una semana.';
   const f=an&&(an.fatigue||coach_fatigue(an)),lv=level==='alta'?'Fatiga alta':level==='moderada'?'Fatiga moderada':'Fatiga baja';
   // (16e) «aunque acabas de recuperar» solo si de verdad hubo una recuperación (descarga, descanso o parón)
@@ -19819,6 +19918,15 @@ function _dlRecoSnoozed(){const t=S.dlRecoSnoozeTs;return typeof t==='number'&&i
 // ¿Hay una «Semana de descarga» del cierre de ciclo entre las propuestas activas?
 function _dlPropActive(){return(S.pendingCoachProposals||[]).some(p=>p&&p.type==='deload')&&coach_pendingView().active.some(p=>p&&p.type==='deload');}
 // {src:'fatigue'|'weeks'|'regress', tag, why, score, weeks} o null
+// (C8) Descarga cuando hace falta, no por calendario. «N semanas seguidas» por sí solo ya no basta para recomendarla: además tiene que
+// marcar algo el resto del medidor (series al límite, objetivos sin cumplir, ejercicios que bajan, sesiones que se alargan: nota sin
+// el factor de las semanas ≥ DL_CAL_MIN), o haber pasado DL_CAL_MAX semanas (red de seguridad); y no cuenta para quien entrena menos
+// de DL_CAL_DENS sesiones por semana de media. Antes, a quien empezaba y progresaba con la fatiga baja le tocaba una de cada seis
+// semanas. Con fatiga alta o dos ejercicios bajando, como siempre.
+const DL_CAL_MIN=30,DL_CAL_MAX=12,DL_CAL_DENS=1.5;
+// Nota de fatiga (0-100) sin el factor «semanas sin descanso», que si no se justifica a sí mismo. fs: los factores del medidor
+function _fatNoWeeks(fs){const a=(fs||[]).filter(x=>x&&x.ok&&x.key!=='weeks'),w=a.reduce((t,x)=>t+x.w,0);return w>0?100*a.reduce((t,x)=>t+x.w*x.s,0)/w:0;}
+function _dlCalOk(f,sw){return f.sessionsSince>=f.weeks*DL_CAL_DENS&&((+sw||0)>=DL_CAL_MIN||f.weeks>=DL_CAL_MAX);}
 function coach_deloadReco(an,m){
   if((S.sessions||[]).length<CYCLE_MIN_SESSIONS)return null;
   const d=getActiveDeload();if(d&&d.kind==='all')return null;
@@ -19828,7 +19936,7 @@ function coach_deloadReco(an,m){
   m=m||coach_fatigueMeter(an);
   const wk=Math.floor(f.weeks);
   const high=m.score!=null&&m.score>=FATIGUE_HIGH&&f.weeks>=2;
-  const long=_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS;
+  const long=_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS&&_dlCalOk(f,_fatNoWeeks(m.factors)); // (C8)
   const reg=!!f.deloadNeeded&&f.regress>=2;
   if(!high&&!long&&!reg)return null;
   const weeksTxt=`${plural(wk,'semana')} seguida${wk===1?'':'s'} entrenando sin descanso ni descarga`;
@@ -19965,11 +20073,65 @@ function _cardioWeekMin(){
   ks.forEach(k=>(p[k].ex||[]).forEach(e=>{const ex=routineEx(e);if(ex&&(ex.cardio||exLT(ex)==='c'))m+=(_cardioMin(ex)||0)*per;}));
   return m;
 }
+// ─── (C6) CAMBIOS DE EJERCICIO SIN CARRUSEL ───
+// Antes el Coach cambiaba ejercicios con facilidad y sin memoria (Remo en cable → Remo en máquina y, dos ciclos después, al revés; 10
+// cambios en 24 semanas a un intermedio que progresaba). Ahora: un ejercicio no se cambia antes de SWAP_MIN_WEEKS con él; no se vuelve
+// a uno que hayas hecho en los últimos SWAP_BACK_DAYS; a quien se estanca nunca se le propone la versión más difícil (Dominadas →
+// Muscle-up); con «Ganar fuerza», tus levantamientos no se cambian; y dos ejercicios no reciben el mismo sustituto.
+const SWAP_MIN_WEEKS=12,SWAP_BACK_DAYS=182;
+// Semanas desde tu primera sesión con ese ejercicio (0 sin registros con fecha)
+function _exAgeWeeks(id){const a=Array.isArray(S.strength&&S.strength[id])?S.strength[id]:[];
+  const r=a.find(x=>x&&typeof x==='object'&&+x.ts>0);return r?(Date.now()-r.ts)/604800000:0;}
+// ─── (C5) ESCALERA ANTE UN ESTANCAMIENTO ───
+// Antes: lo «estable» (que progresa despacio) recibía «una serie más» y lo «estancado» saltaba directo a cambiar el esquema o el
+// ejercicio. Ahora lo estable no se toca y, ante un estancamiento de verdad, un paso por ciclo y por este orden: 1) si tus series
+// salen «fáciles», apretar antes de cambiar nada (sin propuesta: se dice); 2) una serie más, si cabe (C4); 3) otro rango de
+// repeticiones (C9); 4) otro ejercicio (C6). «Ganar fuerza» y «Aguantar más» conservan su primer paso propio (más carga en tus
+// levantamientos, más repeticiones). La memoria de la escalera son tus propuestas aplicadas.
+// Lo último que el Coach te cambió en ese ejercicio en las últimas 16 semanas: 'add_set' | 'rep_scheme' | null
+function _lastChange(exId){const t=Date.now()-112*86400000;let b=null;
+  (S.appliedProposals||[]).forEach(a=>{if(a&&a.exId===exId&&(a.type==='add_set'||a.type==='rep_scheme')&&!_isRampProp(a)&&+a.appliedAt>t&&(!b||+a.appliedAt>+b.appliedAt))b=a;});
+  return b?b.type:null;}
+// ¿Tus 3 últimas sesiones normales de ese ejercicio salieron «fáciles»? (con el esfuerzo apagado o sin marcar, no)
+function _easyLately(exId){const a=(Array.isArray(S.strength&&S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&typeof r==='object'&&!r.dl).slice(-3);
+  return a.length===3&&a.every(r=>rpeCat(r.rpe)===1);}
+// Por qué un ejercicio estancado se queda sin propuesta (it.note)
+const STAG_NOTE={effort:'tus series salen «fáciles»: acércate más al límite antes de cambiar nada',full:'su día ya va lleno de series para ese músculo',young:'lleva poco en tu rutina: dale tiempo antes de cambiarlo'};
+// ─── (C4) TOPES AL AÑADIR SERIES ───
+// Antes el Coach añadía series ciclo tras ciclo sin mirar cuántas llevaba ya ese músculo en la sesión ni cuánto había crecido la rutina
+// (un intermedio pasaba de 39 a 50 series por vuelta en 24 semanas). Ahora, antes de proponer una serie más:
+//  · SES_CAP: 10 series por grupo muscular y sesión, con la cuenta del creador de rutinas (LIB_K.volV: fraccional por patrón);
+//  · ADD_PER_CYCLE: como mucho 2 series nuevas por ciclo;
+//  · VOL_GROWTH: las series que el Coach lleva añadidas no pasan del 15 % de la rutina sin ellas;
+//  · EX_SETS_MAX: no se propone una serie más a un ejercicio que ya tiene 4.
+// La rampa del primer ciclo (2 → 3 series con 65 o más o al empezar de cero) es parte de la rutina y no cuenta ni se limita aquí.
+const SES_CAP=10,ADD_PER_CYCLE=2,VOL_GROWTH=1.15,EX_SETS_MAX=4;
+// Grupos que trabaja un ejercicio → {grupo: 1 | 0,5}; sin ficha en la biblioteca, su grupo muscular entero
+function _exGroups(ex){const L0=ex&&!ex.cardio?exLib(ex):null,L=L0&&LIB_K&&LIB_K.BY.get(L0.id);return L?LIB_K.volV(L):(ex&&ex.muscle?{[ex.muscle]:1}:{});}
+// Series por grupo de un día de tu rutina (las de verdad: en descarga, las que vuelven)
+function _daySetsByGroup(dk){const d=getPlan()[dk],t={};if(!d||!Array.isArray(d.ex))return t;
+  d.ex.forEach(e=>{const x=routineEx(e);if(!x||x.cardio)return;const v=_exGroups(x),n=_baseSets(x);for(const g in v)t[g]=(t[g]||0)+n*v[g];});return t;}
+// ¿Cabe una serie más de este ejercicio en su día? null si cabe; si no, el grupo que ya está lleno
+function _sesCapFull(ex,dk){const t=_daySetsByGroup(dk),v=_exGroups(ex);return Object.keys(v).find(g=>(t[g]||0)+v[g]>SES_CAP+1e-9)||null;}
+function _isRampProp(a){return !!a&&typeof a.id==='string'&&/^ramp_/.test(a.id);}
+// Series que el Coach te ha añadido y siguen en tu rutina (desde tu rutina generada, si la hay) y total de series por vuelta
+function _coachAddedSets(){const pm=_isPlainObj(S.planMeta)?S.planMeta:null,t0=pm?+pm.ts||0:0;
+  return (S.appliedProposals||[]).filter(a=>a&&a.type==='add_set'&&!_isRampProp(a)&&+a.appliedAt>=t0&&a.exId&&findExInPlan(a.exId)).length;}
+function _planSetsTotal(){let t=0;const p=getPlan();liveDayKeys(p).forEach(k=>p[k].ex.forEach(e=>{const x=routineEx(e);if(x&&!x.cardio)t+=_baseSets(x);}));return t;}
+function _volGrowthOk(extra){const add=_coachAddedSets()+(extra||0),tot=_planSetsTotal()+(extra||0);return add+1<=(tot-add)*(VOL_GROWTH-1)+1e-9;}
+// Series nuevas que ya has aceptado en este ciclo
+function _addedThisCycle(){const cs=coach_cycleStart();return (S.appliedProposals||[]).filter(a=>a&&a.type==='add_set'&&!_isRampProp(a)&&+a.appliedAt>=cs).length;}
 function coach_buildCandidates(an){
   const out=[],now=Date.now(),plan=routinePlan(),f=an.fatigue;
   const goal=_coachGoal(),pm=_isPlainObj(S.planMeta)?S.planMeta:{},lifts=new Set(Array.isArray(pm.lifts)?pm.lifts:[]),minor=!!(S.profile&&S.profile.age==='16'); // (E16d)
   const noScheme=goal==='fuerza'||goal==='aguante'||goal==='grasa'||goal==='salud';let volNow=null; // (E16d) sin «×8 con más peso» ni «×12 con menos»
   const hot=new Set((coach_rpeByMuscle(6)||[]).filter(z=>z.avg>=2.6&&z.samples>=3).map(z=>z.muscle));
+  // (C4) ¿cabe una serie más de este ejercicio? (por ejercicio, por sesión, por ciclo y sobre la rutina); nAdd: las que ya van en esta tanda
+  // (E16d) «Ganar músculo»: una serie más solo si el grupo sigue por debajo de lo alto de su rango y de su techo (planMeta.vol)
+  const volOk=ex=>{if(!(goal==='musculo'&&_isPlainObj(pm.vol)))return true;const L0=exLib(ex),L=L0&&LIB_K&&LIB_K.BY.get(L0.id),g=L&&LIB_K.mainGroupV(L),vz=g&&pm.vol[g];
+    if(!vz)return true;if(!volNow)volNow=_planVolNow();return (volNow[g]||0)+1<=Math.min(vz.top||99,vz.techo||99)+1e-9;};
+  const swUsed=new Set();let swHist=null; // (C6) sustitutos ya propuestos en esta tanda e historial por ejercicio de biblioteca
+  let nAdd=0;const addOk=(ex,dk,s)=>s<EX_SETS_MAX&&_addedThisCycle()+nAdd<ADD_PER_CYCLE&&_volGrowthOk(nAdd)&&!_sesCapFull(ex,dk||_dayOfEx(ex.id));
   if(f.deloadNeeded){
     out.push({id:'deload_week',type:'deload',basis:'fatigue',prio:0,sev:f.weeks,ic:'🧘',tag:'Descarga',createdAt:now,
       title:'Semana de descarga',diff:'−40 % de series · mismo peso · 7 días',short:'una semana de descarga',
@@ -19977,6 +20139,7 @@ function coach_buildCandidates(an){
   }
   an.down.forEach(it=>{
     const ex=it.ex,s=_baseSets(ex);
+    if(_isBalEx(ex))return; // (C11)
     if(f.deloadNeeded&&an.down.length>=2){it.covered='deload';return;} // la descarga ya lo cubre
     if(s<=1)return;
     out.push({id:'rm_set_'+ex.id,type:'rm_set',basis:'down',prio:1,sev:it.p.dropPct,ic:'🧘',tag:'Descarga',exId:ex.id,dayKey:it.dayKey,createdAt:now,
@@ -19986,57 +20149,63 @@ function coach_buildCandidates(an){
   an.stagnant.forEach(it=>{
     // Cambiar el esquema de reps (con más o menos peso) solo tiene sentido con peso × reps
     const ex=it.ex,s=_baseSets(ex),kg=exLT(ex)==='w',tr=kg?targetRepsNum(ex):null;
+    if(_isBalEx(ex))return; // (C11)
     const why=`${it.p.stagSessions}+ sesiones (${Math.max(3,Math.round(it.p.stagWeeks))}+ semanas) sin mejorar ${(kg&&!it.p.kgTD)||it.p.metric==='e1rm'?'peso ni reps':_progWhat(it.p).su} con ${s}×${fmtTargetReps(ex).replace(/ reps$/,'')}.`;
     const base={basis:'stagnant',prio:2,sev:it.p.stagSessions,ic:'🔄',tag:'Variación',exId:ex.id,dayKey:it.dayKey,createdAt:now};
     const rr=kg?repRange(ex):null; // (E16d) con rutina generada el objetivo es un rango («8-10»): targetRepsNum no lo lee
-    if(goal==='fuerza'&&rr){ // (E16d) en los básicos, a 4-6 (3-5 en avanzados; 6-8 con 16-17 años, nunca por debajo de 6) con más peso
+    // (C5) paso 1: con tus series saliendo «fáciles», antes de cambiar nada toca apretar
+    if(_easyLately(ex.id)){it.note='effort';return;}
+    const lastCh=_lastChange(ex.id),sch=lastCh!=='rep_scheme'; // sch: aún no se le ha cambiado el rango hace poco
+    if(sch&&goal==='fuerza'&&rr){ // (E16d) en los básicos, a 4-6 (3-5 en avanzados; 6-8 con 16-17 años, nunca por debajo de 6) con más peso
       const R=minor?'6-8':pm.level==='A'?'3-5':'4-6',lo=+R.split('-')[0],L0=exLib(ex);
-      if((L0&&lifts.has(L0.id)||isCompoundEx(ex))&&rr.lo>lo+1){out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s,r:R},title:`Más carga en ${ex.n}`,
+      // (C9) solo en tus levantamientos (planMeta.lifts): antes, cualquier multiarticular (zancadas y búlgaras a 4-6). Sin levantamientos
+      // declarados (rutinas de antes), como siempre
+      if((lifts.size?!!(L0&&lifts.has(L0.id)):isCompoundEx(ex))&&rr.lo>lo+1){out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s,r:R},title:`Más carga en ${ex.n}`,
         diff:`${s}×${_tgtShort(ex)} → ${s}×${R}`,short:`pasar a ${s}×${R} con más peso`,description:`${why} Para «Ganar fuerza», en los básicos: ${s}×${R} con más peso.`});return;}
     }
-    const RA=goal==='aguante'&&rr?(rr.hi<12?'12-15':rr.hi<=15?'15-20':null):null;
+    const RA=sch&&goal==='aguante'&&rr?(rr.hi<12?'12-15':rr.hi<=15?'15-20':null):null;
     if(RA){ // (E16d) más repeticiones
       out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s,r:RA},title:`Más repeticiones en ${ex.n}`,diff:`${s}×${_tgtShort(ex)} → ${s}×${RA}`,
         short:`pasar a ${s}×${RA} con algo menos de peso`,description:`${why} Para «Aguantar más»: ${s}×${RA} con algo menos de peso.`});return;
     }
-    if(!noScheme&&tr!=null&&tr>=10){
-      const ns=Math.min(6,s+1);
-      out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s:ns,r:8},title:`Cambiar esquema en ${ex.n}`,
-        diff:`${s}×${tr} → ${ns}×8`,short:`pasar a ${ns}×8 con algo más de peso`,
-        description:`${why} Pasa a ${ns}×8 con algo más de peso: misma musculatura, estímulo nuevo.`});
-      return;
+    // (C5) paso 2: una serie más, si no se le añadió ya hace poco y cabe (C4: por ejercicio, sesión, ciclo y rutina; «músculo»: su tope semanal)
+    if(!lastCh){
+      if(addOk(ex,it.dayKey,s)&&!hot.has(ex.muscle)&&volOk(ex)){nAdd++;
+        out.push({...base,id:'add_set_'+ex.id,type:'add_set',ic:'💪',tag:'Progresión',title:`Añadir serie a ${ex.n}`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,short:`añadir una serie (${s}→${s+1})`,
+          description:`${why} Una serie más (${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}) antes de cambiar nada. Si sigue igual, lo siguiente será otro rango de repeticiones.`});return;}
+      if(s<EX_SETS_MAX&&_sesCapFull(ex,it.dayKey||_dayOfEx(ex.id)))it.note='full';
     }
-    // Sin kilos: antes que otro ejercicio, su versión más difícil (más estímulo con el mismo patrón)
-    const upV=kg?null:_presVariant(ex,'up');
-    if(upV){
-      out.push({...base,id:'swap_'+ex.id,type:'swap',libExId:upV.id,title:`Cambiar ${ex.n} por ${upV.n}`,
-        diff:`${ex.n} → ${upV.n}`,short:`cambiar a ${upV.n}`,
-        description:`${why} Prueba ${upV.n}: la versión más difícil: más estímulo con el mismo patrón. ${_histStaysTxt(ex)}`});
-      return;
+    // (C9) Otro rango de repeticiones, según el ejercicio y sin sumar series (antes: «N+1 × 8 con más peso» para todo, también un crunch
+    // o unas aperturas inversas). Multiarticular: menos repeticiones con algo más de peso (×8 con reps sueltas de 10 o más; con rango,
+    // dos menos, sin bajar de 6). De un solo músculo: más repeticiones con algo menos de peso (12-15, luego 15-20).
+    if(sch&&!noScheme&&rr&&goal!=='aguante'){
+      const comp=isCompoundEx(ex),num=tr!=null;
+      const to=comp?(num?(tr>=10?8:null):(rr.lo>=8?`${rr.lo-2}-${rr.hi-2}`:null)):(rr.hi<12?'12-15':rr.hi<=15?'15-20':null);
+      if(to!=null){const T=String(to);
+        out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s,r:to},title:comp?(num?`Cambiar esquema en ${ex.n}`:`Más carga en ${ex.n}`):`Más repeticiones en ${ex.n}`,
+          diff:`${s}×${_tgtShort(ex)} → ${s}×${T}`,short:`pasar a ${s}×${T} con algo ${comp?'más':'menos'} de peso`,
+          description:comp?`${why} Pasa a ${s}×${T} con algo más de peso: misma musculatura, estímulo nuevo. Si sigue igual, lo siguiente será otro ejercicio.`
+            :`${why} Pasa a ${s}×${T} con algo menos de peso: en un ejercicio de un solo músculo, más repeticiones rinden más que más carga. Si sigue igual, lo siguiente será otro ejercicio.`});
+        return;}
     }
-    const alt=coach_suggestAlternative(ex);
-    if(alt){
+    // (C6) Otro ejercicio: nunca la versión más difícil de uno en el que te has estancado (antes, sin kilos, era lo primero), ni antes
+    // de 12 semanas con él, ni un levantamiento de «Ganar fuerza», ni uno al que volverías antes de 6 meses, ni el mismo para dos
+    const L6=exLib(ex),noSwap=_exAgeWeeks(ex.id)<SWAP_MIN_WEEKS||(goal==='fuerza'&&L6&&lifts.has(L6.id));
+    const alt=noSwap?null:coach_suggestAlternative(ex,{noRecent:true,hist:(swHist=swHist||_libHistMap()),skip:(L6&&L6.up?new Set([...swUsed,L6.up]):swUsed)});
+    if(noSwap&&!it.note&&_exAgeWeeks(ex.id)<SWAP_MIN_WEEKS)it.note='young';
+    if(alt){swUsed.add(alt.id);
       out.push({...base,id:'swap_'+ex.id,type:'swap',libExId:alt.id,title:`Cambiar ${ex.n} por ${alt.n}`,
         diff:`${ex.n} → ${alt.n}`,short:`cambiar a ${alt.n}`,
         description:`${why} Prueba ${alt.n}: ${alt.reason}. ${_histStaysTxt(ex)}`});
       return;
     }
-    if(tr!=null&&!noScheme){ // (E16d) «×12 con menos peso»: nunca para fuerza, aguante, grasa ni salud
+    if(sch&&tr!=null&&!noScheme&&!noSwap){ // (E16d) «×12 con menos peso»: nunca para fuerza, aguante, grasa ni salud; (C6) último recurso solo si de verdad no hay otro ejercicio
       out.push({...base,id:'change_rep_scheme_'+ex.id,type:'rep_scheme',to:{s,r:12},title:`Cambiar esquema en ${ex.n}`,
         diff:`${s}×${tr} → ${s}×12`,short:`pasar a ${s}×12 con algo menos de peso`,
         description:`${why} Pasa a ${s}×12 con algo menos de peso para retomar el progreso.`});
     }
   });
-  an.flat.forEach(it=>{
-    const ex=it.ex,s=_baseSets(ex);
-    // Solo si está estable de verdad (no bajando), con datos y sin zona muscular ya «al límite»
-    if(s>=5||it.p.sessions<3||it.p.pctWeek<-0.4||hot.has(ex.muscle))return;
-    if(goal==='musculo'&&_isPlainObj(pm.vol)){const L0=exLib(ex),L=L0&&LIB_K&&LIB_K.BY.get(L0.id),g=L&&LIB_K.mainGroupV(L),vz=g&&pm.vol[g]; // (E16d)
-      if(vz){if(!volNow)volNow=_planVolNow();const cap=Math.min(vz.top||99,vz.techo||99);if((volNow[g]||0)+1>cap+1e-9)return;}}
-    out.push({id:'add_set_'+ex.id,type:'add_set',basis:'flat',prio:3,sev:-s,ic:'💪',tag:'Progresión',exId:ex.id,dayKey:it.dayKey,createdAt:now,
-      title:`Añadir serie a ${ex.n}`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,short:`añadir una serie (${s}→${s+1})`,
-      description:`${(w=>w.su[0].toUpperCase()+w.su.slice(1)+' '+w.es)(_progWhat(it.p))} en tus últimas ${it.p.sessions} sesiones. Una serie más (${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}) le da el empujón que necesita.`});
-  });
+  // (C5) Lo «estable» (progresa despacio, sin estancarse) no se toca: ya no recibe «una serie más». El análisis lo dice («sigue el plan»).
   if(goal==='grasa'||goal==='salud'){ // (E16d)
     const wk=_cardioWeekMin();let best=null;
     if(wk<150)liveDayKeys(plan).forEach(k=>{const arr=plan[k].ex||[],j=arr.length-1,ex=j>0?routineEx(arr[j]):null;if(!ex||!(ex.cardio||exLT(ex)==='c'))return;
@@ -20128,6 +20297,10 @@ function coach_item(ex,dk,c){
   }
   return it;
 }
+// (C11) Los ejercicios de equilibrio (el bloque que el creador de rutinas pone con 65 o más) no se juzgan como los de fuerza: mejorar
+// en ellos no es sumar segundos sin fin, así que nunca salen «estancados», «estables» ni «en retroceso» y el Coach no propone
+// cambiarlos, añadirles series ni descargarlos. Su tendencia se sigue calculando (Progreso la enseña igual).
+function _isBalEx(ex){const L=ex&&!ex.cardio?exLib(ex):null;return !!(L&&L.pat==='bal');}
 function coach_analyze(){
   // (11) la rutina tal cual: un ejercicio sustituido «solo hoy» se juzga por el original (el que vuelve al guardar)
   const plan=routinePlan(),items=[],ctx=coach_itemCtx(plan);
@@ -20138,11 +20311,13 @@ function coach_analyze(){
       items.push(coach_item(ex,dk,ctx));
     });
   });
-  const act=items.filter(i=>!i.hold);
+  const act=items.filter(i=>!i.hold&&!_isBalEx(i.ex));
   const of=(arr,...t)=>arr.filter(i=>t.includes(i.p.trend));
   const an={items,strong:of(items,'strong_up'),up:of(items,'up','strong_up'),flat:of(act,'flat'),stagnant:of(act,'stagnant'),down:of(act,'down'),
     held:items.filter(i=>i.hold),withData:items.filter(i=>i.p.trend!=='insufficient')};
   an.fatigue=coach_fatigue(an);
+  // (C8) la «Semana de descarga» del cierre de ciclo, si es solo por semanas, con la misma condición que la recomendación
+  {const f=an.fatigue;if(f.deloadNeeded&&f.regress<2&&!_dlCalOk(f,_fatNoWeeks(coach_fatigueMeter(an).factors)))f.deloadNeeded=false;}
   an.candidates=coach_buildCandidates(an);
   an.preview=coach_selectProposals(an.candidates,{fresh:true}); // lo que propondría al cerrar el ciclo
   an.candByEx={};
@@ -20155,6 +20330,10 @@ function _basisHolds(p,an){
   if(!p.basis)return true; // propuestas de versiones anteriores: se muestran tal cual
   if(p.basis==='fatigue')return an.fatigue.lastRecoveryTs<(+p.createdAt||0);
   if(p.basis==='volume'){const d=getPlan()[p.dayKey];return !!(d&&Array.isArray(d.ex)&&d.ex.filter(e=>!e.cardio).length<3);}
+  // (C12) «Más minutos de cardio»: el cardio no está entre los ejercicios que se analizan (antes caía en «ese ejercicio no está» y la
+  // propuesta, guardada, no se veía nunca). Vale mientras ese cardio siga por debajo de lo propuesto y no llegues a 150 min a la semana.
+  if(p.basis==='cardio'){const ex=p.exId?findExInPlan(p.exId):null;
+    return !!(ex&&(ex.cardio||exLT(ex)==='c')&&p.to&&(_cardioMin(ex)||0)<p.to.min&&_cardioWeekMin()<150);}
   const it=an.items.find(i=>i.ex.id===p.exId);
   if(!it)return false;
   if(it.hold)return false; // recién cambiado / en descarga / recuperándose: primero sus próximas sesiones
@@ -20206,7 +20385,7 @@ function _coachNextStep(it,an,pend,resIds){
     return d?`una semana de descarga (${tag(d)})`:'una semana de descarga (te la propondré al cerrar el ciclo)';
   }
   const c=an.candByEx&&an.candByEx[it.ex.id];
-  if(!c)return'';
+  if(!c)return it.note&&STAG_NOTE[it.note]?STAG_NOTE[it.note]:''; // (C5)
   const res=an.preview&&an.preview.reserve.some(x=>x.id===c.id);
   return`${c.short} (${res?'quedará en reserva al cerrar el ciclo':'te lo propondré al cerrar el ciclo'})`;
 }
@@ -20238,6 +20417,8 @@ function _holdTxt(it){
   return`acabas de cambiarlo a ${parseInt(ex.s)||ex.s}×${fmtTargetReps(ex).replace(/ reps$/,'')}`;
 }
 
+// (C13) ¿Principiante?
+function _coachNovato(){return coach_level()==='P';} // (C3) el nivel con el que el Coach mide tu progreso
 function coach_generateInsights(an,pend,resIds){
   const cycle=coach_cycleData();
   an=an||coach_analyze();
@@ -20254,7 +20435,7 @@ function coach_generateInsights(an,pend,resIds){
     insights.push({type:'info',ic:'🌱',t:'Empezando',d:`Necesitas <strong>${CYCLE_MIN_SESSIONS-(S.sessions||[]).length}</strong> ${CYCLE_MIN_SESSIONS-(S.sessions||[]).length===1?'sesión':'sesiones'} más para tu primer análisis completo. Sigue así.`});
   }else{
     if(consistency.rate>=0.95){
-      insights.push({type:'good',ic:'🎯',t:'Constancia impecable',d:`Llevas <strong>${consistency.perWeek}</strong>${NB}sesiones/semana (objetivo: ${consistency.target}). Estás entrenando como un profesional.`});
+      insights.push({type:'good',ic:'🎯',t:'Constancia impecable',d:`Llevas <strong>${consistency.perWeek}</strong>${NB}sesiones/semana (objetivo: ${consistency.target}).`});
     }else if(consistency.rate>=0.75){
       insights.push({type:'good',ic:'✓',t:'Buena constancia',d:`Vas a <strong>${consistency.perWeek}</strong>${NB}sesiones/semana. Si llegas a ${consistency.target} consistentes vas a ver cambios importantes.`});
     }else if(consistency.rate>=0.5){
@@ -20268,7 +20449,7 @@ function coach_generateInsights(an,pend,resIds){
   if(weight.trend!=='insufficient'){
     const abs=Math.abs(parseFloat(weight.perWeek));
     if(weight.trend==='losing'&&abs>=0.2&&abs<=0.8){
-      insights.push({type:'good',ic:'🔥',t:'Pérdida de grasa saludable',d:`Bajas <strong>${abs} kg/semana</strong> de media (cambio total: ${kgSign(weight.change)}${NB}kg). Es un ritmo moderado: así es más fácil conservar la fuerza.`});
+      insights.push({type:'good',ic:'🔥',t:'Bajas a buen ritmo',d:`Bajas <strong>${abs} kg/semana</strong> de media (${kgSign(weight.change)}${NB}kg en ${plural(Math.round(weight.days),'día')}). Es un ritmo moderado: así es más fácil conservar la fuerza.`});
     }else if(weight.trend==='losing_fast'){
       insights.push({type:'warn',ic:'⚡',t:'Bajas rápido',d:`Pierdes <strong>${abs} kg/semana</strong>. Si va acompañado de debilidad en el gym, podrías estar perdiendo músculo también. La pérdida de peso depende sobre todo de lo que comes: para eso, un dietista-nutricionista.`});
     }else if(weight.trend==='flat'){
@@ -20276,7 +20457,7 @@ function coach_generateInsights(an,pend,resIds){
         insights.push({type:'info',ic:'⚖️',t:'Peso estable',d:`Tu peso lleva ${plural(Math.round(weight.days),'día')} estable. Si buscas perder grasa, lo que más influye es lo que comes: para eso, un dietista-nutricionista. Si no es tu prioridad, es normal mientras ganas fuerza.`});
       }
     }else if(weight.trend==='gaining'&&weight.change>0.5){
-      insights.push({type:'info',ic:'📈',t:'Has ganado peso',d:`Subiste <strong>${kgTxt(Math.round(weight.change*10)/10)}${NB}kg</strong>. Si entrenas constante, parte puede ser músculo. Si buscas perder grasa, revisa tu alimentación.`});
+      insights.push({type:'info',ic:'📈',t:'Has ganado peso',d:`Subiste <strong>${kgTxt(Math.round(weight.change*10)/10)}${NB}kg</strong> en ${plural(Math.round(weight.days),'día')}. Si entrenas constante, parte puede ser músculo. Si buscas perder grasa, revisa tu alimentación.`});
     }
   }
 
@@ -20294,8 +20475,9 @@ function coach_generateInsights(an,pend,resIds){
   if(an.strong.length>0){
     // (los de lastre, detrás: su % es solo del lastre; si es el único, en kilos de lastre)
     const top=an.strong.slice().sort((a,b)=>(a.p.lastre?1:0)-(b.p.lastre?1:0)||b.p.pct-a.p.pct)[0];
-    if(top.p.lastre)insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${top.p.lastV>top.p.firstV?`llevas más lastre: de ${esc(kgTxt(top.p.firstV))} a <strong>${esc(kgTxt(top.p.lastV))} kg</strong>`:`haces más con <strong>${esc(kgTxt(top.p.lastV))} kg</strong> de lastre`} en tus últimas ${top.p.sessions} sesiones. Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
-    else insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${_progWhat(top.p).su} ${_progWhat(top.p).v} un <strong>${pctTxt(top.p.pct)}</strong> en tus últimas ${top.p.sessions} sesiones (${esc(_progExcRange(top.p))}). Los principiantes ganan fuerza rápido — aprovecha esta ventana.`});
+    const nov=_coachNovato()?' Los principiantes ganan fuerza rápido — aprovecha esta ventana.':''; // (C13) solo a quien empieza
+    if(top.p.lastre)insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${top.p.lastV>top.p.firstV?`llevas más lastre: de ${esc(kgTxt(top.p.firstV))} a <strong>${esc(kgTxt(top.p.lastV))} kg</strong>`:`haces más con <strong>${esc(kgTxt(top.p.lastV))} kg</strong> de lastre`} en tus últimas ${top.p.sessions} sesiones.${nov}`});
+    else insights.push({type:'good',ic:'🏆',t:'Progresión excepcional',d:`En <strong>${esc(top.ex.n)}</strong> ${_progWhat(top.p).su} ${_progWhat(top.p).v} un <strong>${pctTxt(top.p.pct)}</strong> en tus últimas ${top.p.sessions} sesiones (${esc(_progExcRange(top.p))}).${nov}`});
   }
 
   if(an.up.length>=2){
@@ -20309,7 +20491,7 @@ function coach_generateInsights(an,pend,resIds){
   if(an.stagnant.length>0){
     const st=byStep(an.stagnant);
     const next=_coachNextStep(st[0],an,pend,resIds);
-    insights.push({type:'warn',ic:'🔀',t:'Estancamiento detectado',d:`${_namesList(st)} ${st.length>1?'llevan':'lleva'} 4+ sesiones (3+ semanas) sin mejorar ${st.every(i=>i.p.metric==='e1rm')?'peso ni reps':st.length===1?_progWhat(st[0].p).su:'su marca'}.${next?` Próximo paso${st.length>1?` en ${esc(st[0].ex.n)}`:''}: ${esc(next)}.`:''}`});
+    insights.push({type:'warn',ic:'🔀',t:'Estancamiento detectado',d:`${_namesList(st)} ${st.length>1?'llevan':'lleva'} ${_lvCfg().ses}+ sesiones (${_lvCfg().days/7}+ semanas) sin mejorar ${st.every(i=>i.p.metric==='e1rm')?'peso ni reps':st.length===1?_progWhat(st[0].p).su:'su marca'}.${next?` Próximo paso${st.length>1?` en ${esc(st[0].ex.n)}`:''}: ${esc(next)}.`:''}`});
   }
 
   if(an.down.length>0){
@@ -20436,7 +20618,7 @@ function coach_detailHtml(an,pv){
   if(watch.length){
     const st=i=>i.hold?(i.hold.kind==='changed'?`${_holdTxt(i)} · dale unas sesiones`:_holdTxt(i))
       :i.p.trend==='down'?(i.covered==='deload'?'por debajo de tu nivel · lo cubre la descarga':'por debajo de tu nivel · si sigue, el Coach lo ajustará')
-      :i.p.trend==='stagnant'?`${i.p.stagSessions}+ sesiones sin mejorar`:'estable · sigue el plan';
+      :i.p.trend==='stagnant'?`${i.p.stagSessions}+ sesiones sin mejorar${i.note&&STAG_NOTE[i.note]?' · '+STAG_NOTE[i.note]:''}`:'estable · sigue el plan';
     h+=`<div class="rec-card">
       <div class="rec-head"><span class="rec-badge med">Vigilar</span><div class="rec-title">Sin cambios por ahora</div></div>
       <div class="rec-diff">${watch.slice(0,5).map(i=>i.hold?row('…','hold',`${esc(i.ex.n)}: ${esc(st(i))}`)
@@ -20508,11 +20690,15 @@ function libAlts(L){
 // que se pueda hacer donde entrenas (routinePlace). Orden: sus alternativas (libAlts: las de antes, tal cual y con su
 // razón → las del catálogo, con su razón why o una generada) → por parecido: mismo patrón, patrón cercano, músculos
 // parecidos o mismo grupo (mejor del mismo grupo y del mismo tipo, compuesto o de aislamiento).
-function coach_suggestAlternative(ex){
+// o (C6, solo las propuestas del Coach; «¿Máquina ocupada?» sigue como siempre): o.noRecent → sin los que hiciste en los últimos
+// SWAP_BACK_DAYS (o.hist: _libHistMap(), para no rehacerlo por ejercicio); o.skip: ids de biblioteca ya propuestos a otro ejercicio.
+function coach_suggestAlternative(ex,o){
   if(!ex||ex.cardio)return null;
+  o=o||{};const hist=o.noRecent?(o.hist||_libHistMap()):null,rec=id=>{const h=hist&&hist[id];return !!(h&&h.ts>0&&Date.now()-h.ts<SWAP_BACK_DAYS*86400000);};
   const src=_libIdOf(ex),L=src?LIB_BY_ID.get(src):null,inPlan=_planLibIds(),dk=_dayOfEx(ex.id)||S.day;
   // (E3c) con el material del sitio de ese día (canDoHere); sin tus sitios, como siempre
-  const ok=id=>{const l=LIB_BY_ID.get(id);return l&&!l.cardio&&id!==src&&!inPlan.has(id)&&canDoHere(l,dk)?l:null;};
+  // (C11) a uno de equilibrio solo le vale otro de equilibrio (antes, en un gimnasio sin más, le salía una máquina de su grupo muscular)
+  const ok=id=>{const l=LIB_BY_ID.get(id);return l&&!l.cardio&&id!==src&&!inPlan.has(id)&&canDoHere(l,dk)&&(!L||L.pat!=='bal'||l.pat==='bal')&&!(o.skip&&o.skip.has(id))&&!rec(id)?l:null;};
   const muscle=ex.muscle||(L&&L.muscle),p=L&&L.pat;
   const why=l=>p&&l.pat===p?`mismo patrón (${PAT_LBL[p].toLowerCase()}) ${l.mat!==L.mat?'con otro material':'con otra variante'}`:l.muscle===muscle?'mismo grupo muscular con otro estímulo':'trabaja músculos parecidos con otro ejercicio';
   for(const [id,reason] of libAlts(L)){const l=ok(id);if(l)return{id:l.id,n:l.n,reason:reason||why(l),lib:l};}
@@ -20612,11 +20798,12 @@ function cycleNextCardHtml(){
     ${gen?`<button type="button" class="btn bp" onclick="cycleNext('nueva')">Rutina nueva con mis respuestas</button>`:''}</div></div>`;
 }
 function _cycleUpProposals(){
-  const p=getPlan(),now=Date.now(),out=[],inPlan=_planLibIds();
+  const p=getPlan(),now=Date.now(),out=[],inPlan=_planLibIds();let nAdd=0; // (C4) las series de «Subir un poco», con los mismos topes
   dayKeys(p).forEach(k=>(p[k].ex||[]).forEach(e=>{const ex=routineEx(e);if(!ex||ex.cardio||out.length>=6||out.some(o=>o.exId===ex.id))return;
     const L=exLib(ex);if(L&&L.pat==='bal')return;
     const base={basis:'cycle',prio:1,ic:'📈',tag:'Subir un poco',exId:ex.id,dayKey:k,createdAt:now},s=_baseSets(ex);
-    if(isCompoundEx(ex)&&s<4){out.push(Object.assign({},base,{id:'up_'+ex.id,type:'add_set',sev:-s,title:`${ex.n}: pasa a ${s+1} series`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,
+    if(isCompoundEx(ex)&&s<EX_SETS_MAX){if(_addedThisCycle()+nAdd>=ADD_PER_CYCLE||!_volGrowthOk(nAdd)||_sesCapFull(ex,k))return;nAdd++;
+      out.push(Object.assign({},base,{id:'up_'+ex.id,type:'add_set',sev:-s,title:`${ex.n}: pasa a ${s+1} series`,diff:`${s}×${_tgtShort(ex)} → ${s+1}×${_tgtShort(ex)}`,
       short:`pasar a ${s+1} series`,description:`Has elegido subir un poco: una serie más en «${ex.n}», sin llegar al límite.`}));return;}
     const up=L&&L.up?LIB_BY_ID.get(L.up):null;
     if(up&&['bw','r','t'].includes(L.lt)&&!inPlan.has(up.id)&&canDoHere(up,k))out.push(Object.assign({},base,{id:'upv_'+ex.id,type:'swap',sev:0,libExId:up.id,
@@ -20656,7 +20843,7 @@ function coach_weekRange(offsetWeeks){
 function coach_weekStats(offsetWeeks){
   const r=coach_weekRange(offsetWeeks);
   const sessions=S.sessions.filter(s=>s.ts>=r.start&&s.ts<=r.end);
-  // Volumen total: suma de (peso × series completadas) en esa semana
+  // Volumen total: kilos movidos en esa semana (peso × repeticiones de cada serie; C13)
   // Match preciso: registro de fuerza cuyo ts cae dentro de ±2h de la sesión (evita colisiones del mismo día con otra rutina)
   let totalVolume=0,avgRpe=0,rpeCount=0;
   // (E1a) Los registros de cada sesión se buscan en todo tu historial, no en los ejercicios de la rutina de ahora: al
@@ -20673,7 +20860,10 @@ function coach_weekStats(offsetWeeks){
         if(diff<7200000&&diff<bestDiff){best=rec;bestDiff=diff;}
       }
       if(best){
-        totalVolume+=(best.v||0)*(best.setsDone||1);
+        // (C13) kilos movidos: peso × repeticiones de cada serie (antes, peso × series: pasar de 12 a 8 repeticiones con más peso
+        // salía como «más volumen»). Los registros sin series, con sus reps; sin reps apuntadas (antiguos, o por tiempo), 10 por serie
+        {const ss=Array.isArray(best.sets)?best.sets.filter(x=>x&&+x.w>0&&+x.r>0):[];
+          totalVolume+=ss.length?ss.reduce((t,x)=>t+(+x.w)*(+x.r),0):(+best.v||0)*(parseInt(best.setsDone)||1)*(parseInt(best.r)>0?parseInt(best.r):10);}
         if(best.rpe&&(+best.v>0||!best.lt)){avgRpe+=best.rpe;rpeCount++;}
       }
     });
@@ -20831,8 +21021,8 @@ function coach_bodyweightPerformanceInsight(){
     return{
       type:'good',
       ic:'🎯',
-      title:'Recomposición corporal',
-      description:`Has bajado ${Math.abs(bwDelta).toFixed(1)} kg de peso pero mantienes o subes fuerza en ejercicios compuestos. Esto es exactamente lo que buscas: estás perdiendo grasa conservando músculo. Sigue así.`,
+      title:'Bajas de peso y mantienes la fuerza',
+      description:`Has bajado ${Math.abs(bwDelta).toFixed(1)} kg y mantienes o subes la fuerza en tus ejercicios multiarticulares: buena señal de que conservas músculo. Sigue así.`,
       bw:bwTxt
     };
   }
@@ -20849,8 +21039,8 @@ function coach_bodyweightPerformanceInsight(){
     return{
       type:'info',
       ic:'💪',
-      title:'Fase de volumen efectiva',
-      description:`Has ganado ${bwDelta.toFixed(1)} kg y la fuerza sube proporcionalmente. Buena ganancia. Si tu objetivo es otro, lo que comes es lo que más influye: para eso, un dietista-nutricionista.`,
+      title:'Subes de peso y de fuerza',
+      description:`Has ganado ${bwDelta.toFixed(1)} kg y tu fuerza sube. Si tu objetivo es otro, lo que comes es lo que más influye: para eso, un dietista-nutricionista.`,
       bw:bwTxt
     };
   }
@@ -20867,8 +21057,8 @@ function coach_bodyweightPerformanceInsight(){
     return{
       type:'good',
       ic:'⚡',
-      title:'Recomposición lenta',
-      description:`Tu peso se mantiene pero la fuerza sube. Estás cambiando músculo por grasa silenciosamente. La báscula no es el mejor indicador en esta fase — fíate del espejo y la fuerza.`,
+      title:'Peso estable y más fuerza',
+      description:`Tu peso se mantiene y tu fuerza sube: buena señal. La báscula sola no dice si es músculo o grasa.`,
       bw:bwTxt
     };
   }
@@ -21072,7 +21262,7 @@ function renderCoach(){
     </div>
     <div class="metric-box">
       <div class="ml">Peso corporal</div>
-      <div class="mv" style="color:${weight.trend==='insufficient'?'var(--text3)':parseFloat(weight.change)<=0?'var(--green)':'var(--red)'}">${weight.trend==='insufficient'?'—':kgSign(weight.change)}</div>
+      <div class="mv" style="color:${weight.trend==='insufficient'?'var(--text3)':parseFloat(weight.changeAll)<=0?'var(--green)':'var(--red)'}">${weight.trend==='insufficient'?'—':kgSign(weight.changeAll)}</div>
       <div class="md">kg ${weight.trend==='insufficient'?'sin datos':'desde el inicio'}</div>
     </div>
   </div>`;
@@ -21133,7 +21323,7 @@ function renderCoach(){
   ${coachPlanCardHtml()}
 
   <div class="sh cfold-sh">Más detalle</div>
-  ${cfoldHtml('ciclo','Tu ciclo',`${plural(cycle.sessions.length,'sesión','sesiones')} · progresan ${progressing}/${withData||'—'}`,cicloHtml)}
+  ${cfoldHtml('ciclo','Tu ciclo',`${plural(cycle.sessions.length,'sesión','sesiones')} · progresan ${progressing}/${withData||'—'}`,cicloHtml+coachLevelHtml())}
   ${cfoldHtml('fat',_rpeOn()?'Fatiga y esfuerzo':'Fatiga',fat.score==null?'sin datos':`${fat.score} · ${esc(fat.level||'')}`,fatigueCardHtml(an))}
   ${cfoldHtml('ana','Análisis del ciclo',insights.length?plural(insights.length,'observación','observaciones'):'recopilando datos',anaHtml)}
   ${cfoldHtml('mm','Tus músculos',mmK==='7d'?'últimos 7 días':mmK==='cycle'?'este ciclo':'4 semanas',mmCoachCardHtml())}
@@ -21666,7 +21856,7 @@ function getLastW(exId){
 //  · Doble progresión en un rango de reps (repRange): mismo peso y +1 rep hasta llegar al tope en todas las series;
 //    entonces sube el salto de tu equipo y vuelve al mínimo del rango.
 //  · RPE medio de la última sesión (1-3, el mismo corte que la etiqueta 😌/💪/🥵): todo fácil → salto doble (si cabe
-//    en el tope del 10 %) o +2 reps; al límite → mismo peso con un objetivo de reps (nunca sube).
+//    en el tope del 10 %) o +2 reps; al límite en TODAS las series y sin reps de sobra → se repite una vez y luego se sube (C1, _limCase).
 //  · Dos sesiones seguidas con el mismo peso claramente por debajo del rango → baja un 5-10 % (al menos un salto).
 //  · Saltos según el equipo (loadStepFor: Ajustes, o el que ya usas en ese ejercicio, o el de su tipo de equipo).
 //    Tope del 10 % por salto: si hasta el salto más pequeño lo supera (1 kg sobre 8.5 kg), antes suma hasta 2 reps
@@ -21713,7 +21903,7 @@ function loadEqClass(ex){
 const LOAD_SNAP=[0.5,1,1.25,2,2.5,5],HIST_SNAP={kb:LOAD_EQ.kb.opts,disco:LOAD_EQ.disco.opts};
 function _histStep(exId,cls){
   const SN=HIST_SNAP[cls]||LOAD_SNAP;
-  const a=(Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&!r.dl&&+r.v>0&&isFinite(+r.v)).slice(-12);
+  const a=_coachRecs(exId,true).filter(r=>r&&!r.dl&&+r.v>0&&isFinite(+r.v)).slice(-12); // (C14)
   const cnt={};
   let top=a.length?+a[0].v:0;
   for(let i=1;i<a.length;i++){
@@ -21796,7 +21986,7 @@ function coach_prescribe(exId,opts){
   if(!ex||ex.cardio)return null;
   const lt=exLT(ex);if(lt==='c')return null;
   if(lt==='w')return _presKg(exId,ex,opts);
-  const all=(Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&typeof r==='object');
+  const all=_coachRecs(exId,true,ex).filter(r=>r&&typeof r==='object'); // (C14)
   if(opts.extra)all.push(opts.extra);
   const real=all.filter(r=>!r.dl),d=real.length?real:all;
   if(!d.length)return null;
@@ -21805,6 +21995,9 @@ function coach_prescribe(exId,opts){
 }
 // Con pesas fijas (kettlebell) un salto de más del 50 % no se da: antes, la variante más difícil
 const KB_MAX=0.5;
+// (C10) Con objetivo «fácil», un salto de más de un 7,5 % del peso pide antes 2 repeticiones por encima del rango (2,5 kg por
+// debajo de 33 kg; 1 kg por debajo de 13). Con un 5 % frenaba casi todo lo que hay por debajo de 50 kg sin cambiar apenas el resultado.
+const LOAD_FACIL_STEP=0.075;
 // Reps con las que empezar tras un salto de pesa fija: las que dan el mismo 1RM estimado con el peso nuevo (Epley), entre
 // loE y lo (16 kg × 14 → 20 kg × 6)
 function _kbReps(w,r,step,lo,loE){
@@ -21830,7 +22023,7 @@ function _upThisWeek(d){for(let i=d.length-1;i>0;i--){if(+d[i].v>+d[i-1].v+1e-9)
 // 8-26 → −20 % (y desde ahí se juzga contra los registros nuevos); más de 26 → sin peso propuesto («Primera vez tras el parón»).
 // La rutina generada lo adelanta a quien dijo que volvía de un parón (planMeta.vuelta), con los registros de antes de ella.
 function _presGap(exId){
-  const a=(_isPlainObj(S.strength)&&Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&typeof r==='object'&&!r.dl&&+r.ts>0);
+  const a=_coachRecs(exId,false).filter(r=>r&&typeof r==='object'&&!r.dl&&+r.ts>0); // (C14) el parón, sobre el conjunto
   const last=a[a.length-1];if(!last)return null;
   const days=(Date.now()-last.ts)/86400000,pm=_isPlainObj(S.planMeta)?S.planMeta:null,pv=pm&&pm.vuelta&&last.ts<pm.ts?pm.vuelta:null;
   return{days,pv,retake:days>182||pv==='recalibrar',cut:days>182?0:(days>56||pv==='menos20')?0.2:days>=LOAD_GAP_DAYS?0.1:0};
@@ -21843,10 +22036,30 @@ function _maxLoadOf(ex){
   const P=S.places[dk?placeOfDay(dk):(S.places.main||'g')];
   return P&&+P.dbMax>0&&+P.dbMax<99?+P.dbMax:null;
 }
+// (C1) «Al límite» en lo alto del rango ya no frena la subida sin fin (antes: «repítelo hasta que salga justo», aunque sobraran
+// repeticiones; quien entrena siempre al fallo no subía nunca). Solo se repite, y una sola vez ('hold'), si TODAS las series fueron al
+// límite, no sobran 2 o más repeticiones sobre el tope y la sesión anterior con este peso no estaba ya en el tope. Si no, se sube un
+// salto (nunca el doble): 'sobran' (2+ repeticiones por encima del tope) · 'repetido' (ya lo repetiste) · 'ultimas' (solo costaron
+// las últimas series, lo normal). Los registros sin series (antiguos) cuentan como «todas al límite». Con objetivo «fácil» (65 o más,
+// rutina prudente, empezar de cero) no cambia nada: «al límite» sigue bajando un salto o repitiendo.
+function _limCase(d,last,w,r,top){
+  if(r>=top+2)return'sobran';
+  const ss=Array.isArray(last.sets)?last.sets.filter(x=>x&&x.rpe>=1&&x.rpe<=3):[];
+  if(ss.length&&!ss.every(x=>x.rpe===3))return'ultimas';
+  const p=d.length>1?d[d.length-2]:null;
+  return p&&Math.abs((+p.v||0)-w)<0.01&&_recReps(p)>=top?'repetido':'hold';
+}
+const LIM_TXT={sobran:', y te sobran repeticiones',repetido:' otra vez: toca subir',ultimas:' en las últimas series'};
+// (C2) Lo que hiciste, como fue: «3×12» si todas las series con el peso de referencia salieron iguales; si no, «12·12·10» (antes el
+// motivo decía «3×10», las más bajas, y no reconocías la sesión)
+function _didTxt(rec,sx,r){
+  const v=+rec.v||0,a=Array.isArray(rec.sets)?rec.sets.map(x=>x&&Math.abs((+x.w||0)-v)<0.01?_setNumR(x.r):null).filter(x=>x!=null):[];
+  return a.length>1&&a.length===sx&&a.some(x=>x!==a[0])?a.join('·'):`${sx}×${r}`;
+}
 function _presKg(exId,ex,opts){
   const rr=repRange(ex);
   if(!rr)return null;
-  const src=(Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&+r.v>0&&isFinite(+r.v));
+  const src=_coachRecs(exId,true,ex).filter(r=>r&&+r.v>0&&isFinite(+r.v)); // (C14)
   if(opts.extra)src.push(opts.extra);
   if(!src.length)return null;
   const real=src.filter(r=>!r.dl),d=real.length?real:src;
@@ -21868,7 +22081,7 @@ function _presKg(exId,ex,opts){
   const sdj=sdTop!=null?sdTop:sd;
   const setsOk=sdj==null||!(sdj>=0)||sdj>=Math.min(lp.s,baseSets);
   const sx=sd>0?sd:lp.s; // «3×12»
-  const did=r!=null?`${sx}×${r}`:'';
+  const did=r!=null?_didTxt(last,sx,r):''; // (C2)
   const rpeT=rc?' '+RPE_TXT[rc]:'';
   const tr=targetRepsNum(ex),scheme=`${baseSets}×${tr!=null?tr:lo+'-'+hi}`; // «4×8» (solo números)
   const P={exId,eq:cls,step,stepSrc:ls.src,lo,hi,sets:Math.max(1,parseInt(ex.s)||baseSets),last:w,lastR:r,lastRpe:rc,lastSets:sd,lastD:last.d||'',lastTs:last.ts||null};
@@ -21937,8 +22150,10 @@ function _presKg(exId,ex,opts){
   if(bigJ){
     if(r>=hiK){
       if(setsUp)return out('keep',w,hiK,`ahora son ${baseSets} series; complétalas con este peso y luego subes`);
-      const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}`;
-      if(rc===3)return out('keep',w,hiK,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+      const limK=rc===3?(_effortObj()==='facil'?'facil':_limCase(d,last,w,r,hiK)):null; // (C1)
+      const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}${LIM_TXT[limK]||''}`;
+      if(limK==='facil')return out('keep',w,hiK,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+      if(limK==='hold')return out('keep',w,hiK,`${today?'hoy ':''}${did} al límite en todas las series; repítelo una vez más y, si vuelve a salir, subes`);
       const gapD=last.ts?Math.floor((Date.now()-last.ts)/86400000):0;
       if(gapD>=LOAD_GAP_DAYS)return out('keep',w,hiK,`hace ${plural(Math.floor(gapD/7),'semana')} que no lo haces: repite antes de subir`);
       const pct=Math.round(step/w*100);
@@ -21958,19 +22173,23 @@ function _presKg(exId,ex,opts){
   if(r>=hi){
     // Serie nueva en el plan (Añadir serie / editor): primero todas las series con este peso, luego se sube
     if(setsUp)return out('keep',w,hi,`ahora son ${baseSets} series; complétalas con este peso y luego subes`);
-    const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}`;
-    const eo=_effortObj();
+    const eo=_effortObj(),lim=rc===3&&eo!=='facil'?_limCase(d,last,w,r,hi):null; // (C1)
+    const repsTxt=`${today?'hoy ':''}${did} ${rc?RPE_TXT[rc]:'completas'}${LIM_TXT[lim]||''}`;
     if(rc===3&&eo==='facil'&&w-step>0)return out('down',w-step,lo,`${today?'hoy ':''}${did} al límite: un salto menos, tu rutina va con margen`);
-    if(rc===3)return out('keep',w,hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+    if(rc===3&&eo==='facil')return out('keep',w,hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+    if(lim==='hold')return out('keep',w,hi,`${today?'hoy ':''}${did} al límite en todas las series; repítelo una vez más y, si vuelve a salir, subes`);
     if(eo==='facil'&&rc===2)return out('keep',w,hi,`${repsTxt}: tu objetivo es que salga «fácil»; repite con este peso`);
     // (M2b) Prudente y con el esfuerzo apagado en Ajustes: sin saber si te sobraba, el tope dos sesiones seguidas con este peso
     if(eo==='facil'&&!_rpeOn()&&!_topTwice(d,ex,w,hi))return out('keep',w,hi,`${repsTxt}: primera vez en el tope con ${kgTxt(w)} kg; repítelo otra sesión y, si sale igual, subes`);
     if(eo==='facil'&&_upThisWeek(d))return out('keep',w,hi,`${repsTxt}; ya subiste esta semana: como mucho una subida por semana`);
+    // (C10) Con objetivo «fácil» y un salto grande para ese peso (más de un 7,5 %: 2,5 kg sobre 27,5), antes de subir se llega a 2
+    // repeticiones por encima del rango. Sin esto, 12 «fáciles» → +9 % → sale al límite → un salto menos → vuelta a subir, sin avanzar.
+    if(eo==='facil'&&step>w*LOAD_FACIL_STEP+1e-9&&r<hi+2)return out('reps',w,r+1,`${repsTxt}; +${kgTxt(step)} kg sería un ${Math.round(step/w*100)} % más: antes llega a ${hi+2} repeticiones`);
     // Pausa larga: repetir antes de subir
     const gapD=last.ts?Math.floor((Date.now()-last.ts)/86400000):0;
     if(gapD>=LOAD_GAP_DAYS)return out('keep',w,hi,`hace ${plural(Math.floor(gapD/7),'semana')} que no lo haces: repite antes de subir`);
     // Salto: doble si fue fácil (o te sobraron 3+ reps), sin pasar del 10 %
-    let k=eo!=='facil'&&(rc===1||r>=hi+3)?2:1; // (E6) con «fácil» de objetivo, nunca el salto doble
+    let k=eo!=='facil'&&rc!==3&&(rc===1||r>=hi+3)?2:1; // (E6) con «fácil» de objetivo, nunca el salto doble; (C1) ni tras una sesión al límite
     while(k>1&&k*step>w*LOAD_CAP+1e-9)k--;
     // Lastre de peso corporal (chaleco, mochila, un disco): el % sobre el lastre no dice nada (de 2.5 a 5 kg es un 100 %
     // más de lastre y muy poco más de carga total): un salto siempre que no pase del lastre que ya llevas (2.5 → 5 → 7.5)
@@ -22065,7 +22284,9 @@ function _presReps(exId,ex,lt,all,opts){
     return out('keep',v,`completa las ${B.baseSets} series antes de subir; ${when} hiciste ${B.sd}${B.lp.s!==B.baseSets?' de '+B.lp.s:''}`,v>r?`Busca ${v} reps`:'',null,true);}
   if(r>=hi){
     if(B.setsUp)return out('keep',hi,`ahora son ${B.baseSets} series; complétalas y luego subes`);
-    if(rc===3)return out('keep',hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+    {const lim=rc===3?(_effortObj()==='facil'?'facil':_limCase(d,last,0,r,hi)):null; // (C1) también sin kilos
+      if(lim==='facil')return out('keep',hi,`${today?'hoy ':''}${did} al límite; repítelo hasta que salga «justo» y entonces subes`);
+      if(lim==='hold')return out('keep',hi,`${today?'hoy ':''}${did} al límite en todas las series; repítelo una vez más antes de pasar a algo más difícil`);}
     if(B.gap>=LOAD_GAP_DAYS)return out('keep',hi,`hace ${plural(Math.floor(B.gap/7),'semana')} que no lo haces: repite antes de subir`);
     const done=`${B.sx}×${hi} completas`,L=exLib(ex);
     if(L&&(L.mat==='banda'||L.mat==='minibanda'))return out('harder',lo,`${done}: banda más dura y vuelve a ${lo} reps`,'Usa una banda más dura',{band:true});
@@ -22289,7 +22510,7 @@ const RPE_COL={1:'var(--green)',2:'var(--amber)',3:'var(--red)'};
 const TGT_LEG_RPE='<div class="tgt-leg"><span><i style="background:var(--green)"></i>fácil</span><span><i style="background:var(--amber)"></i>justo</span><span><i style="background:var(--red)"></i>al límite</span></div>';
 function presWhyHtml(ex,p){
   if(!_presIsKg(p))return _presWhyNoKg(ex,p);
-  const recs=(Array.isArray(S.strength[ex.id])?S.strength[ex.id]:[]).filter(r=>r&&+r.v>0&&!r.dl).slice(-5);
+  const recs=_coachRecs(ex.id,true,ex).filter(r=>r&&+r.v>0&&!r.dl).slice(-5); // (C14)
   let svg='';
   if(recs.length){
     const n=recs.length,W=300,vs=recs.map(r=>+r.v),mn=Math.min(...vs),mx=Math.max(...vs);
@@ -22310,14 +22531,15 @@ function presWhyHtml(ex,p){
       <li>Rango <b>${p.lo}-${p.hi} reps</b>: mismo peso y una rep más cada vez. Al hacer ${p.hi} en todas las series, sube un salto y vuelve a ${p.lo}.</li>
       <li>Salto: <b>${esc(src)}</b>. Sube como mucho un 10 % (doble si ${on?'fue fácil':'te sobran 3 reps o más'}). Con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.</li>
       ${!on&&_effortObj()==='facil'?`<li>Tu rutina va con margen: subes solo tras llegar a ${p.hi} reps en todas las series dos sesiones seguidas con el mismo peso.</li>`:''}
-      <li>${on?'«Al límite» no sube peso. ':''}Dos sesiones seguidas por debajo de ${p.lo} reps: baja un 5-10 %, al menos un salto.</li>${p.hiK?`
+      ${_effortObj()==='facil'&&p.step>p.last*LOAD_FACIL_STEP+1e-9?`<li>Tu rutina va con margen y +${esc(st)} kg es un salto grande para este peso: antes de subir llegas a ${p.hi+2} reps.</li>`:''}
+      <li>${on?(_effortObj()==='facil'?'«Al límite» no sube peso: un salto menos. ':'Si todas las series salen «al límite» y sin repeticiones de sobra, repite una vez antes de subir. '):''}Dos sesiones seguidas por debajo de ${p.lo} reps: baja un 5-10 %, al menos un salto.</li>${p.hiK?`
       <li>Pesas fijas: +${esc(st)} kg es un ${Math.round(p.step/Math.max(1,p.last)*100)} %. Antes de saltar llegas a ${p.hiK} reps; tras el salto empiezas con menos reps y vuelves a subir.</li>`:''}
     </ul>
     ${LOAD_EQ[p.eq]&&p.weight>0?'<button type="button" class="tgt-set" onclick="openLoadSettings()">Cambiar saltos de peso ›</button>':''}`;
 }
 // «¿Por qué?» de un objetivo sin kilos: tus 5 últimas sesiones (su medida y esfuerzo) y la regla
 function _presWhyNoKg(ex,p){
-  const lt=p.lt,wm=p.last>0,recs=(Array.isArray(S.strength[ex.id])?S.strength[ex.id]:[]).filter(r=>r&&!r.dl&&(wm?+r.v>0:!(+r.v>0))&&_recMetric(r,lt)!=null).slice(-5);
+  const lt=p.lt,wm=p.last>0,recs=_coachRecs(ex.id,true,ex).filter(r=>r&&!r.dl&&(wm?+r.v>0:!(+r.v>0))&&_recMetric(r,lt)!=null).slice(-5);
   let svg='';
   if(recs.length){
     const n=recs.length,W=300,vs=recs.map(r=>_recMetric(r,lt)),mn=Math.min(...vs),mx=Math.max(...vs);
@@ -22337,7 +22559,7 @@ function _presWhyNoKg(ex,p){
   return`${svg}${on?TGT_LEG_RPE:''}
     <ul class="tgt-rules">
       <li>${rule}</li>
-      <li>${on?'Al límite no sube. ':''}Dos sesiones claramente por debajo: variante más fácil.</li>
+      <li>${on?(_effortObj()==='facil'?'Al límite no sube. ':'Con todas las series al límite, repite una vez antes de subir. '):''}Dos sesiones claramente por debajo: variante más fácil.</li>
     </ul>
     ${LOAD_EQ[p.eq]&&p.weight>0?'<button type="button" class="tgt-set" onclick="openLoadSettings()">Cambiar saltos de peso ›</button>':''}`;
 }
@@ -25198,7 +25420,7 @@ function progStatusMap(list){
   return out;
 }
 // El porqué del estado, con las palabras del Coach («4+ sesiones sin mejorar», «1RM est. +6.2 %»…). Estancado: el Coach
-// mira el tramo final más corto que ya lo demuestra (≥ 4 sesiones en ≥ 3 semanas), así que son «N+» (pueden ser más).
+// mira el tramo final más corto que ya lo demuestra (≥ 4 sesiones en ≥ 3 semanas; más según tu nivel, C3), así que son «N+» (pueden ser más).
 // Sin paréntesis (van dentro del aria-label de la fila, que ya lleva comas) y con espacio duro antes de «%».
 function _plWhy(k,it,pr){
   const p=it.p,pct=v=>(v>=0?'+':'−')+Math.abs(v).toFixed(Math.abs(v)<10?1:0)+NB+'%';
@@ -25669,7 +25891,7 @@ function progJump(id){
 // Guía de progresión: las cuatro reglas, en una hoja de ayuda (antes ocupaban el final de la pantalla)
 function progGuideHtml(){
   const R=[['var(--green)','↑','¿Llegaste al tope del rango en todas las series?','Sube un salto de tu equipo (2.5 kg en Smith, 1 kg en polea o mancuerna…) y vuelve al mínimo del rango. '+(_rpeOn()?'Si fue fácil':'Si te sobran 3 reps o más')+', puede ser doble. Como mucho un 10 %: con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.'],
-    _rpeOn()?['var(--blue)','+','¿Dentro del rango, o al límite?','Mismo peso y una rep más la próxima vez. «Al límite» nunca sube peso.']:['var(--blue)','+','¿Dentro del rango?','Mismo peso y una rep más la próxima vez.'], // (M2)
+    _rpeOn()?['var(--blue)','+','¿Dentro del rango, o al límite?','Mismo peso y una rep más la próxima vez. '+(_effortObj()==='facil'?'«Al límite» nunca sube peso.':'Si llegas al tope con todas las series «al límite», repite una vez antes de subir.')]:['var(--blue)','+','¿Dentro del rango?','Mismo peso y una rep más la próxima vez.'], // (M2)
     ['var(--amber)','↓','¿Dos sesiones seguidas por debajo del rango?','Baja un 5–10 % (al menos un salto) y vuelve a subir desde ahí. No pasa nada.'],
     ['var(--blue)','→','La regla de oro',`${getWeeklyTarget()} día${getWeeklyTarget()!==1?'s':''}/semana durante meses = resultados reales. La constancia lo es todo.`],
   ];
@@ -28523,6 +28745,7 @@ function importData(o){o=o||{}; // (E7) o.fromOnboarding: desde la bienvenida
             migrated.keepAwake=_kaImp;
             migrated.restOn=_restImp;
             migrated.rpeOn=_rpeImp;
+            migrated.coachLevel=_sanitizeCoachLevel(data.coachLevel); // (C3) tu nivel para el Coach, si la copia lo trae
             // Temporizador: nunca se importa ni se hereda (el del backup es de otro momento; el actual, de otros datos)
             migrated.restTimer=null;
             // Sanear nombres y campos de texto del plan personalizado (defensa XSS). Sin las claves del catálogo (se leen

@@ -357,6 +357,7 @@ function importData(o){o=o||{}; // (E7) o.fromOnboarding: desde la bienvenida
             migrated.keepAwake=_kaImp;
             migrated.restOn=_restImp;
             migrated.rpeOn=_rpeImp;
+            migrated.coachLevel=_sanitizeCoachLevel(data.coachLevel); // (C3) tu nivel para el Coach, si la copia lo trae
             // Temporizador: nunca se importa ni se hereda (el del backup es de otro momento; el actual, de otros datos)
             migrated.restTimer=null;
             // Sanear nombres y campos de texto del plan personalizado (defensa XSS). Sin las claves del catálogo (se leen

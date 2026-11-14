@@ -1067,6 +1067,8 @@ if(typeof S.keepAwake!=='boolean')S.keepAwake=true;
 if(typeof S.restOn!=='boolean')S.restOn=true;
 // (M2) Esfuerzo de cada serie (Ajustes → «Esfuerzo de cada serie»): igual, encendido salvo que lo apagues
 if(typeof S.rpeOn!=='boolean')S.rpeOn=true;
+// (C3) Tu nivel para el Coach, si lo elegiste: {l:'P'|'I'|'A', ts}; cualquier otra cosa, sin elegir (se deduce)
+S.coachLevel=_isPlainObj(S.coachLevel)&&['P','I','A'].includes(S.coachLevel.l)&&typeof S.coachLevel.ts==='number'&&isFinite(S.coachLevel.ts)&&S.coachLevel.ts>0?{l:S.coachLevel.l,ts:S.coachLevel.ts}:null;
 // «Solo hoy» (v20): sustituciones con forma válida (las caducadas vuelven en el primer render, subTick)
 _sanitizePlanSubs(S.currentPlan);
 
