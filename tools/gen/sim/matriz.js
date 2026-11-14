@@ -23,6 +23,17 @@ const PLAN = arg('plan') === 'rota';
 // sale de todo, también semanas sin pierna o sin tirón); el generador la aplica solo a quien puede elegir y si queda equilibrada
 const ROLES = arg('roles') === 'azar', TIPOS8 = ['torso', 'pierna', 'empuje', 'tiron', 'completo', 'pecho_triceps', 'espalda_biceps', 'hombros_brazos'];
 const conRoles = pr => { if (!ROLES || !(pr.a.days >= 3)) return; pr.a.roles = Array.from({ length: pr.a.days }, (_, i) => TIPOS8[(pr.id * 7 + i * (3 + pr.id % 4) + (pr.id >> 3)) % 8]); };
+// --sesion (v15, tipo de sesión): cada perfil elige el tipo de sesión que corresponde a sus minutos (G.sesionDe) en vez de decirlos. Las
+// invariantes son las mismas (los minutos pasan a ser el presupuesto interno del tipo) más las del tipo (seguridad.js); y los perfiles de
+// «Completa» se generan también con «Lo esencial» y «A fondo» para comprobar el orden: ejercicios por día y minutos, de menos a más.
+// El orden se exige entre tipos que salen con el mismo reparto; si el material o una molestia cambian el reparto de un tipo a otro (otro
+// número de entrenos), los días no se pueden comparar uno a uno: se cuenta aparte (sesion_orden_otro_reparto), sin ser un fallo
+const SES = process.argv.includes('--sesion');
+const conSesion = pr => { if (SES) pr.a.sesion = G.sesionDe(pr.a.min); };
+const ordenSesion = (pr, inp, res, f) => { if (!SES || inp.sesion !== 'completa') return;
+  const de = s => { const m = G.genRoutine(G.desdeRespuestas(Object.assign({}, pr.a, { sesion: s }))).meta; return Object.assign({ split: m.split }, m.sesion); }, e = de('esencial'), c = Object.assign({ split: res.meta.split }, res.meta.sesion), fo = de('fondo'), med = s => s.ej.reduce((x, y) => x + y, 0) / s.ej.length;
+  const mal = (a, b) => !(med(a) <= med(b) + 1e-9 && a.min <= b.min), txt = `${e.ej.join('/')} ≈${e.min} · ${c.ej.join('/')} ≈${c.min} · ${fo.ej.join('/')} ≈${fo.min}`;
+  if ((e.split === c.split && mal(e, c)) || (c.split === fo.split && mal(c, fo))) f.sesion_orden = txt; else if (mal(e, c) || mal(c, fo)) f._otroReparto = txt; };
 const planStat = { pedidos: 0, salen: 0, por: {} };
 const conPlan = pr => { if (!PLAN) return; const o = G.planes(G.desdeRespuestas(pr.a)).otros; if (o.length) pr.a.plan = o[pr.id % o.length]; };
 const cuentaPlan = (pr, res) => { if (!pr.a.plan) return; const p = planStat.por[pr.a.plan] = planStat.por[pr.a.plan] || { pedidos: 0, salen: 0 }; planStat.pedidos++; p.pedidos++; if (res.meta.split === pr.a.plan) { planStat.salen++; p.salen++; } };
@@ -101,7 +112,7 @@ const HUECO_MUS = { SQ: ['quads'], LU: ['quads', 'glutes'], HI: ['hams', 'glutes
 const musAjeno = (L, slot) => { const ms = HUECO_MUS[slot]; if (!ms) return false; const thr = slot === 'CO' ? 0.6 : 0.8; return !ms.some(m => (L.mus[m] || 0) >= thr); };
 const ZL = { rodilla: 'rodilla', hombro: 'hombro', lumbar: 'espalda baja', muneca: 'muñeca o codo', cadera: 'cadera' };
 const NV = +(arg('n') || 4);
-const TAG = (OPT.pesos || 'propuesta') + (OPT.tipo ? '-tipo_' + OPT.tipo : '') + (OPT.pases ? '-pases_' + OPT.pases : '') + (arg('basic') ? '-basic_' + arg('basic') : '') + (OPT.reparto === 'dias' ? '-dias' : '') + (VER ? '-v' + VER : '');
+const TAG = (OPT.pesos || 'propuesta') + (OPT.tipo ? '-tipo_' + OPT.tipo : '') + (OPT.pases ? '-pases_' + OPT.pases : '') + (arg('basic') ? '-basic_' + arg('basic') : '') + (OPT.reparto === 'dias' ? '-dias' : '') + (process.argv.includes('--sesion') ? '-sesion' : '') + (VER ? '-v' + VER : '');
 // medición 3: etiqueta std (menus.js) y levantamientos objetivo
 const MN = require('./menus.js')(K);
 const LIFT_ID = { SQ: 'lib_back_squat', PH: 'lib_bench_press', HI: 'lib_deadlift', PV: 'lib_ohp_bb' };
@@ -196,7 +207,8 @@ function analizar(res, inp, prof) {
   // (medición 4: con 15 min y calentamiento obligatorio —65+ o prudente, C-17— la regla explícita es 2 ejercicios: `meta.corto`)
   days.forEach(d => { const n = d.rows.filter(r => r.kind === 'str').length; if (n < 3) { if (res.meta.corto && n >= 2) bump(q, 'menos3_c17', d.letra + ':' + n); else bump(f, 'menos3', d.letra + ':' + n); } if (n > 8) bump(f, 'mas8', d.letra + ':' + n); });
   // tiempo (se acepta +5 %, §E.11) · medición 4: tiempo_sobre_100 = algún día por encima de lo pedido, aunque sea dentro del +5 %
-  days.forEach(d => { if (d.minExact > inp.min * 1.05 + 1e-9) bump(f, 'tiempo', d.letra + ':' + Math.round(d.minExact) + '>' + inp.min); else if (d.minExact > inp.min + 0.5) bump(q, 'tiempo_sobre_100', d.letra + ':' + Math.round(d.minExact * 10) / 10 + '>' + inp.min); });
+  // (v15: el exprés elegido como tipo de sesión promete «15-20 min», no 15 justos)
+  days.forEach(d => { if (d.minExact > (inp.sesion === 'expres' ? 20 : inp.min) * 1.05 + 1e-9) bump(f, 'tiempo', d.letra + ':' + Math.round(d.minExact) + '>' + inp.min); else if (d.minExact > inp.min + 0.5) bump(q, 'tiempo_sobre_100', d.letra + ':' + Math.round(d.minExact * 10) / 10 + '>' + inp.min); });
   // ── volumen (medición 4: cuenta fraccional por patrón y deltoides por cabezas, desde las filas; objetivos de §E.3 revisados) ──
   const OV = objetivosV(inp, P), MAT = materialV(inp, P, res), r1 = x => Math.round(x * 10) / 10;
   const VV = { v: {}, dir: {} }; K.PG.forEach(g => { VV.v[g] = 0; VV.dir[g] = 0; });
@@ -416,11 +428,11 @@ const verUno = (pr, inp, res, f, q) => { console.log(`\n#${pr.id} · ${resumen(p
   for (const d of res.det) { console.log(`  ${d.nombre} [${d.role} · ${d.place}/${d.preset}] ≈ ${d.minExact.toFixed(1)} min`); d.rows.forEach(r => console.log(`     ${(r.lib || '—').padEnd(30)} ${String(r.series || '').padStart(2)} × ${String(r.reps).padEnd(7)} ${r.descanso_s != null ? r.descanso_s + 's' : ''} ${r.slot ? '[' + r.slot + r.prio + (r.pass === 'near' ? '~' : r.oi > 0 ? '*' : '') + ']' : ''} ${r.kind === 'bal' ? r.min + ' min' : ''}`)); } };
 for (const pr of profs) {
   if (SOLO && !SOLO.has(pr.id)) continue;
-  conPlan(pr); conRoles(pr);
+  conSesion(pr); conPlan(pr); conRoles(pr);
   const inp = G.desdeRespuestas(pr.a);
   const a0 = Date.now(); const res = G.genRoutine(inp); agg.ms.push(Date.now() - a0); cuentaPlan(pr, res);
   if (ROLES && pr.a.roles) { planStat.pedidos++; if (res.meta.roles) { planStat.salen++; const z = (res.meta.warn.find(w => w.c === 'semana_sin') || { p: { z: [] } }).p.z.join('+') || 'completa'; planStat.por[z] = (planStat.por[z] || 0) + 1; } }
-  const { f, q, ex } = analizar(res, inp, pr);
+  const { f, q, ex } = analizar(res, inp, pr); ordenSesion(pr, inp, res, f); if (f._otroReparto) { q.sesion_orden_otro_reparto = f._otroReparto; delete f._otroReparto; }
   if (SOLO) verUno(pr, inp, res, f, q);
   agg.n++;
   // medición 2: agregados nuevos y segmentos
@@ -461,10 +473,10 @@ const aggS = { n: 0, f: {}, ej: {}, q: {}, porCaso: {}, det: 0, detN: 0, ms: [] 
 const muestrasS = [];
 if (arg('seg') !== '0') for (const pr of perfilesSeguridad()) {
   if (SOLO && !SOLO.has(pr.id)) continue;
-  conPlan(pr); conRoles(pr);
+  conSesion(pr); conPlan(pr); conRoles(pr);
   const inp = G.desdeRespuestas(pr.a);
   const a0 = Date.now(); const res = G.genRoutine(inp); aggS.ms.push(Date.now() - a0); cuentaPlan(pr, res);
-  const { f, q } = analizar(res, inp, pr);
+  const { f, q } = analizar(res, inp, pr); ordenSesion(pr, inp, res, f); if (f._otroReparto) { q.sesion_orden_otro_reparto = f._otroReparto; delete f._otroReparto; }
   if (SOLO) verUno(pr, inp, res, f, q);
   aggS.n++; const c = aggS.porCaso[pr.especial] = aggS.porCaso[pr.especial] || { perfiles: 0, con_fallo: 0, claves: {} }; c.perfiles++;
   if (Object.keys(f).length) c.con_fallo++;

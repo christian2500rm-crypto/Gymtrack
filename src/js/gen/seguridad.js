@@ -171,6 +171,11 @@ return function (K, G, X) {
     if (textos.some(s => /por tu molestia/.test(s)) && !Object.keys(zs).length && !P.segM && !P.huesos && !P.posparto && !P.prud) bump('texto_no_cuadra', 'molestia sin molestia');
     if (P.cauto && textos.some(s => /sobren 2-3/.test(s))) bump('texto_no_cuadra', 'cauto con 2-3');
     if (textos.some(s => /\d\.\d/.test(s))) bump('texto_no_cuadra', 'punto decimal: ' + textos.find(s => /\d\.\d/.test(s)).slice(0, 50));
+    // v15 (T1, tipo de sesión): con un tipo elegido la persona no dijo minutos: ningún texto habla de «los que dijiste» ni de «los que te
+    // sobran»; y el resumen que pintan las tarjetas (meta.sesion) es el de la rutina que sale (minutos del día más largo, ejercicios por día)
+    if (inp.sesion) { const malo = textos.concat(X.avisos(res, inp)).find(s => /dijiste|Te sobran|\b(Con|En) \d+ minutos\b|sesiones de \d+ minutos|quepa en \d+ min|días de \d+ minutos/.test(s)); if (malo) bump('sesion_texto_minutos', malo.slice(0, 70)); }
+    { const sm = m.sesion, nEj = days.map(d => d.rows.filter(r => r.kind === 'str').length);
+      if (!sm || sm.tipo !== (inp.sesion || null) || sm.min !== Math.round(Math.max(...days.map(d => d.minutos)) / 5) * 5 || sm.ej.join() !== nEj.join()) bump('sesion_resumen', JSON.stringify(sm)); }
     return f;
   };
 };

@@ -161,6 +161,10 @@ const PERSONAS = [
   { key: 'lola', nombre: 'Lola', edad: 41, grupo: 'reparto elegido', motivo: 'P1: empieza de cero y elige empuje, tirón, pierna y cuerpo completo: se le permite, con sus series y su esfuerzo de inicio',
     a: { goal: 'salud', exp: 'cero', days: 4, min: 45, age: '40', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('barrio'), c: null }, plan: 'pplc4' },
     resumen: 'Salud y forma · Empiezo de cero · 4 días, 45 min · Gimnasio de barrio · 40-64 · «Cambiar reparto»: empuje, tirón, pierna y cuerpo completo', esp: null },
+  // v15 (tipo de sesión): la persona elige el tipo de sesión en vez de los minutos
+  { key: 'tina', nombre: 'Tina', edad: 29, grupo: 'tipo de sesión', motivo: 'T1: elige el tipo de sesión («Completa») en vez de los minutos: el tipo fija la receta, y el tiempo se enseña en vez de preguntarse',
+    a: { goal: 'musculo', exp: '6m2a', days: 3, sesion: 'completa', age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null } },
+    resumen: 'Ganar músculo · De 6 meses a 2 años · 3 días, sesión «Completa» · Gimnasio grande', esp: null },
 ];
 
 // ── v7 (paso 4): lo que DEBE y lo que NO DEBE salir, por persona, comprobado en código. R = rutina analizada (mkR). Cada regla: [texto, (R) → bien?, (R) → detalle] ──
@@ -183,6 +187,8 @@ const T = (R, re) => re.test(R.txt);
 // v14 (P1): los días de la semana por su tipo y la regla común de la variante 'recomendado' (y de quien no puede elegir): el plan no se aplica
 const roles = R => Object.values(R.m.tpl).join(',');
 const ELEGIDOS = ['tpt3', 'pplt4', 'pplc4', 'grp4', 'pplet5', 'grp5', 'tptpt5', 'pplg6'];
+// v15 (tipo de sesión): el resumen (meta.sesion) de lo que saldría con cada tipo, para las mismas respuestas
+const TIPOS_SES = R => Object.fromEntries(['expres', 'esencial', 'completa', 'fondo'].map(s => [s, G.genRoutine(Object.assign({}, R.inp, { sesion: s, min: G.SESION[s] })).meta.sesion]));
 const SIN_PLAN = ['El reparto elegido no se aplica aquí (solo vale con un entreno distinto por día y con quien puede elegir)', R => !ELEGIDOS.includes(R.m.split), R => R.m.split];
 const REGLAS = {
   lucia: { debe: [
@@ -472,6 +478,15 @@ Object.assign(REGLAS, {
     ['Sale el reparto elegido (empuje, tirón, pierna y cuerpo completo)', R => R.m.split === 'pplc4', R => R.m.split],
     ['Sigue en modo inicio: 2 series en todo y esfuerzo «Fácil»', R => R.rows.every(r => r.series === 2) && R.m.effort.obj === 'facil', R => R.rows.map(r => r.series).join('')],
     ['A quien empieza no se le ofrece «por músculos»', R => !G.planes(R.inp).otros.some(x => /^grp/.test(x)), R => G.planes(R.inp).otros.join(',')]] },
+  tina: (() => { const reglas = [
+    ['La sesión es «Completa» y su resumen (minutos y ejercicios por día) es el de la rutina', R => R.m.sesion.tipo === 'completa' && R.m.sesion.min === Math.round(Math.max(...R.det.map(d => d.minutos)) / 5) * 5 && R.m.sesion.ej.join() === R.det.map(d => d.rows.filter(r => r.kind === 'str').length).join(), R => JSON.stringify(R.m.sesion)],
+    ['Como mucho 7 ejercicios de fuerza por día (el tope de «Completa»)', R => R.m.sesion.ejMax <= 7 && R.m.sesion.ejMin >= 6, R => R.m.sesion.ej.join('/')],
+    ['Exprés ≤ Lo esencial ≤ Completa ≤ A fondo, en ejercicios y en minutos; «Lo esencial» son 5 ejercicios y «A fondo» llega a 8', R => { const s = TIPOS_SES(R); return s.expres.ejMax <= s.esencial.ejMin && s.esencial.ejMax <= s.completa.ejMin && s.completa.ejMax <= s.fondo.ejMax && s.expres.min <= s.esencial.min && s.esencial.min <= s.completa.min && s.completa.min <= s.fondo.min && s.esencial.ejMax === 5 && s.fondo.ejMax === 8; },
+      R => JSON.stringify(Object.fromEntries(Object.entries(TIPOS_SES(R)).map(([k, s]) => [k, s.ej.join('/') + ' ≈' + s.min])))],
+    ['Ningún texto habla de minutos que la persona no dijo; dice lo que dura', R => !T(R, /dijiste|Te sobran|Con \d+ minutos/) && T(R, /Cada día dura unos \d+ min\.|Los días duran entre \d+ y \d+ min\./)],
+    ['Sin tipo guardado, se deduce de los minutos de antes (T7): 15-20 exprés, 30 lo esencial, 45-60 completa, 75-90 a fondo', () => [15, 20, 30, 45, 60, 75, 90].map(G.sesionDe).join() === 'expres,expres,esencial,completa,completa,fondo,fondo'],
+    ['Sin tipo de sesión, los minutos mandan como siempre (las rutinas de antes no cambian)', R => { const a = Object.assign({}, R.inp, { sesion: null, min: 60 }); const r = G.genRoutine(a); return r.meta.sesion.tipo === null && r.det.every(d => d.minExact <= 60 * 1.05); }]];
+    return { debe: reglas, debeAlt: reglas }; })(),
 });
 function mkR(res, inp, Xx) {
   const P = G.effective(inp);
@@ -549,7 +564,7 @@ function chequeos(res, inp) {
     Object.entries(ses).forEach(([g, v]) => { if (v > 10 + 1e-9) out.push(`V9 ${d.letra}: ${g} ${v} > 10`); });
     if (d.minExact > inp.min * 1.05 + 1e-9) out.push(`minutos ${d.letra}: ${Math.round(d.minExact)} > ${inp.min} × 1,05`);
     const IA = ['I', 'A'].includes(P.level) && !P.cauto;
-    if (IA && inp.min >= 45 && d.minExact < 0.85 * inp.min && d.sobraMotivo !== 'rango') out.push(`minutos ${d.letra}: ${Math.round(d.minExact)} < 85 % de ${inp.min} sin motivo`);
+    if (IA && inp.min >= 45 && !inp.sesion && d.minExact < 0.85 * inp.min && d.sobraMotivo !== 'rango') out.push(`minutos ${d.letra}: ${Math.round(d.minExact)} < 85 % de ${inp.min} sin motivo`);
     if ((P.inicio || (P.mayor && !P.mayorExp)) && d.rows.some(r => r.kind === 'str' && r.series > 2)) out.push(`series ${d.letra}: más de 2 con inicio o 65+`);
     if (P.mayorExp && d.rows.some(r => r.kind === 'str' && r.series > (r.prio === 1 ? 3 : 2))) out.push(`series ${d.letra}: 65+ con experiencia por encima de 3 (principal) o 2 (resto)`); });
   K.PG.forEach(g => { const c = (m.vol[g] || {}).techo; if (c != null && sem[g] > c + 1e-9) out.push(`V8: ${g} ${Math.round(sem[g] * 10) / 10} > ${c}`); });

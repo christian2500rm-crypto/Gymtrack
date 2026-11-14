@@ -7,6 +7,7 @@ module.exports = function (K, G) {
   let mnC = null; const MN_ = () => mnC || (mnC = require('./menus.js')(K));
   const GOAL = { musculo: 'Ganar músculo', fuerza: 'Ganar fuerza', grasa: 'Perder grasa', salud: 'Salud y forma', aguante: 'Aguantar más' };
   const zl = z => ({ rodilla: 'rodilla', hombro: 'hombro', lumbar: 'espalda baja', muneca: 'muñeca o codo', cadera: 'cadera', otra: 'otra zona' })[z] || z;
+  const SES = { expres: 'Exprés', esencial: 'Lo esencial', completa: 'Completa', fondo: 'A fondo' };   // v15 (T1): el tipo de sesión, como lo ve la persona
   const fmtMin = s => s % 60 ? (s >= 60 ? Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' min' : s + ' s') : (s / 60) + ' min';
   const joinY = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1];
   const num = x => String(Math.round(x * 10) / 10).replace('.', ',');   // v9 (J-19): coma decimal
@@ -118,7 +119,7 @@ module.exports = function (K, G) {
     // v5 (D-19): si un press dejó su sitio a un tirón para que tirón:empuje no baje de 1, se dice y no se promete ese levantamiento
     const tc = m.why.find(w => w.c === 'te_cambio');
     if (tc) { const esTiron = ['pull_h', 'pull_v', 'rear'].includes(BY.get(tc.p.a).pat), de = BY.get(tc.p.de).n.toLowerCase(), a = BY.get(tc.p.a).n.toLowerCase();
-      out.push(esTiron ? `Con ${tc.p.min} minutos no caben dos presses y el tirón que equilibra el hombro: en lugar de ${de}, ${a}. Si un día tienes más tiempo, añádelo.`
+      out.push(esTiron ? `${inp.sesion ? `En la sesión «${SES[inp.sesion]}»` : `Con ${tc.p.min} minutos`} no caben dos presses y el tirón que equilibra el hombro: en lugar de ${de}, ${a}. Si un día tienes más tiempo, añádelo.`
         : `Con tu material no hay tirones suficientes para equilibrar otro ejercicio de empuje, que es lo que cuida el hombro: en lugar de ${de}, ${a}.`); }
     if (!tc && m.why.some(w => w.c === 'fuerza_k2') && (['tp2', 'ppl3'].includes(m.split) || (m.split === 'cc2' && m.wd === 3))) out.push(m.wd === 3 ? 'Para ganar fuerza, cada básico se repite a menudo: 2 entrenos que se alternan, y cada levantamiento sale 1,5 veces por semana.' : `Para ganar fuerza, cada básico se repite: con ${m.wd} días, cada levantamiento sale ${num(m.split === 'ppl3' ? 2 * m.wd / 6 : m.wd / 2)} veces por semana.`);   // C-06
     { const cm = m.why.find(w => w.c === 'capMenor'); if (cm) out.push(`Has dicho ${d} días: con 16-17 años, 3 días de pesas bastan para progresar y recuperar${inp.sport !== 'no' ? ' con tu deporte' : ''}; los otros, ${inp.sport !== 'no' ? 'tu deporte o descanso' : 'camina o descansa'}.`); }   // v9 (J-11) · v14 (P12): sin «cámbialo en Cambiar reparto» (la hoja no ofrece quitar este tope)
@@ -216,10 +217,12 @@ module.exports = function (K, G) {
     // v7 (D-22): si el cardio final solo sale de algunos días, se dice de cuáles (antes, «he quitado el cardio final» y, dos líneas más abajo, «10 min de bici al final»)
     const cardioDias = (m.cut || []).filter(c => c.startsWith('cardio_fuera')).map(c => 'ABCDEF'[+c.split(':')[1]]).filter((x, i, a) => a.indexOf(x) === i);
     const quedaCardio = res.det.some(dd => dd.rows.some(r => r.kind === 'cardio'));
-    if (cutC || cutD || cutA) out.push(`Para que quepa en ${inp.min} min he ${joinY([cutD ? `dejado los descansos en ${fmtMin(m.rest.comp)}` : null, cutA ? `quitado ${cutA.p.n === 1 ? 'un accesorio' : cutA.p.n + ' accesorios'}` : null, cutC ? (quedaCardio && cardioDias.length ? `quitado el cardio final ${cardioDias.length === 1 ? 'del día ' + cardioDias[0] : 'de los días ' + joinY(cardioDias)}` : 'quitado el cardio final') : null].filter(Boolean))}.`);
+    if (cutC || cutD || cutA) out.push(`${inp.sesion ? 'Para que la sesión no se alargue,' : `Para que quepa en ${inp.min} min`} he ${joinY([cutD ? `dejado los descansos en ${fmtMin(m.rest.comp)}` : null, cutA ? `quitado ${cutA.p.n === 1 ? 'un accesorio' : cutA.p.n + ' accesorios'}` : null, cutC ? (quedaCardio && cardioDias.length ? `quitado el cardio final ${cardioDias.length === 1 ? 'del día ' + cardioDias[0] : 'de los días ' + joinY(cardioDias)}` : 'quitado el cardio final') : null].filter(Boolean))}.`);
+    // v15 (T1): con tipo de sesión, la persona no dijo minutos: se dice lo que dura, sin «tú dijiste»
+    else if (inp.sesion) { const mn = Math.min(...est); out.push(mx - mn >= 5 ? `Los días duran entre ${Math.round(mn)} y ${Math.round(mx)} min.` : `Cada día dura unos ${Math.round(mx)} min.`); }
     else if (mx <= inp.min * 1.05) { const mn = Math.min(...est); out.push(mx - mn >= 5 ? `Los días duran entre ${Math.round(mn)} y ${Math.round(mx)} min (tú dijiste ${inp.min}).` : `Cabe en unos ${Math.round(mx)} min (tú dijiste ${inp.min}).`); }   // v10 (J-19)
     const sp = m.why.find(w => w.c === 'time_spare');
-    if (sp && sp.p.m >= 10) {
+    if (sp && sp.p.m >= 10 && !inp.sesion) {   // v15 (T1): «te sobran N minutos» solo tiene sentido si la persona dijo cuántos tenía
       // v5 (D-15, D-22): el texto dice el motivo real que da el generador (time_spare.p.motivo); «no hace falta más» solo con el rango lleno
       const mot = sp.p.motivo || (P.cauto || P.level === 'P0' || P.level === 'P' ? 'novato' : 'tope');
       const cu = (sp.p.mx && sp.p.mx - sp.p.m >= 10 ? `entre ${sp.p.m} y ${sp.p.mx} minutos según el día` : `unos ${sp.p.m} minutos`) + (sp.p.dias && sp.p.dias.length < res.det.length ? ` (${sp.p.dias.length === 1 ? 'el día ' + sp.p.dias[0] : 'los días ' + joinY(sp.p.dias)})` : '');   // v10 (J-19): qué días
@@ -231,16 +234,17 @@ module.exports = function (K, G) {
         : mot === 'inicio' ? `Te sobran ${cu}: en las primeras semanas, 2 series y pocos ejercicios bastan; el Coach irá subiendo.${anade}`
         : mot === 'novato' || mot === 'prudente' ? `Te sobran ${cu}: para empezar, con este volumen basta; el Coach irá subiendo.${anade}`
         : `Te sobran ${cu}.${anade}${pocos}`); }
-    if (m.why.some(w => w.c === 'expres')) out.push('En 15 minutos priorizo lo básico: 3 ejercicios de 2 series. Haz la primera serie con poco peso. Con 30 cabría una rutina completa.');
+    if (m.why.some(w => w.c === 'expres')) out.push(inp.sesion ? 'En la sesión exprés priorizo lo básico: 3 ejercicios de 2 series. Haz la primera serie con poco peso. Con «Lo esencial» cabría una rutina completa.' : 'En 15 minutos priorizo lo básico: 3 ejercicios de 2 series. Haz la primera serie con poco peso. Con 30 cabría una rutina completa.');
     { const c = m.why.find(w => w.c === 'corto');   // v5 (C-17)
       if (c) { const nn = c.p.nMin != null && c.p.nMin !== c.p.nMax ? c.p.nMin + ' o ' + c.p.nMax : (c.p.nMax || c.p.n);
-        out.push(`En ${c.p.min} minutos, con los 5 de calentamiento que necesitas, caben ${nn} ejercicios de 2 series por día. Haz la primera serie con poco peso. Con 30 minutos cabría una rutina completa.`); } }
+        out.push(inp.sesion ? `En la sesión exprés, con los 5 minutos de calentamiento que necesitas, caben ${nn} ejercicios de 2 series por día. Haz la primera serie con poco peso. Con «Lo esencial» cabría una rutina completa.`
+          : `En ${c.p.min} minutos, con los 5 de calentamiento que necesitas, caben ${nn} ejercicios de 2 series por día. Haz la primera serie con poco peso. Con 30 minutos cabría una rutina completa.`); } }
     // cardio
     const cardioRows = res.det.flatMap(dd => dd.rows).filter(r => r.kind === 'cardio'), cardioRow = cardioRows[0];
     // v9 (J-14): con «Aguantar más» o «Perder grasa», el tiempo que sobra va al cardio: la frase dice cuánto y por qué
     if (cardioRow) { const mins = [...new Set(cardioRows.map(r => r.min))].sort((a, b) => a - b), nombres = [...new Set(cardioRows.map(r => r.n.replace(/^Cardio — /, '').toLowerCase()))];
       out.push(`${mins.length === 1 ? mins[0] : 'Entre ' + mins[0] + ' y ' + mins[mins.length - 1]} min de ${nombres.length === 1 ? nombres[0] : 'cardio (' + joinY(nombres.slice(0, 2)).replace(' y ', ' o ') + ')'} al final${m.cardioRelleno ? `: con «${GOAL[inp.goal]}», el tiempo que sobra va al cardio${inp.goal === 'salud' ? ', que es la otra mitad de la salud' : ''}` : ''}${P.zones.rodilla ? (m.cardioRelleno ? ', sin cargar la rodilla' : ': suma sin cargar la rodilla') : P.noImpact || P.mayor ? (m.cardioRelleno ? ', de bajo impacto' : ': de bajo impacto') : ''}.`); }
-    else if (cutC) out.push(`Con ${inp.min} minutos no cabe el cardio al final: ${inp.sport === 'suave' ? 'sigue con tus paseos y, si puedes, haz 2 de 30 minutos a paso ligero' : inp.days > res.weeklyTarget ? 'hazlo en los días sin pesas' : 'hazlo otro día, aparte, 20-30 minutos a paso ligero o en bici'}.`);   // v10 (J-19)
+    else if (cutC) out.push(`${inp.sesion ? `En la sesión «${SES[inp.sesion]}»` : `Con ${inp.min} minutos`} no cabe el cardio al final: ${inp.sport === 'suave' ? 'sigue con tus paseos y, si puedes, haz 2 de 30 minutos a paso ligero' : inp.days > res.weeklyTarget ? 'hazlo en los días sin pesas' : 'hazlo otro día, aparte, 20-30 minutos a paso ligero o en bici'}.`);   // v10 (J-19)
     if (m.why.some(w => w.c === 'paseos')) out.push('Sigue con tus paseos: ya cuentan como cardio.');
     // v7 (C-23): «así se aconseja» (calentamiento, equilibrio, máquinas y sin llegar al límite sí son lo que dicen las guías; el tope de días no)
     // v10 (J-16): la frase de 65+ con lo que hay: equilibrio en la sesión o en casa, máquinas solo si las hay
@@ -283,7 +287,7 @@ module.exports = function (K, G) {
     const gSin = new Set(((m.warn.find(w => w.c === 'semana_sin') || { p: { z: [] } }).p.z).flatMap(z => ({ pierna: ['cuads', 'isquios', 'gluteos', 'gemelos'], empuje: ['pecho', 'hombro_lat', 'triceps'], tiron: ['espalda', 'biceps', 'hombro_post'] })[z] || []));
     const volW = m.warn.filter(w => w.c === 'vol_corto' && !gSin.has(w.p.g) && !(simple && ['hombro_lat', 'hombro_post'].includes(w.p.g)) && !((K.PSMALL || []).includes(w.p.g) && (simple || !P.prioV.has(w.p.g))));
     const vT = volW.filter(w => w.p.motivo === 'tiempo').map(w => VL(w.p.g).toLowerCase());
-    if (vT.length) add(`Con ${inp.min} minutos, ${joinY([...new Set(vT)])} ${vT.length === 1 ? 'se queda' : 'se quedan'} por debajo de lo ideal: con más tiempo o más días se completa${vT.length === 1 ? '' : 'n'}.`);
+    if (vT.length) add(`${inp.sesion ? `En la sesión «${SES[inp.sesion]}»` : `Con ${inp.min} minutos`}, ${joinY([...new Set(vT)])} ${vT.length === 1 ? 'se queda' : 'se quedan'} por debajo de lo ideal: con ${inp.sesion === 'fondo' ? 'más días' : inp.sesion ? 'una sesión más larga o más días' : 'más tiempo o más días'} se completa${vT.length === 1 ? '' : 'n'}.`);
     const vP = volW.filter(w => w.p.motivo === 'tope').map(w => VL(w.p.g).toLowerCase());
     if (vP.length) add(P.mayorExp ? `Las primeras semanas, pocas series por ejercicio (3 en los principales y 2 en el resto): ${joinY([...new Set(vP)])} ${vP.length === 1 ? 'se queda' : 'se quedan'} algo por debajo de lo ideal; al cerrar el primer ciclo, el Coach te propondrá subir.`   // v7 (C-07)
       : P.mayor || P.inicio ? `Las primeras semanas, 2 series por ejercicio: ${joinY([...new Set(vP)])} ${vP.length === 1 ? 'se queda' : 'se quedan'} algo por debajo de lo ideal; al cerrar el primer ciclo, el Coach te propondrá pasar a 3.`
@@ -297,19 +301,19 @@ module.exports = function (K, G) {
       if (nD.length) { const vs = vD.map(w => Math.round(w.p.v)), os = vD.map(w => Math.round(w.p.obj)), rg = a => Math.min(...a) === Math.max(...a) ? 'unas ' + a[0] : 'entre ' + Math.min(...a) + ' y ' + Math.max(...a);
         // (con 4 grupos o más, una frase para todos, como lo diría un entrenador: «cada músculo recibe unas N series por semana»)
         const media = Math.round(vs.reduce((a, b) => a + b, 0) / vs.length);
-        if (nD.length >= 4) add(`Con ${res.weeklyTarget} días de ${inp.min} minutos, cada músculo recibe unas ${media} series por semana, menos de lo ideal para tu nivel${inp.goal === 'grasa' ? '; para perder grasa conservando el músculo, está bien' : ''}. Si un día tienes más tiempo, el Coach lo aprovecha.`);
-        else add(`Con ${res.weeklyTarget} días de ${inp.min} minutos, ${joinY(nD)} ${nD.length === 1 ? 'recibe' : 'reciben'} ${Math.min(...vs) >= 2 ? rg(vs) + ' series por semana, algo menos de lo ideal (' + rg(os) + ')' : 'menos series de lo ideal'}. Si un día tienes más tiempo, el Coach lo aprovecha.`); } }
+        if (nD.length >= 4) add(`${inp.sesion ? `Con ${res.weeklyTarget} días y la sesión «${SES[inp.sesion]}»` : `Con ${res.weeklyTarget} días de ${inp.min} minutos`}, cada músculo recibe unas ${media} series por semana, menos de lo ideal para tu nivel${inp.goal === 'grasa' ? '; para perder grasa conservando el músculo, está bien' : ''}. Si un día tienes más tiempo, el Coach lo aprovecha.`);
+        else add(`${inp.sesion ? `Con ${res.weeklyTarget} días y la sesión «${SES[inp.sesion]}»` : `Con ${res.weeklyTarget} días de ${inp.min} minutos`}, ${joinY(nD)} ${nD.length === 1 ? 'recibe' : 'reciben'} ${Math.min(...vs) >= 2 ? rg(vs) + ' series por semana, algo menos de lo ideal (' + rg(os) + ')' : 'menos series de lo ideal'}. Si un día tienes más tiempo, el Coach lo aprovecha.`); } }
     for (const w of m.warn) {
       if (w.c === 'vol_corto' || w.c === 'semana_sin') continue;
-      else if (w.c === 'equilibrio_casa') add(`Con ${inp.min} minutos no cabe el equilibrio: hazlo en casa cualquier día, 2-5 minutos, apoyándote en una pared o una silla.`);   // v5 (C-17, C-09); v8 (J-19): los minutos de la persona
-      else if (w.c === 'extensores_casa') add(`Con ${inp.min} minutos no caben los extensores de la espalda: 2 días por semana, en casa, 2 series de bird dog o de Y-T-W boca abajo.`);   // v8 (J-07)
-      else if (w.c === 'no_cabe') add(`Tu Día ${'ABCDEF'[w.p.dia]} dura unos ${w.p.m} min (dijiste ${w.p.min}). ¿Subimos el tiempo o quito un ejercicio?`);
+      else if (w.c === 'equilibrio_casa') add(`${inp.sesion ? `En la sesión «${SES[inp.sesion]}»` : `Con ${inp.min} minutos`} no cabe el equilibrio: hazlo en casa cualquier día, 2-5 minutos, apoyándote en una pared o una silla.`);   // v5 (C-17, C-09); v8 (J-19): los minutos de la persona
+      else if (w.c === 'extensores_casa') add(`${inp.sesion ? `En la sesión «${SES[inp.sesion]}»` : `Con ${inp.min} minutos`} no caben los extensores de la espalda: 2 días por semana, en casa, 2 series de bird dog o de Y-T-W boca abajo.`);   // v8 (J-07)
+      else if (w.c === 'no_cabe') add(inp.sesion ? `Tu Día ${'ABCDEF'[w.p.dia]} sale más largo que los demás: unos ${w.p.m} min.` : `Tu Día ${'ABCDEF'[w.p.dia]} dura unos ${w.p.m} min (dijiste ${w.p.min}). ¿Subimos el tiempo o quito un ejercicio?`);
       else if (w.c === 'pocos_pesas') add('Para empezar, 3 o 4 días de pesas rinden casi igual y recuperas mejor. Si quieres moverte más, los otros días camina o haz cardio suave.');
       else if (w.c === 'alternos') add('Mejor en días alternos: así cada músculo descansa entre sesiones.');
       else if (w.c === 'suelo') add('Algún ejercicio pide tumbarse en el suelo porque no había otra opción en ese hueco: cámbialo con ⇄ si te cuesta.');
       else if (w.c === 'sin_cardio') add(`No encuentro un cardio que puedas hacer ahí: ${inp.days > res.weeklyTarget ? 'el cardio, en los días sin pesas' : 'camina a paso ligero o ve en bici otro día, 20-30 minutos'}.`);   // v10 (J-19)
       else if (w.c === 'sin_calentamiento') add('No encuentro un calentamiento con tu material: camina o muévete 5 minutos antes de empezar.');
-      else if (w.c === 'core_corto') add(`En sesiones de ${inp.min} minutos no cabe el core: haz 2 minutos de ${P.noFloor ? "plancha con las manos en una mesa o una encimera, sin bajar al suelo," : P.posparto ? "dead bug o bird dog (estas semanas, mejor que la plancha)" : "plancha"} en casa cualquier día.`);   // v2 (D-18); v10 (J-19): los minutos de la persona; con «sin suelo», sin suelo; en el posparto, sin plancha frontal (J-27)
+      else if (w.c === 'core_corto') add(`${inp.sesion ? 'En la sesión exprés' : `En sesiones de ${inp.min} minutos`} no cabe el core: haz 2 minutos de ${P.noFloor ? "plancha con las manos en una mesa o una encimera, sin bajar al suelo," : P.posparto ? "dead bug o bird dog (estas semanas, mejor que la plancha)" : "plancha"} en casa cualquier día.`);   // v2 (D-18); v10 (J-19): los minutos de la persona; con «sin suelo», sin suelo; en el posparto, sin plancha frontal (J-27)
       // v7 (paso 4): avisos de seguridad y modos
       else if (w.c === 'consulta_inactivo') add('Como ahora no haces ejercicio y marcaste una enfermedad o una medicación, te recomiendo comentarlo con tu médico antes de empezar. La rutina es suave igualmente.');   // C-10
       else if (w.c === 'huesos') add('Con huesos frágiles, nada que doble o gire la espalda ni ejercicios de impacto. Consúltalo con tu médico antes de subir los pesos.');   // C-13
