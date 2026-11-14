@@ -13995,5 +13995,49 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('p7OtroDia',async()=>{
+// (P7, repaso del reparto) «Otro entreno para este día» cambia los ejercicios del día abierto y deja los demás días con los suyos; la
+// rutina que queda cumple las mismas reglas, se reproduce (borrador incluido) y respeta lo fijado con ⇄. Otro día después no deshace el
+// primero; «Otra propuesta» lo olvida; si no hay otro entreno posible, lo dice y no cambia nada. Vale también con una rutina de 65 o más.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),tt=()=>tx(document.getElementById('toast'));
+const libs=k=>_ob.c.days[k].ex.filter(x=>!x.cardio).map(x=>x.lib).slice().sort().join(','),todo=()=>Object.keys(_ob.c.days).map(k=>_ob.c.days[k].ex.map(x=>x.lib+':'+x.s+':'+x.r).join(',')).join('|'),seg=()=>Object.keys(_ob.g.E.SEG(_ob.g.res,_ob.g.inp));
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,age:'18',sport:'no',prio:[]});['plan','enfoque','forma'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.dia=null;_ob.pins={};_ob.alt=0;_ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);
+  obTab('B');await W(5);const L0={A:libs('A'),B:libs('B'),C:libs('C'),D:libs('D')};
+  E($('.ob-od')&&/Otro entreno para este día/.test(tx($('.ob-od')))&&$('.ob-od').getBoundingClientRect().height>=44,'botón: '+tx($('.ob-od')));
+  // el Día B cambia; los demás conservan sus ejercicios
+  $('.ob-od').click();await W(10);const B1=libs('B');
+  E(B1!==L0.B&&libs('A')===L0.A&&libs('C')===L0.C&&libs('D')===L0.D&&_ob.g.res.meta.split==='tp4'&&_ob.tab==='B','otro entreno del Día B: '+pj([B1!==L0.B,libs('A')===L0.A,libs('C')===L0.C,libs('D')===L0.D]));
+  E(/Día B: \d+ ejercicios? nuevos?\. Los demás días, como estaban/.test(tt())&&/Ha cambiado: los ejercicios del Día B/.test(tx($('.ob-changed'))),'aviso: '+tt()+' / '+tx($('.ob-changed')));
+  E(!seg().length&&_ob.g.res.ok&&_ob.g.res.det.every(d=>d.minutos<=63)&&_ob.g.res.meta.ratio.tiron_empuje>=1&&/^Pierna/.test(_ob.g.res.days.B.focus),'la rutina no cumple: '+seg());
+  // se reproduce: al repintar y desde el borrador
+  {const t1=todo();_ob.dirty=true;obRender();await W(5);E(todo()===t1,'no se reproduce al repintar');
+    E(S.obDraft&&S.obDraft.dia&&Object.keys(S.obDraft.dia.altDia).length===1&&Object.keys(S.obDraft.dia.fijos).length>=10,'borrador sin el día: '+pj(S.obDraft&&S.obDraft.dia&&S.obDraft.dia.altDia));
+    hideOnboarding();showOnboarding({from:'settings'});await W(3);_ob.h={nada:true};_ob.reparto='dias';_ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);E(todo()===t1,'no se reproduce desde el borrador');}
+  // lo fijado con ⇄ en ese día se respeta; otra vez más da otro entreno
+  obTab('B');await W(5);const i=_ob.c.days.B.ex.findIndex(x=>!x.cardio);obSwap('B',i);await W(5);
+  {const o=[...document.querySelectorAll('#ob-sheet-root .obx-alt')].filter(b=>b.dataset.lib!==_ob.c.days.B.ex[i].lib);if(o.length){o[0].click();await W(5);document.getElementById('obx-go').click();await W(5);}else obSheetClose();}
+  const pin=_ob.c.days.B.ex[i].lib,fijado=Object.values(_ob.pins).includes(pin);$('.ob-od').click();await W(10);
+  E(libs('B')!==B1&&libs('A')===L0.A&&libs('C')===L0.C&&libs('D')===L0.D&&(!fijado||_ob.c.days.B.ex[i].lib===pin),'segunda vez o lo fijado: '+pj([libs('B')!==B1,fijado,_ob.c.days.B.ex[i].lib===pin]));
+  // otro día después no deshace el primero
+  {const B2=libs('B');obTab('C');await W(5);$('.ob-od').click();await W(10);E(libs('C')!==L0.C&&libs('B')===B2&&libs('A')===L0.A&&libs('D')===L0.D&&!seg().length,'otro entreno del Día C: '+pj([libs('C')!==L0.C,libs('B')===B2,seg()]));}
+  // si no hay otro entreno posible, lo dice y no cambia nada
+  {const G=_ob.g.E.G,real=G.otroDia,t1=todo();G.otroDia=()=>null;try{$('.ob-od').click();await W(10);}finally{G.otroDia=real;}E(todo()===t1&&/No he encontrado otro entreno para este día/.test(tt()),'sin otro entreno: '+tt());}
+  // «Otra propuesta» entera lo olvida
+  obOther(1);await W(5);E(!_ob.dia&&_ob.alt===1,'«Otra propuesta» conserva lo de un día: '+pj(_ob.dia&&_ob.dia.altDia));obOther(-1);await W(5);
+  // con 65 o más también vale, con sus reglas
+  Object.assign(_ob.a,{age:'65',goal:'salud',days:3});_ob.pins={};_ob.dirty=true;obRender();await W(5);obTab('A');await W(5);
+  {const A0=libs('A'),B0=libs('B');$('.ob-od').click();await W(10);E((libs('A')!==A0&&libs('B')===B0&&!seg().length)||/No he encontrado/.test(tt()),'65 o más: '+pj([libs('A')!==A0,libs('B')===B0,seg(),tt()]));}
+  E(pj(getPlan())===plan0,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

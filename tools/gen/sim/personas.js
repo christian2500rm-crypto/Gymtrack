@@ -390,6 +390,10 @@ Object.assign(REGLAS, {
     ['El día de pierna lleva sentadilla y bisagra principales', R => R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'squat') && R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'hinge')],
     ['Pecho y espalda llegan a su objetivo (el torso trabaja 2 veces)', R => R.m.vol.pecho.v >= R.m.vol.pecho.obj && R.m.vol.espalda.v >= R.m.vol.espalda.obj, R => JSON.stringify([R.m.vol.pecho, R.m.vol.espalda])],
     ['El porqué dice que hay un solo día de pierna', R => T(R, /un solo día de pierna/)],
+    ['Otro entreno para un día (P7): ese día cambia, los demás conservan sus ejercicios, la rutina cumple todo y se reproduce', R => R.res.det.every((_, pos) => { const o = G.otroDia(R.inp, {}, R.res, pos); if (!o) return false;
+      const f = d => d.rows.filter(x => x.kind === 'str').map(x => x.lib).sort().join(','), r1 = G.genRoutine(R.inp, { altDia: o.ctx.altDia, fijos: o.ctx.fijos, prev: new Set(o.ctx.prev) });
+      return o.res.ok && o.nuevos >= 1 && o.res.det.every((d, i) => i === pos ? f(d) !== f(R.res.det[i]) : f(d) === f(R.res.det[i])) && Object.keys(SEG(o.res, R.inp)).length === 0 && JSON.stringify(r1.days) === JSON.stringify(o.res.days)
+        && o.res.det.every(d => d.minExact <= R.inp.min * 1.05 + 1e-9) && o.res.meta.ratio.tiron_empuje >= 1 - 1e-9; })],
     ['Mover los días (P8): la misma rutina con las letras cambiadas, y un orden que no es de sus días se ignora', R => { const o = [2, 0, 1, 3], L = 'ABCD', r2 = G.genRoutine(R.inp, { orden: o }), fila = d => JSON.stringify(d.rows.map(x => [x.lib, x.series, x.reps]));
       return r2.ok && r2.det.map(d => d.letra).join('') === L && o.every((src, i) => fila(r2.det[i]) === fila(R.res.det[src]) && r2.meta.tpl[L[i]] === R.m.tpl[L[src]] && r2.days[L[i]].focus === R.res.days[L[src]].focus && r2.days[L[i]].label === 'Día ' + L[i])
         && Object.keys(SEG(r2, R.inp)).length === 0 && !G.genRoutine(R.inp, { orden: [1, 0, 2] }).meta.orden && !G.genRoutine(R.inp, { orden: [0, 0, 1, 2] }).meta.orden; }],
@@ -403,6 +407,10 @@ Object.assign(REGLAS, {
     ['El día de pecho lleva al menos tres ejercicios de pecho y un tríceps', R => R.rows.filter(r => r.dia === 'A' && ['push_h', 'fly'].includes(r.L.pat)).length >= 3 && R.rows.some(r => r.dia === 'A' && r.L.pat === 'tri')],
     ['Curl en el día de espalda y curl y tríceps en el de hombros', R => R.rows.some(r => r.dia === 'B' && r.L.pat === 'curl') && R.rows.some(r => r.dia === 'D' && r.L.pat === 'curl') && R.rows.some(r => r.dia === 'D' && r.L.pat === 'tri')],
     ['Tirón y empuje equilibrados (≥ 1)', R => R.m.ratio.tiron_empuje >= 1 - 1e-9, R => R.m.ratio.tiron_empuje],
+    ['Otro entreno para un día (P7): ese día cambia, los demás conservan sus ejercicios, la rutina cumple todo y se reproduce', R => R.res.det.every((_, pos) => { const o = G.otroDia(R.inp, {}, R.res, pos); if (!o) return false;
+      const f = d => d.rows.filter(x => x.kind === 'str').map(x => x.lib).sort().join(','), r1 = G.genRoutine(R.inp, { altDia: o.ctx.altDia, fijos: o.ctx.fijos, prev: new Set(o.ctx.prev) });
+      return o.res.ok && o.nuevos >= 1 && o.res.det.every((d, i) => i === pos ? f(d) !== f(R.res.det[i]) : f(d) === f(R.res.det[i])) && Object.keys(SEG(o.res, R.inp)).length === 0 && JSON.stringify(r1.days) === JSON.stringify(o.res.days)
+        && o.res.det.every(d => d.minExact <= R.inp.min * 1.05 + 1e-9) && o.res.meta.ratio.tiron_empuje >= 1 - 1e-9; })],
     ['El porqué dice que cada músculo trabaja 1 vez por semana', R => T(R, /1 vez por semana/)]] },
   hugo: { debe: [SIN_PLAN],
     debeAlt: [

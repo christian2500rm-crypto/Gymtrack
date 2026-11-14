@@ -75,6 +75,8 @@
 .ob-wkn{font-size:15px;color:var(--text);line-height:1.45}
 .ob-rpq{margin:0}
 /* (P8) mover el día abierto antes o después */
+.ob-od{margin-top:6px;padding-bottom:0}
+.ob-od+.ob-mv{margin-top:2px}
 .ob-mv{display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--border)}
 .ob-mv span{flex:1;min-width:0;font-size:14px;color:var(--text2)}
 .ob-mvb{min-height:44px;padding:0 14px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}

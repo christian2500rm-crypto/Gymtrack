@@ -17,6 +17,7 @@ function showOnboarding(o){
     places:d&&d.places?JSON.parse(JSON.stringify(d.places)):null,resumed:false};
   if(a.forma==='dias'||a.forma==='recomendado')_ob.reparto=a.forma; // (P9) la forma que ya habías elegido
   if(d&&Array.isArray(d.orden)){_ob.orden=d.orden.slice();_ob.ordenDe=d.ordenDe||null;} // (P8) el orden que le diste a los días
+  if(d&&_isPlainObj(d.dia)){_ob.dia=JSON.parse(JSON.stringify(d.dia));_ob.diaDe=d.diaDe||null;} // (P7) «Otro entreno para este día»
   let st=o.step||(d&&OB_STEPS.includes(d.step)?d.step:null);
   // (§C.0) los pasos de salud nunca se retoman desde el borrador: se vuelven a preguntar
   if(!o.step&&st&&['ob-salud','ob-medico','ob-supervision','ob-posparto','ob-embarazo','ob-molestias','ob-consulta'].includes(st))st='ob-salud'; // (solo al retomar el borrador)
@@ -76,7 +77,7 @@ function _obSaveDraft(){
   if(!_ob)return;
   if(_ob.reparto)_ob.a.forma=_ob.reparto;else delete _ob.a.forma; // (P9)
   const a=JSON.parse(JSON.stringify(_ob.a));['screen','zones','huesos','posparto','otraTxt'].forEach(k=>{delete a[k];});
-  S.obDraft=_sanitizeObDraft({v:1,ts:Date.now(),from:_ob.from,step:_ob.step,a,alt:_ob.alt||0,pins:_ob.pins||{},places:_ob.places,orden:_ob.orden||null,ordenDe:_ob.ordenDe||null,
+  S.obDraft=_sanitizeObDraft({v:1,ts:Date.now(),from:_ob.from,step:_ob.step,a,alt:_ob.alt||0,pins:_ob.pins||{},places:_ob.places,orden:_ob.orden||null,ordenDe:_ob.ordenDe||null,dia:_ob.dia||null,diaDe:_ob.diaDe||null,
     accepted:S.obDraft&&S.obDraft.accepted||null});
   saveState();
 }
@@ -570,13 +571,16 @@ function _privacyTxtHtml(){return`<p>Todo se queda en este móvil: no hay cuenta
 function _obHistCtx(){
   const h={},m=_libHistMap(),now=Date.now();
   Object.keys(m).forEach(lib=>{const x=m[lib];h[lib]={n:x.n,recent:!!(x.ts&&now-x.ts<60*86400000)};});
-  return{hist:h,fav:new Set(Array.isArray(S.libFav)?S.libFav:[]),alt:_ob.alt||0,orden:_ob.orden||null}; // (P8) el orden que le diste a los días
+  return{hist:h,fav:new Set(Array.isArray(S.libFav)?S.libFav:[]),alt:_ob.alt||0,orden:_ob.orden||null, // (P8) el orden que le diste a los días
+    ...(_ob.dia?{altDia:_ob.dia.altDia,fijos:_ob.dia.fijos,prev:new Set(_ob.dia.prev||[])}:{})}; // (P7) «Otro entreno para este día»
 }
 function _obGenerate(){
   const a=_obAnswers(),o={reparto:_obForma(),tope:a.tope!==false};
   let g=genRoutineFrom(a,_obHistCtx(),o);if(!g)return null;
   // (P8) el orden que le diste a los días vale para ese reparto y ese número de días: con otro, se olvida
   if(_ob.orden&&(!g.res.meta.orden||_ob.ordenDe!==g.res.meta.split+':'+g.res.det.length)){_ob.orden=null;_ob.ordenDe=null;g=genRoutineFrom(a,_obHistCtx(),o);if(!g)return null;}
+  // (P7) lo mismo con «Otro entreno para este día»: sus anclas son de ese reparto
+  if(_ob.dia&&_ob.diaDe!==g.res.meta.split+':'+g.res.det.length){_ob.dia=null;_ob.diaDe=null;g=genRoutineFrom(a,_obHistCtx(),o);if(!g)return null;}
   const c=genCandidate(g);_obApplyPins(c,g);
   // (P1) el reparto que elegiste deja de estar guardado si ya no se te ofrece (cambiaste los días, la edad, pasaste a 2-4 entrenos…)
   if(_ob.a.plan){let ok=false;try{ok=_obForma()==='dias'&&g.E.G.planes(g.inp).otros.includes(_ob.a.plan);}catch(e){}if(!ok)delete _ob.a.plan;}
@@ -638,6 +642,18 @@ function _zonasDe(pats){const n={pierna:0,empuje:0,'tirón':0};pats.forEach(p=>{
 // Parejas de días seguidos que repiten zona: [[i, zona]…] (i = el primero de la pareja)
 function _zonasSeguidas(dias){const out=[];for(let i=0;i+1<dias.length;i++){const z=dias[i].filter(x=>dias[i+1].includes(x));if(z.length)out.push([i,z[0]]);}return out;}
 function _obZonasDias(g){return g.res.det.map(d=>_zonasDe(d.rows.filter(r=>r.kind==='str').map(r=>r.pat)));}
+// ── (P7, repaso del reparto) «Otro entreno para este día»: cambia los ejercicios del día abierto y deja los demás como están. Lo hace el
+// generador (otroDia: sorteo solo en ese día, los demás anclados a lo que tienen; las series de la semana se vuelven a cuadrar y pasan
+// las mismas reglas). _ob.dia guarda el contexto que reproduce la rutina que ves; lo que fijaste con ⇄ se vuelve a aplicar ──
+function obOtherDay(letra){
+  if(!_ob||!_ob.g)return;const g=_ob.g,ks=Object.keys(g.res.days),pos=ks.indexOf(letra);if(pos<0)return;
+  let o=null;try{o=g.E.G.otroDia(g.inp,_obHistCtx(),g.res,pos);}catch(e){}
+  if(!o){toast('No he encontrado otro entreno para este día que deje los demás como están. Cambia un ejercicio con ⇄ o prueba «Otra propuesta».',4800);return;}
+  _ob.dia={altDia:o.ctx.altDia,fijos:o.ctx.fijos,prev:o.ctx.prev};_ob.diaDe=g.res.meta.split+':'+ks.length;_ob.why=null;_ob.dirty=true;_obSaveDraft();_obGenerate();
+  _ob.changed=`los ejercicios del Día ${letra}`;obRender({keepFocus:true,keepScroll:true});
+  const b=document.querySelector('#ob-root .ob-od');if(b)try{b.focus({preventScroll:true});}catch(e){}
+  toast(`Día ${letra}: ${plural(o.nuevos,'ejercicio nuevo','ejercicios nuevos')}. Los demás días, como estaban`,3200);
+}
 function obMoveDay(letra,dir){
   if(!_ob||!_ob.g)return;const ks=Object.keys(_ob.g.res.days),K=ks.length,i=ks.indexOf(letra),j=i+(dir<0?-1:1);if(i<0||j<0||j>=K)return;
   const cur=Array.isArray(_ob.g.res.meta.orden)&&_ob.g.res.meta.orden.length===K?_ob.g.res.meta.orden.slice():Array.from({length:K},(_,n)=>n);
@@ -709,6 +725,7 @@ function _obDaysHtml(){
     <div class="ob-dh"><b>Día ${tab} · ${esc(r.days[tab].focus)}</b><span>${two?ic(d.place==='c'?'home':'dumbbell')+' ':''}<span class="nw">≈ ${Math.round(c.est[tab])}${NB}min</span> · ${plural(nStr,'ejercicio')}</span></div>
     ${rows.map((x,i)=>_obRowHtml(d,x,rows.filter(y=>y.kind!=='bal').indexOf(x))).join('')}
     ${P.inicio||P.cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
+    ${nStr&&typeof obOtherDay==='function'?`<button type="button" class="ob-link ob-od" onclick="obOtherDay('${tab}')">Otro entreno para este día ›</button>`:''}
     ${ks.length>1&&typeof obMoveDay==='function'?`<div class="ob-mv" role="group" aria-label="Mover el Día ${tab}"><span>Mover este día</span><button type="button" class="ob-mvb" data-d="-1" onclick="obMoveDay('${tab}',-1)" aria-label="Mover el Día ${tab} antes"${ks.indexOf(tab)===0?' disabled':''}>‹ Antes</button><button type="button" class="ob-mvb" data-d="1" onclick="obMoveDay('${tab}',1)" aria-label="Mover el Día ${tab} después"${ks.indexOf(tab)===ks.length-1?' disabled':''}>Después ›</button></div>`:''}
   </section>`;
 }
@@ -991,7 +1008,7 @@ function obSwapAvoidOnly(){if(!_ob||!_ob.sw)return;const {letra,i}=_ob.sw,d=_ob.
 function obOther(dir){
   if(!_ob)return;const n=Math.max(0,(_ob.alt||0)+dir);
   if(dir>0&&n>5){toast('Ya te he enseñado las mejores opciones con estas respuestas. Si quieres algo distinto, cambia alguna.',4200);return;}
-  _ob.alt=n;_ob.dirty=true;_obSaveDraft();obRender({keepFocus:true});
+  _ob.alt=n;_ob.dia=null;_ob.diaDe=null;_ob.dirty=true;_obSaveDraft();obRender({keepFocus:true}); // (P7) otra propuesta entera: sin lo de un día suelto
   if(dir>0&&Object.keys(_ob.pins||{}).length)toast(`Mantengo ${plural(Object.keys(_ob.pins).length,'ejercicio que elegiste','ejercicios que elegiste')}`,2600);
 }
 // ── (P1, P4) El reparto de la semana: qué va cada día. El generador dice qué repartos se ofrecen a este perfil (planes: el recomendado
@@ -1000,7 +1017,7 @@ function obOther(dir){
 function _obGenWith(a,plan,rep,tope,neutro){
   const b=JSON.parse(JSON.stringify(a));if(plan)b.plan=plan;else delete b.plan;b.tope=tope;
   if(neutro&&b.enfoque==='torso')delete b.enfoque; // (P2) una ficha de la hoja es ese reparto tal cual, sin el «Más torso» de tus respuestas
-  const g=genRoutineFrom(b,Object.assign(_obHistCtx(),{orden:null}),{reparto:rep,tope});return g&&g.res.ok?g:null; // (P8) sin tu orden de días: es otro reparto
+  const g=genRoutineFrom(b,Object.assign(_obHistCtx(),{orden:null,altDia:null,fijos:null,prev:null}),{reparto:rep,tope});return g&&g.res.ok?g:null; // (P8) sin tu orden de días: es otro reparto
 }
 function _obRepInfo(g){try{return g.E.X.reparto(g.res,g.inp);}catch(e){return null;}}
 function _obRepLine(i){

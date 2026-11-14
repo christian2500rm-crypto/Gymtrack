@@ -537,6 +537,25 @@ return function (K, OPT) {
     const beginner = LV[P.lvS] <= LV.P;
     return (PLANES[P.wd] || []).filter(id => id !== rec && !(/^grp/.test(id) && (beginner || inp.goal === 'fuerza')) && !(id === 'cc3' && inp.consec));
   }
+  // v14 (P7): «Otro entreno para este día». Con la rutina que la persona tiene delante (res; pos = el día por su posición), se rehace todo
+  // con el sorteo solo en ese día (ctx.altDia), cada hueco de los demás días anclado al ejercicio que ya tiene (ctx.fijos) y lo que ese día
+  // llevaba, penalizado (ctx.prev). Es una rutina generada entera: las series de la semana se vuelven a cuadrar y pasan las mismas reglas.
+  // Solo vale si los demás días conservan exactamente sus ejercicios y ese día cambia; si no, se prueba otra vez del sorteo (hasta 8) y, si
+  // ninguna vale, null (la app lo dice). Devuelve la rutina y el contexto que la reproduce ({altDia, fijos, prev})
+  function otroDia(inp, ctx, res, pos) {
+    ctx = ctx || {}; const K = res.det.length; if (!(pos >= 0 && pos < K)) return null;
+    const ord = Array.isArray(res.meta.orden) && res.meta.orden.length === K ? res.meta.orden : [...Array(K).keys()], src = ord[pos];
+    const libs = d => d.rows.filter(r => r.kind === 'str').map(r => r.lib), firma = d => libs(d).slice().sort().join(',');
+    const fijos = {}; res.det.forEach((d, i) => { if (i !== pos) d.rows.forEach(r => { if (r.kind === 'str' && r.key) fijos[r.key] = r.lib; }); });
+    const prev = libs(res.det[pos]), n0 = ctx.altDia && ctx.altDia[src] ? ctx.altDia[src] : 0;
+    for (let n = n0 + 1; n <= n0 + 8; n++) {
+      const c2 = Object.assign({}, ctx, { altDia: { [src]: n }, fijos, prev: new Set(prev) }), r = genRoutine(inp, c2);
+      if (!r.ok || r.det.length !== K || r.meta.split !== res.meta.split) continue;
+      if (!r.det.every((d, i) => i === pos || firma(d) === firma(res.det[i])) || firma(r.det[pos]) === firma(res.det[pos])) continue;
+      return { res: r, ctx: { altDia: c2.altDia, fijos, prev }, n, nuevos: libs(r.det[pos]).filter(x => !prev.includes(x)).length };
+    }
+    return null;
+  }
   // v14 (P9): la forma de reparto de salida, que la app usa para elegir la opción `reparto` cuando la persona no ha elegido ninguna. D1
   // (6 nov) puso «un entreno distinto cada día» ('dias') para todo el mundo; el 13 nov el usuario aprobó que quien EMPIEZA DE CERO (modo
   // inicio) salga con 2 entrenos que se alternan ('recomendado'): con 'dias' le salían 15 ejercicios distintos con 3 días y 20 con 4, cada
@@ -843,11 +862,15 @@ return function (K, OPT) {
     // cuidado» de una zona que duele ahora, gana aunque sea varios escalones peor o se repita en la semana (antes, +5,5 dejaba el press en el
     // suelo de un avanzado delante del press con banda repetido, con la nota «no había otra opción», que era falsa)
     if (st.P.noFloor && cs.some(c => !TAGS.suelo.has(c.L.id) && !ahoraCuidado(st.P, c.L.id))) cs.forEach(c => { if (TAGS.suelo.has(c.L.id)) c.eff += 100; });
+    // v14 (P7): un hueco anclado (ctx.fijos: clave del hueco → ejercicio) se queda con su ejercicio si sigue siendo posible
+    { const fx = st.ctx.fijos && st.ctx.fijos[h.key]; if (fx) { const c = cs.find(c => c.L.id === fx); if (c) return c; } }
     const mn = Math.min(...cs.map(c => c.eff));
-    if (st.ctx.alt) {   // «Otra propuesta»: sorteo dentro de los dos primeros escalones (D-05.4)
+    // v14 (P7): «Otro entreno para este día» (ctx.altDia: índice del día → vez): el sorteo de «Otra propuesta», solo en ese día y con su semilla
+    const lot = st.ctx.altDia && st.ctx.altDia[t.n] ? st.ctx.altDia[t.n] : 0, sd = lot ? fnv1a(st.seed + ':d' + t.n + ':' + lot) : st.seed, J = lot ? 0.9 : st.J;
+    if (st.ctx.alt || lot) {   // «Otra propuesta»: sorteo dentro de los dos primeros escalones (D-05.4)
       let best = null, bs = -1e9;
       for (const c of cs) { if (c.eff > mn + 1 + 1e-9) continue;
-        const s = c.tie - 0.25 * (c.eff - mn) + st.J * (fnv1a(st.seed + '|' + h.key + '|' + c.L.id) / 4294967296) - (st.ctx.prev && st.ctx.prev.has(c.L.id) ? 0.5 : 0);
+        const s = c.tie - 0.25 * (c.eff - mn) + J * (fnv1a(sd + '|' + h.key + '|' + c.L.id) / 4294967296) - (st.ctx.prev && st.ctx.prev.has(c.L.id) ? 0.5 : 0);
         if (s > bs + 1e-12 || (Math.abs(s - bs) <= 1e-12 && c.L.id < best.L.id)) { best = c; bs = s; } }
       return best;
     }
@@ -1917,7 +1940,7 @@ return function (K, OPT) {
         const rr = repRange(L, x.r);
         const repsTxt = typeof x.r === 'string' ? (/s$/.test(x.r) ? parseInt(x.r) + ' s' : x.r) : rr ? rr.lo + '-' + rr.hi : String(x.r);
         const nota = [h.id === 'CO' ? 'core' : null, L.u ? 'unilateral: por lado' : null, ...x.notes.filter(n => !/^sin rango/.test(n)), porQue(L, h, x, st)].filter(Boolean).join(' · ');
-        rows.push({ lib: L.id, n: L.n, series: x.s, reps: repsTxt, r: x.r, descanso_s: restOf(L, x, st), nota, kind: 'str', slot: h.id, prio: h.prio, role: x.role, pat: L.pat, mat: L.mat, dif: L.dif, u: !!L.u, c: !!L.c, cuidado: x.cuidado || null, pass: x.pass, oi: x.oi, strict: x.strict });
+        rows.push({ lib: L.id, n: L.n, series: x.s, reps: repsTxt, r: x.r, descanso_s: restOf(L, x, st), nota, kind: 'str', slot: h.id, prio: h.prio, role: x.role, pat: L.pat, mat: L.mat, dif: L.dif, u: !!L.u, c: !!L.c, cuidado: x.cuidado || null, pass: x.pass, oi: x.oi, strict: x.strict, key: h.key });
       }
       if (t.cardio) { ex.push({ lib: t.cardio.lib, s: 1, r: t.cardio.min + ' min' }); rows.push({ lib: t.cardio.lib, n: BY.get(t.cardio.lib).n, series: 1, reps: t.cardio.min + ' min', descanso_s: null, nota: 'cardio final', kind: 'cardio', min: t.cardio.min }); }
       const label = 'Día ' + k, focus = focusOf(t, st);
@@ -1988,7 +2011,7 @@ return function (K, OPT) {
     if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
     return null;
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
 };
 
 })();

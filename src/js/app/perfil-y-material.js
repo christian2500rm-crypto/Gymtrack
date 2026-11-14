@@ -145,7 +145,11 @@ function _sanitizeObDraft(o){
   const pins={};if(_isPlainObj(o.pins))Object.keys(o.pins).slice(0,40).forEach(k=>{if(/^[A-Za-z0-9:_-]{1,40}$/.test(k)&&_LIBID_RE.test(o.pins[k]))pins[k]=o.pins[k];});
   const d={v:1,ts:o.ts,from:_oneOf(o.from,['first','settings'])||'first',step:_oneOf(o.step,OB_STEPS)||'ob-meta',a,alt:_num(o.alt,0,99)||0,pins,
     places:_sanitizePlaces(o.places),accepted:null,
-    orden:Array.isArray(o.orden)&&o.orden.length>=2&&o.orden.length<=6&&o.orden.slice().sort().join()===o.orden.map((_,i)=>i).join()?o.orden.slice():null,ordenDe:typeof o.ordenDe==='string'?o.ordenDe.slice(0,30):null}; // (P8) el orden de los días de la rutina propuesta
+    orden:Array.isArray(o.orden)&&o.orden.length>=2&&o.orden.length<=6&&o.orden.slice().sort().join()===o.orden.map((_,i)=>i).join()?o.orden.slice():null,ordenDe:typeof o.ordenDe==='string'?o.ordenDe.slice(0,30):null,dia:null,diaDe:typeof o.diaDe==='string'?o.diaDe.slice(0,30):null}; // (P8) el orden de los días de la rutina propuesta
+  if(_isPlainObj(o.dia)&&_isPlainObj(o.dia.altDia)&&_isPlainObj(o.dia.fijos)){ // (P7) «Otro entreno para este día»: vez por día, anclas (clave de hueco → ejercicio) y lo que llevaba
+    const ad={},fj={};Object.keys(o.dia.altDia).slice(0,6).forEach(k=>{const n=_num(o.dia.altDia[k],1,99);if(/^[0-5]$/.test(k)&&n!=null)ad[k]=n;});
+    Object.keys(o.dia.fijos).slice(0,80).forEach(k=>{if(/^[A-Za-z0-9#:]{1,40}$/.test(k)&&_LIBID_RE.test(o.dia.fijos[k]))fj[k]=o.dia.fijos[k];});
+    if(Object.keys(ad).length)d.dia={altDia:ad,fijos:fj,prev:_ids(o.dia.prev,16,_LIBID_RE)};}
   if(_isPlainObj(o.accepted)){const days=_sanitizePlanCopy(o.accepted.days,null);
     if(days){dayKeys(days).forEach(k=>{if(!days[k].did)days[k].did=newDayId(days);});const meta=_sanitizePlanMeta(o.accepted.meta,days);
       if(meta){meta.why=meta.why.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));meta.warn=meta.warn.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));}
