@@ -9,7 +9,7 @@ module.exports = function (K, G) {
   const zl = z => ({ rodilla: 'rodilla', hombro: 'hombro', lumbar: 'espalda baja', muneca: 'muñeca o codo', cadera: 'cadera', otra: 'otra zona' })[z] || z;
   const SES = { expres: 'Exprés', esencial: 'Lo esencial', completa: 'Completa', fondo: 'A fondo' };   // v15 (T1): el tipo de sesión, como lo ve la persona
   const fmtMin = s => s % 60 ? (s >= 60 ? Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0') + ' min' : s + ' s') : (s / 60) + ' min';
-  const joinY = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1];
+  const joinY = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + (/^h?i(?!e)/i.test(a[a.length - 1]) ? ' e ' : ' y ') + a[a.length - 1];   // «e isquios», no «y isquios»
   const num = x => String(Math.round(x * 10) / 10).replace('.', ',');   // v9 (J-19): coma decimal
   const moda = xs => { const c = {}; xs.forEach(x => { c[x] = (c[x] || 0) + 1; }); return +Object.keys(c).sort((a, b) => c[b] - c[a] || a - b)[0]; };
   const SLOT_N = { TV: 'jalones', TH: 'remos', CU: 'curl de bíceps', TR: 'tríceps de aislamiento', RA: 'elevaciones laterales', RE: 'hombro posterior', KF: 'curl femoral', KE: 'extensión de cuádriceps', CA: 'gemelos', FL: 'aperturas', PV: 'press de hombros', PI: 'press inclinado', CO: 'core', HE: 'puente o hip thrust', HI: 'peso muerto', SQ: 'sentadillas', LU: 'zancadas', PH: 'press', PW: 'explosivos' };

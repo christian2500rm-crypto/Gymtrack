@@ -2016,7 +2016,7 @@ module.exports = function (K, OPT) {
     const gs = GROUPS.filter(g => vol[g] >= 2 && zoneOk(t, g)).sort((a, b) => vol[b] - vol[a]).slice(0, 3).map(g => K.GLBL[g].toLowerCase());
     return nm + ' — ' + joinY(gs);
   }
-  const joinY = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' y ' + a[a.length - 1];
+  const joinY = a => a.length <= 1 ? (a[0] || '') : a.slice(0, -1).join(', ') + (/^h?i(?!e)/i.test(a[a.length - 1]) ? ' e ' : ' y ') + a[a.length - 1];   // «e isquios», no «y isquios»
   // E14a (§K.3): el bloque de equilibrio con ejercicios del catálogo. 3 min: a una pierna y talones y puntas; 5: a una pierna, pasos en
   // línea y girando la cabeza; 8: los cuatro (talones y puntas para empezar). min = su parte del bloque (suman los minutos del bloque).
   const BAL_SEQ = { 3: [['balance_single_leg', 2, '20s', 1.5], ['balance_heel_toe', 2, 12, 1.5]],

@@ -22,7 +22,7 @@ let _hoyPick=null;  // {dk, id}: ejercicio elegido a mano para la vista previa (
 let _hoyKeep=null;  // elemento #hoy-pv montado: se reutiliza entre repintados (mismo canvas, giro y fase)
 const HOY_MUS={piernas:'piernas',pecho:'pecho',espalda:'espalda',hombros:'hombros',biceps:'bíceps',triceps:'tríceps',core:'abdomen'};
 const HOY_WD=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
-function _joinY(a){return a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+' y '+a[a.length-1];}
+function _joinY(a){return a.length<2?(a[0]||''):a.slice(0,-1).join(', ')+(/^h?i(?!e)/i.test(a[a.length-1])?' e ':' y ')+a[a.length-1];} // «e isquios», no «y isquios»
 // Día que toca: el siguiente de la rotación. (E1a) Si ese día no existe o se ha quedado vacío, el siguiente con ejercicios
 // (los vacíos no entran en la rotación); si ningún día tiene ejercicios, el que tocaba (o el primero) y Inicio lo dice.
 function hoyDayKey(){
