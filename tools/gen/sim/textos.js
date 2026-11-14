@@ -358,5 +358,17 @@ module.exports = function (K, G) {
       vTorso: Math.min(veces(['push_h', 'fly']), veces(['pull_h', 'pull_v'])), vPierna: veces(['squat', 'lunge', 'hinge', 'hip_ext']),
       cortos: GRANDES.filter(([g]) => m.vol[g] && m.vol[g].obj && m.vol[g].v < m.vol[g].obj - 0.75 - 1e-9).map(([, l]) => l) };
   }
-  return { porque, avisos, GOAL, compra, prohibidas, AVISOS_VISIBLES, rangoDe, reparto };
+  // v14 (P10): la sugerencia por prioridades. Si con el reparto de ahora una zona prioritaria se queda por debajo de su objetivo (el mismo
+  // margen que el aviso de volumen) y con otro de los repartos que se le ofrecen (otros: [{ id, res }], ya generados) ninguna prioridad se
+  // queda corta, se dice cuál y qué cuesta (los días de pierna que pierde). Es una sugerencia: no cambia nada sola. null si no hay nada que sugerir
+  const PRIO_LBL = { pecho: 'el pecho', espalda: 'la espalda', hombro_lat: 'los hombros', hombro_post: 'los hombros', biceps: 'los bíceps', triceps: 'los tríceps', gluteos: 'los glúteos', cuads: 'los cuádriceps', isquios: 'los isquios', gemelos: 'los gemelos', abdomen: 'el abdomen' };
+  function sugerencia(res, inp, otros) {
+    const P = G.effective(inp), corto = r => [...P.prioV].filter(g => r.meta.vol[g] && r.meta.vol[g].obj && r.meta.vol[g].v < r.meta.vol[g].obj - 0.75 - 1e-9);
+    const c0 = corto(res); if (!c0.length) return null;
+    const o = (otros || []).find(x => x && x.res && x.res.ok && x.id !== res.meta.split && corto(x.res).length === 0); if (!o) return null;
+    const a = reparto(res, inp), b = reparto(o.res, inp), gr = [...new Set(c0.map(g => PRIO_LBL[g] || g))], plural = gr.length > 1 || /^(los|las) /.test(gr[0]);
+    return { id: o.id, grupos: gr, dias: b.dias, pierna: b.pierna,
+      texto: `Con este reparto, ${joinY(gr)} no ${plural ? 'llegan' : 'llega'} a lo que pide tu prioridad. Con ${joinY(b.dias).toLowerCase()} sí${b.pierna < a.pierna ? ` (la pierna pasa a ${b.pierna === 1 ? '1 día' : num(b.pierna) + ' días'})` : ''}: lo tienes en «Cambiar reparto».` };
+  }
+  return { porque, avisos, GOAL, compra, prohibidas, AVISOS_VISIBLES, rangoDe, reparto, sugerencia };
 };

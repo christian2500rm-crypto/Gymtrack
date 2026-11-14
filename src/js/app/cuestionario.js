@@ -1093,7 +1093,14 @@ function _obRepOpts(){
   return _ob.ropts={g:g0,planes,rec:pl.rec};
 }
 // (P4) Por qué este reparto y qué más hay, bajo la semana. Solo promete lo que la hoja enseña de verdad
-function _obRepWhy(g){
+// (P10) Con una prioridad que no llega a lo suyo y otro reparto de los que se te ofrecen con el que sí: se sugiere, sin cambiar nada
+function _obSugerencia(g){
+  try{const ro=_obRepOpts();if(ro.planes.length<2||_obForma()!=='dias')return'';
+    const sg=g.E.X.sugerencia(g.res,g.inp,ro.planes.filter(p=>!p.cur).map(p=>({id:p.id,res:p.g.res})));
+    return sg?`<p class="ob-foot ob-sug" data-plan="${esc(sg.id)}">${esc(sg.texto)}</p>`:'';}catch(e){return'';}
+}
+function _obRepWhy(g){return _obRepWhy0(g)+_obSugerencia(g);}
+function _obRepWhy0(g){
   const ro=_obRepOpts(),m=g.res.meta,cur=ro.planes.find(p=>p.cur),rec=ro.planes.find(p=>p.rec),otros=ro.planes.filter(p=>!p.cur);
   // (P9) quien empieza de cero sale con 2 entrenos que se alternan: se dice por qué (la hoja ofrece un entreno distinto cada día)
   if(!_ob.reparto&&_obForma()==='recomendado'&&m.K<m.wd)return'<p class="ob-foot ob-rpq">Para empezar, pocos ejercicios que se repiten: así se aprenden antes. Cuando quieras más variedad, en «Cambiar reparto» tienes un entreno distinto cada día.</p>';

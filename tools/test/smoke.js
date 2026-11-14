@@ -14094,5 +14094,38 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('p10SugerenciaPrio',async()=>{
+// (P10, repaso del reparto) Si una prioridad no llega a lo suyo con el reparto de ahora y con otro de los que se te ofrecen sí, la
+// tarjeta de la semana lo sugiere (qué zona, con qué reparto y qué cuesta) sin cambiar nada: el reparto sugerido está en la hoja y, al
+// elegirlo, la prioridad llega y la sugerencia desaparece. Sin prioridades, con 2-4 entrenos que se repiten o sin poder elegir, no sale.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),rp=()=>[...document.querySelectorAll('#ob-sheet-root .ob-rp')];
+const cortas=()=>{const g=_ob.g,P=g.E.G.effective(g.inp),v=g.res.meta.vol;return[...P.prioV].filter(k=>v[k]&&v[k].obj&&v[k].v<v[k].obj-0.75-1e-9);};
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:4,min:60,age:'18',sport:'no',prio:['pecho','brazos']});['plan','enfoque','forma','roles'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.dia=null;_ob.pins={};_ob.alt=0;_ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);
+  // con pecho y brazos y torso/pierna ×2, el pecho no llega: se sugiere otro reparto, sin cambiar nada
+  const sg=$('.ob-sug'),id=sg&&sg.dataset.plan;
+  E(_ob.g.res.meta.split==='tp4'&&cortas().includes('pecho')&&sg&&/el pecho no llega/.test(tx(sg))&&/a lo que pide tu prioridad/.test(tx(sg))&&/lo tienes en «Cambiar reparto»/.test(tx(sg)),'sugerencia: '+pj([_ob.g.res.meta.split,cortas(),tx(sg)]));
+  E(!_ob.a.plan&&!_ob.a.enfoque&&$('.ob-split .ob-link'),'la sugerencia cambió algo o falta el enlace');
+  // el reparto sugerido está en la hoja; al elegirlo, las prioridades llegan y la sugerencia desaparece
+  if(id){obSplitSheet();await W(5);const b=rp().find(x=>x.dataset.plan===id);E(!!b,'el sugerido no está en la hoja: '+id+' / '+rp().map(x=>x.dataset.plan));
+    if(b){b.click();await W(10);E(_ob.g.res.meta.split===id&&cortas().length===0&&!$('.ob-sug'),'tras elegir el sugerido: '+pj([_ob.g.res.meta.split,cortas(),tx($('.ob-sug'))]));}else obSheetClose();}
+  // al revés: con prioridad de piernas y un solo día de pierna, sugiere volver a dos
+  Object.assign(_ob.a,{prio:['piernas'],enfoque:'torso'});delete _ob.a.plan;_ob.dirty=true;obRender();await W(5);
+  E(_ob.g.res.meta.split==='pplt4'&&$('.ob-sug')&&/los cuádriceps|los isquios/.test(tx($('.ob-sug')))&&/no llegan/.test(tx($('.ob-sug')))&&$('.ob-sug').dataset.plan==='tp4','prioridad de piernas con un día de pierna: '+pj([_ob.g.res.meta.split,tx($('.ob-sug'))]));
+  // sin prioridades, con 2-4 entrenos que se repiten y con 65 o más: nada
+  Object.assign(_ob.a,{prio:[]});delete _ob.a.enfoque;_ob.dirty=true;obRender();await W(5);E(!$('.ob-sug'),'sin prioridades: '+tx($('.ob-sug')));
+  Object.assign(_ob.a,{prio:['pecho','brazos']});_ob.reparto='recomendado';_ob.dirty=true;obRender();await W(5);E(!$('.ob-sug'),'con 2-4 entrenos: '+tx($('.ob-sug')));
+  _ob.reparto='dias';Object.assign(_ob.a,{age:'65',goal:'salud'});_ob.dirty=true;obRender();await W(5);E(!$('.ob-sug'),'con 65 o más: '+tx($('.ob-sug')));
+  E(pj(getPlan())===plan0,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

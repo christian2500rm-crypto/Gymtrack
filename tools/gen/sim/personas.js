@@ -396,6 +396,14 @@ Object.assign(REGLAS, {
     ['El día de pierna lleva sentadilla y bisagra principales', R => R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'squat') && R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'hinge')],
     ['Pecho y espalda llegan a su objetivo (el torso trabaja 2 veces)', R => R.m.vol.pecho.v >= R.m.vol.pecho.obj && R.m.vol.espalda.v >= R.m.vol.espalda.obj, R => JSON.stringify([R.m.vol.pecho, R.m.vol.espalda])],
     ['El porqué dice que hay un solo día de pierna', R => T(R, /un solo día de pierna/)],
+    ['Las prioridades sugieren un reparto (P10): con pecho y brazos y torso/pierna ×2 el pecho no llega y se sugiere el de un día de pierna; con prioridad de piernas y un día de pierna, torso/pierna ×2; y la sugerencia es verdad', R => {
+      const con = (extra, plan) => { const i = G.desdeRespuestas(Object.assign({ goal: 'musculo', exp: '6m2a', days: 4, min: 60, age: '18', screen: 'nada', zones: {}, sport: 'no', places: R.inp.places }, extra, plan ? { plan } : {})); return { i, r: G.genRoutine(i) }; };
+      const otros = (extra, de) => ['tp4', 'pplt4', 'pplc4', 'grp4'].filter(id => id !== de).map(id => ({ id, res: con(extra, id === 'tp4' ? null : id).r }));
+      const a = con({ prio: ['pecho', 'brazos'] }), sa = X.sugerencia(a.r, a.i, otros({ prio: ['pecho', 'brazos'] }, 'tp4'));
+      const b = con({ prio: ['piernas'] }, 'pplt4'), sb = X.sugerencia(b.r, b.i, otros({ prio: ['piernas'] }, 'pplt4'));
+      const llega = (s, extra) => { const r = s.id === 'tp4' ? con(extra).r : con(extra, s.id).r, P2 = G.effective(con(extra).i); return [...P2.prioV].every(g => r.meta.vol[g].v >= r.meta.vol[g].obj - 0.75 - 1e-9); };
+      return a.r.meta.split === 'tp4' && sa && sa.grupos.includes('el pecho') && /no llega/.test(sa.texto) && /Cambiar reparto/.test(sa.texto) && llega(sa, { prio: ['pecho', 'brazos'] }) && X.prohibidas([sa.texto]).length === 0
+        && b.r.meta.split === 'pplt4' && sb && sb.id === 'tp4' && /los cuádriceps|los isquios/.test(sb.texto) && llega(sb, { prio: ['piernas'] }); }],
     ['Otro entreno para un día (P7): ese día cambia, los demás conservan sus ejercicios, la rutina cumple todo y se reproduce', R => R.res.det.every((_, pos) => { const o = G.otroDia(R.inp, {}, R.res, pos); if (!o) return false;
       const f = d => d.rows.filter(x => x.kind === 'str').map(x => x.lib).sort().join(','), r1 = G.genRoutine(R.inp, { altDia: o.ctx.altDia, fijos: o.ctx.fijos, prev: new Set(o.ctx.prev) });
       return o.res.ok && o.nuevos >= 1 && o.res.det.every((d, i) => i === pos ? f(d) !== f(R.res.det[i]) : f(d) === f(R.res.det[i])) && Object.keys(SEG(o.res, R.inp)).length === 0 && JSON.stringify(r1.days) === JSON.stringify(o.res.days)
@@ -423,6 +431,7 @@ Object.assign(REGLAS, {
     ['Sale el reparto elegido (empuje, tirón, pierna y torso)', R => R.m.split === 'pplt4', R => R.m.split],
     ['Los cuatro levantamientos de fuerza siguen en la semana: sentadilla, peso muerto, banca y militar', R => hay(R, 'back_squat', 'deadlift', 'bench_press', 'ohp_bb').length === 4, R => hay(R, 'back_squat', 'deadlift', 'bench_press', 'ohp_bb').join(',')],
     ['Sentadilla y peso muerto, los dos en el día de pierna', R => R.rows.filter(r => ['lib_back_squat', 'lib_deadlift'].includes(r.lib)).every(r => r.dia === 'C')],
+    ['Sin prioridades no hay nada que sugerir (P10)', R => X.sugerencia(R.res, R.inp, G.planes(R.inp).otros.map(id => ({ id, res: G.genRoutine(Object.assign({}, R.inp, { plan: id })) }))) === null],
     ['A quien busca fuerza no se le ofrece «por músculos»', R => !G.planes(R.inp).otros.some(x => /^grp/.test(x)), R => G.planes(R.inp).otros.join(',')]] },
   paco: { debe: [SIN_PLAN, ['Torso y pierna (su reparto de 65 o más con experiencia)', R => ['tp2', 'tp4'].includes(R.m.split), R => R.m.split]],
     debeAlt: [SIN_PLAN, ['Torso y pierna en 4 entrenos (su reparto de 65 o más con experiencia)', R => R.m.split === 'tp4', R => R.m.split],
