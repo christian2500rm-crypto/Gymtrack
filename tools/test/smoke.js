@@ -6529,7 +6529,7 @@ await safe('dlRecommend',async()=>{
     S.restWeeks=[{startTs:Date.now()-10*_D3,endTs:Date.now()-3*_D3}];if(coach_deloadReco())throw new Error('recién descansado');
     S.restWeeks=[{startTs:Date.now()-2*_D3,endTs:Date.now()+5*_D3}];if(coach_deloadReco())throw new Error('en semana de descanso');S.restWeeks=[];
     m=_fat13({weeks:4,r3:0.1,miss:0,drop:0,dur:0});if(coach_deloadReco())throw new Error('4 semanas');
-    m=_fat13({weeks:6,r3:0.1,miss:0,drop:0,dur:0});r=coach_deloadReco();const wk=Math.floor(coach_analyze().fatigue.weeks);
+    m=_fat13({weeks:13,r3:0.1,miss:0,drop:0,dur:0});r=coach_deloadReco();const wk=Math.floor(coach_analyze().fatigue.weeks);
     if(m.level!=='baja'||!r||r.src!=='weeks'||r.tag!==`${wk} semanas sin descanso`||!r.why.startsWith(`Llevas ${wk} semanas seguidas entrenando sin descanso ni descarga.`))throw new Error('semanas '+JSON.stringify(r));
     if(!startDeload('ex',[getPlan().A.ex.find(e=>!e.cardio&&+e.s>1).id],'x')||!coach_deloadReco())throw new Error('«Descarga en X» no deja recomendar la de todo el plan');
     _restoreDeload(true);if(!startDeload('all')||coach_deloadReco())throw new Error('en descarga');_restoreDeload(true);S.deloadHistory=[];
@@ -6670,8 +6670,8 @@ await safe('dlRound1',async()=>{
       const an=coach_analyze(),m=coach_fatigueMeter(an);
       const fk=o=>Object.assign({},an,{fatigue:Object.assign({},an.fatigue,o)});
       if(m.level&&m.level!=='alta'){
-        const w1=coach_fatigueMeter(fk({weeks:8,sessionsSince:12,regress:0,deloadNeeded:true})).why;
-        if(/seguir apretando/.test(w1)||!/pero llevas 8 semanas sin descanso/.test(w1))throw new Error('medidor con 8 semanas: '+w1);
+        const w1=coach_fatigueMeter(fk({weeks:12,sessionsSince:20,regress:0,deloadNeeded:true})).why;
+        if(/seguir apretando/.test(w1)||!/pero llevas 12 semanas sin descanso/.test(w1))throw new Error('medidor con 12 semanas: '+w1);
         const w2=coach_fatigueMeter(fk({weeks:3,sessionsSince:12,regress:2,deloadNeeded:true})).why;
         if(/seguir apretando/.test(w2)||!/pero 2 ejercicios bajan de nivel/.test(w2))throw new Error('medidor con retrocesos: '+w2);
       }
@@ -6803,7 +6803,7 @@ await safe('dlPolish13e',async()=>{
     // (13e r1) tras «Ahora no» la propuesta queda en espera (sin «Aplicar», no cuenta en Inicio) y la única oferta es el
     // botón del medidor (su línea: primero el diagnóstico, sin instrucciones detrás)
     S.currentPlan=JSON.parse(base);
-    _fat13({weeks:6,r3:0.1,miss:0,drop:0,dur:0});S.dlRecoSnoozeTs=null;_dlRecoPlan='sets';
+    _fat13({weeks:13,r3:0.1,miss:0,drop:0,dur:0});S.dlRecoSnoozeTs=null;_dlRecoPlan='sets';
     if(!coach_deloadReco())throw new Error('sin recomendación');
     S.pendingCoachProposals=[{id:'deload_week',type:'deload',basis:'fatigue',prio:0,sev:6,ic:'🧘',tag:'Descarga',createdAt:Date.now(),title:'Semana de descarga',diff:'−40 % de series · mismo peso · 7 días',short:'una semana de descarga',description:'Llevas 6 semanas sin descanso.'}];
     if(!coach_pendingView().active.some(p=>p.type==='deload'))throw new Error('propuesta no activa');
@@ -9025,7 +9025,7 @@ await safe('menores16b',async()=>{
     _fat13({weeks:3,r3:0.7,miss:0.5,drop:0.5,dur:0.4});S.dlRecoSnoozeTs=Date.now()+5*D;m=coach_fatigueMeter();
     E(m.level==='alta'&&m.dlGo,'fatiga alta pospuesta sin botón '+m.score);S.dlRecoSnoozeTs=null;
     // 7. Pista «Máximo 3 cambios…»: no con la descarga como única propuesta (enlace o en espera); sí con otra propuesta
-    _fat13({weeks:6,r3:0.1,miss:0,drop:0,dur:0});S.dlRecoSnoozeTs=null;
+    _fat13({weeks:13,r3:0.1,miss:0,drop:0,dur:0});S.dlRecoSnoozeTs=null;
     const dlP={id:'deload_week',type:'deload',basis:'fatigue',prio:0,sev:6,ic:'🧘',tag:'Descarga',createdAt:Date.now(),title:'Semana de descarga',diff:'−40 % de series · mismo peso · 7 días',short:'una semana de descarga',description:'Llevas 6 semanas sin descanso.'};
     S.pendingCoachProposals=[dlP];go('coach');await W(10);
     E(document.querySelector('#app .prop-dl-link')&&!document.querySelector('#app .prop-hint'),'pista con solo el enlace a la descarga');
@@ -13565,6 +13565,38 @@ try{
     const an=coach_analyze(),it=an.items.find(i=>i.ex.id===X.ex.id);
     E(it&&it.p.trend==='stagnant'&&it.note==='effort'&&!an.candByEx[X.ex.id],'análisis: '+(it&&it.p.trend)+' '+(it&&it.note));
     E(coach_detailHtml(an,coach_pendingView(an)).includes('acércate más al límite'),'el análisis detallado no dice el motivo');}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  _coachLvPin=pin0;
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('coachDescargaCalendario',async()=>{
+// (C8) La semana de descarga «por semanas seguidas» ya no sale solo por calendario: hace falta que el resto del medidor marque algo
+// (aquí, series al límite), o llevar 12 semanas (red de seguridad), y entrenar al menos 1,5 sesiones por semana de media. Antes, 5
+// semanas progresando con la fatiga baja ya la recomendaban.
+const full=JSON.parse(JSON.stringify(S)),bad=[],pin0=_coachLvPin;const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  _coachLvPin='P';S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.planMeta=null;S.appliedProposals=[];S.pendingCoachProposals=[];S.dlRecoSnoozeTs=null;S.mesocycles=[];S.rpeOn=true;syncActiveWorkout();
+  const D=864e5,n=Date.now(),exs=Object.values(getPlan()).flatMap(d=>d.ex).filter(e=>!e.cardio&&exLT(e)==='w').slice(0,3),k0=liveDayKeys()[0];E(exs.length===3,'sin tres ejercicios con kilos');
+  // nSes sesiones, una cada «cada» días; progresando despacio y cumpliendo el objetivo; esfuerzo «justo» (o «al límite» las dos últimas semanas)
+  const monta=(nSes,cada,lim)=>{S.sessions=[...Array(nSes)].map((_,i)=>({day:k0,date:'x',ts:n-(nSes-1-i)*cada*D-3600e3}));S.coachStart=S.sessions[0].ts;S.strength={};
+    exs.forEach(x=>{const hi=repRange(x).hi;S.strength[x.id]=S.sessions.map((s,i)=>{const v=40+Math.floor(i/4)*2.5,rp=lim&&n-s.ts<14*D?3:2;
+      return{d:'x',v,r:hi,setsDone:3,rpe:rp,muscle:x.muscle,ts:s.ts,ps:3,pr:x.r,sets:[{w:v,r:hi,rpe:rp},{w:v,r:hi,rpe:rp},{w:v,r:hi,rpe:rp}]};});});
+    const an=coach_analyze(),m=coach_fatigueMeter(an),r=coach_deloadReco(an,m);
+    return{an,m,r,src:r?r.src:null,sw:Math.round(_fatNoWeeks(m.factors)),w:+an.fatigue.weeks.toFixed(1),cand:an.candidates.some(c=>c.type==='deload')};};
+  // 6 semanas seguidas, 3-4 días por semana, todo en orden: ni recomendación ni propuesta de descarga
+  let q=monta(24,2,false);E(q.w>=5&&q.m.score!=null&&q.sw<DL_CAL_MIN&&!q.r&&!q.cand&&!q.an.fatigue.deloadNeeded,'6 semanas sin señales: '+pj([q.w,q.m.score,q.sw,q.src,q.cand]));
+  E(!q.m.why.includes('semana de descarga')&&!q.m.dlGo,'el medidor la pide igualmente: '+q.m.why);
+  // las mismas 6 semanas con las series al límite: sí
+  q=monta(24,2,true);E(q.sw>=DL_CAL_MIN&&q.src==='weeks'&&q.cand,'6 semanas con series al límite: '+pj([q.w,q.m.score,q.sw,q.src,q.cand]));
+  // 13 semanas sin señales: red de seguridad
+  q=monta(46,2,false);E(q.w>=DL_CAL_MAX&&q.sw<DL_CAL_MIN&&q.src==='weeks'&&q.cand,'13 semanas: '+pj([q.w,q.sw,q.src,q.cand]));
+  // una sesión cada 6 días: no cuenta, ni con 13 semanas ni con las series al límite
+  q=monta(8,6,true);E(q.w>=5&&!q.r&&!q.cand,'una sesión cada 6 días, 6 semanas: '+pj([q.w,q.sw,q.src,q.cand]));
+  q=monta(16,6,false);E(q.w>=DL_CAL_MAX&&!q.r&&!q.cand,'una sesión cada 6 días, 13 semanas: '+pj([q.w,q.sw,q.src,q.cand]));
+  // la nota sin el factor de las semanas: solo cuentan los factores con datos
+  E(_fatNoWeeks([{key:'weeks',ok:true,w:20,s:1},{key:'rpe',ok:true,w:30,s:0.5},{key:'miss',ok:false,w:20,s:1}])===50&&_fatNoWeeks([{key:'weeks',ok:true,w:20,s:1}])===0&&_fatNoWeeks(null)===0,'_fatNoWeeks');
   if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
 }finally{
   _coachLvPin=pin0;

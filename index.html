@@ -19545,15 +19545,15 @@ function coach_fatigueMeter(an){
   const why=score==null?(!hasSess?(on?'Entrena y marca el esfuerzo de tus series: con 2 semanas de datos verás tu fatiga.':'Entrena: con 2 semanas de datos verás tu fatiga.')
       :!recent?`No has entrenado en las 2${NB}últimas semanas: no hay fatiga que medir.`
       :on?'Aún faltan datos: marca el esfuerzo de tus series (Fácil, Justo o Al límite) un par de semanas más.':'Aún faltan datos: entrena un par de semanas más.')
-    :_fatWhyCtx(level,an);
+    :_fatWhyCtx(level,an,_fatNoWeeks(factors));
   // dlGo: con la recomendación pospuesta y la línea pidiendo descarga, el medidor ofrece empezarla (botón)
-  const dlGo=score!=null&&!!_fatDlAsk(level,an)&&_dlSnoozedOffer();
+  const dlGo=score!=null&&!!_fatDlAsk(level,an,_fatNoWeeks(factors))&&_dlSnoozedOffer();
   return{score,level,factors,main,why,enough,dlGo,days:FATIGUE_DAYS};
 }
 // (13 r1) La línea del medidor no contradice al resto del Coach: en descarga o descanso toca recuperar, y si la semana de
 // descarga se recomienda por semanas sin descanso o por ejercicios que bajan, se dice aunque la nota sea baja.
 // ¿Pide la línea una semana de descarga? 'alta' | 'weeks' | 'regress' | null
-function _fatDlAsk(level,an){
+function _fatDlAsk(level,an,sw){ // sw (C8): la nota sin el factor de las semanas
   const dl=getActiveDeload();
   if((dl&&dl.kind==='all')||getActiveRest())return null;
   // (16b) Las mismas reglas que coach_deloadReco (salvo «Ahora no», que decide quien llama): con la fatiga alta solo
@@ -19561,17 +19561,17 @@ function _fatDlAsk(level,an){
   const f=an&&(an.fatigue||coach_fatigue(an));
   if(f&&(S.sessions||[]).length>=CYCLE_MIN_SESSIONS){
     if(level==='alta'&&f.weeks>=2)return'alta';
-    if(_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS)return'weeks';
+    if(_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS&&_dlCalOk(f,sw))return'weeks';
     if(f.deloadNeeded&&f.regress>=2)return'regress';
   }
   return null;
 }
-function _fatWhyCtx(level,an){
+function _fatWhyCtx(level,an,sw){
   const dl=getActiveDeload();
   if(dl&&dl.kind==='all')return level==='alta'?'Fatiga alta: bien hecho, estás en tu semana de descarga. Toca recuperar, no apretar.'
     :'Estás en tu semana de descarga: toca recuperar, no apretar.';
   if(getActiveRest())return'Estás en tu semana de descanso: toca recuperar.';
-  const ask=_fatDlAsk(level,an);
+  const ask=_fatDlAsk(level,an,sw);
   if(ask==='alta')return'Fatiga alta: tu cuerpo pide bajar el ritmo una semana.';
   const f=an&&(an.fatigue||coach_fatigue(an)),lv=level==='alta'?'Fatiga alta':level==='moderada'?'Fatiga moderada':'Fatiga baja';
   // (16e) «aunque acabas de recuperar» solo si de verdad hubo una recuperación (descarga, descanso o parón)
@@ -19695,6 +19695,15 @@ function _dlRecoSnoozed(){const t=S.dlRecoSnoozeTs;return typeof t==='number'&&i
 // ¿Hay una «Semana de descarga» del cierre de ciclo entre las propuestas activas?
 function _dlPropActive(){return(S.pendingCoachProposals||[]).some(p=>p&&p.type==='deload')&&coach_pendingView().active.some(p=>p&&p.type==='deload');}
 // {src:'fatigue'|'weeks'|'regress', tag, why, score, weeks} o null
+// (C8) Descarga cuando hace falta, no por calendario. «N semanas seguidas» por sí solo ya no basta para recomendarla: además tiene que
+// marcar algo el resto del medidor (series al límite, objetivos sin cumplir, ejercicios que bajan, sesiones que se alargan: nota sin
+// el factor de las semanas ≥ DL_CAL_MIN), o haber pasado DL_CAL_MAX semanas (red de seguridad); y no cuenta para quien entrena menos
+// de DL_CAL_DENS sesiones por semana de media. Antes, a quien empezaba y progresaba con la fatiga baja le tocaba una de cada seis
+// semanas. Con fatiga alta o dos ejercicios bajando, como siempre.
+const DL_CAL_MIN=30,DL_CAL_MAX=12,DL_CAL_DENS=1.5;
+// Nota de fatiga (0-100) sin el factor «semanas sin descanso», que si no se justifica a sí mismo. fs: los factores del medidor
+function _fatNoWeeks(fs){const a=(fs||[]).filter(x=>x&&x.ok&&x.key!=='weeks'),w=a.reduce((t,x)=>t+x.w,0);return w>0?100*a.reduce((t,x)=>t+x.w*x.s,0)/w:0;}
+function _dlCalOk(f,sw){return f.sessionsSince>=f.weeks*DL_CAL_DENS&&((+sw||0)>=DL_CAL_MIN||f.weeks>=DL_CAL_MAX);}
 function coach_deloadReco(an,m){
   if((S.sessions||[]).length<CYCLE_MIN_SESSIONS)return null;
   const d=getActiveDeload();if(d&&d.kind==='all')return null;
@@ -19704,7 +19713,7 @@ function coach_deloadReco(an,m){
   m=m||coach_fatigueMeter(an);
   const wk=Math.floor(f.weeks);
   const high=m.score!=null&&m.score>=FATIGUE_HIGH&&f.weeks>=2;
-  const long=_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS;
+  const long=_dlProactive()&&f.weeks>=_dlRecoWeeks()&&f.sessionsSince>=DELOAD_RECO_MIN_SESS&&_dlCalOk(f,_fatNoWeeks(m.factors)); // (C8)
   const reg=!!f.deloadNeeded&&f.regress>=2;
   if(!high&&!long&&!reg)return null;
   const weeksTxt=`${plural(wk,'semana')} seguida${wk===1?'':'s'} entrenando sin descanso ni descarga`;
@@ -20084,6 +20093,8 @@ function coach_analyze(){
   const an={items,strong:of(items,'strong_up'),up:of(items,'up','strong_up'),flat:of(act,'flat'),stagnant:of(act,'stagnant'),down:of(act,'down'),
     held:items.filter(i=>i.hold),withData:items.filter(i=>i.p.trend!=='insufficient')};
   an.fatigue=coach_fatigue(an);
+  // (C8) la «Semana de descarga» del cierre de ciclo, si es solo por semanas, con la misma condición que la recomendación
+  {const f=an.fatigue;if(f.deloadNeeded&&f.regress<2&&!_dlCalOk(f,_fatNoWeeks(coach_fatigueMeter(an).factors)))f.deloadNeeded=false;}
   an.candidates=coach_buildCandidates(an);
   an.preview=coach_selectProposals(an.candidates,{fresh:true}); // lo que propondría al cerrar el ciclo
   an.candByEx={};
