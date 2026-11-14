@@ -7,6 +7,9 @@ function _toastPlace(){
   try{
     let b=_dockH();const app=document.getElementById('app').getBoundingClientRect(),cta=S.tab==='dash'?document.querySelector('.hoy>.hoy-cta'):null;
     if(cta){const r=cta.getBoundingClientRect(),dk=app.bottom-b;if(r.height&&r.bottom>dk-70&&r.top<dk)b=Math.round(app.bottom-r.top)+4;}
+    // En el cuestionario (a pantalla completa), encima de su barra de botones fija: si no, el aviso se pintaba sobre «Usar esta rutina»
+    const ob=typeof _obOpen==='function'&&_obOpen()?document.querySelector('#onboarding .ob-next'):null;
+    if(ob){const r=ob.getBoundingClientRect(),vh=window.innerHeight;if(r.height&&r.top<vh&&r.bottom>vh-8)b=Math.max(b,Math.round(vh-r.top)+4);}
     const v=b+'px',rs=document.documentElement.style;if(rs.getPropertyValue('--toast-b')!==v)rs.setProperty('--toast-b',v);
   }catch(e){}
 }

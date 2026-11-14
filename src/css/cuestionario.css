@@ -107,6 +107,7 @@
 .ob-mv span{flex:1;min-width:0;font-size:14px;color:var(--text2)}
 .ob-mvb{min-height:44px;padding:0 14px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .ob-mvb:disabled{opacity:.45;cursor:default}
+.ob-mvw{margin:10px 0 0;color:var(--amber-hi)}
 .ob-mvb:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ob-qc .ob-link.ob-qc-rp{padding:4px 0}
 .ob-qc .ob-changed{margin:0 0 10px}

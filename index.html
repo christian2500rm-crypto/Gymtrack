@@ -305,6 +305,7 @@ input{font-family:inherit}
 .ob-mv span{flex:1;min-width:0;font-size:14px;color:var(--text2)}
 .ob-mvb{min-height:44px;padding:0 14px;border-radius:var(--rsm);background:var(--bg3);border:1px solid var(--border2);color:var(--text);font:inherit;font-size:14px;font-weight:600;cursor:pointer}
 .ob-mvb:disabled{opacity:.45;cursor:default}
+.ob-mvw{margin:10px 0 0;color:var(--amber-hi)}
 .ob-mvb:focus-visible{outline:2px solid var(--green);outline-offset:2px}
 .ob-qc .ob-link.ob-qc-rp{padding:4px 0}
 .ob-qc .ob-changed{margin:0 0 10px}
@@ -15925,6 +15926,14 @@ function _zonasDe(pats){const n={pierna:0,empuje:0,'tirón':0};pats.forEach(p=>{
 // Parejas de días seguidos que repiten zona: [[i, zona]…] (i = el primero de la pareja)
 function _zonasSeguidas(dias){const out=[];for(let i=0;i+1<dias.length;i++){const z=dias[i].filter(x=>dias[i+1].includes(x));if(z.length)out.push([i,z[0]]);}return out;}
 function _obZonasDias(g){return g.res.det.map(d=>_zonasDe(d.rows.filter(r=>r.kind==='str').map(r=>r.pat)));}
+// (P8) Con el orden que le diste a los días, ¿queda la misma zona dos días seguidos y en el orden de partida no? Se dice en una línea
+// junto a los botones de mover, que se queda mientras el orden siga así (antes iba en el aviso que desaparece, y tapaba los botones)
+function _obOrdenOjo(g){
+  try{const o=g.res.meta.orden,cur=_obZonasDias(g),K=cur.length;if(!Array.isArray(o)||o.length!==K)return'';
+    const nat=[];o.forEach((src,i)=>{nat[src]=cur[i];});const zs=_zonasSeguidas(cur);if(zs.length<=_zonasSeguidas(nat).length)return'';
+    const ks=Object.keys(g.res.days),[i,z]=zs[0];
+    return`Ojo: el Día ${ks[i]} y el Día ${ks[i+1]} trabajan ${z==='pierna'?'la pierna':'el '+z} seguidos. Si entrenas dos días seguidos, deja uno de descanso en medio.`;}catch(e){return'';}
+}
 // ── (P7, repaso del reparto) «Otro entreno para este día»: cambia los ejercicios del día abierto y deja los demás como están. Lo hace el
 // generador (otroDia: sorteo solo en ese día, los demás anclados a lo que tienen; las series de la semana se vuelven a cuadrar y pasan
 // las mismas reglas). _ob.dia guarda el contexto que reproduce la rutina que ves; lo que fijaste con ⇄ se vuelve a aplicar ──
@@ -15991,14 +16000,14 @@ function obOtherDay(letra){
 function obMoveDay(letra,dir){
   if(!_ob||!_ob.g)return;const ks=Object.keys(_ob.g.res.days),K=ks.length,i=ks.indexOf(letra),j=i+(dir<0?-1:1);if(i<0||j<0||j>=K)return;
   const cur=Array.isArray(_ob.g.res.meta.orden)&&_ob.g.res.meta.orden.length===K?_ob.g.res.meta.orden.slice():Array.from({length:K},(_,n)=>n);
-  const antes=_zonasSeguidas(_obZonasDias(_ob.g)).length;[cur[i],cur[j]]=[cur[j],cur[i]];
+  [cur[i],cur[j]]=[cur[j],cur[i]];
   // lo que fijaste con ⇄ va con su día (la clave lleva la letra)
   const P={};Object.keys(_ob.pins||{}).forEach(k=>{const a=k.split('|');if(a[0]===ks[i])a[0]=ks[j];else if(a[0]===ks[j])a[0]=ks[i];P[a.join('|')]=_ob.pins[k];});_ob.pins=P;
   _ob.orden=cur.every((x,n)=>x===n)?null:cur;_ob.ordenDe=_ob.g.res.meta.split+':'+K;_ob.tab=ks[j];_ob.why=null;_ob.dirty=true;_obSaveDraft();_obGenerate();
-  const zs=_zonasSeguidas(_obZonasDias(_ob.g)),ri=_obRepInfo(_ob.g);
+  const ri=_obRepInfo(_ob.g);
   _ob.changed='el orden de los días'+(ri&&!ri.completo?': '+ri.dias.join(' · '):'');
   obRender({keepFocus:true,keepScroll:true});const b=document.querySelector(`#ob-root .ob-mvb[data-d="${dir<0?-1:1}"]:not([disabled])`)||document.querySelector('#ob-root .ob-mvb:not([disabled])');if(b)try{b.focus({preventScroll:true});}catch(e){}
-  toast(`Ahora es el Día ${ks[j]}`+(zs.length>antes?`. Ojo: el Día ${ks[zs[0][0]]} y el Día ${ks[zs[0][0]+1]} trabajan ${zs[0][1]==='pierna'?'la pierna':'el '+zs[0][1]} seguidos; si entrenas dos días seguidos, deja uno en medio`:''),zs.length>antes?5200:2400);
+  toast(`Ahora es el Día ${ks[j]}`,2400); // (el «ojo» de las zonas seguidas es una línea fija bajo los botones: _obOrdenOjo)
 }
 // (M3) Imagen de un ejercicio de la biblioteca: el fotograma 3D del motor (thumbsIn lo dibuja en tiempo libre y lo guarda) encima
 // de su respaldo, la figura teñida con su emoji (cardio: solo el emoji), como en el selector. TH_OB: la de las filas de la rutina
@@ -16061,7 +16070,7 @@ function _obDaysHtml(){
     ${P.inicio||P.cauto?'<p class="ob-foot">4 × 8-10 = 4 series de 8 a 10 repeticiones.</p>':''}
     ${typeof obFocusSheet==='function'&&_obPuedeFoco(g)?`<button type="button" class="ob-link ob-fo" aria-haspopup="dialog" onclick="obFocusSheet('${tab}')">Cambiar el foco de este día ›</button>`:''}
     ${nStr&&typeof obOtherDay==='function'?`<button type="button" class="ob-link ob-od" onclick="obOtherDay('${tab}')">Otro entreno para este día ›</button>`:''}
-    ${ks.length>1&&typeof obMoveDay==='function'?`<div class="ob-mv" role="group" aria-label="Mover el Día ${tab}"><span>Mover este día</span><button type="button" class="ob-mvb" data-d="-1" onclick="obMoveDay('${tab}',-1)" aria-label="Mover el Día ${tab} antes"${ks.indexOf(tab)===0?' disabled':''}>‹ Antes</button><button type="button" class="ob-mvb" data-d="1" onclick="obMoveDay('${tab}',1)" aria-label="Mover el Día ${tab} después"${ks.indexOf(tab)===ks.length-1?' disabled':''}>Después ›</button></div>`:''}
+    ${ks.length>1&&typeof obMoveDay==='function'?`<div class="ob-mv" role="group" aria-label="Mover el Día ${tab}"><span>Mover este día</span><button type="button" class="ob-mvb" data-d="-1" onclick="obMoveDay('${tab}',-1)" aria-label="Mover el Día ${tab} antes"${ks.indexOf(tab)===0?' disabled':''}>‹ Antes</button><button type="button" class="ob-mvb" data-d="1" onclick="obMoveDay('${tab}',1)" aria-label="Mover el Día ${tab} después"${ks.indexOf(tab)===ks.length-1?' disabled':''}>Después ›</button></div>${_obOrdenOjo(g)?`<p class="ob-foot ob-mvw" role="status">${esc(_obOrdenOjo(g))}</p>`:''}`:''}
   </section>`;
 }
 OB_SCR['ob-rutina']={block:4,html:()=>{
@@ -16972,6 +16981,9 @@ function _toastPlace(){
   try{
     let b=_dockH();const app=document.getElementById('app').getBoundingClientRect(),cta=S.tab==='dash'?document.querySelector('.hoy>.hoy-cta'):null;
     if(cta){const r=cta.getBoundingClientRect(),dk=app.bottom-b;if(r.height&&r.bottom>dk-70&&r.top<dk)b=Math.round(app.bottom-r.top)+4;}
+    // En el cuestionario (a pantalla completa), encima de su barra de botones fija: si no, el aviso se pintaba sobre «Usar esta rutina»
+    const ob=typeof _obOpen==='function'&&_obOpen()?document.querySelector('#onboarding .ob-next'):null;
+    if(ob){const r=ob.getBoundingClientRect(),vh=window.innerHeight;if(r.height&&r.top<vh&&r.bottom>vh-8)b=Math.max(b,Math.round(vh-r.top)+4);}
     const v=b+'px',rs=document.documentElement.style;if(rs.getPropertyValue('--toast-b')!==v)rs.setProperty('--toast-b',v);
   }catch(e){}
 }

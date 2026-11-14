@@ -14035,11 +14035,17 @@ try{
   E(pj(_ob.orden)==='[0,2,1,3]'&&_ob.tab==='C'&&Object.values(_ob.g.res.meta.tpl).join(',')==='T1,T2,P1,P2'&&tx($('.ob-wkn'))==='Torso · Torso · Pierna · Pierna','orden tras mover: '+pj([_ob.orden,_ob.tab,Object.values(_ob.g.res.meta.tpl),tx($('.ob-wkn'))]));
   E(libs('A')===L0.A&&libs('B')===L0.C&&libs('C')===LB&&libs('D')===L0.D&&_ob.c.days.C.ex[i].lib===pin&&Object.keys(_ob.pins).every(k=>!/^B\|/.test(k))&&Object.keys(_ob.pins).some(k=>/^C\|/.test(k)),'los ejercicios o lo fijado no van con su día');
   E(/^Pierna/.test(_ob.g.res.days.C.focus)&&_ob.g.res.days.C.label==='Día C'&&/Día C · Pierna/.test(tx($('.ob-dh')))&&/Ha cambiado: el orden de los días: Torso · Torso · Pierna · Pierna/.test(tx($('.ob-changed'))),'día C y «Ha cambiado»: '+tx($('.ob-changed')));
-  E(/Ahora es el Día C/.test(tt())&&/Ojo: el Día [A-D] y el Día [A-D] trabajan .* seguidos/.test(tt()),'aviso de zonas seguidas: '+tt());
+  // el aviso corto («Ahora es el Día C») sale por encima de la barra de botones fija, sin taparla; el «ojo» de las zonas seguidas es
+  // una línea junto a los botones de mover, que no desaparece: sigue ahí al repintar y al cambiar de día
+  {const to=document.getElementById('toast'),bar=$('.ob-next').getBoundingClientRect(),tb=parseFloat(getComputedStyle(to).bottom),ojo=()=>tx($('.ob-mvw'));
+    E(/^Ahora es el Día C$/.test(tt())&&!/Ojo/.test(tt())&&to.classList.contains('show'),'aviso corto: '+tt());
+    E(bar.height>0&&tb>=window.innerHeight-bar.top&&tb<window.innerHeight-bar.top+24,'el aviso tapa la barra de botones: '+pj([tb,window.innerHeight,bar.top]));
+    E(/^Ojo: el Día [A-D] y el Día [A-D] trabajan (la pierna|el tirón|el empuje) seguidos\. Si entrenas dos días seguidos, deja uno de descanso en medio\.$/.test(ojo()),'línea de zonas seguidas: '+ojo());
+    const o1=ojo();obRender();await W(5);E(ojo()===o1,'la línea no se queda al repintar');obTab('A');await W(5);E(ojo()===o1,'la línea no sale en los demás días');obTab('C');await W(5);}
   E(_ob.t.porque.concat(_ob.t.avisos).length===t0&&Object.keys(_ob.g.E.SEG(_ob.g.res,_ob.g.inp)).length===0&&pj(S.obDraft.orden)==='[0,2,1,3]','textos, seguridad o borrador: '+pj(S.obDraft&&S.obDraft.orden));
   // «Otra propuesta» conserva el orden; volver a moverlo lo deja como estaba; cambiar de reparto lo olvida
   obOther(1);await W(5);E(Object.values(_ob.g.res.meta.tpl).join(',')==='T1,T2,P1,P2','«Otra propuesta» pierde el orden');obOther(-1);await W(5);
-  obTab('C');await W(5);mv(-1).click();await W(10);E(!_ob.orden&&Object.values(_ob.g.res.meta.tpl).join(',')==='T1,P1,T2,P2'&&libs('B')===LB&&!/Ojo/.test(tt()),'vuelta al orden de partida: '+pj([_ob.orden,tt()]));
+  obTab('C');await W(5);mv(-1).click();await W(10);E(!_ob.orden&&Object.values(_ob.g.res.meta.tpl).join(',')==='T1,P1,T2,P2'&&libs('B')===LB&&!/Ojo/.test(tt())&&!$('.ob-mvw'),'vuelta al orden de partida: '+pj([_ob.orden,tt(),tx($('.ob-mvw'))]));
   obTab('D');await W(5);E(mv(1).disabled&&!mv(-1).disabled,'botones del último día');mv(-1).click();await W(10);E(pj(_ob.orden)==='[0,1,3,2]','mover el último: '+pj(_ob.orden));
   obSplitSheet();await W(5);[...document.querySelectorAll('#ob-sheet-root .ob-rp')].find(b=>b.dataset.plan==='pplc4').click();await W(10);
   E(!_ob.orden&&Object.values(_ob.g.res.meta.tpl).join(',')==='E,Ti,Pi,CCB','otro reparto conserva un orden que no es suyo: '+pj([_ob.orden,Object.values(_ob.g.res.meta.tpl)]));
