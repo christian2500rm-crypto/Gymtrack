@@ -46,6 +46,19 @@
 .ob-min{position:relative}
 .ob-min[aria-checked="true"]{background:var(--green);border-color:var(--green);color:var(--accent-ink);font-weight:600}
 .ob-min .ob-rec{top:-10px}
+/* (T1) Tipo de sesión: tarjetas con el tiempo aproximado a la derecha y el total debajo */
+.ob-lbl2{margin-top:6px}
+.ob-ses{display:flex;flex-direction:column;gap:8px}
+.ob-se{display:flex;flex-direction:column;gap:3px;width:100%;min-height:56px;padding:13px 16px;border:1px solid var(--border2);border-radius:var(--r);background:var(--bg2);color:var(--text);font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s}
+.ob-se:active{transform:scale(.99)}
+.ob-se[aria-checked=true]{border-color:var(--green);background:var(--green-bg2)}
+.ob-se-t{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-size:17px;font-weight:600;line-height:1.3}
+.ob-se-t span{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--green-hi);white-space:nowrap;font-variant-numeric:tabular-nums}
+.ob-se-d{font-size:14px;color:var(--text2);line-height:1.45}
+.ob-se[aria-checked=true] .ob-se-d{color:var(--text)}
+.ob-tot{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:var(--r);background:var(--bg3)}
+.ob-tot b{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
+.ob-tot span{font-size:13px;color:var(--text2);line-height:1.5}
 .ob-week{font-size:15px;line-height:1.55;color:var(--text);padding:12px 14px;border-radius:var(--r);background:var(--bg2);border:1px solid var(--border)}
 .ob-sw{border:1px solid var(--border);border-radius:var(--r);background:var(--bg2)}
 .ob-seg .lib-pl{white-space:normal;line-height:1.25;padding:6px 8px;font-size:14px}

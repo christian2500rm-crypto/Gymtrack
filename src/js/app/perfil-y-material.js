@@ -8,6 +8,10 @@ const PROF_PARON_ANTES=['lt6m','6m2a','gt2a'],PROF_PARON_FUERA=['2a6m','gt6m','g
 const PROF_MINS=[15,20,30,45,60,75,90],PROF_AGES=['16','18','40','65','75','nd'],PROF_SPORT=['no','suave','piernas','agua'];
 const PROF_PRIO=['pecho','espalda','hombros','brazos','gluteos','piernas','abdomen'],PROF_STYLE=['maq','libre','igual'];
 const PROF_WARM=['normal','corto'],PROF_CARDIO=['auto','si','no'];
+// (T1) El tipo de sesión, que se elige en lugar de los minutos, y los minutos que se guardan con cada tipo (los del presupuesto del generador).
+// (T7) Sin tipo guardado se deduce de los minutos de antes: 15-20 exprés · 30 lo esencial · 45-60 completa · 75-90 a fondo
+const PROF_SESION=['expres','esencial','completa','fondo'],SES_MIN={expres:15,esencial:30,completa:60,fondo:90},SES_LBL={expres:'Exprés',esencial:'Lo esencial',completa:'Completa',fondo:'A fondo'};
+function sesionDeMin(m){m=+m||60;return m<=20?'expres':m<=30?'esencial':m<=60?'completa':'fondo';}
 const PROF_TIPOS=['torso','pierna','empuje','tiron','completo','pecho_triceps','espalda_biceps','hombros_brazos','pecho','espalda','hombros','brazos']; // (P6) tipos de día
 const PROF_PLAN=['cc3','tpc3','tpt3','ppl3','tp4','pplt4','pplc4','grp4','ulppl','tptpt5','pplet5','grp5','ppl6','tp6','pplg6']; // (P1) el reparto que elige la persona en «Cambiar reparto»
 const PROF_SEX=['m','h','nd'],PROF_ENFOQUE=['gluteo','torso','igual']; // (D10) mujer · hombre · prefiero no decirlo; enfoque de la rutina
@@ -39,6 +43,7 @@ function _sanitizeProfile(o){
   p.levelManual=_oneOf(o.levelManual,PROF_LEVELS);
   const d=parseInt(o.days);p.days=Number.isInteger(d)&&d>=2&&d<=6?d:null;
   const m=+o.min;p.min=isFinite(m)&&m>0?PROF_MINS.reduce((b,x)=>Math.abs(x-m)<Math.abs(b-m)?x:b,PROF_MINS[0]):null;
+  p.sesion=_oneOf(o.sesion,PROF_SESION)||(p.min?sesionDeMin(p.min):null); // (T1, T7)
   p.consec=_bool(o.consec);
   p.tope=typeof o.tope==='boolean'?o.tope:null; // (D5) «4 de pesas y el resto, cardio suave» (true) o «todos de pesas» (false)
   const dO=parseInt(o.daysOther);p.daysOther=Number.isInteger(dO)&&dO>=0&&dO<=5&&(p.days==null||dO<p.days)?dO:0;

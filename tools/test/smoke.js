@@ -10916,17 +10916,17 @@ try{
   opt('Hombre').click();await wait();E(_ob.step==='ob-exp'&&_ob.a.sex==='h','«Hombre» → P3 '+pj(_ob.a));
   opt('Más de 2 años').click();await wait();E(_ob.step==='ob-ritmo','«Más de 2 años» → ritmo');
   opt('Me cuesta semanas o meses').click();await wait();E(_ob.step==='ob-tiempo'&&_ob.a.ritmo==='meses','ritmo → P4');
-  // P4 con la recomendación de quien tiene experiencia: 4 días y 60 min
-  E(_ob.a.days===4&&_ob.a.min===60&&/Recomendado/.test(tx($('[data-k=days][data-v="4"]')))&&/Recomendado/.test(tx($('[data-k=min][data-v="60"]'))),'P4 recomendado '+pj([_ob.a.days,_ob.a.min]));
+  // P4 con la recomendación de quien tiene experiencia: 4 días y la sesión «Completa» (T1: el tipo de sesión, en vez de los minutos)
+  E(_ob.a.days===4&&_ob.a.sesion==='completa'&&_ob.a.min===60&&/Recomendado/.test(tx($('[data-k=days][data-v="4"]')))&&/Recomendado/.test(tx($('[data-k=sesion][data-v="completa"]'))),'P4 recomendado '+pj([_ob.a.days,_ob.a.sesion,_ob.a.min]));
   E(/Tu semana: A · B · C · D\. Torso y pierna/.test(tx($('.ob-week'))),'semana de 4 días: '+tx($('.ob-week')));
   obTimeSet('days',3);await W(3);E($('[role=switch]')&&/Todo el cuerpo/.test(tx($('.ob-week'))),'3 días: interruptor de días seguidos');
   $('[role=switch]').click();await W(3);E(_ob.a.consec===true&&/Torso, pierna y todo el cuerpo/.test(tx($('.ob-week'))),'días seguidos');
-  obTimeSet('min',15);await W(3);E(/Con tan poco tiempo haré lo esencial/.test(tx($('.ob-body'))),'aviso de 15 min');
-  E($$('.ob-min').length===7&&$$('.ob-min').every(b=>b.querySelector('.nw')),'número y unidad sin partir');
+  obTimeSet('sesion','esencial');await W(3);E(_ob.a.sesion==='esencial'&&_ob.a.min===30&&$('[data-k=sesion][data-v="esencial"]').getAttribute('aria-checked')==='true'&&/Unos \d+\s*min por sesión/.test(tx($('.ob-tot'))),'«Lo esencial»: '+pj([_ob.a.sesion,_ob.a.min,tx($('.ob-tot'))]));
+  E($$('.ob-se').length>=3&&$$('.ob-se').every(b=>/≈\s*\d+\s*min/.test(tx(b)))&&!$('.ob-min'),'tarjetas de tipo con su tiempo, sin fichas de minutos');
   // Quien empieza de cero: 3 días y 45 min recomendados; con 5 días, la pregunta de D5 con «4 de pesas» marcada
   obBack();await W(3);obBack();await W(3);E(_ob.step==='ob-exp','Atrás hasta P3');
   opt('Empiezo de cero').click();await wait();E(_ob.step==='ob-tiempo'&&!('ritmo' in _ob.a),'«Empiezo de cero» → P4 y fuera el ritmo');
-  E(/Recomendado/.test(tx($('[data-k=days][data-v="3"]')))&&/Recomendado/.test(tx($('[data-k=min][data-v="45"]'))),'recomendación de quien empieza');
+  E(/Recomendado/.test(tx($('[data-k=days][data-v="3"]')))&&/Recomendado/.test(tx($('[data-k=sesion][data-v="completa"]'))),'recomendación de quien empieza');
   obTimeSet('days',5);await W(3);
   E($('[data-k=tope][data-v=si]')&&$('[data-k=tope][data-v=si]').getAttribute('aria-checked')==='true'&&_ob.a.tope===true&&/4 días de pesas \(A · B · A · B\) y 1 de cardio suave/.test(tx($('.ob-week'))),'D5 con 5 días (P9: quien empieza de cero, 2 entrenos que se alternan): '+tx($('.ob-week')));
   $('[data-k=tope][data-v=no]').click();await W(3);E(_ob.a.tope===false&&/A · B · A · B · A\./.test(tx($('.ob-week'))),'D5: los 5 de pesas '+tx($('.ob-week')));
@@ -11228,10 +11228,10 @@ try{
   openSettings();await W(5);const st=document.getElementById('set-train');
   E(st&&/Tus respuestas/.test(tx(st))&&!/Días de entrenamiento por semana/.test(tx(document.getElementById('settings-root')))&&!/Rehacer onboarding/.test(tx(document.getElementById('settings-root'))),'sección de Ajustes');
   const base=ids(),prof0=pj(S.profile);
-  // 1. «Tus respuestas» → «Tu tiempo» suelta → 4 días → Guardar → «Ver qué cambia» → P8 y P9 (sin consentimiento) → Qué cambia → Aplicar
-  openAnswers();await W(5);E(_ob.step==='ob-resp'&&$$('.ob-rr').length>=8&&/3 días · 60/.test(tx($('.ob-resp'))),'lista de respuestas');
-  $$('.ob-rr').find(b=>/Tu tiempo/.test(tx(b))).click();await W(5);E(_ob.step==='ob-tiempo'&&_ob.single&&tx($('#ob-go'))==='Guardar','pantalla suelta');
-  obTimeSet('days',4);await W(3);$('#ob-go').click();await W(5);E(_ob.step==='ob-resp'&&/4 días · 60/.test(tx($('.ob-resp')))&&/Ver qué cambia en tu rutina/.test(tx($('#ob-go'))),'vuelta a la lista');
+  // 1. «Tus respuestas» → «Días y sesión» suelta → 4 días → Guardar → «Ver qué cambia» → P8 y P9 (sin consentimiento) → Qué cambia → Aplicar
+  openAnswers();await W(5);E(_ob.step==='ob-resp'&&$$('.ob-rr').length>=8&&/3 días · Completa/.test(tx($('.ob-resp'))),'lista de respuestas');
+  $$('.ob-rr').find(b=>/Días y sesión/.test(tx(b))).click();await W(5);E(_ob.step==='ob-tiempo'&&_ob.single&&tx($('#ob-go'))==='Guardar','pantalla suelta');
+  obTimeSet('days',4);await W(3);$('#ob-go').click();await W(5);E(_ob.step==='ob-resp'&&/4 días · Completa/.test(tx($('.ob-resp')))&&/Ver qué cambia en tu rutina/.test(tx($('#ob-go'))),'vuelta a la lista');
   $('#ob-go').click();await W(5);E(_ob.step==='ob-salud','sin consentimiento, primero P8 '+_ob.step);
   opt('Nada de esto').click();await wait();E(_ob.step==='ob-molestias'&&/No guardé tus molestias/.test(tx($('#ob-h'))),'luego P9 '+_ob.step);
   $('#ob-go').click();await W(10);E(_ob.step==='ob-resp-qc'&&/Se quedan \d+ · cambian \d+ · nuevos \d+ · salen \d+/.test(tx($('.ob-qc')))&&/A · B · C · D/.test(tx($('.ob-qc'))),'Qué cambia '+_ob.step);
@@ -11277,7 +11277,7 @@ try{
   openSettings();openMyMaterial('c');_myMat.draft.c=placeFromPreset('nada');_myMat.draft.main='c';_myMat.draft.g=null;saveMyMaterial();await W(10);cmodalOk();await W(10);
   btn('Aplicar cambios').click();await W(10);E(S.places.main==='c'&&!S.places.g&&okPlace()&&ids()!==best,'sitio peor: todo se puede hacer en casa sin material');
   // 3. De 3 a 5 días y volver a la anterior
-  const before5=ids();openAnswers();await W(5);$$('.ob-rr').find(b=>/Tu tiempo/.test(tx(b))).click();await W(5);obTimeSet('days',5);await W(3);$('#ob-go').click();await W(5);
+  const before5=ids();openAnswers();await W(5);$$('.ob-rr').find(b=>/Días y sesión/.test(tx(b))).click();await W(5);obTimeSet('days',5);await W(3);$('#ob-go').click();await W(5);
   _ob.healthAsked=true;$('#ob-go').click();await W(10);btn('Aplicar cambios').click();await W(10);
   E(S.profile.days===5&&ids()!==before5,'5 días '+pj([S.profile.days,dayKeys().length]));
   openSettings();await W(5);const rb=[...document.querySelectorAll('#set-train .set-row')].find(r=>/Volver a mi rutina anterior/.test(tx(r)));E(!!rb,'fila «Volver a mi rutina anterior»');
@@ -11540,7 +11540,7 @@ try{
   obFinishQs();await W(5);
   const g=document.getElementById('ob-gen'),ls=g?[...g.querySelectorAll('.ob-gen-l')].map(tx):[];
   E(_ob.step==='ob-rutina'&&g&&/Preparando tu rutina/.test(tx(g)),'sin transición');
-  E(ls.length===4&&ls[0]==='✓ '+_matCount(pl.g,'g')+' ejercicios posibles con tu material'&&/^✓ Tu semana: A( · [A-F])+/.test(ls[1])&&/^✓ Unas \d+ series por semana para cada músculo grande$/.test(ls[2])&&ls[3]==='✓ Cada día cabe en 60 min','líneas: '+ls.join(' | '));
+  E(ls.length===4&&ls[0]==='✓ '+_matCount(pl.g,'g')+' ejercicios posibles con tu material'&&/^✓ Tu semana: A( · [A-F])+/.test(ls[1])&&/^✓ Unas \d+ series por semana para cada músculo grande$/.test(ls[2])&&/^✓ Cada día, unos \d+\s*min$/.test(ls[3])&&ls[3].includes(String(_ob.g.res.meta.sesion.min)),'líneas: '+ls.join(' | '));
   E(/Tu rutina está lista/.test(tx(document.getElementById('ob-root'))),'el resultado debajo');
   await W(1400);E(!document.getElementById('ob-gen'),'no se quita');
   obRender();await W(5);E(!document.getElementById('ob-gen'),'sale otra vez al repintar');
@@ -14190,6 +14190,52 @@ try{
   Object.assign(_ob.a,{prio:[]});delete _ob.a.enfoque;_ob.dirty=true;obRender();await W(5);E(!$('.ob-sug'),'sin prioridades: '+tx($('.ob-sug')));
   Object.assign(_ob.a,{prio:['pecho','brazos']});_ob.reparto='recomendado';_ob.dirty=true;obRender();await W(5);E(!$('.ob-sug'),'con 2-4 entrenos: '+tx($('.ob-sug')));
   _ob.reparto='dias';Object.assign(_ob.a,{age:'65',goal:'salud'});_ob.dirty=true;obRender();await W(5);E(!$('.ob-sug'),'con 65 o más: '+tx($('.ob-sug')));
+  E(pj(getPlan())===plan0,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('t1TipoSesion',async()=>{
+// (T1, tipo de sesión) El cuestionario pregunta el tipo de sesión en vez de los minutos: los días siguen arriba y debajo van tres tarjetas
+// («Lo esencial», «Completa», recomendada, y «A fondo») con el tiempo aproximado y los ejercicios que salen con cada una, que son los del
+// generador para esas respuestas. La rutina que sale es la del tipo marcado y dura lo que decía su tarjeta; nada habla de «los minutos que
+// dijiste». Sin tipo guardado se deduce de los minutos de antes (T7).
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),se=()=>[...document.querySelectorAll('#ob-root .ob-se')],sel=()=>se().find(b=>b.getAttribute('aria-checked')==='true');
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:3,age:'18',sport:'no',prio:[]});['plan','enfoque','forma','roles','sesion','min'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.dia=null;_ob.pins={};_ob.alt=0;_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
+  // la pantalla: los días arriba, las tarjetas de tipo debajo, sin fichas de minutos; «Completa» marcada y recomendada
+  E(!!$('.ob-days')&&se().length>=3&&!$('.ob-min')&&!/Minutos por sesión/.test(tx($('.ob-body')))&&sel()&&sel().dataset.v==='completa'&&/Recomendado/.test(tx(sel())),'pantalla: '+pj([se().map(b=>b.dataset.v),sel()&&sel().dataset.v]));
+  E(_ob.a.sesion==='completa'&&_ob.a.min===60,'por defecto: '+pj([_ob.a.sesion,_ob.a.min]));
+  // cada tarjeta enseña su tiempo y sus ejercicios, que son los del generador para estas respuestas; y van de menos a más
+  const I=_obSesInfo();
+  ['esencial','completa','fondo'].forEach(id=>{const b=se().find(x=>x.dataset.v===id),i=I[id];E(b&&i&&new RegExp('≈\\s*'+i.min+'\\s*min').test(tx(b))&&/ejercicios/.test(tx(b))&&tx(b).includes(String(i.ejMax)),'tarjeta '+id+': '+tx(b)+' / '+pj(i));});
+  E(I.esencial.ejMax===5&&I.esencial.ejMax<=I.completa.ejMin&&I.completa.ejMax<=I.fondo.ejMax&&I.completa.ejMax<=7&&I.esencial.min<=I.completa.min&&I.completa.min<=I.fondo.min,'orden de los tipos: '+pj(I));
+  E(new RegExp('Unos '+I.completa.min+'\\s*min por sesión').test(tx($('.ob-tot'))),'total: '+tx($('.ob-tot')));
+  E(se().every(b=>b.getBoundingClientRect().height>=44),'tarjetas de menos de 44 px');
+  // tocar otra tarjeta: cambia la marcada, el total y lo guardado; «Lo esencial» dice que no lleva brazos directos
+  se().find(b=>b.dataset.v==='esencial').click();await W(4);
+  E(_ob.a.sesion==='esencial'&&_ob.a.min===30&&sel().dataset.v==='esencial'&&new RegExp('Unos '+I.esencial.min+'\\s*min por sesión').test(tx($('.ob-tot')))&&/Los brazos trabajan con los presses y los remos/.test(tx(sel())),'«Lo esencial»: '+pj([_ob.a.sesion,_ob.a.min,tx($('.ob-tot')),tx(sel())]));
+  // la rutina que sale es la del tipo y dura lo que decía la tarjeta; el chip lo enseña y nada habla de minutos «dichos»
+  _ob.step='ob-rutina';obRender();await W(6);
+  {const m=_ob.g.res.meta,chips=[...document.querySelectorAll('#ob-root .ob-ch')].map(tx);
+    E(_ob.g.inp.sesion==='esencial'&&m.sesion.tipo==='esencial'&&m.sesion.ejMax===5&&m.sesion.min===I.esencial.min&&m.sesion.ej.join()===I.esencial.ej.join(),'la rutina no es la de la tarjeta: '+pj([m.sesion,I.esencial]));
+    E(chips.some(c=>new RegExp('^Lo esencial · ≈\\s*'+m.sesion.min+'\\s*min$').test(c))&&!chips.some(c=>/^\d+\s*min$/.test(c)),'chips: '+pj(chips));
+    E(!/dijiste|Te sobran/.test(tx($('.ob-body'))),'la rutina habla de minutos dichos');
+    E(_obRespRows().some(r=>r[1]==='Días y sesión'&&/3 días · Lo esencial/.test(r[2])),'«Tus respuestas»: '+pj(_obRespRows().map(r=>r.slice(1))));}
+  // desde el chip, cambiar el tipo rehace la rutina y dice qué ha cambiado
+  obEditFromResult('ob-tiempo');await W(4);se().find(b=>b.dataset.v==='fondo').click();await W(4);
+  E(/«Lo esencial» → «A fondo»/.test(_obChangedTxt()||''),'«Ha cambiado»: '+_obChangedTxt());
+  _ob.single=false;_ob.step='ob-rutina';obRender();await W(6);E(_ob.g.inp.sesion==='fondo'&&_ob.g.res.meta.sesion.min===I.fondo.min&&_ob.g.res.meta.sesion.ejMax===I.fondo.ejMax,'«A fondo»: '+pj([_ob.g.res.meta.sesion,I.fondo]));
+  // (T7) sin tipo guardado se deduce de los minutos de antes, en las respuestas y en el perfil guardado
+  delete _ob.a.sesion;E([15,20,30,45,60,75,90].map(m=>{_ob.a.min=m;return _obAnswers().sesion||'min';}).join()===['min','min','esencial','completa','completa','fondo','fondo'].join(),'T7 en las respuestas: '+[15,20,30,45,60,75,90].map(m=>{_ob.a.min=m;return _obAnswers().sesion||'min';}).join());
+  E(_sanitizeProfile({mode:'gen',goal:'musculo',exp:'6m2a',days:3,min:90}).sesion==='fondo'&&_sanitizeProfile({mode:'gen',days:3,min:45,sesion:'esencial'}).sesion==='esencial'&&_sanitizeProfile({mode:'gen',days:3,sesion:'x'}).sesion===null,'T7 en el perfil guardado');
+  E([15,20,30,45,60,75,90].map(sesionDeMin).join()===[15,20,30,45,60,75,90].map(genEngine().G.sesionDe).join(),'la app y el generador no deducen lo mismo');
   E(pj(getPlan())===plan0,'tocó la rutina actual');
   if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
 }finally{
