@@ -14319,5 +14319,33 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('t6FondoPrincipiante',async()=>{
+// (T6, tipo de sesión) «A fondo» se ofrece a todo el mundo y a quien lleva menos de 6 meses le da de verdad más que «Completa»: más
+// ejercicios (7 por día como mucho) y más minutos, sin más series. A quien empieza de cero le sale como «Completa» (el modo inicio no
+// se relaja) y la tarjeta lo dice.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),card=id=>document.querySelector('#ob-root .ob-se[data-v="'+id+'"]'),sum=a=>a.reduce((x,y)=>x+y,0);
+const sg=k=>[...document.querySelectorAll('#ob-root .ob-sg [data-k="'+k+'"]')],on=k=>sg(k).find(b=>b.getAttribute('aria-checked')==='true');
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  _ob.from='first'; // (como primera vez: desde Ajustes el nivel sube solo con lo entrenado)
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'lt6m',days:3,age:'18',sport:'no',prio:[],sesion:'fondo',min:90});['plan','enfoque','forma','roles','abs','cardio','cardioEnd'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.dia=null;_ob.pins={};_ob.alt=0;_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
+  {const I=_obSesInfo();
+    E(card('fondo')&&I.fondo&&I.completa&&sum(I.fondo.ej)>sum(I.completa.ej)&&I.fondo.min>I.completa.min&&I.fondo.ejMax<=7&&I.completa.ejMax<=6,'menos de 6 meses: '+pj([I.completa,I.fondo]));
+    E(!/sale igual que «Completa»/.test(tx(card('fondo')))&&/un ejercicio propio para cada músculo/.test(tx(card('fondo'))),'tarjeta: '+tx(card('fondo')));}
+  _ob.step='ob-rutina';obRender();await W(6);
+  {const g=_ob.g,rows=g.res.det.flatMap(d=>d.rows.filter(r=>r.kind==='str'));E(g.res.ok&&g.inp.sesion==='fondo'&&rows.every(r=>r.series<=3)&&g.res.meta.sesion.biceps&&g.res.meta.sesion.triceps,'rutina a fondo de principiante: '+pj(g.res.meta.sesion)+' '+rows.map(r=>r.series).join(''));}
+  // quien empieza de cero: «A fondo» se ofrece, sale como «Completa» y lo dice
+  _ob.a.exp='cero';_ob.reparto=null;_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
+  {const I=_obSesInfo();E(card('fondo')&&I.fondo&&I.completa&&I.fondo.ej.join()===I.completa.ej.join()&&I.fondo.min===I.completa.min&&I.fondo.ejMax<=5&&/sale igual que «Completa»/.test(tx(card('fondo'))),'empieza de cero: '+pj([I.completa,I.fondo])+' '+tx(card('fondo')));}
+  E(pj(getPlan())===plan0,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

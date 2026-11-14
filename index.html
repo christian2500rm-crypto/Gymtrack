@@ -10697,7 +10697,10 @@ return function (K, OPT) {
   const cardioDef = a => { if (a.cardioEnd === 'no' || a.sesion === 'expres') return 0;
     const d = a.goal === 'grasa' ? (['piernas', 'agua'].includes(a.sport) ? 10 : 20) : a.goal === 'salud' ? ((a.sport === 'no' || !a.sport) ? 10 : 0) : a.goal === 'aguante' ? (a.sport === 'suave' ? 0 : 10) : 0;
     return d || (a.cardioEnd === 'si' ? 10 : 0); };
-  const capOf = (P, min, ses) => Math.min((P.inicio ? 5 : P.mayorExp ? 7 : (LV[P.lvS] <= LV.P || P.cauto) ? 6 : ses === 'completa' ? 7 : 8) + (P.prioG.has('biceps') && (min == null || min > 20) ? 1 : 0), min == null ? 8 : min <= 15 ? 3 : min <= 20 ? 4 : min <= 30 ? 5 + (P.prioG.has('biceps') ? 1 : 0) : 8);
+  // v15 (T6): «A fondo» se ofrece a todo el mundo y tiene que dar más que «Completa». Para quien lleva menos de 6 meses (principiante sin
+  // modo de precaución) el tope sube de 6 a 7 ejercicios, y gana ejercicios, no series (ver build). El modo inicio (5), el prudente y 65 o
+  // más (6; 7 con experiencia) no se tocan: a esos «A fondo» les sale como «Completa».
+  const capOf = (P, min, ses) => Math.min((P.inicio ? 5 : P.mayorExp ? 7 : P.cauto ? 6 : LV[P.lvS] <= LV.P ? (ses === 'fondo' ? 7 : 6) : ses === 'completa' ? 7 : 8) + (P.prioG.has('biceps') && (min == null || min > 20) ? 1 : 0), min == null ? 8 : min <= 15 ? 3 : min <= 20 ? 4 : min <= 30 ? 5 + (P.prioG.has('biceps') ? 1 : 0) : 8);
   const novato = P => LV[P.lvS] <= LV.P || P.cauto;   // el déficit se cubre antes con series que con ejercicios nuevos
   // grupo para contar «ejercicios distintos por grupo y semana» (hombro por cabezas, C-05)
   function subGroup(L) { const g = mainGroup(L); if (g !== 'hombros') return g; const m = L.mus; const f = m.frontdelts || 0, s = m.sidedelts || 0, r = m.reardelts || 0; return 'hombros:' + (r >= f && r >= s ? 'post' : s > f ? 'lat' : 'ant'); }
@@ -11199,7 +11202,8 @@ return function (K, OPT) {
       // secundarios, detrás de los demás. Son un extra (h.xbr): lo primero que sale si el día no cabe; nunca desplazan a otro ejercicio.
       // (empuje y tirón ya llevan el suyo como secundario; con prioridad de brazos manda J-08; con «más glúteo», el torso va en lo justo)
       const xbr = new Set();
-      if (inp.goal === 'musculo' && !P.cauto && inp.min >= 45 && !P.prioG.has('biceps') && !P.enfoque && /^(T\d|TC)$/.test(rb)) {
+      // v15 (T6): y en «A fondo», con cualquier objetivo y también en los días de cuerpo completo («un ejercicio propio para cada músculo»)
+      if (!P.cauto && !P.prioG.has('biceps') && !P.enfoque && ((inp.goal === 'musculo' && inp.min >= 45 && /^(T\d|TC)$/.test(rb)) || (inp.sesion === 'fondo' && /^(T\d|TC|CC[ABC])$/.test(rb)))) {
         for (const w of ['CU', 'TR']) { if (def.some(d => d[0] === w && d[1] <= 2)) continue; const i = def.findIndex(d => d[0] === w && d[1] === 3); if (i >= 0) { def[i] = [w, 2].concat(def[i].slice(2)); xbr.add(i); } }
       }
       const slots = def.map((d, i) => mkSlot(d[0], d[1], d[2], role + '#' + n + ':' + d[0] + ':' + i));
@@ -11252,8 +11256,14 @@ return function (K, OPT) {
     if (inp.min === 15 || P.corto) expres(st, P.corto ? (inp.min <= 15 ? 2 : 3) : 3); else {
       balanceVolume(st);
       // E.16: huecos 3 si hay déficit (ordenados por las prioridades), sin pasar del tope de la sesión (v2, D-08)
+      // v15 (T6): en «A fondo», a quien lleva menos de 6 meses (sin modo de precaución) sus accesorios le entran aunque el volumen ya llegue
+      // al objetivo: gana ejercicios (uno por músculo, a 2 series), sin pasar de lo alto del rango bueno de su nivel (objetivo × 1,3), del
+      // techo semanal (V8), del tope por sesión (V9) ni de 2 ejercicios distintos por grupo (05 §4.2)
+      const fondoP = inp.sesion === 'fondo' && !P.cauto && LV[P.lvS] <= LV.P;
+      const cabeFondo = (h, t) => { if (!fondoP) return false; const x = fill(h, t, st, true); if (!x) return false; const L = BY.get(x.lib), g = mgV(L), vol = volume(st);
+        return groupN(st, subGroup(L)) < 2 && canAddEx(st, t, L, 2, vol) && (!tgt.top[g] || vol.v[g] + 2 * t.f <= tgt.top[g] + 1e-9); };
       T.forEach(t => t.slots.filter(h => h.prio === 3 && !h.on && !h.x && !h.cap).sort((a, b) => (P.prioV.has(b.grupo) ? 1 : 0) - (P.prioV.has(a.grupo) ? 1 : 0))
-        .forEach(h => { if ((deficit(st, h.grupo) || (h.id === 'AB' && P.prioV.has('gluteos'))) && nStr(t) < capOf(P, inp.min, inp.sesion)) { const x = fill(h, t, st); if (x) { h.x = x; h.on = true; setPres(st, t, h); h.x.s = 2; if (!fitsDay(t, st)) { h.on = false; st.used.delete(h.x.lib); h.x = null; } } } }));
+        .forEach(h => { if ((deficit(st, h.grupo) || (h.id === 'AB' && P.prioV.has('gluteos')) || cabeFondo(h, t)) && nStr(t) < capOf(P, inp.min, inp.sesion)) { const x = fill(h, t, st); if (x) { h.x = x; h.on = true; setPres(st, t, h); h.x.s = 2; if (!fitsDay(t, st)) { h.on = false; st.used.delete(h.x.lib); h.x = null; } } } }));
     }
     fitTime(st);
     // v15 (T3): «Abdominales: No» = la misma rutina sin sus ejercicios de abdominales (ningún otro ocupa su sitio: la sesión dura menos)

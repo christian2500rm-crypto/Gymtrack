@@ -165,6 +165,9 @@ const PERSONAS = [
   { key: 'tina', nombre: 'Tina', edad: 29, grupo: 'tipo de sesión', motivo: 'T1: elige el tipo de sesión («Completa») en vez de los minutos: el tipo fija la receta, y el tiempo se enseña en vez de preguntarse',
     a: { goal: 'musculo', exp: '6m2a', days: 3, sesion: 'completa', age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null } },
     resumen: 'Ganar músculo · De 6 meses a 2 años · 3 días, sesión «Completa» · Gimnasio grande', esp: null },
+  { key: 'leo', nombre: 'Leo', edad: 24, grupo: 'tipo de sesión', motivo: 'T6: lleva menos de 6 meses y elige «A fondo»: tiene que darle más que «Completa» (más ejercicios, uno por músculo) sin pasar de los techos de su nivel',
+    a: { goal: 'musculo', exp: 'lt6m', days: 3, sesion: 'fondo', age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null } },
+    resumen: 'Ganar músculo · Menos de 6 meses · 3 días, sesión «A fondo» · Gimnasio grande', esp: null },
 ];
 
 // ── v7 (paso 4): lo que DEBE y lo que NO DEBE salir, por persona, comprobado en código. R = rutina analizada (mkR). Cada regla: [texto, (R) → bien?, (R) → detalle] ──
@@ -500,6 +503,15 @@ Object.assign(REGLAS, {
     ['Ningún texto habla de minutos que la persona no dijo; dice lo que dura', R => !T(R, /dijiste|Te sobran|Con \d+ minutos/) && T(R, /Cada día dura unos \d+ min\.|Los días duran entre \d+ y \d+ min\./)],
     ['Sin tipo guardado, se deduce de los minutos de antes (T7): 15-20 exprés, 30 lo esencial, 45-60 completa, 75-90 a fondo', () => [15, 20, 30, 45, 60, 75, 90].map(G.sesionDe).join() === 'expres,expres,esencial,completa,completa,fondo,fondo'],
     ['Sin tipo de sesión, los minutos mandan como siempre (las rutinas de antes no cambian)', R => { const a = Object.assign({}, R.inp, { sesion: null, min: 60 }); const r = G.genRoutine(a); return r.meta.sesion.tipo === null && r.det.every(d => d.minExact <= 60 * 1.05); }]];
+    return { debe: reglas, debeAlt: reglas }; })(),
+  leo: (() => { const otra = (R, x) => G.genRoutine(G.desdeRespuestas(Object.assign({}, PERSONAS.find(p => p.key === 'leo').a, x))), tot = r => r.meta.sesion.ej.reduce((a, b) => a + b, 0);
+    const reglas = [
+    ['«A fondo» le da más que «Completa»: más ejercicios a la semana y más minutos, con 7 por día como mucho', R => { const c = otra(R, { sesion: 'completa' }); return tot(R.res) > tot(c) && R.m.sesion.min > c.meta.sesion.min && R.m.sesion.ejMax <= 7 && c.meta.sesion.ejMax <= 6; }, R => R.m.sesion.ej.join('/') + ' ≈' + R.m.sesion.min + ' frente a ' + otra(R, { sesion: 'completa' }).meta.sesion.ej.join('/') + ' ≈' + otra(R, { sesion: 'completa' }).meta.sesion.min],
+    ['Gana ejercicios, no series: 2 o 3 series por ejercicio, como en «Completa»', R => R.rows.every(r => r.series <= 3), R => R.rows.map(r => r.series).join('')],
+    ['Bíceps y tríceps con su ejercicio propio', R => R.m.sesion.biceps && R.m.sesion.triceps],
+    ['Ningún grupo pasa de lo alto del rango bueno de su nivel por los accesorios añadidos (ni del techo semanal)', R => Object.entries(R.m.vol).every(([g, v]) => v.v <= v.techo + 1e-9), R => Object.entries(R.m.vol).filter(([g, v]) => v.v > v.techo).map(([g]) => g).join()],
+    ['A quien empieza de cero «A fondo» le sale como «Completa»: el modo inicio (5 ejercicios, 2 series) no se relaja', R => { const f = otra(R, { exp: 'cero' }), c = otra(R, { exp: 'cero', sesion: 'completa' }); return JSON.stringify(f.days) === JSON.stringify(c.days) && f.meta.sesion.ejMax <= 5 && f.det.every(d => d.rows.every(r => r.kind !== 'str' || r.series === 2)); }],
+    ['A 65 o más (sin experiencia) tampoco le cambia: 6 ejercicios como mucho, con su equilibrio', R => { const f = otra(R, { age: '65' }), c = otra(R, { age: '65', sesion: 'completa' }); return f.meta.sesion.ejMax <= 6 && f.meta.sesion.ej.join() === c.meta.sesion.ej.join() && f.det.every(d => d.rows.some(r => r.kind === 'bal')); }]];
     return { debe: reglas, debeAlt: reglas }; })(),
 });
 function mkR(res, inp, Xx) {
