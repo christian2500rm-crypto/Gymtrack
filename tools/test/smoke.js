@@ -14275,5 +14275,49 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('t3AbsCardio',async()=>{
+// (T3, tipo de sesión) Dos interruptores en la misma pantalla, ya marcados según el objetivo: «Abdominales» (Sí / No) y «Cardio al
+// terminar» (No / 10 min / 20 min). El total de abajo cambia al tocarlos; sin abdominales sale la misma rutina sin su core; el cardio
+// elegido sale tal cual cada día. El cardio ya no está en «Afinar mi rutina» (un solo sitio). A 65 o más no se le ofrece quitar los abdominales.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),card=id=>document.querySelector('#ob-root .ob-se[data-v="'+id+'"]'),sum=a=>a.reduce((x,y)=>x+y,0);
+const sg=k=>[...document.querySelectorAll('#ob-root .ob-sg [data-k="'+k+'"]')],on=k=>sg(k).find(b=>b.getAttribute('aria-checked')==='true');
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp:'6m2a',days:3,age:'18',sport:'no',prio:[],sesion:'completa',min:60});['plan','enfoque','forma','roles','abs','cardio','cardioEnd'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.dia=null;_ob.pins={};_ob.alt=0;_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
+  // marcados según el objetivo: con «Ganar músculo», abdominales sí y cardio no; objetivos de toque de 44 px
+  E(sg('abs').length===2&&sg('cardio').length===3&&on('abs')&&on('abs').dataset.v==='1'&&on('cardio')&&on('cardio').dataset.v==='0'&&sg('abs').concat(sg('cardio')).every(b=>b.getBoundingClientRect().height>=44&&b.getBoundingClientRect().width>=44),'interruptores: '+pj([sg('abs').length,sg('cardio').length,on('abs')&&on('abs').dataset.v,on('cardio')&&on('cardio').dataset.v]));
+  const I0=_obSesInfo().completa;E(I0.abs&&I0.cardio===0&&/con abdominales\. Sin cardio/.test(tx($('.ob-tot'))),'total de salida: '+tx($('.ob-tot')));
+  // sin abdominales: menos ejercicios y no más tiempo, y el total lo dice
+  sg('abs').find(b=>b.dataset.v==='0').click();await W(5);
+  const I1=_obSesInfo().completa;E(_ob.a.abs===false&&on('abs').dataset.v==='0'&&!I1.abs&&I1.sinAbs&&I1.min<=I0.min&&sum(I1.ej)<sum(I0.ej)&&/sin abdominales/.test(tx($('.ob-tot'))),'sin abdominales: '+pj([I0,I1])+' '+tx($('.ob-tot')));
+  // cardio de 20 min: la sesión dura 20 min más
+  sg('cardio').find(b=>b.dataset.v==='20').click();await W(5);
+  const I2=_obSesInfo().completa;E(_ob.a.cardio===20&&on('cardio').dataset.v==='20'&&I2.cardio===20&&I2.min===I1.min+20&&sum(I2.ej)===sum(I1.ej)&&/con 20\s*min de cardio al final/.test(tx($('.ob-tot')))&&new RegExp('Unos '+I2.min+'\\s*min').test(tx($('.ob-tot'))),'cardio 20: '+pj([I1.min,I2.min,I2.cardio])+' '+tx($('.ob-tot')));
+  // la rutina que sale: sin core, con 20 min de cardio cada día; los chips y el porqué lo dicen
+  _ob.step='ob-rutina';obRender();await W(6);
+  {const g=_ob.g,m=g.res.meta,chips=[...document.querySelectorAll('#ob-root .ob-ch')].map(tx);
+    E(g.res.ok&&g.res.det.every(d=>!d.rows.some(r=>r.kind==='str'&&['core','core_iso','core_rot','carry'].includes(r.pat))&&d.rows.filter(r=>r.kind==='cardio').length===1&&d.rows.find(r=>r.kind==='cardio').min===20)&&m.sesion.min===I2.min,'rutina sin core y con cardio: '+pj(m.sesion));
+    E(chips.includes('Sin abdominales')&&chips.some(c=>/^Cardio 20\s*min$/.test(c))&&(_ob.t.porque||[]).some(x=>/^Sin abdominales, como elegiste/.test(x)),'chips y porqué: '+pj([chips,_ob.t.porque]));}
+  // «Afinar mi rutina» ya no lleva el cardio: está en un solo sitio
+  obTune();await W(4);E(/Afinar mi rutina/.test(tx(document.getElementById('ob-sheet-root')))&&!/Cardio al terminar/.test(tx(document.getElementById('ob-sheet-root'))),'el cardio sigue en «Afinar mi rutina»');obTuneClose();await W(3);
+  // lo marcado según el objetivo: perder grasa, 20; salud, 10; quien tenía «Nunca» guardado, sigue sin cardio
+  Object.assign(_ob.a,{goal:'grasa',abs:true});delete _ob.a.cardio;_ob.step='ob-tiempo';obRender();await W(5);E(on('cardio').dataset.v==='20'&&_obSesInfo().completa.cardio===20,'perder grasa: '+on('cardio').dataset.v);
+  _ob.a.goal='salud';obRender();await W(5);E(on('cardio').dataset.v==='10'&&_obSesInfo().completa.cardio===10,'salud: '+on('cardio').dataset.v);
+  _ob.a.cardioEnd='no';obRender();await W(5);E(on('cardio').dataset.v==='0'&&_obSesInfo().completa.cardio===0,'«Nunca» de antes: '+on('cardio').dataset.v);delete _ob.a.cardioEnd;
+  // a 65 o más no se le ofrece quitar los abdominales; y aunque viniera guardado, se quedan
+  Object.assign(_ob.a,{age:'65',abs:false});obRender();await W(5);
+  {const c=_obSesInfo().completa;E(sg('abs').length===0&&sg('cardio').length===3&&c.abs&&c.absFijo&&!c.sinAbs,'65 o más: '+pj([sg('abs').length,c]));}
+  // el perfil guardado
+  {const p=_sanitizeProfile({mode:'gen',days:3,sesion:'completa',abs:false,cardio:10}),q=_sanitizeProfile({mode:'gen',days:3,cardio:15});E(p.abs===false&&p.cardio===10&&q.abs===true&&q.cardio===null,'perfil: '+pj([p.abs,p.cardio,q.abs,q.cardio]));}
+  E(pj(getPlan())===plan0,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()

@@ -145,7 +145,7 @@ module.exports = function (K, G, X) {
     // J-13: nada de 2:30 o más de descanso en series de 10 repeticiones o más
     for (const { d, r, L } of str) { const rr = G.repRange(L, r.r); if (r.descanso_s >= 150 && rr && rr.lo >= 10) bump('descanso_incoherente', d.letra + ':' + L.id + ' ' + r.reps + ' ' + r.descanso_s + 's'); }
     // J-14: «Aguantar más» y «Perder grasa»: un día con 15 min o más sin usar, con cardio posible y por debajo de su tope (45 min), no
-    if (['aguante', 'grasa', 'salud'].includes(inp.goal) && inp.cardioEnd !== 'no' && !m.corto && !m.why.some(w => w.c === 'expres') && !m.warn.some(w => w.c === 'sin_cardio'))
+    if (['aguante', 'grasa', 'salud'].includes(inp.goal) && inp.cardioEnd !== 'no' && !inp.sesion && !m.corto && !m.why.some(w => w.c === 'expres') && !m.warn.some(w => w.c === 'sin_cardio'))
       days.forEach(d => { const c = d.rows.find(r => r.kind === 'cardio'); if (inp.min - d.minExact >= 15 + 1e-9 && (!c || c.min < (inp.goal === 'salud' ? 30 : 45))) bump('objetivo_cardio_sin_usar', d.letra + ':' + Math.round(inp.min - d.minExact)); });
     // J-11: 16-17 con experiencia: sin rango de 6 o menos; si pidió explosivos y no hay, se dice por qué
     if (P.menor) for (const { d, r, L } of str) { const rr = G.repRange(L, r.r); if (r.slot !== 'PW' && rr && rr.hi <= 6) bump('menor_pesado', d.letra + ':' + L.id + ' ' + r.reps); }
@@ -186,6 +186,19 @@ module.exports = function (K, G, X) {
         const ds = days.filter(d => zona[g].test(d.role)); if (!ds.length) continue;
         const hay = K.C.some(L => L.pat === pat[g] && L.lt !== 'c' && L.dif <= P.difCap && G.safeL(L, inp) && ds.some(d => K.placeCan(L, inp.places[d.place], d.place)));
         if (hay) bump('sesion_brazos', g + ': ' + ((m.vol[g] || {}).dir || 0) + ' directas'); } }
+    // v15 (T3): los dos interruptores. Sin abdominales no sale ningún ejercicio de core (y lo dice), salvo a quien no se le pueden quitar
+    // (65 o más, «Prefiero no decirlo», huesos frágiles, rutina prudente o el abdomen de prioridad: a esos, como siempre); el cardio elegido
+    // sale tal cual todos los días (o un aviso si en ese sitio no hay con qué), y sin cardio elegido no sale ninguno
+    if (inp.sesion) { const CORE = ['core', 'core_iso', 'core_rot', 'carry'], core = str.filter(({ L }) => CORE.includes(L.pat)), car = days.map(d => d.rows.filter(r => r.kind === 'cardio'));
+      const fijo = P.segM || P.huesos || P.prud || P.prioV.has('abdomen');
+      // (un día de 3 ejercicios puede conservar el suyo si no hay otro que ocupe su sitio: V4; el texto lo dice)
+      const coreMal = core.filter(({ d }) => d.rows.filter(r => r.kind === 'str').length > 3);
+      if (inp.abs === false && !fijo && (coreMal.length || !textos.some(s => core.length ? /^Sin abdominales, como elegiste, salvo/.test(s) : /^Sin abdominales, como elegiste: /.test(s)))) bump('sesion_abs', coreMal.length ? 'sale ' + coreMal[0].L.id : 'falta el texto');
+      if (inp.abs === false && fijo && textos.some(s => /^Sin abdominales/.test(s))) bump('sesion_abs', 'se los quita a quien no se puede');
+      if (!inp.cardio && car.some(c => c.length)) bump('sesion_cardio', 'sale cardio sin pedirlo');
+      if (inp.cardio && car.some(c => c.length > 1 || (c.length === 1 && c[0].min !== inp.cardio))) bump('sesion_cardio', 'no son ' + inp.cardio + ' min: ' + car.map(c => c.map(r => r.min).join('+')).join('/'));
+      if (inp.cardio && car.some(c => !c.length) && !m.warn.some(w => w.c === 'sin_cardio')) bump('sesion_cardio', 'falta el cardio de algún día, sin aviso');
+      if (days.some((d, i) => Math.abs(d.minutos - (d.minExact + (car[i][0] ? car[i][0].min : 0))) > 0.51)) bump('sesion_cardio', 'la duración no suma el cardio'); }
     { const sm = m.sesion, nEj = days.map(d => d.rows.filter(r => r.kind === 'str').length);
       if (!sm || sm.tipo !== (inp.sesion || null) || sm.min !== Math.round(days.reduce((x, d) => x + d.minutos, 0) / days.length / 5) * 5 || sm.ej.join() !== nEj.join()) bump('sesion_resumen', JSON.stringify(sm)); }
     return f;

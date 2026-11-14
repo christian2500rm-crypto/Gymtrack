@@ -211,6 +211,12 @@ return function (K, OPT) {
   // sesionDe: el tipo que corresponde a unos minutos guardados de antes (T7: 15-20 exprés · 30 lo esencial · 45-60 completa · 75-90 a fondo)
   const SESION = { expres: 15, esencial: 30, completa: 60, fondo: 90 };
   const sesionDe = min => { const m = +min || 60; return m <= 20 ? 'expres' : m <= 30 ? 'esencial' : m <= 60 ? 'completa' : 'fondo'; };
+  // v15 (T3): el cardio al terminar que sale marcado según el objetivo (minutos: 0, 10 o 20). Músculo y fuerza, no; perder grasa, 20 (10
+  // si ya hace un deporte de piernas o de agua); salud, 10 si no hace otro deporte; aguantar más, 10 (0 si ya pasea). En el exprés, no.
+  // Quien tenía «siempre» o «nunca» en «Afinar mi rutina» (cardioEnd) lo conserva: 10 como mínimo, o nada.
+  const cardioDef = a => { if (a.cardioEnd === 'no' || a.sesion === 'expres') return 0;
+    const d = a.goal === 'grasa' ? (['piernas', 'agua'].includes(a.sport) ? 10 : 20) : a.goal === 'salud' ? ((a.sport === 'no' || !a.sport) ? 10 : 0) : a.goal === 'aguante' ? (a.sport === 'suave' ? 0 : 10) : 0;
+    return d || (a.cardioEnd === 'si' ? 10 : 0); };
   const capOf = (P, min, ses) => Math.min((P.inicio ? 5 : P.mayorExp ? 7 : (LV[P.lvS] <= LV.P || P.cauto) ? 6 : ses === 'completa' ? 7 : 8) + (P.prioG.has('biceps') && (min == null || min > 20) ? 1 : 0), min == null ? 8 : min <= 15 ? 3 : min <= 20 ? 4 : min <= 30 ? 5 + (P.prioG.has('biceps') ? 1 : 0) : 8);
   const novato = P => LV[P.lvS] <= LV.P || P.cauto;   // el déficit se cubre antes con series que con ejercicios nuevos
   // grupo para contar «ejercicios distintos por grupo y semana» (hombro por cabezas, C-05)
@@ -318,7 +324,7 @@ return function (K, OPT) {
     const minS = !sesion ? a.min : sesion === 'expres' && (modes.includes('mayor') || prudent) ? 20 : SESION[sesion];
     return {
       // v12 (D10): con «más glúteo», el glúteo ocupa uno de los dos huecos de prioridad (P11 lo enseña marcado): queda uno para elegir
-      goal: a.goal, level, modes, days: a.days, min: minS, sesion, consec: !!a.consec, age: a.age, sport: a.sport || 'no', prio: a.enfoque === 'gluteo' ? (a.prio || []).filter(p => p !== 'gluteos').slice(0, 1) : (a.prio || []).slice(0, 2),
+      goal: a.goal, level, modes, days: a.days, min: minS, sesion, abs: !sesion || a.abs !== false, cardio: !sesion ? null : [0, 10, 20].includes(a.cardio) ? a.cardio : cardioDef(a), consec: !!a.consec, age: a.age, sport: a.sport || 'no', prio: a.enfoque === 'gluteo' ? (a.prio || []).filter(p => p !== 'gluteos').slice(0, 1) : (a.prio || []).slice(0, 2),
       pref, style: a.style || 'igual', warm: a.warm || 'normal', cardioEnd: a.cardioEnd || 'auto', power: !!a.power,
       avoid: a.avoid || [], places: a.places, daysOther: a.daysOther || 0, zones, prudent, keep: null, pins: null, enfoque: a.enfoque === 'gluteo' ? 'gluteo' : null,
       plan: typeof a.plan === 'string' && SPLITS[a.plan] ? a.plan : null, masTorso: a.enfoque === 'torso', roles: Array.isArray(a.roles) && a.roles.length >= 3 && a.roles.length <= 6 && a.roles.every(t => typeof t === 'string') ? a.roles.slice() : null, salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
@@ -443,7 +449,10 @@ return function (K, OPT) {
     const opZones = Object.keys(zones).filter(z => z !== 'otra' && (zones[z] === 'op' || zones[z] === 'reciente'));
     // v7 (D-03): zonas que duelen ahora (sin rango pesado ni levantamiento objetivo en sus ejercicios «con cuidado»)
     const ahoraZ = Object.keys(zones).filter(z => z !== 'otra' && zones[z] === 'ahora');
-    return { M, mayor, m75, prud, inicio, vuelta: M.has('vuelta'), level, lvS, lvV: lvS, cauto, wd, capP, difCap, dif2, powerOk, prioG, prioV, zones, corto, enfoque,
+    // v15 (T3): «Abdominales: No». A 65 o más, «Prefiero no decirlo», huesos frágiles y rutina prudente no se les quita el core (ni se les
+    // ofrece: su interruptor no sale); tampoco a quien tiene el abdomen de prioridad
+    const absFijo = segM || huesos || prud || prioV.has('abdomen'), sinAbs = !!inp.sesion && inp.abs === false && !absFijo;
+    return { M, mayor, m75, prud, inicio, vuelta: M.has('vuelta'), level, lvS, lvV: lvS, cauto, wd, capP, difCap, dif2, powerOk, prioG, prioV, zones, corto, enfoque, absFijo, sinAbs,
       segM, huesos, posparto, mayorExp, ahoraZ, zonaActiva, menor,
       // v8: molestias concretas (J-02, J-04, J-05, J-06)
       hombroAhora: zones.hombro === 'ahora', rodillaAhora: zones.rodilla === 'ahora', munecaAhora: zones.muneca === 'ahora', lumbarFuera: ['op', 'reciente'].includes(zones.lumbar), lumbarZ: !!zones.lumbar,
@@ -759,6 +768,7 @@ return function (K, OPT) {
     addWarmupBalanceCardio(st);
     prescribe(st);
     capSessions(st);
+    if (P.sinAbs && inp.min === 15) quitaAbs(st, true);   // v15 (T3): en el exprés, el core sale antes de elegir los 3 ejercicios
     if (inp.min === 15 || P.corto) expres(st, P.corto ? (inp.min <= 15 ? 2 : 3) : 3); else {
       balanceVolume(st);
       // E.16: huecos 3 si hay déficit (ordenados por las prioridades), sin pasar del tope de la sesión (v2, D-08)
@@ -766,8 +776,21 @@ return function (K, OPT) {
         .forEach(h => { if ((deficit(st, h.grupo) || (h.id === 'AB' && P.prioV.has('gluteos'))) && nStr(t) < capOf(P, inp.min, inp.sesion)) { const x = fill(h, t, st); if (x) { h.x = x; h.on = true; setPres(st, t, h); h.x.s = 2; if (!fitsDay(t, st)) { h.on = false; st.used.delete(h.x.lib); h.x = null; } } } }));
     }
     fitTime(st);
+    // v15 (T3): «Abdominales: No» = la misma rutina sin sus ejercicios de abdominales (ningún otro ocupa su sitio: la sesión dura menos)
+    if (P.sinAbs) quitaAbs(st);
     orderSessions(st);
     return st;
+  }
+  // (un día de 3 ejercicios no baja de 3, V4: su core solo sale si otro hueco del día ocupa su sitio; si no hay ninguno, se queda)
+  function quitaAbs(st, todo) {
+    const esCore = id => { const L = BY.get(id); return famOf(L) === 'core' || CORE_PATS.includes(L.pat); }, fuera = h => { h.on = false; st.used.delete(h.x.lib); h.x = null; h.cut = 1; };
+    st.T.forEach(t => t.slots.slice().forEach(h => { if (!h.on || !h.x || h.obl || h.fijo || !esCore(h.x.lib)) return;
+      if (todo || nStr(t) > 3) { fuera(h); return; }
+      const alt = t.slots.find(k => { if (k === h || k.on || k.empty || k.id === 'CO' || k.id === 'PW') return false; const x = k.x || fill(k, t, st, true); return !!x && !esCore(x.lib) && canAddEx(st, t, BY.get(x.lib), 2); });
+      if (!alt) return;
+      if (!alt.x) alt.x = fill(alt, t, st); else st.used.add(alt.x.lib);
+      if (!alt.x) return; alt.on = true; setPres(st, t, alt); alt.x.s = 2; fuera(h); }));
+    st.warn = st.warn.filter(w => w.c !== 'core_corto' && !(w.c === 'vol_corto' && w.p && w.p.g === 'abdomen'));
   }
   function mkSlot(id, prio, add, key) {
     const d = SLOT[id]; const pats = d.pats.slice(); (add || []).forEach(p => { if (!pats.includes(p)) pats.push(p); });
@@ -1505,7 +1528,8 @@ return function (K, OPT) {
     if (P.corto) wm = 5;
     const knee = !!P.zones.rodilla, low = knee || P.noImpact || P.segM;
     let cm = 0;
-    if (inp.cardioEnd !== 'no') {
+    if (inp.sesion) cm = inp.cardio || 0;   // v15 (T3): con tipo de sesión, los minutos de cardio que eligió la persona
+    else if (inp.cardioEnd !== 'no') {
       if (inp.goal === 'grasa') cm = ['piernas', 'agua'].includes(inp.sport) ? 10 : 15;
       else if (inp.goal === 'salud') cm = (inp.sport === 'no' || !inp.sport) ? 10 : 0;
       else if (inp.goal === 'aguante') cm = inp.sport === 'suave' ? 0 : 10;
@@ -1535,6 +1559,7 @@ return function (K, OPT) {
         const lowC = low || P.prud || (LV[P.level] <= LV.P && inp.goal === 'grasa'); st.cardioLow = lowC;
         const id = pickCardio(t, st, home ? CARD_FINAL_HOME : CARD_FINAL_GYM, lowC, t.warm && t.warm.lib) || null;
         t.cardio = id ? { lib: id, min: cm } : null; if (!id) st.warn.push({ c: 'sin_cardio', p: { dia: t.n } });
+        if (t.cardio && inp.sesion) t.cardio.fijo = 1;   // v15 (T3): va aparte del presupuesto del tipo (dayMinutes no lo cuenta; la duración que se enseña, sí)
       } else t.cardio = null;
     }
     if (inp.sport === 'suave' && inp.goal !== 'grasa') st.why.push({ c: 'paseos' });
@@ -1575,7 +1600,7 @@ return function (K, OPT) {
       const first = !firstDone && !st.P.inicio && L.c && L.lt === 'w'; if (first) firstDone = true;
       sec += exSecs(L, h.x, st, first, o);
     }
-    if (!onlyStr) { if (t.warm) sec += t.warm.min * 60; if (t.balance) sec += t.balance.min * 60; if (t.cardio && !(o && o.noCardio)) sec += t.cardio.min * 60; }
+    if (!onlyStr) { if (t.warm) sec += t.warm.min * 60; if (t.balance) sec += t.balance.min * 60; if (t.cardio && !t.cardio.fijo && !(o && o.noCardio)) sec += t.cardio.min * 60; }
     return sec / 60;
   }
   function fitTime(st) {
@@ -1602,10 +1627,10 @@ return function (K, OPT) {
       // 1. descanso de aislamientos −15 s (toda la rutina)
       if (R.iso - 15 >= R.floor.iso && act(t).some(h => !BY.get(h.x.lib).c)) { R.iso -= 15; did = 'iso'; }
       // 2. cardio final a 10 min
-      else if (t.cardio && t.cardio.min > 10) { t.cardio.min = 10; did = 'cardio10'; }
+      else if (t.cardio && !t.cardio.fijo && t.cardio.min > 10) { t.cardio.min = 10; did = 'cardio10'; }
       // 3. cardio final fuera (con «Perder grasa», antes el paso 6; si ni así cabe, fuera el cardio y se recuperan los accesorios)
-      else if (t.cardio && inp.goal !== 'grasa') { t.cardio = null; did = 'cardio_fuera'; }
-      else if (t.cardio && inp.goal === 'grasa') {
+      else if (t.cardio && !t.cardio.fijo && inp.goal !== 'grasa') { t.cardio = null; did = 'cardio_fuera'; }
+      else if (t.cardio && !t.cardio.fijo && inp.goal === 'grasa') {
         const snap = act(t).filter(h => h.prio === 3 && canRemove(t, h));
         let fits = false; const tmp = [];
         for (const h of snap.slice().reverse()) { h.on = false; tmp.push(h); if (dayMinutes(t, st) <= budget) { fits = true; break; } }
@@ -1729,7 +1754,7 @@ return function (K, OPT) {
     // min de cardio; de bajo impacto si hace falta): para esos objetivos el cardio es parte del objetivo (05 §8.2 y §7.2). Si la persona
     // dijo «sin cardio al final», no
     // (con «Salud y forma», lo mismo hasta 30 min: el aeróbico es la otra mitad de la salud, OMS 2020: 150-300 min por semana)
-    if (['aguante', 'grasa', 'salud'].includes(inp.goal) && inp.cardioEnd !== 'no' && !st.expres && !st.corto) st.T.forEach(t => {
+    if (['aguante', 'grasa', 'salud'].includes(inp.goal) && inp.cardioEnd !== 'no' && !inp.sesion && !st.expres && !st.corto) st.T.forEach(t => {   // (v15: con tipo de sesión, el cardio es el elegido)
       const spare = inp.min - dayMinutes(t, st); if (spare < 15) return;
       if (!t.cardio) { const id = pickCardio(t, st, t.place === 'c' ? CARD_FINAL_HOME : CARD_FINAL_GYM, st.cardioLow, t.warm && t.warm.lib); if (!id) { if (!st.warn.some(w => w.c === 'sin_cardio')) st.warn.push({ c: 'sin_cardio', p: { dia: t.n } }); return; } t.cardio = { lib: id, min: 0 }; }
       const add = Math.min(Math.floor((spare + 1e-9) / 5) * 5, (inp.goal === 'salud' ? 30 : 45) - t.cardio.min);
@@ -1944,7 +1969,7 @@ return function (K, OPT) {
       const need = v5need(st, f);
       if (cnt[f] + 1e-9 < need) hard.push('V5:' + f + ':' + cnt[f].toFixed(1) + '<' + need);
     }
-    if (cnt.core < 1 && K.C.some(L => famOf(L) === 'core' && T.some(t => canDo(L, t, st, false)))) { if (inp.min <= 20) soft.push('S:core_corto'); else hard.push('V5:core'); }
+    if (cnt.core < 1 && !P.sinAbs && K.C.some(L => famOf(L) === 'core' && T.some(t => canDo(L, t, st, false)))) { if (inp.min <= 20) soft.push('S:core_corto'); else hard.push('V5:core'); }
     // v5 (C-04, C-05): V8 · techo semanal en series fraccionales por grupo de planificación
     const { v } = volume(st);
     PG.forEach(g => { if (v[g] > st.tgt.ceil[g] + 1e-9) hard.push('V8:' + g + ':' + Math.round(v[g] * 10) / 10 + '>' + st.tgt.ceil[g]); });
@@ -2008,14 +2033,14 @@ return function (K, OPT) {
       if (t.cardio) { ex.push({ lib: t.cardio.lib, s: 1, r: t.cardio.min + ' min' }); rows.push({ lib: t.cardio.lib, n: BY.get(t.cardio.lib).n, series: 1, reps: t.cardio.min + ' min', descanso_s: null, nota: 'cardio final', kind: 'cardio', min: t.cardio.min }); }
       const label = 'Día ' + k, focus = focusOf(t, st);
       days[k] = { label, focus, ex };
-      det.push({ letra: k, role: t.rb, place: t.place, preset: t.P && t.P.preset, ligero: !!t.light, nombre: label + ' · ' + focus, minutos: Math.round(dayMinutes(t, st)), minExact: dayMinutes(t, st), sobraMotivo: t.sobraMotivo || null, rows, empty: t.slots.filter(h => h.empty && !h.sust && h.prio <= 2).map(h => h.id) });
+      det.push({ letra: k, role: t.rb, place: t.place, preset: t.P && t.P.preset, ligero: !!t.light, nombre: label + ' · ' + focus, minutos: Math.round(dayMinutes(t, st) + (t.cardio && t.cardio.fijo ? t.cardio.min : 0)), minExact: dayMinutes(t, st), sobraMotivo: t.sobraMotivo || null, rows, empty: t.slots.filter(h => h.empty && !h.sust && h.prio <= 2).map(h => h.id) });
     });
     const vol = volume(st), pp = pushPull(st);
     // v15 (T1): el resumen de la sesión, con la rutina final: lo que enseña la tarjeta del tipo es esto mismo (minutos de un día medio,
     // redondeados a 5; ejercicios de fuerza por día; si hay bíceps y tríceps directos, abdominales y cardio final)
     const nEj = det.map(d => d.rows.filter(r => r.kind === 'str').length), filas = det.flatMap(d => d.rows);
     const sesion = { tipo: inp.sesion || null, min: Math.round(det.reduce((x, d) => x + d.minutos, 0) / det.length / 5) * 5, ej: nEj, ejMin: Math.min(...nEj), ejMax: Math.max(...nEj),
-      biceps: vol.dir.biceps > 0, triceps: vol.dir.triceps > 0, abs: filas.some(r => r.kind === 'str' && CORE_PATS.includes(r.pat)), cardio: Math.max(0, ...filas.filter(r => r.kind === 'cardio').map(r => r.min)) };
+      biceps: vol.dir.biceps > 0, triceps: vol.dir.triceps > 0, sinAbs: !!P.sinAbs, absFijo: !!P.absFijo, abs: filas.some(r => r.kind === 'str' && CORE_PATS.includes(r.pat)), cardio: Math.max(0, ...filas.filter(r => r.kind === 'cardio').map(r => r.min)) };
     // ── v7 (paso 4): por qué y avisos de seguridad y modos, con la rutina final ──
     const why2 = [], warn2 = [];
     // D-22: «No incluyo el jalón tras nuca…» solo si la persona lo hacía (historial o favorito): si no, es ruido
@@ -2085,7 +2110,7 @@ return function (K, OPT) {
     if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
     return null;
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, tipoDe, repartoDeTipos, TIPO_TPL, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT, SESION, sesionDe };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, tipoDe, repartoDeTipos, TIPO_TPL, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT, SESION, sesionDe, cardioDef };
 };
 
 })();

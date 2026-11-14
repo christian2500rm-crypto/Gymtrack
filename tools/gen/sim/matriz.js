@@ -29,7 +29,8 @@ const conRoles = pr => { if (!ROLES || !(pr.a.days >= 3)) return; pr.a.roles = A
 // El orden se exige entre tipos que salen con el mismo reparto; si el material o una molestia cambian el reparto de un tipo a otro (otro
 // número de entrenos), los días no se pueden comparar uno a uno: se cuenta aparte (sesion_orden_otro_reparto), sin ser un fallo
 const SES = process.argv.includes('--sesion');
-const conSesion = pr => { if (SES) pr.a.sesion = G.sesionDe(pr.a.min); };
+// (T3) y mueve los dos interruptores: 1 de cada 3 sin abdominales; el cardio, el de su objetivo o 0, 10 o 20 min
+const conSesion = pr => { if (!SES) return; pr.a.sesion = G.sesionDe(pr.a.min); if (pr.id % 3 === 0) pr.a.abs = false; if (pr.id % 4) pr.a.cardio = [0, 10, 20][pr.id % 4 - 1]; };
 const ordenSesion = (pr, inp, res, f) => { if (!SES || inp.sesion !== 'completa') return;
   const de = s => { const m = G.genRoutine(G.desdeRespuestas(Object.assign({}, pr.a, { sesion: s }))).meta; return Object.assign({ split: m.split }, m.sesion); }, e = de('esencial'), c = Object.assign({ split: res.meta.split }, res.meta.sesion), fo = de('fondo'), med = s => s.ej.reduce((x, y) => x + y, 0) / s.ej.length;
   // (holgura: los minutos van redondeados a 5 y dos rutinas casi iguales pueden caer a un lado y a otro; un ejercicio menos en un solo día

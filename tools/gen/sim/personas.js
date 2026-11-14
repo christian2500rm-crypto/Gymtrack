@@ -193,6 +193,7 @@ const TIPOS_SES = R => Object.fromEntries(['expres', 'esencial', 'completa', 'fo
 const BRAZOS_T2 = R => { const out = []; for (const goal of ['musculo', 'fuerza', 'grasa', 'salud', 'aguante']) for (const days of [3, 4]) for (const exp of ['cero', 'lt6m', '6m2a']) for (const sesion of ['esencial', 'completa', 'fondo']) {
   const v = G.genRoutine(G.desdeRespuestas({ goal, exp, days, sesion, age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: R.inp.places })).meta.vol, b = v.biceps.dir, t = v.triceps.dir;
   out.push({ et: `${goal} ${exp} ${days}d ${sesion}: ${b}/${t}`, ok: sesion === 'esencial' ? b === 0 && t === 0 : exp === 'cero' ? b >= 2 || t >= 2 : b >= 2 && t >= 2 }); } return out; };   // (modo inicio: al menos uno de los dos; ver seguridad.js)
+const TINA_A = () => PERSONAS.find(p => p.key === 'tina').a;   // v15 (T3): las respuestas de Tina, para generar variantes
 const SIN_PLAN = ['El reparto elegido no se aplica aquí (solo vale con un entreno distinto por día y con quien puede elegir)', R => !ELEGIDOS.includes(R.m.split), R => R.m.split];
 const REGLAS = {
   lucia: { debe: [
@@ -489,6 +490,13 @@ Object.assign(REGLAS, {
       R => JSON.stringify(Object.fromEntries(Object.entries(TIPOS_SES(R)).map(([k, s]) => [k, s.ej.join('/') + ' ≈' + s.min])))],
     ['«Completa» y «A fondo» llevan bíceps y tríceps directos (2 series o más por semana de cada uno) con todos los objetivos, con 3 y con 4 días y también con menos de 6 meses (T2); quien empieza de cero, al menos uno de los dos; «Lo esencial», ninguno',
       R => BRAZOS_T2(R).every(x => x.ok), R => BRAZOS_T2(R).filter(x => !x.ok).map(x => x.et).join(' · ')],
+    ['Los dos interruptores (T3): sin abdominales sale la misma rutina sin su core y dura menos; el cardio elegido (10 o 20 min) sale tal cual cada día y la sesión dura eso de más; músculo sale sin cardio marcado y «Perder grasa» con 20',
+      R => { const con = x => { const i = G.desdeRespuestas(Object.assign({}, TINA_A(), x)); return { i, r: G.genRoutine(i) }; }, fz = r => r.det.map(d => d.rows.filter(w => w.kind === 'str' && !['core', 'core_iso', 'core_rot', 'carry'].includes(w.pat)).map(w => w.lib + '×' + w.series).join()).join('|');
+        const base = con({}), sin = con({ abs: false }), c10 = con({ cardio: 10 }), c20 = con({ cardio: 20 }), gr = con({ goal: 'grasa' }), mayor = con({ abs: false, age: '65' });
+        const car = r => r.det.map(d => d.rows.filter(w => w.kind === 'cardio').map(w => w.min).join()).join('/');
+        return base.i.cardio === 0 && car(base.r) === '//' && base.r.meta.sesion.abs && !sin.r.meta.sesion.abs && fz(sin.r) === fz(base.r) && sin.r.meta.sesion.min < base.r.meta.sesion.min
+          && car(c10.r) === '10/10/10' && car(c20.r) === '20/20/20' && c10.r.det.every((d, k) => d.minutos === base.r.det[k].minutos + 10) && c20.r.meta.sesion.min === base.r.meta.sesion.min + 20 && fz(c20.r) === fz(base.r)
+          && gr.i.cardio === 20 && car(gr.r) === '20/20/20' && mayor.r.meta.sesion.abs && mayor.r.meta.sesion.absFijo && G.cardioDef({ goal: 'salud', sport: 'no' }) === 10 && G.cardioDef({ goal: 'grasa', cardioEnd: 'no' }) === 0 && G.cardioDef({ goal: 'musculo', cardioEnd: 'si' }) === 10 && G.cardioDef({ goal: 'grasa', sesion: 'expres' }) === 0; }],
     ['Ningún texto habla de minutos que la persona no dijo; dice lo que dura', R => !T(R, /dijiste|Te sobran|Con \d+ minutos/) && T(R, /Cada día dura unos \d+ min\.|Los días duran entre \d+ y \d+ min\./)],
     ['Sin tipo guardado, se deduce de los minutos de antes (T7): 15-20 exprés, 30 lo esencial, 45-60 completa, 75-90 a fondo', () => [15, 20, 30, 45, 60, 75, 90].map(G.sesionDe).join() === 'expres,expres,esencial,completa,completa,fondo,fondo'],
     ['Sin tipo de sesión, los minutos mandan como siempre (las rutinas de antes no cambian)', R => { const a = Object.assign({}, R.inp, { sesion: null, min: 60 }); const r = G.genRoutine(a); return r.meta.sesion.tipo === null && r.det.every(d => d.minExact <= 60 * 1.05); }]];

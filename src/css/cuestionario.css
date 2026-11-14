@@ -56,6 +56,13 @@
 .ob-se-t span{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--green-hi);white-space:nowrap;font-variant-numeric:tabular-nums}
 .ob-se-d{font-size:14px;color:var(--text2);line-height:1.45}
 .ob-se[aria-checked=true] .ob-se-d{color:var(--text)}
+/* (T3) «Y además»: abdominales y cardio al terminar */
+.ob-xs{display:flex;flex-direction:column;gap:6px}
+.ob-xr{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;min-height:48px}
+.ob-xr>span{font-size:15px;font-weight:500}
+.ob-sg{display:inline-flex;margin-left:auto;padding:3px;border:1px solid var(--border2);border-radius:999px;background:var(--bg2)}
+.ob-sg button{min-width:48px;min-height:44px;padding:8px 11px;border:0;border-radius:999px;background:none;color:var(--text2);font:inherit;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background .15s,color .15s}
+.ob-sg button[aria-checked=true]{background:var(--green);color:var(--accent-ink)}
 .ob-tot{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:var(--r);background:var(--bg3)}
 .ob-tot b{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
 .ob-tot span{font-size:13px;color:var(--text2);line-height:1.5}

@@ -100,7 +100,7 @@ module.exports = function (K, G) {
     else if (m.split.indexOf('x:') === 0) out.push(`Un reparto a tu medida, día a día: ${joinY(res.det.map(dd => (G.NOMBRE_DIA[dd.role] || dd.role).toLowerCase()))}. Yo pongo los ejercicios, las series y el equilibrio de la semana.`);   // v14 (P6)
     else if (ELEGIDO[m.split]) { out.push(ELEGIDO[m.split]);
       // «por músculos»: por qué los días de un solo grupo salen más cortos (el tope de 10 series por músculo y sesión, V9)
-      if (m.split.indexOf('grp') === 0 && res.det.some(dd => inp.min - dd.minutos >= 10)) out.push('Los días de un solo grupo salen más cortos: pasadas unas 10 series de un músculo en la misma sesión, las siguientes aportan poco.'); }
+      if (m.split.indexOf('grp') === 0 && res.det.some(dd => inp.min - (dd.minExact != null ? dd.minExact : dd.minutos) >= 10)) out.push('Los días de un solo grupo salen más cortos: pasadas unas 10 series de un músculo en la misma sesión, las siguientes aportan poco.'); }
     else if (m.split === 'ppl3' && m.wd === 3) out.push('Empuje, tirón y pierna: cada zona tiene su día y trabaja 1 vez por semana, con la sesión entera para ella.');
     else if (m.split === 'ppl3') out.push(`Empuje, tirón y pierna: con ${m.wd} días, cada músculo ${num(f)} veces por semana sin repetir dos días seguidos.`);
     else if (m.split === 'ppl6') out.push('Empuje, tirón y pierna dos veces, con ejercicios distintos cada vez: 6 entrenos, uno por día; cada músculo trabaja 2 veces por semana.');
@@ -246,6 +246,8 @@ module.exports = function (K, G) {
       out.push(`${mins.length === 1 ? mins[0] : 'Entre ' + mins[0] + ' y ' + mins[mins.length - 1]} min de ${nombres.length === 1 ? nombres[0] : 'cardio (' + joinY(nombres.slice(0, 2)).replace(' y ', ' o ') + ')'} al final${m.cardioRelleno ? `: con «${GOAL[inp.goal]}», el tiempo que sobra va al cardio${inp.goal === 'salud' ? ', que es la otra mitad de la salud' : ''}` : ''}${P.zones.rodilla ? (m.cardioRelleno ? ', sin cargar la rodilla' : ': suma sin cargar la rodilla') : P.noImpact || P.mayor ? (m.cardioRelleno ? ', de bajo impacto' : ': de bajo impacto') : ''}.`); }
     else if (cutC) out.push(`${inp.sesion ? `En la sesión «${SES[inp.sesion]}»` : `Con ${inp.min} minutos`} no cabe el cardio al final: ${inp.sport === 'suave' ? 'sigue con tus paseos y, si puedes, haz 2 de 30 minutos a paso ligero' : inp.days > res.weeklyTarget ? 'hazlo en los días sin pesas' : 'hazlo otro día, aparte, 20-30 minutos a paso ligero o en bici'}.`);   // v10 (J-19)
     if (m.why.some(w => w.c === 'paseos')) out.push('Sigue con tus paseos: ya cuentan como cardio.');
+    if (m.sesion && m.sesion.sinAbs) out.push(m.sesion.abs ? 'Sin abdominales, como elegiste, salvo en algún día con muy pocos ejercicios: ahí se queda uno para que la sesión no se quede en dos.'
+      : 'Sin abdominales, como elegiste: el abdomen trabaja de apoyo en los ejercicios básicos.');   // v15 (T3)
     // v7 (C-23): «así se aconseja» (calentamiento, equilibrio, máquinas y sin llegar al límite sí son lo que dicen las guías; el tope de días no)
     // v10 (J-16): la frase de 65+ con lo que hay: equilibrio en la sesión o en casa, máquinas solo si las hay
     const strRows = res.det.flatMap(dd => dd.rows.filter(r => r.kind === 'str' && BY.get(r.lib).lt === 'w')), maqs = strRows.filter(r => ['maquina', 'polea', 'smith'].includes(BY.get(r.lib).mat)).length;

@@ -254,6 +254,13 @@ input{font-family:inherit}
 .ob-se-t span{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--green-hi);white-space:nowrap;font-variant-numeric:tabular-nums}
 .ob-se-d{font-size:14px;color:var(--text2);line-height:1.45}
 .ob-se[aria-checked=true] .ob-se-d{color:var(--text)}
+/* (T3) «Y además»: abdominales y cardio al terminar */
+.ob-xs{display:flex;flex-direction:column;gap:6px}
+.ob-xr{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;min-height:48px}
+.ob-xr>span{font-size:15px;font-weight:500}
+.ob-sg{display:inline-flex;margin-left:auto;padding:3px;border:1px solid var(--border2);border-radius:999px;background:var(--bg2)}
+.ob-sg button{min-width:48px;min-height:44px;padding:8px 11px;border:0;border-radius:999px;background:none;color:var(--text2);font:inherit;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer;transition:background .15s,color .15s}
+.ob-sg button[aria-checked=true]{background:var(--green);color:var(--accent-ink)}
 .ob-tot{display:flex;flex-direction:column;gap:2px;padding:12px 14px;border-radius:var(--r);background:var(--bg3)}
 .ob-tot b{font-family:'DM Sans',sans-serif;font-size:20px;font-weight:600;letter-spacing:-.3px;font-variant-numeric:tabular-nums}
 .ob-tot span{font-size:13px;color:var(--text2);line-height:1.5}
@@ -10684,6 +10691,12 @@ return function (K, OPT) {
   // sesionDe: el tipo que corresponde a unos minutos guardados de antes (T7: 15-20 exprés · 30 lo esencial · 45-60 completa · 75-90 a fondo)
   const SESION = { expres: 15, esencial: 30, completa: 60, fondo: 90 };
   const sesionDe = min => { const m = +min || 60; return m <= 20 ? 'expres' : m <= 30 ? 'esencial' : m <= 60 ? 'completa' : 'fondo'; };
+  // v15 (T3): el cardio al terminar que sale marcado según el objetivo (minutos: 0, 10 o 20). Músculo y fuerza, no; perder grasa, 20 (10
+  // si ya hace un deporte de piernas o de agua); salud, 10 si no hace otro deporte; aguantar más, 10 (0 si ya pasea). En el exprés, no.
+  // Quien tenía «siempre» o «nunca» en «Afinar mi rutina» (cardioEnd) lo conserva: 10 como mínimo, o nada.
+  const cardioDef = a => { if (a.cardioEnd === 'no' || a.sesion === 'expres') return 0;
+    const d = a.goal === 'grasa' ? (['piernas', 'agua'].includes(a.sport) ? 10 : 20) : a.goal === 'salud' ? ((a.sport === 'no' || !a.sport) ? 10 : 0) : a.goal === 'aguante' ? (a.sport === 'suave' ? 0 : 10) : 0;
+    return d || (a.cardioEnd === 'si' ? 10 : 0); };
   const capOf = (P, min, ses) => Math.min((P.inicio ? 5 : P.mayorExp ? 7 : (LV[P.lvS] <= LV.P || P.cauto) ? 6 : ses === 'completa' ? 7 : 8) + (P.prioG.has('biceps') && (min == null || min > 20) ? 1 : 0), min == null ? 8 : min <= 15 ? 3 : min <= 20 ? 4 : min <= 30 ? 5 + (P.prioG.has('biceps') ? 1 : 0) : 8);
   const novato = P => LV[P.lvS] <= LV.P || P.cauto;   // el déficit se cubre antes con series que con ejercicios nuevos
   // grupo para contar «ejercicios distintos por grupo y semana» (hombro por cabezas, C-05)
@@ -10791,7 +10804,7 @@ return function (K, OPT) {
     const minS = !sesion ? a.min : sesion === 'expres' && (modes.includes('mayor') || prudent) ? 20 : SESION[sesion];
     return {
       // v12 (D10): con «más glúteo», el glúteo ocupa uno de los dos huecos de prioridad (P11 lo enseña marcado): queda uno para elegir
-      goal: a.goal, level, modes, days: a.days, min: minS, sesion, consec: !!a.consec, age: a.age, sport: a.sport || 'no', prio: a.enfoque === 'gluteo' ? (a.prio || []).filter(p => p !== 'gluteos').slice(0, 1) : (a.prio || []).slice(0, 2),
+      goal: a.goal, level, modes, days: a.days, min: minS, sesion, abs: !sesion || a.abs !== false, cardio: !sesion ? null : [0, 10, 20].includes(a.cardio) ? a.cardio : cardioDef(a), consec: !!a.consec, age: a.age, sport: a.sport || 'no', prio: a.enfoque === 'gluteo' ? (a.prio || []).filter(p => p !== 'gluteos').slice(0, 1) : (a.prio || []).slice(0, 2),
       pref, style: a.style || 'igual', warm: a.warm || 'normal', cardioEnd: a.cardioEnd || 'auto', power: !!a.power,
       avoid: a.avoid || [], places: a.places, daysOther: a.daysOther || 0, zones, prudent, keep: null, pins: null, enfoque: a.enfoque === 'gluteo' ? 'gluteo' : null,
       plan: typeof a.plan === 'string' && SPLITS[a.plan] ? a.plan : null, masTorso: a.enfoque === 'torso', roles: Array.isArray(a.roles) && a.roles.length >= 3 && a.roles.length <= 6 && a.roles.every(t => typeof t === 'string') ? a.roles.slice() : null, salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
@@ -10916,7 +10929,10 @@ return function (K, OPT) {
     const opZones = Object.keys(zones).filter(z => z !== 'otra' && (zones[z] === 'op' || zones[z] === 'reciente'));
     // v7 (D-03): zonas que duelen ahora (sin rango pesado ni levantamiento objetivo en sus ejercicios «con cuidado»)
     const ahoraZ = Object.keys(zones).filter(z => z !== 'otra' && zones[z] === 'ahora');
-    return { M, mayor, m75, prud, inicio, vuelta: M.has('vuelta'), level, lvS, lvV: lvS, cauto, wd, capP, difCap, dif2, powerOk, prioG, prioV, zones, corto, enfoque,
+    // v15 (T3): «Abdominales: No». A 65 o más, «Prefiero no decirlo», huesos frágiles y rutina prudente no se les quita el core (ni se les
+    // ofrece: su interruptor no sale); tampoco a quien tiene el abdomen de prioridad
+    const absFijo = segM || huesos || prud || prioV.has('abdomen'), sinAbs = !!inp.sesion && inp.abs === false && !absFijo;
+    return { M, mayor, m75, prud, inicio, vuelta: M.has('vuelta'), level, lvS, lvV: lvS, cauto, wd, capP, difCap, dif2, powerOk, prioG, prioV, zones, corto, enfoque, absFijo, sinAbs,
       segM, huesos, posparto, mayorExp, ahoraZ, zonaActiva, menor,
       // v8: molestias concretas (J-02, J-04, J-05, J-06)
       hombroAhora: zones.hombro === 'ahora', rodillaAhora: zones.rodilla === 'ahora', munecaAhora: zones.muneca === 'ahora', lumbarFuera: ['op', 'reciente'].includes(zones.lumbar), lumbarZ: !!zones.lumbar,
@@ -11232,6 +11248,7 @@ return function (K, OPT) {
     addWarmupBalanceCardio(st);
     prescribe(st);
     capSessions(st);
+    if (P.sinAbs && inp.min === 15) quitaAbs(st, true);   // v15 (T3): en el exprés, el core sale antes de elegir los 3 ejercicios
     if (inp.min === 15 || P.corto) expres(st, P.corto ? (inp.min <= 15 ? 2 : 3) : 3); else {
       balanceVolume(st);
       // E.16: huecos 3 si hay déficit (ordenados por las prioridades), sin pasar del tope de la sesión (v2, D-08)
@@ -11239,8 +11256,21 @@ return function (K, OPT) {
         .forEach(h => { if ((deficit(st, h.grupo) || (h.id === 'AB' && P.prioV.has('gluteos'))) && nStr(t) < capOf(P, inp.min, inp.sesion)) { const x = fill(h, t, st); if (x) { h.x = x; h.on = true; setPres(st, t, h); h.x.s = 2; if (!fitsDay(t, st)) { h.on = false; st.used.delete(h.x.lib); h.x = null; } } } }));
     }
     fitTime(st);
+    // v15 (T3): «Abdominales: No» = la misma rutina sin sus ejercicios de abdominales (ningún otro ocupa su sitio: la sesión dura menos)
+    if (P.sinAbs) quitaAbs(st);
     orderSessions(st);
     return st;
+  }
+  // (un día de 3 ejercicios no baja de 3, V4: su core solo sale si otro hueco del día ocupa su sitio; si no hay ninguno, se queda)
+  function quitaAbs(st, todo) {
+    const esCore = id => { const L = BY.get(id); return famOf(L) === 'core' || CORE_PATS.includes(L.pat); }, fuera = h => { h.on = false; st.used.delete(h.x.lib); h.x = null; h.cut = 1; };
+    st.T.forEach(t => t.slots.slice().forEach(h => { if (!h.on || !h.x || h.obl || h.fijo || !esCore(h.x.lib)) return;
+      if (todo || nStr(t) > 3) { fuera(h); return; }
+      const alt = t.slots.find(k => { if (k === h || k.on || k.empty || k.id === 'CO' || k.id === 'PW') return false; const x = k.x || fill(k, t, st, true); return !!x && !esCore(x.lib) && canAddEx(st, t, BY.get(x.lib), 2); });
+      if (!alt) return;
+      if (!alt.x) alt.x = fill(alt, t, st); else st.used.add(alt.x.lib);
+      if (!alt.x) return; alt.on = true; setPres(st, t, alt); alt.x.s = 2; fuera(h); }));
+    st.warn = st.warn.filter(w => w.c !== 'core_corto' && !(w.c === 'vol_corto' && w.p && w.p.g === 'abdomen'));
   }
   function mkSlot(id, prio, add, key) {
     const d = SLOT[id]; const pats = d.pats.slice(); (add || []).forEach(p => { if (!pats.includes(p)) pats.push(p); });
@@ -11978,7 +12008,8 @@ return function (K, OPT) {
     if (P.corto) wm = 5;
     const knee = !!P.zones.rodilla, low = knee || P.noImpact || P.segM;
     let cm = 0;
-    if (inp.cardioEnd !== 'no') {
+    if (inp.sesion) cm = inp.cardio || 0;   // v15 (T3): con tipo de sesión, los minutos de cardio que eligió la persona
+    else if (inp.cardioEnd !== 'no') {
       if (inp.goal === 'grasa') cm = ['piernas', 'agua'].includes(inp.sport) ? 10 : 15;
       else if (inp.goal === 'salud') cm = (inp.sport === 'no' || !inp.sport) ? 10 : 0;
       else if (inp.goal === 'aguante') cm = inp.sport === 'suave' ? 0 : 10;
@@ -12008,6 +12039,7 @@ return function (K, OPT) {
         const lowC = low || P.prud || (LV[P.level] <= LV.P && inp.goal === 'grasa'); st.cardioLow = lowC;
         const id = pickCardio(t, st, home ? CARD_FINAL_HOME : CARD_FINAL_GYM, lowC, t.warm && t.warm.lib) || null;
         t.cardio = id ? { lib: id, min: cm } : null; if (!id) st.warn.push({ c: 'sin_cardio', p: { dia: t.n } });
+        if (t.cardio && inp.sesion) t.cardio.fijo = 1;   // v15 (T3): va aparte del presupuesto del tipo (dayMinutes no lo cuenta; la duración que se enseña, sí)
       } else t.cardio = null;
     }
     if (inp.sport === 'suave' && inp.goal !== 'grasa') st.why.push({ c: 'paseos' });
@@ -12048,7 +12080,7 @@ return function (K, OPT) {
       const first = !firstDone && !st.P.inicio && L.c && L.lt === 'w'; if (first) firstDone = true;
       sec += exSecs(L, h.x, st, first, o);
     }
-    if (!onlyStr) { if (t.warm) sec += t.warm.min * 60; if (t.balance) sec += t.balance.min * 60; if (t.cardio && !(o && o.noCardio)) sec += t.cardio.min * 60; }
+    if (!onlyStr) { if (t.warm) sec += t.warm.min * 60; if (t.balance) sec += t.balance.min * 60; if (t.cardio && !t.cardio.fijo && !(o && o.noCardio)) sec += t.cardio.min * 60; }
     return sec / 60;
   }
   function fitTime(st) {
@@ -12075,10 +12107,10 @@ return function (K, OPT) {
       // 1. descanso de aislamientos −15 s (toda la rutina)
       if (R.iso - 15 >= R.floor.iso && act(t).some(h => !BY.get(h.x.lib).c)) { R.iso -= 15; did = 'iso'; }
       // 2. cardio final a 10 min
-      else if (t.cardio && t.cardio.min > 10) { t.cardio.min = 10; did = 'cardio10'; }
+      else if (t.cardio && !t.cardio.fijo && t.cardio.min > 10) { t.cardio.min = 10; did = 'cardio10'; }
       // 3. cardio final fuera (con «Perder grasa», antes el paso 6; si ni así cabe, fuera el cardio y se recuperan los accesorios)
-      else if (t.cardio && inp.goal !== 'grasa') { t.cardio = null; did = 'cardio_fuera'; }
-      else if (t.cardio && inp.goal === 'grasa') {
+      else if (t.cardio && !t.cardio.fijo && inp.goal !== 'grasa') { t.cardio = null; did = 'cardio_fuera'; }
+      else if (t.cardio && !t.cardio.fijo && inp.goal === 'grasa') {
         const snap = act(t).filter(h => h.prio === 3 && canRemove(t, h));
         let fits = false; const tmp = [];
         for (const h of snap.slice().reverse()) { h.on = false; tmp.push(h); if (dayMinutes(t, st) <= budget) { fits = true; break; } }
@@ -12202,7 +12234,7 @@ return function (K, OPT) {
     // min de cardio; de bajo impacto si hace falta): para esos objetivos el cardio es parte del objetivo (05 §8.2 y §7.2). Si la persona
     // dijo «sin cardio al final», no
     // (con «Salud y forma», lo mismo hasta 30 min: el aeróbico es la otra mitad de la salud, OMS 2020: 150-300 min por semana)
-    if (['aguante', 'grasa', 'salud'].includes(inp.goal) && inp.cardioEnd !== 'no' && !st.expres && !st.corto) st.T.forEach(t => {
+    if (['aguante', 'grasa', 'salud'].includes(inp.goal) && inp.cardioEnd !== 'no' && !inp.sesion && !st.expres && !st.corto) st.T.forEach(t => {   // (v15: con tipo de sesión, el cardio es el elegido)
       const spare = inp.min - dayMinutes(t, st); if (spare < 15) return;
       if (!t.cardio) { const id = pickCardio(t, st, t.place === 'c' ? CARD_FINAL_HOME : CARD_FINAL_GYM, st.cardioLow, t.warm && t.warm.lib); if (!id) { if (!st.warn.some(w => w.c === 'sin_cardio')) st.warn.push({ c: 'sin_cardio', p: { dia: t.n } }); return; } t.cardio = { lib: id, min: 0 }; }
       const add = Math.min(Math.floor((spare + 1e-9) / 5) * 5, (inp.goal === 'salud' ? 30 : 45) - t.cardio.min);
@@ -12417,7 +12449,7 @@ return function (K, OPT) {
       const need = v5need(st, f);
       if (cnt[f] + 1e-9 < need) hard.push('V5:' + f + ':' + cnt[f].toFixed(1) + '<' + need);
     }
-    if (cnt.core < 1 && K.C.some(L => famOf(L) === 'core' && T.some(t => canDo(L, t, st, false)))) { if (inp.min <= 20) soft.push('S:core_corto'); else hard.push('V5:core'); }
+    if (cnt.core < 1 && !P.sinAbs && K.C.some(L => famOf(L) === 'core' && T.some(t => canDo(L, t, st, false)))) { if (inp.min <= 20) soft.push('S:core_corto'); else hard.push('V5:core'); }
     // v5 (C-04, C-05): V8 · techo semanal en series fraccionales por grupo de planificación
     const { v } = volume(st);
     PG.forEach(g => { if (v[g] > st.tgt.ceil[g] + 1e-9) hard.push('V8:' + g + ':' + Math.round(v[g] * 10) / 10 + '>' + st.tgt.ceil[g]); });
@@ -12481,14 +12513,14 @@ return function (K, OPT) {
       if (t.cardio) { ex.push({ lib: t.cardio.lib, s: 1, r: t.cardio.min + ' min' }); rows.push({ lib: t.cardio.lib, n: BY.get(t.cardio.lib).n, series: 1, reps: t.cardio.min + ' min', descanso_s: null, nota: 'cardio final', kind: 'cardio', min: t.cardio.min }); }
       const label = 'Día ' + k, focus = focusOf(t, st);
       days[k] = { label, focus, ex };
-      det.push({ letra: k, role: t.rb, place: t.place, preset: t.P && t.P.preset, ligero: !!t.light, nombre: label + ' · ' + focus, minutos: Math.round(dayMinutes(t, st)), minExact: dayMinutes(t, st), sobraMotivo: t.sobraMotivo || null, rows, empty: t.slots.filter(h => h.empty && !h.sust && h.prio <= 2).map(h => h.id) });
+      det.push({ letra: k, role: t.rb, place: t.place, preset: t.P && t.P.preset, ligero: !!t.light, nombre: label + ' · ' + focus, minutos: Math.round(dayMinutes(t, st) + (t.cardio && t.cardio.fijo ? t.cardio.min : 0)), minExact: dayMinutes(t, st), sobraMotivo: t.sobraMotivo || null, rows, empty: t.slots.filter(h => h.empty && !h.sust && h.prio <= 2).map(h => h.id) });
     });
     const vol = volume(st), pp = pushPull(st);
     // v15 (T1): el resumen de la sesión, con la rutina final: lo que enseña la tarjeta del tipo es esto mismo (minutos de un día medio,
     // redondeados a 5; ejercicios de fuerza por día; si hay bíceps y tríceps directos, abdominales y cardio final)
     const nEj = det.map(d => d.rows.filter(r => r.kind === 'str').length), filas = det.flatMap(d => d.rows);
     const sesion = { tipo: inp.sesion || null, min: Math.round(det.reduce((x, d) => x + d.minutos, 0) / det.length / 5) * 5, ej: nEj, ejMin: Math.min(...nEj), ejMax: Math.max(...nEj),
-      biceps: vol.dir.biceps > 0, triceps: vol.dir.triceps > 0, abs: filas.some(r => r.kind === 'str' && CORE_PATS.includes(r.pat)), cardio: Math.max(0, ...filas.filter(r => r.kind === 'cardio').map(r => r.min)) };
+      biceps: vol.dir.biceps > 0, triceps: vol.dir.triceps > 0, sinAbs: !!P.sinAbs, absFijo: !!P.absFijo, abs: filas.some(r => r.kind === 'str' && CORE_PATS.includes(r.pat)), cardio: Math.max(0, ...filas.filter(r => r.kind === 'cardio').map(r => r.min)) };
     // ── v7 (paso 4): por qué y avisos de seguridad y modos, con la rutina final ──
     const why2 = [], warn2 = [];
     // D-22: «No incluyo el jalón tras nuca…» solo si la persona lo hacía (historial o favorito): si no, es ruido
@@ -12558,7 +12590,7 @@ return function (K, OPT) {
     if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
     return null;
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, tipoDe, repartoDeTipos, TIPO_TPL, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT, SESION, sesionDe };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, tipoDe, repartoDeTipos, TIPO_TPL, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT, SESION, sesionDe, cardioDef };
 };
 
 })();
@@ -12664,7 +12696,7 @@ return function (K, G) {
     else if (m.split.indexOf('x:') === 0) out.push(`Un reparto a tu medida, día a día: ${joinY(res.det.map(dd => (G.NOMBRE_DIA[dd.role] || dd.role).toLowerCase()))}. Yo pongo los ejercicios, las series y el equilibrio de la semana.`);   // v14 (P6)
     else if (ELEGIDO[m.split]) { out.push(ELEGIDO[m.split]);
       // «por músculos»: por qué los días de un solo grupo salen más cortos (el tope de 10 series por músculo y sesión, V9)
-      if (m.split.indexOf('grp') === 0 && res.det.some(dd => inp.min - dd.minutos >= 10)) out.push('Los días de un solo grupo salen más cortos: pasadas unas 10 series de un músculo en la misma sesión, las siguientes aportan poco.'); }
+      if (m.split.indexOf('grp') === 0 && res.det.some(dd => inp.min - (dd.minExact != null ? dd.minExact : dd.minutos) >= 10)) out.push('Los días de un solo grupo salen más cortos: pasadas unas 10 series de un músculo en la misma sesión, las siguientes aportan poco.'); }
     else if (m.split === 'ppl3' && m.wd === 3) out.push('Empuje, tirón y pierna: cada zona tiene su día y trabaja 1 vez por semana, con la sesión entera para ella.');
     else if (m.split === 'ppl3') out.push(`Empuje, tirón y pierna: con ${m.wd} días, cada músculo ${num(f)} veces por semana sin repetir dos días seguidos.`);
     else if (m.split === 'ppl6') out.push('Empuje, tirón y pierna dos veces, con ejercicios distintos cada vez: 6 entrenos, uno por día; cada músculo trabaja 2 veces por semana.');
@@ -12810,6 +12842,8 @@ return function (K, G) {
       out.push(`${mins.length === 1 ? mins[0] : 'Entre ' + mins[0] + ' y ' + mins[mins.length - 1]} min de ${nombres.length === 1 ? nombres[0] : 'cardio (' + joinY(nombres.slice(0, 2)).replace(' y ', ' o ') + ')'} al final${m.cardioRelleno ? `: con «${GOAL[inp.goal]}», el tiempo que sobra va al cardio${inp.goal === 'salud' ? ', que es la otra mitad de la salud' : ''}` : ''}${P.zones.rodilla ? (m.cardioRelleno ? ', sin cargar la rodilla' : ': suma sin cargar la rodilla') : P.noImpact || P.mayor ? (m.cardioRelleno ? ', de bajo impacto' : ': de bajo impacto') : ''}.`); }
     else if (cutC) out.push(`${inp.sesion ? `En la sesión «${SES[inp.sesion]}»` : `Con ${inp.min} minutos`} no cabe el cardio al final: ${inp.sport === 'suave' ? 'sigue con tus paseos y, si puedes, haz 2 de 30 minutos a paso ligero' : inp.days > res.weeklyTarget ? 'hazlo en los días sin pesas' : 'hazlo otro día, aparte, 20-30 minutos a paso ligero o en bici'}.`);   // v10 (J-19)
     if (m.why.some(w => w.c === 'paseos')) out.push('Sigue con tus paseos: ya cuentan como cardio.');
+    if (m.sesion && m.sesion.sinAbs) out.push(m.sesion.abs ? 'Sin abdominales, como elegiste, salvo en algún día con muy pocos ejercicios: ahí se queda uno para que la sesión no se quede en dos.'
+      : 'Sin abdominales, como elegiste: el abdomen trabaja de apoyo en los ejercicios básicos.');   // v15 (T3)
     // v7 (C-23): «así se aconseja» (calentamiento, equilibrio, máquinas y sin llegar al límite sí son lo que dicen las guías; el tope de días no)
     // v10 (J-16): la frase de 65+ con lo que hay: equilibrio en la sesión o en casa, máquinas solo si las hay
     const strRows = res.det.flatMap(dd => dd.rows.filter(r => r.kind === 'str' && BY.get(r.lib).lt === 'w')), maqs = strRows.filter(r => ['maquina', 'polea', 'smith'].includes(BY.get(r.lib).mat)).length;
@@ -13089,7 +13123,7 @@ return function (K, G, X) {
     // J-13: nada de 2:30 o más de descanso en series de 10 repeticiones o más
     for (const { d, r, L } of str) { const rr = G.repRange(L, r.r); if (r.descanso_s >= 150 && rr && rr.lo >= 10) bump('descanso_incoherente', d.letra + ':' + L.id + ' ' + r.reps + ' ' + r.descanso_s + 's'); }
     // J-14: «Aguantar más» y «Perder grasa»: un día con 15 min o más sin usar, con cardio posible y por debajo de su tope (45 min), no
-    if (['aguante', 'grasa', 'salud'].includes(inp.goal) && inp.cardioEnd !== 'no' && !m.corto && !m.why.some(w => w.c === 'expres') && !m.warn.some(w => w.c === 'sin_cardio'))
+    if (['aguante', 'grasa', 'salud'].includes(inp.goal) && inp.cardioEnd !== 'no' && !inp.sesion && !m.corto && !m.why.some(w => w.c === 'expres') && !m.warn.some(w => w.c === 'sin_cardio'))
       days.forEach(d => { const c = d.rows.find(r => r.kind === 'cardio'); if (inp.min - d.minExact >= 15 + 1e-9 && (!c || c.min < (inp.goal === 'salud' ? 30 : 45))) bump('objetivo_cardio_sin_usar', d.letra + ':' + Math.round(inp.min - d.minExact)); });
     // J-11: 16-17 con experiencia: sin rango de 6 o menos; si pidió explosivos y no hay, se dice por qué
     if (P.menor) for (const { d, r, L } of str) { const rr = G.repRange(L, r.r); if (r.slot !== 'PW' && rr && rr.hi <= 6) bump('menor_pesado', d.letra + ':' + L.id + ' ' + r.reps); }
@@ -13130,6 +13164,19 @@ return function (K, G, X) {
         const ds = days.filter(d => zona[g].test(d.role)); if (!ds.length) continue;
         const hay = K.C.some(L => L.pat === pat[g] && L.lt !== 'c' && L.dif <= P.difCap && G.safeL(L, inp) && ds.some(d => K.placeCan(L, inp.places[d.place], d.place)));
         if (hay) bump('sesion_brazos', g + ': ' + ((m.vol[g] || {}).dir || 0) + ' directas'); } }
+    // v15 (T3): los dos interruptores. Sin abdominales no sale ningún ejercicio de core (y lo dice), salvo a quien no se le pueden quitar
+    // (65 o más, «Prefiero no decirlo», huesos frágiles, rutina prudente o el abdomen de prioridad: a esos, como siempre); el cardio elegido
+    // sale tal cual todos los días (o un aviso si en ese sitio no hay con qué), y sin cardio elegido no sale ninguno
+    if (inp.sesion) { const CORE = ['core', 'core_iso', 'core_rot', 'carry'], core = str.filter(({ L }) => CORE.includes(L.pat)), car = days.map(d => d.rows.filter(r => r.kind === 'cardio'));
+      const fijo = P.segM || P.huesos || P.prud || P.prioV.has('abdomen');
+      // (un día de 3 ejercicios puede conservar el suyo si no hay otro que ocupe su sitio: V4; el texto lo dice)
+      const coreMal = core.filter(({ d }) => d.rows.filter(r => r.kind === 'str').length > 3);
+      if (inp.abs === false && !fijo && (coreMal.length || !textos.some(s => core.length ? /^Sin abdominales, como elegiste, salvo/.test(s) : /^Sin abdominales, como elegiste: /.test(s)))) bump('sesion_abs', coreMal.length ? 'sale ' + coreMal[0].L.id : 'falta el texto');
+      if (inp.abs === false && fijo && textos.some(s => /^Sin abdominales/.test(s))) bump('sesion_abs', 'se los quita a quien no se puede');
+      if (!inp.cardio && car.some(c => c.length)) bump('sesion_cardio', 'sale cardio sin pedirlo');
+      if (inp.cardio && car.some(c => c.length > 1 || (c.length === 1 && c[0].min !== inp.cardio))) bump('sesion_cardio', 'no son ' + inp.cardio + ' min: ' + car.map(c => c.map(r => r.min).join('+')).join('/'));
+      if (inp.cardio && car.some(c => !c.length) && !m.warn.some(w => w.c === 'sin_cardio')) bump('sesion_cardio', 'falta el cardio de algún día, sin aviso');
+      if (days.some((d, i) => Math.abs(d.minutos - (d.minExact + (car[i][0] ? car[i][0].min : 0))) > 0.51)) bump('sesion_cardio', 'la duración no suma el cardio'); }
     { const sm = m.sesion, nEj = days.map(d => d.rows.filter(r => r.kind === 'str').length);
       if (!sm || sm.tipo !== (inp.sesion || null) || sm.min !== Math.round(days.reduce((x, d) => x + d.minutos, 0) / days.length / 5) * 5 || sm.ej.join() !== nEj.join()) bump('sesion_resumen', JSON.stringify(sm)); }
     return f;
@@ -14890,6 +14937,7 @@ function _sanitizeProfile(o){
   const d=parseInt(o.days);p.days=Number.isInteger(d)&&d>=2&&d<=6?d:null;
   const m=+o.min;p.min=isFinite(m)&&m>0?PROF_MINS.reduce((b,x)=>Math.abs(x-m)<Math.abs(b-m)?x:b,PROF_MINS[0]):null;
   p.sesion=_oneOf(o.sesion,PROF_SESION)||(p.min?sesionDeMin(p.min):null); // (T1, T7)
+  p.abs=o.abs!==false;p.cardio=[0,10,20].includes(o.cardio)?o.cardio:null; // (T3) abdominales sí o no; cardio al terminar (minutos; null: el de tu objetivo)
   p.consec=_bool(o.consec);
   p.tope=typeof o.tope==='boolean'?o.tope:null; // (D5) «4 de pesas y el resto, cardio suave» (true) o «todos de pesas» (false)
   const dO=parseInt(o.daysOther);p.daysOther=Number.isInteger(dO)&&dO>=0&&dO<=5&&(p.days==null||dO<p.days)?dO:0;
@@ -15461,12 +15509,19 @@ function _obSesDesc(id,I){
   const c=I.completa;if(s&&c&&s.min===c.min&&s.ej.join()===c.ej.join())return'Con tus respuestas sale igual que «Completa»: por ahora, ese es tu tope.';
   return cap('más series y un ejercicio propio para cada músculo.');
 }
+// (T3) Los dos interruptores de la sesión: abdominales (sí o no) y cardio al terminar (no, 10 o 20 min), ya marcados según el objetivo.
+// El de abdominales no sale a quien no se le pueden quitar (65 o más, huesos frágiles, rutina prudente o el abdomen de prioridad).
+function _obCardio(a){if([0,10,20].includes(a.cardio))return a.cardio;try{return genEngine().G.cardioDef(Object.assign({},a,{sesion:_obSesOf(a)}));}catch(e){return 0;}}
+function _obSesExtras(a,s){
+  const seg=(k,lbl,opts,cur)=>`<div class="ob-xr"><span id="ob-l-${k}">${lbl}</span><div class="ob-sg" role="radiogroup" aria-labelledby="ob-l-${k}">${opts.map(([v,t])=>`<button type="button" role="radio" aria-checked="${String(cur)===String(v)}" data-k="${k}" data-v="${v}" onclick="obTimeSet('${k}','${v}')">${t}</button>`).join('')}</div></div>`;
+  return`<div class="ob-lbl ob-lbl2">Y además</div><div class="ob-xs">${s&&s.absFijo?'':seg('abs','Abdominales',[['1','Sí'],['0','No']],a.abs===false?'0':'1')}${seg('cardio','Cardio al terminar',[['0','No'],['10',`10${NB}min`],['20',`20${NB}min`]],_obCardio(a))}</div>`;
+}
 function _obSesTot(s){
   if(!s)return'';const n=_obSesN(s).replace(/^De /,'de ');
-  return`<div class="ob-tot" aria-live="polite"><b>Unos ${s.min}${NB}min por sesión</b><span>${esc(n)} de fuerza${s.abs?', con abdominales':''}${s.cardio?` y ${s.cardio}${NB}min de cardio al final`:''}. El tiempo es aproximado: depende de tus descansos y de cuánta gente haya.</span></div>`;
+  return`<div class="ob-tot" aria-live="polite"><b>Unos ${s.min}${NB}min por sesión</b><span>${esc(n)} de fuerza, ${s.abs?'con':'sin'} abdominales${s.cardio?` y con ${s.cardio}${NB}min de cardio al final`:'. Sin cardio'}. El tiempo es aproximado: depende de tus descansos y de cuánta gente haya.</span></div>`;
 }
 function obTimeSet(k,v){if(!_ob)return;const a=_ob.a;
-  if(k==='consec')a.consec=!a.consec;else if(k==='sesion'){if(!PROF_SESION.includes(v))return;a.sesion=v;a.min=SES_MIN[v];}else a[k]=k==='tope'?v==='si':+v;
+  if(k==='consec')a.consec=!a.consec;else if(k==='sesion'){if(!PROF_SESION.includes(v))return;a.sesion=v;a.min=SES_MIN[v];}else if(k==='abs')a.abs=v==='1';else if(k==='cardio'){a.cardio=[0,10,20].includes(+v)?+v:0;delete a.cardioEnd;}else a[k]=k==='tope'?v==='si':+v;
   if(k==='days'&&!(a.days>=5&&_obBeginner(a)))delete a.tope;
   if(k==='days'&&a.days>=5&&_obBeginner(a)&&a.tope==null)a.tope=true;
   _obSaveDraft();obRender({keepFocus:true,keepScroll:true});
@@ -15492,6 +15547,7 @@ OB_SCR['ob-tiempo']={block:2,html:()=>{const a=_ob.a;
   <div class="ob-week" aria-live="polite">${esc(_obWeekTxt(a))}</div>
   <div class="ob-lbl ob-lbl2" id="ob-l-ses">Tipo de sesión</div>
   <div class="ob-ses" role="radiogroup" aria-labelledby="ob-l-ses">${OB_SES.map(sBtn).join('')}</div>
+  ${_obSesExtras(a,I[a.sesion])}
   ${_obSesTot(I[a.sesion])}
   <p class="ob-foot">Lo confirmo al final, con tu edad, tu salud y tu material.</p>
   ${_obWhy('Con los días decido cómo repartir el cuerpo; con el tipo de sesión, cuántos ejercicios y series lleva cada día. El tiempo sale de ahí, contando calentamiento y descansos.')}
@@ -15743,6 +15799,7 @@ function _obAnswers(){
   if(a.enfoque!=='gluteo'&&a.enfoque!=='torso')delete a.enfoque; // (P2) «Más torso»: un solo día de pierna
   delete a.forma; // (P9) la forma va en la opción del generador, no en sus respuestas
   {const s=_obSesOf(a);if(s)a.sesion=s;else delete a.sesion;} // (T1, T7) el tipo de sesión; sin tipo guardado, el de sus minutos
+  if(a.abs!==false)delete a.abs;if(![0,10,20].includes(a.cardio))delete a.cardio; // (T3) lo no elegido lo decide el generador (con abdominales; el cardio de tu objetivo)
   if(_ob.from==='settings'&&!a.levelManual){const ef=_obEfectiva();if(ef)a.efectiva=ef;} // (E11a) el nivel sube solo con lo entrenado
   return a;
 }
@@ -15816,7 +15873,8 @@ function _obChips(){
   const a=_ob.a,pl=_ob.places||{},out=[];
   if(a.goal)out.push([OB_GOAL_LBL[a.goal],'ob-meta']);
   {const s=_obSesOf(a),m=_ob.g&&_ob.g.res.meta.sesion; // (T1) el tipo de sesión y lo que dura la rutina que hay en pantalla
-    out.push([plural(a.days||3,'día'),'ob-tiempo'],[s?SES_LBL[s]+(m&&m.tipo===s?` · ≈${NB}${m.min}${NB}min`:''):(a.min||60)+NB+'min','ob-tiempo']);}
+    out.push([plural(a.days||3,'día'),'ob-tiempo'],[s?SES_LBL[s]+(m&&m.tipo===s?` · ≈${NB}${m.min}${NB}min`:''):(a.min||60)+NB+'min','ob-tiempo']);
+    if(m&&m.sinAbs)out.push(['Sin abdominales','ob-tiempo']);if(m&&m.cardio&&s)out.push([`Cardio ${m.cardio}${NB}min`,'ob-tiempo']);} // (T3)
   ['g','c'].forEach(k=>{const P=pl[k];if(P)out.push([_placeLbl(P),k===pl.main?'ob-lugar':'ob-lugar2']);});
   if(a.exp)out.push([OB_EXP_LBL[a.exp],'ob-exp']);
   if(a.enfoque==='gluteo')out.push(['Más glúteo','ob-enfoque']);
@@ -16050,6 +16108,7 @@ function _obChangedTxt(){
   if(A.goal!==a.goal&&a.goal)out.push((OB_GOAL_LBL[a.goal]||'').toLowerCase());
   if(A.days!==a.days)out.push(`${A.days} → ${plural(a.days,'día')}`);
   {const s0=_obSesOf(A),s1=_obSesOf(a);if(s0!==s1&&s0&&s1)out.push(`«${SES_LBL[s0]}» → «${SES_LBL[s1]}»`);else if(!(s0&&s1)&&A.min!==a.min)out.push(`${A.min} → ${a.min} min`);} // (T1)
+  if((A.abs===false)!==(a.abs===false))out.push(a.abs===false?'sin abdominales':'con abdominales');if(_obCardio(A)!==_obCardio(a))out.push(_obCardio(a)?`${_obCardio(a)} min de cardio`:'sin cardio'); // (T3)
   if(A.exp!==a.exp)out.push('tu experiencia');if(A.enfoque!==a.enfoque)out.push('el enfoque');
   if(JSON.stringify(A.prio||[])!==JSON.stringify(a.prio||[]))out.push('tus prioridades');
   if(b.places!==JSON.stringify(_ob.places))out.push('tu material');if(b.h!==JSON.stringify(_ob.h.zones||{}))out.push('tus molestias');
@@ -16361,7 +16420,6 @@ function obTune(){
   <div class="hist-sheet-body ob-tune">
     <div class="ob-lbl">¿Cómo prefieres entrenar?</div>${seg('style',[['maq','Máquinas y poleas'],['libre','Peso libre'],['igual','Me da igual']],a.style||'igual')}
     <div class="ob-lbl">Calentamiento</div>${seg('warm',[['normal','Normal (5 min)'],['corto','Corto (3 min)']],a.warm||'normal')}
-    <div class="ob-lbl">Cardio al terminar</div>${seg('cardioEnd',[['auto','Según mi objetivo'],['si','Siempre'],['no','Nunca']],a.cardioEnd||'auto')}
     ${noPow?'':`<div class="ob-lbl">Explosivos</div>${seg('power',[['1','Incluir saltos'],['0','Sin explosivos']],a.power?'1':'0')}`}
     <div class="ob-lbl">Nivel</div>${seg('levelManual',[['','Automático'],['P','Principiante'],['I','Intermedio'],['A','Avanzado']],a.levelManual||'')}
     ${(a.avoid||[]).length?`<div class="ob-lbl">Ejercicios que no quieres</div>${a.avoid.map(id=>`<div class="ob-av1"><span>${esc((LIB_BY_ID.get(id)||{}).n||id)}</span><button type="button" class="ob-link" onclick="obUnavoid('${id}')">Volver a permitir</button></div>`).join('')}`:''}
@@ -16391,7 +16449,7 @@ const OB_SPORT_LBL={no:'No, por ahora no',suave:'Camino o voy en bici',piernas:'
 function _obRespRows(){
   const a=_ob.a,pl=_ob.places||{},pr=(a.prio||[]).filter(x=>!(a.enfoque==='gluteo'&&x==='gluteos'));
   const rows=[['ob-meta','Objetivo',(OB_GOAL_LBL[a.goal]||'—')],['ob-sexo','Mujer u hombre',({m:'Mujer',h:'Hombre',nd:'Prefiero no decirlo'})[a.sex]||'—']];
-  rows.push(['ob-exp','Experiencia',OB_EXP_LBL[a.exp]||'—'],['ob-tiempo','Días y sesión',a.days?`${plural(a.days,'día')} · ${_obSesOf(a)?SES_LBL[_obSesOf(a)]:(a.min||60)+NB+'min'}`:'—'],
+  rows.push(['ob-exp','Experiencia',OB_EXP_LBL[a.exp]||'—'],['ob-tiempo','Días y sesión',a.days?`${plural(a.days,'día')} · ${_obSesOf(a)?SES_LBL[_obSesOf(a)]:(a.min||60)+NB+'min'}${a.abs===false?' · sin abdominales':''}${_obSesOf(a)&&_obCardio(a)?` · cardio ${_obCardio(a)}${NB}min`:''}`:'—'],
     ['ob-lugar','Dónde entrenas',['g','c'].filter(k=>pl[k]).map(k=>_placeLbl(pl[k])).join(' · ')||'—'],
     ['ob-edad','Edad',OB_AGE_LBL[a.age]||'—'],['ob-molestias','Molestias',S.health?Object.keys(S.health.zones||{}).map(z=>(OB_ZONES.find(x=>x[0]===z)||['',z])[2]).join(', ')||'Ninguna':'No guardadas'],
     ['ob-deporte','Otro deporte',OB_SPORT_LBL[a.sport]||'—'],['ob-enfoque','Torso y pierna',({gluteo:'Más glúteo y pierna',torso:'Más torso'})[a.enfoque]||'Equilibrado'],['ob-foco','Prioridades',(a.enfoque==='gluteo'?['Glúteos']:[]).concat(pr.map(k=>(OB_PRIO.find(x=>x[0]===k)||['',k])[1])).join(' y ')||'Todo por igual']);

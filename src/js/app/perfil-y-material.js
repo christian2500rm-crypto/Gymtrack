@@ -44,6 +44,7 @@ function _sanitizeProfile(o){
   const d=parseInt(o.days);p.days=Number.isInteger(d)&&d>=2&&d<=6?d:null;
   const m=+o.min;p.min=isFinite(m)&&m>0?PROF_MINS.reduce((b,x)=>Math.abs(x-m)<Math.abs(b-m)?x:b,PROF_MINS[0]):null;
   p.sesion=_oneOf(o.sesion,PROF_SESION)||(p.min?sesionDeMin(p.min):null); // (T1, T7)
+  p.abs=o.abs!==false;p.cardio=[0,10,20].includes(o.cardio)?o.cardio:null; // (T3) abdominales sí o no; cardio al terminar (minutos; null: el de tu objetivo)
   p.consec=_bool(o.consec);
   p.tope=typeof o.tope==='boolean'?o.tope:null; // (D5) «4 de pesas y el resto, cardio suave» (true) o «todos de pesas» (false)
   const dO=parseInt(o.daysOther);p.daysOther=Number.isInteger(dO)&&dO>=0&&dO<=5&&(p.days==null||dO<p.days)?dO:0;
