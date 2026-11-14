@@ -130,9 +130,37 @@ function _progRestart(data,i,ex){
   if(_effortObj()==='facil'&&rpeCat(a.rpe)===3)return true;
   return la!=null&&_loadFail(a,la)&&!!p&&Math.abs(+p.v-+a.v)<0.01&&_loadFail(p,lo(p)||la);
 }
+// ─── (C14) EL MISMO EJERCICIO EN DOS DÍAS ───
+// Una rutina puede repetir un ejercicio en dos días (sentadilla el día B y el D): cada uno tiene su id y su historial, y antes el Coach
+// los llevaba como dos ejercicios distintos (el jueves no sabía lo que hiciste el lunes). Lo guardado no cambia: el Coach LEE juntos
+// los registros de los «hermanos» (los ejercicios de tu rutina con la misma ficha de la biblioteca).
+//  · El objetivo del día (peso y repeticiones) solo se comparte entre hermanos con las mismas series y el mismo rango: un día pesado y
+//    otro ligero siguen cada uno su progresión.
+//  · La tendencia (progresa, estancado, retroceso) y el parón se miran siempre sobre el conjunto.
+// Ids de los hermanos de un ejercicio de tu rutina, él incluido (null si no tiene). same: solo los de sus mismas series y rango
+function _sibIds(ex,same){
+  const lib=ex&&!ex.cardio?_libIdOf(ex):null;if(!lib)return null;
+  const key=e=>_baseSets(e)+'|'+String(e.r==null?'':e.r).trim(),k0=same?key(ex):null,p=routinePlan(),out=[];
+  Object.keys(p).forEach(dk=>{const d=p[dk];if(!d||!Array.isArray(d.ex))return;
+    d.ex.forEach(e=>{if(!e||e.cardio||out.includes(e.id)||_libIdOf(e)!==lib)return;if(same&&e.id!==ex.id&&key(e)!==k0)return;out.push(e.id);});});
+  return out.length>1&&out.includes(ex.id)?out:null;
+}
+// Registros de un ejercicio para el Coach: los suyos (la misma lista de siempre) o, con hermanos, los de todos por fecha
+function _coachRecs(exId,same,ex){
+  const own=_isPlainObj(S.strength)&&Array.isArray(S.strength[exId])?S.strength[exId]:[];
+  ex=ex||findExInPlan(exId);const ids=ex&&ex.id===exId?_sibIds(ex,same):null;if(!ids)return own;
+  const all=[];ids.forEach(id=>{(Array.isArray(S.strength[id])?S.strength[id]:[]).forEach(r=>{if(r&&typeof r==='object')all.push(r);});});
+  return all.sort((a,b)=>(+a.ts||0)-(+b.ts||0));
+}
+// Como _progSrc, con los registros de los hermanos (para la tendencia; la fatiga sigue contando cada registro una vez con _progSrc)
+function _progSrcAll(exId){
+  const ex=findExInPlan(exId),ids=ex&&ex.id===exId?_sibIds(ex,false):null;if(!ids)return _progSrc(exId);
+  const all=[];ids.forEach(id=>{_progSrc(id).forEach(r=>{if(r&&typeof r==='object')all.push(r);});});
+  return all.sort((a,b)=>(+a.ts||0)-(+b.ts||0));
+}
 function coach_exerciseProgression(exId,sinceTs){
   const ex=findExInPlan(exId)||{id:exId};
-  const src=_progSrc(exId);
+  const src=_progSrcAll(exId); // (C14)
   // Sin kilos (su último registro es de peso corporal, solo reps, tiempo o distancia sin peso): su propia medida
   {let la=null;for(let i=src.length-1;i>=0;i--){const r=src[i];if(r&&typeof r==='object'&&!r.dl){la=r;break;}}
     if(la&&!(+la.v>0)&&_recLT(la)!=='w')return _progNoKg(exId,ex,_recLT(la),sinceTs);}
@@ -212,7 +240,7 @@ function _noKgScore(v,lt){return lt==='t'?1+v/120:lt==='d'?1+v/100:1+v/30;}
 // metros) de los registros sin peso. Empieza después del último reinicio: tras llegar al tope y bajar (banda más dura,
 // variante nueva…) bajar no es un retroceso. metric: 'reps' | 't' | 'd'; firstV/lastV en esa medida.
 function _progNoKg(exId,ex,lt,sinceTs){
-  const src=_progSrc(exId);
+  const src=_progSrcAll(exId); // (C14)
   let all=src.filter(r=>r&&typeof r==='object'&&!(+r.v>0)&&typeof r.ts==='number'&&isFinite(r.ts)&&!r.dl&&!_lightAt(exId,r.ts)&&_recMetric(r,lt)!=null);
   if(sinceTs)all=all.filter(r=>r.ts>=sinceTs);
   all.sort((a,b)=>a.ts-b.ts);

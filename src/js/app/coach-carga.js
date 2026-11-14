@@ -53,7 +53,7 @@ function loadEqClass(ex){
 const LOAD_SNAP=[0.5,1,1.25,2,2.5,5],HIST_SNAP={kb:LOAD_EQ.kb.opts,disco:LOAD_EQ.disco.opts};
 function _histStep(exId,cls){
   const SN=HIST_SNAP[cls]||LOAD_SNAP;
-  const a=(Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&!r.dl&&+r.v>0&&isFinite(+r.v)).slice(-12);
+  const a=_coachRecs(exId,true).filter(r=>r&&!r.dl&&+r.v>0&&isFinite(+r.v)).slice(-12); // (C14)
   const cnt={};
   let top=a.length?+a[0].v:0;
   for(let i=1;i<a.length;i++){
@@ -136,7 +136,7 @@ function coach_prescribe(exId,opts){
   if(!ex||ex.cardio)return null;
   const lt=exLT(ex);if(lt==='c')return null;
   if(lt==='w')return _presKg(exId,ex,opts);
-  const all=(Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&typeof r==='object');
+  const all=_coachRecs(exId,true,ex).filter(r=>r&&typeof r==='object'); // (C14)
   if(opts.extra)all.push(opts.extra);
   const real=all.filter(r=>!r.dl),d=real.length?real:all;
   if(!d.length)return null;
@@ -172,7 +172,7 @@ function _upThisWeek(d){for(let i=d.length-1;i>0;i--){if(+d[i].v>+d[i-1].v+1e-9)
 // 8-26 → −20 % (y desde ahí se juzga contra los registros nuevos); más de 26 → sin peso propuesto («Primera vez tras el parón»).
 // La rutina generada lo adelanta a quien dijo que volvía de un parón (planMeta.vuelta), con los registros de antes de ella.
 function _presGap(exId){
-  const a=(_isPlainObj(S.strength)&&Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&typeof r==='object'&&!r.dl&&+r.ts>0);
+  const a=_coachRecs(exId,false).filter(r=>r&&typeof r==='object'&&!r.dl&&+r.ts>0); // (C14) el parón, sobre el conjunto
   const last=a[a.length-1];if(!last)return null;
   const days=(Date.now()-last.ts)/86400000,pm=_isPlainObj(S.planMeta)?S.planMeta:null,pv=pm&&pm.vuelta&&last.ts<pm.ts?pm.vuelta:null;
   return{days,pv,retake:days>182||pv==='recalibrar',cut:days>182?0:(days>56||pv==='menos20')?0.2:days>=LOAD_GAP_DAYS?0.1:0};
@@ -208,7 +208,7 @@ function _didTxt(rec,sx,r){
 function _presKg(exId,ex,opts){
   const rr=repRange(ex);
   if(!rr)return null;
-  const src=(Array.isArray(S.strength[exId])?S.strength[exId]:[]).filter(r=>r&&+r.v>0&&isFinite(+r.v));
+  const src=_coachRecs(exId,true,ex).filter(r=>r&&+r.v>0&&isFinite(+r.v)); // (C14)
   if(opts.extra)src.push(opts.extra);
   if(!src.length)return null;
   const real=src.filter(r=>!r.dl),d=real.length?real:src;
@@ -659,7 +659,7 @@ const RPE_COL={1:'var(--green)',2:'var(--amber)',3:'var(--red)'};
 const TGT_LEG_RPE='<div class="tgt-leg"><span><i style="background:var(--green)"></i>fácil</span><span><i style="background:var(--amber)"></i>justo</span><span><i style="background:var(--red)"></i>al límite</span></div>';
 function presWhyHtml(ex,p){
   if(!_presIsKg(p))return _presWhyNoKg(ex,p);
-  const recs=(Array.isArray(S.strength[ex.id])?S.strength[ex.id]:[]).filter(r=>r&&+r.v>0&&!r.dl).slice(-5);
+  const recs=_coachRecs(ex.id,true,ex).filter(r=>r&&+r.v>0&&!r.dl).slice(-5); // (C14)
   let svg='';
   if(recs.length){
     const n=recs.length,W=300,vs=recs.map(r=>+r.v),mn=Math.min(...vs),mx=Math.max(...vs);
@@ -688,7 +688,7 @@ function presWhyHtml(ex,p){
 }
 // «¿Por qué?» de un objetivo sin kilos: tus 5 últimas sesiones (su medida y esfuerzo) y la regla
 function _presWhyNoKg(ex,p){
-  const lt=p.lt,wm=p.last>0,recs=(Array.isArray(S.strength[ex.id])?S.strength[ex.id]:[]).filter(r=>r&&!r.dl&&(wm?+r.v>0:!(+r.v>0))&&_recMetric(r,lt)!=null).slice(-5);
+  const lt=p.lt,wm=p.last>0,recs=_coachRecs(ex.id,true,ex).filter(r=>r&&!r.dl&&(wm?+r.v>0:!(+r.v>0))&&_recMetric(r,lt)!=null).slice(-5);
   let svg='';
   if(recs.length){
     const n=recs.length,W=300,vs=recs.map(r=>_recMetric(r,lt)),mn=Math.min(...vs),mx=Math.max(...vs);

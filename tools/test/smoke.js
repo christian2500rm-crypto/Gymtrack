@@ -13633,5 +13633,42 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('coachMismoEjercicio',async()=>{
+// (C14) El mismo ejercicio en dos días de tu rutina (dos ids, dos historiales): el Coach los lee juntos. Con las mismas series y el
+// mismo rango comparten objetivo (el segundo día sigue donde lo dejó el primero); con rangos o series distintos, cada uno el suyo.
+// La tendencia y el parón, siempre sobre el conjunto. Lo guardado no cambia y la fatiga cuenta cada registro una sola vez.
+const full=JSON.parse(JSON.stringify(S)),bad=[],pin0=_coachLvPin;const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+try{
+  _coachLvPin='P';S.open=null;S.sets={};S.reopenedSession=null;S.deload=null;S.deloadHistory=[];S.restWeeks=[];S.planMeta=null;S.appliedProposals=[];S.rpeOn=true;S.loadSteps=_defaultLoadSteps();S.strength={};syncActiveWorkout();
+  const p=getPlan(),ks=liveDayKeys(p),k1=ks.find(k=>p[k].ex.some(e=>!e.cardio&&exLT(e)==='w'&&isCompoundEx(e)&&exLib(e)&&loadEqClass(e)!=='kb'&&loadEqClass(e)!=='disco'));E(!!k1&&ks.length>1,'rutina sin dos días o sin multiarticular de biblioteca');
+  if(k1&&ks.length>1){const A=p[k1].ex.find(e=>!e.cardio&&exLT(e)==='w'&&isCompoundEx(e)&&exLib(e)&&loadEqClass(e)!=='kb'&&loadEqClass(e)!=='disco'),k2=ks.find(k=>k!==k1);
+    A.s=3;A.r=12;const B=Object.assign(_libCopy(exLib(A),'zz_dup'),{s:3,r:12});p[k2].ex.push(B);
+    const D=864e5,n=Date.now(),hi=repRange(A).hi,lo=repRange(A).lo;
+    const rec=(d,v,r)=>({d:'x',v,r,setsDone:3,rpe:2,ts:n-d*D,ps:3,pr:12,sets:[{w:v,r,rpe:2},{w:v,r,rpe:2},{w:v,r,rpe:2}]});
+    E(pj(_sibIds(A,true))===pj(_sibIds(B,true))||(_sibIds(A,true)||[]).slice().sort().join()===(_sibIds(B,true)||[]).slice().sort().join(),'hermanos: '+pj([_sibIds(A,true),_sibIds(B,true)]));
+    // el segundo día sigue donde lo dejó el primero
+    S.strength[A.id]=[rec(7,60,hi)];E(!S.strength[B.id],'B ya tenía historial');
+    let pa=coach_prescribe(A.id),pb=coach_prescribe(B.id);E(pb&&pa&&pb.kind===pa.kind&&Math.abs(pb.weight-pa.weight)<0.01&&pb.kind==='up','B sin el historial de A: '+pj([pa&&pa.head,pb&&pb.head]));
+    const w2=pa.weight;S.strength[B.id]=[rec(3,w2,lo)];pa=coach_prescribe(A.id);
+    E(pa.kind==='reps'&&Math.abs(pa.weight-w2)<0.01&&pa.reps===lo+1&&Math.abs(pa.last-w2)<0.01,'A no sigue lo último de B: '+pa.head+' · '+pa.reason);
+    // lo guardado no cambia, y sin hermanos se lee la lista de siempre
+    E(S.strength[A.id].length===1&&S.strength[B.id].length===1,'se ha tocado lo guardado');
+    const solo=p[k1].ex.find(e=>!e.cardio&&e.id!==A.id);if(solo){S.strength[solo.id]=[rec(5,20,10)];E(_coachRecs(solo.id,true)===S.strength[solo.id]&&!_sibIds(solo,false),'sin hermanos no es la lista de siempre');}
+    // la tendencia, sobre el conjunto; la fatiga, cada registro una vez
+    E(coach_exerciseProgression(A.id).sessions===2&&coach_exerciseProgression(B.id).sessions===2,'tendencia sin juntar: '+coach_exerciseProgression(A.id).sessions);
+    E(_fatRecs(n-14*D,n+1).filter(x=>x.id===A.id||x.id===B.id).length===2,'la fatiga cuenta registros repetidos');
+    // con otro rango (o con otras series), cada uno su objetivo; la tendencia y el parón siguen juntos
+    B.r='4-6';pa=coach_prescribe(A.id);pb=coach_prescribe(B.id);
+    E(Math.abs(pa.last-60)<0.01&&Math.abs(pb.last-w2)<0.01&&!_sibIds(A,true)&&(_sibIds(A,false)||[]).length===2,'con otro rango comparten objetivo: '+pj([pa.last,pb.last]));
+    E(coach_exerciseProgression(A.id).sessions===2,'con otro rango, la tendencia se separa');
+    S.strength[A.id]=[rec(40,60,hi)];S.strength[B.id]=[rec(2,w2,5)];E(_presGap(A.id).cut===0&&coach_prescribe(A.id).kind!=='down','con el otro día hecho anteayer, lo trata como parón: '+pj(_presGap(A.id)));
+    delete S.strength[B.id];E(_presGap(A.id).cut>0,'sin el otro día, el parón de 40 días no cuenta');
+    B.r=12;B.s=4;S.strength[B.id]=[rec(2,w2,lo)];E(Math.abs(coach_prescribe(A.id).last-60)<0.01&&!_sibIds(A,true),'con otras series comparten objetivo');}
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  _coachLvPin=pin0;
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('animsAll',async()=>{if(rep.anims!==EXERCISE_DB.length)throw new Error(rep.anims+' de '+EXERCISE_DB.length);_animAll('al terminar');});
 return rep;})()
