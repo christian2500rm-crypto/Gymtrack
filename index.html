@@ -21772,6 +21772,8 @@ function coach_prescribe(exId,opts){
 }
 // Con pesas fijas (kettlebell) un salto de más del 50 % no se da: antes, la variante más difícil
 const KB_MAX=0.5;
+// (C10) Con objetivo «fácil», un salto de más de un 5 % del peso pide antes 2 repeticiones por encima del rango
+const LOAD_FACIL_STEP=0.05;
 // Reps con las que empezar tras un salto de pesa fija: las que dan el mismo 1RM estimado con el peso nuevo (Epley), entre
 // loE y lo (16 kg × 14 → 20 kg × 6)
 function _kbReps(w,r,step,lo,loE){
@@ -21956,6 +21958,9 @@ function _presKg(exId,ex,opts){
     // (M2b) Prudente y con el esfuerzo apagado en Ajustes: sin saber si te sobraba, el tope dos sesiones seguidas con este peso
     if(eo==='facil'&&!_rpeOn()&&!_topTwice(d,ex,w,hi))return out('keep',w,hi,`${repsTxt}: primera vez en el tope con ${kgTxt(w)} kg; repítelo otra sesión y, si sale igual, subes`);
     if(eo==='facil'&&_upThisWeek(d))return out('keep',w,hi,`${repsTxt}; ya subiste esta semana: como mucho una subida por semana`);
+    // (C10) Con objetivo «fácil» y un salto grande para ese peso (más de un 5 %: 2,5 kg sobre 27,5), antes de subir se llega a 2
+    // repeticiones por encima del rango. Sin esto, 12 «fáciles» → +9 % → sale al límite → un salto menos → vuelta a subir, sin avanzar.
+    if(eo==='facil'&&step>w*LOAD_FACIL_STEP+1e-9&&r<hi+2)return out('reps',w,r+1,`${repsTxt}; +${kgTxt(step)} kg sería un ${Math.round(step/w*100)} % más: antes llega a ${hi+2} repeticiones`);
     // Pausa larga: repetir antes de subir
     const gapD=last.ts?Math.floor((Date.now()-last.ts)/86400000):0;
     if(gapD>=LOAD_GAP_DAYS)return out('keep',w,hi,`hace ${plural(Math.floor(gapD/7),'semana')} que no lo haces: repite antes de subir`);
@@ -22302,6 +22307,7 @@ function presWhyHtml(ex,p){
       <li>Rango <b>${p.lo}-${p.hi} reps</b>: mismo peso y una rep más cada vez. Al hacer ${p.hi} en todas las series, sube un salto y vuelve a ${p.lo}.</li>
       <li>Salto: <b>${esc(src)}</b>. Sube como mucho un 10 % (doble si ${on?'fue fácil':'te sobran 3 reps o más'}). Con pesos ligeros, antes suma 2 reps y luego da el salto mínimo.</li>
       ${!on&&_effortObj()==='facil'?`<li>Tu rutina va con margen: subes solo tras llegar a ${p.hi} reps en todas las series dos sesiones seguidas con el mismo peso.</li>`:''}
+      ${_effortObj()==='facil'&&p.step>p.last*LOAD_FACIL_STEP+1e-9?`<li>Tu rutina va con margen y +${esc(st)} kg es un salto grande para este peso: antes de subir llegas a ${p.hi+2} reps.</li>`:''}
       <li>${on?(_effortObj()==='facil'?'«Al límite» no sube peso: un salto menos. ':'Si todas las series salen «al límite» y sin repeticiones de sobra, repite una vez antes de subir. '):''}Dos sesiones seguidas por debajo de ${p.lo} reps: baja un 5-10 %, al menos un salto.</li>${p.hiK?`
       <li>Pesas fijas: +${esc(st)} kg es un ${Math.round(p.step/Math.max(1,p.last)*100)} %. Antes de saltar llegas a ${p.hiK} reps; tras el salto empiezas con menos reps y vuelves a subir.</li>`:''}
     </ul>
