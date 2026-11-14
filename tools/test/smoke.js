@@ -13461,6 +13461,28 @@ try{
   Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
 }
 });
+await safe('otroDiaSinRepetidos',async()=>{
+// «Otro entreno para este día» no mete en ese día un ejercicio que otro día ya tiene. Antes, casi la mitad de las veces la semana
+// salía con el mismo ejercicio dos veces: el día rehecho se quedaba con uno que estaba anclado a otro día.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};
+const rep=()=>{const c={};_ob.g.res.det.forEach(d=>d.rows.filter(x=>x.kind==='str').forEach(x=>{(c[x.lib]=c[x.lib]||[]).push(d.letra);}));return Object.keys(c).filter(k=>c[k].length>1).map(k=>k+' en '+c[k].join('+'));};
+try{
+  S.onboarded=true;S.obDraft=null;saveState();
+  for(const [exp,days] of [['gt2a',3],['6m2a',3],['lt6m',3],['6m2a',4]]){
+    showOnboarding({from:'settings'});await W(3);
+    Object.assign(_ob.a,{mode:'gen',goal:'musculo',sex:'h',exp,days,sesion:'completa',min:60,age:'18',sport:'no',prio:[]});['plan','enfoque','forma','roles','abs','cardio'].forEach(k=>delete _ob.a[k]);
+    _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.dia=null;_ob.pins={};_ob.alt=0;_ob.step='ob-rutina';_ob.dirty=true;obRender();await W(5);
+    const base=rep();E(_ob.g&&_ob.g.res.ok,'no hay rutina '+exp+' '+days);
+    for(const k of Object.keys(_ob.g.res.days)){obTab(k);await W(2);obOtherDay(k);await W(5);
+      const r=rep().filter(x=>!base.includes(x));E(!r.length,exp+' '+days+' días, otro entreno para el Día '+k+': repite '+r.join(' ; '));}
+    hideOnboarding();await W(3);
+  }
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,6).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);const og=document.getElementById('ob-gen');if(og)og.remove();try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
 await safe('coachCardioVisible',async()=>{
 // (C12) «Más minutos de cardio» (objetivo «Salud y forma» o «Perder grasa») se ve y se aplica: antes se generaba y se guardaba, pero
 // el Coach la daba por caducada (el cardio no está entre los ejercicios que analiza) y nunca salía en la lista. Ya aplicada, deja de valer.

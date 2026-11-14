@@ -960,6 +960,11 @@ return function (K, OPT) {
     if (st.P.noFloor && cs.some(c => !TAGS.suelo.has(c.L.id) && !ahoraCuidado(st.P, c.L.id))) cs.forEach(c => { if (TAGS.suelo.has(c.L.id)) c.eff += 100; });
     // v14 (P7): un hueco anclado (ctx.fijos: clave del hueco → ejercicio) se queda con su ejercicio si sigue siendo posible
     { const fx = st.ctx.fijos && st.ctx.fijos[h.key]; if (fx) { const c = cs.find(c => c.L.id === fx); if (c) return c; } }
+    // v16: lo anclado a otro hueco queda reservado para él. Al rehacer un solo día («Otro entreno para este día», «Cambiar el foco de este
+    // día»), ese día podía quedarse con un ejercicio que otro día ya tenía anclado, y la semana salía con el mismo ejercicio dos veces
+    // (casi la mitad de las veces). Un hueco sin ancla solo lo coge si no le queda ninguna otra opción
+    if (st.ctx.fijos) { const res = st.fijSet || (st.fijSet = new Set(Object.values(st.ctx.fijos)));
+      if (cs.some(c => !res.has(c.L.id))) cs.forEach(c => { if (res.has(c.L.id)) c.eff += 100; }); }
     const mn = Math.min(...cs.map(c => c.eff));
     // v14 (P7): «Otro entreno para este día» (ctx.altDia: índice del día → vez): el sorteo de «Otra propuesta», solo en ese día y con su semilla
     const lot = st.ctx.altDia && st.ctx.altDia[t.n] ? st.ctx.altDia[t.n] : 0, sd = lot ? fnv1a(st.seed + ':d' + t.n + ':' + lot) : st.seed, J = lot ? 0.9 : st.J;
