@@ -8,6 +8,7 @@ const PROF_PARON_ANTES=['lt6m','6m2a','gt2a'],PROF_PARON_FUERA=['2a6m','gt6m','g
 const PROF_MINS=[15,20,30,45,60,75,90],PROF_AGES=['16','18','40','65','75','nd'],PROF_SPORT=['no','suave','piernas','agua'];
 const PROF_PRIO=['pecho','espalda','hombros','brazos','gluteos','piernas','abdomen'],PROF_STYLE=['maq','libre','igual'];
 const PROF_WARM=['normal','corto'],PROF_CARDIO=['auto','si','no'];
+const PROF_TIPOS=['torso','pierna','empuje','tiron','completo','pecho_triceps','espalda_biceps','hombros_brazos','pecho','espalda','hombros','brazos']; // (P6) tipos de día
 const PROF_PLAN=['cc3','tpc3','tpt3','ppl3','tp4','pplt4','pplc4','grp4','ulppl','tptpt5','pplet5','grp5','ppl6','tp6','pplg6']; // (P1) el reparto que elige la persona en «Cambiar reparto»
 const PROF_SEX=['m','h','nd'],PROF_ENFOQUE=['gluteo','torso','igual']; // (D10) mujer · hombre · prefiero no decirlo; enfoque de la rutina
 // Sitios: presets (P5), accesorios (§K.1, con las cosas de casa), familias de máquina (13) y tipos de cardio (9)
@@ -51,6 +52,8 @@ function _sanitizeProfile(o){
   const ds=_isPlainObj(o.dismiss)?o.dismiss:{};p.dismiss={};['own','invite','safety','weight','cycle','repaso'].forEach(k=>{p.dismiss[k]=_num(ds[k],0,9e15);}); // (E15) cycle: «¿Cómo seguimos?» contestado · (E16c) repaso anual
   p.nr=_oneOf(o.nr,['ent','pro','med']);
   p.warn=_oneOf(o.warn,['consulta','matrona']); // (E11b) aviso fijo de salud (§H.2): solo cuál, no el motivo // (E9a) sin rutina automática: qué tarjeta enseñar (no guarda el motivo)
+  p.roles=Array.isArray(o.roles)&&o.roles.length>=3&&o.roles.length<=6&&o.roles.every(t=>PROF_TIPOS.includes(t))?o.roles.slice():null; // (P6) la semana montada día a día: el tipo de cada día
+  p.forma=_oneOf(o.forma,['dias','recomendado']); // (P9) la forma de reparto elegida a mano en «Cambiar reparto» (null: la de salida de tu nivel)
   p.plan=_oneOf(o.plan,PROF_PLAN); // (P1) reparto elegido (null: el recomendado); el generador lo ignora si ya no se te ofrece
   p.sex=_oneOf(o.sex,PROF_SEX);p.enfoque=_oneOf(o.enfoque,PROF_ENFOQUE); // (D10) más glúteo y pierna · (P2 del repaso del reparto) para todos, y «torso» = un solo día de pierna
   return p;
@@ -143,7 +146,12 @@ function _sanitizeObDraft(o){
   const a=_sanitizeProfile(Object.assign({},_isPlainObj(o.a)?o.a:{},{mode:'gen'}));
   const pins={};if(_isPlainObj(o.pins))Object.keys(o.pins).slice(0,40).forEach(k=>{if(/^[A-Za-z0-9:_-]{1,40}$/.test(k)&&_LIBID_RE.test(o.pins[k]))pins[k]=o.pins[k];});
   const d={v:1,ts:o.ts,from:_oneOf(o.from,['first','settings'])||'first',step:_oneOf(o.step,OB_STEPS)||'ob-meta',a,alt:_num(o.alt,0,99)||0,pins,
-    places:_sanitizePlaces(o.places),accepted:null};
+    places:_sanitizePlaces(o.places),accepted:null,
+    orden:Array.isArray(o.orden)&&o.orden.length>=2&&o.orden.length<=6&&o.orden.slice().sort().join()===o.orden.map((_,i)=>i).join()?o.orden.slice():null,ordenDe:typeof o.ordenDe==='string'?o.ordenDe.slice(0,30):null,dia:null,diaDe:typeof o.diaDe==='string'?o.diaDe.slice(0,30):null}; // (P8) el orden de los días de la rutina propuesta
+  if(_isPlainObj(o.dia)&&_isPlainObj(o.dia.altDia)&&_isPlainObj(o.dia.fijos)){ // (P7) «Otro entreno para este día»: vez por día, anclas (clave de hueco → ejercicio) y lo que llevaba
+    const ad={},fj={};Object.keys(o.dia.altDia).slice(0,6).forEach(k=>{const n=_num(o.dia.altDia[k],1,99);if(/^[0-5]$/.test(k)&&n!=null)ad[k]=n;});
+    Object.keys(o.dia.fijos).slice(0,80).forEach(k=>{if(/^[A-Za-z0-9#:]{1,40}$/.test(k)&&_LIBID_RE.test(o.dia.fijos[k]))fj[k]=o.dia.fijos[k];});
+    if(Object.keys(ad).length||Object.keys(fj).length)d.dia={altDia:ad,fijos:fj,prev:_ids(o.dia.prev,16,_LIBID_RE)};} // (P6) o solo anclas, tras cambiar el foco de un día
   if(_isPlainObj(o.accepted)){const days=_sanitizePlanCopy(o.accepted.days,null);
     if(days){dayKeys(days).forEach(k=>{if(!days[k].did)days[k].did=newDayId(days);});const meta=_sanitizePlanMeta(o.accepted.meta,days);
       if(meta){meta.why=meta.why.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));meta.warn=meta.warn.filter(x=>!/^(zona|salud|huesos|posparto|prud)/.test(x.c));}

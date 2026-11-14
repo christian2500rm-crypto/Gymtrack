@@ -186,6 +186,7 @@ function renderRoutineEditor(opts){
         </div>
         <div class="ed-days">
           <div class="ed-days-h">Tus días <span>${plural(n,'día')} de 6</span></div>
+          ${typeof dayMoveHtml==='function'?dayMoveHtml(plan,_editDay):''}
           <button type="button" class="btn bs" onclick="addDayUI()"${n>=6?' disabled':''}>${n>=6?'Ya tienes 6 días: es el máximo':`＋ Añadir día (Día ${DAY_KEYS[n]})`}</button>
           <button type="button" class="btn bs" onclick="startFromScratchUI()">Empezar de cero</button>
           <button type="button" class="btn bs" onclick="resetPlanToDefault()">Volver a la rutina de ejemplo</button>

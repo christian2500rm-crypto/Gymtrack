@@ -19,6 +19,10 @@ const ENFOQUE = arg('enfoque') === 'gluteo' ? 'gluteo' : arg('enfoque') === 'tor
 // --plan=rota (v14, P1): cada perfil al que se le ofrecen otros repartos en «Cambiar reparto» (G.planes) pide uno de ellos, rotando;
 // las invariantes son las mismas. La salida lleva `plan`: cuántos lo pidieron y cuántos salieron con él, por reparto
 const PLAN = arg('plan') === 'rota';
+// --roles=azar (v14, P6): cada perfil con 3 días o más pide una semana montada día a día (el tipo de cada día, por su número de perfil:
+// sale de todo, también semanas sin pierna o sin tirón); el generador la aplica solo a quien puede elegir y si queda equilibrada
+const ROLES = arg('roles') === 'azar', TIPOS8 = ['torso', 'pierna', 'empuje', 'tiron', 'completo', 'pecho_triceps', 'espalda_biceps', 'hombros_brazos'];
+const conRoles = pr => { if (!ROLES || !(pr.a.days >= 3)) return; pr.a.roles = Array.from({ length: pr.a.days }, (_, i) => TIPOS8[(pr.id * 7 + i * (3 + pr.id % 4) + (pr.id >> 3)) % 8]); };
 const planStat = { pedidos: 0, salen: 0, por: {} };
 const conPlan = pr => { if (!PLAN) return; const o = G.planes(G.desdeRespuestas(pr.a)).otros; if (o.length) pr.a.plan = o[pr.id % o.length]; };
 const cuentaPlan = (pr, res) => { if (!pr.a.plan) return; const p = planStat.por[pr.a.plan] = planStat.por[pr.a.plan] || { pedidos: 0, salen: 0 }; planStat.pedidos++; p.pedidos++; if (res.meta.split === pr.a.plan) { planStat.salen++; p.salen++; } };
@@ -412,9 +416,10 @@ const verUno = (pr, inp, res, f, q) => { console.log(`\n#${pr.id} · ${resumen(p
   for (const d of res.det) { console.log(`  ${d.nombre} [${d.role} · ${d.place}/${d.preset}] ≈ ${d.minExact.toFixed(1)} min`); d.rows.forEach(r => console.log(`     ${(r.lib || '—').padEnd(30)} ${String(r.series || '').padStart(2)} × ${String(r.reps).padEnd(7)} ${r.descanso_s != null ? r.descanso_s + 's' : ''} ${r.slot ? '[' + r.slot + r.prio + (r.pass === 'near' ? '~' : r.oi > 0 ? '*' : '') + ']' : ''} ${r.kind === 'bal' ? r.min + ' min' : ''}`)); } };
 for (const pr of profs) {
   if (SOLO && !SOLO.has(pr.id)) continue;
-  conPlan(pr);
+  conPlan(pr); conRoles(pr);
   const inp = G.desdeRespuestas(pr.a);
   const a0 = Date.now(); const res = G.genRoutine(inp); agg.ms.push(Date.now() - a0); cuentaPlan(pr, res);
+  if (ROLES && pr.a.roles) { planStat.pedidos++; if (res.meta.roles) { planStat.salen++; const z = (res.meta.warn.find(w => w.c === 'semana_sin') || { p: { z: [] } }).p.z.join('+') || 'completa'; planStat.por[z] = (planStat.por[z] || 0) + 1; } }
   const { f, q, ex } = analizar(res, inp, pr);
   if (SOLO) verUno(pr, inp, res, f, q);
   agg.n++;
@@ -456,7 +461,7 @@ const aggS = { n: 0, f: {}, ej: {}, q: {}, porCaso: {}, det: 0, detN: 0, ms: [] 
 const muestrasS = [];
 if (arg('seg') !== '0') for (const pr of perfilesSeguridad()) {
   if (SOLO && !SOLO.has(pr.id)) continue;
-  conPlan(pr);
+  conPlan(pr); conRoles(pr);
   const inp = G.desdeRespuestas(pr.a);
   const a0 = Date.now(); const res = G.genRoutine(inp); aggS.ms.push(Date.now() - a0); cuentaPlan(pr, res);
   const { f, q } = analizar(res, inp, pr);
@@ -472,7 +477,7 @@ const ms = agg.ms.slice().sort((a, b) => a - b);
 const pct = (a, b) => b ? Math.round(1000 * a / b) / 10 + ' %' : '—';
 const salida = {
   modo: TAG, perfiles: agg.n, segundos: Math.round((Date.now() - t0) / 100) / 10, ms_mediana: ms[Math.floor(ms.length / 2)], ms_p95: ms[Math.floor(ms.length * 0.95)],
-  ok_false: agg.okFalse, repartos: agg.splits, ...(PLAN ? { plan: planStat } : {}),
+  ok_false: agg.okFalse, repartos: agg.splits, ...(PLAN || ROLES ? { plan: planStat } : {}),
   invariantes: Object.fromEntries(Object.entries(agg.f).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, { n: v, tasa: pct(v, agg.n), ejemplo: agg.ej[k] }])),
   calidad: Object.fromEntries(Object.entries(agg.q).sort((a, b) => b[1] - a[1]).map(([k, v]) => [k, { n: v, tasa: pct(v, agg.n), ejemplo: agg.ejq[k] }])),
   volumen_grupos_en_objetivo: pct(agg.volOk, agg.volTot), tiron_empuje_ge1_con_material: pct(agg.tironOk, agg.tironPerf) + ` (${agg.tironOk}/${agg.tironPerf})`,

@@ -310,12 +310,35 @@ return function (K, OPT) {
       goal: a.goal, level, modes, days: a.days, min: a.min, consec: !!a.consec, age: a.age, sport: a.sport || 'no', prio: a.enfoque === 'gluteo' ? (a.prio || []).filter(p => p !== 'gluteos').slice(0, 1) : (a.prio || []).slice(0, 2),
       pref, style: a.style || 'igual', warm: a.warm || 'normal', cardioEnd: a.cardioEnd || 'auto', power: !!a.power,
       avoid: a.avoid || [], places: a.places, daysOther: a.daysOther || 0, zones, prudent, keep: null, pins: null, enfoque: a.enfoque === 'gluteo' ? 'gluteo' : null,
-      plan: typeof a.plan === 'string' && SPLITS[a.plan] ? a.plan : null, masTorso: a.enfoque === 'torso', salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
+      plan: typeof a.plan === 'string' && SPLITS[a.plan] ? a.plan : null, masTorso: a.enfoque === 'torso', roles: Array.isArray(a.roles) && a.roles.length >= 3 && a.roles.length <= 6 && a.roles.every(t => typeof t === 'string') ? a.roles.slice() : null, salud, screen: scr, inactivo, paron: e === 'paron' ? Object.assign({}, a.paron) : null, subeNivel,
     };
   }
 
   // ════════ genRoutine (E.16) ════════
-  function genRoutine(inp, ctx) {
+  // v14 (P8): mover los días de orden. ctx.orden = para cada posición nueva, el índice del día en el orden del generador ([1, 0, 2, 3] = el
+  // segundo pasa a ser el Día A). Es solo un cambio de letras: la rutina es la misma (misma semilla, mismos ejercicios y series); se remapea
+  // todo lo que nombra un día en la salida (days, det, los mapas de meta, time_spare.dias, no_cabe.dia, cut, removed y las validaciones).
+  // Un orden que no es una permutación de sus días (p. ej. porque cambió el número de días) se ignora
+  function reordenar(res, orden) {
+    const L = 'ABCDEF', K = res.det.length;
+    if (!Array.isArray(orden) || orden.length !== K || orden.slice().sort().join() !== [...Array(K).keys()].join() || orden.every((x, i) => x === i)) return res;
+    const pos = {}; orden.forEach((src, i) => { pos[src] = i; });   // índice de antes → índice nuevo
+    const lt = l => L[pos[L.indexOf(l)]], mapa = o => o ? Object.fromEntries(orden.map((src, i) => [L[i], o[L[src]]])) : o;
+    const days = {}; orden.forEach((src, i) => { days[L[i]] = Object.assign({}, res.days[L[src]], { label: 'Día ' + L[i] }); });
+    const det = orden.map((src, i) => Object.assign({}, res.det[src], { letra: L[i], nombre: 'Día ' + L[i] + ' · ' + days[L[i]].focus }));
+    const m = res.meta, fix = w => { if (!w || !w.p) return w; const p = Object.assign({}, w.p);
+      if (w.c === 'time_spare' && Array.isArray(p.dias)) p.dias = p.dias.map(lt).sort();
+      if (w.c === 'no_cabe' && typeof p.dia === 'number' && pos[p.dia] != null) p.dia = pos[p.dia];
+      return Object.assign({}, w, { p }); };
+    const val = s => String(s).split(':').map(tk => /^[A-F]$/.test(tk) && lt(tk) ? lt(tk) : tk).join(':');
+    const meta = Object.assign({}, m, { tpl: mapa(m.tpl), dayPlace: mapa(m.dayPlace), fd: mapa(m.fd), est: mapa(m.est), lifts: mapa(m.lifts), why: (m.why || []).map(fix), warn: (m.warn || []).map(fix),
+      cut: (m.cut || []).map(c => { const a = String(c).split(':'); return a.length === 2 && pos[+a[1]] != null ? a[0] + ':' + pos[+a[1]] : c; }),
+      removed: (m.removed || []).map(r => Object.assign({}, r, { t: pos[r.t] != null ? pos[r.t] : r.t })),
+      validate: m.validate ? Object.assign({}, m.validate, { hard: (m.validate.hard || []).map(val), softAll: (m.validate.softAll || []).map(val) }) : m.validate, orden: orden.slice() });
+    return Object.assign({}, res, { days, det, meta, reason: res.reason ? res.reason.map(val) : res.reason });
+  }
+  function genRoutine(inp, ctx) { const r = genRoutineBase(inp, ctx); return ctx && ctx.orden ? reordenar(r, ctx.orden) : r; }
+  function genRoutineBase(inp, ctx) {
     ctx = Object.assign({ hist: {}, fav: new Set(), alt: 0, prev: null }, ctx || {});
     const P = effective(inp);
     const seed0 = ctx.seed != null ? ctx.seed : fnv1a(canon(seedSrc(inp)));
@@ -337,7 +360,9 @@ return function (K, OPT) {
       // v3 (D-12): el reparto de la tabla solo se cambia por una validación dura; con 'dias', también si el material no da para K entrenos
       // distintos (huecos 1 vacíos, con respaldo de otro patrón o con una rareza): entonces K baja y se explica (k_material)
       // (en 'recomendado', un hueco 1 que se queda vacío también es «el material no da»: §E.2, «no llena un día entero de tirón»)
-      if (bo.v.hard.length === 0 && bo.q.h1v === 0 && (OPT.reparto !== 'dias' || bo.q.h1 === 0)) return finish(bo, tried);
+      // v14 (P6): un reparto a medida («x:…») solo vale si tirón y empuje quedan equilibrados (la regla que cuida el hombro); si no, la cadena sigue
+      const teOk = opt.id.indexOf('x:') !== 0 || pushPull(bo).ps === 0 || pushPull(bo).ratio >= 1 - 1e-9;
+      if (bo.v.hard.length === 0 && bo.q.h1v === 0 && teOk && (OPT.reparto !== 'dias' || bo.q.h1 === 0)) return finish(bo, tried);
       if (!best || better(bo, best)) best = bo;
     }
     return finish(best, tried);
@@ -368,7 +393,7 @@ return function (K, OPT) {
   function seedSrc(inp) {
     const pl = {}; for (const k of ['g', 'c']) { const p = inp.places && inp.places[k]; if (p) pl[k] = { mats: [...p.mats].sort(), acc: [...(p.acc || [])].sort(), mach: p.mach === 'all' ? 'all' : [...(p.mach || [])].sort(), card: p.card === 'all' ? 'all' : [...(p.card || [])].sort(), dbMax: p.dbMax, kb: p.kb }; }
     return { goal: inp.goal, level: inp.level, modes: [...inp.modes].sort(), days: inp.days, min: inp.min, consec: inp.consec, age: inp.age, sport: inp.sport, prio: [...inp.prio].sort(), pref: inp.pref,
-      style: inp.style, warm: inp.warm, cardioEnd: inp.cardioEnd, power: inp.power, avoid: [...inp.avoid].sort(), main: inp.places.main, pl, daysOther: inp.daysOther, zones: inp.zones, prudent: !!inp.prudent, v: GEN_VERSION, cat: CAT_SIG , ...(inp.enfoque ? { enfoque: inp.enfoque } : {}), ...(inp.plan ? { plan: inp.plan } : {}), ...(inp.masTorso ? { masTorso: 1 } : {}) };
+      style: inp.style, warm: inp.warm, cardioEnd: inp.cardioEnd, power: inp.power, avoid: [...inp.avoid].sort(), main: inp.places.main, pl, daysOther: inp.daysOther, zones: inp.zones, prudent: !!inp.prudent, v: GEN_VERSION, cat: CAT_SIG , ...(inp.enfoque ? { enfoque: inp.enfoque } : {}), ...(inp.plan ? { plan: inp.plan } : {}), ...(inp.masTorso ? { masTorso: 1 } : {}), ...(inp.roles ? { roles: inp.roles } : {}) };
   }
 
   function effective(inp) {
@@ -480,10 +505,14 @@ return function (K, OPT) {
       // v14 (P1): el reparto que eligió la persona en «Cambiar reparto» (inp.plan), si es de los que se le ofrecen (planesDe). Si su material
       // no da (validación dura o hueco principal vacío o de respaldo), la cadena sigue con el reparto de siempre y el texto lo dice
       rec = id;
-      if (inp.plan && inp.plan !== id && planesDe(inp, P, id).includes(inp.plan)) { chain = [inp.plan].concat(chain.filter(x => x !== inp.plan)); id = inp.plan; }
+      // v14 (P6): el reparto montado día a día (el tipo de cada día) manda sobre el elegido y sobre «Más torso», con los mismos límites
+      const medida = inp.roles && inp.roles.length === wd && puedeElegir(inp, P) ? repartoDeTipos(inp.roles) : null;
+      if (medida && medida.id !== id) { chain = [medida.id].concat(chain.filter(x => x !== medida.id)); id = medida.id; why.push({ c: 'a_medida' }); }
+      else if (medida) why.push({ c: 'a_medida' });
+      else if (inp.plan && inp.plan !== id && planesDe(inp, P, id).includes(inp.plan)) { chain = [inp.plan].concat(chain.filter(x => x !== inp.plan)); id = inp.plan; }
       // v14 (P2): «Más torso» en el cuestionario = el reparto con un solo día de pierna de sus días, si se le ofrece a esta persona (los
       // mismos límites que un reparto elegido). Lo que elija después en «Cambiar reparto» (inp.plan) manda; el recomendado (rec) no cambia
-      else if (inp.masTorso && !inp.plan && UNA_PIERNA[wd] && planesDe(inp, P, id).includes(UNA_PIERNA[wd])) { const t = UNA_PIERNA[wd]; chain = [t].concat(chain.filter(x => x !== t)); id = t; why.push({ c: 'mas_torso' }); }
+      else if (inp.masTorso && !inp.plan && !medida && UNA_PIERNA[wd] && planesDe(inp, P, id).includes(UNA_PIERNA[wd])) { const t = UNA_PIERNA[wd]; chain = [t].concat(chain.filter(x => x !== t)); id = t; why.push({ c: 'mas_torso' }); }
     } else {
       if (col65) {
         if (wd <= 2) id = 'cc2';
@@ -507,13 +536,62 @@ return function (K, OPT) {
   // A nadie con 65 o más, rutina prudente o 16-17 años (siguen con el suyo: sus reglas no se tocan), ni con menos de 30 min (el exprés y
   // el modo corto eligen por familias), ni con «más glúteo» (ya eligió su reparto). «Por músculos» (grp…), ni a quien empieza (aprende
   // antes repitiendo) ni con «Ganar fuerza» (cada levantamiento saldría una vez por semana sin más práctica); cuerpo completo ×3, no con días seguidos
+  // v14 (P6): el reparto montado día a día. La persona elige el TIPO de cada día (inp.roles) y aquí se pasa a plantillas: si la semana es la
+  // de un reparto con nombre, ese (con sus textos); si no, uno a medida («x:…») con una plantilla distinta por cada repetición del tipo (el
+  // único día de pierna de la semana es el completo, PU). Como mucho 3 de torso, de pierna o de cuerpo completo, 2 de empuje o de tirón y 1
+  // de cada día «por músculos»
+  const TIPO_TPL = { torso: ['T1', 'T2', 'T3'], pierna: ['P1', 'P2', 'P3'], empuje: ['E1', 'E2'], tiron: ['Ti1', 'Ti2'], completo: ['CCA', 'CCB', 'CCC'], pecho_triceps: ['PT'], espalda_biceps: ['EB'],
+    hombros_brazos: ['HB'], pecho: ['PE'], espalda: ['ES'], hombros: ['HO'], brazos: ['BR'] };
+  const tipoDe = r => { const b = ROLE_BASE(r); return /^T(\d|C)$/.test(b) ? 'torso' : /^(PU|P\d|Pi\d?|PC)$/.test(b) ? 'pierna' : /^E\d?$/.test(b) ? 'empuje' : /^Ti\d?$/.test(b) ? 'tiron' : /^CC[A-C]$/.test(b) ? 'completo' :
+    ({ PT: 'pecho_triceps', EB: 'espalda_biceps', HB: 'hombros_brazos', PE: 'pecho', ES: 'espalda', HO: 'hombros', BR: 'brazos' })[b] || null; };
+  const NOMBRADOS = ['cc3', 'tpc3', 'tpt3', 'ppl3', 'tp4', 'pplt4', 'pplc4', 'grp4', 'ulppl', 'tptpt5', 'pplet5', 'grp5', 'tp4cc', 'ppl6', 'tp6', 'pplg6'];
+  function repartoDeTipos(tipos) {
+    if (!Array.isArray(tipos) || tipos.length < 3 || tipos.length > 6 || !tipos.every(t => TIPO_TPL[t])) return null;
+    // una semana con días de empuje (o de pecho, o de hombros) necesita algún día que tire (torso, tirón, cuerpo completo o espalda): es la
+    // regla que cuida el hombro (tirón:empuje ≥ 1). Sin él, el equilibrio tendría que quitar empujes y meter remos donde no tocan
+    if (tipos.some(t => ['empuje', 'pecho_triceps', 'pecho', 'hombros', 'hombros_brazos'].includes(t)) && !tipos.some(t => ['torso', 'tiron', 'completo', 'espalda_biceps', 'espalda'].includes(t))) return null;
+    const nom = NOMBRADOS.find(id => SPLITS[id].length === tipos.length && SPLITS[id].every((r, i) => tipoDe(r) === tipos[i]));
+    if (nom) return { id: nom, roles: SPLITS[nom].slice() };
+    const n = {}, k = {}; tipos.forEach(t => { n[t] = (n[t] || 0) + 1; });
+    const tpl = tipos.map(t => { const i = k[t] = (k[t] || 0) + 1; return n[t] === 1 ? (t === 'pierna' ? 'PU' : t === 'empuje' ? 'E' : t === 'tiron' ? 'Ti' : TIPO_TPL[t][0]) : (TIPO_TPL[t][i - 1] || null); });
+    if (!tpl.every(Boolean)) return null;
+    const id = 'x:' + tpl.join(''); SPLITS[id] = tpl; return { id, roles: tpl };
+  }
+  // quién puede elegir reparto (uno con nombre, «Más torso» o día a día): nadie con 65 o más, rutina prudente o 16-17 años, ni con menos de
+  // 30 min, ni con «más glúteo»; y siempre con un entreno distinto por día
+  const puedeElegir = (inp, P) => OPT.reparto === 'dias' && !P.mayor && !P.prud && !P.menor && inp.min >= 30 && inp.enfoque !== 'gluteo' && P.wd >= 3;
   const UNA_PIERNA = { 3: 'tpt3', 4: 'pplt4', 5: 'pplet5', 6: 'pplg6' };   // v14 (P2): el reparto de «Más torso» para cada número de días
   const PLANES = { 3: ['cc3', 'tpc3', 'tpt3', 'ppl3'], 4: ['tp4', 'pplt4', 'pplc4', 'grp4'], 5: ['ulppl', 'tptpt5', 'pplet5', 'grp5'], 6: ['ppl6', 'tp6', 'pplg6'] };
   function planesDe(inp, P, rec) {
-    if (OPT.reparto !== 'dias' || P.mayor || P.prud || P.menor || inp.min < 30 || inp.enfoque === 'gluteo') return [];
+    if (!puedeElegir(inp, P)) return [];
     const beginner = LV[P.lvS] <= LV.P;
     return (PLANES[P.wd] || []).filter(id => id !== rec && !(/^grp/.test(id) && (beginner || inp.goal === 'fuerza')) && !(id === 'cc3' && inp.consec));
   }
+  // v14 (P7): «Otro entreno para este día». Con la rutina que la persona tiene delante (res; pos = el día por su posición), se rehace todo
+  // con el sorteo solo en ese día (ctx.altDia), cada hueco de los demás días anclado al ejercicio que ya tiene (ctx.fijos) y lo que ese día
+  // llevaba, penalizado (ctx.prev). Es una rutina generada entera: las series de la semana se vuelven a cuadrar y pasan las mismas reglas.
+  // Solo vale si los demás días conservan exactamente sus ejercicios y ese día cambia; si no, se prueba otra vez del sorteo (hasta 8) y, si
+  // ninguna vale, null (la app lo dice). Devuelve la rutina y el contexto que la reproduce ({altDia, fijos, prev})
+  function otroDia(inp, ctx, res, pos) {
+    ctx = ctx || {}; const K = res.det.length; if (!(pos >= 0 && pos < K)) return null;
+    const ord = Array.isArray(res.meta.orden) && res.meta.orden.length === K ? res.meta.orden : [...Array(K).keys()], src = ord[pos];
+    const libs = d => d.rows.filter(r => r.kind === 'str').map(r => r.lib), firma = d => libs(d).slice().sort().join(',');
+    const fijos = {}; res.det.forEach((d, i) => { if (i !== pos) d.rows.forEach(r => { if (r.kind === 'str' && r.key) fijos[r.key] = r.lib; }); });
+    const prev = libs(res.det[pos]), n0 = ctx.altDia && ctx.altDia[src] ? ctx.altDia[src] : 0;
+    for (let n = n0 + 1; n <= n0 + 8; n++) {
+      const c2 = Object.assign({}, ctx, { altDia: { [src]: n }, fijos, prev: new Set(prev) }), r = genRoutine(inp, c2);
+      if (!r.ok || r.det.length !== K || r.meta.split !== res.meta.split) continue;
+      if (!r.det.every((d, i) => i === pos || firma(d) === firma(res.det[i])) || firma(r.det[pos]) === firma(res.det[pos])) continue;
+      return { res: r, ctx: { altDia: c2.altDia, fijos, prev }, n, nuevos: libs(r.det[pos]).filter(x => !prev.includes(x)).length };
+    }
+    return null;
+  }
+  // v14 (P9): la forma de reparto de salida, que la app usa para elegir la opción `reparto` cuando la persona no ha elegido ninguna. D1
+  // (6 nov) puso «un entreno distinto cada día» ('dias') para todo el mundo; el 13 nov el usuario aprobó que quien EMPIEZA DE CERO (modo
+  // inicio) salga con 2 entrenos que se alternan ('recomendado'): con 'dias' le salían 15 ejercicios distintos con 3 días y 20 con 4, cada
+  // uno una vez por semana, y al empezar se aprende repitiendo. No si pidió una estructura que solo existe con un entreno por día (un
+  // reparto elegido, «Más torso» o «Más glúteo y pierna»): lo pedido manda
+  function formaInicial(inp) { return (inp.modes || []).includes('inicio') && !inp.plan && !inp.masTorso && inp.enfoque !== 'gluteo' ? 'recomendado' : 'dias'; }
   // lo que usa la app para montar «Cambiar reparto»: el recomendado y los demás (ella genera cada uno y enseña solo los que salen)
   function planes(inp) { const P = effective(inp), rec = tableSplit(Object.assign({}, inp, { plan: null }), P).rec; return { rec, otros: planesDe(inp, P, rec) }; }
   function splitOptions(inp, P) {
@@ -814,11 +892,15 @@ return function (K, OPT) {
     // cuidado» de una zona que duele ahora, gana aunque sea varios escalones peor o se repita en la semana (antes, +5,5 dejaba el press en el
     // suelo de un avanzado delante del press con banda repetido, con la nota «no había otra opción», que era falsa)
     if (st.P.noFloor && cs.some(c => !TAGS.suelo.has(c.L.id) && !ahoraCuidado(st.P, c.L.id))) cs.forEach(c => { if (TAGS.suelo.has(c.L.id)) c.eff += 100; });
+    // v14 (P7): un hueco anclado (ctx.fijos: clave del hueco → ejercicio) se queda con su ejercicio si sigue siendo posible
+    { const fx = st.ctx.fijos && st.ctx.fijos[h.key]; if (fx) { const c = cs.find(c => c.L.id === fx); if (c) return c; } }
     const mn = Math.min(...cs.map(c => c.eff));
-    if (st.ctx.alt) {   // «Otra propuesta»: sorteo dentro de los dos primeros escalones (D-05.4)
+    // v14 (P7): «Otro entreno para este día» (ctx.altDia: índice del día → vez): el sorteo de «Otra propuesta», solo en ese día y con su semilla
+    const lot = st.ctx.altDia && st.ctx.altDia[t.n] ? st.ctx.altDia[t.n] : 0, sd = lot ? fnv1a(st.seed + ':d' + t.n + ':' + lot) : st.seed, J = lot ? 0.9 : st.J;
+    if (st.ctx.alt || lot) {   // «Otra propuesta»: sorteo dentro de los dos primeros escalones (D-05.4)
       let best = null, bs = -1e9;
       for (const c of cs) { if (c.eff > mn + 1 + 1e-9) continue;
-        const s = c.tie - 0.25 * (c.eff - mn) + st.J * (fnv1a(st.seed + '|' + h.key + '|' + c.L.id) / 4294967296) - (st.ctx.prev && st.ctx.prev.has(c.L.id) ? 0.5 : 0);
+        const s = c.tie - 0.25 * (c.eff - mn) + J * (fnv1a(sd + '|' + h.key + '|' + c.L.id) / 4294967296) - (st.ctx.prev && st.ctx.prev.has(c.L.id) ? 0.5 : 0);
         if (s > bs + 1e-12 || (Math.abs(s - bs) <= 1e-12 && c.L.id < best.L.id)) { best = c; bs = s; } }
       return best;
     }
@@ -1888,7 +1970,7 @@ return function (K, OPT) {
         const rr = repRange(L, x.r);
         const repsTxt = typeof x.r === 'string' ? (/s$/.test(x.r) ? parseInt(x.r) + ' s' : x.r) : rr ? rr.lo + '-' + rr.hi : String(x.r);
         const nota = [h.id === 'CO' ? 'core' : null, L.u ? 'unilateral: por lado' : null, ...x.notes.filter(n => !/^sin rango/.test(n)), porQue(L, h, x, st)].filter(Boolean).join(' · ');
-        rows.push({ lib: L.id, n: L.n, series: x.s, reps: repsTxt, r: x.r, descanso_s: restOf(L, x, st), nota, kind: 'str', slot: h.id, prio: h.prio, role: x.role, pat: L.pat, mat: L.mat, dif: L.dif, u: !!L.u, c: !!L.c, cuidado: x.cuidado || null, pass: x.pass, oi: x.oi, strict: x.strict });
+        rows.push({ lib: L.id, n: L.n, series: x.s, reps: repsTxt, r: x.r, descanso_s: restOf(L, x, st), nota, kind: 'str', slot: h.id, prio: h.prio, role: x.role, pat: L.pat, mat: L.mat, dif: L.dif, u: !!L.u, c: !!L.c, cuidado: x.cuidado || null, pass: x.pass, oi: x.oi, strict: x.strict, key: h.key });
       }
       if (t.cardio) { ex.push({ lib: t.cardio.lib, s: 1, r: t.cardio.min + ' min' }); rows.push({ lib: t.cardio.lib, n: BY.get(t.cardio.lib).n, series: 1, reps: t.cardio.min + ' min', descanso_s: null, nota: 'cardio final', kind: 'cardio', min: t.cardio.min }); }
       const label = 'Día ' + k, focus = focusOf(t, st);
@@ -1912,6 +1994,11 @@ return function (K, OPT) {
     if (P.zones.otra) warn2.push({ c: 'otra_zona', p: { tipo: P.zones.otra } });                         // C-15
     // (con días seguidos y cuerpo completo al final —65+ o prudente por material—, el aviso de días alternos)
     if (inp.consec && ['cc2', 'cc3'].includes(st.opt.id) && P.wd >= 3 && !st.opt.warn.some(w => w.c === 'alternos')) warn2.push({ c: 'alternos' });
+    // v14 (P6): una semana montada día a día que se queda sin una zona (ningún ejercicio de pierna, de empuje o de tirón): no se impide, se dice
+    const aMedida = st.opt.why.some(w => w.c === 'a_medida') && st.opt.id === st.opt.table;
+    if (aMedida) { const hay = pats => T.some(t => act(t).some(h => pats.includes(BY.get(h.x.lib).pat)));
+      const sin = [['pierna', ['squat', 'lunge', 'hinge', 'hip_ext']], ['empuje', ['push_h', 'push_v']], ['tiron', ['pull_h', 'pull_v']]].filter(([, p]) => !hay(p)).map(([z]) => z);
+      if (sin.length) warn2.push({ c: 'semana_sin', p: { z: sin } }); }
     // C-01: objetivo de esfuerzo por modo, para que el Coach lea las caritas RESPECTO de él (ver 40-simulacion.md, cambio 42)
     const effort = P.cauto ? { obj: 'facil', rir: '3 o más', subidas: 'lenta', ultimaAlLimite: false } : { obj: 'justo', rir: LV[P.level] <= LV.P || P.menor ? '2-3' : '1-2', subidas: 'normal', ultimaAlLimite: false };   // v9 (J-11): 16-17, dejando 2 o más
     // C-07, C-08, §G.5: lo que el Coach propone al cerrar el primer ciclo (no se aplica solo)
@@ -1929,7 +2016,8 @@ return function (K, OPT) {
       corto: st.corto || 0,
       ratio: { tiron_empuje: Math.round(pp.ratio * 100) / 100, rodilla_cadera: Math.round(pp.rh * 100) / 100 },
       why: st.why.concat(st.opt.why, why2), warn: st.warn.concat(st.opt.warn, warn2), seed: st.seed, alt: st.ctx.alt, modes: [...P.M], level: P.level, lvS: P.lvS, wd: P.wd, f: st.f, fd: Object.fromEntries(T.map((t, i) => [letters[i], t.f])),
-      validate: st.v, tried, cut: st.cut, removed: st.removed, alternas: st.opt.alternas, table: st.opt.table, rec: st.opt.rec || st.opt.table, plan: inp.plan || (st.opt.rec && st.opt.table !== st.opt.rec && st.opt.why.some(w => w.c === 'mas_torso') ? st.opt.table : null),   // plan: el reparto pedido (en la hoja o con «Más torso»)
+      validate: st.v, tried, cut: st.cut, removed: st.removed, alternas: st.opt.alternas, table: st.opt.table, rec: st.opt.rec || st.opt.table, roles: aMedida ? T.map(t => tipoDe(t.rb)) : null,   // (P6) el tipo de cada día, si la semana se montó día a día
+      plan: st.opt.why.some(w => w.c === 'a_medida') ? st.opt.table : inp.plan || (st.opt.rec && st.opt.table !== st.opt.rec && st.opt.why.some(w => w.c === 'mas_torso') ? st.opt.table : null),   // plan: el reparto pedido (en la hoja o con «Más torso»)
       log: st.log, reparto: OPT.reparto, capP: !!P.capP,
       lifts: Object.fromEntries(T.map((t, i) => [letters[i], (t.lift || []).map(id => { const h = t.slots.find(k => k.id === id && k.prio === 1 && k.on && k.x); return h ? h.x.lib : null; }).filter(Boolean)])) };
     const ok = st.v.hard.length === 0;
@@ -1959,7 +2047,7 @@ return function (K, OPT) {
     if (h.prio === 1) { const gs = GROUPS.filter(g => frac(L, g) === 1).map(g => K.GLBL[g].toLowerCase()); return 'Base del día: ' + joinY(gs.slice(0, 2)) + '.'; }
     return null;
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, tipoDe, repartoDeTipos, TIPO_TPL, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT };
 };
 
 })();

@@ -152,6 +152,12 @@ const PERSONAS = [
   { key: 'marcos', nombre: 'Marcos', edad: 26, grupo: 'reparto elegido', motivo: 'P2: «Más glúteo y pierna» ya no es solo para mujeres: un hombre con 4 días',
     a: { goal: 'musculo', exp: '6m2a', days: 4, min: 60, age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null }, enfoque: 'gluteo' },
     resumen: 'Ganar músculo · De 6 meses a 2 años · 4 días, 60 min · Gimnasio grande · Hombre · Reparto entre torso y pierna: «Más glúteo y pierna»', esp: null },
+  { key: 'vera', nombre: 'Vera', edad: 32, grupo: 'reparto elegido', motivo: 'P6: cambia el foco del cuarto día de torso/pierna ×2 a «hombros y brazos»: una semana a su medida',
+    a: { goal: 'musculo', exp: '6m2a', days: 4, min: 60, age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null }, roles: ['torso', 'pierna', 'torso', 'hombros_brazos'] },
+    resumen: 'Ganar músculo · De 6 meses a 2 años · 4 días, 60 min · Gimnasio grande · Día a día: torso, pierna, torso, hombros y brazos', esp: null },
+  { key: 'saul', nombre: 'Saúl', edad: 28, grupo: 'reparto elegido', motivo: 'P6: una semana montada día a día que se queda sin pierna: se permite y se dice sin rodeos',
+    a: { goal: 'musculo', exp: '6m2a', days: 4, min: 60, age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null }, roles: ['torso', 'hombros_brazos', 'torso', 'pecho_triceps'] },
+    resumen: 'Ganar músculo · De 6 meses a 2 años · 4 días, 60 min · Gimnasio grande · Día a día: torso, hombros y brazos, torso, pecho y tríceps', esp: null },
   { key: 'lola', nombre: 'Lola', edad: 41, grupo: 'reparto elegido', motivo: 'P1: empieza de cero y elige empuje, tirón, pierna y cuerpo completo: se le permite, con sus series y su esfuerzo de inicio',
     a: { goal: 'salud', exp: 'cero', days: 4, min: 45, age: '40', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('barrio'), c: null }, plan: 'pplc4' },
     resumen: 'Salud y forma · Empiezo de cero · 4 días, 45 min · Gimnasio de barrio · 40-64 · «Cambiar reparto»: empuje, tirón, pierna y cuerpo completo', esp: null },
@@ -180,6 +186,7 @@ const ELEGIDOS = ['tpt3', 'pplt4', 'pplc4', 'grp4', 'pplet5', 'grp5', 'tptpt5', 
 const SIN_PLAN = ['El reparto elegido no se aplica aquí (solo vale con un entreno distinto por día y con quien puede elegir)', R => !ELEGIDOS.includes(R.m.split), R => R.m.split];
 const REGLAS = {
   lucia: { debe: [
+    ['Empieza de cero: la forma de salida son 2 entrenos que se alternan (P9; cambia D1 para quien empieza)', R => G.formaInicial(R.inp) === 'recomendado' && G.formaInicial(Object.assign({}, R.inp, { masTorso: true })) === 'dias' && G.formaInicial(Object.assign({}, R.inp, { enfoque: 'gluteo' })) === 'dias'],
     ['Cuerpo completo A/B que se alternan (inicio con 3 días)', R => R.m.split === 'cc2' && R.m.wd === 3, R => R.m.split],
     ['Primer escalón en casa: sentadilla a la silla y flexiones inclinadas o de rodillas', R => tiene(R, 'chair_squat') && tiene(R, 'pushup_incline', 'pushup_knee'), R => [...R.ids].join(',')],
     ['Modo inicio: 2 series y 4-5 ejercicios por día', R => R.rows.every(r => r.series <= 2) && R.det.every(d => { const n = d.rows.filter(r => r.kind === 'str').length; return n >= 4 && n <= 5; }), R => R.det.map(d => d.rows.filter(r => r.kind === 'str').length).join('/')],
@@ -188,6 +195,7 @@ const REGLAS = {
     ['Flexiones completas, sentadilla libre o fondos (variantes duras para empezar)', R => hay(R, 'pushup', 'air_squat', 'bench_dip', 'pushup_wide').length > 0, R => hay(R, 'pushup', 'air_squat', 'bench_dip', 'pushup_wide').join(',')],
     ['Pasarse de 45 min', R => !enRango(R, 0, 1.05), mins]] },
   marta: { debe: [
+    ['Con experiencia, la forma de salida es un entreno distinto cada día (P9 solo cambia a quien empieza de cero)', R => G.formaInicial(R.inp) === 'dias'],
     ['Torso/pierna ×2 (K=4)', R => R.m.split === 'tp4', R => R.m.split],
     ['Pierna con básicos de barra o máquina en el hueco 1 (sentadilla, prensa, hack, rumano, peso muerto, hip thrust)', R => R.rows.filter(r => r.prio === 1 && ['squat', 'hinge', 'hip_ext', 'lunge'].includes(r.L.pat)).every(r => ['back_squat', 'leg_press', 'hack_squat', 'rdl_bb', 'deadlift', 'hip_thrust_bb', 'hip_thrust_machine', 'front_squat', 'squat_smith'].includes(r.lib.replace('lib_', ''))), R => R.rows.filter(r => r.prio === 1).map(r => r.lib).join(',')],
     ['Hip thrust (barra o máquina) por su prioridad de glúteos', R => tiene(R, 'hip_thrust_bb', 'hip_thrust_machine')],
@@ -388,6 +396,21 @@ Object.assign(REGLAS, {
     ['El día de pierna lleva sentadilla y bisagra principales', R => R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'squat') && R.rows.some(r => r.dia === 'C' && r.prio === 1 && r.L.pat === 'hinge')],
     ['Pecho y espalda llegan a su objetivo (el torso trabaja 2 veces)', R => R.m.vol.pecho.v >= R.m.vol.pecho.obj && R.m.vol.espalda.v >= R.m.vol.espalda.obj, R => JSON.stringify([R.m.vol.pecho, R.m.vol.espalda])],
     ['El porqué dice que hay un solo día de pierna', R => T(R, /un solo día de pierna/)],
+    ['Las prioridades sugieren un reparto (P10): con pecho y brazos y torso/pierna ×2 el pecho no llega y se sugiere el de un día de pierna; con prioridad de piernas y un día de pierna, torso/pierna ×2; y la sugerencia es verdad', R => {
+      const con = (extra, plan) => { const i = G.desdeRespuestas(Object.assign({ goal: 'musculo', exp: '6m2a', days: 4, min: 60, age: '18', screen: 'nada', zones: {}, sport: 'no', places: R.inp.places }, extra, plan ? { plan } : {})); return { i, r: G.genRoutine(i) }; };
+      const otros = (extra, de) => ['tp4', 'pplt4', 'pplc4', 'grp4'].filter(id => id !== de).map(id => ({ id, res: con(extra, id === 'tp4' ? null : id).r }));
+      const a = con({ prio: ['pecho', 'brazos'] }), sa = X.sugerencia(a.r, a.i, otros({ prio: ['pecho', 'brazos'] }, 'tp4'));
+      const b = con({ prio: ['piernas'] }, 'pplt4'), sb = X.sugerencia(b.r, b.i, otros({ prio: ['piernas'] }, 'pplt4'));
+      const llega = (s, extra) => { const r = s.id === 'tp4' ? con(extra).r : con(extra, s.id).r, P2 = G.effective(con(extra).i); return [...P2.prioV].every(g => r.meta.vol[g].v >= r.meta.vol[g].obj - 0.75 - 1e-9); };
+      return a.r.meta.split === 'tp4' && sa && sa.grupos.includes('el pecho') && /no llega/.test(sa.texto) && /Cambiar reparto/.test(sa.texto) && llega(sa, { prio: ['pecho', 'brazos'] }) && X.prohibidas([sa.texto]).length === 0
+        && b.r.meta.split === 'pplt4' && sb && sb.id === 'tp4' && /los cuádriceps|los isquios/.test(sb.texto) && llega(sb, { prio: ['piernas'] }); }],
+    ['Otro entreno para un día (P7): ese día cambia, los demás conservan sus ejercicios, la rutina cumple todo y se reproduce', R => R.res.det.every((_, pos) => { const o = G.otroDia(R.inp, {}, R.res, pos); if (!o) return false;
+      const f = d => d.rows.filter(x => x.kind === 'str').map(x => x.lib).sort().join(','), r1 = G.genRoutine(R.inp, { altDia: o.ctx.altDia, fijos: o.ctx.fijos, prev: new Set(o.ctx.prev) });
+      return o.res.ok && o.nuevos >= 1 && o.res.det.every((d, i) => i === pos ? f(d) !== f(R.res.det[i]) : f(d) === f(R.res.det[i])) && Object.keys(SEG(o.res, R.inp)).length === 0 && JSON.stringify(r1.days) === JSON.stringify(o.res.days)
+        && o.res.det.every(d => d.minExact <= R.inp.min * 1.05 + 1e-9) && o.res.meta.ratio.tiron_empuje >= 1 - 1e-9; })],
+    ['Mover los días (P8): la misma rutina con las letras cambiadas, y un orden que no es de sus días se ignora', R => { const o = [2, 0, 1, 3], L = 'ABCD', r2 = G.genRoutine(R.inp, { orden: o }), fila = d => JSON.stringify(d.rows.map(x => [x.lib, x.series, x.reps]));
+      return r2.ok && r2.det.map(d => d.letra).join('') === L && o.every((src, i) => fila(r2.det[i]) === fila(R.res.det[src]) && r2.meta.tpl[L[i]] === R.m.tpl[L[src]] && r2.days[L[i]].focus === R.res.days[L[src]].focus && r2.days[L[i]].label === 'Día ' + L[i])
+        && Object.keys(SEG(r2, R.inp)).length === 0 && !G.genRoutine(R.inp, { orden: [1, 0, 2] }).meta.orden && !G.genRoutine(R.inp, { orden: [0, 0, 1, 2] }).meta.orden; }],
     ['El coste se dice: aviso de volumen con cuádriceps, isquios o glúteos', R => R.avisos.some(t => /cuádriceps|isquios|glúteos/.test(t) && /menos de lo ideal/.test(t)), R => R.avisos.join(' | ')],
     ['Sesiones de 51-63 min', R => enRango(R, 0.85, 1.05), mins]],
     noDebeAlt: [['«Con tu material no sale bien el reparto que elegiste»', R => T(R, /no sale bien el reparto que elegiste/)]] },
@@ -398,12 +421,17 @@ Object.assign(REGLAS, {
     ['El día de pecho lleva al menos tres ejercicios de pecho y un tríceps', R => R.rows.filter(r => r.dia === 'A' && ['push_h', 'fly'].includes(r.L.pat)).length >= 3 && R.rows.some(r => r.dia === 'A' && r.L.pat === 'tri')],
     ['Curl en el día de espalda y curl y tríceps en el de hombros', R => R.rows.some(r => r.dia === 'B' && r.L.pat === 'curl') && R.rows.some(r => r.dia === 'D' && r.L.pat === 'curl') && R.rows.some(r => r.dia === 'D' && r.L.pat === 'tri')],
     ['Tirón y empuje equilibrados (≥ 1)', R => R.m.ratio.tiron_empuje >= 1 - 1e-9, R => R.m.ratio.tiron_empuje],
+    ['Otro entreno para un día (P7): ese día cambia, los demás conservan sus ejercicios, la rutina cumple todo y se reproduce', R => R.res.det.every((_, pos) => { const o = G.otroDia(R.inp, {}, R.res, pos); if (!o) return false;
+      const f = d => d.rows.filter(x => x.kind === 'str').map(x => x.lib).sort().join(','), r1 = G.genRoutine(R.inp, { altDia: o.ctx.altDia, fijos: o.ctx.fijos, prev: new Set(o.ctx.prev) });
+      return o.res.ok && o.nuevos >= 1 && o.res.det.every((d, i) => i === pos ? f(d) !== f(R.res.det[i]) : f(d) === f(R.res.det[i])) && Object.keys(SEG(o.res, R.inp)).length === 0 && JSON.stringify(r1.days) === JSON.stringify(o.res.days)
+        && o.res.det.every(d => d.minExact <= R.inp.min * 1.05 + 1e-9) && o.res.meta.ratio.tiron_empuje >= 1 - 1e-9; })],
     ['El porqué dice que cada músculo trabaja 1 vez por semana', R => T(R, /1 vez por semana/)]] },
   hugo: { debe: [SIN_PLAN],
     debeAlt: [
     ['Sale el reparto elegido (empuje, tirón, pierna y torso)', R => R.m.split === 'pplt4', R => R.m.split],
     ['Los cuatro levantamientos de fuerza siguen en la semana: sentadilla, peso muerto, banca y militar', R => hay(R, 'back_squat', 'deadlift', 'bench_press', 'ohp_bb').length === 4, R => hay(R, 'back_squat', 'deadlift', 'bench_press', 'ohp_bb').join(',')],
     ['Sentadilla y peso muerto, los dos en el día de pierna', R => R.rows.filter(r => ['lib_back_squat', 'lib_deadlift'].includes(r.lib)).every(r => r.dia === 'C')],
+    ['Sin prioridades no hay nada que sugerir (P10)', R => X.sugerencia(R.res, R.inp, G.planes(R.inp).otros.map(id => ({ id, res: G.genRoutine(Object.assign({}, R.inp, { plan: id })) }))) === null],
     ['A quien busca fuerza no se le ofrece «por músculos»', R => !G.planes(R.inp).otros.some(x => /^grp/.test(x)), R => G.planes(R.inp).otros.join(',')]] },
   paco: { debe: [SIN_PLAN, ['Torso y pierna (su reparto de 65 o más con experiencia)', R => ['tp2', 'tp4'].includes(R.m.split), R => R.m.split]],
     debeAlt: [SIN_PLAN, ['Torso y pierna en 4 entrenos (su reparto de 65 o más con experiencia)', R => R.m.split === 'tp4', R => R.m.split],
@@ -424,7 +452,22 @@ Object.assign(REGLAS, {
     ['Tres días de pierna y uno de torso', R => R.m.split === 'p3t1', R => R.m.split],
     ['Hip thrust o puente en la semana', R => R.rows.some(r => r.L.pat === 'hip_ext')],
     ['Con «más glúteo» no se ofrecen otros repartos', R => G.planes(R.inp).otros.length === 0, R => G.planes(R.inp).otros.join(',')]] },
-  lola: { debe: [SIN_PLAN],
+  vera: { debe: [SIN_PLAN, ['Sin un entreno distinto por día, la semana a medida no se aplica', R => !R.m.roles && String(R.m.split).indexOf('x:') !== 0, R => R.m.split]],
+    debeAlt: [
+    ['Sale su semana: torso, pierna, torso, hombros y brazos', R => R.m.split === 'x:T1PUT2HB' && roles(R) === 'T1,PU,T2,HB' && R.m.roles.join(',') === 'torso,pierna,torso,hombros_brazos', R => R.m.split + ' ' + roles(R)],
+    ['La pierna que queda es el día completo (sentadilla y bisagra principales)', R => R.rows.some(r => r.dia === 'B' && r.prio === 1 && r.L.pat === 'squat') && R.rows.some(r => r.dia === 'B' && r.prio === 1 && r.L.pat === 'hinge')],
+    ['El día de hombros y brazos lleva press de hombros, elevaciones, curl y tríceps', R => ['push_v', 'raise', 'curl', 'tri'].every(p => R.rows.some(r => r.dia === 'D' && r.L.pat === p)), R => R.rows.filter(r => r.dia === 'D').map(r => r.L.pat).join(',')],
+    ['Tirón y empuje equilibrados (≥ 1)', R => R.m.ratio.tiron_empuje >= 1 - 1e-9, R => R.m.ratio.tiron_empuje],
+    ['El porqué dice que es un reparto a su medida y el recomendado sigue siendo torso/pierna ×2', R => T(R, /Un reparto a tu medida, día a día: torso, pierna, torso y hombros y brazos/) && R.m.rec === 'tp4'],
+    ['La semana tiene de todo: sin aviso de «se queda sin»', R => !T(R, /Tu semana se queda sin/)]] },
+  saul: { debe: [SIN_PLAN],
+    debeAlt: [
+    ['Sale su semana sin pierna (se permite)', R => R.m.split === 'x:T1HBT2PT' && !R.rows.some(r => ['squat', 'lunge', 'hinge', 'hip_ext'].includes(r.L.pat)), R => R.m.split],
+    ['Y se dice sin rodeos, el primero de los avisos', R => /^Tu semana se queda sin pierna: ningún día la trabaja/.test(R.avisos[0] || ''), R => R.avisos[0]],
+    ['Tirón y empuje equilibrados (≥ 1)', R => R.m.ratio.tiron_empuje >= 1 - 1e-9, R => R.m.ratio.tiron_empuje],
+    ['Con 65 o más, la misma semana no se aplica (sus reglas no se tocan)', R => { const i2 = G.desdeRespuestas(Object.assign({}, R.res && { goal: 'salud', exp: '6m2a', days: 4, min: 60, age: '65', screen: 'nada', zones: {}, sport: 'no', prio: [], places: R.inp.places, roles: R.inp.roles })), r2 = G.genRoutine(i2); return r2.ok && !r2.meta.roles && String(r2.meta.split).indexOf('x:') !== 0; }],
+    ['Una semana imposible (cuatro días de pierna) se ignora', R => { const r2 = G.genRoutine(Object.assign({}, R.inp, { roles: ['pierna', 'pierna', 'pierna', 'pierna'] })); return r2.ok && !r2.meta.roles && r2.meta.split === 'tp4'; }]] },
+  lola: { debe: [SIN_PLAN, ['Empieza de cero pero eligió su reparto: la forma de salida es un entreno distinto cada día (lo pedido manda, P9)', R => G.formaInicial(R.inp) === 'dias']],
     debeAlt: [
     ['Sale el reparto elegido (empuje, tirón, pierna y cuerpo completo)', R => R.m.split === 'pplc4', R => R.m.split],
     ['Sigue en modo inicio: 2 series en todo y esfuerzo «Fácil»', R => R.rows.every(r => r.series === 2) && R.m.effort.obj === 'facil', R => R.rows.map(r => r.series).join('')],

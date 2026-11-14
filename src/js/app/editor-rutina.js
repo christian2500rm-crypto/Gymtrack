@@ -312,6 +312,25 @@ function removeDayUI(dk){
       if(_routineEdOpen)renderRoutineEditor({top:true});render();
     }});
 }
+// ── (P8, repaso del reparto) Mover un día antes o después en tu rutina: cambia el orden de la semana (las letras), no los ejercicios. El
+// historial va con cada ejercicio y las sesiones ya hechas conservan su nombre (stampSessionsLbl). Con «Ganar fuerza» en dos sitios el
+// orden lo marcan los sitios (planMeta.seq) y no se ofrece. Si el orden nuevo deja la misma zona dos días seguidos, se avisa ──
+function _dayMoveFixed(){return _isPlainObj(S.planMeta)&&Array.isArray(S.planMeta.seq)&&S.planMeta.seq.length>0;}
+function _planZonasDias(p){return dayKeys(p).map(k=>_zonasDe((p[k].ex||[]).map(e=>{const L=LIB_K&&LIB_K.BY.get(_libIdOf(e));return L?L.pat:'';})));}
+function dayMoveHtml(plan,dk){
+  const K=dayKeys(plan),i=K.indexOf(dk);if(K.length<2||i<0||_dayMoveFixed())return'';const dl=esc(dayLabel(dk,plan));
+  return`<div class="ed-move" role="group" aria-label="Mover el ${dl}"><span>Mover el ${dl}</span><button type="button" class="btn bs" data-dk="${esc(dk)}" onclick="moveDayUI(this.dataset.dk,-1)" aria-label="Mover el ${dl} antes"${i===0?' disabled':''}>‹ Antes</button><button type="button" class="btn bs" data-dk="${esc(dk)}" onclick="moveDayUI(this.dataset.dk,1)" aria-label="Mover el ${dl} después"${i===K.length-1?' disabled':''}>Después ›</button></div>`;
+}
+function moveDayUI(dk,dir){
+  const p=getPlan(),K=dayKeys(p),i=K.indexOf(dk),j=i+(dir<0?-1:1);if(i<0||j<0||j>=K.length||_dayMoveFixed())return;
+  if(_dayEditBlocked())return;
+  const antes=_zonasSeguidas(_planZonasDias(p)).length;
+  stampSessionsLbl();const map={};K.forEach(k=>{map[k]=k;});map[K[i]]=K[j];map[K[j]]=K[i];
+  _reletter(map);_editDay=K[j];_markPlanEdited();saveState();
+  const zs=_zonasSeguidas(_planZonasDias(getPlan()));
+  toast(`Ahora es el Día ${K[j]}`+(zs.length>antes?`. Ojo: el Día ${K[zs[0][0]]} y el Día ${K[zs[0][0]+1]} trabajan ${zs[0][1]==='pierna'?'la pierna':'el '+zs[0][1]} seguidos; si entrenas dos días seguidos, deja uno en medio`:''),zs.length>antes?5200:2400);
+  if(_routineEdOpen)renderRoutineEditor();render();
+}
 // Cambiar el nombre: se edita el foco («Pierna — glúteo y femoral», hasta 200); el nombre corto sigue siendo «Día X»
 function renameDayUI(dk){
   const p=getPlan();if(!_isPlanDay(p[dk]))return;
