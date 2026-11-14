@@ -168,6 +168,9 @@ const PERSONAS = [
   { key: 'leo', nombre: 'Leo', edad: 24, grupo: 'tipo de sesión', motivo: 'T6: lleva menos de 6 meses y elige «A fondo»: tiene que darle más que «Completa» (más ejercicios, uno por músculo) sin pasar de los techos de su nivel',
     a: { goal: 'musculo', exp: 'lt6m', days: 3, sesion: 'fondo', age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null } },
     resumen: 'Ganar músculo · Menos de 6 meses · 3 días, sesión «A fondo» · Gimnasio grande', esp: null },
+  { key: 'eva', nombre: 'Eva', edad: 37, grupo: 'tipo de sesión', motivo: 'T5: solo tiene un cuarto de hora y elige «Exprés»: por dentro, el exprés de siempre (y el modo corto con 65 o más)',
+    a: { goal: 'salud', exp: '6m2a', days: 3, sesion: 'expres', age: '18', screen: 'nada', zones: {}, sport: 'no', prio: [], places: { main: 'g', g: K.place('grande'), c: null } },
+    resumen: 'Salud y forma · De 6 meses a 2 años · 3 días, sesión «Exprés» · Gimnasio grande', esp: null },
 ];
 
 // ── v7 (paso 4): lo que DEBE y lo que NO DEBE salir, por persona, comprobado en código. R = rutina analizada (mkR). Cada regla: [texto, (R) → bien?, (R) → detalle] ──
@@ -512,6 +515,14 @@ Object.assign(REGLAS, {
     ['Ningún grupo pasa de lo alto del rango bueno de su nivel por los accesorios añadidos (ni del techo semanal)', R => Object.entries(R.m.vol).every(([g, v]) => v.v <= v.techo + 1e-9), R => Object.entries(R.m.vol).filter(([g, v]) => v.v > v.techo).map(([g]) => g).join()],
     ['A quien empieza de cero «A fondo» le sale como «Completa»: el modo inicio (5 ejercicios, 2 series) no se relaja', R => { const f = otra(R, { exp: 'cero' }), c = otra(R, { exp: 'cero', sesion: 'completa' }); return JSON.stringify(f.days) === JSON.stringify(c.days) && f.meta.sesion.ejMax <= 5 && f.det.every(d => d.rows.every(r => r.kind !== 'str' || r.series === 2)); }],
     ['A 65 o más (sin experiencia) tampoco le cambia: 6 ejercicios como mucho, con su equilibrio', R => { const f = otra(R, { age: '65' }), c = otra(R, { age: '65', sesion: 'completa' }); return f.meta.sesion.ejMax <= 6 && f.meta.sesion.ej.join() === c.meta.sesion.ej.join() && f.det.every(d => d.rows.some(r => r.kind === 'bal')); }]];
+    return { debe: reglas, debeAlt: reglas }; })(),
+  eva: (() => { const otra = x => G.genRoutine(G.desdeRespuestas(Object.assign({}, PERSONAS.find(p => p.key === 'eva').a, x)));
+    const reglas = [
+    ['El exprés de siempre: 3 ejercicios de 2 series por día, unos 15 minutos, sin calentamiento aparte', R => R.m.sesion.tipo === 'expres' && R.inp.min === 15 && R.m.sesion.ej.every(n => n === 3) && R.rows.every(r => r.series === 2) && R.m.sesion.min <= 20 && R.det.every(d => !d.rows.some(r => r.kind === 'warm')), R => JSON.stringify(R.m.sesion)],
+    ['Sin cardio marcado en el exprés (aunque su objetivo lo lleve en las demás); si lo pide, sale', R => R.inp.cardio === 0 && R.m.sesion.cardio === 0 && otra({ sesion: 'completa' }).meta.sesion.cardio === 10 && otra({ cardio: 10 }).meta.sesion.cardio === 10],
+    ['El texto habla de la sesión exprés, no de «15 minutos»', R => T(R, /En la sesión exprés priorizo lo básico/) && !T(R, /En 15 minutos/)],
+    ['Con 65 o más, el exprés es el modo corto: 5 minutos de calentamiento y 2 o 3 ejercicios, unos 20 minutos', R => { const r = otra({ age: '65' }); return r.meta.corto && r.det.every(d => d.rows.some(w => w.kind === 'warm' && w.min === 5)) && r.meta.sesion.ejMax <= 3 && r.meta.sesion.min <= 20 && X.porque(r, G.desdeRespuestas(Object.assign({}, PERSONAS.find(p => p.key === 'eva').a, { age: '65' }))).some(s => /En la sesión exprés, con los 5 minutos de calentamiento/.test(s)); }],
+    ['Sin abdominales en el exprés: ningún ejercicio de core entre los 3', R => otra({ abs: false }).det.every(d => d.rows.filter(w => w.kind === 'str').length === 3 && !d.rows.some(w => ['core', 'core_iso', 'core_rot', 'carry'].includes(w.pat)))]];
     return { debe: reglas, debeAlt: reglas }; })(),
 });
 function mkR(res, inp, Xx) {

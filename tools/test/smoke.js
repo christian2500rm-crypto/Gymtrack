@@ -14233,7 +14233,7 @@ try{
   E(/«Lo esencial» → «A fondo»/.test(_obChangedTxt()||''),'«Ha cambiado»: '+_obChangedTxt());
   _ob.single=false;_ob.step='ob-rutina';obRender();await W(6);E(_ob.g.inp.sesion==='fondo'&&_ob.g.res.meta.sesion.min===I.fondo.min&&_ob.g.res.meta.sesion.ejMax===I.fondo.ejMax,'«A fondo»: '+pj([_ob.g.res.meta.sesion,I.fondo]));
   // (T7) sin tipo guardado se deduce de los minutos de antes, en las respuestas y en el perfil guardado
-  delete _ob.a.sesion;E([15,20,30,45,60,75,90].map(m=>{_ob.a.min=m;return _obAnswers().sesion||'min';}).join()===['min','min','esencial','completa','completa','fondo','fondo'].join(),'T7 en las respuestas: '+[15,20,30,45,60,75,90].map(m=>{_ob.a.min=m;return _obAnswers().sesion||'min';}).join());
+  delete _ob.a.sesion;E([15,20,30,45,60,75,90].map(m=>{_ob.a.min=m;return _obAnswers().sesion||'min';}).join()===['expres','expres','esencial','completa','completa','fondo','fondo'].join(),'T7 en las respuestas: '+[15,20,30,45,60,75,90].map(m=>{_ob.a.min=m;return _obAnswers().sesion||'min';}).join());
   E(_sanitizeProfile({mode:'gen',goal:'musculo',exp:'6m2a',days:3,min:90}).sesion==='fondo'&&_sanitizeProfile({mode:'gen',days:3,min:45,sesion:'esencial'}).sesion==='esencial'&&_sanitizeProfile({mode:'gen',days:3,sesion:'x'}).sesion===null,'T7 en el perfil guardado');
   E([15,20,30,45,60,75,90].map(sesionDeMin).join()===[15,20,30,45,60,75,90].map(genEngine().G.sesionDe).join(),'la app y el generador no deducen lo mismo');
   E(pj(getPlan())===plan0,'tocó la rutina actual');
@@ -14340,6 +14340,36 @@ try{
   // quien empieza de cero: «A fondo» se ofrece, sale como «Completa» y lo dice
   _ob.a.exp='cero';_ob.reparto=null;_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
   {const I=_obSesInfo();E(card('fondo')&&I.fondo&&I.completa&&I.fondo.ej.join()===I.completa.ej.join()&&I.fondo.min===I.completa.min&&I.fondo.ejMax<=5&&/sale igual que «Completa»/.test(tx(card('fondo'))),'empieza de cero: '+pj([I.completa,I.fondo])+' '+tx(card('fondo')));}
+  E(pj(getPlan())===plan0,'tocó la rutina actual');
+  if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
+}finally{
+  clearTimeout(_obAdvT);try{obSheetClose();}catch(e){}if(_obOpen())hideOnboarding();try{closeSettings();document.getElementById('toast').classList.remove('show');}catch(e){}
+  Object.keys(S).forEach(k=>{if(!(k in full))delete S[k];});Object.assign(S,JSON.parse(JSON.stringify(full)));S.open=null;syncActiveWorkout();saveState();go('dash');await W(20);
+}
+});
+await safe('t5Expres',async()=>{
+// (T5, tipo de sesión) «Exprés» es la cuarta tarjeta, más pequeña y al final, sin «Recomendado»: por dentro, el exprés de siempre
+// (3 ejercicios de 2 series) y, con 65 o más, el modo corto (5 min de calentamiento). No marca cardio aunque el objetivo lo lleve.
+const full=JSON.parse(JSON.stringify(S)),bad=[];const E=(c,m)=>{if(!c)bad.push(m);};const pj=x=>JSON.stringify(x);
+const tx=el=>el?el.textContent.replace(/\s+/g,' ').trim():'',$=q=>document.querySelector('#ob-root '+q),se=()=>[...document.querySelectorAll('#ob-root .ob-se')],card=id=>se().find(b=>b.dataset.v===id);
+try{
+  S.onboarded=true;S.obDraft=null;saveState();const plan0=pj(getPlan());
+  showOnboarding({from:'settings'});await W(3);
+  Object.assign(_ob.a,{mode:'gen',goal:'salud',sex:'h',exp:'6m2a',days:3,age:'18',sport:'no',prio:[],sesion:'completa',min:60});['plan','enfoque','forma','roles','abs','cardio','cardioEnd'].forEach(k=>delete _ob.a[k]);
+  _ob.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};_ob.h={nada:true};_ob.reparto='dias';_ob.orden=null;_ob.dia=null;_ob.pins={};_ob.alt=0;_ob.step='ob-tiempo';_ob.dirty=true;obRender();await W(5);
+  const x=card('expres'),c=card('completa');
+  E(se().length===4&&se()[3]===x&&x&&!/Recomendado/.test(tx(x))&&/Exprés/.test(tx(x))&&/≈\s*\d+\s*min/.test(tx(x))&&x.getBoundingClientRect().height>=44&&x.getBoundingClientRect().height<c.getBoundingClientRect().height,'la cuarta tarjeta: '+pj([se().map(b=>b.dataset.v),tx(x),x&&x.getBoundingClientRect().height,c.getBoundingClientRect().height]));
+  x.click();await W(5);
+  {const I=_obSesInfo(),car=document.querySelector('#ob-root [data-k=cardio][aria-checked=true]');
+    E(_ob.a.sesion==='expres'&&_ob.a.min===15&&I.expres&&I.expres.ejMax===3&&I.expres.min<=20&&car&&car.dataset.v==='0'&&I.expres.cardio===0,'exprés marcado: '+pj([_ob.a.sesion,_ob.a.min,I.expres,car&&car.dataset.v]));}
+  _ob.step='ob-rutina';obRender();await W(6);
+  {const m=_ob.g.res.meta,rows=_ob.g.res.det.flatMap(d=>d.rows.filter(r=>r.kind==='str'));
+    E(_ob.g.inp.sesion==='expres'&&_ob.g.inp.min===15&&m.sesion.ej.every(n=>n===3)&&rows.every(r=>r.series===2)&&_ob.g.res.ok,'la rutina exprés: '+pj(m.sesion));
+    {const T=(_ob.t.porque||[]).concat(_ob.t.avisos||[]);E(T.some(x=>/En la sesión exprés priorizo lo básico/.test(x))&&!T.some(x=>/En 15 minutos|dijiste/.test(x)),'texto del exprés: '+pj(T));}
+    E([...document.querySelectorAll('#ob-root .ob-ch')].some(b=>/^Exprés · ≈\s*\d+\s*min$/.test(tx(b))),'chip del exprés');}
+  // con 65 o más: el modo corto de siempre
+  _ob.a.age='65';_ob.dirty=true;obRender();await W(6);
+  E(_ob.g.inp.min===20&&_ob.g.res.meta.corto&&_ob.g.res.det.every(d=>d.rows.some(r=>r.kind==='warm'&&r.min===5))&&_ob.g.res.meta.sesion.ejMax<=3&&_ob.g.res.ok,'65 o más en exprés: '+pj([_ob.g.inp.min,_ob.g.res.meta.corto,_ob.g.res.meta.sesion]));
   E(pj(getPlan())===plan0,'tocó la rutina actual');
   if(bad.length)throw new Error([...new Set(bad)].slice(0,8).join(' | '));
 }finally{

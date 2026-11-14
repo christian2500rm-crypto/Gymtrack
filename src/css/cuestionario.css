@@ -56,6 +56,7 @@
 .ob-se-t span{font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;color:var(--green-hi);white-space:nowrap;font-variant-numeric:tabular-nums}
 .ob-se-d{font-size:14px;color:var(--text2);line-height:1.45}
 .ob-se[aria-checked=true] .ob-se-d{color:var(--text)}
+.ob-se-x{min-height:48px;padding:9px 16px;gap:1px}.ob-se-x .ob-se-t{font-size:15px}.ob-se-x .ob-se-d{font-size:13px}
 /* (T3) «Y además»: abdominales y cardio al terminar */
 .ob-xs{display:flex;flex-direction:column;gap:6px}
 .ob-xr{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;min-height:48px}

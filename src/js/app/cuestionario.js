@@ -268,8 +268,10 @@ function _obWeekTxt(a){
 // (T1) El tipo de sesión, en lugar de los minutos. Las tarjetas enseñan lo que sale con cada tipo para las respuestas de ahora: el
 // resumen del propio generador (meta.sesion: minutos del día más largo y ejercicios por día). Lo que falte por contestar (el sitio, la
 // edad, la salud) se supone con lo más habitual, y la pantalla lo dice: «Lo confirmo al final».
-const OB_SES=[['esencial','Lo esencial'],['completa','Completa'],['fondo','A fondo']];
-function _obSesOf(a){return OB_SES.some(x=>x[0]===a.sesion)?a.sesion:(a.min&&OB_SES.some(x=>x[0]===sesionDeMin(a.min))?sesionDeMin(a.min):null);}
+// (T5) «Exprés», la cuarta, más pequeña y al final: no es la recomendada para nadie, pero quien solo tiene 15-20 minutos la encuentra
+const OB_SES=[['esencial','Lo esencial'],['completa','Completa'],['fondo','A fondo'],['expres','Exprés']];
+// El tipo de sesión de unas respuestas: el guardado; sin él, el de sus minutos de antes (T7); sin nada, «Completa»
+function _obSesOf(a){return OB_SES.some(x=>x[0]===a.sesion)?a.sesion:sesionDeMin(a.min);}
 function _obSesInfo(){
   const a=_obAnswers(),pl=a.places||{};if(!pl.main||!pl[pl.main])a.places={v:1,main:'g',g:placeFromPreset('grande'),c:null};
   const rep=_ob.reparto==='dias'||_ob.reparto==='recomendado'?_ob.reparto:_obFormaDef(a),base=Object.assign({},a);delete base.sesion;delete base.min;
@@ -281,6 +283,7 @@ function _obSesInfo(){
 function _obSesN(s){return s.ejMin===s.ejMax?plural(s.ejMax,'ejercicio'):s.ejMax-s.ejMin===1?`${s.ejMin} o ${s.ejMax} ejercicios`:`De ${s.ejMin} a ${s.ejMax} ejercicios`;}
 function _obSesDesc(id,I){
   const s=I[id],n=s?_obSesN(s)+': ':'',cap=t=>n?n+t:t.charAt(0).toUpperCase()+t.slice(1),br=s&&s.biceps&&s.triceps;
+  if(id==='expres')return cap('lo básico, para los días sin tiempo.');
   if(id==='esencial')return cap('los que mueven más músculo a la vez.')+(s&&(s.biceps||s.triceps)?'':' Los brazos trabajan con los presses y los remos.');
   if(id==='completa')return cap(br?'lo esencial más hombros, bíceps y tríceps.':'lo esencial y algo más de trabajo para cada zona.');
   const c=I.completa;if(s&&c&&s.min===c.min&&s.ej.join()===c.ej.join())return'Con tus respuestas sale igual que «Completa»: por ahora, ese es tu tope.';
@@ -305,12 +308,12 @@ function obTimeSet(k,v){if(!_ob)return;const a=_ob.a;
   const b=document.querySelector(`#ob-root [data-k="${k}"][data-v="${CSS.escape(String(k==='consec'?'x':v))}"]`)||document.querySelector(`#ob-root [data-k="${k}"]`);if(b)try{b.focus();}catch(e){}}
 OB_SCR['ob-tiempo']={block:2,html:()=>{const a=_ob.a;
   if(!(a.days>=2&&a.days<=6))a.days=_obRecDays(a);
-  if(!_obSesOf(a)){a.sesion='completa';a.min=SES_MIN.completa;}else if(!a.sesion)a.sesion=_obSesOf(a); // (T7) sin tipo guardado, el de sus minutos
+  if(!PROF_SESION.includes(a.sesion)){a.sesion=_obSesOf(a);if(!a.min)a.min=SES_MIN[a.sesion];} // (T7) sin tipo guardado, el de sus minutos; sin nada, «Completa»
   if(a.days>=5&&_obBeginner(a)&&a.tope==null)a.tope=true;
   const rd=_obRecDays(a),I=_obSesInfo();
   const dBtn=n=>`<button type="button" class="ob-dn${a.days===n?' on':''}" role="radio" aria-checked="${a.days===n}" data-k="days" data-v="${n}" onclick="obTimeSet('days',${n})" aria-label="${plural(n,'día')}${n===rd?', recomendado':''}">${n}${n===rd?'<i class="ob-rec">Recomendado</i>':''}</button>`;
   const sBtn=([id,t])=>{const on=a.sesion===id,s=I[id];
-    return`<button type="button" class="ob-se" role="radio" aria-checked="${on}" data-k="sesion" data-v="${id}" onclick="obTimeSet('sesion','${id}')"><span class="ob-se-t">${esc(t)}${s?`<span>≈${NB}${s.min}${NB}min</span>`:''}</span><span class="ob-se-d">${esc(_obSesDesc(id,I))}</span>${id==='completa'?'<em class="ob-tag">Recomendado</em>':''}</button>`;};
+    return`<button type="button" class="ob-se${id==='expres'?' ob-se-x':''}" role="radio" aria-checked="${on}" data-k="sesion" data-v="${id}" onclick="obTimeSet('sesion','${id}')"><span class="ob-se-t">${esc(t)}${s?`<span>≈${NB}${s.min}${NB}min</span>`:''}</span><span class="ob-se-d">${esc(_obSesDesc(id,I))}</span>${id==='completa'?'<em class="ob-tag">Recomendado</em>':''}</button>`;};
   return`<h1 class="ob-title" id="ob-h" tabindex="-1">¿Cómo quieres entrenar?</h1>
   <p class="ob-sub">Cuenta solo los días que de verdad puedes. Si un día no puedes, no pasa nada: sigues por donde lo dejaste.</p>
   <div class="ob-lbl" id="ob-l-days">Días por semana</div>
