@@ -217,6 +217,18 @@ module.exports = function (K, OPT) {
   const cardioDef = a => { if (a.cardioEnd === 'no' || a.sesion === 'expres') return 0;
     const d = a.goal === 'grasa' ? (['piernas', 'agua'].includes(a.sport) ? 10 : 20) : a.goal === 'salud' ? ((a.sport === 'no' || !a.sport) ? 10 : 0) : a.goal === 'aguante' ? (a.sport === 'suave' ? 0 : 10) : 0;
     return d || (a.cardioEnd === 'si' ? 10 : 0); };
+  // v15 (T8): los minutos que enseña cada tarjeta, a partir de los resúmenes (meta.sesion) de los cuatro tipos para las mismas respuestas.
+  // Redondeados a 5, como siempre; pero si así dos tipos seguidos (exprés < lo esencial < completa < a fondo) que dan rutinas distintas
+  // salen con el mismo tiempo (o al revés), todas las tarjetas pasan a minutos sueltos: «≈ 58» y «≈ 60» en vez de «≈ 60» las dos. Dos tipos
+  // con la misma rutina dicen lo mismo. Y si el mayor no dura de verdad más (menos de un minuto de diferencia, o hasta uno menos: «A fondo»
+  // a quien lleva menos de 6 meses reparte las mismas series en más ejercicios), los dos dicen el tiempo del menor: no se inventa una
+  // diferencia ni se enseña al revés (la tarjeta lo explica: «en el mismo tiempo que…»)
+  const ORDEN_SES = ['expres', 'esencial', 'completa', 'fondo'];
+  const tiemposSesion = I => {
+    const ts = ORDEN_SES.filter(t => I[t]), x = t => I[t].minX != null ? I[t].minX : I[t].min, a5 = t => I[t].min;
+    const choca = ts.some((t, i) => i > 0 && I[t].firma !== I[ts[i - 1]].firma && a5(t) <= a5(ts[i - 1])), out = {};
+    ts.forEach((t, i) => { const v = choca ? Math.round(x(t)) : a5(t), p = i > 0 ? out[ts[i - 1]] : null; out[t] = p != null && v < p ? p : v; });
+    return out; };
   // v15 (T6): «A fondo» se ofrece a todo el mundo y tiene que dar más que «Completa». Para quien lleva menos de 6 meses (principiante sin
   // modo de precaución) el tope sube de 6 a 7 ejercicios, y gana ejercicios, no series (ver build). El modo inicio (5), el prudente y 65 o
   // más (6; 7 con experiencia) no se tocan: a esos «A fondo» les sale como «Completa».
@@ -2053,8 +2065,10 @@ module.exports = function (K, OPT) {
     const vol = volume(st), pp = pushPull(st);
     // v15 (T1): el resumen de la sesión, con la rutina final: lo que enseña la tarjeta del tipo es esto mismo (minutos de un día medio,
     // redondeados a 5; ejercicios de fuerza por día; si hay bíceps y tríceps directos, abdominales y cardio final)
-    const nEj = det.map(d => d.rows.filter(r => r.kind === 'str').length), filas = det.flatMap(d => d.rows);
-    const sesion = { tipo: inp.sesion || null, min: Math.round(det.reduce((x, d) => x + d.minutos, 0) / det.length / 5) * 5, ej: nEj, ejMin: Math.min(...nEj), ejMax: Math.max(...nEj),
+    // v15 (T8): y además los minutos sin redondear (minX) y una firma de la rutina, para que las tarjetas de dos tipos que dan rutinas
+    // distintas no enseñen el mismo tiempo por culpa del redondeo (ver tiemposSesion)
+    const nEj = det.map(d => d.rows.filter(r => r.kind === 'str').length), filas = det.flatMap(d => d.rows), minX = det.reduce((x, d) => x + d.minutos, 0) / det.length;
+    const sesion = { tipo: inp.sesion || null, min: Math.round(minX / 5) * 5, minX: Math.round(minX * 100) / 100, firma: fnv1a(JSON.stringify(days)), ej: nEj, ejMin: Math.min(...nEj), ejMax: Math.max(...nEj),
       biceps: vol.dir.biceps > 0, triceps: vol.dir.triceps > 0, sinAbs: !!P.sinAbs, absFijo: !!P.absFijo, abs: filas.some(r => r.kind === 'str' && CORE_PATS.includes(r.pat)), cardio: Math.max(0, ...filas.filter(r => r.kind === 'cardio').map(r => r.min)) };
     // ── v7 (paso 4): por qué y avisos de seguridad y modos, con la rutina final ──
     const why2 = [], warn2 = [];
@@ -2141,5 +2155,5 @@ module.exports = function (K, OPT) {
     const g1 = joinY(gs.slice(0, 2)) || (K.GLBL[mainGroup(L)] || '').toLowerCase();
     return POR_PAT[L.pat] || (g1 ? 'Suma series de ' + g1 + '.' : null);
   }
-  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, tipoDe, repartoDeTipos, TIPO_TPL, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT, SESION, sesionDe, cardioDef };
+  return { genRoutine, desdeRespuestas, effective, volumeTargets, repRange, mainGroup, frac, GEN_VERSION, fnv1a, canon, SLOT, TPL, LIFT, heavyOk, famOf, planes, formaInicial, reordenar, otroDia, tipoDe, repartoDeTipos, TIPO_TPL, SPLITS, UNA_PIERNA, NOMBRE_DIA, LEG_TPL, safeL: (L, inp) => safe(L, { inp, P: effective(inp) }), clsOf, OPT, SESION, sesionDe, cardioDef, tiemposSesion };
 };

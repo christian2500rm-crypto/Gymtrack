@@ -10,7 +10,7 @@ Hace, en este orden: `node tools/build.js --check` (si `index.html` no coincide 
 estático propio de la raíz del repositorio en un puerto libre, comprueba la guarda de `__seed.html`, pasa `smoke.js`
 dos veces (con 6 meses de datos sembrados y como usuario nuevo) y resume pasos y fallos. Tarda unos minutos.
 
-Línea base (noviembre de 2026, tras el repaso del reparto, la mejora del Coach y el tipo de sesión): **320 pasos por pasada** y estos fallos conocidos, que dependen de la fecha (el «Wrapped» del mes
+Línea base (noviembre de 2026, tras el repaso del reparto, la mejora del Coach y el tipo de sesión): **321 pasos por pasada** y estos fallos conocidos, que dependen de la fecha (el «Wrapped» del mes
 en curso): con datos `wrapped14r1bFixes` y `cortes18`; usuario nuevo `wrapped14r1bFixes` y `menores16c`. No cuentan
 como fallo. `entrenoDock16` puede fallar si la máquina está muy cargada: repite antes de buscar el error. Una
 pasada que sale vacía (Chrome agotó el tiempo virtual, también por carga) se repite una vez sola; si vuelve a salir
